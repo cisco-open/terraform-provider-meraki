@@ -1,0 +1,1 @@
+terraform import meraki_networks_appliance_prefixes_delegated_statics.example "network_id,static_delegated_prefix_id"

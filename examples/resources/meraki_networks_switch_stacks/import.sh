@@ -1,0 +1,1 @@
+terraform import meraki_networks_switch_stacks.example "network_id,switch_stack_id"

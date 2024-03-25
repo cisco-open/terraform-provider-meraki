@@ -1,0 +1,1 @@
+terraform import meraki_devices.example "QBSA-TFWJ-U4L9"

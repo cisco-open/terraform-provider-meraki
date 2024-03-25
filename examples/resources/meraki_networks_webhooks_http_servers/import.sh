@@ -1,0 +1,1 @@
+terraform import meraki_networks_webhooks_http_servers.example "http_server_id,network_id"

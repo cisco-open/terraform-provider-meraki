@@ -1,0 +1,1 @@
+terraform import meraki_organizations_login_security.example "organization_id"

@@ -1,0 +1,1 @@
+terraform import meraki_devices_management_interface.example "serial"

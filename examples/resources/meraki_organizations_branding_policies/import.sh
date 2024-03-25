@@ -1,0 +1,1 @@
+terraform import meraki_organizations_branding_policies.example "branding_policy_id,organization_id"

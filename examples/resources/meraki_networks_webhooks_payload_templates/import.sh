@@ -1,0 +1,1 @@
+terraform import meraki_networks_webhooks_payload_templates.example "network_id,payload_template_id"

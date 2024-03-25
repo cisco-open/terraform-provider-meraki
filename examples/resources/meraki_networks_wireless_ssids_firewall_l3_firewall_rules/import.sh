@@ -1,0 +1,1 @@
+terraform import meraki_networks_wireless_ssids_firewall_l3_firewall_rules.example "network_id,number"

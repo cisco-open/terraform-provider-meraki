@@ -1,0 +1,1 @@
+terraform import meraki_networks_snmp.example "network_id"

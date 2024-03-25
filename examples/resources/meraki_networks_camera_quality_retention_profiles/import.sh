@@ -1,0 +1,1 @@
+terraform import meraki_networks_camera_quality_retention_profiles.example "network_id,quality_retention_profile_id"

@@ -1,0 +1,1 @@
+terraform import meraki_networks_appliance_firewall_port_forwarding_rules.example "network_id"

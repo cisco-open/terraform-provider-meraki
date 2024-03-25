@@ -1,0 +1,1 @@
+terraform import meraki_networks_traffic_analysis.example "network_id"

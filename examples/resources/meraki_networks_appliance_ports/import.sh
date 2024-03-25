@@ -1,0 +1,1 @@
+terraform import meraki_networks_appliance_ports.example "network_id,port_id"

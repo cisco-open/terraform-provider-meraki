@@ -1,0 +1,1 @@
+terraform import meraki_networks_switch_stacks_routing_static_routes.example "network_id,static_route_id,switch_stack_id"

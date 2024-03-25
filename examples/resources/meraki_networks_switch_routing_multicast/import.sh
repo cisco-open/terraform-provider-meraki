@@ -1,0 +1,1 @@
+terraform import meraki_networks_switch_routing_multicast.example "network_id"

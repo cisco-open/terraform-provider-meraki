@@ -1,0 +1,1 @@
+terraform import meraki_networks_switch_dscp_to_cos_mappings.example "network_id"

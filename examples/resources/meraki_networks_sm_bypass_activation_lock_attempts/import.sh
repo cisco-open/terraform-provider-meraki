@@ -1,0 +1,1 @@
+terraform import meraki_networks_sm_bypass_activation_lock_attempts.example "attempt_id,network_id"

@@ -1,0 +1,1 @@
+terraform import meraki_networks_cellular_gateway_subnet_pool.example "network_id"

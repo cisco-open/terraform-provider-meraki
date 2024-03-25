@@ -1,0 +1,1 @@
+terraform import meraki_networks_cellular_gateway_dhcp.example "network_id"

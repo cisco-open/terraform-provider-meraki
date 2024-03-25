@@ -1,0 +1,1 @@
+terraform import meraki_organizations_insight_monitored_media_servers.example "monitored_media_server_id,organization_id"

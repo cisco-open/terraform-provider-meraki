@@ -1,0 +1,1 @@
+terraform import meraki_organizations_alerts_profiles.example "organization_id"

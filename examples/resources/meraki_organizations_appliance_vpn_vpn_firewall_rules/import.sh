@@ -1,0 +1,1 @@
+terraform import meraki_organizations_appliance_vpn_vpn_firewall_rules.example "organization_id"

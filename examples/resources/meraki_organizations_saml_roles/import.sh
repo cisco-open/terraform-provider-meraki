@@ -1,0 +1,1 @@
+terraform import meraki_organizations_saml_roles.example "organization_id,saml_role_id"

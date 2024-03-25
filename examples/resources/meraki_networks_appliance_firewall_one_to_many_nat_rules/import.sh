@@ -1,0 +1,1 @@
+terraform import meraki_networks_appliance_firewall_one_to_many_nat_rules.example "network_id"

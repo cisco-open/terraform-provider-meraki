@@ -1,0 +1,1 @@
+terraform import meraki_organizations_policy_objects.example "organization_id,policy_object_id"

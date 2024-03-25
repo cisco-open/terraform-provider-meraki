@@ -1,0 +1,261 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+package provider
+
+// DATA SOURCE NORMAL
+import (
+	"context"
+	"log"
+
+	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+)
+
+var (
+	_ datasource.DataSource              = &DevicesManagementInterfaceDataSource{}
+	_ datasource.DataSourceWithConfigure = &DevicesManagementInterfaceDataSource{}
+)
+
+func NewDevicesManagementInterfaceDataSource() datasource.DataSource {
+	return &DevicesManagementInterfaceDataSource{}
+}
+
+type DevicesManagementInterfaceDataSource struct {
+	client *merakigosdk.Client
+}
+
+func (d *DevicesManagementInterfaceDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	if req.ProviderData == nil {
+		return
+	}
+	client := req.ProviderData.(MerakiProviderData).Client
+	d.client = client
+}
+
+// Metadata returns the data source type name.
+func (d *DevicesManagementInterfaceDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_devices_management_interface"
+}
+
+func (d *DevicesManagementInterfaceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		Attributes: map[string]schema.Attribute{
+			"serial": schema.StringAttribute{
+				MarkdownDescription: `serial path parameter.`,
+				Required:            true,
+			},
+			"item": schema.SingleNestedAttribute{
+				Computed: true,
+				Attributes: map[string]schema.Attribute{
+
+					"ddns_hostnames": schema.SingleNestedAttribute{
+						Computed: true,
+						Attributes: map[string]schema.Attribute{
+
+							"active_ddns_hostname": schema.StringAttribute{
+								Computed: true,
+							},
+							"ddns_hostname_wan1": schema.StringAttribute{
+								Computed: true,
+							},
+							"ddns_hostname_wan2": schema.StringAttribute{
+								Computed: true,
+							},
+						},
+					},
+					"wan1": schema.SingleNestedAttribute{
+						Computed: true,
+						Attributes: map[string]schema.Attribute{
+
+							"static_dns": schema.ListAttribute{
+								Computed:    true,
+								ElementType: types.StringType,
+							},
+							"static_gateway_ip": schema.StringAttribute{
+								Computed: true,
+							},
+							"static_ip": schema.StringAttribute{
+								Computed: true,
+							},
+							"static_subnet_mask": schema.StringAttribute{
+								Computed: true,
+							},
+							"using_static_ip": schema.BoolAttribute{
+								Computed: true,
+							},
+							"vlan": schema.Int64Attribute{
+								Computed: true,
+							},
+							"wan_enabled": schema.StringAttribute{
+								Computed: true,
+							},
+						},
+					},
+					"wan2": schema.SingleNestedAttribute{
+						Computed: true,
+						Attributes: map[string]schema.Attribute{
+
+							"using_static_ip": schema.BoolAttribute{
+								Computed: true,
+							},
+							"vlan": schema.Int64Attribute{
+								Computed: true,
+							},
+							"wan_enabled": schema.StringAttribute{
+								Computed: true,
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func (d *DevicesManagementInterfaceDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var devicesManagementInterface DevicesManagementInterface
+	diags := req.Config.Get(ctx, &devicesManagementInterface)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	selectedMethod := 1
+	if selectedMethod == 1 {
+		log.Printf("[DEBUG] Selected method: GetDeviceManagementInterface")
+		vvSerial := devicesManagementInterface.Serial.ValueString()
+
+		response1, restyResp1, err := d.client.Devices.GetDeviceManagementInterface(vvSerial)
+
+		if err != nil || response1 == nil {
+			if restyResp1 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp1.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetDeviceManagementInterface",
+				err.Error(),
+			)
+			return
+		}
+
+		devicesManagementInterface = ResponseDevicesGetDeviceManagementInterfaceItemToBody(devicesManagementInterface, response1)
+		diags = resp.State.Set(ctx, &devicesManagementInterface)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+	}
+}
+
+// structs
+type DevicesManagementInterface struct {
+	Serial types.String                                 `tfsdk:"serial"`
+	Item   *ResponseDevicesGetDeviceManagementInterface `tfsdk:"item"`
+}
+
+type ResponseDevicesGetDeviceManagementInterface struct {
+	DdnsHostnames *ResponseDevicesGetDeviceManagementInterfaceDdnsHostnames `tfsdk:"ddns_hostnames"`
+	Wan1          *ResponseDevicesGetDeviceManagementInterfaceWan1          `tfsdk:"wan1"`
+	Wan2          *ResponseDevicesGetDeviceManagementInterfaceWan2          `tfsdk:"wan2"`
+}
+
+type ResponseDevicesGetDeviceManagementInterfaceDdnsHostnames struct {
+	ActiveDdnsHostname types.String `tfsdk:"active_ddns_hostname"`
+	DdnsHostnameWan1   types.String `tfsdk:"ddns_hostname_wan1"`
+	DdnsHostnameWan2   types.String `tfsdk:"ddns_hostname_wan2"`
+}
+
+type ResponseDevicesGetDeviceManagementInterfaceWan1 struct {
+	StaticDNS        types.List   `tfsdk:"static_dns"`
+	StaticGatewayIP  types.String `tfsdk:"static_gateway_ip"`
+	StaticIP         types.String `tfsdk:"static_ip"`
+	StaticSubnetMask types.String `tfsdk:"static_subnet_mask"`
+	UsingStaticIP    types.Bool   `tfsdk:"using_static_ip"`
+	VLAN             types.Int64  `tfsdk:"vlan"`
+	WanEnabled       types.String `tfsdk:"wan_enabled"`
+}
+
+type ResponseDevicesGetDeviceManagementInterfaceWan2 struct {
+	UsingStaticIP types.Bool   `tfsdk:"using_static_ip"`
+	VLAN          types.Int64  `tfsdk:"vlan"`
+	WanEnabled    types.String `tfsdk:"wan_enabled"`
+}
+
+// ToBody
+func ResponseDevicesGetDeviceManagementInterfaceItemToBody(state DevicesManagementInterface, response *merakigosdk.ResponseDevicesGetDeviceManagementInterface) DevicesManagementInterface {
+	itemState := ResponseDevicesGetDeviceManagementInterface{
+		DdnsHostnames: func() *ResponseDevicesGetDeviceManagementInterfaceDdnsHostnames {
+			if response.DdnsHostnames != nil {
+				return &ResponseDevicesGetDeviceManagementInterfaceDdnsHostnames{
+					ActiveDdnsHostname: types.StringValue(response.DdnsHostnames.ActiveDdnsHostname),
+					DdnsHostnameWan1:   types.StringValue(response.DdnsHostnames.DdnsHostnameWan1),
+					DdnsHostnameWan2:   types.StringValue(response.DdnsHostnames.DdnsHostnameWan2),
+				}
+			}
+			return &ResponseDevicesGetDeviceManagementInterfaceDdnsHostnames{}
+		}(),
+		Wan1: func() *ResponseDevicesGetDeviceManagementInterfaceWan1 {
+			if response.Wan1 != nil {
+				return &ResponseDevicesGetDeviceManagementInterfaceWan1{
+					StaticDNS:        StringSliceToList(response.Wan1.StaticDNS),
+					StaticGatewayIP:  types.StringValue(response.Wan1.StaticGatewayIP),
+					StaticIP:         types.StringValue(response.Wan1.StaticIP),
+					StaticSubnetMask: types.StringValue(response.Wan1.StaticSubnetMask),
+					UsingStaticIP: func() types.Bool {
+						if response.Wan1.UsingStaticIP != nil {
+							return types.BoolValue(*response.Wan1.UsingStaticIP)
+						}
+						return types.Bool{}
+					}(),
+					VLAN: func() types.Int64 {
+						if response.Wan1.VLAN != nil {
+							return types.Int64Value(int64(*response.Wan1.VLAN))
+						}
+						return types.Int64{}
+					}(),
+					WanEnabled: types.StringValue(response.Wan1.WanEnabled),
+				}
+			}
+			return &ResponseDevicesGetDeviceManagementInterfaceWan1{}
+		}(),
+		Wan2: func() *ResponseDevicesGetDeviceManagementInterfaceWan2 {
+			if response.Wan2 != nil {
+				return &ResponseDevicesGetDeviceManagementInterfaceWan2{
+					UsingStaticIP: func() types.Bool {
+						if response.Wan2.UsingStaticIP != nil {
+							return types.BoolValue(*response.Wan2.UsingStaticIP)
+						}
+						return types.Bool{}
+					}(),
+					VLAN: func() types.Int64 {
+						if response.Wan2.VLAN != nil {
+							return types.Int64Value(int64(*response.Wan2.VLAN))
+						}
+						return types.Int64{}
+					}(),
+					WanEnabled: types.StringValue(response.Wan2.WanEnabled),
+				}
+			}
+			return &ResponseDevicesGetDeviceManagementInterfaceWan2{}
+		}(),
+	}
+	state.Item = &itemState
+	return state
+}

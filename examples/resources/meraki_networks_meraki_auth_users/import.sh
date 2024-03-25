@@ -1,0 +1,1 @@
+terraform import meraki_networks_meraki_auth_users.example "meraki_auth_user_id,network_id"

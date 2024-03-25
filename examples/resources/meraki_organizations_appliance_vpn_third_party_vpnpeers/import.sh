@@ -1,0 +1,1 @@
+terraform import meraki_organizations_appliance_vpn_third_party_vpnpeers.example "organization_id"

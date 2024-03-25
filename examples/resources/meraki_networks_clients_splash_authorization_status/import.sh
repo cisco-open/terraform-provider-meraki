@@ -1,0 +1,1 @@
+terraform import meraki_networks_clients_splash_authorization_status.example "client_id,network_id"

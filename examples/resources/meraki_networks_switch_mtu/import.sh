@@ -1,0 +1,1 @@
+terraform import meraki_networks_switch_mtu.example "network_id"

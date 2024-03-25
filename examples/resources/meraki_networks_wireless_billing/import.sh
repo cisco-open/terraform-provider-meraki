@@ -1,0 +1,1 @@
+terraform import meraki_networks_wireless_billing.example "network_id"

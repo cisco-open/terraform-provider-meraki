@@ -1,0 +1,1 @@
+terraform import meraki_networks_appliance_security_intrusion.example "network_id"

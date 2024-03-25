@@ -1,0 +1,1 @@
+terraform import meraki_networks_appliance_vpn_site_to_site_vpn.example "network_id"

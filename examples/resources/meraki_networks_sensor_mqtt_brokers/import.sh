@@ -1,0 +1,1 @@
+terraform import meraki_networks_sensor_mqtt_brokers.example "mqtt_broker_id,network_id"

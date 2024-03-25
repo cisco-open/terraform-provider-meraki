@@ -1,0 +1,1 @@
+terraform import meraki_networks_syslog_servers.example "network_id"

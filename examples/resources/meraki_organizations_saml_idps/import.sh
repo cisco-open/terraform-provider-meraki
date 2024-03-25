@@ -1,0 +1,1 @@
+terraform import meraki_organizations_saml_idps.example "idp_id,organization_id"

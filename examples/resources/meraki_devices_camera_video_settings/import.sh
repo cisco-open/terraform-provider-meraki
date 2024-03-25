@@ -1,0 +1,1 @@
+terraform import meraki_devices_camera_video_settings.example "serial"

@@ -1,0 +1,1 @@
+terraform import meraki_devices_camera_quality_and_retention.example "serial"

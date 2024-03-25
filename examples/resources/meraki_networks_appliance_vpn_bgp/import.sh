@@ -1,0 +1,1 @@
+terraform import meraki_networks_appliance_vpn_bgp.example "network_id"

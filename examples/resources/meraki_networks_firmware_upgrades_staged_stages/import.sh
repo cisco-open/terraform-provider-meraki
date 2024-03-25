@@ -1,0 +1,1 @@
+terraform import meraki_networks_firmware_upgrades_staged_stages.example "network_id"

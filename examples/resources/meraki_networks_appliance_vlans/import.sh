@@ -1,0 +1,1 @@
+terraform import meraki_networks_appliance_vlans.example "network_id,vlan_id"

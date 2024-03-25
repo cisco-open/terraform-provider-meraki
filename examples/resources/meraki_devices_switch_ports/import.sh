@@ -1,0 +1,1 @@
+terraform import meraki_devices_switch_ports.example "port_id,serial"

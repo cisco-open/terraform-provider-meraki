@@ -1,0 +1,1 @@
+terraform import meraki_networks_sensor_alerts_profiles.example "id,network_id"

@@ -1,0 +1,1 @@
+terraform import meraki_networks_firmware_upgrades_staged_groups.example "group_id,network_id"

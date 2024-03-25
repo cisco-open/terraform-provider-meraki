@@ -1,0 +1,1 @@
+terraform import meraki_networks_floor_plans.example "floor_plan_id,network_id"

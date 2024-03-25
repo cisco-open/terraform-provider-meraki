@@ -1,0 +1,1 @@
+terraform import meraki_networks_appliance_content_filtering.example "network_id"

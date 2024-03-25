@@ -1,0 +1,1 @@
+terraform import meraki_networks_sm_target_groups.example "network_id,target_group_id"

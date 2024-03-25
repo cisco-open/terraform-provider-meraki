@@ -1,0 +1,1 @@
+terraform import meraki_networks.example "network_id,organization_id"

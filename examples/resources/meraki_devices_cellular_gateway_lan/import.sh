@@ -1,0 +1,1 @@
+terraform import meraki_devices_cellular_gateway_lan.example "serial"

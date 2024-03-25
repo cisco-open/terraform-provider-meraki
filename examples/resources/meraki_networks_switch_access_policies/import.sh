@@ -1,0 +1,1 @@
+terraform import meraki_networks_switch_access_policies.example "access_policy_number,network_id"

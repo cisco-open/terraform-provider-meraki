@@ -1,0 +1,182 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+package provider
+
+// DATA SOURCE NORMAL
+import (
+	"context"
+	"log"
+
+	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+)
+
+var (
+	_ datasource.DataSource              = &NetworksSwitchSettingsDataSource{}
+	_ datasource.DataSourceWithConfigure = &NetworksSwitchSettingsDataSource{}
+)
+
+func NewNetworksSwitchSettingsDataSource() datasource.DataSource {
+	return &NetworksSwitchSettingsDataSource{}
+}
+
+type NetworksSwitchSettingsDataSource struct {
+	client *merakigosdk.Client
+}
+
+func (d *NetworksSwitchSettingsDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	if req.ProviderData == nil {
+		return
+	}
+	client := req.ProviderData.(MerakiProviderData).Client
+	d.client = client
+}
+
+// Metadata returns the data source type name.
+func (d *NetworksSwitchSettingsDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_networks_switch_settings"
+}
+
+func (d *NetworksSwitchSettingsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		Attributes: map[string]schema.Attribute{
+			"network_id": schema.StringAttribute{
+				MarkdownDescription: `networkId path parameter. Network ID`,
+				Required:            true,
+			},
+			"item": schema.SingleNestedAttribute{
+				Computed: true,
+				Attributes: map[string]schema.Attribute{
+
+					"power_exceptions": schema.SetNestedAttribute{
+						MarkdownDescription: `Exceptions on a per switch basis to "useCombinedPower"`,
+						Computed:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+
+								"power_type": schema.StringAttribute{
+									MarkdownDescription: `Per switch exception (combined, redundant, useNetworkSetting)`,
+									Computed:            true,
+								},
+								"serial": schema.StringAttribute{
+									MarkdownDescription: `Serial number of the switch`,
+									Computed:            true,
+								},
+							},
+						},
+					},
+					"use_combined_power": schema.BoolAttribute{
+						MarkdownDescription: `The use Combined Power as the default behavior of secondary power supplies on supported devices.`,
+						Computed:            true,
+					},
+					"vlan": schema.Int64Attribute{
+						MarkdownDescription: `Management VLAN`,
+						Computed:            true,
+					},
+				},
+			},
+		},
+	}
+}
+
+func (d *NetworksSwitchSettingsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var networksSwitchSettings NetworksSwitchSettings
+	diags := req.Config.Get(ctx, &networksSwitchSettings)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	selectedMethod := 1
+	if selectedMethod == 1 {
+		log.Printf("[DEBUG] Selected method: GetNetworkSwitchSettings")
+		vvNetworkID := networksSwitchSettings.NetworkID.ValueString()
+
+		response1, restyResp1, err := d.client.Switch.GetNetworkSwitchSettings(vvNetworkID)
+
+		if err != nil || response1 == nil {
+			if restyResp1 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp1.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkSwitchSettings",
+				err.Error(),
+			)
+			return
+		}
+
+		networksSwitchSettings = ResponseSwitchGetNetworkSwitchSettingsItemToBody(networksSwitchSettings, response1)
+		diags = resp.State.Set(ctx, &networksSwitchSettings)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+	}
+}
+
+// structs
+type NetworksSwitchSettings struct {
+	NetworkID types.String                            `tfsdk:"network_id"`
+	Item      *ResponseSwitchGetNetworkSwitchSettings `tfsdk:"item"`
+}
+
+type ResponseSwitchGetNetworkSwitchSettings struct {
+	PowerExceptions  *[]ResponseSwitchGetNetworkSwitchSettingsPowerExceptions `tfsdk:"power_exceptions"`
+	UseCombinedPower types.Bool                                               `tfsdk:"use_combined_power"`
+	VLAN             types.Int64                                              `tfsdk:"vlan"`
+}
+
+type ResponseSwitchGetNetworkSwitchSettingsPowerExceptions struct {
+	PowerType types.String `tfsdk:"power_type"`
+	Serial    types.String `tfsdk:"serial"`
+}
+
+// ToBody
+func ResponseSwitchGetNetworkSwitchSettingsItemToBody(state NetworksSwitchSettings, response *merakigosdk.ResponseSwitchGetNetworkSwitchSettings) NetworksSwitchSettings {
+	itemState := ResponseSwitchGetNetworkSwitchSettings{
+		PowerExceptions: func() *[]ResponseSwitchGetNetworkSwitchSettingsPowerExceptions {
+			if response.PowerExceptions != nil {
+				result := make([]ResponseSwitchGetNetworkSwitchSettingsPowerExceptions, len(*response.PowerExceptions))
+				for i, powerExceptions := range *response.PowerExceptions {
+					result[i] = ResponseSwitchGetNetworkSwitchSettingsPowerExceptions{
+						PowerType: types.StringValue(powerExceptions.PowerType),
+						Serial:    types.StringValue(powerExceptions.Serial),
+					}
+				}
+				return &result
+			}
+			return &[]ResponseSwitchGetNetworkSwitchSettingsPowerExceptions{}
+		}(),
+		UseCombinedPower: func() types.Bool {
+			if response.UseCombinedPower != nil {
+				return types.BoolValue(*response.UseCombinedPower)
+			}
+			return types.Bool{}
+		}(),
+		VLAN: func() types.Int64 {
+			if response.VLAN != nil {
+				return types.Int64Value(int64(*response.VLAN))
+			}
+			return types.Int64{}
+		}(),
+	}
+	state.Item = &itemState
+	return state
+}

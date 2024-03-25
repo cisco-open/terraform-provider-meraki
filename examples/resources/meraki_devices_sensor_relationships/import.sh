@@ -1,0 +1,1 @@
+terraform import meraki_devices_sensor_relationships.example "serial"

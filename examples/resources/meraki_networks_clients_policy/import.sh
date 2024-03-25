@@ -1,0 +1,1 @@
+terraform import meraki_networks_clients_policy.example "client_id,network_id"

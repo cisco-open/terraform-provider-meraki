@@ -1,0 +1,1 @@
+terraform import meraki_devices_wireless_bluetooth_settings.example "serial"

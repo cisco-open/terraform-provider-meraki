@@ -1,0 +1,1 @@
+terraform import meraki_networks_wireless_ssids_bonjour_forwarding.example "network_id,number"

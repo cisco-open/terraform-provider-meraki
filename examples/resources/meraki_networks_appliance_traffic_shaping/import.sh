@@ -1,0 +1,1 @@
+terraform import meraki_networks_appliance_traffic_shaping.example "network_id"

@@ -1,0 +1,1 @@
+terraform import meraki_networks_camera_wireless_profiles.example "network_id,wireless_profile_id"

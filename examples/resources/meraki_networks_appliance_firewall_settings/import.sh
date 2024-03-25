@@ -1,0 +1,1 @@
+terraform import meraki_networks_appliance_firewall_settings.example "network_id"

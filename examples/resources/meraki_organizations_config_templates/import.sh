@@ -1,0 +1,1 @@
+terraform import meraki_organizations_config_templates.example "config_template_id,organization_id"

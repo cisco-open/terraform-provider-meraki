@@ -1,0 +1,1 @@
+terraform import meraki_networks_switch_qos_rules_order.example "network_id,qos_rule_id"

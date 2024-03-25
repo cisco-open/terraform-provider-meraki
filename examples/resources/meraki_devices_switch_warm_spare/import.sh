@@ -1,0 +1,1 @@
+terraform import meraki_devices_switch_warm_spare.example "serial"

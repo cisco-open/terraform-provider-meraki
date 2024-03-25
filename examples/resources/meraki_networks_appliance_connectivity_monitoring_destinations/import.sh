@@ -1,0 +1,1 @@
+terraform import meraki_networks_appliance_connectivity_monitoring_destinations.example "network_id"

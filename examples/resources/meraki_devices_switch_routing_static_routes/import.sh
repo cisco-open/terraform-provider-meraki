@@ -1,0 +1,1 @@
+terraform import meraki_devices_switch_routing_static_routes.example "serial,static_route_id"

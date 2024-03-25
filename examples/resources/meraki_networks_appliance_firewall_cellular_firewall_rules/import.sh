@@ -1,0 +1,1 @@
+terraform import meraki_networks_appliance_firewall_cellular_firewall_rules.example "network_id"

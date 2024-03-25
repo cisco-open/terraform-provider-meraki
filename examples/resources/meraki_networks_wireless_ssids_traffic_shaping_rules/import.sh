@@ -1,0 +1,1 @@
+terraform import meraki_networks_wireless_ssids_traffic_shaping_rules.example "network_id,number"

@@ -1,0 +1,1 @@
+terraform import meraki_networks_switch_storm_control.example "network_id"

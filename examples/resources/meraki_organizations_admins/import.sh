@@ -1,0 +1,1 @@
+terraform import meraki_organizations_admins.example "organization_id"

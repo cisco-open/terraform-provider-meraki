@@ -1,4 +1,4 @@
-## 0.1.0-alpha (- -, 2024)
+## 0.1.0-alpha (March 26, 2024)
 FEATURES:
 * **New Data Source:** `meraki_administered_identities_me`
 * **New Data Source:** `meraki_devices_appliance_performance`

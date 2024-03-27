@@ -29,7 +29,7 @@ To install this provider, copy and paste this code into your Terraform configura
 terraform {
   required_providers {
     meraki = {
-      source = "meraki/meraki"
+      source = "cisco-open/meraki"
       version = "0.1.0-alpha"
     }
   }
@@ -37,7 +37,7 @@ terraform {
 
 provider "meraki" {
   # Configuration options
-  # More info at https://registry.terraform.io/providers/meraki/meraki/latest/docs#example-usage
+  # More info at https://registry.terraform.io/providers/cisco-open/meraki/latest/docs#example-usage
 }
 ```
 
@@ -75,7 +75,7 @@ terraform {
 
 provider "meraki" {
   # Configuration options
-  # More info at https://registry.terraform.io/providers/meraki/meraki/latest/docs#example-usage
+  # More info at https://registry.terraform.io/providers/cisco-open/meraki/latest/docs#example-usage
 }
 ```
 

@@ -43,19 +43,19 @@ provider "meraki" {
 
 ### From build
 
-Clone this repository to: `$GOPATH/src/github.com/meraki/terraform-provider-meraki`
+Clone this repository to: `$GOPATH/src/github.com/cisco-open/terraform-provider-meraki`
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/meraki/
-$ cd $GOPATH/src/github.com/meraki/
-$ git clone git@github.com:meraki/terraform-provider-meraki.git
+mkdir -p $GOPATH/src/github.com/meraki/
+cd $GOPATH/src/github.com/meraki/
+git clone https://github.com/cisco-open/terraform-provider-meraki.git
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/meraki/terraform-provider-meraki
-$ make build
+cd $GOPATH/src/github.com/cisco-open/terraform-provider-meraki
+make build
 ```
 
 If the Makefile values (HOSTNAME, NAMESPACE, NAME, VERSION) were not changed, then the following code could used without changes.
@@ -111,7 +111,7 @@ $ make testacc
 
 ## Documentation
 
-In the docs directory you can find the documentation.
+In the docs directory, you can find the documentation.
 
 ## Compatibility matrix
 The following table shows the supported versions.

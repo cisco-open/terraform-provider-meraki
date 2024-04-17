@@ -136,7 +136,7 @@ func StringSliceToSetInt(items *[]int) basetypes.SetValue {
 		return types.SetNull(types.Int64Type)
 	}
 	for _, item := range *items {
-		eles = append(eles, basetypes.NewStringValue(string(item)))
+		eles = append(eles, basetypes.NewInt64Value(int64(item)))
 	}
 
 	return types.SetValueMust(types.Int64Type, eles)

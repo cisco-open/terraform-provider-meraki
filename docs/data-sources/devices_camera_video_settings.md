@@ -39,5 +39,5 @@ output "meraki_devices_camera_video_settings_example" {
 
 Read-Only:
 
-- `external_rtsp_enabled` (Boolean)
-- `rtsp_url` (String)
+- `external_rtsp_enabled` (Boolean) Boolean indicating if external rtsp stream is exposed
+- `rtsp_url` (String) External rstp url. Will only be returned if external rtsp stream is exposed

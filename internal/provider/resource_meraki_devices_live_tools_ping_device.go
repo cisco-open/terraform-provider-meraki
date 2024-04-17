@@ -1,33 +1,15 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE ACTION
 
 import (
 	"context"
-	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -64,7 +46,6 @@ func (r *DevicesLiveToolsPingDeviceResource) Metadata(_ context.Context, req res
 func (r *DevicesLiveToolsPingDeviceResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-
 			"serial": schema.StringAttribute{
 				MarkdownDescription: `serial path parameter.`,
 				Required:            true,
@@ -72,74 +53,125 @@ func (r *DevicesLiveToolsPingDeviceResource) Schema(_ context.Context, _ resourc
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
-
 			"item": schema.SingleNestedAttribute{
 				Computed: true,
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
 				Attributes: map[string]schema.Attribute{
 
+					"callback": schema.SingleNestedAttribute{
+						MarkdownDescription: `Information for callback used to send back results`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"id": schema.StringAttribute{
+								MarkdownDescription: `The ID of the callback. To check the status of the callback, use this ID in a request to /webhooks/callbacks/statuses/{id}`,
+								Computed:            true,
+							},
+							"status": schema.StringAttribute{
+								MarkdownDescription: `The status of the callback`,
+								Computed:            true,
+							},
+							"url": schema.StringAttribute{
+								MarkdownDescription: `The callback URL for the webhook target. This was either provided in the original request or comes from a configured webhook receiver`,
+								Computed:            true,
+							},
+						},
+					},
 					"ping_id": schema.StringAttribute{
 						MarkdownDescription: `Id to check the status of your ping request.`,
 						Computed:            true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
 					},
 					"request": schema.SingleNestedAttribute{
 						MarkdownDescription: `Ping request parameters`,
 						Computed:            true,
-						PlanModifiers: []planmodifier.Object{
-							objectplanmodifier.UseStateForUnknown(),
-						},
 						Attributes: map[string]schema.Attribute{
 
 							"count": schema.Int64Attribute{
 								MarkdownDescription: `Number of pings to send`,
 								Computed:            true,
-								PlanModifiers: []planmodifier.Int64{
-									int64planmodifier.UseStateForUnknown(),
-								},
 							},
 							"serial": schema.StringAttribute{
 								MarkdownDescription: `Device serial number`,
 								Computed:            true,
-								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.UseStateForUnknown(),
-								},
 							},
 							"target": schema.StringAttribute{
 								MarkdownDescription: `IP address or FQDN to ping`,
 								Computed:            true,
-								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.UseStateForUnknown(),
-								},
 							},
 						},
 					},
 					"status": schema.StringAttribute{
 						MarkdownDescription: `Status of the ping request.`,
 						Computed:            true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
 					},
 					"url": schema.StringAttribute{
 						MarkdownDescription: `GET this url to check the status of your ping request.`,
 						Computed:            true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
 					},
 				},
 			},
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
+					"callback": schema.SingleNestedAttribute{
+						MarkdownDescription: `Details for the callback. Please include either an httpServerId OR url and sharedSecret`,
+						Optional:            true,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"http_server": schema.SingleNestedAttribute{
+								MarkdownDescription: `The webhook receiver used for the callback webhook.`,
+								Optional:            true,
+								Computed:            true,
+								Attributes: map[string]schema.Attribute{
+
+									"id": schema.StringAttribute{
+										MarkdownDescription: `The webhook receiver ID that will receive information. If specifying this, please leave the url and sharedSecret fields blank.`,
+										Optional:            true,
+										Computed:            true,
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.RequiresReplace(),
+										},
+									},
+								},
+							},
+							"payload_template": schema.SingleNestedAttribute{
+								MarkdownDescription: `The payload template of the webhook used for the callback`,
+								Optional:            true,
+								Computed:            true,
+								Attributes: map[string]schema.Attribute{
+
+									"id": schema.StringAttribute{
+										MarkdownDescription: `The ID of the payload template. Defaults to 'wpt_00005' for the Callback (included) template.`,
+										Optional:            true,
+										Computed:            true,
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.RequiresReplace(),
+										},
+									},
+								},
+							},
+							"shared_secret": schema.StringAttribute{
+								MarkdownDescription: `A shared secret that will be included in the requests sent to the callback URL. It can be used to verify that the request was sent by Meraki. If using this field, please also specify an url.`,
+								Optional:            true,
+								Computed:            true,
+								PlanModifiers: []planmodifier.String{
+									stringplanmodifier.RequiresReplace(),
+								},
+							},
+							"url": schema.StringAttribute{
+								MarkdownDescription: `The callback URL for the webhook target. If using this field, please also specify a sharedSecret.`,
+								Optional:            true,
+								Computed:            true,
+								PlanModifiers: []planmodifier.String{
+									stringplanmodifier.RequiresReplace(),
+								},
+							},
+						},
+					},
 					"count": schema.Int64Attribute{
 						MarkdownDescription: `Count parameter to pass to ping. [1..5], default 5`,
 						Optional:            true,
+						Computed:            true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.RequiresReplace(),
 						},
@@ -149,30 +181,26 @@ func (r *DevicesLiveToolsPingDeviceResource) Schema(_ context.Context, _ resourc
 		},
 	}
 }
-
 func (r *DevicesLiveToolsPingDeviceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
 	var data DevicesLiveToolsPingDeviceRs
-	log.Printf("[DEBUG] Despues 1")
+
 	var item types.Object
-	log.Printf("[DEBUG] Antes")
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &item)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	log.Printf("[DEBUG] Despues 1")
+
 	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty:    true,
 		UnhandledUnknownAsEmpty: true,
 	})...)
-	log.Printf("[DEBUG] Despues 2")
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
 	//Has Paths
 	vvSerial := data.Serial.ValueString()
-	// serial
-	log.Printf("[DEBUG] Llegue aqui")
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Devices.CreateDeviceLiveToolsPingDevice(vvSerial, dataRequest)
 
@@ -198,15 +226,15 @@ func (r *DevicesLiveToolsPingDeviceResource) Create(ctx context.Context, req res
 }
 
 func (r *DevicesLiveToolsPingDeviceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *DevicesLiveToolsPingDeviceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *DevicesLiveToolsPingDeviceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -218,10 +246,17 @@ type DevicesLiveToolsPingDeviceRs struct {
 }
 
 type ResponseDevicesCreateDeviceLiveToolsPingDevice struct {
-	PingID  types.String                                           `tfsdk:"ping_id"`
-	Request *ResponseDevicesCreateDeviceLiveToolsPingDeviceRequest `tfsdk:"request"`
-	Status  types.String                                           `tfsdk:"status"`
-	URL     types.String                                           `tfsdk:"url"`
+	Callback *ResponseDevicesCreateDeviceLiveToolsPingDeviceCallback `tfsdk:"callback"`
+	PingID   types.String                                            `tfsdk:"ping_id"`
+	Request  *ResponseDevicesCreateDeviceLiveToolsPingDeviceRequest  `tfsdk:"request"`
+	Status   types.String                                            `tfsdk:"status"`
+	URL      types.String                                            `tfsdk:"url"`
+}
+
+type ResponseDevicesCreateDeviceLiveToolsPingDeviceCallback struct {
+	ID     types.String `tfsdk:"id"`
+	Status types.String `tfsdk:"status"`
+	URL    types.String `tfsdk:"url"`
 }
 
 type ResponseDevicesCreateDeviceLiveToolsPingDeviceRequest struct {
@@ -231,12 +266,53 @@ type ResponseDevicesCreateDeviceLiveToolsPingDeviceRequest struct {
 }
 
 type RequestDevicesCreateDeviceLiveToolsPingDeviceRs struct {
-	Count types.Int64 `tfsdk:"count"`
+	Callback *RequestDevicesCreateDeviceLiveToolsPingDeviceCallbackRs `tfsdk:"callback"`
+	Count    types.Int64                                              `tfsdk:"count"`
+}
+
+type RequestDevicesCreateDeviceLiveToolsPingDeviceCallbackRs struct {
+	HTTPServer      *RequestDevicesCreateDeviceLiveToolsPingDeviceCallbackHttpServerRs      `tfsdk:"http_server"`
+	PayloadTemplate *RequestDevicesCreateDeviceLiveToolsPingDeviceCallbackPayloadTemplateRs `tfsdk:"payload_template"`
+	SharedSecret    types.String                                                            `tfsdk:"shared_secret"`
+	URL             types.String                                                            `tfsdk:"url"`
+}
+
+type RequestDevicesCreateDeviceLiveToolsPingDeviceCallbackHttpServerRs struct {
+	ID types.String `tfsdk:"id"`
+}
+
+type RequestDevicesCreateDeviceLiveToolsPingDeviceCallbackPayloadTemplateRs struct {
+	ID types.String `tfsdk:"id"`
 }
 
 // FromBody
 func (r *DevicesLiveToolsPingDeviceRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestDevicesCreateDeviceLiveToolsPingDevice {
-	re := *&r.Parameters
+	re := *r.Parameters
+	var requestDevicesCreateDeviceLiveToolsPingDeviceCallback *merakigosdk.RequestDevicesCreateDeviceLiveToolsPingDeviceCallback
+	if re.Callback != nil {
+		var requestDevicesCreateDeviceLiveToolsPingDeviceCallbackHTTPServer *merakigosdk.RequestDevicesCreateDeviceLiveToolsPingDeviceCallbackHTTPServer
+		if re.Callback.HTTPServer != nil {
+			iD := re.Callback.HTTPServer.ID.ValueString()
+			requestDevicesCreateDeviceLiveToolsPingDeviceCallbackHTTPServer = &merakigosdk.RequestDevicesCreateDeviceLiveToolsPingDeviceCallbackHTTPServer{
+				ID: iD,
+			}
+		}
+		var requestDevicesCreateDeviceLiveToolsPingDeviceCallbackPayloadTemplate *merakigosdk.RequestDevicesCreateDeviceLiveToolsPingDeviceCallbackPayloadTemplate
+		if re.Callback.PayloadTemplate != nil {
+			iD := re.Callback.PayloadTemplate.ID.ValueString()
+			requestDevicesCreateDeviceLiveToolsPingDeviceCallbackPayloadTemplate = &merakigosdk.RequestDevicesCreateDeviceLiveToolsPingDeviceCallbackPayloadTemplate{
+				ID: iD,
+			}
+		}
+		sharedSecret := re.Callback.SharedSecret.ValueString()
+		uRL := re.Callback.URL.ValueString()
+		requestDevicesCreateDeviceLiveToolsPingDeviceCallback = &merakigosdk.RequestDevicesCreateDeviceLiveToolsPingDeviceCallback{
+			HTTPServer:      requestDevicesCreateDeviceLiveToolsPingDeviceCallbackHTTPServer,
+			PayloadTemplate: requestDevicesCreateDeviceLiveToolsPingDeviceCallbackPayloadTemplate,
+			SharedSecret:    sharedSecret,
+			URL:             uRL,
+		}
+	}
 	count := new(int64)
 	if !re.Count.IsUnknown() && !re.Count.IsNull() {
 		*count = re.Count.ValueInt64()
@@ -244,7 +320,8 @@ func (r *DevicesLiveToolsPingDeviceRs) toSdkApiRequestCreate(ctx context.Context
 		count = nil
 	}
 	out := merakigosdk.RequestDevicesCreateDeviceLiveToolsPingDevice{
-		Count: int64ToIntPointer(count),
+		Callback: requestDevicesCreateDeviceLiveToolsPingDeviceCallback,
+		Count:    int64ToIntPointer(count),
 	}
 	return &out
 }
@@ -252,6 +329,16 @@ func (r *DevicesLiveToolsPingDeviceRs) toSdkApiRequestCreate(ctx context.Context
 // ToBody
 func ResponseDevicesCreateDeviceLiveToolsPingDeviceItemToBody(state DevicesLiveToolsPingDeviceRs, response *merakigosdk.ResponseDevicesCreateDeviceLiveToolsPingDevice) DevicesLiveToolsPingDeviceRs {
 	itemState := ResponseDevicesCreateDeviceLiveToolsPingDevice{
+		Callback: func() *ResponseDevicesCreateDeviceLiveToolsPingDeviceCallback {
+			if response.Callback != nil {
+				return &ResponseDevicesCreateDeviceLiveToolsPingDeviceCallback{
+					ID:     types.StringValue(response.Callback.ID),
+					Status: types.StringValue(response.Callback.Status),
+					URL:    types.StringValue(response.Callback.URL),
+				}
+			}
+			return &ResponseDevicesCreateDeviceLiveToolsPingDeviceCallback{}
+		}(),
 		PingID: types.StringValue(response.PingID),
 		Request: func() *ResponseDevicesCreateDeviceLiveToolsPingDeviceRequest {
 			if response.Request != nil {

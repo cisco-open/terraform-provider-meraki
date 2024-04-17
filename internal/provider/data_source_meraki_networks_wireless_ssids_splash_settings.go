@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -233,6 +217,10 @@ func (d *NetworksWirelessSSIDsSplashSettingsDataSource) Schema(_ context.Context
 						MarkdownDescription: `SSID number`,
 						Computed:            true,
 					},
+					"theme_id": schema.StringAttribute{
+						MarkdownDescription: `The id of the selected splash theme.`,
+						Computed:            true,
+					},
 					"use_redirect_url": schema.BoolAttribute{
 						MarkdownDescription: `The Boolean indicating whether the the user will be redirected to the custom redirect URL after the splash page.`,
 						Computed:            true,
@@ -310,6 +298,7 @@ type ResponseWirelessGetNetworkWirelessSsidSplashSettings struct {
 	SplashTimeout                   types.Int64                                                             `tfsdk:"splash_timeout"`
 	SplashURL                       types.String                                                            `tfsdk:"splash_url"`
 	SSIDNumber                      types.Int64                                                             `tfsdk:"ssid_number"`
+	ThemeID                         types.String                                                            `tfsdk:"theme_id"`
 	UseRedirectURL                  types.Bool                                                              `tfsdk:"use_redirect_url"`
 	UseSplashURL                    types.Bool                                                              `tfsdk:"use_splash_url"`
 	WelcomeMessage                  types.String                                                            `tfsdk:"welcome_message"`
@@ -502,6 +491,7 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBody(state Networ
 			}
 			return types.Int64{}
 		}(),
+		ThemeID: types.StringValue(response.ThemeID),
 		UseRedirectURL: func() types.Bool {
 			if response.UseRedirectURL != nil {
 				return types.BoolValue(*response.UseRedirectURL)

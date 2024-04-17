@@ -50,16 +50,16 @@ output "meraki_networks_clients_overview_example" {
 
 Read-Only:
 
-- `counts` (Attributes) (see [below for nested schema](#nestedatt--item--counts))
-- `usages` (Attributes) (see [below for nested schema](#nestedatt--item--usages))
+- `counts` (Attributes) The number of clients on a network over a given time range (see [below for nested schema](#nestedatt--item--counts))
+- `usages` (Attributes) The average usage of the clients on a network over a given time range (see [below for nested schema](#nestedatt--item--usages))
 
 <a id="nestedatt--item--counts"></a>
 ### Nested Schema for `item.counts`
 
 Read-Only:
 
-- `total` (Number)
-- `with_heavy_usage` (Number)
+- `total` (Number) The total number of clients on a network
+- `with_heavy_usage` (Number) The total number of clients with heavy usage on a network
 
 
 <a id="nestedatt--item--usages"></a>
@@ -67,5 +67,5 @@ Read-Only:
 
 Read-Only:
 
-- `average` (Number)
-- `with_heavy_usage_average` (Number)
+- `average` (Number) The average usage of all clients on a network
+- `with_heavy_usage_average` (Number) The average usage of all clients with heavy usage on a network

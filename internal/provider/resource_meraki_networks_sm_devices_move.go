@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE ACTION
@@ -21,7 +5,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -61,7 +45,6 @@ func (r *NetworksSmDevicesMoveResource) Metadata(_ context.Context, req resource
 func (r *NetworksSmDevicesMoveResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-
 			"network_id": schema.StringAttribute{
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
@@ -73,7 +56,7 @@ func (r *NetworksSmDevicesMoveResource) Schema(_ context.Context, _ resource.Sch
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"ids": schema.SetAttribute{
+					"ids": schema.ListAttribute{
 						MarkdownDescription: `The Meraki Ids of the set of devices.`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -87,7 +70,7 @@ func (r *NetworksSmDevicesMoveResource) Schema(_ context.Context, _ resource.Sch
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"ids": schema.SetAttribute{
+					"ids": schema.ListAttribute{
 						MarkdownDescription: `The ids of the devices to be moved.`,
 						Optional:            true,
 						Computed:            true,
@@ -101,19 +84,19 @@ func (r *NetworksSmDevicesMoveResource) Schema(_ context.Context, _ resource.Sch
 							stringplanmodifier.RequiresReplace(),
 						},
 					},
-					"scope": schema.SetAttribute{
+					"scope": schema.ListAttribute{
 						MarkdownDescription: `The scope (one of all, none, withAny, withAll, withoutAny, or withoutAll) and a set of tags of the devices to be moved.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `The serials of the devices to be moved.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"wifi_macs": schema.SetAttribute{
+					"wifi_macs": schema.ListAttribute{
 						MarkdownDescription: `The wifiMacs of the devices to be moved.`,
 						Optional:            true,
 						Computed:            true,
@@ -144,7 +127,6 @@ func (r *NetworksSmDevicesMoveResource) Create(ctx context.Context, req resource
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Sm.MoveNetworkSmDevices(vvNetworkID, dataRequest)
 
@@ -163,21 +145,22 @@ func (r *NetworksSmDevicesMoveResource) Create(ctx context.Context, req resource
 		return
 	}
 	//Item
-	data2 := ResponseSmMoveNetworkSmDevicesItemToBody(data, response)
+	data = ResponseSmMoveNetworkSmDevicesItemToBody(data, response)
 
-	diags := resp.State.Set(ctx, &data2)
+	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
 func (r *NetworksSmDevicesMoveResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *NetworksSmDevicesMoveResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *NetworksSmDevicesMoveResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 

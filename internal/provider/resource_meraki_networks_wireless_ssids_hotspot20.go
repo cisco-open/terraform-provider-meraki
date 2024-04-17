@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,8 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -32,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -129,6 +115,12 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ res
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"0",
+									"1",
+								),
+							},
 						},
 						"methods": schema.SetNestedAttribute{
 							MarkdownDescription: `An array of EAP methods for the realm.`,
@@ -199,6 +191,18 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ res
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"Chargeable public network",
+						"Emergency services only network",
+						"Free public network",
+						"Personal device network",
+						"Private network",
+						"Private network with guest access",
+						"Test or experimental",
+						"Wildcard",
+					),
+				},
 			},
 			"network_id": schema.StringAttribute{
 				MarkdownDescription: `networkId path parameter. Network ID`,
@@ -261,13 +265,82 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ res
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"Airplane",
+								"Alcohol and Drug Rehabilitation Center",
+								"Amphitheater",
+								"Amusement Park",
+								"Arena",
+								"Attorney Office",
+								"Automobile or Truck",
+								"Automotive Service Station",
+								"Bank",
+								"Bar",
+								"Boarding House",
+								"Bus",
+								"Bus Stop",
+								"City Park",
+								"Coffee Shop",
+								"Convention Center",
+								"Doctor or Dentist office",
+								"Dormitory",
+								"Emergency Coordination Center",
+								"Factory",
+								"Ferry",
+								"Fire Station",
+								"Gas Station",
+								"Grocery Market",
+								"Group Home",
+								"Hospital",
+								"Hotel or Motel",
+								"Kiosk",
+								"Library",
+								"Long-Term Care Facility",
+								"Motor Bike",
+								"Muni-mesh Network",
+								"Museum",
+								"Passenger Terminal",
+								"Place of Worship",
+								"Police Station",
+								"Post Office",
+								"Prison or Jail",
+								"Private Residence",
+								"Professional Office",
+								"Research and Development Facility",
+								"Rest Area",
+								"Restaurant",
+								"Retail Store",
+								"School, Primary",
+								"School, Secondary",
+								"Ship or Boat",
+								"Shopping Mall",
+								"Stadium",
+								"Theater",
+								"Traffic Control",
+								"Train",
+								"University or College",
+								"Unspecified",
+								"Unspecified Assembly",
+								"Unspecified Business",
+								"Unspecified Educational",
+								"Unspecified Factory and Industrial",
+								"Unspecified Institutional",
+								"Unspecified Mercantile",
+								"Unspecified Outdoor",
+								"Unspecified Residential",
+								"Unspecified Storage",
+								"Unspecified Utility and Miscellaneous",
+								"Unspecified Vehicular",
+								"Zoo or Aquarium",
+							),
+						},
 					},
 				},
 			},
 		},
 	}
 }
-
 func (r *NetworksWirelessSSIDsHotspot20Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
 	var data NetworksWirelessSSIDsHotspot20Rs
@@ -288,7 +361,6 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Create(ctx context.Context, req
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvNumber := data.Number.ValueString()
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDHotspot20(vvNetworkID, vvNumber)
@@ -341,7 +413,7 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Create(ctx context.Context, req
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -370,9 +442,7 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Read(ctx context.Context, req r
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvNumber := data.Number.ValueString()
-	// number
 	responseGet, restyRespGet, err := r.client.Wireless.GetNetworkWirelessSSIDHotspot20(vvNetworkID, vvNumber)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -396,7 +466,7 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Read(ctx context.Context, req r
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -429,7 +499,6 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Update(ctx context.Context, req
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvNumber := data.Number.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDHotspot20(vvNetworkID, vvNumber, dataRequest)
@@ -454,7 +523,7 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Update(ctx context.Context, req
 
 func (r *NetworksWirelessSSIDsHotspot20Resource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksWirelessSSIDsHotspot20", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -534,14 +603,14 @@ func (r *NetworksWirelessSSIDsHotspot20Rs) toSdkApiRequestUpdate(ctx context.Con
 			var requestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethods []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethods
 			if rItem1.Methods != nil {
 				for _, rItem2 := range *rItem1.Methods { //Methods// name: methods
-					var requestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethodsAuthenticationTypes *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethodsAuthenticationTypes
-					if rItem2.AuthenticationTypes != nil {
-						requestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethodsAuthenticationTypes = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethodsAuthenticationTypes{}
-					}
+					// var requestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethodsAuthenticationTypes *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethodsAuthenticationTypes
+					// if rItem2.AuthenticationTypes != nil {
+					// 	requestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethodsAuthenticationTypes = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethodsAuthenticationTypes{}
+					// }
 					iD := rItem2.ID.ValueString()
 					requestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethods = append(requestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethods, merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethods{
-						AuthenticationTypes: requestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethodsAuthenticationTypes,
-						ID:                  iD,
+						// AuthenticationTypes: requestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethodsAuthenticationTypes,
+						ID: iD,
 					})
 				}
 			}

@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -142,59 +126,78 @@ func (d *DevicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 				Attributes: map[string]schema.Attribute{
 
 					"address": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Physical address of the device`,
+						Computed:            true,
 					},
-					"beacon_id_params": schema.SingleNestedAttribute{
-						Computed: true,
-						Attributes: map[string]schema.Attribute{
+					"details": schema.SetNestedAttribute{
+						MarkdownDescription: `Additional device information`,
+						Computed:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
 
-							"major": schema.Int64Attribute{
-								Computed: true,
-							},
-							"minor": schema.Int64Attribute{
-								Computed: true,
-							},
-							"uuid": schema.StringAttribute{
-								Computed: true,
+								"name": schema.StringAttribute{
+									MarkdownDescription: `Additional property name`,
+									Computed:            true,
+								},
+								"value": schema.StringAttribute{
+									MarkdownDescription: `Additional property value`,
+									Computed:            true,
+								},
 							},
 						},
 					},
 					"firmware": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Firmware version of the device`,
+						Computed:            true,
 					},
-					"floor_plan_id": schema.StringAttribute{
-						Computed: true,
+					"imei": schema.StringAttribute{
+						MarkdownDescription: `IMEI of the device, if applicable`,
+						Computed:            true,
 					},
 					"lan_ip": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `LAN IP address of the device`,
+						Computed:            true,
 					},
 					"lat": schema.Float64Attribute{
-						Computed: true,
+						MarkdownDescription: `Latitude of the device`,
+						Computed:            true,
 					},
 					"lng": schema.Float64Attribute{
-						Computed: true,
+						MarkdownDescription: `Longitude of the device`,
+						Computed:            true,
 					},
 					"mac": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `MAC address of the device`,
+						Computed:            true,
 					},
 					"model": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Model of the device`,
+						Computed:            true,
 					},
 					"name": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Name of the device`,
+						Computed:            true,
 					},
 					"network_id": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `ID of the network the device belongs to`,
+						Computed:            true,
 					},
 					"notes": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Notes for the device, limited to 255 characters`,
+						Computed:            true,
+					},
+					"product_type": schema.StringAttribute{
+						MarkdownDescription: `Product type of the device`,
+						Computed:            true,
 					},
 					"serial": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Serial number of the device`,
+						Computed:            true,
 					},
 					"tags": schema.ListAttribute{
-						Computed:    true,
-						ElementType: types.StringType,
+						MarkdownDescription: `List of tags assigned to the device`,
+						Computed:            true,
+						ElementType:         types.StringType,
 					},
 				},
 			},
@@ -209,8 +212,29 @@ func (d *DevicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 							MarkdownDescription: `Physical address of the device`,
 							Computed:            true,
 						},
+						"details": schema.SetNestedAttribute{
+							MarkdownDescription: `Additional device information`,
+							Computed:            true,
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+
+									"name": schema.StringAttribute{
+										MarkdownDescription: `Additional property name`,
+										Computed:            true,
+									},
+									"value": schema.StringAttribute{
+										MarkdownDescription: `Additional property value`,
+										Computed:            true,
+									},
+								},
+							},
+						},
 						"firmware": schema.StringAttribute{
 							MarkdownDescription: `Firmware version of the device`,
+							Computed:            true,
+						},
+						"imei": schema.StringAttribute{
+							MarkdownDescription: `IMEI of the device, if applicable`,
 							Computed:            true,
 						},
 						"lan_ip": schema.StringAttribute{
@@ -373,43 +397,27 @@ type Devices struct {
 	Item                      *ResponseDevicesGetDevice                          `tfsdk:"item"`
 }
 
-type ResponseItemOrganizationsGetOrganizationDevices struct {
-	Address     types.String  `tfsdk:"address"`
-	Firmware    types.String  `tfsdk:"firmware"`
-	LanIP       types.String  `tfsdk:"lan_ip"`
-	Lat         types.Float64 `tfsdk:"lat"`
-	Lng         types.Float64 `tfsdk:"lng"`
-	Mac         types.String  `tfsdk:"mac"`
-	Model       types.String  `tfsdk:"model"`
-	Name        types.String  `tfsdk:"name"`
-	NetworkID   types.String  `tfsdk:"network_id"`
-	Notes       types.String  `tfsdk:"notes"`
-	ProductType types.String  `tfsdk:"product_type"`
-	Serial      types.String  `tfsdk:"serial"`
-	Tags        types.List    `tfsdk:"tags"`
-}
-
 type ResponseDevicesGetDevice struct {
-	Address        types.String                            `tfsdk:"address"`
-	BeaconIDParams *ResponseDevicesGetDeviceBeaconIdParams `tfsdk:"beacon_id_params"`
-	Firmware       types.String                            `tfsdk:"firmware"`
-	FloorPlanID    types.String                            `tfsdk:"floor_plan_id"`
-	LanIP          types.String                            `tfsdk:"lan_ip"`
-	Lat            types.Float64                           `tfsdk:"lat"`
-	Lng            types.Float64                           `tfsdk:"lng"`
-	Mac            types.String                            `tfsdk:"mac"`
-	Model          types.String                            `tfsdk:"model"`
-	Name           types.String                            `tfsdk:"name"`
-	NetworkID      types.String                            `tfsdk:"network_id"`
-	Notes          types.String                            `tfsdk:"notes"`
-	Serial         types.String                            `tfsdk:"serial"`
-	Tags           types.List                              `tfsdk:"tags"`
+	Address     types.String                       `tfsdk:"address"`
+	Details     *[]ResponseDevicesGetDeviceDetails `tfsdk:"details"`
+	Firmware    types.String                       `tfsdk:"firmware"`
+	Imei        types.String                       `tfsdk:"imei"`
+	LanIP       types.String                       `tfsdk:"lan_ip"`
+	Lat         types.Float64                      `tfsdk:"lat"`
+	Lng         types.Float64                      `tfsdk:"lng"`
+	Mac         types.String                       `tfsdk:"mac"`
+	Model       types.String                       `tfsdk:"model"`
+	Name        types.String                       `tfsdk:"name"`
+	NetworkID   types.String                       `tfsdk:"network_id"`
+	Notes       types.String                       `tfsdk:"notes"`
+	ProductType types.String                       `tfsdk:"product_type"`
+	Serial      types.String                       `tfsdk:"serial"`
+	Tags        types.List                         `tfsdk:"tags"`
 }
 
-type ResponseDevicesGetDeviceBeaconIdParams struct {
-	Major types.Int64  `tfsdk:"major"`
-	Minor types.Int64  `tfsdk:"minor"`
-	UUID  types.String `tfsdk:"uuid"`
+type ResponseDevicesGetDeviceDetails struct {
+	Name  types.String `tfsdk:"name"`
+	Value types.String `tfsdk:"value"`
 }
 
 // ToBody
@@ -417,8 +425,22 @@ func ResponseDevicesGetOrganizationDevicesItemsToBody(state Devices, response *m
 	var items []ResponseItemOrganizationsGetOrganizationDevices
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationDevices{
-			Address:  types.StringValue(item.Address),
+			Address: types.StringValue(item.Address),
+			Details: func() *[]ResponseItemOrganizationsGetOrganizationDevicesDetails {
+				if item.Details != nil {
+					result := make([]ResponseItemOrganizationsGetOrganizationDevicesDetails, len(*item.Details))
+					for i, details := range *item.Details {
+						result[i] = ResponseItemOrganizationsGetOrganizationDevicesDetails{
+							Name:  types.StringValue(details.Name),
+							Value: types.StringValue(details.Value),
+						}
+					}
+					return &result
+				}
+				return &[]ResponseItemOrganizationsGetOrganizationDevicesDetails{}
+			}(),
 			Firmware: types.StringValue(item.Firmware),
+			Imei:     types.StringValue(item.Imei),
 			LanIP:    types.StringValue(item.LanIP),
 			Lat: func() types.Float64 {
 				if item.Lat != nil {
@@ -450,29 +472,22 @@ func ResponseDevicesGetOrganizationDevicesItemsToBody(state Devices, response *m
 func ResponseDevicesGetDeviceItemToBody(state Devices, response *merakigosdk.ResponseDevicesGetDevice) Devices {
 	itemState := ResponseDevicesGetDevice{
 		Address: types.StringValue(response.Address),
-		BeaconIDParams: func() *ResponseDevicesGetDeviceBeaconIdParams {
-			if response.BeaconIDParams != nil {
-				return &ResponseDevicesGetDeviceBeaconIdParams{
-					Major: func() types.Int64 {
-						if response.BeaconIDParams.Major != nil {
-							return types.Int64Value(int64(*response.BeaconIDParams.Major))
-						}
-						return types.Int64{}
-					}(),
-					Minor: func() types.Int64 {
-						if response.BeaconIDParams.Minor != nil {
-							return types.Int64Value(int64(*response.BeaconIDParams.Minor))
-						}
-						return types.Int64{}
-					}(),
-					UUID: types.StringValue(response.BeaconIDParams.UUID),
+		Details: func() *[]ResponseDevicesGetDeviceDetails {
+			if response.Details != nil {
+				result := make([]ResponseDevicesGetDeviceDetails, len(*response.Details))
+				for i, details := range *response.Details {
+					result[i] = ResponseDevicesGetDeviceDetails{
+						Name:  types.StringValue(details.Name),
+						Value: types.StringValue(details.Value),
+					}
 				}
+				return &result
 			}
-			return &ResponseDevicesGetDeviceBeaconIdParams{}
+			return &[]ResponseDevicesGetDeviceDetails{}
 		}(),
-		Firmware:    types.StringValue(response.Firmware),
-		FloorPlanID: types.StringValue(response.FloorPlanID),
-		LanIP:       types.StringValue(response.LanIP),
+		Firmware: types.StringValue(response.Firmware),
+		Imei:     types.StringValue(response.Imei),
+		LanIP:    types.StringValue(response.LanIP),
 		Lat: func() types.Float64 {
 			if response.Lat != nil {
 				return types.Float64Value(float64(*response.Lat))
@@ -485,13 +500,14 @@ func ResponseDevicesGetDeviceItemToBody(state Devices, response *merakigosdk.Res
 			}
 			return types.Float64{}
 		}(),
-		Mac:       types.StringValue(response.Mac),
-		Model:     types.StringValue(response.Model),
-		Name:      types.StringValue(response.Name),
-		NetworkID: types.StringValue(response.NetworkID),
-		Notes:     types.StringValue(response.Notes),
-		Serial:    types.StringValue(response.Serial),
-		Tags:      StringSliceToList(response.Tags),
+		Mac:         types.StringValue(response.Mac),
+		Model:       types.StringValue(response.Model),
+		Name:        types.StringValue(response.Name),
+		NetworkID:   types.StringValue(response.NetworkID),
+		Notes:       types.StringValue(response.Notes),
+		ProductType: types.StringValue(response.ProductType),
+		Serial:      types.StringValue(response.Serial),
+		Tags:        StringSliceToList(response.Tags),
 	}
 	state.Item = &itemState
 	return state

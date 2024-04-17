@@ -27,6 +27,7 @@ resource "meraki_networks_appliance_firewall_inbound_firewall_rules" "example" {
     src_port       = "Any"
     syslog_enabled = false
   }]
+  syslog_default_rule = true
 }
 
 output "meraki_networks_appliance_firewall_inbound_firewall_rules_example" {

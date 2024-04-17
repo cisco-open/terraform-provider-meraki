@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -184,7 +168,6 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Create(ctx context.Context, r
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvName := data.Name.ValueString()
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkWebhooksPayloadTemplates(vvNetworkID)
@@ -207,7 +190,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Create(ctx context.Context, r
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter PayloadTemplateID",
-					"Error",
+					err.Error(),
 				)
 				return
 			}
@@ -264,7 +247,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Create(ctx context.Context, r
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter PayloadTemplateID",
-				"Error",
+				err.Error(),
 			)
 			return
 		}
@@ -318,9 +301,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Read(ctx context.Context, req
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvPayloadTemplateID := data.PayloadTemplateID.ValueString()
-	// payload_template_id
 	responseGet, restyRespGet, err := r.client.Networks.GetNetworkWebhooksPayloadTemplate(vvNetworkID, vvPayloadTemplateID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -344,7 +325,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Read(ctx context.Context, req
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkWebhooksPayloadTemplateItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -377,7 +358,6 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Update(ctx context.Context, r
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvPayloadTemplateID := data.PayloadTemplateID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkWebhooksPayloadTemplate(vvNetworkID, vvPayloadTemplateID, dataRequest)

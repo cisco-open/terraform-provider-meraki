@@ -54,7 +54,7 @@ output "meraki_networks_appliance_prefixes_delegated_statics_example" {
 
 Optional:
 
-- `interfaces` (List of String) Uplink provided or independent
+- `interfaces` (Set of String) Uplink provided or independent
 - `type` (String) Origin type
 
 ## Import

@@ -98,5 +98,5 @@ Read-Only:
 - `stp_guard` (String) The state of the STP guard ('disabled', 'root guard', 'bpdu guard' or 'loop guard').
 - `tags` (List of String) The list of tags of the switch port.
 - `type` (String) The type of the switch port ('trunk' or 'access').
-- `vlan` (Number) The VLAN of the switch port. A null value will clear the value set for trunk ports.
+- `vlan` (Number) The VLAN of the switch port. For a trunk port, this is the native VLAN. A null value will clear the value set for trunk ports.
 - `voice_vlan` (Number) The voice VLAN of the switch port. Only applicable to access ports.

@@ -21,10 +21,11 @@ resource "meraki_networks_wireless_billing" "example" {
 
     bandwidth_limits = {
 
-      limit_down = 1000
-      limit_up   = 1000
+      limit_down = 1000000
+      limit_up   = 1000000
     }
-    price      = 5
+    id         = "1"
+    price      = 5.0
     time_limit = "1 hour"
   }]
 }
@@ -52,17 +53,20 @@ output "meraki_networks_wireless_billing_example" {
 Optional:
 
 - `bandwidth_limits` (Attributes) The uplink bandwidth settings for the pricing plan. (see [below for nested schema](#nestedatt--plans--bandwidth_limits))
-- `id` (String) The id of the pricing plan to update.
 - `price` (Number) The price of the billing plan.
-- `time_limit` (String) The time limit of the pricing plan in minutes. Can be '1 hour', '1 day', '1 week', or '30 days'.
+- `time_limit` (String) The time limit of the pricing plan in minutes.
+
+Read-Only:
+
+- `id` (String) The id of the pricing plan to update.
 
 <a id="nestedatt--plans--bandwidth_limits"></a>
 ### Nested Schema for `plans.bandwidth_limits`
 
 Optional:
 
-- `limit_down` (Number) The maximum download limit (integer, in Kbps). null indicates no limit
-- `limit_up` (Number) The maximum upload limit (integer, in Kbps). null indicates no limit
+- `limit_down` (Number) The maximum download limit (integer, in Kbps).
+- `limit_up` (Number) The maximum upload limit (integer, in Kbps).
 
 ## Import
 

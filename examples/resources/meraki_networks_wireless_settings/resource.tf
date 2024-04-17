@@ -5,8 +5,16 @@ resource "meraki_networks_wireless_settings" "example" {
   led_lights_on              = false
   location_analytics_enabled = false
   meshing_enabled            = true
-  network_id                 = "string"
-  upgrade_strategy            = "minimizeUpgradeTime"
+  named_vlans = {
+
+    pool_dhcp_monitoring = {
+
+      duration = 5
+      enabled  = true
+    }
+  }
+  network_id      = "string"
+  upgradestrategy = "minimizeUpgradeTime"
 }
 
 output "meraki_networks_wireless_settings_example" {

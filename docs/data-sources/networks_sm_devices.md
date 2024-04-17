@@ -23,6 +23,8 @@ data "meraki_networks_sm_devices" "example" {
   scope          = ["string"]
   serials        = ["string"]
   starting_after = "string"
+  system_types   = ["string"]
+  uuids          = ["string"]
   wifi_macs      = ["string"]
 }
 
@@ -47,12 +49,14 @@ output "meraki_networks_sm_devices_example" {
     ownerEmail, ownerUsername, osBuild, publicIp, phoneNumber, diskInfoJson, deviceCapacity, isManaged, hadMdm, isSupervised, meid, imei, iccid,
     simCarrierNetwork, cellularDataUsed, isHotspotEnabled, createdAt, batteryEstCharge, quarantined, avName, avRunning, asName, fwName,
     isRooted, loginRequired, screenLockEnabled, screenLockDelay, autoLoginDisabled, autoTags, hasMdm, hasDesktopAgent, diskEncryptionEnabled,
-    hardwareEncryptionCaps, passCodeLock, usesHardwareKeystore, androidSecurityPatchVersion, and url.
+    hardwareEncryptionCaps, passCodeLock, usesHardwareKeystore, androidSecurityPatchVersion, cellular, and url.
 - `ids` (List of String) ids query parameter. Filter devices by id(s).
 - `per_page` (Number) perPage query parameter. The number of entries per page returned. Acceptable range is 3 1000. Default is 1000.
 - `scope` (List of String) scope query parameter. Specify a scope (one of all, none, withAny, withAll, withoutAny, or withoutAll) and a set of tags.
 - `serials` (List of String) serials query parameter. Filter devices by serial(s).
 - `starting_after` (String) startingAfter query parameter. A token used by the server to indicate the start of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.
+- `system_types` (List of String) systemTypes query parameter. Filter devices by system type(s).
+- `uuids` (List of String) uuids query parameter. Filter devices by uuid(s).
 - `wifi_macs` (List of String) wifiMacs query parameter. Filter devices by wifi mac(s).
 
 ### Read-Only

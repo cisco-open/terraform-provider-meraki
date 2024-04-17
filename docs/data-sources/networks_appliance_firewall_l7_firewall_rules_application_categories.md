@@ -39,21 +39,21 @@ output "meraki_networks_appliance_firewall_l7_firewall_rules_application_categor
 
 Read-Only:
 
-- `application_categories` (Attributes Set) (see [below for nested schema](#nestedatt--item--application_categories))
+- `application_categories` (Attributes Set) The L7 firewall application categories and their associated applications for an MX network (see [below for nested schema](#nestedatt--item--application_categories))
 
 <a id="nestedatt--item--application_categories"></a>
 ### Nested Schema for `item.application_categories`
 
 Read-Only:
 
-- `applications` (Attributes Set) (see [below for nested schema](#nestedatt--item--application_categories--applications))
-- `id` (String)
-- `name` (String)
+- `applications` (Attributes Set) Details of the associated applications (see [below for nested schema](#nestedatt--item--application_categories--applications))
+- `id` (String) The id of the category
+- `name` (String) The name of the category
 
 <a id="nestedatt--item--application_categories--applications"></a>
 ### Nested Schema for `item.application_categories.applications`
 
 Read-Only:
 
-- `id` (String)
-- `name` (String)
+- `id` (String) The id of the application
+- `name` (String) The name of the application

@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -74,74 +58,98 @@ func (d *NetworksSwitchStacksRoutingInterfacesDhcpDataSource) Schema(_ context.C
 				Attributes: map[string]schema.Attribute{
 
 					"boot_file_name": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The PXE boot server file name for the DHCP server running on the switch stack interface`,
+						Computed:            true,
 					},
 					"boot_next_server": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The PXE boot server IP for the DHCP server running on the switch stack interface`,
+						Computed:            true,
 					},
 					"boot_options_enabled": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Enable DHCP boot options to provide PXE boot options configs for the dhcp server running on the switch stack interface`,
+						Computed:            true,
 					},
 					"dhcp_lease_time": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The DHCP lease time config for the dhcp server running on the switch stack interface ('30 minutes', '1 hour', '4 hours', '12 hours', '1 day' or '1 week')`,
+						Computed:            true,
 					},
 					"dhcp_mode": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The DHCP mode options for the switch stack interface ('dhcpDisabled', 'dhcpRelay' or 'dhcpServer')`,
+						Computed:            true,
 					},
 					"dhcp_options": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `Array of DHCP options consisting of code, type and value for the DHCP server running on the switch stack interface`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"code": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The code for DHCP option which should be from 2 to 254`,
+									Computed:            true,
 								},
 								"type": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The type of the DHCP option which should be one of ('text', 'ip', 'integer' or 'hex')`,
+									Computed:            true,
 								},
 								"value": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The value of the DHCP option`,
+									Computed:            true,
 								},
 							},
 						},
 					},
+					"dhcp_relay_server_ips": schema.ListAttribute{
+						MarkdownDescription: `The DHCP relay server IPs to which DHCP packets would get relayed for the switch stack interface`,
+						Computed:            true,
+						ElementType:         types.StringType,
+					},
 					"dns_custom_nameservers": schema.ListAttribute{
-						Computed:    true,
-						ElementType: types.StringType,
+						MarkdownDescription: `The DHCP name server IPs when DHCP name server option is 'custom'`,
+						Computed:            true,
+						ElementType:         types.StringType,
 					},
 					"dns_nameservers_option": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The DHCP name server option for the dhcp server running on the switch stack interface ('googlePublicDns', 'openDns' or 'custom')`,
+						Computed:            true,
 					},
 					"fixed_ip_assignments": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `Array of DHCP reserved IP assignments for the DHCP server running on the switch stack interface`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"ip": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The IP address of the client which has fixed IP address assigned to it`,
+									Computed:            true,
 								},
 								"mac": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The MAC address of the client which has fixed IP address`,
+									Computed:            true,
 								},
 								"name": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The name of the client which has fixed IP address`,
+									Computed:            true,
 								},
 							},
 						},
 					},
 					"reserved_ip_ranges": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `Array of DHCP reserved IP assignments for the DHCP server running on the switch stack interface`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"comment": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The comment for the reserved IP range`,
+									Computed:            true,
 								},
 								"end": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The ending IP address of the reserved IP range`,
+									Computed:            true,
 								},
 								"start": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The starting IP address of the reserved IP range`,
+									Computed:            true,
 								},
 							},
 						},
@@ -204,6 +212,7 @@ type ResponseSwitchGetNetworkSwitchStackRoutingInterfaceDhcp struct {
 	DhcpLeaseTime        types.String                                                                 `tfsdk:"dhcp_lease_time"`
 	DhcpMode             types.String                                                                 `tfsdk:"dhcp_mode"`
 	DhcpOptions          *[]ResponseSwitchGetNetworkSwitchStackRoutingInterfaceDhcpDhcpOptions        `tfsdk:"dhcp_options"`
+	DhcpRelayServerIPs   types.List                                                                   `tfsdk:"dhcp_relay_server_ips"`
 	DNSCustomNameservers types.List                                                                   `tfsdk:"dns_custom_nameservers"`
 	DNSNameserversOption types.String                                                                 `tfsdk:"dns_nameservers_option"`
 	FixedIPAssignments   *[]ResponseSwitchGetNetworkSwitchStackRoutingInterfaceDhcpFixedIpAssignments `tfsdk:"fixed_ip_assignments"`
@@ -255,6 +264,7 @@ func ResponseSwitchGetNetworkSwitchStackRoutingInterfaceDhcpItemToBody(state Net
 			}
 			return &[]ResponseSwitchGetNetworkSwitchStackRoutingInterfaceDhcpDhcpOptions{}
 		}(),
+		DhcpRelayServerIPs:   StringSliceToList(response.DhcpRelayServerIPs),
 		DNSCustomNameservers: StringSliceToList(response.DNSCustomNameservers),
 		DNSNameserversOption: types.StringValue(response.DNSNameserversOption),
 		FixedIPAssignments: func() *[]ResponseSwitchGetNetworkSwitchStackRoutingInterfaceDhcpFixedIpAssignments {

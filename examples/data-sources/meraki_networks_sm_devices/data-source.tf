@@ -9,6 +9,8 @@ data "meraki_networks_sm_devices" "example" {
   scope          = ["string"]
   serials        = ["string"]
   starting_after = "string"
+  system_types   = ["string"]
+  uuids          = ["string"]
   wifi_macs      = ["string"]
 }
 

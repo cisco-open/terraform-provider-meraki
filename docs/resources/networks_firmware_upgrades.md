@@ -78,6 +78,18 @@ resource "meraki_networks_firmware_upgrades" "example" {
       }
       participate_in_next_beta_release = false
     }
+    switch_catalyst = {
+
+      next_upgrade = {
+
+        time = "2019-03-17T17:22:52Z"
+        to_version = {
+
+          id = "1234"
+        }
+      }
+      participate_in_next_beta_release = false
+    }
     wireless = {
 
       next_upgrade = {
@@ -127,6 +139,7 @@ Optional:
 - `cellular_gateway` (Attributes) The network device to be updated (see [below for nested schema](#nestedatt--products--cellular_gateway))
 - `sensor` (Attributes) The network device to be updated (see [below for nested schema](#nestedatt--products--sensor))
 - `switch` (Attributes) The network device to be updated (see [below for nested schema](#nestedatt--products--switch))
+- `switch_catalyst` (Attributes) The network device to be updated (see [below for nested schema](#nestedatt--products--switch_catalyst))
 - `wireless` (Attributes) The network device to be updated (see [below for nested schema](#nestedatt--products--wireless))
 
 <a id="nestedatt--products--appliance"></a>
@@ -610,6 +623,32 @@ Read-Only:
 - `release_date` (String) Release date of the firmware version
 - `release_type` (String) Release type of the firmware version
 - `short_name` (String) Firmware version short name
+
+
+
+
+<a id="nestedatt--products--switch_catalyst"></a>
+### Nested Schema for `products.switch_catalyst`
+
+Optional:
+
+- `next_upgrade` (Attributes) The pending firmware upgrade if it exists (see [below for nested schema](#nestedatt--products--switch_catalyst--next_upgrade))
+- `participate_in_next_beta_release` (Boolean) Whether or not the network wants beta firmware
+
+<a id="nestedatt--products--switch_catalyst--next_upgrade"></a>
+### Nested Schema for `products.switch_catalyst.next_upgrade`
+
+Optional:
+
+- `time` (String) The time of the last successful upgrade
+- `to_version` (Attributes) The version to be updated to (see [below for nested schema](#nestedatt--products--switch_catalyst--next_upgrade--to_version))
+
+<a id="nestedatt--products--switch_catalyst--next_upgrade--to_version"></a>
+### Nested Schema for `products.switch_catalyst.next_upgrade.to_version`
+
+Optional:
+
+- `id` (String) The version ID
 
 
 

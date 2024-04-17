@@ -15,7 +15,9 @@ description: |-
 ```terraform
 resource "meraki_organizations_policy_objects_groups" "example" {
 
+  category        = "NetworkObjectGroup"
   name            = "Web Servers - Datacenter 10"
+  object_ids      = [100]
   organization_id = "string"
 }
 
@@ -35,14 +37,14 @@ output "meraki_organizations_policy_objects_groups_example" {
 
 - `category` (String) Category of a policy object group (one of: NetworkObjectGroup, GeoLocationGroup, PortObjectGroup, ApplicationGroup)
 - `name` (String) A name for the group of network addresses, unique within the organization (alphanumeric, space, dash, or underscore characters only)
-- `object_ids` (List of String) A list of Policy Object ID's that this NetworkObjectGroup should be associated to (note: these ID's will replace the existing associated Policy Objects)
+- `object_ids` (Set of String) A list of Policy Object ID's that this NetworkObjectGroup should be associated to (note: these ID's will replace the existing associated Policy Objects)
 - `policy_object_group_id` (String) policyObjectGroupId path parameter. Policy object group ID
 
 ### Read-Only
 
 - `created_at` (String)
 - `id` (String) The ID of this resource.
-- `network_ids` (List of String)
+- `network_ids` (Set of String)
 - `updated_at` (String)
 
 ## Import

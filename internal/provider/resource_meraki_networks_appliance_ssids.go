@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -23,8 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -34,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -74,6 +60,14 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"8021x-meraki",
+						"8021x-radius",
+						"open",
+						"psk",
+					),
+				},
 			},
 			"default_vlan_id": schema.Int64Attribute{
 				MarkdownDescription: `The VLAN ID of the VLAN associated to this SSID.`,
@@ -102,6 +96,33 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 					},
 				},
 			},
+			"dot11w": schema.SingleNestedAttribute{
+				MarkdownDescription: `The current setting for Protected Management Frames (802.11w).`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
+				Attributes: map[string]schema.Attribute{
+
+					"enabled": schema.BoolAttribute{
+						MarkdownDescription: `Whether 802.11w is enabled or not.`,
+						Computed:            true,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
+					},
+					"required": schema.BoolAttribute{
+						MarkdownDescription: `(Optional) Whether 802.11w is required or not.`,
+						Computed:            true,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
+					},
+				},
+			},
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: `Whether or not the SSID is enabled.`,
 				Computed:            true,
@@ -116,6 +137,12 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"wep",
+						"wpa",
+					),
 				},
 			},
 			"name": schema.StringAttribute{
@@ -145,6 +172,7 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"radius_servers": schema.SetNestedAttribute{
 				MarkdownDescription: `The RADIUS 802.1x servers to be used for authentication.`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
@@ -154,6 +182,7 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 
 						"host": schema.StringAttribute{
 							MarkdownDescription: `The IP address of your RADIUS server.`,
+							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -161,6 +190,7 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 						},
 						"port": schema.Int64Attribute{
 							MarkdownDescription: `The UDP port your RADIUS servers listens on for Access-requests.`,
+							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -168,6 +198,7 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 						},
 						"secret": schema.StringAttribute{
 							MarkdownDescription: `The RADIUS client shared secret.`,
+							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -223,6 +254,14 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"WPA1 and WPA2",
+						"WPA2 only",
+						"WPA3 Transition Mode",
+						"WPA3 only",
+					),
 				},
 			},
 		},
@@ -360,7 +399,7 @@ func (r *NetworksApplianceSSIDsResource) Read(ctx context.Context, req resource.
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceSSIDItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -419,7 +458,7 @@ func (r *NetworksApplianceSSIDsResource) Update(ctx context.Context, req resourc
 
 func (r *NetworksApplianceSSIDsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksApplianceSSIDs", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -437,6 +476,7 @@ type NetworksApplianceSSIDsRs struct {
 	Visible                      types.Bool                                                                `tfsdk:"visible"`
 	WpaEncryptionMode            types.String                                                              `tfsdk:"wpa_encryption_mode"`
 	DhcpEnforcedDeauthentication *RequestApplianceUpdateNetworkApplianceSsidDhcpEnforcedDeauthenticationRs `tfsdk:"dhcp_enforced_deauthentication"`
+	Dot11W                       *RequestApplianceUpdateNetworkApplianceSsidDot11WRs                       `tfsdk:"dot11w"`
 	Psk                          types.String                                                              `tfsdk:"psk"`
 }
 
@@ -448,6 +488,11 @@ type ResponseApplianceGetNetworkApplianceSsidRadiusServersRs struct {
 
 type RequestApplianceUpdateNetworkApplianceSsidDhcpEnforcedDeauthenticationRs struct {
 	Enabled types.Bool `tfsdk:"enabled"`
+}
+
+type RequestApplianceUpdateNetworkApplianceSsidDot11WRs struct {
+	Enabled  types.Bool `tfsdk:"enabled"`
+	Required types.Bool `tfsdk:"required"`
 }
 
 // FromBody
@@ -475,6 +520,25 @@ func (r *NetworksApplianceSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 		}()
 		requestApplianceUpdateNetworkApplianceSSIDDhcpEnforcedDeauthentication = &merakigosdk.RequestApplianceUpdateNetworkApplianceSSIDDhcpEnforcedDeauthentication{
 			Enabled: enabled,
+		}
+	}
+	var requestApplianceUpdateNetworkApplianceSSIDDot11W *merakigosdk.RequestApplianceUpdateNetworkApplianceSSIDDot11W
+	if r.Dot11W != nil {
+		enabled := func() *bool {
+			if !r.Dot11W.Enabled.IsUnknown() && !r.Dot11W.Enabled.IsNull() {
+				return r.Dot11W.Enabled.ValueBoolPointer()
+			}
+			return nil
+		}()
+		required := func() *bool {
+			if !r.Dot11W.Required.IsUnknown() && !r.Dot11W.Required.IsNull() {
+				return r.Dot11W.Required.ValueBoolPointer()
+			}
+			return nil
+		}()
+		requestApplianceUpdateNetworkApplianceSSIDDot11W = &merakigosdk.RequestApplianceUpdateNetworkApplianceSSIDDot11W{
+			Enabled:  enabled,
+			Required: required,
 		}
 	}
 	enabled := new(bool)
@@ -535,6 +599,7 @@ func (r *NetworksApplianceSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 		AuthMode:                     *authMode,
 		DefaultVLANID:                int64ToIntPointer(defaultVLANID),
 		DhcpEnforcedDeauthentication: requestApplianceUpdateNetworkApplianceSSIDDhcpEnforcedDeauthentication,
+		Dot11W:                       requestApplianceUpdateNetworkApplianceSSIDDot11W,
 		Enabled:                      enabled,
 		EncryptionMode:               *encryptionMode,
 		Name:                         *name,

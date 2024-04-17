@@ -41,13 +41,13 @@ output "meraki_networks_wireless_ssids_firewall_l7_firewall_rules_example" {
 
 Read-Only:
 
-- `rules` (Attributes Set) (see [below for nested schema](#nestedatt--item--rules))
+- `rules` (Attributes Set) An ordered array of the firewall rules for this SSID (not including the local LAN access rule or the default rule). (see [below for nested schema](#nestedatt--item--rules))
 
 <a id="nestedatt--item--rules"></a>
 ### Nested Schema for `item.rules`
 
 Read-Only:
 
-- `policy` (String)
-- `type` (String)
-- `value` (String)
+- `policy` (String) 'Deny' traffic specified by this rule
+- `type` (String) Type of the L7 firewall rule. One of: 'application', 'applicationCategory', 'host', 'port', 'ipRange'
+- `value` (String) The value of what needs to get blocked. Format of the value varies depending on type of the firewall rule selected.

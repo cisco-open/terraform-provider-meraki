@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -94,6 +78,9 @@ func (d *NetworksCameraQualityRetentionProfilesDataSource) Schema(_ context.Cont
 						Computed: true,
 					},
 					"restricted_bandwidth_mode_enabled": schema.BoolAttribute{
+						Computed: true,
+					},
+					"schedule_id": schema.StringAttribute{
 						Computed: true,
 					},
 					"video_settings": schema.SingleNestedAttribute{
@@ -184,6 +171,9 @@ func (d *NetworksCameraQualityRetentionProfilesDataSource) Schema(_ context.Cont
 							Computed: true,
 						},
 						"restricted_bandwidth_mode_enabled": schema.BoolAttribute{
+							Computed: true,
+						},
+						"schedule_id": schema.StringAttribute{
 							Computed: true,
 						},
 						"video_settings": schema.SingleNestedAttribute{
@@ -331,6 +321,7 @@ type ResponseItemCameraGetNetworkCameraQualityRetentionProfiles struct {
 	Name                           types.String                                                             `tfsdk:"name"`
 	NetworkID                      types.String                                                             `tfsdk:"network_id"`
 	RestrictedBandwidthModeEnabled types.Bool                                                               `tfsdk:"restricted_bandwidth_mode_enabled"`
+	ScheduleID                     types.String                                                             `tfsdk:"schedule_id"`
 	VideoSettings                  *ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettings `tfsdk:"video_settings"`
 }
 
@@ -371,6 +362,7 @@ type ResponseCameraGetNetworkCameraQualityRetentionProfile struct {
 	Name                           types.String                                                        `tfsdk:"name"`
 	NetworkID                      types.String                                                        `tfsdk:"network_id"`
 	RestrictedBandwidthModeEnabled types.Bool                                                          `tfsdk:"restricted_bandwidth_mode_enabled"`
+	ScheduleID                     types.String                                                        `tfsdk:"schedule_id"`
 	VideoSettings                  *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettings `tfsdk:"video_settings"`
 }
 
@@ -445,6 +437,7 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfilesItemsToBody(state Net
 				}
 				return types.Bool{}
 			}(),
+			ScheduleID: types.StringValue(item.ScheduleID),
 			VideoSettings: func() *ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettings {
 				if item.VideoSettings != nil {
 					return &ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettings{
@@ -536,6 +529,7 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBody(state Netwo
 			}
 			return types.Bool{}
 		}(),
+		ScheduleID: types.StringValue(response.ScheduleID),
 		VideoSettings: func() *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettings {
 			if response.VideoSettings != nil {
 				return &ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettings{

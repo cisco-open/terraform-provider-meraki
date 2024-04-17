@@ -8,7 +8,7 @@ description: |-
 
 # meraki_networks_switch_link_aggregations (Resource)
 
-~>Note: If you are going to manage a pre-existing resource, you must use import. See [import](#import)
+
 
 ## Example Usage
 
@@ -62,11 +62,10 @@ Optional:
 - `port_id` (String) Port identifier of switch port. For modules, the identifier is "SlotNumber_ModuleType_PortNumber" (Ex: "1_8X10G_1"), otherwise it is just the port number (Ex: "8").
 - `profile` (String) Profile identifier.
 
-<a id="import"></a>
 ## Import
 
 Import is supported using the following syntax:
 
 ```shell
-terraform import meraki_networks_switch_link_aggregations.example "network_id,id"
+terraform import meraki_networks_switch_link_aggregations.example "network_id"
 ```

@@ -19,7 +19,7 @@ data "meraki_devices_sensor_relationships" "example" {
 }
 
 output "meraki_devices_sensor_relationships_example" {
-  value = data.meraki_devices_sensor_relationships.example.items
+  value = data.meraki_devices_sensor_relationships.example.item
 }
 ```
 
@@ -32,24 +32,24 @@ output "meraki_devices_sensor_relationships_example" {
 
 ### Read-Only
 
-- `items` (Attributes List) Array of ResponseSensorGetDeviceSensorRelationships (see [below for nested schema](#nestedatt--items))
+- `item` (Attributes) (see [below for nested schema](#nestedatt--item))
 
-<a id="nestedatt--items"></a>
-### Nested Schema for `items`
-
-Read-Only:
-
-- `livestream` (Attributes) A role defined between an MT sensor and an MV camera that adds the camera's livestream to the sensor's details page. Snapshots from the camera will also appear in alert notifications that the sensor triggers. (see [below for nested schema](#nestedatt--items--livestream))
-
-<a id="nestedatt--items--livestream"></a>
-### Nested Schema for `items.livestream`
+<a id="nestedatt--item"></a>
+### Nested Schema for `item`
 
 Read-Only:
 
-- `related_devices` (Attributes Set) An array of the related devices for the role (see [below for nested schema](#nestedatt--items--livestream--related_devices))
+- `livestream` (Attributes) A role defined between an MT sensor and an MV camera that adds the camera's livestream to the sensor's details page. Snapshots from the camera will also appear in alert notifications that the sensor triggers. (see [below for nested schema](#nestedatt--item--livestream))
 
-<a id="nestedatt--items--livestream--related_devices"></a>
-### Nested Schema for `items.livestream.related_devices`
+<a id="nestedatt--item--livestream"></a>
+### Nested Schema for `item.livestream`
+
+Read-Only:
+
+- `related_devices` (Attributes Set) An array of the related devices for the role (see [below for nested schema](#nestedatt--item--livestream--related_devices))
+
+<a id="nestedatt--item--livestream--related_devices"></a>
+### Nested Schema for `item.livestream.related_devices`
 
 Read-Only:
 

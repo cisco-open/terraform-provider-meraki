@@ -20,7 +20,7 @@ data "meraki_organizations_config_templates_switch_profiles" "example" {
 }
 
 output "meraki_organizations_config_templates_switch_profiles_example" {
-  value = data.meraki_organizations_config_templates_switch_profiles.example.item
+  value = data.meraki_organizations_config_templates_switch_profiles.example.items
 }
 ```
 
@@ -34,13 +34,13 @@ output "meraki_organizations_config_templates_switch_profiles_example" {
 
 ### Read-Only
 
-- `item` (Attributes) (see [below for nested schema](#nestedatt--item))
+- `items` (Attributes List) Array of ResponseSwitchGetOrganizationConfigTemplateSwitchProfiles (see [below for nested schema](#nestedatt--items))
 
-<a id="nestedatt--item"></a>
-### Nested Schema for `item`
+<a id="nestedatt--items"></a>
+### Nested Schema for `items`
 
 Read-Only:
 
 - `model` (String) Switch model
-- `name` (String) Switch profile name
-- `switch_profile_id` (String) Switch profile id
+- `name` (String) Switch template name
+- `switch_profile_id` (String) Switch template id

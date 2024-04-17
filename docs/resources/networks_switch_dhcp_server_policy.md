@@ -19,13 +19,13 @@ resource "meraki_networks_switch_dhcp_server_policy" "example" {
 
     email = {
 
-      enabled = false
+      enabled = true
     }
   }
   allowed_servers = ["00:50:56:00:00:01", "00:50:56:00:00:02"]
   arp_inspection = {
 
-    enabled = false
+    enabled = true
   }
   blocked_servers = ["00:50:56:00:00:03", "00:50:56:00:00:04"]
   default_policy  = "block"
@@ -46,10 +46,12 @@ output "meraki_networks_switch_dhcp_server_policy_example" {
 
 ### Optional
 
-- `alerts` (Attributes) Alert settings for DHCP servers (see [below for nested schema](#nestedatt--alerts))
-- `allowed_servers` (List of String) List the MAC addresses of DHCP servers to permit on the network when defaultPolicy is set to block. An empty array will clear the entries.
+- `alerts` (Attributes) Email alert settings for DHCP servers (see [below for nested schema](#nestedatt--alerts))
+- `allowed_servers` (Set of String) List the MAC addresses of DHCP servers to permit on the network when defaultPolicy is set
+      to block.An empty array will clear the entries.
 - `arp_inspection` (Attributes) Dynamic ARP Inspection settings (see [below for nested schema](#nestedatt--arp_inspection))
-- `blocked_servers` (List of String) List the MAC addresses of DHCP servers to block on the network when defaultPolicy is set to allow. An empty array will clear the entries.
+- `blocked_servers` (Set of String) List the MAC addresses of DHCP servers to block on the network when defaultPolicy is set
+      to allow.An empty array will clear the entries.
 - `default_policy` (String) 'allow' or 'block' new DHCP servers. Default value is 'allow'.
 
 <a id="nestedatt--alerts"></a>
@@ -57,7 +59,7 @@ output "meraki_networks_switch_dhcp_server_policy_example" {
 
 Optional:
 
-- `email` (Attributes) Email alert settings for DHCP servers (see [below for nested schema](#nestedatt--alerts--email))
+- `email` (Attributes) Alert settings for DHCP servers (see [below for nested schema](#nestedatt--alerts--email))
 
 <a id="nestedatt--alerts--email"></a>
 ### Nested Schema for `alerts.email`
@@ -77,7 +79,7 @@ Optional:
 
 Read-Only:
 
-- `unsupported_models` (List of String)
+- `unsupported_models` (Set of String) List of switch models that does not support dynamic ARP inspection
 
 ## Import
 

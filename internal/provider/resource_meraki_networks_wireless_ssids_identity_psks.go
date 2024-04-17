@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -88,7 +72,6 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Schema(_ context.Context, _ 
 			},
 			"identity_psk_id": schema.StringAttribute{
 				MarkdownDescription: `identityPskId path parameter. Identity psk ID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -148,7 +131,6 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvNumber := data.Number.ValueString()
 	vvName := data.Name.ValueString()
 	//Items
@@ -172,7 +154,7 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter IDentityPskID",
-					"Error",
+					err.Error(),
 				)
 				return
 			}
@@ -188,9 +170,9 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 		}
 	}
 	dataRequest := data.toSdkApiRequestCreate(ctx)
-	restyResp2, err := r.client.Wireless.CreateNetworkWirelessSSIDIDentityPsk(vvNetworkID, vvNumber, dataRequest)
+	response, restyResp2, err := r.client.Wireless.CreateNetworkWirelessSSIDIDentityPsk(vvNetworkID, vvNumber, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkWirelessSSIDIDentityPsk",
@@ -230,7 +212,7 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter IDentityPskID",
-				"Error",
+				err.Error(),
 			)
 			return
 		}
@@ -285,7 +267,6 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Read(ctx context.Context, re
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvNumber := data.Number.ValueString()
 	// number
 	vvIDentityPskID := data.ID.ValueString()
@@ -313,7 +294,7 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Read(ctx context.Context, re
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSSIDIDentityPskItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -348,12 +329,11 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Update(ctx context.Context, 
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvNumber := data.Number.ValueString()
 	vvIDentityPskID := data.ID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDIDentityPsk(vvNetworkID, vvNumber, vvIDentityPskID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDIDentityPsk(vvNetworkID, vvNumber, vvIDentityPskID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDIDentityPsk",

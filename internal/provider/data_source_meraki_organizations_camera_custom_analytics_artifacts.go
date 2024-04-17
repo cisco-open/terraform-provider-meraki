@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -70,20 +54,29 @@ func (d *OrganizationsCameraCustomAnalyticsArtifactsDataSource) Schema(_ context
 				Attributes: map[string]schema.Attribute{
 
 					"artifact_id": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Custom analytics artifact ID`,
+						Computed:            true,
 					},
 					"name": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Custom analytics artifact name`,
+						Computed:            true,
 					},
 					"organization_id": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Organization ID`,
+						Computed:            true,
 					},
 					"status": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `Custom analytics artifact status`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
+							"message": schema.StringAttribute{
+								MarkdownDescription: `Status message`,
+								Computed:            true,
+							},
 							"type": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `Status type`,
+								Computed:            true,
 							},
 						},
 					},
@@ -97,20 +90,29 @@ func (d *OrganizationsCameraCustomAnalyticsArtifactsDataSource) Schema(_ context
 					Attributes: map[string]schema.Attribute{
 
 						"artifact_id": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Custom analytics artifact ID`,
+							Computed:            true,
 						},
 						"name": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Custom analytics artifact name`,
+							Computed:            true,
 						},
 						"organization_id": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Organization ID`,
+							Computed:            true,
 						},
 						"status": schema.SingleNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `Custom analytics artifact status`,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
+								"message": schema.StringAttribute{
+									MarkdownDescription: `Status message`,
+									Computed:            true,
+								},
 								"type": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Status type`,
+									Computed:            true,
 								},
 							},
 						},
@@ -203,7 +205,8 @@ type ResponseItemCameraGetOrganizationCameraCustomAnalyticsArtifacts struct {
 }
 
 type ResponseItemCameraGetOrganizationCameraCustomAnalyticsArtifactsStatus struct {
-	Type types.String `tfsdk:"type"`
+	Message types.String `tfsdk:"message"`
+	Type    types.String `tfsdk:"type"`
 }
 
 type ResponseCameraGetOrganizationCameraCustomAnalyticsArtifact struct {
@@ -214,7 +217,8 @@ type ResponseCameraGetOrganizationCameraCustomAnalyticsArtifact struct {
 }
 
 type ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactStatus struct {
-	Type types.String `tfsdk:"type"`
+	Message types.String `tfsdk:"message"`
+	Type    types.String `tfsdk:"type"`
 }
 
 // ToBody
@@ -228,7 +232,8 @@ func ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactsItemsToBody(stat
 			Status: func() *ResponseItemCameraGetOrganizationCameraCustomAnalyticsArtifactsStatus {
 				if item.Status != nil {
 					return &ResponseItemCameraGetOrganizationCameraCustomAnalyticsArtifactsStatus{
-						Type: types.StringValue(item.Status.Type),
+						Message: types.StringValue(item.Status.Message),
+						Type:    types.StringValue(item.Status.Type),
 					}
 				}
 				return &ResponseItemCameraGetOrganizationCameraCustomAnalyticsArtifactsStatus{}
@@ -248,7 +253,8 @@ func ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactItemToBody(state 
 		Status: func() *ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactStatus {
 			if response.Status != nil {
 				return &ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactStatus{
-					Type: types.StringValue(response.Status.Type),
+					Message: types.StringValue(response.Status.Message),
+					Type:    types.StringValue(response.Status.Type),
 				}
 			}
 			return &ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactStatus{}

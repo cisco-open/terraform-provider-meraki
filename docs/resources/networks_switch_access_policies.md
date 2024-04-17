@@ -88,8 +88,13 @@ output "meraki_networks_switch_access_policies_example" {
 - `radius_servers` (Attributes Set) List of RADIUS servers to require connecting devices to authenticate against before granting network access (see [below for nested schema](#nestedatt--radius_servers))
 - `radius_testing_enabled` (Boolean) If enabled, Meraki devices will periodically send access-request messages to these RADIUS servers
 - `url_redirect_walled_garden_enabled` (Boolean) Enable to restrict access for clients to a response_objectific set of IP addresses or hostnames prior to authentication
-- `url_redirect_walled_garden_ranges` (List of String) IP address ranges, in CIDR notation, to restrict access for clients to a specific set of IP addresses or hostnames prior to authentication
+- `url_redirect_walled_garden_ranges` (Set of String) IP address ranges, in CIDR notation, to restrict access for clients to a specific set of IP addresses or hostnames prior to authentication
 - `voice_vlan_clients` (Boolean) CDP/LLDP capable voice clients will be able to use this VLAN. Automatically true when hostMode is 'Multi-Domain'.
+
+### Read-Only
+
+- `counts` (Attributes) Counts associated with the access policy (see [below for nested schema](#nestedatt--counts))
+- `radius_servers_response` (Attributes Set) List of RADIUS servers to require connecting devices to authenticate against before granting network access (see [below for nested schema](#nestedatt--radius_servers_response))
 
 <a id="nestedatt--dot1x"></a>
 ### Nested Schema for `dot1x`
@@ -133,6 +138,32 @@ Optional:
 ### Nested Schema for `radius_servers`
 
 Optional:
+
+- `host` (String) Public IP address of the RADIUS server
+- `port` (Number) UDP port that the RADIUS server listens on for access requests
+- `secret` (String) RADIUS client shared secret
+
+
+<a id="nestedatt--counts"></a>
+### Nested Schema for `counts`
+
+Read-Only:
+
+- `ports` (Attributes) Counts associated with ports (see [below for nested schema](#nestedatt--counts--ports))
+
+<a id="nestedatt--counts--ports"></a>
+### Nested Schema for `counts.ports`
+
+Read-Only:
+
+- `with_this_policy` (Number) Number of ports in the network with this policy. For template networks, this is the number of template ports (not child ports) with this policy.
+
+
+
+<a id="nestedatt--radius_servers_response"></a>
+### Nested Schema for `radius_servers_response`
+
+Read-Only:
 
 - `host` (String) Public IP address of the RADIUS server
 - `port` (Number) UDP port that the RADIUS server listens on for access requests

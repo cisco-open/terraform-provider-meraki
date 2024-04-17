@@ -1,0 +1,1 @@
+terraform import meraki_devices_live_tools_wake_on_lan.example "serial,wake_on_lan_id"

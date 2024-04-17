@@ -29,23 +29,24 @@ output "meraki_organizations_camera_custom_analytics_artifacts_example" {
 
 ### Required
 
-- `organization_id` (String) organizationId path parameter. Organization ID
+- `organization_id` (String) Organization ID
 
 ### Optional
 
-- `artifact_id` (String) artifactId path parameter. Artifact ID
-- `name` (String) Unique name of the artifact
+- `artifact_id` (String) Custom analytics artifact ID
+- `name` (String) Custom analytics artifact name
 
 ### Read-Only
 
-- `status` (Attributes) (see [below for nested schema](#nestedatt--status))
+- `status` (Attributes) Custom analytics artifact status (see [below for nested schema](#nestedatt--status))
 
 <a id="nestedatt--status"></a>
 ### Nested Schema for `status`
 
 Read-Only:
 
-- `type` (String)
+- `message` (String) Status message
+- `type` (String) Status type
 
 ## Import
 

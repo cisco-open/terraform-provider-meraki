@@ -45,7 +45,7 @@ output "meraki_devices_camera_sense_example" {
 
 ### Read-Only
 
-- `mqtt_topics` (List of String)
+- `mqtt_topics` (Set of String)
 
 <a id="nestedatt--audio_detection"></a>
 ### Nested Schema for `audio_detection`

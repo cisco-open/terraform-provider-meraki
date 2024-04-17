@@ -63,6 +63,7 @@ resource "meraki_networks_wireless_ssids_splash_settings" "example" {
   }
   splash_timeout   = 1440
   splash_url       = "https://www.custom_splash_url.com"
+  theme_id         = "c3ddcb4f16785ee747ab5ffc10867d6c8ea704be"
   use_redirect_url = true
   use_splash_url   = true
   welcome_message  = "Welcome!"

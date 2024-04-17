@@ -1,8 +1,9 @@
 
 resource "meraki_networks_wireless_ssids_firewall_l3_firewall_rules" "example" {
 
-  network_id = "string"
-  number     = "string"
+  allow_lan_access = true
+  network_id       = "string"
+  number           = "string"
   rules = [{
 
     comment   = "Allow TCP traffic to subnet with HTTP servers."

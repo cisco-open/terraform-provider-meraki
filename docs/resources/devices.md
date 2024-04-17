@@ -17,7 +17,6 @@ resource "meraki_devices" "example" {
 
   lat    = 37.4180951010362
   lng    = -122.098531723022
-  mac    = "00:11:22:33:44:55"
   name   = "My AP"
   serial = "string"
   tags   = ["recently-added"]
@@ -33,42 +32,43 @@ output "meraki_devices_example" {
 
 ### Required
 
-- `serial` (String) serial path parameter.
+- `serial` (String) Serial number of the device
 
 ### Optional
 
-- `address` (String) The address of a device
+- `address` (String) Physical address of the device
 - `floor_plan_id` (String) The floor plan to associate to this device. null disassociates the device from the floorplan.
-- `lat` (Number) The latitude of a device
-- `lng` (Number) The longitude of a device
-- `mac` (String) Mac.
+- `lat` (Number) Latitude of the device
+- `lng` (Number) Longitude of the device
 - `move_map_marker` (Boolean) Whether or not to set the latitude and longitude of a device based on the new address. Only applies when lat and lng are not specified.
-- `name` (String) The name of a device
-- `notes` (String) The notes for the device. String. Limited to 255 characters.
-- `switch_profile_id` (String) The ID of a switch profile to bind to the device (for available switch profiles, see the 'Switch Profiles' endpoint). Use null to unbind the switch device from the current profile. For a device to be bindable to a switch profile, it must (1) be a switch, and (2) belong to a network that is bound to a configuration template.
-- `tags` (List of String) The list of tags of a device
+- `name` (String) Name of the device
+- `notes` (String) Notes for the device, limited to 255 characters
+- `switch_profile_id` (String) The ID of a switch template to bind to the device (for available switch templates, see the 'Switch Templates' endpoint). Use null to unbind the switch device from the current profile. For a device to be bindable to a switch template, it must (1) be a switch, and (2) belong to a network that is bound to a configuration template.
+- `tags` (Set of String) List of tags assigned to the device
 
 ### Read-Only
 
-- `beacon_id_params` (Attributes) (see [below for nested schema](#nestedatt--beacon_id_params))
-- `firmware` (String)
-- `lan_ip` (String)
-- `model` (String)
-- `network_id` (String)
+- `details` (Attributes Set) Additional device information (see [below for nested schema](#nestedatt--details))
+- `firmware` (String) Firmware version of the device
+- `imei` (String) IMEI of the device, if applicable
+- `lan_ip` (String) LAN IP address of the device
+- `mac` (String) MAC address of the device
+- `model` (String) Model of the device
+- `network_id` (String) ID of the network the device belongs to
+- `product_type` (String) Product type of the device
 
-<a id="nestedatt--beacon_id_params"></a>
-### Nested Schema for `beacon_id_params`
+<a id="nestedatt--details"></a>
+### Nested Schema for `details`
 
 Read-Only:
 
-- `major` (Number)
-- `minor` (Number)
-- `uuid` (String)
+- `name` (String) Additional property name
+- `value` (String) Additional property value
 
 ## Import
 
 Import is supported using the following syntax:
 
 ```shell
-terraform import meraki_devices.example "serial"
+terraform import meraki_devices.example "organization_id,serial"
 ```

@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -66,44 +50,55 @@ func (d *DevicesCellularGatewayLanDataSource) Schema(_ context.Context, _ dataso
 				Attributes: map[string]schema.Attribute{
 
 					"device_lan_ip": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Lan IP of the MG`,
+						Computed:            true,
 					},
 					"device_name": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Name of the MG.`,
+						Computed:            true,
 					},
 					"device_subnet": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Subnet configuration of the MG.`,
+						Computed:            true,
 					},
 					"fixed_ip_assignments": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `list of all fixed IP assignments for a single MG`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"ip": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The IP address you want to assign to a specific server or device`,
+									Computed:            true,
 								},
 								"mac": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The MAC address of the server or device that hosts the internal resource that you wish to receive the specified IP address`,
+									Computed:            true,
 								},
 								"name": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `A descriptive name of the assignment`,
+									Computed:            true,
 								},
 							},
 						},
 					},
 					"reserved_ip_ranges": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `list of all reserved IP ranges for a single MG`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"comment": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Comment explaining the reserved IP range`,
+									Computed:            true,
 								},
 								"end": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Ending IP included in the reserved range of IPs`,
+									Computed:            true,
 								},
 								"start": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Starting IP included in the reserved range of IPs`,
+									Computed:            true,
 								},
 							},
 						},

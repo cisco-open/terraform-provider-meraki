@@ -19,8 +19,10 @@ resource "meraki_organizations_snmp" "example" {
   peer_ips        = ["123.123.123.1"]
   v2c_enabled     = false
   v3_auth_mode    = "SHA"
+  v3_auth_pass    = "password"
   v3_enabled      = true
   v3_priv_mode    = "AES128"
+  v3_priv_pass    = "password"
 }
 
 output "meraki_organizations_snmp_example" {
@@ -37,7 +39,7 @@ output "meraki_organizations_snmp_example" {
 
 ### Optional
 
-- `peer_ips` (List of String) The list of IPv4 addresses that are allowed to access the SNMP server.
+- `peer_ips` (Set of String) The list of IPv4 addresses that are allowed to access the SNMP server.
 - `v2c_enabled` (Boolean) Boolean indicating whether SNMP version 2c is enabled for the organization.
 - `v3_auth_mode` (String) The SNMP version 3 authentication mode. Can be either 'MD5' or 'SHA'.
 - `v3_auth_pass` (String) The SNMP version 3 authentication password. Must be at least 8 characters if specified.
@@ -47,8 +49,10 @@ output "meraki_organizations_snmp_example" {
 
 ### Read-Only
 
-- `hostname` (String)
-- `port` (Number)
+- `hostname` (String) The hostname of the SNMP server.
+- `port` (Number) The port of the SNMP server.
+- `v2_community_string` (String) The community string for SNMP version 2c, if enabled.
+- `v3_user` (String) The user for SNMP version 3, if enabled.
 
 ## Import
 

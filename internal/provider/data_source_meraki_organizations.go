@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -57,8 +41,20 @@ func (d *OrganizationsDataSource) Metadata(_ context.Context, req datasource.Met
 func (d *OrganizationsDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"ending_before": schema.StringAttribute{
+				MarkdownDescription: `endingBefore query parameter. A token used by the server to indicate the end of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.`,
+				Optional:            true,
+			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
+				Optional:            true,
+			},
+			"per_page": schema.Int64Attribute{
+				MarkdownDescription: `perPage query parameter. The number of entries per page returned. Acceptable range is 3 9000. Default is 9000.`,
+				Optional:            true,
+			},
+			"starting_after": schema.StringAttribute{
+				MarkdownDescription: `startingAfter query parameter. A token used by the server to indicate the start of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.`,
 				Optional:            true,
 			},
 			"item": schema.SingleNestedAttribute{
@@ -115,7 +111,7 @@ func (d *OrganizationsDataSource) Schema(_ context.Context, _ datasource.SchemaR
 						Attributes: map[string]schema.Attribute{
 
 							"details": schema.SetNestedAttribute{
-								MarkdownDescription: `Details related to organization management, possibly empty`,
+								MarkdownDescription: `Details related to organization management, possibly empty. Details may be named 'MSP ID', 'IP restriction mode for API', or 'IP restriction mode for dashboard', if the organization admin has configured any.`,
 								Computed:            true,
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
@@ -200,7 +196,7 @@ func (d *OrganizationsDataSource) Schema(_ context.Context, _ datasource.SchemaR
 							Attributes: map[string]schema.Attribute{
 
 								"details": schema.SetNestedAttribute{
-									MarkdownDescription: `Details related to organization management, possibly empty`,
+									MarkdownDescription: `Details related to organization management, possibly empty. Details may be named 'MSP ID', 'IP restriction mode for API', or 'IP restriction mode for dashboard', if the organization admin has configured any.`,
 									Computed:            true,
 									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
@@ -240,7 +236,7 @@ func (d *OrganizationsDataSource) Read(ctx context.Context, req datasource.ReadR
 		return
 	}
 
-	method1 := []bool{}
+	method1 := []bool{!organizations.PerPage.IsNull(), !organizations.StartingAfter.IsNull(), !organizations.EndingBefore.IsNull()}
 	log.Printf("[DEBUG] Selecting method. Method 1 %v", method1)
 	method2 := []bool{!organizations.OrganizationID.IsNull()}
 	log.Printf("[DEBUG] Selecting method. Method 2 %v", method2)
@@ -248,8 +244,13 @@ func (d *OrganizationsDataSource) Read(ctx context.Context, req datasource.ReadR
 	selectedMethod := pickMethod([][]bool{method1, method2})
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetOrganizations")
+		queryParams1 := merakigosdk.GetOrganizationsQueryParams{}
 
-		response1, restyResp1, err := d.client.Organizations.GetOrganizations()
+		queryParams1.PerPage = int(organizations.PerPage.ValueInt64())
+		queryParams1.StartingAfter = organizations.StartingAfter.ValueString()
+		queryParams1.EndingBefore = organizations.EndingBefore.ValueString()
+
+		response1, restyResp1, err := d.client.Organizations.GetOrganizations(&queryParams1)
 
 		if err != nil || response1 == nil {
 			if restyResp1 != nil {
@@ -299,6 +300,9 @@ func (d *OrganizationsDataSource) Read(ctx context.Context, req datasource.ReadR
 
 // structs
 type Organizations struct {
+	PerPage        types.Int64                                  `tfsdk:"per_page"`
+	StartingAfter  types.String                                 `tfsdk:"starting_after"`
+	EndingBefore   types.String                                 `tfsdk:"ending_before"`
 	OrganizationID types.String                                 `tfsdk:"organization_id"`
 	Items          *[]ResponseItemOrganizationsGetOrganizations `tfsdk:"items"`
 	Item           *ResponseOrganizationsGetOrganization        `tfsdk:"item"`

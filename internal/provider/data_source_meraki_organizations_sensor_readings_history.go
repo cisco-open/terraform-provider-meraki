@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -62,7 +46,7 @@ func (d *OrganizationsSensorReadingsHistoryDataSource) Schema(_ context.Context,
 				Optional:            true,
 			},
 			"metrics": schema.ListAttribute{
-				MarkdownDescription: `metrics query parameter. Types of sensor readings to retrieve. If no metrics are supplied, all available types of readings will be retrieved. Allowed values are battery, button, door, humidity, indoorAirQuality, noise, pm25, temperature, tvoc, and water.`,
+				MarkdownDescription: `metrics query parameter. Types of sensor readings to retrieve. If no metrics are supplied, all available types of readings will be retrieved. Allowed values are apparentPower, battery, button, co2, current, door, downstreamPower, frequency, humidity, indoorAirQuality, noise, pm25, powerFactor, realPower, remoteLockoutSwitch, temperature, tvoc, voltage, and water.`,
 				Optional:            true,
 				ElementType:         types.StringType,
 			},
@@ -107,6 +91,17 @@ func (d *OrganizationsSensorReadingsHistoryDataSource) Schema(_ context.Context,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
+						"apparent_power": schema.SingleNestedAttribute{
+							MarkdownDescription: `Reading for the 'apparentPower' metric. This will only be present if the 'metric' property equals 'apparentPower'.`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"draw": schema.Float64Attribute{
+									MarkdownDescription: `Apparent power reading in volt-amperes.`,
+									Computed:            true,
+								},
+							},
+						},
 						"battery": schema.SingleNestedAttribute{
 							MarkdownDescription: `Reading for the 'battery' metric. This will only be present if the 'metric' property equals 'battery'.`,
 							Computed:            true,
@@ -129,6 +124,28 @@ func (d *OrganizationsSensorReadingsHistoryDataSource) Schema(_ context.Context,
 								},
 							},
 						},
+						"co2": schema.SingleNestedAttribute{
+							MarkdownDescription: `Reading for the 'co2' metric. This will only be present if the 'metric' property equals 'co2'.`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"concentration": schema.Int64Attribute{
+									MarkdownDescription: `CO2 reading in parts per million.`,
+									Computed:            true,
+								},
+							},
+						},
+						"current": schema.SingleNestedAttribute{
+							MarkdownDescription: `Reading for the 'current' metric. This will only be present if the 'metric' property equals 'current'.`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"draw": schema.Float64Attribute{
+									MarkdownDescription: `Electrical current reading in amperes.`,
+									Computed:            true,
+								},
+							},
+						},
 						"door": schema.SingleNestedAttribute{
 							MarkdownDescription: `Reading for the 'door' metric. This will only be present if the 'metric' property equals 'door'.`,
 							Computed:            true,
@@ -136,6 +153,28 @@ func (d *OrganizationsSensorReadingsHistoryDataSource) Schema(_ context.Context,
 
 								"open": schema.BoolAttribute{
 									MarkdownDescription: `True if the door is open.`,
+									Computed:            true,
+								},
+							},
+						},
+						"downstream_power": schema.SingleNestedAttribute{
+							MarkdownDescription: `Reading for the 'downstreamPower' metric. This will only be present if the 'metric' property equals 'downstreamPower'.`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"enabled": schema.BoolAttribute{
+									MarkdownDescription: `True if power is turned on to the device that is connected downstream of the MT40 power monitor.`,
+									Computed:            true,
+								},
+							},
+						},
+						"frequency": schema.SingleNestedAttribute{
+							MarkdownDescription: `Reading for the 'frequency' metric. This will only be present if the 'metric' property equals 'frequency'.`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"level": schema.Float64Attribute{
+									MarkdownDescription: `Electrical current frequency reading in hertz.`,
 									Computed:            true,
 								},
 							},
@@ -210,6 +249,39 @@ func (d *OrganizationsSensorReadingsHistoryDataSource) Schema(_ context.Context,
 								},
 							},
 						},
+						"power_factor": schema.SingleNestedAttribute{
+							MarkdownDescription: `Reading for the 'powerFactor' metric. This will only be present if the 'metric' property equals 'powerFactor'.`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"percentage": schema.Int64Attribute{
+									MarkdownDescription: `Power factor reading as a percentage.`,
+									Computed:            true,
+								},
+							},
+						},
+						"real_power": schema.SingleNestedAttribute{
+							MarkdownDescription: `Reading for the 'realPower' metric. This will only be present if the 'metric' property equals 'realPower'.`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"draw": schema.Float64Attribute{
+									MarkdownDescription: `Real power reading in watts.`,
+									Computed:            true,
+								},
+							},
+						},
+						"remote_lockout_switch": schema.SingleNestedAttribute{
+							MarkdownDescription: `Reading for the 'remoteLockoutSwitch' metric. This will only be present if the 'metric' property equals 'remoteLockoutSwitch'.`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"locked": schema.BoolAttribute{
+									MarkdownDescription: `True if power controls are disabled via the MT40's physical remote lockout switch.`,
+									Computed:            true,
+								},
+							},
+						},
 						"serial": schema.StringAttribute{
 							MarkdownDescription: `Serial number of the sensor that took the reading.`,
 							Computed:            true,
@@ -240,6 +312,17 @@ func (d *OrganizationsSensorReadingsHistoryDataSource) Schema(_ context.Context,
 
 								"concentration": schema.Int64Attribute{
 									MarkdownDescription: `TVOC reading in micrograms per cubic meter.`,
+									Computed:            true,
+								},
+							},
+						},
+						"voltage": schema.SingleNestedAttribute{
+							MarkdownDescription: `Reading for the 'voltage' metric. This will only be present if the 'metric' property equals 'voltage'.`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"level": schema.Float64Attribute{
+									MarkdownDescription: `Voltage reading in volts.`,
 									Computed:            true,
 								},
 							},
@@ -324,20 +407,33 @@ type OrganizationsSensorReadingsHistory struct {
 }
 
 type ResponseItemSensorGetOrganizationSensorReadingsHistory struct {
-	Battery          *ResponseItemSensorGetOrganizationSensorReadingsHistoryBattery          `tfsdk:"battery"`
-	Button           *ResponseItemSensorGetOrganizationSensorReadingsHistoryButton           `tfsdk:"button"`
-	Door             *ResponseItemSensorGetOrganizationSensorReadingsHistoryDoor             `tfsdk:"door"`
-	Humidity         *ResponseItemSensorGetOrganizationSensorReadingsHistoryHumidity         `tfsdk:"humidity"`
-	IndoorAirQuality *ResponseItemSensorGetOrganizationSensorReadingsHistoryIndoorAirQuality `tfsdk:"indoor_air_quality"`
-	Metric           types.String                                                            `tfsdk:"metric"`
-	Network          *ResponseItemSensorGetOrganizationSensorReadingsHistoryNetwork          `tfsdk:"network"`
-	Noise            *ResponseItemSensorGetOrganizationSensorReadingsHistoryNoise            `tfsdk:"noise"`
-	Pm25             *ResponseItemSensorGetOrganizationSensorReadingsHistoryPm25             `tfsdk:"pm25"`
-	Serial           types.String                                                            `tfsdk:"serial"`
-	Temperature      *ResponseItemSensorGetOrganizationSensorReadingsHistoryTemperature      `tfsdk:"temperature"`
-	Ts               types.String                                                            `tfsdk:"ts"`
-	Tvoc             *ResponseItemSensorGetOrganizationSensorReadingsHistoryTvoc             `tfsdk:"tvoc"`
-	Water            *ResponseItemSensorGetOrganizationSensorReadingsHistoryWater            `tfsdk:"water"`
+	ApparentPower       *ResponseItemSensorGetOrganizationSensorReadingsHistoryApparentPower       `tfsdk:"apparent_power"`
+	Battery             *ResponseItemSensorGetOrganizationSensorReadingsHistoryBattery             `tfsdk:"battery"`
+	Button              *ResponseItemSensorGetOrganizationSensorReadingsHistoryButton              `tfsdk:"button"`
+	Co2                 *ResponseItemSensorGetOrganizationSensorReadingsHistoryCo2                 `tfsdk:"co2"`
+	Current             *ResponseItemSensorGetOrganizationSensorReadingsHistoryCurrent             `tfsdk:"current"`
+	Door                *ResponseItemSensorGetOrganizationSensorReadingsHistoryDoor                `tfsdk:"door"`
+	DownstreamPower     *ResponseItemSensorGetOrganizationSensorReadingsHistoryDownstreamPower     `tfsdk:"downstream_power"`
+	Frequency           *ResponseItemSensorGetOrganizationSensorReadingsHistoryFrequency           `tfsdk:"frequency"`
+	Humidity            *ResponseItemSensorGetOrganizationSensorReadingsHistoryHumidity            `tfsdk:"humidity"`
+	IndoorAirQuality    *ResponseItemSensorGetOrganizationSensorReadingsHistoryIndoorAirQuality    `tfsdk:"indoor_air_quality"`
+	Metric              types.String                                                               `tfsdk:"metric"`
+	Network             *ResponseItemSensorGetOrganizationSensorReadingsHistoryNetwork             `tfsdk:"network"`
+	Noise               *ResponseItemSensorGetOrganizationSensorReadingsHistoryNoise               `tfsdk:"noise"`
+	Pm25                *ResponseItemSensorGetOrganizationSensorReadingsHistoryPm25                `tfsdk:"pm25"`
+	PowerFactor         *ResponseItemSensorGetOrganizationSensorReadingsHistoryPowerFactor         `tfsdk:"power_factor"`
+	RealPower           *ResponseItemSensorGetOrganizationSensorReadingsHistoryRealPower           `tfsdk:"real_power"`
+	RemoteLockoutSwitch *ResponseItemSensorGetOrganizationSensorReadingsHistoryRemoteLockoutSwitch `tfsdk:"remote_lockout_switch"`
+	Serial              types.String                                                               `tfsdk:"serial"`
+	Temperature         *ResponseItemSensorGetOrganizationSensorReadingsHistoryTemperature         `tfsdk:"temperature"`
+	Ts                  types.String                                                               `tfsdk:"ts"`
+	Tvoc                *ResponseItemSensorGetOrganizationSensorReadingsHistoryTvoc                `tfsdk:"tvoc"`
+	Voltage             *ResponseItemSensorGetOrganizationSensorReadingsHistoryVoltage             `tfsdk:"voltage"`
+	Water               *ResponseItemSensorGetOrganizationSensorReadingsHistoryWater               `tfsdk:"water"`
+}
+
+type ResponseItemSensorGetOrganizationSensorReadingsHistoryApparentPower struct {
+	Draw types.Float64 `tfsdk:"draw"`
 }
 
 type ResponseItemSensorGetOrganizationSensorReadingsHistoryBattery struct {
@@ -348,8 +444,24 @@ type ResponseItemSensorGetOrganizationSensorReadingsHistoryButton struct {
 	PressType types.String `tfsdk:"press_type"`
 }
 
+type ResponseItemSensorGetOrganizationSensorReadingsHistoryCo2 struct {
+	Concentration types.Int64 `tfsdk:"concentration"`
+}
+
+type ResponseItemSensorGetOrganizationSensorReadingsHistoryCurrent struct {
+	Draw types.Float64 `tfsdk:"draw"`
+}
+
 type ResponseItemSensorGetOrganizationSensorReadingsHistoryDoor struct {
 	Open types.Bool `tfsdk:"open"`
+}
+
+type ResponseItemSensorGetOrganizationSensorReadingsHistoryDownstreamPower struct {
+	Enabled types.Bool `tfsdk:"enabled"`
+}
+
+type ResponseItemSensorGetOrganizationSensorReadingsHistoryFrequency struct {
+	Level types.Float64 `tfsdk:"level"`
 }
 
 type ResponseItemSensorGetOrganizationSensorReadingsHistoryHumidity struct {
@@ -377,6 +489,18 @@ type ResponseItemSensorGetOrganizationSensorReadingsHistoryPm25 struct {
 	Concentration types.Int64 `tfsdk:"concentration"`
 }
 
+type ResponseItemSensorGetOrganizationSensorReadingsHistoryPowerFactor struct {
+	Percentage types.Int64 `tfsdk:"percentage"`
+}
+
+type ResponseItemSensorGetOrganizationSensorReadingsHistoryRealPower struct {
+	Draw types.Float64 `tfsdk:"draw"`
+}
+
+type ResponseItemSensorGetOrganizationSensorReadingsHistoryRemoteLockoutSwitch struct {
+	Locked types.Bool `tfsdk:"locked"`
+}
+
 type ResponseItemSensorGetOrganizationSensorReadingsHistoryTemperature struct {
 	Celsius    types.Float64 `tfsdk:"celsius"`
 	Fahrenheit types.Float64 `tfsdk:"fahrenheit"`
@@ -384,6 +508,10 @@ type ResponseItemSensorGetOrganizationSensorReadingsHistoryTemperature struct {
 
 type ResponseItemSensorGetOrganizationSensorReadingsHistoryTvoc struct {
 	Concentration types.Int64 `tfsdk:"concentration"`
+}
+
+type ResponseItemSensorGetOrganizationSensorReadingsHistoryVoltage struct {
+	Level types.Float64 `tfsdk:"level"`
 }
 
 type ResponseItemSensorGetOrganizationSensorReadingsHistoryWater struct {
@@ -395,6 +523,19 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 	var items []ResponseItemSensorGetOrganizationSensorReadingsHistory
 	for _, item := range *response {
 		itemState := ResponseItemSensorGetOrganizationSensorReadingsHistory{
+			ApparentPower: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryApparentPower {
+				if item.ApparentPower != nil {
+					return &ResponseItemSensorGetOrganizationSensorReadingsHistoryApparentPower{
+						Draw: func() types.Float64 {
+							if item.ApparentPower.Draw != nil {
+								return types.Float64Value(float64(*item.ApparentPower.Draw))
+							}
+							return types.Float64{}
+						}(),
+					}
+				}
+				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryApparentPower{}
+			}(),
 			Battery: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryBattery {
 				if item.Battery != nil {
 					return &ResponseItemSensorGetOrganizationSensorReadingsHistoryBattery{
@@ -416,6 +557,32 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 				}
 				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryButton{}
 			}(),
+			Co2: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryCo2 {
+				if item.Co2 != nil {
+					return &ResponseItemSensorGetOrganizationSensorReadingsHistoryCo2{
+						Concentration: func() types.Int64 {
+							if item.Co2.Concentration != nil {
+								return types.Int64Value(int64(*item.Co2.Concentration))
+							}
+							return types.Int64{}
+						}(),
+					}
+				}
+				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryCo2{}
+			}(),
+			Current: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryCurrent {
+				if item.Current != nil {
+					return &ResponseItemSensorGetOrganizationSensorReadingsHistoryCurrent{
+						Draw: func() types.Float64 {
+							if item.Current.Draw != nil {
+								return types.Float64Value(float64(*item.Current.Draw))
+							}
+							return types.Float64{}
+						}(),
+					}
+				}
+				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryCurrent{}
+			}(),
 			Door: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryDoor {
 				if item.Door != nil {
 					return &ResponseItemSensorGetOrganizationSensorReadingsHistoryDoor{
@@ -428,6 +595,32 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 					}
 				}
 				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryDoor{}
+			}(),
+			DownstreamPower: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryDownstreamPower {
+				if item.DownstreamPower != nil {
+					return &ResponseItemSensorGetOrganizationSensorReadingsHistoryDownstreamPower{
+						Enabled: func() types.Bool {
+							if item.DownstreamPower.Enabled != nil {
+								return types.BoolValue(*item.DownstreamPower.Enabled)
+							}
+							return types.Bool{}
+						}(),
+					}
+				}
+				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryDownstreamPower{}
+			}(),
+			Frequency: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryFrequency {
+				if item.Frequency != nil {
+					return &ResponseItemSensorGetOrganizationSensorReadingsHistoryFrequency{
+						Level: func() types.Float64 {
+							if item.Frequency.Level != nil {
+								return types.Float64Value(float64(*item.Frequency.Level))
+							}
+							return types.Float64{}
+						}(),
+					}
+				}
+				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryFrequency{}
 			}(),
 			Humidity: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryHumidity {
 				if item.Humidity != nil {
@@ -498,6 +691,45 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 				}
 				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryPm25{}
 			}(),
+			PowerFactor: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryPowerFactor {
+				if item.PowerFactor != nil {
+					return &ResponseItemSensorGetOrganizationSensorReadingsHistoryPowerFactor{
+						Percentage: func() types.Int64 {
+							if item.PowerFactor.Percentage != nil {
+								return types.Int64Value(int64(*item.PowerFactor.Percentage))
+							}
+							return types.Int64{}
+						}(),
+					}
+				}
+				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryPowerFactor{}
+			}(),
+			RealPower: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryRealPower {
+				if item.RealPower != nil {
+					return &ResponseItemSensorGetOrganizationSensorReadingsHistoryRealPower{
+						Draw: func() types.Float64 {
+							if item.RealPower.Draw != nil {
+								return types.Float64Value(float64(*item.RealPower.Draw))
+							}
+							return types.Float64{}
+						}(),
+					}
+				}
+				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryRealPower{}
+			}(),
+			RemoteLockoutSwitch: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryRemoteLockoutSwitch {
+				if item.RemoteLockoutSwitch != nil {
+					return &ResponseItemSensorGetOrganizationSensorReadingsHistoryRemoteLockoutSwitch{
+						Locked: func() types.Bool {
+							if item.RemoteLockoutSwitch.Locked != nil {
+								return types.BoolValue(*item.RemoteLockoutSwitch.Locked)
+							}
+							return types.Bool{}
+						}(),
+					}
+				}
+				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryRemoteLockoutSwitch{}
+			}(),
 			Serial: types.StringValue(item.Serial),
 			Temperature: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryTemperature {
 				if item.Temperature != nil {
@@ -531,6 +763,19 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 					}
 				}
 				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryTvoc{}
+			}(),
+			Voltage: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryVoltage {
+				if item.Voltage != nil {
+					return &ResponseItemSensorGetOrganizationSensorReadingsHistoryVoltage{
+						Level: func() types.Float64 {
+							if item.Voltage.Level != nil {
+								return types.Float64Value(float64(*item.Voltage.Level))
+							}
+							return types.Float64{}
+						}(),
+					}
+				}
+				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryVoltage{}
 			}(),
 			Water: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryWater {
 				if item.Water != nil {

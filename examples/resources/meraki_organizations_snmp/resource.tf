@@ -5,8 +5,10 @@ resource "meraki_organizations_snmp" "example" {
   peer_ips        = ["123.123.123.1"]
   v2c_enabled     = false
   v3_auth_mode    = "SHA"
+  v3_auth_pass    = "password"
   v3_enabled      = true
   v3_priv_mode    = "AES128"
+  v3_priv_pass    = "password"
 }
 
 output "meraki_organizations_snmp_example" {

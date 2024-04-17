@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -79,6 +63,12 @@ func (d *OrganizationsActionBatchesDataSource) Schema(_ context.Context, _ datas
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
+								"body": schema.StringAttribute{
+									//Entro en string ds
+									//TODO interface
+									MarkdownDescription: `Data provided in the body of the Action. Contents depend on the Action type`,
+									Computed:            true,
+								},
 								"operation": schema.StringAttribute{
 									MarkdownDescription: `The operation to be used by this action`,
 									Computed:            true,
@@ -87,6 +77,25 @@ func (d *OrganizationsActionBatchesDataSource) Schema(_ context.Context, _ datas
 									MarkdownDescription: `Unique identifier for the resource to be acted on`,
 									Computed:            true,
 								},
+							},
+						},
+					},
+					"callback": schema.SingleNestedAttribute{
+						MarkdownDescription: `Information for callback used to send back results`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"id": schema.StringAttribute{
+								MarkdownDescription: `The ID of the callback. To check the status of the callback, use this ID in a request to /webhooks/callbacks/statuses/{id}`,
+								Computed:            true,
+							},
+							"status": schema.StringAttribute{
+								MarkdownDescription: `The status of the callback`,
+								Computed:            true,
+							},
+							"url": schema.StringAttribute{
+								MarkdownDescription: `The callback URL for the webhook target. This was either provided in the original request or comes from a configured webhook receiver`,
+								Computed:            true,
 							},
 						},
 					},
@@ -153,69 +162,80 @@ func (d *OrganizationsActionBatchesDataSource) Schema(_ context.Context, _ datas
 					Attributes: map[string]schema.Attribute{
 
 						"actions": schema.SetNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `A set of changes made as part of this action (<a href='https://developer.cisco.com/meraki/api/#/rest/guides/action-batches/'>more details</a>)`,
+							Computed:            true,
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 
-									"body": schema.SingleNestedAttribute{
-										Computed: true,
-										Attributes: map[string]schema.Attribute{
-
-											"enabled": schema.BoolAttribute{
-												Computed: true,
-											},
-										},
+									"body": schema.StringAttribute{
+										//Entro en string ds
+										//TODO interface
+										MarkdownDescription: `Data provided in the body of the Action. Contents depend on the Action type`,
+										Computed:            true,
 									},
 									"operation": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The operation to be used by this action`,
+										Computed:            true,
 									},
 									"resource": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `Unique identifier for the resource to be acted on`,
+										Computed:            true,
 									},
 								},
 							},
 						},
 						"confirmed": schema.BoolAttribute{
-							Computed: true,
+							MarkdownDescription: `Flag describing whether the action should be previewed before executing or not`,
+							Computed:            true,
 						},
 						"id": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `ID of the action batch. Can be used to check the status of the action batch at /organizations/{organizationId}/actionBatches/{actionBatchId}`,
+							Computed:            true,
 						},
 						"organization_id": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `ID of the organization this action batch belongs to`,
+							Computed:            true,
 						},
 						"status": schema.SingleNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `Status of action batch`,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
 								"completed": schema.BoolAttribute{
-									Computed: true,
+									MarkdownDescription: `Flag describing whether all actions in the action batch have completed`,
+									Computed:            true,
 								},
 								"created_resources": schema.SetNestedAttribute{
-									Computed: true,
+									MarkdownDescription: `Resources created as a result of this action batch`,
+									Computed:            true,
 									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 
-											"id": schema.Int64Attribute{
-												Computed: true,
+											"id": schema.StringAttribute{
+												MarkdownDescription: `ID of the created resource`,
+												Computed:            true,
 											},
 											"uri": schema.StringAttribute{
-												Computed: true,
+												MarkdownDescription: `URI, not including base, of the created resource`,
+												Computed:            true,
 											},
 										},
 									},
 								},
 								"errors": schema.ListAttribute{
-									Computed:    true,
-									ElementType: types.StringType,
+									MarkdownDescription: `List of errors encountered when running actions in the action batch`,
+									Computed:            true,
+									ElementType:         types.StringType,
 								},
 								"failed": schema.BoolAttribute{
-									Computed: true,
+									MarkdownDescription: `Flag describing whether any actions in the action batch failed`,
+									Computed:            true,
 								},
 							},
 						},
 						"synchronous": schema.BoolAttribute{
-							Computed: true,
+							MarkdownDescription: `Flag describing whether actions should run synchronously or asynchronously`,
+							Computed:            true,
 						},
 					},
 				},
@@ -317,9 +337,7 @@ type ResponseItemOrganizationsGetOrganizationActionBatchesActions struct {
 	Resource  types.String                                                      `tfsdk:"resource"`
 }
 
-type ResponseItemOrganizationsGetOrganizationActionBatchesActionsBody struct {
-	Enabled types.Bool `tfsdk:"enabled"`
-}
+type ResponseItemOrganizationsGetOrganizationActionBatchesActionsBody interface{}
 
 type ResponseItemOrganizationsGetOrganizationActionBatchesStatus struct {
 	Completed        types.Bool                                                                     `tfsdk:"completed"`
@@ -329,12 +347,13 @@ type ResponseItemOrganizationsGetOrganizationActionBatchesStatus struct {
 }
 
 type ResponseItemOrganizationsGetOrganizationActionBatchesStatusCreatedResources struct {
-	ID  types.Int64  `tfsdk:"id"`
+	ID  types.String `tfsdk:"id"`
 	URI types.String `tfsdk:"uri"`
 }
 
 type ResponseOrganizationsGetOrganizationActionBatch struct {
 	Actions        *[]ResponseOrganizationsGetOrganizationActionBatchActions `tfsdk:"actions"`
+	Callback       *ResponseOrganizationsGetOrganizationActionBatchCallback  `tfsdk:"callback"`
 	Confirmed      types.Bool                                                `tfsdk:"confirmed"`
 	ID             types.String                                              `tfsdk:"id"`
 	OrganizationID types.String                                              `tfsdk:"organization_id"`
@@ -343,8 +362,17 @@ type ResponseOrganizationsGetOrganizationActionBatch struct {
 }
 
 type ResponseOrganizationsGetOrganizationActionBatchActions struct {
-	Operation types.String `tfsdk:"operation"`
-	Resource  types.String `tfsdk:"resource"`
+	Body      *ResponseOrganizationsGetOrganizationActionBatchActionsBody `tfsdk:"body"`
+	Operation types.String                                                `tfsdk:"operation"`
+	Resource  types.String                                                `tfsdk:"resource"`
+}
+
+type ResponseOrganizationsGetOrganizationActionBatchActionsBody interface{}
+
+type ResponseOrganizationsGetOrganizationActionBatchCallback struct {
+	ID     types.String `tfsdk:"id"`
+	Status types.String `tfsdk:"status"`
+	URL    types.String `tfsdk:"url"`
 }
 
 type ResponseOrganizationsGetOrganizationActionBatchStatus struct {
@@ -369,19 +397,7 @@ func ResponseOrganizationsGetOrganizationActionBatchesItemsToBody(state Organiza
 					result := make([]ResponseItemOrganizationsGetOrganizationActionBatchesActions, len(*item.Actions))
 					for i, actions := range *item.Actions {
 						result[i] = ResponseItemOrganizationsGetOrganizationActionBatchesActions{
-							Body: func() *ResponseItemOrganizationsGetOrganizationActionBatchesActionsBody {
-								if actions.Body != nil {
-									return &ResponseItemOrganizationsGetOrganizationActionBatchesActionsBody{
-										Enabled: func() types.Bool {
-											if actions.Body.Enabled != nil {
-												return types.BoolValue(*actions.Body.Enabled)
-											}
-											return types.Bool{}
-										}(),
-									}
-								}
-								return &ResponseItemOrganizationsGetOrganizationActionBatchesActionsBody{}
-							}(),
+							// Body: types.StringValue(actions.Body),//TODO POSIBLE interface
 							Operation: types.StringValue(actions.Operation),
 							Resource:  types.StringValue(actions.Resource),
 						}
@@ -412,12 +428,7 @@ func ResponseOrganizationsGetOrganizationActionBatchesItemsToBody(state Organiza
 								result := make([]ResponseItemOrganizationsGetOrganizationActionBatchesStatusCreatedResources, len(*item.Status.CreatedResources))
 								for i, createdResources := range *item.Status.CreatedResources {
 									result[i] = ResponseItemOrganizationsGetOrganizationActionBatchesStatusCreatedResources{
-										ID: func() types.Int64 {
-											if createdResources.ID != nil {
-												return types.Int64Value(int64(*createdResources.ID))
-											}
-											return types.Int64{}
-										}(),
+										ID:  types.StringValue(createdResources.ID),
 										URI: types.StringValue(createdResources.URI),
 									}
 								}
@@ -456,6 +467,7 @@ func ResponseOrganizationsGetOrganizationActionBatchItemToBody(state Organizatio
 				result := make([]ResponseOrganizationsGetOrganizationActionBatchActions, len(*response.Actions))
 				for i, actions := range *response.Actions {
 					result[i] = ResponseOrganizationsGetOrganizationActionBatchActions{
+						// Body:      types.StringValue(actions.Body), //TODO POSIBLE interface
 						Operation: types.StringValue(actions.Operation),
 						Resource:  types.StringValue(actions.Resource),
 					}
@@ -463,6 +475,16 @@ func ResponseOrganizationsGetOrganizationActionBatchItemToBody(state Organizatio
 				return &result
 			}
 			return &[]ResponseOrganizationsGetOrganizationActionBatchActions{}
+		}(),
+		Callback: func() *ResponseOrganizationsGetOrganizationActionBatchCallback {
+			if response.Callback != nil {
+				return &ResponseOrganizationsGetOrganizationActionBatchCallback{
+					ID:     types.StringValue(response.Callback.ID),
+					Status: types.StringValue(response.Callback.Status),
+					URL:    types.StringValue(response.Callback.URL),
+				}
+			}
+			return &ResponseOrganizationsGetOrganizationActionBatchCallback{}
 		}(),
 		Confirmed: func() types.Bool {
 			if response.Confirmed != nil {

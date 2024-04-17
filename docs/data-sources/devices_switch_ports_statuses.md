@@ -56,6 +56,7 @@ Read-Only:
 - `port_id` (String) The string identifier of this port on the switch. This is commonly just the port number but may contain additional identifying information such as the slot and module-type if the port is located on a port module.
 - `power_usage_in_wh` (Number) How much power (in watt-hours) has been delivered by this port during the timespan.
 - `secure_port` (Attributes) The Secure Port status of the port. (see [below for nested schema](#nestedatt--items--secure_port))
+- `spanning_tree` (Attributes) The Spanning Tree Protocol (STP) information of the connected device. (see [below for nested schema](#nestedatt--items--spanning_tree))
 - `speed` (String) The current data transfer rate which the port is operating at.
 - `status` (String) The current connection status of the port.
 - `traffic_in_kbps` (Attributes) A breakdown of the average speed of data that has passed through this port during the timespan. (see [below for nested schema](#nestedatt--items--traffic_in_kbps))
@@ -112,9 +113,17 @@ Read-Only:
 
 - `allowed_vlans` (String) The VLANs allowed on the . Only applicable to trunk ports.
 - `type` (String) The type of the  ('trunk' or 'access').
-- `vlan` (Number) The VLAN of the . A null value will clear the value set for trunk ports.
+- `vlan` (Number) The VLAN of the . For a trunk port, this is the native VLAN. A null value will clear the value set for trunk ports.
 - `voice_vlan` (Number) The voice VLAN of the . Only applicable to access ports.
 
+
+
+<a id="nestedatt--items--spanning_tree"></a>
+### Nested Schema for `items.spanning_tree`
+
+Read-Only:
+
+- `statuses` (List of String) The current Spanning Tree Protocol statuses of the port.
 
 
 <a id="nestedatt--items--traffic_in_kbps"></a>

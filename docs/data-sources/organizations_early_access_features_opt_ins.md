@@ -19,15 +19,6 @@ data "meraki_organizations_early_access_features_opt_ins" "example" {
 }
 
 output "meraki_organizations_early_access_features_opt_ins_example" {
-  value = data.meraki_organizations_early_access_features_opt_ins.example.items
-}
-
-data "meraki_organizations_early_access_features_opt_ins" "example" {
-
-  organization_id = "string"
-}
-
-output "meraki_organizations_early_access_features_opt_ins_example" {
   value = data.meraki_organizations_early_access_features_opt_ins.example.item
 }
 ```
@@ -43,42 +34,21 @@ output "meraki_organizations_early_access_features_opt_ins_example" {
 ### Read-Only
 
 - `item` (Attributes) (see [below for nested schema](#nestedatt--item))
-- `items` (Attributes List) Array of ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptIns (see [below for nested schema](#nestedatt--items))
 
 <a id="nestedatt--item"></a>
 ### Nested Schema for `item`
 
 Read-Only:
 
-- `created_at` (String)
-- `id` (String)
-- `limit_scope_to_networks` (Attributes Set) (see [below for nested schema](#nestedatt--item--limit_scope_to_networks))
-- `short_name` (String)
+- `created_at` (String) Time when Early Access Feature was created
+- `id` (String) ID of Early Access Feature
+- `limit_scope_to_networks` (Attributes Set) Networks assigned to the Early Access Feature (see [below for nested schema](#nestedatt--item--limit_scope_to_networks))
+- `short_name` (String) Name of Early Access Feature
 
 <a id="nestedatt--item--limit_scope_to_networks"></a>
 ### Nested Schema for `item.limit_scope_to_networks`
 
 Read-Only:
 
-- `id` (String)
-- `name` (String)
-
-
-
-<a id="nestedatt--items"></a>
-### Nested Schema for `items`
-
-Read-Only:
-
-- `created_at` (String)
-- `id` (String)
-- `limit_scope_to_networks` (Attributes Set) (see [below for nested schema](#nestedatt--items--limit_scope_to_networks))
-- `short_name` (String)
-
-<a id="nestedatt--items--limit_scope_to_networks"></a>
-### Nested Schema for `items.limit_scope_to_networks`
-
-Read-Only:
-
-- `id` (String)
-- `name` (String)
+- `id` (String) ID of Network
+- `name` (String) Name of Network

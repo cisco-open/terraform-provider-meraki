@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -66,60 +50,93 @@ func (d *DevicesManagementInterfaceDataSource) Schema(_ context.Context, _ datas
 				Attributes: map[string]schema.Attribute{
 
 					"ddns_hostnames": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `Dynamic DNS hostnames.`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"active_ddns_hostname": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `Active dynamic DNS hostname.`,
+								Computed:            true,
 							},
 							"ddns_hostname_wan1": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `WAN 1 dynamic DNS hostname.`,
+								Computed:            true,
 							},
 							"ddns_hostname_wan2": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `WAN 2 dynamic DNS hostname.`,
+								Computed:            true,
 							},
 						},
 					},
 					"wan1": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `WAN 1 settings`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"static_dns": schema.ListAttribute{
-								Computed:    true,
-								ElementType: types.StringType,
+								MarkdownDescription: `Up to two DNS IPs.`,
+								Computed:            true,
+								ElementType:         types.StringType,
 							},
 							"static_gateway_ip": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `The IP of the gateway on the WAN.`,
+								Computed:            true,
 							},
 							"static_ip": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `The IP the device should use on the WAN.`,
+								Computed:            true,
 							},
 							"static_subnet_mask": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `The subnet mask for the WAN.`,
+								Computed:            true,
 							},
 							"using_static_ip": schema.BoolAttribute{
-								Computed: true,
+								MarkdownDescription: `Configure the interface to have static IP settings or use DHCP.`,
+								Computed:            true,
 							},
 							"vlan": schema.Int64Attribute{
-								Computed: true,
+								MarkdownDescription: `The VLAN that management traffic should be tagged with. Applies whether usingStaticIp is true or false.`,
+								Computed:            true,
 							},
 							"wan_enabled": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `Enable or disable the interface (only for MX devices). Valid values are 'enabled', 'disabled', and 'not configured'.`,
+								Computed:            true,
 							},
 						},
 					},
 					"wan2": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `WAN 2 settings (only for MX devices)`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
+							"static_dns": schema.ListAttribute{
+								MarkdownDescription: `Up to two DNS IPs.`,
+								Computed:            true,
+								ElementType:         types.StringType,
+							},
+							"static_gateway_ip": schema.StringAttribute{
+								MarkdownDescription: `The IP of the gateway on the WAN.`,
+								Computed:            true,
+							},
+							"static_ip": schema.StringAttribute{
+								MarkdownDescription: `The IP the device should use on the WAN.`,
+								Computed:            true,
+							},
+							"static_subnet_mask": schema.StringAttribute{
+								MarkdownDescription: `The subnet mask for the WAN.`,
+								Computed:            true,
+							},
 							"using_static_ip": schema.BoolAttribute{
-								Computed: true,
+								MarkdownDescription: `Configure the interface to have static IP settings or use DHCP.`,
+								Computed:            true,
 							},
 							"vlan": schema.Int64Attribute{
-								Computed: true,
+								MarkdownDescription: `The VLAN that management traffic should be tagged with. Applies whether usingStaticIp is true or false.`,
+								Computed:            true,
 							},
 							"wan_enabled": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `Enable or disable the interface (only for MX devices). Valid values are 'enabled', 'disabled', and 'not configured'.`,
+								Computed:            true,
 							},
 						},
 					},
@@ -193,9 +210,13 @@ type ResponseDevicesGetDeviceManagementInterfaceWan1 struct {
 }
 
 type ResponseDevicesGetDeviceManagementInterfaceWan2 struct {
-	UsingStaticIP types.Bool   `tfsdk:"using_static_ip"`
-	VLAN          types.Int64  `tfsdk:"vlan"`
-	WanEnabled    types.String `tfsdk:"wan_enabled"`
+	StaticDNS        types.List   `tfsdk:"static_dns"`
+	StaticGatewayIP  types.String `tfsdk:"static_gateway_ip"`
+	StaticIP         types.String `tfsdk:"static_ip"`
+	StaticSubnetMask types.String `tfsdk:"static_subnet_mask"`
+	UsingStaticIP    types.Bool   `tfsdk:"using_static_ip"`
+	VLAN             types.Int64  `tfsdk:"vlan"`
+	WanEnabled       types.String `tfsdk:"wan_enabled"`
 }
 
 // ToBody
@@ -238,6 +259,10 @@ func ResponseDevicesGetDeviceManagementInterfaceItemToBody(state DevicesManageme
 		Wan2: func() *ResponseDevicesGetDeviceManagementInterfaceWan2 {
 			if response.Wan2 != nil {
 				return &ResponseDevicesGetDeviceManagementInterfaceWan2{
+					StaticDNS:        StringSliceToList(response.Wan2.StaticDNS),
+					StaticGatewayIP:  types.StringValue(response.Wan2.StaticGatewayIP),
+					StaticIP:         types.StringValue(response.Wan2.StaticIP),
+					StaticSubnetMask: types.StringValue(response.Wan2.StaticSubnetMask),
 					UsingStaticIP: func() types.Bool {
 						if response.Wan2.UsingStaticIP != nil {
 							return types.BoolValue(*response.Wan2.UsingStaticIP)

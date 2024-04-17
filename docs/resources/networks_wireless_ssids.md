@@ -15,10 +15,278 @@ description: |-
 ```terraform
 resource "meraki_networks_wireless_ssids" "example" {
 
-  enabled    = true
-  name       = "My SSID"
+  active_directory = {
+
+    credentials = {
+
+      logon_name = "user"
+      password   = "password"
+    }
+    servers = [{
+
+      host = "127.0.0.1"
+      port = 3268
+    }]
+  }
+  adult_content_filtering_enabled = false
+  ap_tags_and_vlan_ids = [{
+
+    tags    = ["tag1", "tag2"]
+    vlan_id = 100
+  }]
+  auth_mode                            = "8021x-radius"
+  availability_tags                    = ["tag1", "tag2"]
+  available_on_all_aps                 = false
+  band_selection                       = "5 GHz band only"
+  concentrator_network_id              = "N_24329156"
+  default_vlan_id                      = 1
+  disassociate_clients_on_vpn_failover = false
+  dns_rewrite = {
+
+    dns_custom_nameservers = ["8.8.8.8", "8.8.4.4"]
+    enabled                = true
+  }
+  dot11r = {
+
+    adaptive = true
+    enabled  = true
+  }
+  dot11w = {
+
+    enabled  = true
+    required = false
+  }
+  enabled                 = true
+  encryption_mode         = "wpa"
+  enterprise_admin_access = "access enabled"
+  gre = {
+
+    concentrator = {
+
+      host = "192.168.1.1"
+    }
+    key = 5
+  }
+  ip_assignment_mode    = "NAT mode"
+  lan_isolation_enabled = true
+  ldap = {
+
+    base_distinguished_name = "dc=example,dc=com"
+    credentials = {
+
+      distinguished_name = "cn=user,dc=example,dc=com"
+      password           = "password"
+    }
+    server_ca_certificate = {
+
+      contents = <<EOT
+          "-----BEGIN CERTIFICATE-----
+        MIIDyTCCArGgAwIBAgIKBBNXOVCGU1YztjANBgkqhkiG9w0BAQsFADAnMQ4wDAYD
+        VQQKEwVDaXNjbzEVMBMGA1UEAxMMQUNUMiBTVURJIENBMB4XDTIxMDUzMTEzNTUx
+        NVoXDTI5MDUxNDIwMjU0MVowbTEpMCcGA1UEBRMgUElEOkM5MjAwTC0yNFAtNEcg
+        U046SkFFMjUyMjBSMksxDjAMBgNVBAoTBUNpc2NvMRgwFgYDVQQLEw9BQ1QtMiBM
+        aXRlIFNVREkxFjAUBgNVBAMTDUM5MjAwTC0yNFAtNEcwggEiMA0GCSqGSIb3DQEB
+        AQUAA4IBDwAwggEKAoIBAQDaUPxW76gT5MdoEAt+UrDFiYA9RYh2iHicDViBEyow
+        TR1TuP36bHh13X3vtGiDsCD88Ci2TZIqd/EDkkc7v9ipUUYVVH+YDrPt2Aukb1PH
+        D6K0R+KhgEzRo5x54TlU6oWvjUpwNZUwwdhMWIQaUVkMyZBYNy0jGPLO8jwZhyBg
+        1Fneybr9pwedGbLrAaz+gdEikB8B4a/fvPjVfL5Ngb4QRjFqWuE+X3nLc0kHedep
+        6nfgpUNXMlStVm5nIXKP6OjmzfCHPYh9L2Ehs1TrSk1ser9Ofx0ZMVL/jBZR2EIj
+        OZ8tH6KlX2/B2pbSPIO6kD5c4UA8Cf1SbDJCwJ/kI9ihAgMBAAGjgbAwga0wDgYD
+        VR0PAQH/BAQDAgXgMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUSNjx8cJw1Vu7
+        fHMJk6+4uDAD+H8wTQYDVR0RBEYwRKBCBgkrBgEEAQkVAgOgNRMzQ2hpcElEPVVV
+        VUNNaElGcUVFMklFUUVBQWNBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUE9MB0GA1Ud
+        DgQWBBRdhMkFD/z5hokaQeLbaRsp4hkvbzANBgkqhkiG9w0BAQsFAAOCAQEAMtuh
+        YpBz4xEZ7YdJsLpw67Q0TTJGnTBRpzAeY1urYDoDz8TSx556XG7z3IRzuED5KVSp
+        OwmH/iZ+tDfYQ3W3ElWTW93871DkuW4WQIfbnoHg/F7bF0DKYVkD3rpZjyz3NhzH
+        d7cjTdJXQ85bTAOXDuxKH3qewrXxxOGXgh3I6NUq0UwMTWh84lND7Jl+ZAQkYNS2
+        iHanTZFQBk3ML0NUb7fKDYGRTZRqwQ/upIO4S6LV1cxH/6V0qbMy3sCSHZoMLrW3
+        0m3M6yKpe5+VZzHZwmWdUf3Ot+zKjhveK5/YNsMIASdvtvymxUizq2Hr1hvR/kPc
+        p1vuyWxipU8JfzOh/A==
+        -----END CERTIFICATE-----
+        "
+          EOT
+    }
+    servers = [{
+
+      host = "127.0.0.1"
+      port = 389
+    }]
+  }
+  local_radius = {
+
+    cache_timeout = 60
+    certificate_authentication = {
+
+      client_root_ca_certificate = {
+
+        contents = <<EOT
+          "-----BEGIN CERTIFICATE-----
+        MIIDyTCCArGgAwIBAgIKBBNXOVCGU1YztjANBgkqhkiG9w0BAQsFADAnMQ4wDAYD
+        VQQKEwVDaXNjbzEVMBMGA1UEAxMMQUNUMiBTVURJIENBMB4XDTIxMDUzMTEzNTUx
+        NVoXDTI5MDUxNDIwMjU0MVowbTEpMCcGA1UEBRMgUElEOkM5MjAwTC0yNFAtNEcg
+        U046SkFFMjUyMjBSMksxDjAMBgNVBAoTBUNpc2NvMRgwFgYDVQQLEw9BQ1QtMiBM
+        aXRlIFNVREkxFjAUBgNVBAMTDUM5MjAwTC0yNFAtNEcwggEiMA0GCSqGSIb3DQEB
+        AQUAA4IBDwAwggEKAoIBAQDaUPxW76gT5MdoEAt+UrDFiYA9RYh2iHicDViBEyow
+        TR1TuP36bHh13X3vtGiDsCD88Ci2TZIqd/EDkkc7v9ipUUYVVH+YDrPt2Aukb1PH
+        D6K0R+KhgEzRo5x54TlU6oWvjUpwNZUwwdhMWIQaUVkMyZBYNy0jGPLO8jwZhyBg
+        1Fneybr9pwedGbLrAaz+gdEikB8B4a/fvPjVfL5Ngb4QRjFqWuE+X3nLc0kHedep
+        6nfgpUNXMlStVm5nIXKP6OjmzfCHPYh9L2Ehs1TrSk1ser9Ofx0ZMVL/jBZR2EIj
+        OZ8tH6KlX2/B2pbSPIO6kD5c4UA8Cf1SbDJCwJ/kI9ihAgMBAAGjgbAwga0wDgYD
+        VR0PAQH/BAQDAgXgMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUSNjx8cJw1Vu7
+        fHMJk6+4uDAD+H8wTQYDVR0RBEYwRKBCBgkrBgEEAQkVAgOgNRMzQ2hpcElEPVVV
+        VUNNaElGcUVFMklFUUVBQWNBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUE9MB0GA1Ud
+        DgQWBBRdhMkFD/z5hokaQeLbaRsp4hkvbzANBgkqhkiG9w0BAQsFAAOCAQEAMtuh
+        YpBz4xEZ7YdJsLpw67Q0TTJGnTBRpzAeY1urYDoDz8TSx556XG7z3IRzuED5KVSp
+        OwmH/iZ+tDfYQ3W3ElWTW93871DkuW4WQIfbnoHg/F7bF0DKYVkD3rpZjyz3NhzH
+        d7cjTdJXQ85bTAOXDuxKH3qewrXxxOGXgh3I6NUq0UwMTWh84lND7Jl+ZAQkYNS2
+        iHanTZFQBk3ML0NUb7fKDYGRTZRqwQ/upIO4S6LV1cxH/6V0qbMy3sCSHZoMLrW3
+        0m3M6yKpe5+VZzHZwmWdUf3Ot+zKjhveK5/YNsMIASdvtvymxUizq2Hr1hvR/kPc
+        p1vuyWxipU8JfzOh/A==
+        -----END CERTIFICATE-----
+        "
+          EOT
+      }
+      enabled            = true
+      ocsp_responder_url = "http://ocsp-server.example.com"
+      use_ldap           = false
+      use_ocsp           = true
+    }
+    password_authentication = {
+
+      enabled = false
+    }
+  }
+  mandatory_dhcp_enabled = false
+  min_bitrate            = 5.5
+  name                   = "My SSID"
+  named_vlans = {
+
+    radius = {
+
+      guest_vlan = {
+
+        enabled = true
+        name    = "Guest VLAN"
+      }
+    }
+    tagging = {
+
+      by_ap_tags = [{
+
+        tags      = ["tag1", "tag2"]
+        vlan_name = "My VLAN"
+      }]
+      default_vlan_name = "My VLAN"
+      enabled           = true
+    }
+  }
   network_id = "string"
   number     = "string"
+  oauth = {
+
+    allowed_domains = ["example.com"]
+  }
+  per_client_bandwidth_limit_down    = 1
+  per_client_bandwidth_limit_up      = 1
+  per_ssid_bandwidth_limit_down      = 1
+  per_ssid_bandwidth_limit_up        = 1
+  psk                                = "deadbeef"
+  radius_accounting_enabled          = true
+  radius_accounting_interim_interval = 5
+  radius_accounting_servers = [{
+
+    ca_certificate = <<EOT
+          "-----BEGIN CERTIFICATE-----
+        MIIDyTCCArGgAwIBAgIKBBNXOVCGU1YztjANBgkqhkiG9w0BAQsFADAnMQ4wDAYD
+        VQQKEwVDaXNjbzEVMBMGA1UEAxMMQUNUMiBTVURJIENBMB4XDTIxMDUzMTEzNTUx
+        NVoXDTI5MDUxNDIwMjU0MVowbTEpMCcGA1UEBRMgUElEOkM5MjAwTC0yNFAtNEcg
+        U046SkFFMjUyMjBSMksxDjAMBgNVBAoTBUNpc2NvMRgwFgYDVQQLEw9BQ1QtMiBM
+        aXRlIFNVREkxFjAUBgNVBAMTDUM5MjAwTC0yNFAtNEcwggEiMA0GCSqGSIb3DQEB
+        AQUAA4IBDwAwggEKAoIBAQDaUPxW76gT5MdoEAt+UrDFiYA9RYh2iHicDViBEyow
+        TR1TuP36bHh13X3vtGiDsCD88Ci2TZIqd/EDkkc7v9ipUUYVVH+YDrPt2Aukb1PH
+        D6K0R+KhgEzRo5x54TlU6oWvjUpwNZUwwdhMWIQaUVkMyZBYNy0jGPLO8jwZhyBg
+        1Fneybr9pwedGbLrAaz+gdEikB8B4a/fvPjVfL5Ngb4QRjFqWuE+X3nLc0kHedep
+        6nfgpUNXMlStVm5nIXKP6OjmzfCHPYh9L2Ehs1TrSk1ser9Ofx0ZMVL/jBZR2EIj
+        OZ8tH6KlX2/B2pbSPIO6kD5c4UA8Cf1SbDJCwJ/kI9ihAgMBAAGjgbAwga0wDgYD
+        VR0PAQH/BAQDAgXgMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUSNjx8cJw1Vu7
+        fHMJk6+4uDAD+H8wTQYDVR0RBEYwRKBCBgkrBgEEAQkVAgOgNRMzQ2hpcElEPVVV
+        VUNNaElGcUVFMklFUUVBQWNBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUE9MB0GA1Ud
+        DgQWBBRdhMkFD/z5hokaQeLbaRsp4hkvbzANBgkqhkiG9w0BAQsFAAOCAQEAMtuh
+        YpBz4xEZ7YdJsLpw67Q0TTJGnTBRpzAeY1urYDoDz8TSx556XG7z3IRzuED5KVSp
+        OwmH/iZ+tDfYQ3W3ElWTW93871DkuW4WQIfbnoHg/F7bF0DKYVkD3rpZjyz3NhzH
+        d7cjTdJXQ85bTAOXDuxKH3qewrXxxOGXgh3I6NUq0UwMTWh84lND7Jl+ZAQkYNS2
+        iHanTZFQBk3ML0NUb7fKDYGRTZRqwQ/upIO4S6LV1cxH/6V0qbMy3sCSHZoMLrW3
+        0m3M6yKpe5+VZzHZwmWdUf3Ot+zKjhveK5/YNsMIASdvtvymxUizq2Hr1hvR/kPc
+        p1vuyWxipU8JfzOh/A==
+        -----END CERTIFICATE-----
+        "
+          EOT
+    host           = "0.0.0.0"
+    port           = 3000
+    radsec_enabled = true
+    secret         = "secret-string"
+  }]
+  radius_attribute_for_group_policies = "Filter-Id"
+  radius_authentication_nas_id        = "00-11-22-33-44-55:AP1"
+  radius_called_station_id            = "00-11-22-33-44-55:AP1"
+  radius_coa_enabled                  = true
+  radius_failover_policy              = "Deny access"
+  radius_fallback_enabled             = true
+  radius_guest_vlan_enabled           = true
+  radius_guest_vlan_id                = 1
+  radius_load_balancing_policy        = "Round robin"
+  radius_override                     = false
+  radius_proxy_enabled                = false
+  radius_server_attempts_limit        = 5
+  radius_server_timeout               = 5
+  radius_servers = [{
+
+    ca_certificate              = <<EOT
+          "-----BEGIN CERTIFICATE-----
+        MIIDyTCCArGgAwIBAgIKBBNXOVCGU1YztjANBgkqhkiG9w0BAQsFADAnMQ4wDAYD
+        VQQKEwVDaXNjbzEVMBMGA1UEAxMMQUNUMiBTVURJIENBMB4XDTIxMDUzMTEzNTUx
+        NVoXDTI5MDUxNDIwMjU0MVowbTEpMCcGA1UEBRMgUElEOkM5MjAwTC0yNFAtNEcg
+        U046SkFFMjUyMjBSMksxDjAMBgNVBAoTBUNpc2NvMRgwFgYDVQQLEw9BQ1QtMiBM
+        aXRlIFNVREkxFjAUBgNVBAMTDUM5MjAwTC0yNFAtNEcwggEiMA0GCSqGSIb3DQEB
+        AQUAA4IBDwAwggEKAoIBAQDaUPxW76gT5MdoEAt+UrDFiYA9RYh2iHicDViBEyow
+        TR1TuP36bHh13X3vtGiDsCD88Ci2TZIqd/EDkkc7v9ipUUYVVH+YDrPt2Aukb1PH
+        D6K0R+KhgEzRo5x54TlU6oWvjUpwNZUwwdhMWIQaUVkMyZBYNy0jGPLO8jwZhyBg
+        1Fneybr9pwedGbLrAaz+gdEikB8B4a/fvPjVfL5Ngb4QRjFqWuE+X3nLc0kHedep
+        6nfgpUNXMlStVm5nIXKP6OjmzfCHPYh9L2Ehs1TrSk1ser9Ofx0ZMVL/jBZR2EIj
+        OZ8tH6KlX2/B2pbSPIO6kD5c4UA8Cf1SbDJCwJ/kI9ihAgMBAAGjgbAwga0wDgYD
+        VR0PAQH/BAQDAgXgMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUSNjx8cJw1Vu7
+        fHMJk6+4uDAD+H8wTQYDVR0RBEYwRKBCBgkrBgEEAQkVAgOgNRMzQ2hpcElEPVVV
+        VUNNaElGcUVFMklFUUVBQWNBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUE9MB0GA1Ud
+        DgQWBBRdhMkFD/z5hokaQeLbaRsp4hkvbzANBgkqhkiG9w0BAQsFAAOCAQEAMtuh
+        YpBz4xEZ7YdJsLpw67Q0TTJGnTBRpzAeY1urYDoDz8TSx556XG7z3IRzuED5KVSp
+        OwmH/iZ+tDfYQ3W3ElWTW93871DkuW4WQIfbnoHg/F7bF0DKYVkD3rpZjyz3NhzH
+        d7cjTdJXQ85bTAOXDuxKH3qewrXxxOGXgh3I6NUq0UwMTWh84lND7Jl+ZAQkYNS2
+        iHanTZFQBk3ML0NUb7fKDYGRTZRqwQ/upIO4S6LV1cxH/6V0qbMy3sCSHZoMLrW3
+        0m3M6yKpe5+VZzHZwmWdUf3Ot+zKjhveK5/YNsMIASdvtvymxUizq2Hr1hvR/kPc
+        p1vuyWxipU8JfzOh/A==
+        -----END CERTIFICATE-----
+        "
+          EOT
+    host                        = "0.0.0.0"
+    open_roaming_certificate_id = 2
+    port                        = 3000
+    radsec_enabled              = true
+    secret                      = "secret-string"
+  }]
+  radius_testing_enabled            = true
+  secondary_concentrator_network_id = "disabled"
+  speed_burst = {
+
+    enabled = true
+  }
+  splash_guest_sponsor_domains = ["example.com"]
+  splash_page                  = "Click-through splash page"
+  use_vlan_tagging             = false
+  visible                      = true
+  vlan_id                      = 10
+  walled_garden_enabled        = true
+  walled_garden_ranges         = ["example.com", "1.1.1.1/32"]
+  wpa_encryption_mode          = "WPA2 only"
 }
 
 output "meraki_networks_wireless_ssids_example" {
@@ -32,17 +300,17 @@ output "meraki_networks_wireless_ssids_example" {
 ### Required
 
 - `network_id` (String) networkId path parameter. Network ID
-- `number` (Number) number path parameter.
+- `number` (Number) Unique identifier of the SSID
 
 ### Optional
 
 - `active_directory` (Attributes) The current setting for Active Directory. Only valid if splashPage is 'Password-protected with Active Directory' (see [below for nested schema](#nestedatt--active_directory))
 - `adult_content_filtering_enabled` (Boolean) Boolean indicating whether or not adult content will be blocked
 - `ap_tags_and_vlan_ids` (Attributes Set) The list of tags and VLAN IDs used for VLAN tagging. This param is only valid when the ipAssignmentMode is 'Bridge mode' or 'Layer 3 roaming' (see [below for nested schema](#nestedatt--ap_tags_and_vlan_ids))
-- `auth_mode` (String) The association control method for the SSID ('open', 'open-enhanced', 'psk', 'open-with-radius', 'open-with-nac', '8021x-meraki', '8021x-nac', '8021x-radius', '8021x-google', '8021x-localradius', 'ipsk-with-radius' or 'ipsk-without-radius')
-- `availability_tags` (List of String) Accepts a list of tags for this SSID. If availableOnAllAps is false, then the SSID will only be broadcast by APs with tags matching any of the tags in this list.
-- `available_on_all_aps` (Boolean) Boolean indicating whether all APs should broadcast the SSID or if it should be restricted to APs matching any availability tags. Can only be false if the SSID has availability tags.
-- `band_selection` (String) The client-serving radio frequencies of this SSID in the default indoor RF profile. ('Dual band operation', '5 GHz band only' or 'Dual band operation with Band Steering')
+- `auth_mode` (String) The association control method for the SSID
+- `availability_tags` (Set of String) List of tags for this SSID. If availableOnAllAps is false, then the SSID is only broadcast by APs with tags matching any of the tags in this list
+- `available_on_all_aps` (Boolean) Whether all APs broadcast the SSID or if it's restricted to APs matching any availability tags
+- `band_selection` (String) The client-serving radio frequencies of this SSID in the default indoor RF profile
 - `concentrator_network_id` (String) The concentrator to use when the ipAssignmentMode is 'Layer 3 roaming with a concentrator' or 'VPN'.
 - `default_vlan_id` (Number) The default VLAN ID used for 'all other APs'. This param is only valid when the ipAssignmentMode is 'Bridge mode' or 'Layer 3 roaming'
 - `disassociate_clients_on_vpn_failover` (Boolean) Disassociate clients when 'VPN' concentrator failover occurs in order to trigger clients to re-associate and generate new DHCP requests. This param is only valid if ipAssignmentMode is 'VPN'.
@@ -50,34 +318,35 @@ output "meraki_networks_wireless_ssids_example" {
 - `dot11r` (Attributes) The current setting for 802.11r (see [below for nested schema](#nestedatt--dot11r))
 - `dot11w` (Attributes) The current setting for Protected Management Frames (802.11w). (see [below for nested schema](#nestedatt--dot11w))
 - `enabled` (Boolean) Whether or not the SSID is enabled
-- `encryption_mode` (String) The psk encryption mode for the SSID ('wep' or 'wpa'). This param is only valid if the authMode is 'psk'
+- `encryption_mode` (String) The psk encryption mode for the SSID
 - `enterprise_admin_access` (String) Whether or not an SSID is accessible by 'enterprise' administrators ('access disabled' or 'access enabled')
 - `gre` (Attributes) Ethernet over GRE settings (see [below for nested schema](#nestedatt--gre))
-- `ip_assignment_mode` (String) The client IP assignment mode ('NAT mode', 'Bridge mode', 'Layer 3 roaming', 'Ethernet over GRE', 'Layer 3 roaming with a concentrator' or 'VPN')
+- `ip_assignment_mode` (String) The client IP assignment mode
 - `lan_isolation_enabled` (Boolean) Boolean indicating whether Layer 2 LAN isolation should be enabled or disabled. Only configurable when ipAssignmentMode is 'Bridge mode'.
 - `ldap` (Attributes) The current setting for LDAP. Only valid if splashPage is 'Password-protected with LDAP'. (see [below for nested schema](#nestedatt--ldap))
 - `local_radius` (Attributes) The current setting for Local Authentication, a built-in RADIUS server on the access point. Only valid if authMode is '8021x-localradius'. (see [below for nested schema](#nestedatt--local_radius))
-- `mandatory_dhcp_enabled` (Boolean) If true, Mandatory DHCP will enforce that clients connecting to this SSID must use the IP address assigned by the DHCP server. Clients who use a static IP address won't be able to associate.
-- `min_bitrate` (Number) The minimum bitrate in Mbps of this SSID in the default indoor RF profile. ('1', '2', '5.5', '6', '9', '11', '12', '18', '24', '36', '48' or '54')
+- `mandatory_dhcp_enabled` (Boolean) Whether clients connecting to this SSID must use the IP address assigned by the DHCP server
+- `min_bitrate` (Number) The minimum bitrate in Mbps of this SSID in the default indoor RF profile
 - `name` (String) The name of the SSID
+- `named_vlans` (Attributes) Named VLAN settings. (see [below for nested schema](#nestedatt--named_vlans))
 - `oauth` (Attributes) The OAuth settings of this SSID. Only valid if splashPage is 'Google OAuth'. (see [below for nested schema](#nestedatt--oauth))
 - `per_client_bandwidth_limit_down` (Number) The download bandwidth limit in Kbps. (0 represents no limit.)
 - `per_client_bandwidth_limit_up` (Number) The upload bandwidth limit in Kbps. (0 represents no limit.)
-- `per_ssid_bandwidth_limit_down` (Number) The total download bandwidth limit in Kbps. (0 represents no limit.)
-- `per_ssid_bandwidth_limit_up` (Number) The total upload bandwidth limit in Kbps. (0 represents no limit.)
+- `per_ssid_bandwidth_limit_down` (Number) The total download bandwidth limit in Kbps (0 represents no limit)
+- `per_ssid_bandwidth_limit_up` (Number) The total upload bandwidth limit in Kbps (0 represents no limit)
 - `psk` (String) The passkey for the SSID. This param is only valid if the authMode is 'psk'
-- `radius_accounting_enabled` (Boolean) Whether or not RADIUS accounting is enabled. This param is only valid if the authMode is 'open-with-radius', '8021x-radius' or 'ipsk-with-radius'
+- `radius_accounting_enabled` (Boolean) Whether or not RADIUS accounting is enabled
 - `radius_accounting_interim_interval` (Number) The interval (in seconds) in which accounting information is updated and sent to the RADIUS accounting server.
-- `radius_accounting_servers` (Attributes Set) The RADIUS accounting 802.1X servers to be used for authentication. This param is only valid if the authMode is 'open-with-radius', '8021x-radius' or 'ipsk-with-radius' and radiusAccountingEnabled is 'true' (see [below for nested schema](#nestedatt--radius_accounting_servers))
-- `radius_attribute_for_group_policies` (String) Specify the RADIUS attribute used to look up group policies ('Filter-Id', 'Reply-Message', 'Airespace-ACL-Name' or 'Aruba-User-Role'). Access points must receive this attribute in the RADIUS Access-Accept message
+- `radius_accounting_servers` (Attributes Set) List of RADIUS accounting 802.1X servers to be used for authentication (see [below for nested schema](#nestedatt--radius_accounting_servers))
+- `radius_attribute_for_group_policies` (String) RADIUS attribute used to look up group policies
 - `radius_authentication_nas_id` (String) The template of the NAS identifier to be used for RADIUS authentication (ex. $NODE_MAC$:$VAP_NUM$).
 - `radius_called_station_id` (String) The template of the called station identifier to be used for RADIUS (ex. $NODE_MAC$:$VAP_NUM$).
 - `radius_coa_enabled` (Boolean) If true, Meraki devices will act as a RADIUS Dynamic Authorization Server and will respond to RADIUS Change-of-Authorization and Disconnect messages sent by the RADIUS server.
-- `radius_failover_policy` (String) This policy determines how authentication requests should be handled in the event that all of the configured RADIUS servers are unreachable ('Deny access' or 'Allow access')
+- `radius_failover_policy` (String) Policy which determines how authentication requests should be handled in the event that all of the configured RADIUS servers are unreachable
 - `radius_fallback_enabled` (Boolean) Whether or not higher priority RADIUS servers should be retried after 60 seconds.
 - `radius_guest_vlan_enabled` (Boolean) Whether or not RADIUS Guest VLAN is enabled. This param is only valid if the authMode is 'open-with-radius' and addressing mode is not set to 'isolated' or 'nat' mode
 - `radius_guest_vlan_id` (Number) VLAN ID of the RADIUS Guest VLAN. This param is only valid if the authMode is 'open-with-radius' and addressing mode is not set to 'isolated' or 'nat' mode
-- `radius_load_balancing_policy` (String) This policy determines which RADIUS server will be contacted first in an authentication attempt and the ordering of any necessary retry attempts ('Strict priority order' or 'Round robin')
+- `radius_load_balancing_policy` (String) Policy which determines which RADIUS server will be contacted first in an authentication attempt, and the ordering of any necessary retry attempts
 - `radius_override` (Boolean) If true, the RADIUS response can override VLAN tag. This is not valid when ipAssignmentMode is 'NAT mode'.
 - `radius_proxy_enabled` (Boolean) If true, Meraki devices will proxy RADIUS messages through the Meraki cloud to the configured RADIUS auth and accounting servers.
 - `radius_server_attempts_limit` (Number) The maximum number of transmit attempts after which a RADIUS server is failed over (must be between 1-5).
@@ -86,21 +355,23 @@ output "meraki_networks_wireless_ssids_example" {
 - `radius_testing_enabled` (Boolean) If true, Meraki devices will periodically send Access-Request messages to configured RADIUS servers using identity 'meraki_8021x_test' to ensure that the RADIUS servers are reachable.
 - `secondary_concentrator_network_id` (String) The secondary concentrator to use when the ipAssignmentMode is 'VPN'. If configured, the APs will switch to using this concentrator if the primary concentrator is unreachable. This param is optional. ('disabled' represents no secondary concentrator.)
 - `speed_burst` (Attributes) The SpeedBurst setting for this SSID' (see [below for nested schema](#nestedatt--speed_burst))
-- `splash_guest_sponsor_domains` (List of String) Array of valid sponsor email domains for sponsored guest splash type.
-- `splash_page` (String) The type of splash page for the SSID ('None', 'Click-through splash page', 'Billing', 'Password-protected with Meraki RADIUS', 'Password-protected with custom RADIUS', 'Password-protected with Active Directory', 'Password-protected with LDAP', 'SMS authentication', 'Systems Manager Sentry', 'Facebook Wi-Fi', 'Google OAuth', 'Sponsored guest', 'Cisco ISE' or 'Google Apps domain'). This attribute is not supported for template children.
+- `splash_guest_sponsor_domains` (Set of String) Array of valid sponsor email domains for sponsored guest splash type.
+- `splash_page` (String) The type of splash page for the SSID
 - `use_vlan_tagging` (Boolean) Whether or not traffic should be directed to use specific VLANs. This param is only valid if the ipAssignmentMode is 'Bridge mode' or 'Layer 3 roaming'
-- `visible` (Boolean) Boolean indicating whether APs should advertise or hide this SSID. APs will only broadcast this SSID if set to true
+- `visible` (Boolean) Whether the SSID is advertised or hidden by the AP
 - `vlan_id` (Number) The VLAN ID used for VLAN tagging. This param is only valid when the ipAssignmentMode is 'Layer 3 roaming with a concentrator' or 'VPN'
-- `walled_garden_enabled` (Boolean) Allow access to a configurable list of IP ranges, which users may access prior to sign-on.
-- `walled_garden_ranges` (List of String) Specify your walled garden by entering an array of addresses, ranges using CIDR notation, domain names, and domain wildcards (e.g. '192.168.1.1/24', '192.168.37.10/32', 'www.yahoo.com', '*.google.com']). Meraki's splash page is automatically included in your walled garden.
-- `wpa_encryption_mode` (String) The types of WPA encryption. ('WPA1 only', 'WPA1 and WPA2', 'WPA2 only', 'WPA3 Transition Mode', 'WPA3 only' or 'WPA3 192-bit Security')
+- `walled_garden_enabled` (Boolean) Allow users to access a configurable list of IP ranges prior to sign-on
+- `walled_garden_ranges` (Set of String) Domain names and IP address ranges available in Walled Garden mode
+- `wpa_encryption_mode` (String) The types of WPA encryption
 
 ### Read-Only
 
 - `admin_splash_url` (String)
-- `radius_enabled` (Boolean)
-- `splash_timeout` (String)
-- `ssid_admin_accessible` (Boolean)
+- `local_auth` (Boolean) Extended local auth flag for Enterprise NAC
+- `radius_enabled` (Boolean) Whether RADIUS authentication is enabled
+- `radius_servers_response` (Attributes Set) The RADIUS 802.1X servers to be used for authentication. This param is only valid if the authMode is 'open-with-radius', '8021x-radius' or 'ipsk-with-radius' (see [below for nested schema](#nestedatt--radius_servers_response))
+- `splash_timeout` (String) Splash page timeout
+- `ssid_admin_accessible` (Boolean) SSID Administrator access status
 
 <a id="nestedatt--active_directory"></a>
 ### Nested Schema for `active_directory`
@@ -124,7 +395,7 @@ Optional:
 
 Optional:
 
-- `host` (String) IP address of your Active Directory server.
+- `host` (String) IP address (or FQDN) of your Active Directory server.
 - `port` (Number) (Optional) UDP port the Active Directory server listens on. By default, uses port 3268.
 
 
@@ -134,7 +405,7 @@ Optional:
 
 Optional:
 
-- `tags` (List of String) Array of AP tags
+- `tags` (Set of String) Array of AP tags
 - `vlan_id` (Number) Numerical identifier that is assigned to the VLAN
 
 
@@ -143,7 +414,7 @@ Optional:
 
 Optional:
 
-- `dns_custom_nameservers` (List of String) User specified DNS servers (up to two servers)
+- `dns_custom_nameservers` (Set of String) User specified DNS servers (up to two servers)
 - `enabled` (Boolean) Boolean indicating whether or not DNS server rewrite is enabled. If disabled, upstream DNS will be used
 
 
@@ -214,7 +485,7 @@ Optional:
 
 Optional:
 
-- `host` (String) IP address of your LDAP server.
+- `host` (String) IP address (or FQDN) of your LDAP server.
 - `port` (Number) UDP port the LDAP server listens on.
 
 
@@ -257,12 +528,57 @@ Optional:
 
 
 
+<a id="nestedatt--named_vlans"></a>
+### Nested Schema for `named_vlans`
+
+Optional:
+
+- `radius` (Attributes) RADIUS settings. This param is only valid when authMode is 'open-with-radius' and ipAssignmentMode is not 'NAT mode'. (see [below for nested schema](#nestedatt--named_vlans--radius))
+- `tagging` (Attributes) VLAN tagging settings. This param is only valid when ipAssignmentMode is 'Bridge mode' or 'Layer 3 roaming'. (see [below for nested schema](#nestedatt--named_vlans--tagging))
+
+<a id="nestedatt--named_vlans--radius"></a>
+### Nested Schema for `named_vlans.radius`
+
+Optional:
+
+- `guest_vlan` (Attributes) Guest VLAN settings. Used to direct traffic to a guest VLAN when none of the RADIUS servers are reachable or a client receives access-reject from the RADIUS server. (see [below for nested schema](#nestedatt--named_vlans--radius--guest_vlan))
+
+<a id="nestedatt--named_vlans--radius--guest_vlan"></a>
+### Nested Schema for `named_vlans.radius.guest_vlan`
+
+Optional:
+
+- `enabled` (Boolean) Whether or not RADIUS guest named VLAN is enabled.
+- `name` (String) RADIUS guest VLAN name.
+
+
+
+<a id="nestedatt--named_vlans--tagging"></a>
+### Nested Schema for `named_vlans.tagging`
+
+Optional:
+
+- `by_ap_tags` (Attributes Set) The list of AP tags and VLAN names used for named VLAN tagging. If an AP has a tag matching one in the list, then traffic on this SSID will be directed to use the VLAN name associated to the tag. (see [below for nested schema](#nestedatt--named_vlans--tagging--by_ap_tags))
+- `default_vlan_name` (String) The default VLAN name used to tag traffic in the absence of a matching AP tag.
+- `enabled` (Boolean) Whether or not traffic should be directed to use specific VLAN names.
+
+<a id="nestedatt--named_vlans--tagging--by_ap_tags"></a>
+### Nested Schema for `named_vlans.tagging.by_ap_tags`
+
+Optional:
+
+- `tags` (Set of String) List of AP tags.
+- `vlan_name` (String) VLAN name that will be used to tag traffic.
+
+
+
+
 <a id="nestedatt--oauth"></a>
 ### Nested Schema for `oauth`
 
 Optional:
 
-- `allowed_domains` (List of String) (Optional) The list of domains allowed access to the network.
+- `allowed_domains` (Set of String) (Optional) The list of domains allowed access to the network.
 
 
 <a id="nestedatt--radius_accounting_servers"></a>
@@ -271,14 +587,14 @@ Optional:
 Optional:
 
 - `ca_certificate` (String) Certificate used for authorization for the RADSEC Server
-- `host` (String) IP address to which the APs will send RADIUS accounting messages
+- `host` (String) IP address (or FQDN) to which the APs will send RADIUS accounting messages
 - `port` (Number) Port on the RADIUS server that is listening for accounting messages
 - `radsec_enabled` (Boolean) Use RADSEC (TLS over TCP) to connect to this RADIUS accounting server. Requires radiusProxyEnabled.
 - `secret` (String) Shared key used to authenticate messages between the APs and RADIUS server
 
 Read-Only:
 
-- `open_roaming_certificate_id` (Number)
+- `open_roaming_certificate_id` (Number) The ID of the Openroaming Certificate attached to radius server
 
 
 <a id="nestedatt--radius_servers"></a>
@@ -300,6 +616,19 @@ Optional:
 Optional:
 
 - `enabled` (Boolean) Boolean indicating whether or not to allow users to temporarily exceed the bandwidth limit for short periods while still keeping them under the bandwidth limit over time.
+
+
+<a id="nestedatt--radius_servers_response"></a>
+### Nested Schema for `radius_servers_response`
+
+Read-Only:
+
+- `ca_certificate` (String) Certificate used for authorization for the RADSEC Server
+- `host` (String) IP address of your RADIUS server
+- `open_roaming_certificate_id` (Number) The ID of the Openroaming Certificate attached to radius server.
+- `port` (Number) UDP port the RADIUS server listens on for Access-requests
+- `radsec_enabled` (Boolean) Use RADSEC (TLS over TCP) to connect to this RADIUS server. Requires radiusProxyEnabled.
+- `secret` (String) RADIUS client shared secret
 
 ## Import
 

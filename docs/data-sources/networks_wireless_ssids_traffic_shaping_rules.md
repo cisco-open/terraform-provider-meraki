@@ -41,27 +41,38 @@ output "meraki_networks_wireless_ssids_traffic_shaping_rules_example" {
 
 Read-Only:
 
-- `default_rules_enabled` (Boolean)
-- `rules` (Attributes Set) (see [below for nested schema](#nestedatt--item--rules))
-- `traffic_shaping_enabled` (Boolean)
+- `default_rules_enabled` (Boolean) Whether default traffic shaping rules are enabled (true) or disabled (false). There are 4 default rules, which can be seen on your network's traffic shaping page. Note that default rules count against the rule limit of 8.
+- `rules` (Attributes Set) An array of traffic shaping rules. Rules are applied in the order that
+    they are specified in. An empty list (or null) means no rules. Note that
+    you are allowed a maximum of 8 rules. (see [below for nested schema](#nestedatt--item--rules))
+- `traffic_shaping_enabled` (Boolean) Whether traffic shaping rules are applied to clients on your SSID.
 
 <a id="nestedatt--item--rules"></a>
 ### Nested Schema for `item.rules`
 
 Read-Only:
 
-- `definitions` (Attributes Set) (see [below for nested schema](#nestedatt--item--rules--definitions))
-- `dscp_tag_value` (Number)
-- `pcp_tag_value` (Number)
-- `per_client_bandwidth_limits` (Attributes) (see [below for nested schema](#nestedatt--item--rules--per_client_bandwidth_limits))
+- `definitions` (Attributes Set) A list of objects describing the definitions of your traffic shaping rule. At least one definition is required. (see [below for nested schema](#nestedatt--item--rules--definitions))
+- `dscp_tag_value` (Number) The DSCP tag applied by your rule. null means 'Do not change DSCP tag'.
+    For a list of possible tag values, use the trafficShaping/dscpTaggingOptions endpoint.
+- `pcp_tag_value` (Number) The PCP tag applied by your rule. Can be 0 (lowest priority) through 7 (highest priority).
+    null means 'Do not set PCP tag'.
+- `per_client_bandwidth_limits` (Attributes) An object describing the bandwidth settings for your rule. (see [below for nested schema](#nestedatt--item--rules--per_client_bandwidth_limits))
 
 <a id="nestedatt--item--rules--definitions"></a>
 ### Nested Schema for `item.rules.definitions`
 
 Read-Only:
 
-- `type` (String)
-- `value` (String)
+- `type` (String) The type of definition. Can be one of 'application', 'applicationCategory', 'host', 'port', 'ipRange' or 'localNet'.
+- `value` (String) If "type" is 'host', 'port', 'ipRange' or 'localNet', then "value" must be a string, matching either
+    a hostname (e.g. "somesite.com"), a port (e.g. 8080), or an IP range ("192.1.0.0",
+    "192.1.0.0/16", or "10.1.0.0/16:80"). 'localNet' also supports CIDR notation, excluding
+    custom ports.
+     If "type" is 'application' or 'applicationCategory', then "value" must be an object
+    with the structure { "id": "meraki:layer7/..." }, where "id" is the application category or
+    application ID (for a list of IDs for your network, use the trafficShaping/applicationCategories
+    endpoint).
 
 
 <a id="nestedatt--item--rules--per_client_bandwidth_limits"></a>
@@ -69,13 +80,13 @@ Read-Only:
 
 Read-Only:
 
-- `bandwidth_limits` (Attributes) (see [below for nested schema](#nestedatt--item--rules--per_client_bandwidth_limits--bandwidth_limits))
-- `settings` (String)
+- `bandwidth_limits` (Attributes) The bandwidth limits object, specifying the upload ('limitUp') and download ('limitDown') speed in Kbps. These are only enforced if 'settings' is set to 'custom'. (see [below for nested schema](#nestedatt--item--rules--per_client_bandwidth_limits--bandwidth_limits))
+- `settings` (String) How bandwidth limits are applied by your rule. Can be one of 'network default', 'ignore' or 'custom'.
 
 <a id="nestedatt--item--rules--per_client_bandwidth_limits--bandwidth_limits"></a>
 ### Nested Schema for `item.rules.per_client_bandwidth_limits.settings`
 
 Read-Only:
 
-- `limit_down` (Number)
-- `limit_up` (Number)
+- `limit_down` (Number) The maximum download limit (integer, in Kbps).
+- `limit_up` (Number) The maximum upload limit (integer, in Kbps).

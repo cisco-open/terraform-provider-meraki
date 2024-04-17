@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -65,7 +49,6 @@ func (r *NetworksWebhooksHTTPServersResource) Schema(_ context.Context, _ resour
 		Attributes: map[string]schema.Attribute{
 			"http_server_id": schema.StringAttribute{
 				MarkdownDescription: `httpServerId path parameter. Http server ID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -102,6 +85,7 @@ func (r *NetworksWebhooksHTTPServersResource) Schema(_ context.Context, _ resour
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
+							SuppressDiffString(),
 						},
 					},
 					"payload_template_id": schema.StringAttribute{
@@ -158,7 +142,6 @@ func (r *NetworksWebhooksHTTPServersResource) Create(ctx context.Context, req re
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvName := data.Name.ValueString()
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkWebhooksHTTPServers(vvNetworkID)
@@ -181,7 +164,7 @@ func (r *NetworksWebhooksHTTPServersResource) Create(ctx context.Context, req re
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter HTTPServerID",
-					"Error",
+					err.Error(),
 				)
 				return
 			}
@@ -238,7 +221,7 @@ func (r *NetworksWebhooksHTTPServersResource) Create(ctx context.Context, req re
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter HTTPServerID",
-				"Error",
+				err.Error(),
 			)
 			return
 		}
@@ -292,9 +275,7 @@ func (r *NetworksWebhooksHTTPServersResource) Read(ctx context.Context, req reso
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvHTTPServerID := data.HTTPServerID.ValueString()
-	// http_server_id
 	responseGet, restyRespGet, err := r.client.Networks.GetNetworkWebhooksHTTPServer(vvNetworkID, vvHTTPServerID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -318,7 +299,7 @@ func (r *NetworksWebhooksHTTPServersResource) Read(ctx context.Context, req reso
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkWebhooksHTTPServerItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -351,7 +332,6 @@ func (r *NetworksWebhooksHTTPServersResource) Update(ctx context.Context, req re
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvHTTPServerID := data.HTTPServerID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkWebhooksHTTPServer(vvNetworkID, vvHTTPServerID, dataRequest)

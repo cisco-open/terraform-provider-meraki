@@ -25,6 +25,8 @@ resource "meraki_networks_switch_routing_multicast" "example" {
 
     flood_unknown_multicast_traffic_enabled = true
     igmp_snooping_enabled                   = true
+    stacks                                  = ["789102", "123456", "129102"]
+    switch_profiles                         = ["1234", "4567"]
     switches                                = ["Q234-ABCD-0001", "Q234-ABCD-0002", "Q234-ABCD-0003"]
   }]
 }
@@ -43,16 +45,18 @@ output "meraki_networks_switch_routing_multicast_example" {
 
 ### Optional
 
-- `default_settings` (Attributes) Default multicast setting for entire network. IGMP snooping and Flood unknown multicast traffic settings are enabled by default. (see [below for nested schema](#nestedatt--default_settings))
-- `overrides` (Attributes Set) Array of paired switches/stacks/profiles and corresponding multicast settings. An empty array will clear the multicast settings. (see [below for nested schema](#nestedatt--overrides))
+- `default_settings` (Attributes) Default multicast setting for entire network. IGMP snooping and Flood unknown
+      multicast traffic settings are enabled by default. (see [below for nested schema](#nestedatt--default_settings))
+- `overrides` (Attributes Set) Array of paired switches/stacks/profiles and corresponding multicast settings.
+      An empty array will clear the multicast settings. (see [below for nested schema](#nestedatt--overrides))
 
 <a id="nestedatt--default_settings"></a>
 ### Nested Schema for `default_settings`
 
 Optional:
 
-- `flood_unknown_multicast_traffic_enabled` (Boolean) Flood unknown multicast traffic setting for entire network
-- `igmp_snooping_enabled` (Boolean) IGMP snooping setting for entire network
+- `flood_unknown_multicast_traffic_enabled` (Boolean) Flood unknown multicast traffic enabled for the entire network
+- `igmp_snooping_enabled` (Boolean) IGMP snooping enabled for the entire network
 
 
 <a id="nestedatt--overrides"></a>
@@ -60,11 +64,11 @@ Optional:
 
 Optional:
 
-- `flood_unknown_multicast_traffic_enabled` (Boolean) Flood unknown multicast traffic setting for switches, switch stacks or switch profiles
-- `igmp_snooping_enabled` (Boolean) IGMP snooping setting for switches, switch stacks or switch profiles
-- `stacks` (List of String) List of switch stack ids for non-template network
-- `switch_profiles` (List of String) List of switch profiles ids for template network
-- `switches` (List of String) List of switch serials for non-template network
+- `flood_unknown_multicast_traffic_enabled` (Boolean) Flood unknown multicast traffic enabled for switches, switch stacks or switch templates
+- `igmp_snooping_enabled` (Boolean) IGMP snooping enabled for switches, switch stacks or switch templates
+- `stacks` (Set of String) (optional) List of switch stack ids for non-template network
+- `switch_profiles` (Set of String) (optional) List of switch templates ids for template network
+- `switches` (Set of String) (optional) List of switch serials for non-template network
 
 ## Import
 

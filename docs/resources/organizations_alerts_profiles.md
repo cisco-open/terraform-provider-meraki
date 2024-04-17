@@ -20,6 +20,10 @@ resource "meraki_organizations_alerts_profiles" "example" {
     bit_rate_bps = 10000
     duration     = 60
     interface    = "wan1"
+    jitter_ms    = 100
+    latency_ms   = 100
+    loss_ratio   = 0.1
+    mos          = 3.5
     window       = 600
   }
   description     = "WAN 1 high utilization"
@@ -51,7 +55,7 @@ output "meraki_organizations_alerts_profiles_example" {
 - `alert_config_id` (String) alertConfigId path parameter. Alert config ID
 - `description` (String) User supplied description of the alert
 - `enabled` (Boolean) Is the alert config enabled
-- `network_tags` (List of String) Networks with these tags will be monitored for the alert
+- `network_tags` (Set of String) Networks with these tags will be monitored for the alert
 - `recipients` (Attributes) List of recipients that will recieve the alert. (see [below for nested schema](#nestedatt--recipients))
 - `type` (String) The alert type
 
@@ -66,7 +70,7 @@ Optional:
 
 - `bit_rate_bps` (Number) The threshold the metric must cross to be valid for alerting. Used only for WAN Utilization alerts.
 - `duration` (Number) The total duration in seconds that the threshold should be crossed before alerting
-- `interface` (String) The uplink observed for the alert.  interface must be one of the following: wan1, wan2, cellular
+- `interface` (String) The uplink observed for the alert
 - `jitter_ms` (Number) The threshold the metric must cross to be valid for alerting. Used only for VoIP Jitter alerts.
 - `latency_ms` (Number) The threshold the metric must cross to be valid for alerting. Used only for WAN Latency alerts.
 - `loss_ratio` (Number) The threshold the metric must cross to be valid for alerting. Used only for Packet Loss alerts.
@@ -79,8 +83,8 @@ Optional:
 
 Optional:
 
-- `emails` (List of String) A list of emails that will receive information about the alert
-- `http_server_ids` (List of String) A list base64 encoded urls of webhook endpoints that will receive information about the alert
+- `emails` (Set of String) A list of emails that will receive information about the alert
+- `http_server_ids` (Set of String) A list base64 encoded urls of webhook endpoints that will receive information about the alert
 
 ## Import
 

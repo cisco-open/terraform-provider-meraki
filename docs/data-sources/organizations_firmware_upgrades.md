@@ -15,8 +15,11 @@ description: |-
 ```terraform
 data "meraki_organizations_firmware_upgrades" "example" {
 
+  ending_before   = "string"
   organization_id = "string"
-  product_type    = ["string"]
+  per_page        = 1
+  product_types   = ["string"]
+  starting_after  = "string"
   status          = ["string"]
 }
 
@@ -34,8 +37,11 @@ output "meraki_organizations_firmware_upgrades_example" {
 
 ### Optional
 
-- `product_type` (List of String) productType query parameter. The product type in a given upgrade ID
-- `status` (List of String) status query parameter. The status of an upgrade
+- `ending_before` (String) endingBefore query parameter. A token used by the server to indicate the end of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.
+- `per_page` (Number) perPage query parameter. The number of entries per page returned. Acceptable range is 3 1000. Default is 1000.
+- `product_types` (List of String) productTypes query parameter. Optional parameter to filter the upgrade by product type.
+- `starting_after` (String) startingAfter query parameter. A token used by the server to indicate the start of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.
+- `status` (List of String) status query parameter. Optional parameter to filter the upgrade by status.
 
 ### Read-Only
 
@@ -49,7 +55,7 @@ Read-Only:
 - `completed_at` (String) Timestamp when upgrade completed. Null if status pending.
 - `from_version` (Attributes) ID of the upgrade's starting version (see [below for nested schema](#nestedatt--items--from_version))
 - `network` (Attributes) Network of the upgrade (see [below for nested schema](#nestedatt--items--network))
-- `product_type` (String) product upgraded [wireless, appliance, switch, systemsManager, camera, cellularGateway, sensor]
+- `product_types` (String) product upgraded [wireless, appliance, switch, systemsManager, camera, cellularGateway, sensor]
 - `status` (String) Status of upgrade event: [Cancelled, Completed]
 - `time` (String) Scheduled start time
 - `to_version` (Attributes) ID of the upgrade's target version (see [below for nested schema](#nestedatt--items--to_version))
@@ -61,6 +67,7 @@ Read-Only:
 
 Read-Only:
 
+- `firmware` (String) Firmware name
 - `id` (String) Firmware version ID
 - `release_date` (String) Release date of the firmware version
 - `release_type` (String) Release type of the firmware version
@@ -81,6 +88,7 @@ Read-Only:
 
 Read-Only:
 
+- `firmware` (String) Firmware name
 - `id` (String) Firmware version ID
 - `release_date` (String) Release date of the firmware version
 - `release_type` (String) Release type of the firmware version

@@ -15,9 +15,9 @@ description: |-
 ```terraform
 resource "meraki_organizations_config_templates" "example" {
 
-  name            = "My config template"
-  organization_id = "string"
-  time_zone       = "America/Los_Angeles"
+  name                 = "My config template"
+  organization_id      = "string"
+  time_zone            = "America/Los_Angeles"
 }
 
 output "meraki_organizations_config_templates_example" {
@@ -40,8 +40,8 @@ output "meraki_organizations_config_templates_example" {
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
-- `product_types` (List of String)
+- `id` (String) The ID of the network or config template to copy configuration from
+- `product_types` (Set of String) The product types of the configuration template
 
 ## Import
 

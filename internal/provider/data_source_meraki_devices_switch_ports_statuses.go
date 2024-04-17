@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -222,7 +206,7 @@ func (d *DevicesSwitchPortsStatusesDataSource) Schema(_ context.Context, _ datas
 											Computed:            true,
 										},
 										"vlan": schema.Int64Attribute{
-											MarkdownDescription: `The VLAN of the . A null value will clear the value set for trunk ports.`,
+											MarkdownDescription: `The VLAN of the . For a trunk port, this is the native VLAN. A null value will clear the value set for trunk ports.`,
 											Computed:            true,
 										},
 										"voice_vlan": schema.Int64Attribute{
@@ -234,6 +218,18 @@ func (d *DevicesSwitchPortsStatusesDataSource) Schema(_ context.Context, _ datas
 								"enabled": schema.BoolAttribute{
 									MarkdownDescription: `Whether Secure Port is turned on for this port.`,
 									Computed:            true,
+								},
+							},
+						},
+						"spanning_tree": schema.SingleNestedAttribute{
+							MarkdownDescription: `The Spanning Tree Protocol (STP) information of the connected device.`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"statuses": schema.ListAttribute{
+									MarkdownDescription: `The current Spanning Tree Protocol statuses of the port.`,
+									Computed:            true,
+									ElementType:         types.StringType,
 								},
 							},
 						},
@@ -353,6 +349,7 @@ type ResponseItemSwitchGetDeviceSwitchPortsStatuses struct {
 	PortID         types.String                                                 `tfsdk:"port_id"`
 	PowerUsageInWh types.Float64                                                `tfsdk:"power_usage_in_wh"`
 	SecurePort     *ResponseItemSwitchGetDeviceSwitchPortsStatusesSecurePort    `tfsdk:"secure_port"`
+	SpanningTree   *ResponseItemSwitchGetDeviceSwitchPortsStatusesSpanningTree  `tfsdk:"spanning_tree"`
 	Speed          types.String                                                 `tfsdk:"speed"`
 	Status         types.String                                                 `tfsdk:"status"`
 	TrafficInKbps  *ResponseItemSwitchGetDeviceSwitchPortsStatusesTrafficInKbps `tfsdk:"traffic_in_kbps"`
@@ -397,6 +394,10 @@ type ResponseItemSwitchGetDeviceSwitchPortsStatusesSecurePortConfigOverrides str
 	Type         types.String `tfsdk:"type"`
 	VLAN         types.Int64  `tfsdk:"vlan"`
 	VoiceVLAN    types.Int64  `tfsdk:"voice_vlan"`
+}
+
+type ResponseItemSwitchGetDeviceSwitchPortsStatusesSpanningTree struct {
+	Statuses types.List `tfsdk:"statuses"`
 }
 
 type ResponseItemSwitchGetDeviceSwitchPortsStatusesTrafficInKbps struct {
@@ -531,6 +532,14 @@ func ResponseSwitchGetDeviceSwitchPortsStatusesItemsToBody(state DevicesSwitchPo
 					}
 				}
 				return &ResponseItemSwitchGetDeviceSwitchPortsStatusesSecurePort{}
+			}(),
+			SpanningTree: func() *ResponseItemSwitchGetDeviceSwitchPortsStatusesSpanningTree {
+				if item.SpanningTree != nil {
+					return &ResponseItemSwitchGetDeviceSwitchPortsStatusesSpanningTree{
+						Statuses: StringSliceToList(item.SpanningTree.Statuses),
+					}
+				}
+				return &ResponseItemSwitchGetDeviceSwitchPortsStatusesSpanningTree{}
 			}(),
 			Speed:  types.StringValue(item.Speed),
 			Status: types.StringValue(item.Status),

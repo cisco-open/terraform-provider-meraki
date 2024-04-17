@@ -39,14 +39,14 @@ output "meraki_devices_camera_custom_analytics_example" {
 
 Read-Only:
 
-- `artifact_id` (String)
-- `enabled` (Boolean)
-- `parameters` (Attributes Set) (see [below for nested schema](#nestedatt--item--parameters))
+- `artifact_id` (String) Custom analytics artifact ID
+- `enabled` (Boolean) Whether custom analytics is enabled
+- `parameters` (Attributes Set) Parameters for the custom analytics workload (see [below for nested schema](#nestedatt--item--parameters))
 
 <a id="nestedatt--item--parameters"></a>
 ### Nested Schema for `item.parameters`
 
 Read-Only:
 
-- `name` (String)
-- `value` (Number)
+- `name` (String) Name of the parameter
+- `value` (Number) Value of the parameter

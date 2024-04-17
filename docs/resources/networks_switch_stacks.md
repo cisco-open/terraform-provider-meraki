@@ -34,13 +34,13 @@ output "meraki_networks_switch_stacks_example" {
 
 ### Optional
 
-- `name` (String) Switch stacks name
-- `serials` (List of String) Serials of the switches in the switch stack
+- `name` (String) Name of the Switch stack
+- `serials` (Set of String) Serials of the switches in the switch stack
 - `switch_stack_id` (String) switchStackId path parameter. Switch stack ID
 
 ### Read-Only
 
-- `id` (String) Switch stacks id
+- `id` (String) ID of the Switch stack
 
 ## Import
 

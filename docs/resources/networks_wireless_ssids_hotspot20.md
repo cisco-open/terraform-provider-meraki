@@ -65,13 +65,13 @@ output "meraki_networks_wireless_ssids_hotspot20_example" {
 
 ### Optional
 
-- `domains` (List of String) An array of domain names
+- `domains` (Set of String) An array of domain names
 - `enabled` (Boolean) Whether or not Hotspot 2.0 for this SSID is enabled
 - `mcc_mncs` (Attributes Set) An array of MCC/MNC pairs (see [below for nested schema](#nestedatt--mcc_mncs))
 - `nai_realms` (Attributes Set) An array of NAI realms (see [below for nested schema](#nestedatt--nai_realms))
 - `network_access_type` (String) The network type of this SSID ('Private network', 'Private network with guest access', 'Chargeable public network', 'Free public network', 'Personal device network', 'Emergency services only network', 'Test or experimental', 'Wildcard')
 - `operator` (Attributes) Operator settings for this SSID (see [below for nested schema](#nestedatt--operator))
-- `roam_consort_ois` (List of String) An array of roaming consortium OIs (hexadecimal number 3-5 octets in length)
+- `roam_consort_ois` (Set of String) An array of roaming consortium OIs (hexadecimal number 3-5 octets in length)
 - `venue` (Attributes) Venue settings for this SSID (see [below for nested schema](#nestedatt--venue))
 
 <a id="nestedatt--mcc_mncs"></a>
@@ -109,10 +109,10 @@ Optional:
 
 Read-Only:
 
-- `credentials` (List of String)
-- `eapinner_authentication` (List of String)
-- `non_eapinner_authentication` (List of String)
-- `tunneled_eap_method_credentials` (List of String)
+- `credentials` (Set of String)
+- `eapinner_authentication` (Set of String)
+- `non_eapinner_authentication` (Set of String)
+- `tunneled_eap_method_credentials` (Set of String)
 
 
 

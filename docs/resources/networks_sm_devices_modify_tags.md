@@ -23,7 +23,7 @@ resource "meraki_networks_sm_devices_modify_tags" "example" {
 
     ids           = ["1284392014819", "2983092129865"]
     scope         = ["withAny, old_tag"]
-    serials       = ["Q234-ABCD-0001", "Q234-ABCD-0002", "Q234-ABCD-0003"]
+    serials       = ["XY0XX0Y0X0", "A01B01CD00E", "X02YZ1ZYZX"]
     tags          = ["tag1", "tag2"]
     update_action = "add"
     wifi_macs     = ["00:11:22:33:44:55"]
@@ -52,12 +52,12 @@ output "meraki_networks_sm_devices_modify_tags_example" {
 
 Optional:
 
-- `ids` (List of String) The ids of the devices to be modified.
-- `scope` (List of String) The scope (one of all, none, withAny, withAll, withoutAny, or withoutAll) and a set of tags of the devices to be modified.
-- `serials` (List of String) The serials of the devices to be modified.
-- `tags` (List of String) The tags to be added, deleted, or updated.
+- `ids` (Set of String) The ids of the devices to be modified.
+- `scope` (Set of String) The scope (one of all, none, withAny, withAll, withoutAny, or withoutAll) and a set of tags of the devices to be modified.
+- `serials` (Set of String) The serials of the devices to be modified.
+- `tags` (Set of String) The tags to be added, deleted, or updated.
 - `update_action` (String) One of add, delete, or update. Only devices that have been modified will be returned.
-- `wifi_macs` (List of String) The wifiMacs of the devices to be modified.
+- `wifi_macs` (Set of String) The wifiMacs of the devices to be modified.
 
 
 <a id="nestedatt--items"></a>
@@ -67,5 +67,5 @@ Read-Only:
 
 - `id` (String) The Meraki Id of the device record.
 - `serial` (String) The device serial.
-- `tags` (List of String) An array of tags associated with the device.
+- `tags` (Set of String) An array of tags associated with the device.
 - `wifi_mac` (String) The MAC of the device.

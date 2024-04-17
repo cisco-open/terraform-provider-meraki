@@ -1,26 +1,10 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -114,6 +98,47 @@ func (r *NetworksFirmwareUpgradesStagedEventsResource) Schema(_ context.Context,
 											"short_name": schema.StringAttribute{
 												MarkdownDescription: `Firmware version short name`,
 												Computed:            true,
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"switch_catalyst": schema.SingleNestedAttribute{
+						MarkdownDescription: `Version information for the switch network being upgraded`,
+						Computed:            true,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseStateForUnknown(),
+						},
+						Attributes: map[string]schema.Attribute{
+
+							"next_upgrade": schema.SingleNestedAttribute{
+								MarkdownDescription: `The next upgrade version for the switch network`,
+								Computed:            true,
+								Optional:            true,
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseStateForUnknown(),
+								},
+								Attributes: map[string]schema.Attribute{
+
+									"to_version": schema.SingleNestedAttribute{
+										MarkdownDescription: `The version to be updated to for switch Catalyst devices`,
+										Computed:            true,
+										Optional:            true,
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseStateForUnknown(),
+										},
+										Attributes: map[string]schema.Attribute{
+
+											"id": schema.StringAttribute{
+												MarkdownDescription: `The version ID`,
+												Computed:            true,
+												Optional:            true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.UseStateForUnknown(),
+												},
 											},
 										},
 									},
@@ -241,7 +266,6 @@ func (r *NetworksFirmwareUpgradesStagedEventsResource) Create(ctx context.Contex
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkFirmwareUpgradesStagedEvents(vvNetworkID)
 	//Have Create
@@ -255,7 +279,7 @@ func (r *NetworksFirmwareUpgradesStagedEventsResource) Create(ctx context.Contex
 		}
 	}
 	if responseVerifyItem != nil {
-		data = ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsItemToBodyRs(data, responseVerifyItem, false)
+		data := ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsItemToBodyRs(data, responseVerifyItem, false)
 		//Path params in update assigned
 		resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 		return
@@ -294,7 +318,7 @@ func (r *NetworksFirmwareUpgradesStagedEventsResource) Create(ctx context.Contex
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -323,7 +347,6 @@ func (r *NetworksFirmwareUpgradesStagedEventsResource) Read(ctx context.Context,
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	responseGet, restyRespGet, err := r.client.Networks.GetNetworkFirmwareUpgradesStagedEvents(vvNetworkID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -347,7 +370,7 @@ func (r *NetworksFirmwareUpgradesStagedEventsResource) Read(ctx context.Context,
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -369,7 +392,6 @@ func (r *NetworksFirmwareUpgradesStagedEventsResource) Update(ctx context.Contex
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkFirmwareUpgradesStagedEvents(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
@@ -393,7 +415,7 @@ func (r *NetworksFirmwareUpgradesStagedEventsResource) Update(ctx context.Contex
 
 func (r *NetworksFirmwareUpgradesStagedEventsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksFirmwareUpgradesStagedEvents", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -406,7 +428,8 @@ type NetworksFirmwareUpgradesStagedEventsRs struct {
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsProductsRs struct {
-	Switch *ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsProductsSwitchRs `tfsdk:"switch"`
+	Switch         *ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsProductsSwitchRs `tfsdk:"switch"`
+	SwitchCatalyst *ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsProductsSwitchRs `tfsdk:"switch_catalyst"`
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsProductsSwitchRs struct {
@@ -469,8 +492,28 @@ func (r *NetworksFirmwareUpgradesStagedEventsRs) toSdkApiRequestCreate(ctx conte
 				NextUpgrade: requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchNextUpgrade,
 			}
 		}
+		var requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalyst *merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalyst
+		if r.Products.SwitchCatalyst != nil {
+			var requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgrade *merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgrade
+			if r.Products.SwitchCatalyst.NextUpgrade != nil {
+				var requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgradeToVersion *merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgradeToVersion
+				if r.Products.SwitchCatalyst.NextUpgrade.ToVersion != nil {
+					iD := r.Products.SwitchCatalyst.NextUpgrade.ToVersion.ID.ValueString()
+					requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgradeToVersion = &merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgradeToVersion{
+						ID: iD,
+					}
+				}
+				requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgrade = &merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgrade{
+					ToVersion: requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgradeToVersion,
+				}
+			}
+			requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalyst = &merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalyst{
+				NextUpgrade: requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgrade,
+			}
+		}
 		requestNetworksCreateNetworkFirmwareUpgradesStagedEventProducts = &merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProducts{
-			Switch: requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitch,
+			Switch:         requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitch,
+			SwitchCatalyst: requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalyst,
 		}
 	}
 	var requestNetworksCreateNetworkFirmwareUpgradesStagedEventStages []merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventStages

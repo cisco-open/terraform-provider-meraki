@@ -50,15 +50,15 @@ output "meraki_networks_pii_requests_example" {
 
 Read-Only:
 
-- `completed_at` (Number)
-- `created_at` (Number)
-- `datasets` (String)
-- `id` (String)
-- `mac` (String)
-- `network_id` (String)
-- `organization_wide` (Boolean)
-- `status` (String)
-- `type` (String)
+- `completed_at` (Number) The request's completion time
+- `created_at` (Number) The request's creation time
+- `datasets` (String) The stringified array of datasets related to the provided key that should be deleted.
+- `id` (String) The network or organization identifier
+- `mac` (String) The MAC address of the PII request
+- `network_id` (String) The network identifier
+- `organization_wide` (Boolean) If the data returned is organization-wide. False indicates the data is network-wide.
+- `status` (String) The status of the PII request
+- `type` (String) The type of PII request
 
 
 <a id="nestedatt--items"></a>
@@ -66,12 +66,12 @@ Read-Only:
 
 Read-Only:
 
-- `completed_at` (Number)
-- `created_at` (Number)
-- `datasets` (String)
-- `id` (String)
-- `mac` (String)
-- `network_id` (String)
-- `organization_wide` (Boolean)
-- `status` (String)
-- `type` (String)
+- `completed_at` (Number) The request's completion time
+- `created_at` (Number) The request's creation time
+- `datasets` (String) The stringified array of datasets related to the provided key that should be deleted.
+- `id` (String) The network or organization identifier
+- `mac` (String) The MAC address of the PII request
+- `network_id` (String) The network identifier
+- `organization_wide` (Boolean) If the data returned is organization-wide. False indicates the data is network-wide.
+- `status` (String) The status of the PII request
+- `type` (String) The type of PII request

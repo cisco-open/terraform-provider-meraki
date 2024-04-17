@@ -61,7 +61,7 @@ Optional:
 
 Optional:
 
-- `details` (Attributes Set) Details related to organization management, possibly empty (see [below for nested schema](#nestedatt--management--details))
+- `details` (Attributes Set) Details related to organization management, possibly empty. Details may be named 'MSP ID', 'IP restriction mode for API', or 'IP restriction mode for dashboard', if the organization admin has configured any. (see [below for nested schema](#nestedatt--management--details))
 
 <a id="nestedatt--management--details"></a>
 ### Nested Schema for `management.details`

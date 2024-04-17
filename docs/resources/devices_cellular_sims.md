@@ -41,6 +41,7 @@ output "meraki_devices_cellular_sims_example" {
 Optional:
 
 - `enabled` (Boolean) Failover to secondary SIM (optional)
+- `timeout` (Number) Failover timeout in seconds (optional)
 
 
 <a id="nestedatt--sims"></a>
@@ -57,7 +58,7 @@ Optional:
 
 Optional:
 
-- `allowed_ip_types` (List of String) IP versions to support (permitted values include 'ipv4', 'ipv6').
+- `allowed_ip_types` (Set of String) IP versions to support (permitted values include 'ipv4', 'ipv6').
 - `authentication` (Attributes) APN authentication configurations. (see [below for nested schema](#nestedatt--sims--apns--authentication))
 - `name` (String) APN name.
 

@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,8 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -32,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -81,6 +67,18 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"All SAML admins",
+								"All admins",
+								"All admins of networks tagged...",
+								"All admins of networks...",
+								"All enterprise admins",
+								"All network admins",
+								"All organization admins",
+								"Specific admins...",
+							),
+						},
 					},
 					"values": schema.SetAttribute{
 						MarkdownDescription: `      If 'appliesTo' is set to one of 'Specific admins...', 'All admins of networks...' or 'All admins of networks tagged...', then you must specify this 'values' property to provide the set of
@@ -100,7 +98,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 			},
 			"branding_policy_id": schema.StringAttribute{
 				MarkdownDescription: `brandingPolicyId path parameter. Branding policy ID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -146,6 +143,13 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"gif",
+										"jpg",
+										"png",
+									),
 								},
 							},
 							"preview": schema.SingleNestedAttribute{
@@ -197,6 +201,13 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"default or inherit",
+								"hide",
+								"show",
+							),
+						},
 					},
 					"cases_subtab": schema.StringAttribute{
 						MarkdownDescription: `      The 'Help -> Cases' Dashboard subtab on which Cisco Meraki support cases for this organization can be managed. Can be one
@@ -206,6 +217,13 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
+						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"default or inherit",
+								"hide",
+								"show",
+							),
 						},
 					},
 					"cisco_meraki_product_documentation": schema.StringAttribute{
@@ -225,6 +243,13 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"default or inherit",
+								"hide",
+								"show",
+							),
+						},
 					},
 					"data_protection_requests_subtab": schema.StringAttribute{
 						MarkdownDescription: `      The 'Help -> Data protection requests' Dashboard subtab on which requests to delete, restrict, or export end-user data can
@@ -234,6 +259,13 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
+						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"default or inherit",
+								"hide",
+								"show",
+							),
 						},
 					},
 					"firewall_info_subtab": schema.StringAttribute{
@@ -245,6 +277,13 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"default or inherit",
+								"hide",
+								"show",
+							),
+						},
 					},
 					"get_help_subtab": schema.StringAttribute{
 						MarkdownDescription: `      The 'Help -> Get Help' subtab on which Cisco Meraki KB, Product Manuals, and Support/Case Information are displayed. Note
@@ -255,6 +294,13 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
+						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"default or inherit",
+								"hide",
+								"show",
+							),
 						},
 					},
 					"get_help_subtab_knowledge_base_search": schema.StringAttribute{
@@ -275,6 +321,13 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"default or inherit",
+								"hide",
+								"show",
+							),
+						},
 					},
 					"help_tab": schema.StringAttribute{
 						MarkdownDescription: `      The Help tab, under which all support information resides. If this tab is hidden, no other 'Help' branding
@@ -284,6 +337,13 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
+						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"default or inherit",
+								"hide",
+								"show",
+							),
 						},
 					},
 					"help_widget": schema.StringAttribute{
@@ -295,6 +355,13 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"default or inherit",
+								"hide",
+								"show",
+							),
+						},
 					},
 					"new_features_subtab": schema.StringAttribute{
 						MarkdownDescription: `      The 'Help -> New features' subtab where new Dashboard features are detailed. Can be one of 'default or inherit', 'hide' or 'show'.
@@ -303,6 +370,13 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
+						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"default or inherit",
+								"hide",
+								"show",
+							),
 						},
 					},
 					"sm_forums": schema.StringAttribute{
@@ -313,6 +387,13 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
+						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"default or inherit",
+								"hide",
+								"show",
+							),
 						},
 					},
 					"support_contact_info": schema.StringAttribute{
@@ -332,6 +413,13 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
+						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"default or inherit",
+								"hide",
+								"show",
+							),
 						},
 					},
 				},
@@ -374,7 +462,6 @@ func (r *OrganizationsBrandingPoliciesResource) Create(ctx context.Context, req 
 	}
 	//Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
 	vvName := data.Name.ValueString()
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationBrandingPolicies(vvOrganizationID)
@@ -397,7 +484,7 @@ func (r *OrganizationsBrandingPoliciesResource) Create(ctx context.Context, req 
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter BrandingPolicyID",
-					"Error",
+					err.Error(),
 				)
 				return
 			}
@@ -454,14 +541,14 @@ func (r *OrganizationsBrandingPoliciesResource) Create(ctx context.Context, req 
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter BrandingPolicyID",
-				"Error",
+				err.Error(),
 			)
 			return
 		}
 		responseVerifyItem2, restyRespGet, err := r.client.Organizations.GetOrganizationBrandingPolicy(vvOrganizationID, vvBrandingPolicyID)
 		if responseVerifyItem2 != nil && err == nil {
-			data = ResponseOrganizationsGetOrganizationBrandingPolicyItemToBodyRs(data, responseVerifyItem2, false)
-			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			data3 := ResponseOrganizationsGetOrganizationBrandingPolicyItemToBodyRs(data, responseVerifyItem2, false)
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data3)...)
 			return
 		} else {
 			if restyRespGet != nil {
@@ -508,9 +595,7 @@ func (r *OrganizationsBrandingPoliciesResource) Read(ctx context.Context, req re
 	// Has Item2
 
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
 	vvBrandingPolicyID := data.BrandingPolicyID.ValueString()
-	// branding_policy_id
 	responseGet, restyRespGet, err := r.client.Organizations.GetOrganizationBrandingPolicy(vvOrganizationID, vvBrandingPolicyID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -534,7 +619,7 @@ func (r *OrganizationsBrandingPoliciesResource) Read(ctx context.Context, req re
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseOrganizationsGetOrganizationBrandingPolicyItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -567,7 +652,6 @@ func (r *OrganizationsBrandingPoliciesResource) Update(ctx context.Context, req 
 
 	//Path Params
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
 	vvBrandingPolicyID := data.BrandingPolicyID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationBrandingPolicy(vvOrganizationID, vvBrandingPolicyID, dataRequest)
@@ -677,7 +761,7 @@ func (r *OrganizationsBrandingPoliciesRs) toSdkApiRequestCreate(ctx context.Cont
 	if r.AdminSettings != nil {
 		appliesTo := r.AdminSettings.AppliesTo.ValueString()
 		var values []string = nil
-
+		//Hoola aqui
 		r.AdminSettings.Values.ElementsAs(ctx, &values, false)
 		requestOrganizationsCreateOrganizationBrandingPolicyAdminSettings = &merakigosdk.RequestOrganizationsCreateOrganizationBrandingPolicyAdminSettings{
 			AppliesTo: appliesTo,
@@ -768,7 +852,7 @@ func (r *OrganizationsBrandingPoliciesRs) toSdkApiRequestUpdate(ctx context.Cont
 	if r.AdminSettings != nil {
 		appliesTo := r.AdminSettings.AppliesTo.ValueString()
 		var values []string = nil
-
+		//Hoola aqui
 		r.AdminSettings.Values.ElementsAs(ctx, &values, false)
 		requestOrganizationsUpdateOrganizationBrandingPolicyAdminSettings = &merakigosdk.RequestOrganizationsUpdateOrganizationBrandingPolicyAdminSettings{
 			AppliesTo: appliesTo,

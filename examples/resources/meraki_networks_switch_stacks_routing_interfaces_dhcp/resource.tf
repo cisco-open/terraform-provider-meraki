@@ -12,6 +12,7 @@ resource "meraki_networks_switch_stacks_routing_interfaces_dhcp" "example" {
     type  = "text"
     value = "five"
   }]
+  dhcp_relay_server_ips  = ["1.2.3.4"]
   dns_custom_nameservers = ["8.8.8.8, 8.8.4.4"]
   dns_nameservers_option = "custom"
   fixed_ip_assignments = [{

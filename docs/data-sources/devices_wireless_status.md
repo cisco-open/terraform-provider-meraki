@@ -39,20 +39,20 @@ output "meraki_devices_wireless_status_example" {
 
 Read-Only:
 
-- `basic_service_sets` (Attributes Set) (see [below for nested schema](#nestedatt--item--basic_service_sets))
+- `basic_service_sets` (Attributes Set) SSID status list (see [below for nested schema](#nestedatt--item--basic_service_sets))
 
 <a id="nestedatt--item--basic_service_sets"></a>
 ### Nested Schema for `item.basic_service_sets`
 
 Read-Only:
 
-- `band` (String)
-- `broadcasting` (Boolean)
-- `bssid` (String)
-- `channel` (Number)
-- `channel_width` (String)
-- `enabled` (Boolean)
-- `power` (String)
-- `ssid_name` (String)
-- `ssid_number` (Number)
-- `visible` (Boolean)
+- `band` (String) Frequency range used by wireless network
+- `broadcasting` (Boolean) Whether the SSID is broadcasting based on an availability schedule
+- `bssid` (String) Unique identifier of wireless access point
+- `channel` (Number) Frequency channel used by wireless network
+- `channel_width` (String) Width of frequency channel used by wireless network
+- `enabled` (Boolean) Status of wireless network
+- `power` (String) Strength of wireless signal
+- `ssid_name` (String) Name of wireless network
+- `ssid_number` (Number) Unique identifier of wireless network
+- `visible` (Boolean) Whether the SSID is advertised or hidden

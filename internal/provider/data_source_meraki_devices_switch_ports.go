@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -115,6 +99,28 @@ func (d *DevicesSwitchPortsDataSource) Schema(_ context.Context, _ datasource.Sc
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
+					"mirror": schema.SingleNestedAttribute{
+						MarkdownDescription: `Port mirror`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"mode": schema.StringAttribute{
+								MarkdownDescription: `The port mirror mode. Can be one of ('Destination port', 'Source port' or 'Not mirroring traffic').`,
+								Computed:            true,
+							},
+						},
+					},
+					"module": schema.SingleNestedAttribute{
+						MarkdownDescription: `Expansion module`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"model": schema.StringAttribute{
+								MarkdownDescription: `The model of the expansion module.`,
+								Computed:            true,
+							},
+						},
+					},
 					"name": schema.StringAttribute{
 						MarkdownDescription: `The name of the switch port.`,
 						Computed:            true,
@@ -189,7 +195,7 @@ func (d *DevicesSwitchPortsDataSource) Schema(_ context.Context, _ datasource.Sc
 						Computed:            true,
 					},
 					"vlan": schema.Int64Attribute{
-						MarkdownDescription: `The VLAN of the switch port. A null value will clear the value set for trunk ports.`,
+						MarkdownDescription: `The VLAN of the switch port. For a trunk port, this is the native VLAN. A null value will clear the value set for trunk ports.`,
 						Computed:            true,
 					},
 					"voice_vlan": schema.Int64Attribute{
@@ -250,6 +256,28 @@ func (d *DevicesSwitchPortsDataSource) Schema(_ context.Context, _ datasource.Sc
 							MarkdownDescription: `Only devices with MAC addresses specified in this list will have access to this port. Up to 20 MAC addresses can be defined. Only applicable when 'accessPolicyType' is 'MAC allow list'.`,
 							Computed:            true,
 							ElementType:         types.StringType,
+						},
+						"mirror": schema.SingleNestedAttribute{
+							MarkdownDescription: `Port mirror`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"mode": schema.StringAttribute{
+									MarkdownDescription: `The port mirror mode. Can be one of ('Destination port', 'Source port' or 'Not mirroring traffic').`,
+									Computed:            true,
+								},
+							},
+						},
+						"module": schema.SingleNestedAttribute{
+							MarkdownDescription: `Expansion module`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"model": schema.StringAttribute{
+									MarkdownDescription: `The model of the expansion module.`,
+									Computed:            true,
+								},
+							},
 						},
 						"name": schema.StringAttribute{
 							MarkdownDescription: `The name of the switch port.`,
@@ -325,7 +353,7 @@ func (d *DevicesSwitchPortsDataSource) Schema(_ context.Context, _ datasource.Sc
 							Computed:            true,
 						},
 						"vlan": schema.Int64Attribute{
-							MarkdownDescription: `The VLAN of the switch port. A null value will clear the value set for trunk ports.`,
+							MarkdownDescription: `The VLAN of the switch port. For a trunk port, this is the native VLAN. A null value will clear the value set for trunk ports.`,
 							Computed:            true,
 						},
 						"voice_vlan": schema.Int64Attribute{
@@ -425,6 +453,8 @@ type ResponseItemSwitchGetDeviceSwitchPorts struct {
 	LinkNegotiation             types.String                                   `tfsdk:"link_negotiation"`
 	LinkNegotiationCapabilities types.List                                     `tfsdk:"link_negotiation_capabilities"`
 	MacAllowList                types.List                                     `tfsdk:"mac_allow_list"`
+	Mirror                      *ResponseItemSwitchGetDeviceSwitchPortsMirror  `tfsdk:"mirror"`
+	Module                      *ResponseItemSwitchGetDeviceSwitchPortsModule  `tfsdk:"module"`
 	Name                        types.String                                   `tfsdk:"name"`
 	PeerSgtCapable              types.Bool                                     `tfsdk:"peer_sgt_capable"`
 	PoeEnabled                  types.Bool                                     `tfsdk:"poe_enabled"`
@@ -441,6 +471,14 @@ type ResponseItemSwitchGetDeviceSwitchPorts struct {
 	Udld                        types.String                                   `tfsdk:"udld"`
 	VLAN                        types.Int64                                    `tfsdk:"vlan"`
 	VoiceVLAN                   types.Int64                                    `tfsdk:"voice_vlan"`
+}
+
+type ResponseItemSwitchGetDeviceSwitchPortsMirror struct {
+	Mode types.String `tfsdk:"mode"`
+}
+
+type ResponseItemSwitchGetDeviceSwitchPortsModule struct {
+	Model types.String `tfsdk:"model"`
 }
 
 type ResponseItemSwitchGetDeviceSwitchPortsProfile struct {
@@ -461,6 +499,8 @@ type ResponseSwitchGetDeviceSwitchPort struct {
 	LinkNegotiation             types.String                              `tfsdk:"link_negotiation"`
 	LinkNegotiationCapabilities types.List                                `tfsdk:"link_negotiation_capabilities"`
 	MacAllowList                types.List                                `tfsdk:"mac_allow_list"`
+	Mirror                      *ResponseSwitchGetDeviceSwitchPortMirror  `tfsdk:"mirror"`
+	Module                      *ResponseSwitchGetDeviceSwitchPortModule  `tfsdk:"module"`
 	Name                        types.String                              `tfsdk:"name"`
 	PeerSgtCapable              types.Bool                                `tfsdk:"peer_sgt_capable"`
 	PoeEnabled                  types.Bool                                `tfsdk:"poe_enabled"`
@@ -477,6 +517,14 @@ type ResponseSwitchGetDeviceSwitchPort struct {
 	Udld                        types.String                              `tfsdk:"udld"`
 	VLAN                        types.Int64                               `tfsdk:"vlan"`
 	VoiceVLAN                   types.Int64                               `tfsdk:"voice_vlan"`
+}
+
+type ResponseSwitchGetDeviceSwitchPortMirror struct {
+	Mode types.String `tfsdk:"mode"`
+}
+
+type ResponseSwitchGetDeviceSwitchPortModule struct {
+	Model types.String `tfsdk:"model"`
 }
 
 type ResponseSwitchGetDeviceSwitchPortProfile struct {
@@ -526,7 +574,23 @@ func ResponseSwitchGetDeviceSwitchPortsItemsToBody(state DevicesSwitchPorts, res
 			LinkNegotiation:             types.StringValue(item.LinkNegotiation),
 			LinkNegotiationCapabilities: StringSliceToList(item.LinkNegotiationCapabilities),
 			MacAllowList:                StringSliceToList(item.MacAllowList),
-			Name:                        types.StringValue(item.Name),
+			Mirror: func() *ResponseItemSwitchGetDeviceSwitchPortsMirror {
+				if item.Mirror != nil {
+					return &ResponseItemSwitchGetDeviceSwitchPortsMirror{
+						Mode: types.StringValue(item.Mirror.Mode),
+					}
+				}
+				return &ResponseItemSwitchGetDeviceSwitchPortsMirror{}
+			}(),
+			Module: func() *ResponseItemSwitchGetDeviceSwitchPortsModule {
+				if item.Module != nil {
+					return &ResponseItemSwitchGetDeviceSwitchPortsModule{
+						Model: types.StringValue(item.Module.Model),
+					}
+				}
+				return &ResponseItemSwitchGetDeviceSwitchPortsModule{}
+			}(),
+			Name: types.StringValue(item.Name),
 			PeerSgtCapable: func() types.Bool {
 				if item.PeerSgtCapable != nil {
 					return types.BoolValue(*item.PeerSgtCapable)
@@ -636,7 +700,23 @@ func ResponseSwitchGetDeviceSwitchPortItemToBody(state DevicesSwitchPorts, respo
 		LinkNegotiation:             types.StringValue(response.LinkNegotiation),
 		LinkNegotiationCapabilities: StringSliceToList(response.LinkNegotiationCapabilities),
 		MacAllowList:                StringSliceToList(response.MacAllowList),
-		Name:                        types.StringValue(response.Name),
+		Mirror: func() *ResponseSwitchGetDeviceSwitchPortMirror {
+			if response.Mirror != nil {
+				return &ResponseSwitchGetDeviceSwitchPortMirror{
+					Mode: types.StringValue(response.Mirror.Mode),
+				}
+			}
+			return &ResponseSwitchGetDeviceSwitchPortMirror{}
+		}(),
+		Module: func() *ResponseSwitchGetDeviceSwitchPortModule {
+			if response.Module != nil {
+				return &ResponseSwitchGetDeviceSwitchPortModule{
+					Model: types.StringValue(response.Module.Model),
+				}
+			}
+			return &ResponseSwitchGetDeviceSwitchPortModule{}
+		}(),
+		Name: types.StringValue(response.Name),
 		PeerSgtCapable: func() types.Bool {
 			if response.PeerSgtCapable != nil {
 				return types.BoolValue(*response.PeerSgtCapable)

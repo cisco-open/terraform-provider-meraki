@@ -1,33 +1,19 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -112,6 +98,14 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Schema(_ context.Con
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
 										},
+										Validators: []validator.String{
+											stringvalidator.OneOf(
+												"any",
+												"icmp-ping",
+												"tcp",
+												"udp",
+											),
+										},
 									},
 								},
 							},
@@ -147,6 +141,12 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Schema(_ context.Con
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"internet1",
+									"internet2",
+								),
+							},
 						},
 					},
 				},
@@ -175,7 +175,6 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Create(ctx context.C
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallOneToOneNatRules(vvNetworkID)
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
@@ -227,7 +226,7 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Create(ctx context.C
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceFirewallOneToOneNatRulesItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -256,7 +255,6 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Read(ctx context.Con
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	responseGet, restyRespGet, err := r.client.Appliance.GetNetworkApplianceFirewallOneToOneNatRules(vvNetworkID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -280,7 +278,7 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Read(ctx context.Con
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceFirewallOneToOneNatRulesItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -302,7 +300,6 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Update(ctx context.C
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallOneToOneNatRules(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil {
@@ -326,7 +323,7 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Update(ctx context.C
 
 func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksApplianceFirewallOneToOneNatRules", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -359,10 +356,10 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesRs) toSdkApiRequestUpdate(ctx 
 			if rItem1.AllowedInbound != nil {
 				for _, rItem2 := range *rItem1.AllowedInbound { //AllowedInbound// name: allowedInbound
 					var allowedIPs []string = nil
-
+					//Hoola aqui
 					rItem2.AllowedIPs.ElementsAs(ctx, &allowedIPs, false)
 					var destinationPorts []string = nil
-
+					//Hoola aqui
 					rItem2.DestinationPorts.ElementsAs(ctx, &destinationPorts, false)
 					protocol := rItem2.Protocol.ValueString()
 					requestApplianceUpdateNetworkApplianceFirewallOneToOneNatRulesRulesAllowedInbound = append(requestApplianceUpdateNetworkApplianceFirewallOneToOneNatRulesRulesAllowedInbound, merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallOneToOneNatRulesRulesAllowedInbound{

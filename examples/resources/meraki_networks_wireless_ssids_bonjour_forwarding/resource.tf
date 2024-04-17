@@ -1,7 +1,11 @@
 
 resource "meraki_networks_wireless_ssids_bonjour_forwarding" "example" {
 
-  enabled    = true
+  enabled = true
+  exception = {
+
+    enabled = true
+  }
   network_id = "string"
   number     = "string"
   rules = [{

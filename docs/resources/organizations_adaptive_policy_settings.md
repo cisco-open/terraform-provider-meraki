@@ -33,7 +33,7 @@ output "meraki_organizations_adaptive_policy_settings_example" {
 
 ### Optional
 
-- `enabled_networks` (List of String) List of network IDs with adaptive policy enabled
+- `enabled_networks` (Set of String) List of network IDs with adaptive policy enabled
 
 ## Import
 

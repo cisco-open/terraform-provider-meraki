@@ -15,9 +15,9 @@ description: |-
 ```terraform
 resource "meraki_networks_sm_target_groups" "example" {
 
-  name       = "My target group"
+  name       = "Target group name"
   network_id = "string"
-  scope      = "none"
+  scope      = "withAny, tag1, tag2"
 }
 
 output "meraki_networks_sm_target_groups_example" {
@@ -34,14 +34,14 @@ output "meraki_networks_sm_target_groups_example" {
 
 ### Optional
 
-- `name` (String) The name of this target group
-- `scope` (String) The scope and tag options of the target group. Comma separated values beginning with one of withAny, withAll, withoutAny, withoutAll, all, none, followed by tags. Default to none if empty.
+- `name` (String) The name of this target group.
+- `scope` (String) The scope of the target group.
 - `target_group_id` (String) targetGroupId path parameter. Target group ID
 
 ### Read-Only
 
-- `tags` (String)
-- `type` (String)
+- `id` (String) The ID of this target group.
+- `tags` (Set of String) The tags of the target group.
 
 ## Import
 

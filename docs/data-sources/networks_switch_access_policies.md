@@ -51,6 +51,7 @@ output "meraki_networks_switch_access_policies_example" {
 Read-Only:
 
 - `access_policy_type` (String) Access Type of the policy. Automatically 'Hybrid authentication' when hostMode is 'Multi-Domain'.
+- `counts` (Attributes) Counts associated with the access policy (see [below for nested schema](#nestedatt--item--counts))
 - `dot1x` (Attributes) 802.1x Settings (see [below for nested schema](#nestedatt--item--dot1x))
 - `guest_port_bouncing` (Boolean) If enabled, Meraki devices will periodically send access-request messages to these RADIUS servers
 - `guest_vlan_id` (Number) ID for the guest VLAN allow unauthorized devices access to limited network resources
@@ -67,6 +68,22 @@ Read-Only:
 - `url_redirect_walled_garden_enabled` (Boolean) Enable to restrict access for clients to a response_objectific set of IP addresses or hostnames prior to authentication
 - `url_redirect_walled_garden_ranges` (List of String) IP address ranges, in CIDR notation, to restrict access for clients to a specific set of IP addresses or hostnames prior to authentication
 - `voice_vlan_clients` (Boolean) CDP/LLDP capable voice clients will be able to use this VLAN. Automatically true when hostMode is 'Multi-Domain'.
+
+<a id="nestedatt--item--counts"></a>
+### Nested Schema for `item.counts`
+
+Read-Only:
+
+- `ports` (Attributes) Counts associated with ports (see [below for nested schema](#nestedatt--item--counts--ports))
+
+<a id="nestedatt--item--counts--ports"></a>
+### Nested Schema for `item.counts.ports`
+
+Read-Only:
+
+- `with_this_policy` (Number) Number of ports in the network with this policy. For template networks, this is the number of template ports (not child ports) with this policy.
+
+
 
 <a id="nestedatt--item--dot1x"></a>
 ### Nested Schema for `item.dot1x`
@@ -121,6 +138,7 @@ Read-Only:
 Read-Only:
 
 - `access_policy_type` (String) Access Type of the policy. Automatically 'Hybrid authentication' when hostMode is 'Multi-Domain'.
+- `counts` (Attributes) Counts associated with the access policy (see [below for nested schema](#nestedatt--items--counts))
 - `dot1x` (Attributes) 802.1x Settings (see [below for nested schema](#nestedatt--items--dot1x))
 - `guest_port_bouncing` (Boolean) If enabled, Meraki devices will periodically send access-request messages to these RADIUS servers
 - `guest_vlan_id` (Number) ID for the guest VLAN allow unauthorized devices access to limited network resources
@@ -131,12 +149,28 @@ Read-Only:
 - `radius_accounting_enabled` (Boolean) Enable to send start, interim-update and stop messages to a configured RADIUS accounting server for tracking connected clients
 - `radius_accounting_servers` (Attributes Set) List of RADIUS accounting servers to require connecting devices to authenticate against before granting network access (see [below for nested schema](#nestedatt--items--radius_accounting_servers))
 - `radius_coa_support_enabled` (Boolean) Change of authentication for RADIUS re-authentication and disconnection
-- `radius_group_attribute` (String) Acceptable values are *""* for None, or *"11"* for Group Policies ACL
+- `radius_group_attribute` (String) Acceptable values are *''* for None, or *'11'* for Group Policies ACL
 - `radius_servers` (Attributes Set) List of RADIUS servers to require connecting devices to authenticate against before granting network access (see [below for nested schema](#nestedatt--items--radius_servers))
 - `radius_testing_enabled` (Boolean) If enabled, Meraki devices will periodically send access-request messages to these RADIUS servers
 - `url_redirect_walled_garden_enabled` (Boolean) Enable to restrict access for clients to a response_objectific set of IP addresses or hostnames prior to authentication
 - `url_redirect_walled_garden_ranges` (List of String) IP address ranges, in CIDR notation, to restrict access for clients to a specific set of IP addresses or hostnames prior to authentication
 - `voice_vlan_clients` (Boolean) CDP/LLDP capable voice clients will be able to use this VLAN. Automatically true when hostMode is 'Multi-Domain'.
+
+<a id="nestedatt--items--counts"></a>
+### Nested Schema for `items.counts`
+
+Read-Only:
+
+- `ports` (Attributes) Counts associated with ports (see [below for nested schema](#nestedatt--items--counts--ports))
+
+<a id="nestedatt--items--counts--ports"></a>
+### Nested Schema for `items.counts.ports`
+
+Read-Only:
+
+- `with_this_policy` (Number) Number of ports in the network with this policy. For template networks, this is the number of template ports (not child ports) with this policy.
+
+
 
 <a id="nestedatt--items--dot1x"></a>
 ### Nested Schema for `items.dot1x`

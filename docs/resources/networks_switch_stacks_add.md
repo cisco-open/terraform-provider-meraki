@@ -57,6 +57,6 @@ Optional:
 
 Read-Only:
 
-- `id` (String) Switch stacks id
-- `name` (String) Switch stacks name
+- `id` (String) ID of the Switch stack
+- `name` (String) Name of the Switch stack
 - `serials` (List of String) Serials of the switches in the switch stack

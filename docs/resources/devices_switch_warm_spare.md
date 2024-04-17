@@ -39,7 +39,7 @@ output "meraki_devices_switch_warm_spare_example" {
 
 ### Read-Only
 
-- `primary_serial` (String)
+- `primary_serial` (String) Serial number of the primary switch
 
 ## Import
 

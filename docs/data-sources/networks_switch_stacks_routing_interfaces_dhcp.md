@@ -43,25 +43,26 @@ output "meraki_networks_switch_stacks_routing_interfaces_dhcp_example" {
 
 Read-Only:
 
-- `boot_file_name` (String)
-- `boot_next_server` (String)
-- `boot_options_enabled` (Boolean)
-- `dhcp_lease_time` (String)
-- `dhcp_mode` (String)
-- `dhcp_options` (Attributes Set) (see [below for nested schema](#nestedatt--item--dhcp_options))
-- `dns_custom_nameservers` (List of String)
-- `dns_nameservers_option` (String)
-- `fixed_ip_assignments` (Attributes Set) (see [below for nested schema](#nestedatt--item--fixed_ip_assignments))
-- `reserved_ip_ranges` (Attributes Set) (see [below for nested schema](#nestedatt--item--reserved_ip_ranges))
+- `boot_file_name` (String) The PXE boot server file name for the DHCP server running on the switch stack interface
+- `boot_next_server` (String) The PXE boot server IP for the DHCP server running on the switch stack interface
+- `boot_options_enabled` (Boolean) Enable DHCP boot options to provide PXE boot options configs for the dhcp server running on the switch stack interface
+- `dhcp_lease_time` (String) The DHCP lease time config for the dhcp server running on the switch stack interface ('30 minutes', '1 hour', '4 hours', '12 hours', '1 day' or '1 week')
+- `dhcp_mode` (String) The DHCP mode options for the switch stack interface ('dhcpDisabled', 'dhcpRelay' or 'dhcpServer')
+- `dhcp_options` (Attributes Set) Array of DHCP options consisting of code, type and value for the DHCP server running on the switch stack interface (see [below for nested schema](#nestedatt--item--dhcp_options))
+- `dhcp_relay_server_ips` (List of String) The DHCP relay server IPs to which DHCP packets would get relayed for the switch stack interface
+- `dns_custom_nameservers` (List of String) The DHCP name server IPs when DHCP name server option is 'custom'
+- `dns_nameservers_option` (String) The DHCP name server option for the dhcp server running on the switch stack interface ('googlePublicDns', 'openDns' or 'custom')
+- `fixed_ip_assignments` (Attributes Set) Array of DHCP reserved IP assignments for the DHCP server running on the switch stack interface (see [below for nested schema](#nestedatt--item--fixed_ip_assignments))
+- `reserved_ip_ranges` (Attributes Set) Array of DHCP reserved IP assignments for the DHCP server running on the switch stack interface (see [below for nested schema](#nestedatt--item--reserved_ip_ranges))
 
 <a id="nestedatt--item--dhcp_options"></a>
 ### Nested Schema for `item.dhcp_options`
 
 Read-Only:
 
-- `code` (String)
-- `type` (String)
-- `value` (String)
+- `code` (String) The code for DHCP option which should be from 2 to 254
+- `type` (String) The type of the DHCP option which should be one of ('text', 'ip', 'integer' or 'hex')
+- `value` (String) The value of the DHCP option
 
 
 <a id="nestedatt--item--fixed_ip_assignments"></a>
@@ -69,9 +70,9 @@ Read-Only:
 
 Read-Only:
 
-- `ip` (String)
-- `mac` (String)
-- `name` (String)
+- `ip` (String) The IP address of the client which has fixed IP address assigned to it
+- `mac` (String) The MAC address of the client which has fixed IP address
+- `name` (String) The name of the client which has fixed IP address
 
 
 <a id="nestedatt--item--reserved_ip_ranges"></a>
@@ -79,6 +80,6 @@ Read-Only:
 
 Read-Only:
 
-- `comment` (String)
-- `end` (String)
-- `start` (String)
+- `comment` (String) The comment for the reserved IP range
+- `end` (String) The ending IP address of the reserved IP range
+- `start` (String) The starting IP address of the reserved IP range

@@ -41,7 +41,7 @@ output "meraki_organizations_devices_uplinks_loss_and_latency_example" {
 - `t0` (String) t0 query parameter. The beginning of the timespan for the data. The maximum lookback period is 60 days from today.
 - `t1` (String) t1 query parameter. The end of the timespan for the data. t1 can be a maximum of 5 minutes after t0. The latest possible time that t1 can be is 2 minutes into the past.
 - `timespan` (Number) timespan query parameter. The timespan for which the information will be fetched. If specifying timespan, do not specify parameters t0 and t1. The value must be in seconds and be less than or equal to 5 minutes. The default is 5 minutes.
-- `uplink` (String) uplink query parameter. Optional filter for a specific WAN uplink. Valid uplinks are wan1, wan2, cellular. Default will return all uplinks.
+- `uplink` (String) uplink query parameter. Optional filter for a specific WAN uplink. Valid uplinks are wan1, wan2, wan3, cellular. Default will return all uplinks.
 
 ### Read-Only
 

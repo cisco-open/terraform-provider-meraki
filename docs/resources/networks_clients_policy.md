@@ -36,12 +36,12 @@ output "meraki_networks_clients_policy_example" {
 
 ### Optional
 
-- `device_policy` (String) The policy to assign. Can be 'Whitelisted', 'Blocked', 'Normal' or 'Group policy'. Required.
-- `group_policy_id` (String) [optional] If 'devicePolicy' is set to 'Group policy' this param is used to specify the group policy ID.
+- `device_policy` (String) The name of the client's policy
+- `group_policy_id` (String) The group policy identifier of the client
 
 ### Read-Only
 
-- `mac` (String)
+- `mac` (String) The MAC address of the client
 
 ## Import
 

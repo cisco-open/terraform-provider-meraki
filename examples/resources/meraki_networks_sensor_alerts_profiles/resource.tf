@@ -8,9 +8,21 @@ resource "meraki_networks_sensor_alerts_profiles" "example" {
     metric    = "temperature"
     threshold = {
 
+      apparent_power = {
+
+        draw = 17.2
+      }
+      current = {
+
+        draw = 0.14
+      }
       door = {
 
         open = true
+      }
+      frequency = {
+
+        level = 58.8
       }
       humidity = {
 
@@ -35,16 +47,32 @@ resource "meraki_networks_sensor_alerts_profiles" "example" {
         concentration = 90
         quality       = "fair"
       }
+      power_factor = {
+
+        percentage = 81
+      }
+      real_power = {
+
+        draw = 14.1
+      }
       temperature = {
 
         celsius    = 20.5
-        fahrenheit = 70
+        fahrenheit = 70.0
         quality    = "good"
       }
       tvoc = {
 
         concentration = 400
         quality       = "poor"
+      }
+      upstream_power = {
+
+        outage_detected = true
+      }
+      voltage = {
+
+        level = 119.5
       }
       water = {
 

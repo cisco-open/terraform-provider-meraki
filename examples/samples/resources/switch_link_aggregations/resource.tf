@@ -1,9 +1,9 @@
 terraform {
   required_providers {
     meraki = {
-      version = "0.1.0-alpha"
+      version = "0.2.0-alpha"
       source  = "hashicorp.com/edu/meraki"
-      # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-open/meraki" to use downloaded version from registry
+      # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
   }
 }
@@ -17,15 +17,15 @@ resource "meraki_networks_switch_link_aggregations" "example" {
   switch_ports = [{
     port_id = "9"
     serial  = "QBSB-VLHZ-JQCN"
-  },
-  {
-    port_id = "10"
-    serial  = "QBSB-VLHZ-JQCN"
-  },
-  {
-    port_id = "11"
-    serial  = "QBSB-VLHZ-JQCN"
-  }
+    },
+    {
+      port_id = "10"
+      serial  = "QBSB-VLHZ-JQCN"
+    },
+    {
+      port_id = "11"
+      serial  = "QBSB-VLHZ-JQCN"
+    }
   ]
 }
 

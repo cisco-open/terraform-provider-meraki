@@ -69,7 +69,7 @@ Read-Only:
 
 Read-Only:
 
-- `count_r` (Number) The number of counts the license contains of this model
+- `count` (Number) The number of counts the license contains of this model
 - `model` (String) The license model type
 
 

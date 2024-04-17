@@ -43,7 +43,7 @@ output "meraki_networks_switch_alternate_management_interface_example" {
 ### Optional
 
 - `enabled` (Boolean) Boolean value to enable or disable AMI configuration. If enabled, VLAN and protocols must be set
-- `protocols` (List of String) Can be one or more of the following values: 'radius', 'snmp' or 'syslog'
+- `protocols` (Set of String) Can be one or more of the following values: 'radius', 'snmp' or 'syslog'
 - `switches` (Attributes Set) Array of switch serial number and IP assignment. If parameter is present, it cannot have empty body. Note: switches parameter is not applicable for template networks, in other words, do not put 'switches' in the body when updating template networks. Also, an empty 'switches' array will remove all previous assignments (see [below for nested schema](#nestedatt--switches))
 - `vlan_id` (Number) Alternate management VLAN, must be between 1 and 4094
 

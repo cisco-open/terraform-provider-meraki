@@ -39,15 +39,15 @@ output "meraki_networks_appliance_security_intrusion_example" {
 
 Read-Only:
 
-- `ids_rulesets` (String)
-- `mode` (String)
-- `protected_networks` (Attributes) (see [below for nested schema](#nestedatt--item--protected_networks))
+- `ids_rulesets` (String) Intrusion detection ruleset
+- `mode` (String) Intrusion detection mode
+- `protected_networks` (Attributes) Networks included in and excluded from the detection engine (see [below for nested schema](#nestedatt--item--protected_networks))
 
 <a id="nestedatt--item--protected_networks"></a>
 ### Nested Schema for `item.protected_networks`
 
 Read-Only:
 
-- `excluded_cidr` (List of String)
-- `included_cidr` (List of String)
-- `use_default` (Boolean)
+- `excluded_cidr` (List of String) List of IP addresses or subnets being excluded from protection
+- `included_cidr` (List of String) List of IP addresses or subnets being protected
+- `use_default` (Boolean) Whether special IPv4 addresses should be used (see: https://tools.ietf.org/html/rfc5735)

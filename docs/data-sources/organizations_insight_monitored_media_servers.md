@@ -50,10 +50,10 @@ output "meraki_organizations_insight_monitored_media_servers_example" {
 
 Read-Only:
 
-- `address` (String)
-- `best_effort_monitoring_enabled` (Boolean)
-- `id` (String)
-- `name` (String)
+- `address` (String) The IP address (IPv4 only) or hostname of the media server to monitor
+- `best_effort_monitoring_enabled` (Boolean) Indicates that if the media server doesn't respond to ICMP pings, the nearest hop will be used in its stead
+- `id` (String) Monitored media server id
+- `name` (String) The name of the VoIP provider
 
 
 <a id="nestedatt--items"></a>

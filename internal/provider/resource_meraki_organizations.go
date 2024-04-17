@@ -1,27 +1,15 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
+	"fmt"
+	"net/url"
+	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -125,7 +113,7 @@ func (r *OrganizationsResource) Schema(_ context.Context, _ resource.SchemaReque
 				Attributes: map[string]schema.Attribute{
 
 					"details": schema.SetNestedAttribute{
-						MarkdownDescription: `Details related to organization management, possibly empty`,
+						MarkdownDescription: `Details related to organization management, possibly empty. Details may be named 'MSP ID', 'IP restriction mode for API', or 'IP restriction mode for dashboard', if the organization admin has configured any.`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Set{
@@ -204,7 +192,7 @@ func (r *OrganizationsResource) Create(ctx context.Context, req resource.CreateR
 	// organization_id
 	vvName := data.Name.ValueString()
 	//Items
-	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizations()
+	responseVerifyItem, restyResp1, err := getAllItemsOrganizations(*r.client)
 	//Have Create
 	if err != nil || restyResp1 == nil {
 		if restyResp1.StatusCode() != 404 {
@@ -224,7 +212,7 @@ func (r *OrganizationsResource) Create(ctx context.Context, req resource.CreateR
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter OrganizationID",
-					"Error",
+					err.Error(),
 				)
 				return
 			}
@@ -256,7 +244,7 @@ func (r *OrganizationsResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 	//Items
-	responseGet, restyResp1, err := r.client.Organizations.GetOrganizations()
+	responseGet, restyResp1, err := getAllItemsOrganizations(*r.client)
 	// Has item and has items
 
 	if err != nil || responseGet == nil {
@@ -281,7 +269,7 @@ func (r *OrganizationsResource) Create(ctx context.Context, req resource.CreateR
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter OrganizationID",
-				"Error",
+				err.Error(),
 			)
 			return
 		}
@@ -335,7 +323,6 @@ func (r *OrganizationsResource) Read(ctx context.Context, req resource.ReadReque
 	// Has Item2
 
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
 	responseGet, restyRespGet, err := r.client.Organizations.GetOrganization(vvOrganizationID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -359,7 +346,7 @@ func (r *OrganizationsResource) Read(ctx context.Context, req resource.ReadReque
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseOrganizationsGetOrganizationItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -381,7 +368,6 @@ func (r *OrganizationsResource) Update(ctx context.Context, req resource.UpdateR
 
 	//Path Params
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganization(vvOrganizationID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
@@ -618,10 +604,42 @@ func ResponseOrganizationsGetOrganizationItemToBodyRs(state OrganizationsRs, res
 		}(),
 		Name: types.StringValue(response.Name),
 		URL:  types.StringValue(response.URL),
-		// OrganizationID: types.StringValue(response.ID),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsRs)
 	}
 	return mergeInterfaces(state, itemState, true).(OrganizationsRs)
+}
+
+func getAllItemsOrganizations(client merakigosdk.Client) (merakigosdk.ResponseOrganizationsGetOrganizations, *resty.Response, error) {
+	var all_response merakigosdk.ResponseOrganizationsGetOrganizations
+	response, r2, er := client.Organizations.GetOrganizations(&merakigosdk.GetOrganizationsQueryParams{
+		PerPage: 1000,
+	})
+	count := 0
+	all_response = append(all_response, *response...)
+	for len(*response) >= 1000 {
+		count += 1
+		fmt.Println(count)
+		links := strings.Split(r2.Header().Get("Link"), ",")
+		var link string
+		if count > 1 {
+			link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[2], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
+		} else {
+			link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[1], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
+		}
+		myUrl, _ := url.Parse(link)
+		params, _ := url.ParseQuery(myUrl.RawQuery)
+		if params["endingBefore"] != nil {
+			response, r2, er = client.Organizations.GetOrganizations(&merakigosdk.GetOrganizationsQueryParams{
+				PerPage:      1000,
+				EndingBefore: params["endingBefore"][0],
+			})
+			all_response = append(all_response, *response...)
+		} else {
+			break
+		}
+	}
+
+	return all_response, r2, er
 }

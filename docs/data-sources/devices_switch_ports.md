@@ -61,6 +61,8 @@ Read-Only:
 - `link_negotiation` (String) The link speed for the switch port.
 - `link_negotiation_capabilities` (List of String) Available link speeds for the switch port.
 - `mac_allow_list` (List of String) Only devices with MAC addresses specified in this list will have access to this port. Up to 20 MAC addresses can be defined. Only applicable when 'accessPolicyType' is 'MAC allow list'.
+- `mirror` (Attributes) Port mirror (see [below for nested schema](#nestedatt--item--mirror))
+- `module` (Attributes) Expansion module (see [below for nested schema](#nestedatt--item--module))
 - `name` (String) The name of the switch port.
 - `peer_sgt_capable` (Boolean) If true, Peer SGT is enabled for traffic through this switch port. Applicable to trunk port only, not access port. Cannot be applied to a port on a switch bound to profile.
 - `poe_enabled` (Boolean) The PoE status of the switch port.
@@ -75,8 +77,24 @@ Read-Only:
 - `tags` (List of String) The list of tags of the switch port.
 - `type` (String) The type of the switch port ('trunk' or 'access').
 - `udld` (String) The action to take when Unidirectional Link is detected (Alert only, Enforce). Default configuration is Alert only.
-- `vlan` (Number) The VLAN of the switch port. A null value will clear the value set for trunk ports.
+- `vlan` (Number) The VLAN of the switch port. For a trunk port, this is the native VLAN. A null value will clear the value set for trunk ports.
 - `voice_vlan` (Number) The voice VLAN of the switch port. Only applicable to access ports.
+
+<a id="nestedatt--item--mirror"></a>
+### Nested Schema for `item.mirror`
+
+Read-Only:
+
+- `mode` (String) The port mirror mode. Can be one of ('Destination port', 'Source port' or 'Not mirroring traffic').
+
+
+<a id="nestedatt--item--module"></a>
+### Nested Schema for `item.module`
+
+Read-Only:
+
+- `model` (String) The model of the expansion module.
+
 
 <a id="nestedatt--item--profile"></a>
 ### Nested Schema for `item.profile`
@@ -105,6 +123,8 @@ Read-Only:
 - `link_negotiation` (String) The link speed for the switch port.
 - `link_negotiation_capabilities` (List of String) Available link speeds for the switch port.
 - `mac_allow_list` (List of String) Only devices with MAC addresses specified in this list will have access to this port. Up to 20 MAC addresses can be defined. Only applicable when 'accessPolicyType' is 'MAC allow list'.
+- `mirror` (Attributes) Port mirror (see [below for nested schema](#nestedatt--items--mirror))
+- `module` (Attributes) Expansion module (see [below for nested schema](#nestedatt--items--module))
 - `name` (String) The name of the switch port.
 - `peer_sgt_capable` (Boolean) If true, Peer SGT is enabled for traffic through this switch port. Applicable to trunk port only, not access port. Cannot be applied to a port on a switch bound to profile.
 - `poe_enabled` (Boolean) The PoE status of the switch port.
@@ -119,8 +139,24 @@ Read-Only:
 - `tags` (List of String) The list of tags of the switch port.
 - `type` (String) The type of the switch port ('trunk' or 'access').
 - `udld` (String) The action to take when Unidirectional Link is detected (Alert only, Enforce). Default configuration is Alert only.
-- `vlan` (Number) The VLAN of the switch port. A null value will clear the value set for trunk ports.
+- `vlan` (Number) The VLAN of the switch port. For a trunk port, this is the native VLAN. A null value will clear the value set for trunk ports.
 - `voice_vlan` (Number) The voice VLAN of the switch port. Only applicable to access ports.
+
+<a id="nestedatt--items--mirror"></a>
+### Nested Schema for `items.mirror`
+
+Read-Only:
+
+- `mode` (String) The port mirror mode. Can be one of ('Destination port', 'Source port' or 'Not mirroring traffic').
+
+
+<a id="nestedatt--items--module"></a>
+### Nested Schema for `items.module`
+
+Read-Only:
+
+- `model` (String) The model of the expansion module.
+
 
 <a id="nestedatt--items--profile"></a>
 ### Nested Schema for `items.profile`

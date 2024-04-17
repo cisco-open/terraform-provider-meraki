@@ -50,19 +50,29 @@ output "meraki_organizations_saml_roles_example" {
 
 Read-Only:
 
-- `id` (String)
-- `networks` (Attributes Set) (see [below for nested schema](#nestedatt--item--networks))
-- `org_access` (String)
-- `role` (String)
-- `tags` (Attributes Set) (see [below for nested schema](#nestedatt--item--tags))
+- `camera` (Attributes Set) The list of camera access privileges for SAML administrator (see [below for nested schema](#nestedatt--item--camera))
+- `id` (String) ID associated with the SAML role
+- `networks` (Attributes Set) The list of networks that the SAML administrator has privileges on (see [below for nested schema](#nestedatt--item--networks))
+- `org_access` (String) The privilege of the SAML administrator on the organization
+- `role` (String) The role of the SAML administrator
+- `tags` (Attributes Set) The list of tags that the SAML administrator has privleges on (see [below for nested schema](#nestedatt--item--tags))
+
+<a id="nestedatt--item--camera"></a>
+### Nested Schema for `item.camera`
+
+Read-Only:
+
+- `access` (String) Camera access ability
+- `org_wide` (Boolean) Whether or not SAML administrator has org-wide access
+
 
 <a id="nestedatt--item--networks"></a>
 ### Nested Schema for `item.networks`
 
 Read-Only:
 
-- `access` (String)
-- `id` (String)
+- `access` (String) The privilege of the SAML administrator on the network
+- `id` (String) The network ID
 
 
 <a id="nestedatt--item--tags"></a>
@@ -70,8 +80,8 @@ Read-Only:
 
 Read-Only:
 
-- `access` (String)
-- `tag` (String)
+- `access` (String) The privilege of the SAML administrator on the tag
+- `tag` (String) The name of the tag
 
 
 
@@ -80,19 +90,29 @@ Read-Only:
 
 Read-Only:
 
-- `id` (String)
-- `networks` (Attributes Set) (see [below for nested schema](#nestedatt--items--networks))
-- `org_access` (String)
-- `role` (String)
-- `tags` (Attributes Set) (see [below for nested schema](#nestedatt--items--tags))
+- `camera` (Attributes Set) The list of camera access privileges for SAML administrator (see [below for nested schema](#nestedatt--items--camera))
+- `id` (String) ID associated with the SAML role
+- `networks` (Attributes Set) The list of networks that the SAML administrator has privileges on (see [below for nested schema](#nestedatt--items--networks))
+- `org_access` (String) The privilege of the SAML administrator on the organization
+- `role` (String) The role of the SAML administrator
+- `tags` (Attributes Set) The list of tags that the SAML administrator has privleges on (see [below for nested schema](#nestedatt--items--tags))
+
+<a id="nestedatt--items--camera"></a>
+### Nested Schema for `items.camera`
+
+Read-Only:
+
+- `access` (String) Camera access ability
+- `org_wide` (Boolean) Whether or not SAML administrator has org-wide access
+
 
 <a id="nestedatt--items--networks"></a>
 ### Nested Schema for `items.networks`
 
 Read-Only:
 
-- `access` (String)
-- `id` (String)
+- `access` (String) The privilege of the SAML administrator on the network
+- `id` (String) The network ID
 
 
 <a id="nestedatt--items--tags"></a>
@@ -100,5 +120,5 @@ Read-Only:
 
 Read-Only:
 
-- `access` (String)
-- `tag` (String)
+- `access` (String) The privilege of the SAML administrator on the tag
+- `tag` (String) The name of the tag

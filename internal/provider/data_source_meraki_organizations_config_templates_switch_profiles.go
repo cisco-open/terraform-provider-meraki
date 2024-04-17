@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -65,21 +49,25 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesDataSource) Schema(_ context.
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
 				Required:            true,
 			},
-			"item": schema.SingleNestedAttribute{
-				Computed: true,
-				Attributes: map[string]schema.Attribute{
 
-					"model": schema.StringAttribute{
-						MarkdownDescription: `Switch model`,
-						Computed:            true,
-					},
-					"name": schema.StringAttribute{
-						MarkdownDescription: `Switch profile name`,
-						Computed:            true,
-					},
-					"switch_profile_id": schema.StringAttribute{
-						MarkdownDescription: `Switch profile id`,
-						Computed:            true,
+			"items": schema.ListNestedAttribute{
+				MarkdownDescription: `Array of ResponseSwitchGetOrganizationConfigTemplateSwitchProfiles`,
+				Computed:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+
+						"model": schema.StringAttribute{
+							MarkdownDescription: `Switch model`,
+							Computed:            true,
+						},
+						"name": schema.StringAttribute{
+							MarkdownDescription: `Switch template name`,
+							Computed:            true,
+						},
+						"switch_profile_id": schema.StringAttribute{
+							MarkdownDescription: `Switch template id`,
+							Computed:            true,
+						},
 					},
 				},
 			},
@@ -113,7 +101,7 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesDataSource) Read(ctx context.
 			return
 		}
 
-		organizationsConfigTemplatesSwitchProfiles = ResponseSwitchGetOrganizationConfigTemplateSwitchProfilesItemToBody(organizationsConfigTemplatesSwitchProfiles, response1)
+		organizationsConfigTemplatesSwitchProfiles = ResponseSwitchGetOrganizationConfigTemplateSwitchProfilesItemsToBody(organizationsConfigTemplatesSwitchProfiles, response1)
 		diags = resp.State.Set(ctx, &organizationsConfigTemplatesSwitchProfiles)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
@@ -125,24 +113,28 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesDataSource) Read(ctx context.
 
 // structs
 type OrganizationsConfigTemplatesSwitchProfiles struct {
-	OrganizationID   types.String                                               `tfsdk:"organization_id"`
-	ConfigTemplateID types.String                                               `tfsdk:"config_template_id"`
-	Item             *ResponseSwitchGetOrganizationConfigTemplateSwitchProfiles `tfsdk:"item"`
+	OrganizationID   types.String                                                     `tfsdk:"organization_id"`
+	ConfigTemplateID types.String                                                     `tfsdk:"config_template_id"`
+	Items            *[]ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfiles `tfsdk:"items"`
 }
 
-type ResponseSwitchGetOrganizationConfigTemplateSwitchProfiles struct {
+type ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfiles struct {
 	Model           types.String `tfsdk:"model"`
 	Name            types.String `tfsdk:"name"`
 	SwitchProfileID types.String `tfsdk:"switch_profile_id"`
 }
 
 // ToBody
-func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilesItemToBody(state OrganizationsConfigTemplatesSwitchProfiles, response *merakigosdk.ResponseSwitchGetOrganizationConfigTemplateSwitchProfiles) OrganizationsConfigTemplatesSwitchProfiles {
-	itemState := ResponseSwitchGetOrganizationConfigTemplateSwitchProfiles{
-		Model:           types.StringValue(response.Model),
-		Name:            types.StringValue(response.Name),
-		SwitchProfileID: types.StringValue(response.SwitchProfileID),
+func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilesItemsToBody(state OrganizationsConfigTemplatesSwitchProfiles, response *merakigosdk.ResponseSwitchGetOrganizationConfigTemplateSwitchProfiles) OrganizationsConfigTemplatesSwitchProfiles {
+	var items []ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfiles
+	for _, item := range *response {
+		itemState := ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfiles{
+			Model:           types.StringValue(item.Model),
+			Name:            types.StringValue(item.Name),
+			SwitchProfileID: types.StringValue(item.SwitchProfileID),
+		}
+		items = append(items, itemState)
 	}
-	state.Item = &itemState
+	state.Items = &items
 	return state
 }

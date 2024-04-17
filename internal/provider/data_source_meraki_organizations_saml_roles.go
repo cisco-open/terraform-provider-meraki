@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -69,39 +53,65 @@ func (d *OrganizationsSamlRolesDataSource) Schema(_ context.Context, _ datasourc
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"id": schema.StringAttribute{
-						Computed: true,
-					},
-					"networks": schema.SetNestedAttribute{
-						Computed: true,
+					"camera": schema.SetNestedAttribute{
+						MarkdownDescription: `The list of camera access privileges for SAML administrator`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"access": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Camera access ability`,
+									Computed:            true,
+								},
+								"org_wide": schema.BoolAttribute{
+									MarkdownDescription: `Whether or not SAML administrator has org-wide access`,
+									Computed:            true,
+								},
+							},
+						},
+					},
+					"id": schema.StringAttribute{
+						MarkdownDescription: `ID associated with the SAML role`,
+						Computed:            true,
+					},
+					"networks": schema.SetNestedAttribute{
+						MarkdownDescription: `The list of networks that the SAML administrator has privileges on`,
+						Computed:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+
+								"access": schema.StringAttribute{
+									MarkdownDescription: `The privilege of the SAML administrator on the network`,
+									Computed:            true,
 								},
 								"id": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The network ID`,
+									Computed:            true,
 								},
 							},
 						},
 					},
 					"org_access": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The privilege of the SAML administrator on the organization`,
+						Computed:            true,
 					},
 					"role": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The role of the SAML administrator`,
+						Computed:            true,
 					},
 					"tags": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `The list of tags that the SAML administrator has privleges on`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"access": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The privilege of the SAML administrator on the tag`,
+									Computed:            true,
 								},
 								"tag": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The name of the tag`,
+									Computed:            true,
 								},
 							},
 						},
@@ -115,39 +125,65 @@ func (d *OrganizationsSamlRolesDataSource) Schema(_ context.Context, _ datasourc
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
-						"id": schema.StringAttribute{
-							Computed: true,
-						},
-						"networks": schema.SetNestedAttribute{
-							Computed: true,
+						"camera": schema.SetNestedAttribute{
+							MarkdownDescription: `The list of camera access privileges for SAML administrator`,
+							Computed:            true,
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 
 									"access": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `Camera access ability`,
+										Computed:            true,
+									},
+									"org_wide": schema.BoolAttribute{
+										MarkdownDescription: `Whether or not SAML administrator has org-wide access`,
+										Computed:            true,
+									},
+								},
+							},
+						},
+						"id": schema.StringAttribute{
+							MarkdownDescription: `ID associated with the SAML role`,
+							Computed:            true,
+						},
+						"networks": schema.SetNestedAttribute{
+							MarkdownDescription: `The list of networks that the SAML administrator has privileges on`,
+							Computed:            true,
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+
+									"access": schema.StringAttribute{
+										MarkdownDescription: `The privilege of the SAML administrator on the network`,
+										Computed:            true,
 									},
 									"id": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The network ID`,
+										Computed:            true,
 									},
 								},
 							},
 						},
 						"org_access": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The privilege of the SAML administrator on the organization`,
+							Computed:            true,
 						},
 						"role": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The role of the SAML administrator`,
+							Computed:            true,
 						},
 						"tags": schema.SetNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `The list of tags that the SAML administrator has privleges on`,
+							Computed:            true,
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 
 									"access": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The privilege of the SAML administrator on the tag`,
+										Computed:            true,
 									},
 									"tag": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The name of the tag`,
+										Computed:            true,
 									},
 								},
 							},
@@ -234,11 +270,17 @@ type OrganizationsSamlRoles struct {
 }
 
 type ResponseItemOrganizationsGetOrganizationSamlRoles struct {
+	Camera    *[]ResponseItemOrganizationsGetOrganizationSamlRolesCamera   `tfsdk:"camera"`
 	ID        types.String                                                 `tfsdk:"id"`
 	Networks  *[]ResponseItemOrganizationsGetOrganizationSamlRolesNetworks `tfsdk:"networks"`
 	OrgAccess types.String                                                 `tfsdk:"org_access"`
 	Role      types.String                                                 `tfsdk:"role"`
 	Tags      *[]ResponseItemOrganizationsGetOrganizationSamlRolesTags     `tfsdk:"tags"`
+}
+
+type ResponseItemOrganizationsGetOrganizationSamlRolesCamera struct {
+	Access  types.String `tfsdk:"access"`
+	OrgWide types.Bool   `tfsdk:"org_wide"`
 }
 
 type ResponseItemOrganizationsGetOrganizationSamlRolesNetworks struct {
@@ -252,11 +294,17 @@ type ResponseItemOrganizationsGetOrganizationSamlRolesTags struct {
 }
 
 type ResponseOrganizationsGetOrganizationSamlRole struct {
+	Camera    *[]ResponseOrganizationsGetOrganizationSamlRoleCamera   `tfsdk:"camera"`
 	ID        types.String                                            `tfsdk:"id"`
 	Networks  *[]ResponseOrganizationsGetOrganizationSamlRoleNetworks `tfsdk:"networks"`
 	OrgAccess types.String                                            `tfsdk:"org_access"`
 	Role      types.String                                            `tfsdk:"role"`
 	Tags      *[]ResponseOrganizationsGetOrganizationSamlRoleTags     `tfsdk:"tags"`
+}
+
+type ResponseOrganizationsGetOrganizationSamlRoleCamera struct {
+	Access  types.String `tfsdk:"access"`
+	OrgWide types.Bool   `tfsdk:"org_wide"`
 }
 
 type ResponseOrganizationsGetOrganizationSamlRoleNetworks struct {
@@ -274,6 +322,24 @@ func ResponseOrganizationsGetOrganizationSamlRolesItemsToBody(state Organization
 	var items []ResponseItemOrganizationsGetOrganizationSamlRoles
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationSamlRoles{
+			Camera: func() *[]ResponseItemOrganizationsGetOrganizationSamlRolesCamera {
+				if item.Camera != nil {
+					result := make([]ResponseItemOrganizationsGetOrganizationSamlRolesCamera, len(*item.Camera))
+					for i, camera := range *item.Camera {
+						result[i] = ResponseItemOrganizationsGetOrganizationSamlRolesCamera{
+							Access: types.StringValue(camera.Access),
+							OrgWide: func() types.Bool {
+								if camera.OrgWide != nil {
+									return types.BoolValue(*camera.OrgWide)
+								}
+								return types.Bool{}
+							}(),
+						}
+					}
+					return &result
+				}
+				return &[]ResponseItemOrganizationsGetOrganizationSamlRolesCamera{}
+			}(),
 			ID: types.StringValue(item.ID),
 			Networks: func() *[]ResponseItemOrganizationsGetOrganizationSamlRolesNetworks {
 				if item.Networks != nil {
@@ -312,6 +378,24 @@ func ResponseOrganizationsGetOrganizationSamlRolesItemsToBody(state Organization
 
 func ResponseOrganizationsGetOrganizationSamlRoleItemToBody(state OrganizationsSamlRoles, response *merakigosdk.ResponseOrganizationsGetOrganizationSamlRole) OrganizationsSamlRoles {
 	itemState := ResponseOrganizationsGetOrganizationSamlRole{
+		Camera: func() *[]ResponseOrganizationsGetOrganizationSamlRoleCamera {
+			if response.Camera != nil {
+				result := make([]ResponseOrganizationsGetOrganizationSamlRoleCamera, len(*response.Camera))
+				for i, camera := range *response.Camera {
+					result[i] = ResponseOrganizationsGetOrganizationSamlRoleCamera{
+						Access: types.StringValue(camera.Access),
+						OrgWide: func() types.Bool {
+							if camera.OrgWide != nil {
+								return types.BoolValue(*camera.OrgWide)
+							}
+							return types.Bool{}
+						}(),
+					}
+				}
+				return &result
+			}
+			return &[]ResponseOrganizationsGetOrganizationSamlRoleCamera{}
+		}(),
 		ID: types.StringValue(response.ID),
 		Networks: func() *[]ResponseOrganizationsGetOrganizationSamlRoleNetworks {
 			if response.Networks != nil {

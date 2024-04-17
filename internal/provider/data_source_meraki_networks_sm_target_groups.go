@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -73,17 +57,22 @@ func (d *NetworksSmTargetGroupsDataSource) Schema(_ context.Context, _ datasourc
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
+					"id": schema.StringAttribute{
+						MarkdownDescription: `The ID of this target group.`,
+						Computed:            true,
+					},
 					"name": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The name of this target group.`,
+						Computed:            true,
 					},
 					"scope": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The scope of the target group.`,
+						Computed:            true,
 					},
-					"tags": schema.StringAttribute{
-						Computed: true,
-					},
-					"type": schema.StringAttribute{
-						Computed: true,
+					"tags": schema.ListAttribute{
+						MarkdownDescription: `The tags of the target group.`,
+						Computed:            true,
+						ElementType:         types.StringType,
 					},
 				},
 			},
@@ -94,17 +83,22 @@ func (d *NetworksSmTargetGroupsDataSource) Schema(_ context.Context, _ datasourc
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
+						"id": schema.StringAttribute{
+							MarkdownDescription: `The ID of this target group.`,
+							Computed:            true,
+						},
 						"name": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The name of this target group.`,
+							Computed:            true,
 						},
 						"scope": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The scope of the target group.`,
+							Computed:            true,
 						},
-						"tags": schema.StringAttribute{
-							Computed: true,
-						},
-						"type": schema.StringAttribute{
-							Computed: true,
+						"tags": schema.ListAttribute{
+							MarkdownDescription: `The tags of the target group.`,
+							Computed:            true,
+							ElementType:         types.StringType,
 						},
 					},
 				},
@@ -195,17 +189,17 @@ type NetworksSmTargetGroups struct {
 }
 
 type ResponseItemSmGetNetworkSmTargetGroups struct {
+	ID    types.String `tfsdk:"id"`
 	Name  types.String `tfsdk:"name"`
 	Scope types.String `tfsdk:"scope"`
-	Tags  types.String `tfsdk:"tags"`
-	Type  types.String `tfsdk:"type"`
+	Tags  types.List   `tfsdk:"tags"`
 }
 
 type ResponseSmGetNetworkSmTargetGroup struct {
+	ID    types.String `tfsdk:"id"`
 	Name  types.String `tfsdk:"name"`
 	Scope types.String `tfsdk:"scope"`
-	Tags  types.String `tfsdk:"tags"`
-	Type  types.String `tfsdk:"type"`
+	Tags  types.List   `tfsdk:"tags"`
 }
 
 // ToBody
@@ -213,10 +207,10 @@ func ResponseSmGetNetworkSmTargetGroupsItemsToBody(state NetworksSmTargetGroups,
 	var items []ResponseItemSmGetNetworkSmTargetGroups
 	for _, item := range *response {
 		itemState := ResponseItemSmGetNetworkSmTargetGroups{
+			ID:    types.StringValue(item.ID),
 			Name:  types.StringValue(item.Name),
 			Scope: types.StringValue(item.Scope),
-			Tags:  types.StringValue(item.Tags),
-			Type:  types.StringValue(item.Type),
+			Tags:  StringSliceToList(item.Tags),
 		}
 		items = append(items, itemState)
 	}
@@ -226,10 +220,10 @@ func ResponseSmGetNetworkSmTargetGroupsItemsToBody(state NetworksSmTargetGroups,
 
 func ResponseSmGetNetworkSmTargetGroupItemToBody(state NetworksSmTargetGroups, response *merakigosdk.ResponseSmGetNetworkSmTargetGroup) NetworksSmTargetGroups {
 	itemState := ResponseSmGetNetworkSmTargetGroup{
+		ID:    types.StringValue(response.ID),
 		Name:  types.StringValue(response.Name),
 		Scope: types.StringValue(response.Scope),
-		Tags:  types.StringValue(response.Tags),
-		Type:  types.StringValue(response.Type),
+		Tags:  StringSliceToList(response.Tags),
 	}
 	state.Item = &itemState
 	return state

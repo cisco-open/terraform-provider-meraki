@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -89,7 +73,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpResource) Schema(_ context.Con
 				},
 			},
 			"dhcp_lease_time": schema.StringAttribute{
-				MarkdownDescription: `The DHCP lease time config for the dhcp server running on switch stack interface ('30 minutes', '1 hour', '4 hours', '12 hours', '1 day' or '1 week')`,
+				MarkdownDescription: `The DHCP lease time config for the dhcp server running on the switch stack interface ('30 minutes', '1 hour', '4 hours', '12 hours', '1 day' or '1 week')`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -170,7 +154,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpResource) Schema(_ context.Con
 				},
 			},
 			"fixed_ip_assignments": schema.SetNestedAttribute{
-				MarkdownDescription: `Array of DHCP fixed IP assignments for the DHCP server running on the switch stack interface`,
+				MarkdownDescription: `Array of DHCP reserved IP assignments for the DHCP server running on the switch stack interface`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
@@ -279,7 +263,6 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpResource) Create(ctx context.C
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvSwitchStackID := data.SwitchStackID.ValueString()
 	vvInterfaceID := data.InterfaceID.ValueString()
 	//Item
@@ -300,9 +283,9 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpResource) Create(ctx context.C
 		return
 	}
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Switch.UpdateNetworkSwitchStackRoutingInterfaceDhcp(vvNetworkID, vvSwitchStackID, vvInterfaceID, dataRequest)
+	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchStackRoutingInterfaceDhcp(vvNetworkID, vvSwitchStackID, vvInterfaceID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStackRoutingInterfaceDhcp",
@@ -333,7 +316,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpResource) Create(ctx context.C
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchStackRoutingInterfaceDhcpItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -362,11 +345,8 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpResource) Read(ctx context.Con
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvSwitchStackID := data.SwitchStackID.ValueString()
-	// switch_stack_id
 	vvInterfaceID := data.InterfaceID.ValueString()
-	// interface_id
 	responseGet, restyRespGet, err := r.client.Switch.GetNetworkSwitchStackRoutingInterfaceDhcp(vvNetworkID, vvSwitchStackID, vvInterfaceID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -390,7 +370,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpResource) Read(ctx context.Con
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchStackRoutingInterfaceDhcpItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -425,12 +405,11 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpResource) Update(ctx context.C
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvSwitchStackID := data.SwitchStackID.ValueString()
 	vvInterfaceID := data.InterfaceID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Switch.UpdateNetworkSwitchStackRoutingInterfaceDhcp(vvNetworkID, vvSwitchStackID, vvInterfaceID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchStackRoutingInterfaceDhcp(vvNetworkID, vvSwitchStackID, vvInterfaceID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStackRoutingInterfaceDhcp",
@@ -451,7 +430,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpResource) Update(ctx context.C
 
 func (r *NetworksSwitchStacksRoutingInterfacesDhcpResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksSwitchStacksRoutingInterfacesDhcp", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -466,11 +445,11 @@ type NetworksSwitchStacksRoutingInterfacesDhcpRs struct {
 	DhcpLeaseTime        types.String                                                                   `tfsdk:"dhcp_lease_time"`
 	DhcpMode             types.String                                                                   `tfsdk:"dhcp_mode"`
 	DhcpOptions          *[]ResponseSwitchGetNetworkSwitchStackRoutingInterfaceDhcpDhcpOptionsRs        `tfsdk:"dhcp_options"`
+	DhcpRelayServerIPs   types.Set                                                                      `tfsdk:"dhcp_relay_server_ips"`
 	DNSCustomNameservers types.Set                                                                      `tfsdk:"dns_custom_nameservers"`
 	DNSNameserversOption types.String                                                                   `tfsdk:"dns_nameservers_option"`
 	FixedIPAssignments   *[]ResponseSwitchGetNetworkSwitchStackRoutingInterfaceDhcpFixedIpAssignmentsRs `tfsdk:"fixed_ip_assignments"`
 	ReservedIPRanges     *[]ResponseSwitchGetNetworkSwitchStackRoutingInterfaceDhcpReservedIpRangesRs   `tfsdk:"reserved_ip_ranges"`
-	DhcpRelayServerIPs   types.Set                                                                      `tfsdk:"dhcp_relay_server_ips"`
 }
 
 type ResponseSwitchGetNetworkSwitchStackRoutingInterfaceDhcpDhcpOptionsRs struct {
@@ -631,6 +610,7 @@ func ResponseSwitchGetNetworkSwitchStackRoutingInterfaceDhcpItemToBodyRs(state N
 			}
 			return &[]ResponseSwitchGetNetworkSwitchStackRoutingInterfaceDhcpDhcpOptionsRs{}
 		}(),
+		DhcpRelayServerIPs:   StringSliceToSet(response.DhcpRelayServerIPs),
 		DNSCustomNameservers: StringSliceToSet(response.DNSCustomNameservers),
 		DNSNameserversOption: types.StringValue(response.DNSNameserversOption),
 		FixedIPAssignments: func() *[]ResponseSwitchGetNetworkSwitchStackRoutingInterfaceDhcpFixedIpAssignmentsRs {

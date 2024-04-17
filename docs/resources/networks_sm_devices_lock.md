@@ -24,7 +24,7 @@ resource "meraki_networks_sm_devices_lock" "example" {
     ids       = ["1284392014819", "2983092129865"]
     pin       = 123456
     scope     = ["withAny", "tag1", "tag2"]
-    serials   = ["Q234-ABCD-0001", "Q234-ABCD-0002", "Q234-ABCD-0003"]
+    serials   = ["XY0XX0Y0X0", "A01B01CD00E", "X02YZ1ZYZX"]
     wifi_macs = ["00:11:22:33:44:55"]
   }
 }
@@ -51,11 +51,11 @@ output "meraki_networks_sm_devices_lock_example" {
 
 Optional:
 
-- `ids` (List of String) The ids of the devices to be locked.
+- `ids` (Set of String) The ids of the devices to be locked.
 - `pin` (Number) The pin number for locking macOS devices (a six digit number). Required only for macOS devices.
-- `scope` (List of String) The scope (one of all, none, withAny, withAll, withoutAny, or withoutAll) and a set of tags of the devices to be wiped.
-- `serials` (List of String) The serials of the devices to be locked.
-- `wifi_macs` (List of String) The wifiMacs of the devices to be locked.
+- `scope` (Set of String) The scope (one of all, none, withAny, withAll, withoutAny, or withoutAll) and a set of tags of the devices to be wiped.
+- `serials` (Set of String) The serials of the devices to be locked.
+- `wifi_macs` (Set of String) The wifiMacs of the devices to be locked.
 
 
 <a id="nestedatt--item"></a>
@@ -63,4 +63,4 @@ Optional:
 
 Read-Only:
 
-- `ids` (List of String) The Meraki Ids of the set of devices.
+- `ids` (Set of String) The Meraki Ids of the set of devices.

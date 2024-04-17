@@ -1,0 +1,1 @@
+terraform import meraki_devices_live_tools_throughput_test.example "serial,throughput_test_id"

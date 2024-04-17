@@ -1,8 +1,11 @@
 
 data "meraki_organizations_firmware_upgrades" "example" {
 
+  ending_before   = "string"
   organization_id = "string"
-  product_type    = ["string"]
+  per_page        = 1
+  product_types   = ["string"]
+  starting_after  = "string"
   status          = ["string"]
 }
 

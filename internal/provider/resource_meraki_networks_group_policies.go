@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,8 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -33,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -110,6 +96,13 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"custom",
+								"ignore",
+								"network default",
+							),
+						},
 					},
 				},
 			},
@@ -168,6 +161,13 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"custom",
+								"ignore",
+								"network default",
+							),
+						},
 					},
 				},
 			},
@@ -206,6 +206,13 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"append",
+										"network default",
+										"override",
+									),
+								},
 							},
 						},
 					},
@@ -235,6 +242,13 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"append",
+										"network default",
+										"override",
+									),
+								},
 							},
 						},
 					},
@@ -263,6 +277,13 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"append",
+										"network default",
+										"override",
+									),
 								},
 							},
 						},
@@ -349,6 +370,11 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
 									},
+									Validators: []validator.String{
+										stringvalidator.OneOf(
+											"deny",
+										),
+									},
 								},
 								"type": schema.StringAttribute{
 									MarkdownDescription: `Type of the L7 Rule. Must be 'application', 'applicationCategory', 'host', 'port' or 'ipRange'`,
@@ -356,6 +382,15 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
+									},
+									Validators: []validator.String{
+										stringvalidator.OneOf(
+											"application",
+											"applicationCategory",
+											"host",
+											"ipRange",
+											"port",
+										),
 									},
 								},
 								"value": schema.StringAttribute{
@@ -375,6 +410,13 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
+						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"custom",
+								"ignore",
+								"network default",
+							),
 						},
 					},
 					"traffic_shaping_rules": schema.SetNestedAttribute{
@@ -407,6 +449,16 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 												Optional:            true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
+												},
+												Validators: []validator.String{
+													stringvalidator.OneOf(
+														"application",
+														"applicationCategory",
+														"host",
+														"ipRange",
+														"localNet",
+														"port",
+													),
 												},
 											},
 											"value": schema.StringAttribute{
@@ -511,7 +563,7 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"group_policy_id": schema.StringAttribute{
-				MarkdownDescription: `groupPolicyId path parameter. Group policy ID`,
+				MarkdownDescription: `The ID of the group policy`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -802,6 +854,12 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"bypass",
+						"network default",
+					),
+				},
 			},
 			"vlan_tagging": schema.SingleNestedAttribute{
 				MarkdownDescription: `The VLAN tagging settings for your group policy. Only available if your network has a wireless configuration.`,
@@ -818,6 +876,13 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
+						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"custom",
+								"ignore",
+								"network default",
+							),
 						},
 					},
 					"vlan_id": schema.StringAttribute{
@@ -879,7 +944,7 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter GroupPolicyID",
-					"Error",
+					err.Error(),
 				)
 				return
 			}
@@ -894,9 +959,9 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 		}
 	}
 	dataRequest := data.toSdkApiRequestCreate(ctx)
-	restyResp2, err := r.client.Networks.CreateNetworkGroupPolicy(vvNetworkID, dataRequest)
+	response, restyResp2, err := r.client.Networks.CreateNetworkGroupPolicy(vvNetworkID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkGroupPolicy",
@@ -936,7 +1001,7 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter GroupPolicyID",
-				"Error",
+				err.Error(),
 			)
 			return
 		}
@@ -1052,8 +1117,8 @@ func (r *NetworksGroupPoliciesResource) Update(ctx context.Context, req resource
 	// network_id
 	vvGroupPolicyID := data.GroupPolicyID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Networks.UpdateNetworkGroupPolicy(vvNetworkID, vvGroupPolicyID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Networks.UpdateNetworkGroupPolicy(vvNetworkID, vvGroupPolicyID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkGroupPolicy",

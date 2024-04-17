@@ -1,27 +1,12 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -29,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -1045,6 +1031,63 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 							},
 						},
 					},
+					"switch_catalyst": schema.SingleNestedAttribute{
+						MarkdownDescription: `The network device to be updated`,
+						Computed:            true,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseStateForUnknown(),
+						},
+						Attributes: map[string]schema.Attribute{
+
+							"next_upgrade": schema.SingleNestedAttribute{
+								MarkdownDescription: `The pending firmware upgrade if it exists`,
+								Computed:            true,
+								Optional:            true,
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseStateForUnknown(),
+								},
+								Attributes: map[string]schema.Attribute{
+
+									"time": schema.StringAttribute{
+										MarkdownDescription: `The time of the last successful upgrade`,
+										Computed:            true,
+										Optional:            true,
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.UseStateForUnknown(),
+										},
+									},
+									"to_version": schema.SingleNestedAttribute{
+										MarkdownDescription: `The version to be updated to`,
+										Computed:            true,
+										Optional:            true,
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseStateForUnknown(),
+										},
+										Attributes: map[string]schema.Attribute{
+
+											"id": schema.StringAttribute{
+												MarkdownDescription: `The version ID`,
+												Computed:            true,
+												Optional:            true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.UseStateForUnknown(),
+												},
+											},
+										},
+									},
+								},
+							},
+							"participate_in_next_beta_release": schema.BoolAttribute{
+								MarkdownDescription: `Whether or not the network wants beta firmware`,
+								Computed:            true,
+								Optional:            true,
+								PlanModifiers: []planmodifier.Bool{
+									boolplanmodifier.UseStateForUnknown(),
+								},
+							},
+						},
+					},
 					"wireless": schema.SingleNestedAttribute{
 						MarkdownDescription: `The network device to be updated`,
 						Computed:            true,
@@ -1265,6 +1308,24 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"fri",
+								"friday",
+								"mon",
+								"monday",
+								"sat",
+								"saturday",
+								"sun",
+								"sunday",
+								"thu",
+								"thursday",
+								"tue",
+								"tuesday",
+								"wed",
+								"wednesday",
+							),
+						},
 					},
 					"hour_of_day": schema.StringAttribute{
 						MarkdownDescription: `Hour of the day`,
@@ -1272,6 +1333,34 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
+						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"0:00",
+								"10:00",
+								"11:00",
+								"12:00",
+								"13:00",
+								"14:00",
+								"15:00",
+								"16:00",
+								"17:00",
+								"18:00",
+								"19:00",
+								"1:00",
+								"20:00",
+								"21:00",
+								"22:00",
+								"23:00",
+								"2:00",
+								"3:00",
+								"4:00",
+								"5:00",
+								"6:00",
+								"7:00",
+								"8:00",
+								"9:00",
+							),
 						},
 					},
 				},
@@ -1300,7 +1389,6 @@ func (r *NetworksFirmwareUpgradesResource) Create(ctx context.Context, req resou
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkFirmwareUpgrades(vvNetworkID)
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
@@ -1352,7 +1440,7 @@ func (r *NetworksFirmwareUpgradesResource) Create(ctx context.Context, req resou
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkFirmwareUpgradesItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -1381,7 +1469,6 @@ func (r *NetworksFirmwareUpgradesResource) Read(ctx context.Context, req resourc
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	responseGet, restyRespGet, err := r.client.Networks.GetNetworkFirmwareUpgrades(vvNetworkID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -1405,7 +1492,7 @@ func (r *NetworksFirmwareUpgradesResource) Read(ctx context.Context, req resourc
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkFirmwareUpgradesItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -1427,7 +1514,6 @@ func (r *NetworksFirmwareUpgradesResource) Update(ctx context.Context, req resou
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkFirmwareUpgrades(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
@@ -1451,7 +1537,7 @@ func (r *NetworksFirmwareUpgradesResource) Update(ctx context.Context, req resou
 
 func (r *NetworksFirmwareUpgradesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksFirmwareUpgrades", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -1464,12 +1550,13 @@ type NetworksFirmwareUpgradesRs struct {
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesProductsRs struct {
-	Appliance       *ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceRs       `tfsdk:"appliance"`
-	Camera          *ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraRs          `tfsdk:"camera"`
-	CellularGateway *ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayRs `tfsdk:"cellular_gateway"`
-	Sensor          *ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorRs          `tfsdk:"sensor"`
-	Switch          *ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchRs          `tfsdk:"switch"`
-	Wireless        *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessRs        `tfsdk:"wireless"`
+	Appliance       *ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceRs        `tfsdk:"appliance"`
+	Camera          *ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraRs           `tfsdk:"camera"`
+	CellularGateway *ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayRs  `tfsdk:"cellular_gateway"`
+	Sensor          *ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorRs           `tfsdk:"sensor"`
+	Switch          *ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchRs           `tfsdk:"switch"`
+	Wireless        *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessRs         `tfsdk:"wireless"`
+	SwitchCatalyst  *RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystRs `tfsdk:"switch_catalyst"`
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceRs struct {
@@ -1831,6 +1918,20 @@ type ResponseNetworksGetNetworkFirmwareUpgradesUpgradeWindowRs struct {
 	HourOfDay types.String `tfsdk:"hour_of_day"`
 }
 
+type RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystRs struct {
+	NextUpgrade                  *RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgradeRs `tfsdk:"next_upgrade"`
+	ParticipateInNextBetaRelease types.Bool                                                                       `tfsdk:"participate_in_next_beta_release"`
+}
+
+type RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgradeRs struct {
+	Time      types.String                                                                              `tfsdk:"time"`
+	ToVersion *RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgradeToVersionRs `tfsdk:"to_version"`
+}
+
+type RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgradeToVersionRs struct {
+	ID types.String `tfsdk:"id"`
+}
+
 // FromBody
 func (r *NetworksFirmwareUpgradesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgrades {
 	emptyString := ""
@@ -1976,6 +2077,34 @@ func (r *NetworksFirmwareUpgradesRs) toSdkApiRequestUpdate(ctx context.Context) 
 				ParticipateInNextBetaRelease: participateInNextBetaRelease,
 			}
 		}
+		var requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalyst *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalyst
+		if r.Products.SwitchCatalyst != nil {
+			var requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgrade *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgrade
+			if r.Products.SwitchCatalyst.NextUpgrade != nil {
+				time := r.Products.SwitchCatalyst.NextUpgrade.Time.ValueString()
+				var requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgradeToVersion *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgradeToVersion
+				if r.Products.SwitchCatalyst.NextUpgrade.ToVersion != nil {
+					iD := r.Products.SwitchCatalyst.NextUpgrade.ToVersion.ID.ValueString()
+					requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgradeToVersion = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgradeToVersion{
+						ID: iD,
+					}
+				}
+				requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgrade = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgrade{
+					Time:      time,
+					ToVersion: requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgradeToVersion,
+				}
+			}
+			participateInNextBetaRelease := func() *bool {
+				if !r.Products.SwitchCatalyst.ParticipateInNextBetaRelease.IsUnknown() && !r.Products.SwitchCatalyst.ParticipateInNextBetaRelease.IsNull() {
+					return r.Products.SwitchCatalyst.ParticipateInNextBetaRelease.ValueBoolPointer()
+				}
+				return nil
+			}()
+			requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalyst = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalyst{
+				NextUpgrade:                  requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgrade,
+				ParticipateInNextBetaRelease: participateInNextBetaRelease,
+			}
+		}
 		var requestNetworksUpdateNetworkFirmwareUpgradesProductsWireless *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsWireless
 		if r.Products.Wireless != nil {
 			var requestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessNextUpgrade *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessNextUpgrade
@@ -2010,6 +2139,7 @@ func (r *NetworksFirmwareUpgradesRs) toSdkApiRequestUpdate(ctx context.Context) 
 			CellularGateway: requestNetworksUpdateNetworkFirmwareUpgradesProductsCellularGateway,
 			Sensor:          requestNetworksUpdateNetworkFirmwareUpgradesProductsSensor,
 			Switch:          requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitch,
+			SwitchCatalyst:  requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalyst,
 			Wireless:        requestNetworksUpdateNetworkFirmwareUpgradesProductsWireless,
 		}
 	}

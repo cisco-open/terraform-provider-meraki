@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -64,14 +48,23 @@ func (r *OrganizationsConfigTemplatesResource) Schema(_ context.Context, _ resou
 		Attributes: map[string]schema.Attribute{
 			"config_template_id": schema.StringAttribute{
 				MarkdownDescription: `configTemplateId path parameter. Config template ID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"copy_from_network_id": schema.StringAttribute{
+				MarkdownDescription: `The ID of the network or config template to copy configuration from`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+					SuppressDiffString(),
+				},
+			},
 			"id": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `The ID of the network or config template to copy configuration from`,
+				Computed:            true,
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name of the configuration template`,
@@ -86,8 +79,9 @@ func (r *OrganizationsConfigTemplatesResource) Schema(_ context.Context, _ resou
 				Required:            true,
 			},
 			"product_types": schema.SetAttribute{
-				Computed:    true,
-				ElementType: types.StringType,
+				MarkdownDescription: `The product types of the configuration template`,
+				Computed:            true,
+				ElementType:         types.StringType,
 			},
 			"time_zone": schema.StringAttribute{
 				MarkdownDescription: `The timezone of the configuration template. For a list of allowed timezones, please see the 'TZ' column in the table in <a target='_blank' href='https://en.wikipedia.org/wiki/List_of_tz_database_time_zones'>this article</a>. Not applicable if copying from existing network or template`,
@@ -102,6 +96,7 @@ func (r *OrganizationsConfigTemplatesResource) Schema(_ context.Context, _ resou
 }
 
 //path params to set ['configTemplateId']
+//path params to assign NOT EDITABLE ['copyFromNetworkId']
 
 func (r *OrganizationsConfigTemplatesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
@@ -123,7 +118,6 @@ func (r *OrganizationsConfigTemplatesResource) Create(ctx context.Context, req r
 	}
 	//Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
 	vvName := data.Name.ValueString()
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationConfigTemplates(vvOrganizationID)
@@ -146,7 +140,7 @@ func (r *OrganizationsConfigTemplatesResource) Create(ctx context.Context, req r
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter ConfigTemplateID",
-					"Error",
+					err.Error(),
 				)
 				return
 			}
@@ -161,9 +155,9 @@ func (r *OrganizationsConfigTemplatesResource) Create(ctx context.Context, req r
 		}
 	}
 	dataRequest := data.toSdkApiRequestCreate(ctx)
-	restyResp2, err := r.client.Organizations.CreateOrganizationConfigTemplate(vvOrganizationID, dataRequest)
+	response, restyResp2, err := r.client.Organizations.CreateOrganizationConfigTemplate(vvOrganizationID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationConfigTemplate",
@@ -203,7 +197,7 @@ func (r *OrganizationsConfigTemplatesResource) Create(ctx context.Context, req r
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter ConfigTemplateID",
-				"Error",
+				err.Error(),
 			)
 			return
 		}
@@ -257,7 +251,6 @@ func (r *OrganizationsConfigTemplatesResource) Read(ctx context.Context, req res
 	// Has Item2
 
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
 	vvConfigTemplateID := data.ConfigTemplateID.ValueString()
 	responseGet, restyRespGet, err := r.client.Organizations.GetOrganizationConfigTemplate(vvOrganizationID, vvConfigTemplateID)
 	if err != nil || restyRespGet == nil {
@@ -282,7 +275,7 @@ func (r *OrganizationsConfigTemplatesResource) Read(ctx context.Context, req res
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseOrganizationsGetOrganizationConfigTemplateItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -316,11 +309,10 @@ func (r *OrganizationsConfigTemplatesResource) Update(ctx context.Context, req r
 
 	//Path Params
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
 	vvConfigTemplateID := data.ConfigTemplateID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Organizations.UpdateOrganizationConfigTemplate(vvOrganizationID, vvConfigTemplateID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Organizations.UpdateOrganizationConfigTemplate(vvOrganizationID, vvConfigTemplateID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationConfigTemplate",
@@ -382,6 +374,12 @@ type OrganizationsConfigTemplatesRs struct {
 // FromBody
 func (r *OrganizationsConfigTemplatesRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestOrganizationsCreateOrganizationConfigTemplate {
 	emptyString := ""
+	// copyFromNetworkID := new(string)
+	// if !r.CopyFromNetworkID.IsUnknown() && !r.CopyFromNetworkID.IsNull() {
+	// 	*copyFromNetworkID = r.CopyFromNetworkID.ValueString()
+	// } else {
+	// 	copyFromNetworkID = &emptyString
+	// }
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
 		*name = r.Name.ValueString()
@@ -395,6 +393,7 @@ func (r *OrganizationsConfigTemplatesRs) toSdkApiRequestCreate(ctx context.Conte
 		timeZone = &emptyString
 	}
 	out := merakigosdk.RequestOrganizationsCreateOrganizationConfigTemplate{
+		// CopyFromNetworkID: *copyFromNetworkID,
 		Name:     *name,
 		TimeZone: *timeZone,
 	}

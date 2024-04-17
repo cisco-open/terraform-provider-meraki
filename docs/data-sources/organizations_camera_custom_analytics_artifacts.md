@@ -50,17 +50,18 @@ output "meraki_organizations_camera_custom_analytics_artifacts_example" {
 
 Read-Only:
 
-- `artifact_id` (String)
-- `name` (String)
-- `organization_id` (String)
-- `status` (Attributes) (see [below for nested schema](#nestedatt--item--status))
+- `artifact_id` (String) Custom analytics artifact ID
+- `name` (String) Custom analytics artifact name
+- `organization_id` (String) Organization ID
+- `status` (Attributes) Custom analytics artifact status (see [below for nested schema](#nestedatt--item--status))
 
 <a id="nestedatt--item--status"></a>
 ### Nested Schema for `item.status`
 
 Read-Only:
 
-- `type` (String)
+- `message` (String) Status message
+- `type` (String) Status type
 
 
 
@@ -69,14 +70,15 @@ Read-Only:
 
 Read-Only:
 
-- `artifact_id` (String)
-- `name` (String)
-- `organization_id` (String)
-- `status` (Attributes) (see [below for nested schema](#nestedatt--items--status))
+- `artifact_id` (String) Custom analytics artifact ID
+- `name` (String) Custom analytics artifact name
+- `organization_id` (String) Organization ID
+- `status` (Attributes) Custom analytics artifact status (see [below for nested schema](#nestedatt--items--status))
 
 <a id="nestedatt--items--status"></a>
 ### Nested Schema for `items.status`
 
 Read-Only:
 
-- `type` (String)
+- `message` (String) Status message
+- `type` (String) Status type

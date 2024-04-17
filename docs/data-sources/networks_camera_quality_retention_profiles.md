@@ -59,6 +59,7 @@ Read-Only:
 - `name` (String)
 - `network_id` (String)
 - `restricted_bandwidth_mode_enabled` (Boolean)
+- `schedule_id` (String)
 - `video_settings` (Attributes) (see [below for nested schema](#nestedatt--item--video_settings))
 
 <a id="nestedatt--item--video_settings"></a>
@@ -123,6 +124,7 @@ Read-Only:
 - `name` (String)
 - `network_id` (String)
 - `restricted_bandwidth_mode_enabled` (Boolean)
+- `schedule_id` (String)
 - `video_settings` (Attributes) (see [below for nested schema](#nestedatt--items--video_settings))
 
 <a id="nestedatt--items--video_settings"></a>

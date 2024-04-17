@@ -15,8 +15,9 @@ description: |-
 ```terraform
 resource "meraki_networks_wireless_ssids_firewall_l3_firewall_rules" "example" {
 
-  network_id = "string"
-  number     = "string"
+  allow_lan_access = true
+  network_id       = "string"
+  number           = "string"
   rules = [{
 
     comment   = "Allow TCP traffic to subnet with HTTP servers."
@@ -43,7 +44,7 @@ output "meraki_networks_wireless_ssids_firewall_l3_firewall_rules_example" {
 ### Optional
 
 - `allow_lan_access` (Boolean) Allow wireless client access to local LAN (boolean value - true allows access and false denies access) (optional)
-- `rules` (Attributes Set) An ordered array of the firewall rules for this SSID (not including the local LAN access rule or the default rule) (see [below for nested schema](#nestedatt--rules))
+- `rules` (Attributes Set) An ordered array of the firewall rules for this SSID (not including the local LAN access rule or the default rule). (see [below for nested schema](#nestedatt--rules))
 
 <a id="nestedatt--rules"></a>
 ### Nested Schema for `rules`

@@ -34,14 +34,14 @@ output "meraki_organizations_early_access_features_opt_ins_example" {
 
 ### Optional
 
-- `limit_scope_to_networks` (List of String) A list of network IDs to apply the opt-in to
+- `limit_scope_to_networks` (Set of String) Networks assigned to the Early Access Feature
 - `opt_in_id` (String) optInId path parameter. Opt in ID
-- `short_name` (String) Short name of the early access feature
+- `short_name` (String) Name of Early Access Feature
 
 ### Read-Only
 
-- `created_at` (String)
-- `id` (String) The ID of this resource.
+- `created_at` (String) Time when Early Access Feature was created
+- `id` (String) ID of Early Access Feature
 
 ## Import
 

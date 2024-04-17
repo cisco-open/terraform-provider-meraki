@@ -5,13 +5,13 @@ resource "meraki_networks_switch_dhcp_server_policy" "example" {
 
     email = {
 
-      enabled = false
+      enabled = true
     }
   }
   allowed_servers = ["00:50:56:00:00:01", "00:50:56:00:00:02"]
   arp_inspection = {
 
-    enabled = false
+    enabled = true
   }
   blocked_servers = ["00:50:56:00:00:03", "00:50:56:00:00:04"]
   default_policy  = "block"

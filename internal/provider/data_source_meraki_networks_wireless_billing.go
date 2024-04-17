@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -66,33 +50,41 @@ func (d *NetworksWirelessBillingDataSource) Schema(_ context.Context, _ datasour
 				Attributes: map[string]schema.Attribute{
 
 					"currency": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The currency code of this node group's billing plans`,
+						Computed:            true,
 					},
 					"plans": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `Array of billing plans in the node group. (Can configure a maximum of 5)`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"bandwidth_limits": schema.SingleNestedAttribute{
-									Computed: true,
+									MarkdownDescription: `The uplink bandwidth settings for the pricing plan.`,
+									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"limit_down": schema.Int64Attribute{
-											Computed: true,
+											MarkdownDescription: `The maximum download limit (integer, in Kbps).`,
+											Computed:            true,
 										},
 										"limit_up": schema.Int64Attribute{
-											Computed: true,
+											MarkdownDescription: `The maximum upload limit (integer, in Kbps).`,
+											Computed:            true,
 										},
 									},
 								},
 								"id": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The id of the pricing plan to update.`,
+									Computed:            true,
 								},
-								"price": schema.Int64Attribute{
-									Computed: true,
+								"price": schema.Float64Attribute{
+									MarkdownDescription: `The price of the billing plan.`,
+									Computed:            true,
 								},
 								"time_limit": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The time limit of the pricing plan in minutes.`,
+									Computed:            true,
 								},
 							},
 						},
@@ -152,7 +144,7 @@ type ResponseWirelessGetNetworkWirelessBilling struct {
 type ResponseWirelessGetNetworkWirelessBillingPlans struct {
 	BandwidthLimits *ResponseWirelessGetNetworkWirelessBillingPlansBandwidthLimits `tfsdk:"bandwidth_limits"`
 	ID              types.String                                                   `tfsdk:"id"`
-	Price           types.Int64                                                    `tfsdk:"price"`
+	Price           types.Float64                                                  `tfsdk:"price"`
 	TimeLimit       types.String                                                   `tfsdk:"time_limit"`
 }
 
@@ -190,11 +182,11 @@ func ResponseWirelessGetNetworkWirelessBillingItemToBody(state NetworksWirelessB
 							return &ResponseWirelessGetNetworkWirelessBillingPlansBandwidthLimits{}
 						}(),
 						ID: types.StringValue(plans.ID),
-						Price: func() types.Int64 {
+						Price: func() types.Float64 {
 							if plans.Price != nil {
-								return types.Int64Value(int64(*plans.Price))
+								return types.Float64Value(float64(*plans.Price))
 							}
-							return types.Int64{}
+							return types.Float64{}
 						}(),
 						TimeLimit: types.StringValue(plans.TimeLimit),
 					}

@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -88,6 +72,10 @@ func (d *NetworksSmTrustedAccessConfigsDataSource) Schema(_ context.Context, _ d
 							MarkdownDescription: `time that access starts`,
 							Computed:            true,
 						},
+						"additional_email_text": schema.StringAttribute{
+							MarkdownDescription: `Optional email text`,
+							Computed:            true,
+						},
 						"id": schema.StringAttribute{
 							MarkdownDescription: `device ID`,
 							Computed:            true,
@@ -96,8 +84,16 @@ func (d *NetworksSmTrustedAccessConfigsDataSource) Schema(_ context.Context, _ d
 							MarkdownDescription: `device name`,
 							Computed:            true,
 						},
+						"notify_time_before_access_ends": schema.Int64Attribute{
+							MarkdownDescription: `Time before access expiration reminder email sends`,
+							Computed:            true,
+						},
 						"scope": schema.StringAttribute{
 							MarkdownDescription: `scope`,
+							Computed:            true,
+						},
+						"send_expiration_emails": schema.BoolAttribute{
+							MarkdownDescription: `Send Email Notifications`,
 							Computed:            true,
 						},
 						"ssid_name": schema.StringAttribute{
@@ -170,14 +166,17 @@ type NetworksSmTrustedAccessConfigs struct {
 }
 
 type ResponseItemSmGetNetworkSmTrustedAccessConfigs struct {
-	AccessEndAt   types.String `tfsdk:"access_end_at"`
-	AccessStartAt types.String `tfsdk:"access_start_at"`
-	ID            types.String `tfsdk:"id"`
-	Name          types.String `tfsdk:"name"`
-	Scope         types.String `tfsdk:"scope"`
-	SSIDName      types.String `tfsdk:"ssid_name"`
-	Tags          types.List   `tfsdk:"tags"`
-	TimeboundType types.String `tfsdk:"timebound_type"`
+	AccessEndAt                types.String `tfsdk:"access_end_at"`
+	AccessStartAt              types.String `tfsdk:"access_start_at"`
+	AdditionalEmailText        types.String `tfsdk:"additional_email_text"`
+	ID                         types.String `tfsdk:"id"`
+	Name                       types.String `tfsdk:"name"`
+	NotifyTimeBeforeAccessEnds types.Int64  `tfsdk:"notify_time_before_access_ends"`
+	Scope                      types.String `tfsdk:"scope"`
+	SendExpirationEmails       types.Bool   `tfsdk:"send_expiration_emails"`
+	SSIDName                   types.String `tfsdk:"ssid_name"`
+	Tags                       types.List   `tfsdk:"tags"`
+	TimeboundType              types.String `tfsdk:"timebound_type"`
 }
 
 // ToBody
@@ -185,11 +184,24 @@ func ResponseSmGetNetworkSmTrustedAccessConfigsItemsToBody(state NetworksSmTrust
 	var items []ResponseItemSmGetNetworkSmTrustedAccessConfigs
 	for _, item := range *response {
 		itemState := ResponseItemSmGetNetworkSmTrustedAccessConfigs{
-			AccessEndAt:   types.StringValue(item.AccessEndAt),
-			AccessStartAt: types.StringValue(item.AccessStartAt),
-			ID:            types.StringValue(item.ID),
-			Name:          types.StringValue(item.Name),
-			Scope:         types.StringValue(item.Scope),
+			AccessEndAt:         types.StringValue(item.AccessEndAt),
+			AccessStartAt:       types.StringValue(item.AccessStartAt),
+			AdditionalEmailText: types.StringValue(item.AdditionalEmailText),
+			ID:                  types.StringValue(item.ID),
+			Name:                types.StringValue(item.Name),
+			NotifyTimeBeforeAccessEnds: func() types.Int64 {
+				if item.NotifyTimeBeforeAccessEnds != nil {
+					return types.Int64Value(int64(*item.NotifyTimeBeforeAccessEnds))
+				}
+				return types.Int64{}
+			}(),
+			Scope: types.StringValue(item.Scope),
+			SendExpirationEmails: func() types.Bool {
+				if item.SendExpirationEmails != nil {
+					return types.BoolValue(*item.SendExpirationEmails)
+				}
+				return types.Bool{}
+			}(),
 			SSIDName:      types.StringValue(item.SSIDName),
 			Tags:          StringSliceToList(item.Tags),
 			TimeboundType: types.StringValue(item.TimeboundType),

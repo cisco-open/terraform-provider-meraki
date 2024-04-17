@@ -50,28 +50,28 @@ output "meraki_networks_floor_plans_example" {
 
 Read-Only:
 
-- `bottom_left_corner` (Attributes) (see [below for nested schema](#nestedatt--item--bottom_left_corner))
-- `bottom_right_corner` (Attributes) (see [below for nested schema](#nestedatt--item--bottom_right_corner))
-- `center` (Attributes) (see [below for nested schema](#nestedatt--item--center))
-- `devices` (Attributes Set) (see [below for nested schema](#nestedatt--item--devices))
-- `floor_plan_id` (String)
-- `height` (Number)
-- `image_extension` (String)
-- `image_md5` (String)
-- `image_url` (String)
-- `image_url_expires_at` (String)
-- `name` (String)
-- `top_left_corner` (Attributes) (see [below for nested schema](#nestedatt--item--top_left_corner))
-- `top_right_corner` (Attributes) (see [below for nested schema](#nestedatt--item--top_right_corner))
-- `width` (Number)
+- `bottom_left_corner` (Attributes) The longitude and latitude of the bottom left corner of your floor plan. (see [below for nested schema](#nestedatt--item--bottom_left_corner))
+- `bottom_right_corner` (Attributes) The longitude and latitude of the bottom right corner of your floor plan. (see [below for nested schema](#nestedatt--item--bottom_right_corner))
+- `center` (Attributes) The longitude and latitude of the center of your floor plan. The 'center' or two adjacent corners (e.g. 'topLeftCorner' and 'bottomLeftCorner') must be specified. If 'center' is specified, the floor plan is placed over that point with no rotation. If two adjacent corners are specified, the floor plan is rotated to line up with the two specified points. The aspect ratio of the floor plan's image is preserved regardless of which corners/center are specified. (This means if that more than two corners are specified, only two corners may be used to preserve the floor plan's aspect ratio.). No two points can have the same latitude, longitude pair. (see [below for nested schema](#nestedatt--item--center))
+- `devices` (Attributes Set) List of devices for the floorplan (see [below for nested schema](#nestedatt--item--devices))
+- `floor_plan_id` (String) Floor plan ID
+- `height` (Number) The height of your floor plan.
+- `image_extension` (String) The format type of the image.
+- `image_md5` (String) The file contents (a base 64 encoded string) of your new image. Supported formats are PNG, GIF, and JPG. Note that all images are saved as PNG files, regardless of the format they are uploaded in. If you upload a new image, and you do NOT specify any new geolocation fields ('center, 'topLeftCorner', etc), the floor plan will be recentered with no rotation in order to maintain the aspect ratio of your new image.
+- `image_url` (String) The url link for the floor plan image.
+- `image_url_expires_at` (String) The time the image url link will expire.
+- `name` (String) The name of your floor plan.
+- `top_left_corner` (Attributes) The longitude and latitude of the top left corner of your floor plan. (see [below for nested schema](#nestedatt--item--top_left_corner))
+- `top_right_corner` (Attributes) The longitude and latitude of the top right corner of your floor plan. (see [below for nested schema](#nestedatt--item--top_right_corner))
+- `width` (Number) The width of your floor plan.
 
 <a id="nestedatt--item--bottom_left_corner"></a>
 ### Nested Schema for `item.bottom_left_corner`
 
 Read-Only:
 
-- `lat` (Number)
-- `lng` (Number)
+- `lat` (Number) Latitude
+- `lng` (Number) Longitude
 
 
 <a id="nestedatt--item--bottom_right_corner"></a>
@@ -79,8 +79,8 @@ Read-Only:
 
 Read-Only:
 
-- `lat` (Number)
-- `lng` (Number)
+- `lat` (Number) Latitude
+- `lng` (Number) Longitude
 
 
 <a id="nestedatt--item--center"></a>
@@ -88,8 +88,8 @@ Read-Only:
 
 Read-Only:
 
-- `lat` (Number)
-- `lng` (Number)
+- `lat` (Number) Latitude
+- `lng` (Number) Longitude
 
 
 <a id="nestedatt--item--devices"></a>
@@ -97,29 +97,29 @@ Read-Only:
 
 Read-Only:
 
-- `address` (String)
-- `beacon_id_params` (Attributes) (see [below for nested schema](#nestedatt--item--devices--beacon_id_params))
-- `firmware` (String)
-- `floor_plan_id` (String)
-- `lan_ip` (String)
-- `lat` (Number)
-- `lng` (Number)
-- `mac` (String)
-- `model` (String)
-- `name` (String)
-- `network_id` (String)
-- `notes` (String)
-- `serial` (String)
-- `tags` (List of String)
+- `address` (String) Physical address of the device
+- `details` (Attributes Set) Additional device information (see [below for nested schema](#nestedatt--item--devices--details))
+- `firmware` (String) Firmware version of the device
+- `imei` (String) IMEI of the device, if applicable
+- `lan_ip` (String) LAN IP address of the device
+- `lat` (Number) Latitude of the device
+- `lng` (Number) Longitude of the device
+- `mac` (String) MAC address of the device
+- `model` (String) Model of the device
+- `name` (String) Name of the device
+- `network_id` (String) ID of the network the device belongs to
+- `notes` (String) Notes for the device, limited to 255 characters
+- `product_type` (String) Product type of the device
+- `serial` (String) Serial number of the device
+- `tags` (List of String) List of tags assigned to the device
 
-<a id="nestedatt--item--devices--beacon_id_params"></a>
-### Nested Schema for `item.devices.beacon_id_params`
+<a id="nestedatt--item--devices--details"></a>
+### Nested Schema for `item.devices.details`
 
 Read-Only:
 
-- `major` (Number)
-- `minor` (Number)
-- `uuid` (String)
+- `name` (String) Additional property name
+- `value` (String) Additional property value
 
 
 
@@ -128,8 +128,8 @@ Read-Only:
 
 Read-Only:
 
-- `lat` (Number)
-- `lng` (Number)
+- `lat` (Number) Latitude
+- `lng` (Number) Longitude
 
 
 <a id="nestedatt--item--top_right_corner"></a>
@@ -137,8 +137,8 @@ Read-Only:
 
 Read-Only:
 
-- `lat` (Number)
-- `lng` (Number)
+- `lat` (Number) Latitude
+- `lng` (Number) Longitude
 
 
 
@@ -147,28 +147,28 @@ Read-Only:
 
 Read-Only:
 
-- `bottom_left_corner` (Attributes) (see [below for nested schema](#nestedatt--items--bottom_left_corner))
-- `bottom_right_corner` (Attributes) (see [below for nested schema](#nestedatt--items--bottom_right_corner))
-- `center` (Attributes) (see [below for nested schema](#nestedatt--items--center))
-- `devices` (Attributes Set) (see [below for nested schema](#nestedatt--items--devices))
-- `floor_plan_id` (String)
-- `height` (Number)
-- `image_extension` (String)
-- `image_md5` (String)
-- `image_url` (String)
-- `image_url_expires_at` (String)
-- `name` (String)
-- `top_left_corner` (Attributes) (see [below for nested schema](#nestedatt--items--top_left_corner))
-- `top_right_corner` (Attributes) (see [below for nested schema](#nestedatt--items--top_right_corner))
-- `width` (Number)
+- `bottom_left_corner` (Attributes) The longitude and latitude of the bottom left corner of your floor plan. (see [below for nested schema](#nestedatt--items--bottom_left_corner))
+- `bottom_right_corner` (Attributes) The longitude and latitude of the bottom right corner of your floor plan. (see [below for nested schema](#nestedatt--items--bottom_right_corner))
+- `center` (Attributes) The longitude and latitude of the center of your floor plan. The 'center' or two adjacent corners (e.g. 'topLeftCorner' and 'bottomLeftCorner') must be specified. If 'center' is specified, the floor plan is placed over that point with no rotation. If two adjacent corners are specified, the floor plan is rotated to line up with the two specified points. The aspect ratio of the floor plan's image is preserved regardless of which corners/center are specified. (This means if that more than two corners are specified, only two corners may be used to preserve the floor plan's aspect ratio.). No two points can have the same latitude, longitude pair. (see [below for nested schema](#nestedatt--items--center))
+- `devices` (Attributes Set) List of devices for the floorplan (see [below for nested schema](#nestedatt--items--devices))
+- `floor_plan_id` (String) Floor plan ID
+- `height` (Number) The height of your floor plan.
+- `image_extension` (String) The format type of the image.
+- `image_md5` (String) The file contents (a base 64 encoded string) of your new image. Supported formats are PNG, GIF, and JPG. Note that all images are saved as PNG files, regardless of the format they are uploaded in. If you upload a new image, and you do NOT specify any new geolocation fields ('center, 'topLeftCorner', etc), the floor plan will be recentered with no rotation in order to maintain the aspect ratio of your new image.
+- `image_url` (String) The url link for the floor plan image.
+- `image_url_expires_at` (String) The time the image url link will expire.
+- `name` (String) The name of your floor plan.
+- `top_left_corner` (Attributes) The longitude and latitude of the top left corner of your floor plan. (see [below for nested schema](#nestedatt--items--top_left_corner))
+- `top_right_corner` (Attributes) The longitude and latitude of the top right corner of your floor plan. (see [below for nested schema](#nestedatt--items--top_right_corner))
+- `width` (Number) The width of your floor plan.
 
 <a id="nestedatt--items--bottom_left_corner"></a>
 ### Nested Schema for `items.bottom_left_corner`
 
 Read-Only:
 
-- `lat` (Number)
-- `lng` (Number)
+- `lat` (Number) Latitude
+- `lng` (Number) Longitude
 
 
 <a id="nestedatt--items--bottom_right_corner"></a>
@@ -176,8 +176,8 @@ Read-Only:
 
 Read-Only:
 
-- `lat` (Number)
-- `lng` (Number)
+- `lat` (Number) Latitude
+- `lng` (Number) Longitude
 
 
 <a id="nestedatt--items--center"></a>
@@ -185,8 +185,8 @@ Read-Only:
 
 Read-Only:
 
-- `lat` (Number)
-- `lng` (Number)
+- `lat` (Number) Latitude
+- `lng` (Number) Longitude
 
 
 <a id="nestedatt--items--devices"></a>
@@ -194,29 +194,29 @@ Read-Only:
 
 Read-Only:
 
-- `address` (String)
-- `beacon_id_params` (Attributes) (see [below for nested schema](#nestedatt--items--devices--beacon_id_params))
-- `firmware` (String)
-- `floor_plan_id` (String)
-- `lan_ip` (String)
-- `lat` (Number)
-- `lng` (Number)
-- `mac` (String)
-- `model` (String)
-- `name` (String)
-- `network_id` (String)
-- `notes` (String)
-- `serial` (String)
-- `tags` (List of String)
+- `address` (String) Physical address of the device
+- `details` (Attributes Set) Additional device information (see [below for nested schema](#nestedatt--items--devices--details))
+- `firmware` (String) Firmware version of the device
+- `imei` (String) IMEI of the device, if applicable
+- `lan_ip` (String) LAN IP address of the device
+- `lat` (Number) Latitude of the device
+- `lng` (Number) Longitude of the device
+- `mac` (String) MAC address of the device
+- `model` (String) Model of the device
+- `name` (String) Name of the device
+- `network_id` (String) ID of the network the device belongs to
+- `notes` (String) Notes for the device, limited to 255 characters
+- `product_type` (String) Product type of the device
+- `serial` (String) Serial number of the device
+- `tags` (List of String) List of tags assigned to the device
 
-<a id="nestedatt--items--devices--beacon_id_params"></a>
-### Nested Schema for `items.devices.beacon_id_params`
+<a id="nestedatt--items--devices--details"></a>
+### Nested Schema for `items.devices.details`
 
 Read-Only:
 
-- `major` (Number)
-- `minor` (Number)
-- `uuid` (String)
+- `name` (String) Additional property name
+- `value` (String) Additional property value
 
 
 
@@ -225,8 +225,8 @@ Read-Only:
 
 Read-Only:
 
-- `lat` (Number)
-- `lng` (Number)
+- `lat` (Number) Latitude
+- `lng` (Number) Longitude
 
 
 <a id="nestedatt--items--top_right_corner"></a>
@@ -234,5 +234,5 @@ Read-Only:
 
 Read-Only:
 
-- `lat` (Number)
-- `lng` (Number)
+- `lat` (Number) Latitude
+- `lng` (Number) Longitude

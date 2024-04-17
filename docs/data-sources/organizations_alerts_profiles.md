@@ -39,23 +39,23 @@ output "meraki_organizations_alerts_profiles_example" {
 
 Read-Only:
 
-- `alert_condition` (Attributes) (see [below for nested schema](#nestedatt--items--alert_condition))
-- `description` (String)
-- `enabled` (Boolean)
-- `id` (String)
-- `network_tags` (List of String)
-- `recipients` (Attributes) (see [below for nested schema](#nestedatt--items--recipients))
-- `type` (String)
+- `alert_condition` (Attributes) The conditions that determine if the alert triggers (see [below for nested schema](#nestedatt--items--alert_condition))
+- `description` (String) User supplied description of the alert
+- `enabled` (Boolean) Is the alert config enabled
+- `id` (String) The alert config ID
+- `network_tags` (List of String) Networks with these tags will be monitored for the alert
+- `recipients` (Attributes) List of recipients that will recieve the alert. (see [below for nested schema](#nestedatt--items--recipients))
+- `type` (String) The alert type
 
 <a id="nestedatt--items--alert_condition"></a>
 ### Nested Schema for `items.alert_condition`
 
 Read-Only:
 
-- `bit_rate_bps` (Number)
-- `duration` (Number)
-- `interface` (String)
-- `window` (Number)
+- `bit_rate_bps` (Number) The threshold the metric must cross to be valid for alerting. Used only for WAN Utilization alerts.
+- `duration` (Number) The total duration in seconds that the threshold should be crossed before alerting
+- `interface` (String) The uplink observed for the alert
+- `window` (Number) The look back period in seconds for sensing the alert
 
 
 <a id="nestedatt--items--recipients"></a>
@@ -63,5 +63,5 @@ Read-Only:
 
 Read-Only:
 
-- `emails` (List of String)
-- `http_server_ids` (List of String)
+- `emails` (List of String) A list of emails that will receive information about the alert
+- `http_server_ids` (List of String) A list base64 encoded urls of webhook endpoints that will receive information about the alert

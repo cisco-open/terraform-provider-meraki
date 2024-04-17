@@ -54,11 +54,21 @@ output "meraki_organizations_uplinks_statuses_example" {
 
 Read-Only:
 
+- `high_availability` (Attributes) Device High Availability Capabilities (see [below for nested schema](#nestedatt--items--high_availability))
 - `last_reported_at` (String) Last reported time for the device
 - `model` (String) The uplink model
 - `network_id` (String) Network identifier
 - `serial` (String) The uplink serial
 - `uplinks` (Attributes Set) Uplinks (see [below for nested schema](#nestedatt--items--uplinks))
+
+<a id="nestedatt--items--high_availability"></a>
+### Nested Schema for `items.high_availability`
+
+Read-Only:
+
+- `enabled` (Boolean) Indicates whether High Availability is enabled for the device. For devices that do not support HA, this will be 'false'
+- `role` (String) The HA role of the device on the network. For devices that do not support HA, this will be 'primary'
+
 
 <a id="nestedatt--items--uplinks"></a>
 ### Nested Schema for `items.uplinks`

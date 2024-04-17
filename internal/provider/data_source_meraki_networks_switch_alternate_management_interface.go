@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -66,34 +50,42 @@ func (d *NetworksSwitchAlternateManagementInterfaceDataSource) Schema(_ context.
 				Attributes: map[string]schema.Attribute{
 
 					"enabled": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Boolean value to enable or disable AMI configuration. If enabled, VLAN and protocols must be set`,
+						Computed:            true,
 					},
 					"protocols": schema.ListAttribute{
-						Computed:    true,
-						ElementType: types.StringType,
+						MarkdownDescription: `Can be one or more of the following values: 'radius', 'snmp' or 'syslog'`,
+						Computed:            true,
+						ElementType:         types.StringType,
 					},
 					"switches": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `Array of switch serial number and IP assignment. If parameter is present, it cannot have empty body. Note: switches parameter is not applicable for template networks, in other words, do not put 'switches' in the body when updating template networks. Also, an empty 'switches' array will remove all previous assignments`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"alternate_management_ip": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Switch alternative management IP. To remove a prior IP setting, provide an empty string`,
+									Computed:            true,
 								},
 								"gateway": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Switch gateway must be in IP format. Only and must be specified for Polaris switches`,
+									Computed:            true,
 								},
 								"serial": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Switch serial number`,
+									Computed:            true,
 								},
 								"subnet_mask": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Switch subnet mask must be in IP format. Only and must be specified for Polaris switches`,
+									Computed:            true,
 								},
 							},
 						},
 					},
 					"vlan_id": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `Alternate management VLAN, must be between 1 and 4094`,
+						Computed:            true,
 					},
 				},
 			},

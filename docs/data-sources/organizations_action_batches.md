@@ -54,6 +54,7 @@ output "meraki_organizations_action_batches_example" {
 Read-Only:
 
 - `actions` (Attributes Set) A set of changes made as part of this action (<a href='https://developer.cisco.com/meraki/api/#/rest/guides/action-batches/'>more details</a>) (see [below for nested schema](#nestedatt--item--actions))
+- `callback` (Attributes) Information for callback used to send back results (see [below for nested schema](#nestedatt--item--callback))
 - `confirmed` (Boolean) Flag describing whether the action should be previewed before executing or not
 - `id` (String) ID of the action batch. Can be used to check the status of the action batch at /organizations/{organizationId}/actionBatches/{actionBatchId}
 - `organization_id` (String) ID of the organization this action batch belongs to
@@ -65,8 +66,19 @@ Read-Only:
 
 Read-Only:
 
+- `body` (String) Data provided in the body of the Action. Contents depend on the Action type
 - `operation` (String) The operation to be used by this action
 - `resource` (String) Unique identifier for the resource to be acted on
+
+
+<a id="nestedatt--item--callback"></a>
+### Nested Schema for `item.callback`
+
+Read-Only:
+
+- `id` (String) The ID of the callback. To check the status of the callback, use this ID in a request to /webhooks/callbacks/statuses/{id}
+- `status` (String) The status of the callback
+- `url` (String) The callback URL for the webhook target. This was either provided in the original request or comes from a configured webhook receiver
 
 
 <a id="nestedatt--item--status"></a>
@@ -95,29 +107,21 @@ Read-Only:
 
 Read-Only:
 
-- `actions` (Attributes Set) (see [below for nested schema](#nestedatt--items--actions))
-- `confirmed` (Boolean)
-- `id` (String)
-- `organization_id` (String)
-- `status` (Attributes) (see [below for nested schema](#nestedatt--items--status))
-- `synchronous` (Boolean)
+- `actions` (Attributes Set) A set of changes made as part of this action (<a href='https://developer.cisco.com/meraki/api/#/rest/guides/action-batches/'>more details</a>) (see [below for nested schema](#nestedatt--items--actions))
+- `confirmed` (Boolean) Flag describing whether the action should be previewed before executing or not
+- `id` (String) ID of the action batch. Can be used to check the status of the action batch at /organizations/{organizationId}/actionBatches/{actionBatchId}
+- `organization_id` (String) ID of the organization this action batch belongs to
+- `status` (Attributes) Status of action batch (see [below for nested schema](#nestedatt--items--status))
+- `synchronous` (Boolean) Flag describing whether actions should run synchronously or asynchronously
 
 <a id="nestedatt--items--actions"></a>
 ### Nested Schema for `items.actions`
 
 Read-Only:
 
-- `body` (Attributes) (see [below for nested schema](#nestedatt--items--actions--body))
-- `operation` (String)
-- `resource` (String)
-
-<a id="nestedatt--items--actions--body"></a>
-### Nested Schema for `items.actions.body`
-
-Read-Only:
-
-- `enabled` (Boolean)
-
+- `body` (String) Data provided in the body of the Action. Contents depend on the Action type
+- `operation` (String) The operation to be used by this action
+- `resource` (String) Unique identifier for the resource to be acted on
 
 
 <a id="nestedatt--items--status"></a>
@@ -125,15 +129,15 @@ Read-Only:
 
 Read-Only:
 
-- `completed` (Boolean)
-- `created_resources` (Attributes Set) (see [below for nested schema](#nestedatt--items--status--created_resources))
-- `errors` (List of String)
-- `failed` (Boolean)
+- `completed` (Boolean) Flag describing whether all actions in the action batch have completed
+- `created_resources` (Attributes Set) Resources created as a result of this action batch (see [below for nested schema](#nestedatt--items--status--created_resources))
+- `errors` (List of String) List of errors encountered when running actions in the action batch
+- `failed` (Boolean) Flag describing whether any actions in the action batch failed
 
 <a id="nestedatt--items--status--created_resources"></a>
 ### Nested Schema for `items.status.created_resources`
 
 Read-Only:
 
-- `id` (Number)
-- `uri` (String)
+- `id` (String) ID of the created resource
+- `uri` (String) URI, not including base, of the created resource

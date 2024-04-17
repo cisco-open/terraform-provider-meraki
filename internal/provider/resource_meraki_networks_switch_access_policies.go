@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,8 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -33,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -81,6 +67,31 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"802.1x",
+						"Hybrid authentication",
+						"MAC authentication bypass",
+					),
+				},
+			},
+			"counts": schema.SingleNestedAttribute{
+				MarkdownDescription: `Counts associated with the access policy`,
+				Computed:            true,
+				Attributes: map[string]schema.Attribute{
+
+					"ports": schema.SingleNestedAttribute{
+						MarkdownDescription: `Counts associated with ports`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"with_this_policy": schema.Int64Attribute{
+								MarkdownDescription: `Number of ports in the network with this policy. For template networks, this is the number of template ports (not child ports) with this policy.`,
+								Computed:            true,
+							},
+						},
+					},
+				},
 			},
 			"dot1x": schema.SingleNestedAttribute{
 				MarkdownDescription: `802.1x Settings`,
@@ -97,6 +108,12 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
+						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"both",
+								"inbound",
+							),
 						},
 					},
 				},
@@ -123,6 +140,14 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"Multi-Auth",
+						"Multi-Domain",
+						"Multi-Host",
+						"Single-Host",
+					),
 				},
 			},
 			"increase_access_speed": schema.BoolAttribute{
@@ -268,41 +293,9 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"radius_servers_response": schema.SetNestedAttribute{
-				MarkdownDescription: `List of RADIUS servers to require connecting devices to authenticate against before granting network access`,
-				Computed:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
-				},
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-
-						"host": schema.StringAttribute{
-							MarkdownDescription: `Public IP address of the RADIUS server`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"port": schema.Int64Attribute{
-							MarkdownDescription: `UDP port that the RADIUS server listens on for access requests`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.Int64{
-								int64planmodifier.UseStateForUnknown(),
-							},
-						},
-						"secret": schema.StringAttribute{
-							MarkdownDescription: `RADIUS client shared secret`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-					},
-				},
-			},
 			"radius_servers": schema.SetNestedAttribute{
 				MarkdownDescription: `List of RADIUS servers to require connecting devices to authenticate against before granting network access`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
@@ -312,6 +305,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 
 						"host": schema.StringAttribute{
 							MarkdownDescription: `Public IP address of the RADIUS server`,
+							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -319,6 +313,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 						},
 						"port": schema.Int64Attribute{
 							MarkdownDescription: `UDP port that the RADIUS server listens on for access requests`,
+							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -326,6 +321,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 						},
 						"secret": schema.StringAttribute{
 							MarkdownDescription: `RADIUS client shared secret`,
+							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -394,7 +390,6 @@ func (r *NetworksSwitchAccessPoliciesResource) Create(ctx context.Context, req r
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvName := data.Name.ValueString()
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchAccessPolicies(vvNetworkID)
@@ -417,7 +412,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Create(ctx context.Context, req r
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter AccessPolicyNumber",
-					"",
+					err.Error(),
 				)
 				return
 			}
@@ -474,7 +469,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Create(ctx context.Context, req r
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter AccessPolicyNumber",
-				"Error",
+				err.Error(),
 			)
 			return
 		}
@@ -528,9 +523,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Read(ctx context.Context, req res
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvAccessPolicyNumber := data.AccessPolicyNumber.ValueString()
-	// access_policy_number
 	responseGet, restyRespGet, err := r.client.Switch.GetNetworkSwitchAccessPolicy(vvNetworkID, vvAccessPolicyNumber)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -554,7 +547,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Read(ctx context.Context, req res
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchAccessPolicyItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -587,7 +580,6 @@ func (r *NetworksSwitchAccessPoliciesResource) Update(ctx context.Context, req r
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvAccessPolicyNumber := data.AccessPolicyNumber.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchAccessPolicy(vvNetworkID, vvAccessPolicyNumber, dataRequest)
@@ -645,6 +637,7 @@ type NetworksSwitchAccessPoliciesRs struct {
 	NetworkID                      types.String                                                           `tfsdk:"network_id"`
 	AccessPolicyNumber             types.String                                                           `tfsdk:"access_policy_number"`
 	AccessPolicyType               types.String                                                           `tfsdk:"access_policy_type"`
+	Counts                         *ResponseSwitchGetNetworkSwitchAccessPolicyCountsRs                    `tfsdk:"counts"`
 	Dot1X                          *ResponseSwitchGetNetworkSwitchAccessPolicyDot1XRs                     `tfsdk:"dot1x"`
 	GuestPortBouncing              types.Bool                                                             `tfsdk:"guest_port_bouncing"`
 	GuestVLANID                    types.Int64                                                            `tfsdk:"guest_vlan_id"`
@@ -657,11 +650,18 @@ type NetworksSwitchAccessPoliciesRs struct {
 	RadiusCoaSupportEnabled        types.Bool                                                             `tfsdk:"radius_coa_support_enabled"`
 	RadiusGroupAttribute           types.String                                                           `tfsdk:"radius_group_attribute"`
 	RadiusServers                  *[]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusServersRs           `tfsdk:"radius_servers"`
-	RadiusServersResponse          *[]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusServersRs           `tfsdk:"radius_servers_response"`
 	RadiusTestingEnabled           types.Bool                                                             `tfsdk:"radius_testing_enabled"`
 	URLRedirectWalledGardenEnabled types.Bool                                                             `tfsdk:"url_redirect_walled_garden_enabled"`
 	URLRedirectWalledGardenRanges  types.Set                                                              `tfsdk:"url_redirect_walled_garden_ranges"`
 	VoiceVLANClients               types.Bool                                                             `tfsdk:"voice_vlan_clients"`
+}
+
+type ResponseSwitchGetNetworkSwitchAccessPolicyCountsRs struct {
+	Ports *ResponseSwitchGetNetworkSwitchAccessPolicyCountsPortsRs `tfsdk:"ports"`
+}
+
+type ResponseSwitchGetNetworkSwitchAccessPolicyCountsPortsRs struct {
+	WithThisPolicy types.Int64 `tfsdk:"with_this_policy"`
 }
 
 type ResponseSwitchGetNetworkSwitchAccessPolicyDot1XRs struct {
@@ -1089,8 +1089,27 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestUpdate(ctx context.Conte
 // From gosdk to TF Structs Schema
 func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBodyRs(state NetworksSwitchAccessPoliciesRs, response *merakigosdk.ResponseSwitchGetNetworkSwitchAccessPolicy, is_read bool) NetworksSwitchAccessPoliciesRs {
 	itemState := NetworksSwitchAccessPoliciesRs{
-		AccessPolicyNumber: types.StringValue(response.AccessPolicyNumber),
-		AccessPolicyType:   types.StringValue(response.AccessPolicyType),
+		AccessPolicyType: types.StringValue(response.AccessPolicyType),
+		Counts: func() *ResponseSwitchGetNetworkSwitchAccessPolicyCountsRs {
+			if response.Counts != nil {
+				return &ResponseSwitchGetNetworkSwitchAccessPolicyCountsRs{
+					Ports: func() *ResponseSwitchGetNetworkSwitchAccessPolicyCountsPortsRs {
+						if response.Counts.Ports != nil {
+							return &ResponseSwitchGetNetworkSwitchAccessPolicyCountsPortsRs{
+								WithThisPolicy: func() types.Int64 {
+									if response.Counts.Ports.WithThisPolicy != nil {
+										return types.Int64Value(int64(*response.Counts.Ports.WithThisPolicy))
+									}
+									return types.Int64{}
+								}(),
+							}
+						}
+						return &ResponseSwitchGetNetworkSwitchAccessPolicyCountsPortsRs{}
+					}(),
+				}
+			}
+			return &ResponseSwitchGetNetworkSwitchAccessPolicyCountsRs{}
+		}(),
 		Dot1X: func() *ResponseSwitchGetNetworkSwitchAccessPolicyDot1XRs {
 			if response.Dot1X != nil {
 				return &ResponseSwitchGetNetworkSwitchAccessPolicyDot1XRs{
@@ -1194,7 +1213,7 @@ func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBodyRs(state NetworksSwitch
 			return types.Bool{}
 		}(),
 		RadiusGroupAttribute: types.StringValue(response.RadiusGroupAttribute),
-		RadiusServersResponse: func() *[]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusServersRs {
+		RadiusServers: func() *[]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusServersRs {
 			if response.RadiusServers != nil {
 				result := make([]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusServersRs, len(*response.RadiusServers))
 				for i, radiusServers := range *response.RadiusServers {
@@ -1232,7 +1251,6 @@ func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBodyRs(state NetworksSwitch
 			return types.Bool{}
 		}(),
 	}
-	itemState.RadiusServers = state.RadiusServers
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksSwitchAccessPoliciesRs)
 	}

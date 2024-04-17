@@ -63,9 +63,9 @@ Read-Only:
 
 Read-Only:
 
-- `advertise_via_ospf_enabled` (Boolean)
-- `name` (String)
-- `next_hop_ip` (String)
-- `prefer_over_ospf_routes_enabled` (Boolean)
-- `static_route_id` (String)
-- `subnet` (String)
+- `advertise_via_ospf_enabled` (Boolean) Option to advertise static routes via OSPF
+- `name` (String) The name or description of the layer 3 static route
+- `next_hop_ip` (String) The IP address of the router to which traffic for this destination network should be sent
+- `prefer_over_ospf_routes_enabled` (Boolean) Option to prefer static routes over OSPF routes
+- `static_route_id` (String) The identifier of a layer 3 static route
+- `subnet` (String) The IP address of the subnetwork specified in CIDR notation (ex. 1.2.3.0/24)

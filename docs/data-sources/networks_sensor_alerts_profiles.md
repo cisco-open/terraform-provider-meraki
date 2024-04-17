@@ -53,7 +53,7 @@ Read-Only:
 - `conditions` (Attributes Set) List of conditions that will cause the profile to send an alert. (see [below for nested schema](#nestedatt--item--conditions))
 - `name` (String) Name of the sensor alert profile.
 - `profile_id` (String) ID of the sensor alert profile.
-- `recipients` (Attributes) List of recipients that will recieve the alert. (see [below for nested schema](#nestedatt--item--recipients))
+- `recipients` (Attributes) List of recipients that will receive the alert. (see [below for nested schema](#nestedatt--item--recipients))
 - `schedule` (Attributes) The sensor schedule to use with the alert profile. (see [below for nested schema](#nestedatt--item--schedule))
 - `serials` (List of String) List of device serials assigned to this sensor alert profile.
 
@@ -62,9 +62,9 @@ Read-Only:
 
 Read-Only:
 
-- `direction` (String) If 'above', an alert will be sent when a sensor reads above the threshold. If 'below', an alert will be sent when a sensor reads below the threshold. Only applicable for temperature and humidity thresholds.
-- `duration` (Number) Length of time in seconds that the triggering state must persist before an alert is sent. Available options are 0 seconds, 1 minute, 2 minutes, 3 minutes, 4 minutes, 5 minutes, 10 minutes, 15 minutes, 30 minutes, and 1 hour. Default is 0.
-- `metric` (String) The type of sensor metric that will be monitored for changes. Available metrics are door, humidity, indoorAirQuality, noise, pm25, temperature, tvoc, and water.
+- `direction` (String) If 'above', an alert will be sent when a sensor reads above the threshold. If 'below', an alert will be sent when a sensor reads below the threshold. Only applicable for temperature, humidity, realPower, apparentPower, powerFactor, voltage, current, and frequency thresholds.
+- `duration` (Number) Length of time in seconds that the triggering state must persist before an alert is sent. Available options are 0 seconds, 1 minute, 2 minutes, 3 minutes, 4 minutes, 5 minutes, 10 minutes, 15 minutes, 30 minutes, 1 hour, 2 hours, 4 hours, and 8 hours. Default is 0.
+- `metric` (String) The type of sensor metric that will be monitored for changes. Available metrics are apparentPower, co2, current, door, frequency, humidity, indoorAirQuality, noise, pm25, powerFactor, realPower, temperature, tvoc, upstreamPower, voltage, and water.
 - `threshold` (Attributes) Threshold for sensor readings that will cause an alert to be sent. This object should contain a single property key matching the condition's 'metric' value. (see [below for nested schema](#nestedatt--item--conditions--threshold))
 
 <a id="nestedatt--item--conditions--threshold"></a>
@@ -72,14 +72,37 @@ Read-Only:
 
 Read-Only:
 
+- `apparent_power` (Attributes) Apparent power threshold. 'draw' must be provided. (see [below for nested schema](#nestedatt--item--conditions--threshold--apparent_power))
+- `current` (Attributes) Electrical current threshold. 'level' must be provided. (see [below for nested schema](#nestedatt--item--conditions--threshold--current))
 - `door` (Attributes) Door open threshold. 'open' must be provided and set to true. (see [below for nested schema](#nestedatt--item--conditions--threshold--door))
+- `frequency` (Attributes) Electrical frequency threshold. 'level' must be provided. (see [below for nested schema](#nestedatt--item--conditions--threshold--frequency))
 - `humidity` (Attributes) Humidity threshold. One of 'relativePercentage' or 'quality' must be provided. (see [below for nested schema](#nestedatt--item--conditions--threshold--humidity))
 - `indoor_air_quality` (Attributes) Indoor air quality score threshold. One of 'score' or 'quality' must be provided. (see [below for nested schema](#nestedatt--item--conditions--threshold--indoor_air_quality))
 - `noise` (Attributes) Noise threshold. 'ambient' must be provided. (see [below for nested schema](#nestedatt--item--conditions--threshold--noise))
 - `pm25` (Attributes) PM2.5 concentration threshold. One of 'concentration' or 'quality' must be provided. (see [below for nested schema](#nestedatt--item--conditions--threshold--pm25))
+- `power_factor` (Attributes) Power factor threshold. 'percentage' must be provided. (see [below for nested schema](#nestedatt--item--conditions--threshold--power_factor))
+- `real_power` (Attributes) Real power threshold. 'draw' must be provided. (see [below for nested schema](#nestedatt--item--conditions--threshold--real_power))
 - `temperature` (Attributes) Temperature threshold. One of 'celsius', 'fahrenheit', or 'quality' must be provided. (see [below for nested schema](#nestedatt--item--conditions--threshold--temperature))
 - `tvoc` (Attributes) TVOC concentration threshold. One of 'concentration' or 'quality' must be provided. (see [below for nested schema](#nestedatt--item--conditions--threshold--tvoc))
+- `upstream_power` (Attributes) Upstream power threshold. 'outageDetected' must be provided and set to true. (see [below for nested schema](#nestedatt--item--conditions--threshold--upstream_power))
+- `voltage` (Attributes) Voltage threshold. 'level' must be provided. (see [below for nested schema](#nestedatt--item--conditions--threshold--voltage))
 - `water` (Attributes) Water detection threshold. 'present' must be provided and set to true. (see [below for nested schema](#nestedatt--item--conditions--threshold--water))
+
+<a id="nestedatt--item--conditions--threshold--apparent_power"></a>
+### Nested Schema for `item.conditions.threshold.water`
+
+Read-Only:
+
+- `draw` (Number) Alerting threshold in volt-amps. Must be between 0 and 3750.
+
+
+<a id="nestedatt--item--conditions--threshold--current"></a>
+### Nested Schema for `item.conditions.threshold.water`
+
+Read-Only:
+
+- `draw` (Number) Alerting threshold in amps. Must be between 0 and 15.
+
 
 <a id="nestedatt--item--conditions--threshold--door"></a>
 ### Nested Schema for `item.conditions.threshold.water`
@@ -87,6 +110,14 @@ Read-Only:
 Read-Only:
 
 - `open` (Boolean) Alerting threshold for a door open event. Must be set to true.
+
+
+<a id="nestedatt--item--conditions--threshold--frequency"></a>
+### Nested Schema for `item.conditions.threshold.water`
+
+Read-Only:
+
+- `level` (Number) Alerting threshold in hertz. Must be between 0 and 60.
 
 
 <a id="nestedatt--item--conditions--threshold--humidity"></a>
@@ -133,6 +164,22 @@ Read-Only:
 - `quality` (String) Alerting threshold as a qualitative PM2.5 level.
 
 
+<a id="nestedatt--item--conditions--threshold--power_factor"></a>
+### Nested Schema for `item.conditions.threshold.water`
+
+Read-Only:
+
+- `percentage` (Number) Alerting threshold as the ratio of active power to apparent power. Must be between 0 and 100.
+
+
+<a id="nestedatt--item--conditions--threshold--real_power"></a>
+### Nested Schema for `item.conditions.threshold.water`
+
+Read-Only:
+
+- `draw` (Number) Alerting threshold in watts. Must be between 0 and 3750.
+
+
 <a id="nestedatt--item--conditions--threshold--temperature"></a>
 ### Nested Schema for `item.conditions.threshold.water`
 
@@ -150,6 +197,22 @@ Read-Only:
 
 - `concentration` (Number) Alerting threshold as TVOC micrograms per cubic meter.
 - `quality` (String) Alerting threshold as a qualitative TVOC level.
+
+
+<a id="nestedatt--item--conditions--threshold--upstream_power"></a>
+### Nested Schema for `item.conditions.threshold.water`
+
+Read-Only:
+
+- `outage_detected` (Boolean) Alerting threshold for an upstream power event. Must be set to true.
+
+
+<a id="nestedatt--item--conditions--threshold--voltage"></a>
+### Nested Schema for `item.conditions.threshold.water`
+
+Read-Only:
+
+- `level` (Number) Alerting threshold in volts. Must be between 0 and 250.
 
 
 <a id="nestedatt--item--conditions--threshold--water"></a>
@@ -190,7 +253,7 @@ Read-Only:
 - `conditions` (Attributes Set) List of conditions that will cause the profile to send an alert. (see [below for nested schema](#nestedatt--items--conditions))
 - `name` (String) Name of the sensor alert profile.
 - `profile_id` (String) ID of the sensor alert profile.
-- `recipients` (Attributes) List of recipients that will recieve the alert. (see [below for nested schema](#nestedatt--items--recipients))
+- `recipients` (Attributes) List of recipients that will receive the alert. (see [below for nested schema](#nestedatt--items--recipients))
 - `schedule` (Attributes) The sensor schedule to use with the alert profile. (see [below for nested schema](#nestedatt--items--schedule))
 - `serials` (List of String) List of device serials assigned to this sensor alert profile.
 
@@ -199,9 +262,9 @@ Read-Only:
 
 Read-Only:
 
-- `direction` (String) If 'above', an alert will be sent when a sensor reads above the threshold. If 'below', an alert will be sent when a sensor reads below the threshold. Only applicable for temperature and humidity thresholds.
-- `duration` (Number) Length of time in seconds that the triggering state must persist before an alert is sent. Available options are 0 seconds, 1 minute, 2 minutes, 3 minutes, 4 minutes, 5 minutes, 10 minutes, 15 minutes, 30 minutes, and 1 hour. Default is 0.
-- `metric` (String) The type of sensor metric that will be monitored for changes. Available metrics are door, humidity, indoorAirQuality, noise, pm25, temperature, tvoc, and water.
+- `direction` (String) If 'above', an alert will be sent when a sensor reads above the threshold. If 'below', an alert will be sent when a sensor reads below the threshold. Only applicable for temperature, humidity, realPower, apparentPower, powerFactor, voltage, current, and frequency thresholds.
+- `duration` (Number) Length of time in seconds that the triggering state must persist before an alert is sent. Available options are 0 seconds, 1 minute, 2 minutes, 3 minutes, 4 minutes, 5 minutes, 10 minutes, 15 minutes, 30 minutes, 1 hour, 2 hours, 4 hours, and 8 hours. Default is 0.
+- `metric` (String) The type of sensor metric that will be monitored for changes. Available metrics are apparentPower, co2, current, door, frequency, humidity, indoorAirQuality, noise, pm25, powerFactor, realPower, temperature, tvoc, upstreamPower, voltage, and water.
 - `threshold` (Attributes) Threshold for sensor readings that will cause an alert to be sent. This object should contain a single property key matching the condition's 'metric' value. (see [below for nested schema](#nestedatt--items--conditions--threshold))
 
 <a id="nestedatt--items--conditions--threshold"></a>
@@ -209,14 +272,37 @@ Read-Only:
 
 Read-Only:
 
+- `apparent_power` (Attributes) Apparent power threshold. 'draw' must be provided. (see [below for nested schema](#nestedatt--items--conditions--threshold--apparent_power))
+- `current` (Attributes) Electrical current threshold. 'level' must be provided. (see [below for nested schema](#nestedatt--items--conditions--threshold--current))
 - `door` (Attributes) Door open threshold. 'open' must be provided and set to true. (see [below for nested schema](#nestedatt--items--conditions--threshold--door))
+- `frequency` (Attributes) Electrical frequency threshold. 'level' must be provided. (see [below for nested schema](#nestedatt--items--conditions--threshold--frequency))
 - `humidity` (Attributes) Humidity threshold. One of 'relativePercentage' or 'quality' must be provided. (see [below for nested schema](#nestedatt--items--conditions--threshold--humidity))
 - `indoor_air_quality` (Attributes) Indoor air quality score threshold. One of 'score' or 'quality' must be provided. (see [below for nested schema](#nestedatt--items--conditions--threshold--indoor_air_quality))
 - `noise` (Attributes) Noise threshold. 'ambient' must be provided. (see [below for nested schema](#nestedatt--items--conditions--threshold--noise))
 - `pm25` (Attributes) PM2.5 concentration threshold. One of 'concentration' or 'quality' must be provided. (see [below for nested schema](#nestedatt--items--conditions--threshold--pm25))
+- `power_factor` (Attributes) Power factor threshold. 'percentage' must be provided. (see [below for nested schema](#nestedatt--items--conditions--threshold--power_factor))
+- `real_power` (Attributes) Real power threshold. 'draw' must be provided. (see [below for nested schema](#nestedatt--items--conditions--threshold--real_power))
 - `temperature` (Attributes) Temperature threshold. One of 'celsius', 'fahrenheit', or 'quality' must be provided. (see [below for nested schema](#nestedatt--items--conditions--threshold--temperature))
 - `tvoc` (Attributes) TVOC concentration threshold. One of 'concentration' or 'quality' must be provided. (see [below for nested schema](#nestedatt--items--conditions--threshold--tvoc))
+- `upstream_power` (Attributes) Upstream power threshold. 'outageDetected' must be provided and set to true. (see [below for nested schema](#nestedatt--items--conditions--threshold--upstream_power))
+- `voltage` (Attributes) Voltage threshold. 'level' must be provided. (see [below for nested schema](#nestedatt--items--conditions--threshold--voltage))
 - `water` (Attributes) Water detection threshold. 'present' must be provided and set to true. (see [below for nested schema](#nestedatt--items--conditions--threshold--water))
+
+<a id="nestedatt--items--conditions--threshold--apparent_power"></a>
+### Nested Schema for `items.conditions.threshold.water`
+
+Read-Only:
+
+- `draw` (Number) Alerting threshold in volt-amps. Must be between 0 and 3750.
+
+
+<a id="nestedatt--items--conditions--threshold--current"></a>
+### Nested Schema for `items.conditions.threshold.water`
+
+Read-Only:
+
+- `draw` (Number) Alerting threshold in amps. Must be between 0 and 15.
+
 
 <a id="nestedatt--items--conditions--threshold--door"></a>
 ### Nested Schema for `items.conditions.threshold.water`
@@ -224,6 +310,14 @@ Read-Only:
 Read-Only:
 
 - `open` (Boolean) Alerting threshold for a door open event. Must be set to true.
+
+
+<a id="nestedatt--items--conditions--threshold--frequency"></a>
+### Nested Schema for `items.conditions.threshold.water`
+
+Read-Only:
+
+- `level` (Number) Alerting threshold in hertz. Must be between 0 and 60.
 
 
 <a id="nestedatt--items--conditions--threshold--humidity"></a>
@@ -270,6 +364,22 @@ Read-Only:
 - `quality` (String) Alerting threshold as a qualitative PM2.5 level.
 
 
+<a id="nestedatt--items--conditions--threshold--power_factor"></a>
+### Nested Schema for `items.conditions.threshold.water`
+
+Read-Only:
+
+- `percentage` (Number) Alerting threshold as the ratio of active power to apparent power. Must be between 0 and 100.
+
+
+<a id="nestedatt--items--conditions--threshold--real_power"></a>
+### Nested Schema for `items.conditions.threshold.water`
+
+Read-Only:
+
+- `draw` (Number) Alerting threshold in watts. Must be between 0 and 3750.
+
+
 <a id="nestedatt--items--conditions--threshold--temperature"></a>
 ### Nested Schema for `items.conditions.threshold.water`
 
@@ -287,6 +397,22 @@ Read-Only:
 
 - `concentration` (Number) Alerting threshold as TVOC micrograms per cubic meter.
 - `quality` (String) Alerting threshold as a qualitative TVOC level.
+
+
+<a id="nestedatt--items--conditions--threshold--upstream_power"></a>
+### Nested Schema for `items.conditions.threshold.water`
+
+Read-Only:
+
+- `outage_detected` (Boolean) Alerting threshold for an upstream power event. Must be set to true.
+
+
+<a id="nestedatt--items--conditions--threshold--voltage"></a>
+### Nested Schema for `items.conditions.threshold.water`
+
+Read-Only:
+
+- `level` (Number) Alerting threshold in volts. Must be between 0 and 250.
 
 
 <a id="nestedatt--items--conditions--threshold--water"></a>

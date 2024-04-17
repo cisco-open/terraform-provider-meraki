@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -78,15 +62,15 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 				Attributes: map[string]schema.Attribute{
 
 					"access_policy_number": schema.Int64Attribute{
-						MarkdownDescription: `The number of a custom access policy to configure on the switch profile port. Only applicable when 'accessPolicyType' is 'Custom access policy'.`,
+						MarkdownDescription: `The number of a custom access policy to configure on the switch template port. Only applicable when 'accessPolicyType' is 'Custom access policy'.`,
 						Computed:            true,
 					},
 					"access_policy_type": schema.StringAttribute{
-						MarkdownDescription: `The type of the access policy of the switch profile port. Only applicable to access ports. Can be one of 'Open', 'Custom access policy', 'MAC allow list' or 'Sticky MAC allow list'.`,
+						MarkdownDescription: `The type of the access policy of the switch template port. Only applicable to access ports. Can be one of 'Open', 'Custom access policy', 'MAC allow list' or 'Sticky MAC allow list'.`,
 						Computed:            true,
 					},
 					"allowed_vlans": schema.StringAttribute{
-						MarkdownDescription: `The VLANs allowed on the switch profile port. Only applicable to trunk ports.`,
+						MarkdownDescription: `The VLANs allowed on the switch template port. Only applicable to trunk ports.`,
 						Computed:            true,
 					},
 					"dai_trusted": schema.BoolAttribute{
@@ -94,7 +78,7 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 						Computed:            true,
 					},
 					"enabled": schema.BoolAttribute{
-						MarkdownDescription: `The status of the switch profile port.`,
+						MarkdownDescription: `The status of the switch template port.`,
 						Computed:            true,
 					},
 					"flexible_stacking_enabled": schema.BoolAttribute{
@@ -102,15 +86,15 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 						Computed:            true,
 					},
 					"isolation_enabled": schema.BoolAttribute{
-						MarkdownDescription: `The isolation status of the switch profile port.`,
+						MarkdownDescription: `The isolation status of the switch template port.`,
 						Computed:            true,
 					},
 					"link_negotiation": schema.StringAttribute{
-						MarkdownDescription: `The link speed for the switch profile port.`,
+						MarkdownDescription: `The link speed for the switch template port.`,
 						Computed:            true,
 					},
 					"link_negotiation_capabilities": schema.ListAttribute{
-						MarkdownDescription: `Available link speeds for the switch profile port.`,
+						MarkdownDescription: `Available link speeds for the switch template port.`,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
@@ -119,16 +103,38 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
+					"mirror": schema.SingleNestedAttribute{
+						MarkdownDescription: `Port mirror`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"mode": schema.StringAttribute{
+								MarkdownDescription: `The port mirror mode. Can be one of ('Destination port', 'Source port' or 'Not mirroring traffic').`,
+								Computed:            true,
+							},
+						},
+					},
+					"module": schema.SingleNestedAttribute{
+						MarkdownDescription: `Expansion module`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"model": schema.StringAttribute{
+								MarkdownDescription: `The model of the expansion module.`,
+								Computed:            true,
+							},
+						},
+					},
 					"name": schema.StringAttribute{
-						MarkdownDescription: `The name of the switch profile port.`,
+						MarkdownDescription: `The name of the switch template port.`,
 						Computed:            true,
 					},
 					"poe_enabled": schema.BoolAttribute{
-						MarkdownDescription: `The PoE status of the switch profile port.`,
+						MarkdownDescription: `The PoE status of the switch template port.`,
 						Computed:            true,
 					},
 					"port_id": schema.StringAttribute{
-						MarkdownDescription: `The identifier of the switch profile port.`,
+						MarkdownDescription: `The identifier of the switch template port.`,
 						Computed:            true,
 					},
 					"port_schedule_id": schema.StringAttribute{
@@ -168,7 +174,7 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 						Computed:            true,
 					},
 					"storm_control_enabled": schema.BoolAttribute{
-						MarkdownDescription: `The storm control status of the switch profile port.`,
+						MarkdownDescription: `The storm control status of the switch template port.`,
 						Computed:            true,
 					},
 					"stp_guard": schema.StringAttribute{
@@ -176,12 +182,12 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 						Computed:            true,
 					},
 					"tags": schema.ListAttribute{
-						MarkdownDescription: `The list of tags of the switch profile port.`,
+						MarkdownDescription: `The list of tags of the switch template port.`,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
 					"type": schema.StringAttribute{
-						MarkdownDescription: `The type of the switch profile port ('trunk' or 'access').`,
+						MarkdownDescription: `The type of the switch template port ('trunk' or 'access').`,
 						Computed:            true,
 					},
 					"udld": schema.StringAttribute{
@@ -189,11 +195,11 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 						Computed:            true,
 					},
 					"vlan": schema.Int64Attribute{
-						MarkdownDescription: `The VLAN of the switch profile port. A null value will clear the value set for trunk ports.`,
+						MarkdownDescription: `The VLAN of the switch template port. For a trunk port, this is the native VLAN. A null value will clear the value set for trunk ports.`,
 						Computed:            true,
 					},
 					"voice_vlan": schema.Int64Attribute{
-						MarkdownDescription: `The voice VLAN of the switch profile port. Only applicable to access ports.`,
+						MarkdownDescription: `The voice VLAN of the switch template port. Only applicable to access ports.`,
 						Computed:            true,
 					},
 				},
@@ -206,15 +212,15 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 					Attributes: map[string]schema.Attribute{
 
 						"access_policy_number": schema.Int64Attribute{
-							MarkdownDescription: `The number of a custom access policy to configure on the switch profile port. Only applicable when 'accessPolicyType' is 'Custom access policy'.`,
+							MarkdownDescription: `The number of a custom access policy to configure on the switch template port. Only applicable when 'accessPolicyType' is 'Custom access policy'.`,
 							Computed:            true,
 						},
 						"access_policy_type": schema.StringAttribute{
-							MarkdownDescription: `The type of the access policy of the switch profile port. Only applicable to access ports. Can be one of 'Open', 'Custom access policy', 'MAC allow list' or 'Sticky MAC allow list'.`,
+							MarkdownDescription: `The type of the access policy of the switch template port. Only applicable to access ports. Can be one of 'Open', 'Custom access policy', 'MAC allow list' or 'Sticky MAC allow list'.`,
 							Computed:            true,
 						},
 						"allowed_vlans": schema.StringAttribute{
-							MarkdownDescription: `The VLANs allowed on the switch profile port. Only applicable to trunk ports.`,
+							MarkdownDescription: `The VLANs allowed on the switch template port. Only applicable to trunk ports.`,
 							Computed:            true,
 						},
 						"dai_trusted": schema.BoolAttribute{
@@ -222,7 +228,7 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 							Computed:            true,
 						},
 						"enabled": schema.BoolAttribute{
-							MarkdownDescription: `The status of the switch profile port.`,
+							MarkdownDescription: `The status of the switch template port.`,
 							Computed:            true,
 						},
 						"flexible_stacking_enabled": schema.BoolAttribute{
@@ -230,15 +236,15 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 							Computed:            true,
 						},
 						"isolation_enabled": schema.BoolAttribute{
-							MarkdownDescription: `The isolation status of the switch profile port.`,
+							MarkdownDescription: `The isolation status of the switch template port.`,
 							Computed:            true,
 						},
 						"link_negotiation": schema.StringAttribute{
-							MarkdownDescription: `The link speed for the switch profile port.`,
+							MarkdownDescription: `The link speed for the switch template port.`,
 							Computed:            true,
 						},
 						"link_negotiation_capabilities": schema.ListAttribute{
-							MarkdownDescription: `Available link speeds for the switch profile port.`,
+							MarkdownDescription: `Available link speeds for the switch template port.`,
 							Computed:            true,
 							ElementType:         types.StringType,
 						},
@@ -247,16 +253,38 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 							Computed:            true,
 							ElementType:         types.StringType,
 						},
+						"mirror": schema.SingleNestedAttribute{
+							MarkdownDescription: `Port mirror`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"mode": schema.StringAttribute{
+									MarkdownDescription: `The port mirror mode. Can be one of ('Destination port', 'Source port' or 'Not mirroring traffic').`,
+									Computed:            true,
+								},
+							},
+						},
+						"module": schema.SingleNestedAttribute{
+							MarkdownDescription: `Expansion module`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"model": schema.StringAttribute{
+									MarkdownDescription: `The model of the expansion module.`,
+									Computed:            true,
+								},
+							},
+						},
 						"name": schema.StringAttribute{
-							MarkdownDescription: `The name of the switch profile port.`,
+							MarkdownDescription: `The name of the switch template port.`,
 							Computed:            true,
 						},
 						"poe_enabled": schema.BoolAttribute{
-							MarkdownDescription: `The PoE status of the switch profile port.`,
+							MarkdownDescription: `The PoE status of the switch template port.`,
 							Computed:            true,
 						},
 						"port_id": schema.StringAttribute{
-							MarkdownDescription: `The identifier of the switch profile port.`,
+							MarkdownDescription: `The identifier of the switch template port.`,
 							Computed:            true,
 						},
 						"port_schedule_id": schema.StringAttribute{
@@ -296,7 +324,7 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 							Computed:            true,
 						},
 						"storm_control_enabled": schema.BoolAttribute{
-							MarkdownDescription: `The storm control status of the switch profile port.`,
+							MarkdownDescription: `The storm control status of the switch template port.`,
 							Computed:            true,
 						},
 						"stp_guard": schema.StringAttribute{
@@ -304,12 +332,12 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 							Computed:            true,
 						},
 						"tags": schema.ListAttribute{
-							MarkdownDescription: `The list of tags of the switch profile port.`,
+							MarkdownDescription: `The list of tags of the switch template port.`,
 							Computed:            true,
 							ElementType:         types.StringType,
 						},
 						"type": schema.StringAttribute{
-							MarkdownDescription: `The type of the switch profile port ('trunk' or 'access').`,
+							MarkdownDescription: `The type of the switch template port ('trunk' or 'access').`,
 							Computed:            true,
 						},
 						"udld": schema.StringAttribute{
@@ -317,11 +345,11 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 							Computed:            true,
 						},
 						"vlan": schema.Int64Attribute{
-							MarkdownDescription: `The VLAN of the switch profile port. A null value will clear the value set for trunk ports.`,
+							MarkdownDescription: `The VLAN of the switch template port. For a trunk port, this is the native VLAN. A null value will clear the value set for trunk ports.`,
 							Computed:            true,
 						},
 						"voice_vlan": schema.Int64Attribute{
-							MarkdownDescription: `The voice VLAN of the switch profile port. Only applicable to access ports.`,
+							MarkdownDescription: `The voice VLAN of the switch template port. Only applicable to access ports.`,
 							Computed:            true,
 						},
 					},
@@ -422,6 +450,8 @@ type ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePorts struct {
 	LinkNegotiation             types.String                                                              `tfsdk:"link_negotiation"`
 	LinkNegotiationCapabilities types.List                                                                `tfsdk:"link_negotiation_capabilities"`
 	MacAllowList                types.List                                                                `tfsdk:"mac_allow_list"`
+	Mirror                      *ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsMirror  `tfsdk:"mirror"`
+	Module                      *ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsModule  `tfsdk:"module"`
 	Name                        types.String                                                              `tfsdk:"name"`
 	PoeEnabled                  types.Bool                                                                `tfsdk:"poe_enabled"`
 	PortID                      types.String                                                              `tfsdk:"port_id"`
@@ -437,6 +467,14 @@ type ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePorts struct {
 	Udld                        types.String                                                              `tfsdk:"udld"`
 	VLAN                        types.Int64                                                               `tfsdk:"vlan"`
 	VoiceVLAN                   types.Int64                                                               `tfsdk:"voice_vlan"`
+}
+
+type ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsMirror struct {
+	Mode types.String `tfsdk:"mode"`
+}
+
+type ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsModule struct {
+	Model types.String `tfsdk:"model"`
 }
 
 type ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsProfile struct {
@@ -456,6 +494,8 @@ type ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePort struct {
 	LinkNegotiation             types.String                                                         `tfsdk:"link_negotiation"`
 	LinkNegotiationCapabilities types.List                                                           `tfsdk:"link_negotiation_capabilities"`
 	MacAllowList                types.List                                                           `tfsdk:"mac_allow_list"`
+	Mirror                      *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortMirror  `tfsdk:"mirror"`
+	Module                      *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortModule  `tfsdk:"module"`
 	Name                        types.String                                                         `tfsdk:"name"`
 	PoeEnabled                  types.Bool                                                           `tfsdk:"poe_enabled"`
 	PortID                      types.String                                                         `tfsdk:"port_id"`
@@ -471,6 +511,14 @@ type ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePort struct {
 	Udld                        types.String                                                         `tfsdk:"udld"`
 	VLAN                        types.Int64                                                          `tfsdk:"vlan"`
 	VoiceVLAN                   types.Int64                                                          `tfsdk:"voice_vlan"`
+}
+
+type ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortMirror struct {
+	Mode types.String `tfsdk:"mode"`
+}
+
+type ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortModule struct {
+	Model types.String `tfsdk:"model"`
 }
 
 type ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortProfile struct {
@@ -519,7 +567,23 @@ func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortsItemsToBody(st
 			LinkNegotiation:             types.StringValue(item.LinkNegotiation),
 			LinkNegotiationCapabilities: StringSliceToList(item.LinkNegotiationCapabilities),
 			MacAllowList:                StringSliceToList(item.MacAllowList),
-			Name:                        types.StringValue(item.Name),
+			Mirror: func() *ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsMirror {
+				if item.Mirror != nil {
+					return &ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsMirror{
+						Mode: types.StringValue(item.Mirror.Mode),
+					}
+				}
+				return &ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsMirror{}
+			}(),
+			Module: func() *ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsModule {
+				if item.Module != nil {
+					return &ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsModule{
+						Model: types.StringValue(item.Module.Model),
+					}
+				}
+				return &ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsModule{}
+			}(),
+			Name: types.StringValue(item.Name),
 			PoeEnabled: func() types.Bool {
 				if item.PoeEnabled != nil {
 					return types.BoolValue(*item.PoeEnabled)
@@ -622,7 +686,23 @@ func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortItemToBody(stat
 		LinkNegotiation:             types.StringValue(response.LinkNegotiation),
 		LinkNegotiationCapabilities: StringSliceToList(response.LinkNegotiationCapabilities),
 		MacAllowList:                StringSliceToList(response.MacAllowList),
-		Name:                        types.StringValue(response.Name),
+		Mirror: func() *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortMirror {
+			if response.Mirror != nil {
+				return &ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortMirror{
+					Mode: types.StringValue(response.Mirror.Mode),
+				}
+			}
+			return &ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortMirror{}
+		}(),
+		Module: func() *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortModule {
+			if response.Module != nil {
+				return &ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortModule{
+					Model: types.StringValue(response.Module.Model),
+				}
+			}
+			return &ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortModule{}
+		}(),
+		Name: types.StringValue(response.Name),
 		PoeEnabled: func() types.Bool {
 			if response.PoeEnabled != nil {
 				return types.BoolValue(*response.PoeEnabled)

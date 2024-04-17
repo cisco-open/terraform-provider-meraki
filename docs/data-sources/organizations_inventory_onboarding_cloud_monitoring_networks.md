@@ -19,6 +19,7 @@ data "meraki_organizations_inventory_onboarding_cloud_monitoring_networks" "exam
   ending_before   = "string"
   organization_id = "string"
   per_page        = 1
+  search          = "string"
   starting_after  = "string"
 }
 
@@ -39,6 +40,7 @@ output "meraki_organizations_inventory_onboarding_cloud_monitoring_networks_exam
 
 - `ending_before` (String) endingBefore query parameter. A token used by the server to indicate the end of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.
 - `per_page` (Number) perPage query parameter. The number of entries per page returned. Acceptable range is 3 100000. Default is 1000.
+- `search` (String) search query parameter. Optional parameter to search on network name
 - `starting_after` (String) startingAfter query parameter. A token used by the server to indicate the start of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.
 
 ### Read-Only

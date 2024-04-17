@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -70,151 +54,194 @@ func (d *NetworksFloorPlansDataSource) Schema(_ context.Context, _ datasource.Sc
 				Attributes: map[string]schema.Attribute{
 
 					"bottom_left_corner": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `The longitude and latitude of the bottom left corner of your floor plan.`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"lat": schema.Float64Attribute{
-								Computed: true,
+								MarkdownDescription: `Latitude`,
+								Computed:            true,
 							},
 							"lng": schema.Float64Attribute{
-								Computed: true,
+								MarkdownDescription: `Longitude`,
+								Computed:            true,
 							},
 						},
 					},
 					"bottom_right_corner": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `The longitude and latitude of the bottom right corner of your floor plan.`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"lat": schema.Float64Attribute{
-								Computed: true,
+								MarkdownDescription: `Latitude`,
+								Computed:            true,
 							},
 							"lng": schema.Float64Attribute{
-								Computed: true,
+								MarkdownDescription: `Longitude`,
+								Computed:            true,
 							},
 						},
 					},
 					"center": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `The longitude and latitude of the center of your floor plan. The 'center' or two adjacent corners (e.g. 'topLeftCorner' and 'bottomLeftCorner') must be specified. If 'center' is specified, the floor plan is placed over that point with no rotation. If two adjacent corners are specified, the floor plan is rotated to line up with the two specified points. The aspect ratio of the floor plan's image is preserved regardless of which corners/center are specified. (This means if that more than two corners are specified, only two corners may be used to preserve the floor plan's aspect ratio.). No two points can have the same latitude, longitude pair.`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"lat": schema.Float64Attribute{
-								Computed: true,
+								MarkdownDescription: `Latitude`,
+								Computed:            true,
 							},
 							"lng": schema.Float64Attribute{
-								Computed: true,
+								MarkdownDescription: `Longitude`,
+								Computed:            true,
 							},
 						},
 					},
 					"devices": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `List of devices for the floorplan`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"address": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Physical address of the device`,
+									Computed:            true,
 								},
-								"beacon_id_params": schema.SingleNestedAttribute{
-									Computed: true,
-									Attributes: map[string]schema.Attribute{
+								"details": schema.SetNestedAttribute{
+									MarkdownDescription: `Additional device information`,
+									Computed:            true,
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
 
-										"major": schema.Int64Attribute{
-											Computed: true,
-										},
-										"minor": schema.Int64Attribute{
-											Computed: true,
-										},
-										"uuid": schema.StringAttribute{
-											Computed: true,
+											"name": schema.StringAttribute{
+												MarkdownDescription: `Additional property name`,
+												Computed:            true,
+											},
+											"value": schema.StringAttribute{
+												MarkdownDescription: `Additional property value`,
+												Computed:            true,
+											},
 										},
 									},
 								},
 								"firmware": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Firmware version of the device`,
+									Computed:            true,
 								},
-								"floor_plan_id": schema.StringAttribute{
-									Computed: true,
+								"imei": schema.StringAttribute{
+									MarkdownDescription: `IMEI of the device, if applicable`,
+									Computed:            true,
 								},
 								"lan_ip": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `LAN IP address of the device`,
+									Computed:            true,
 								},
 								"lat": schema.Float64Attribute{
-									Computed: true,
+									MarkdownDescription: `Latitude of the device`,
+									Computed:            true,
 								},
 								"lng": schema.Float64Attribute{
-									Computed: true,
+									MarkdownDescription: `Longitude of the device`,
+									Computed:            true,
 								},
 								"mac": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `MAC address of the device`,
+									Computed:            true,
 								},
 								"model": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Model of the device`,
+									Computed:            true,
 								},
 								"name": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Name of the device`,
+									Computed:            true,
 								},
 								"network_id": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `ID of the network the device belongs to`,
+									Computed:            true,
 								},
 								"notes": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Notes for the device, limited to 255 characters`,
+									Computed:            true,
+								},
+								"product_type": schema.StringAttribute{
+									MarkdownDescription: `Product type of the device`,
+									Computed:            true,
 								},
 								"serial": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Serial number of the device`,
+									Computed:            true,
 								},
 								"tags": schema.ListAttribute{
-									Computed:    true,
-									ElementType: types.StringType,
+									MarkdownDescription: `List of tags assigned to the device`,
+									Computed:            true,
+									ElementType:         types.StringType,
 								},
 							},
 						},
 					},
 					"floor_plan_id": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Floor plan ID`,
+						Computed:            true,
 					},
 					"height": schema.Float64Attribute{
-						Computed: true,
+						MarkdownDescription: `The height of your floor plan.`,
+						Computed:            true,
 					},
 					"image_extension": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The format type of the image.`,
+						Computed:            true,
 					},
 					"image_md5": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The file contents (a base 64 encoded string) of your new image. Supported formats are PNG, GIF, and JPG. Note that all images are saved as PNG files, regardless of the format they are uploaded in. If you upload a new image, and you do NOT specify any new geolocation fields ('center, 'topLeftCorner', etc), the floor plan will be recentered with no rotation in order to maintain the aspect ratio of your new image.`,
+						Computed:            true,
 					},
 					"image_url": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The url link for the floor plan image.`,
+						Computed:            true,
 					},
 					"image_url_expires_at": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The time the image url link will expire.`,
+						Computed:            true,
 					},
 					"name": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The name of your floor plan.`,
+						Computed:            true,
 					},
 					"top_left_corner": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `The longitude and latitude of the top left corner of your floor plan.`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"lat": schema.Float64Attribute{
-								Computed: true,
+								MarkdownDescription: `Latitude`,
+								Computed:            true,
 							},
 							"lng": schema.Float64Attribute{
-								Computed: true,
+								MarkdownDescription: `Longitude`,
+								Computed:            true,
 							},
 						},
 					},
 					"top_right_corner": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `The longitude and latitude of the top right corner of your floor plan.`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"lat": schema.Float64Attribute{
-								Computed: true,
+								MarkdownDescription: `Latitude`,
+								Computed:            true,
 							},
 							"lng": schema.Float64Attribute{
-								Computed: true,
+								MarkdownDescription: `Longitude`,
+								Computed:            true,
 							},
 						},
 					},
-					"width": schema.Int64Attribute{
-						Computed: true,
+					"width": schema.Float64Attribute{
+						MarkdownDescription: `The width of your floor plan.`,
+						Computed:            true,
 					},
 				},
 			},
@@ -226,151 +253,194 @@ func (d *NetworksFloorPlansDataSource) Schema(_ context.Context, _ datasource.Sc
 					Attributes: map[string]schema.Attribute{
 
 						"bottom_left_corner": schema.SingleNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `The longitude and latitude of the bottom left corner of your floor plan.`,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
 								"lat": schema.Float64Attribute{
-									Computed: true,
+									MarkdownDescription: `Latitude`,
+									Computed:            true,
 								},
 								"lng": schema.Float64Attribute{
-									Computed: true,
+									MarkdownDescription: `Longitude`,
+									Computed:            true,
 								},
 							},
 						},
 						"bottom_right_corner": schema.SingleNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `The longitude and latitude of the bottom right corner of your floor plan.`,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
 								"lat": schema.Float64Attribute{
-									Computed: true,
+									MarkdownDescription: `Latitude`,
+									Computed:            true,
 								},
 								"lng": schema.Float64Attribute{
-									Computed: true,
+									MarkdownDescription: `Longitude`,
+									Computed:            true,
 								},
 							},
 						},
 						"center": schema.SingleNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `The longitude and latitude of the center of your floor plan. The 'center' or two adjacent corners (e.g. 'topLeftCorner' and 'bottomLeftCorner') must be specified. If 'center' is specified, the floor plan is placed over that point with no rotation. If two adjacent corners are specified, the floor plan is rotated to line up with the two specified points. The aspect ratio of the floor plan's image is preserved regardless of which corners/center are specified. (This means if that more than two corners are specified, only two corners may be used to preserve the floor plan's aspect ratio.). No two points can have the same latitude, longitude pair.`,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
 								"lat": schema.Float64Attribute{
-									Computed: true,
+									MarkdownDescription: `Latitude`,
+									Computed:            true,
 								},
 								"lng": schema.Float64Attribute{
-									Computed: true,
+									MarkdownDescription: `Longitude`,
+									Computed:            true,
 								},
 							},
 						},
 						"devices": schema.SetNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `List of devices for the floorplan`,
+							Computed:            true,
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 
 									"address": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `Physical address of the device`,
+										Computed:            true,
 									},
-									"beacon_id_params": schema.SingleNestedAttribute{
-										Computed: true,
-										Attributes: map[string]schema.Attribute{
+									"details": schema.SetNestedAttribute{
+										MarkdownDescription: `Additional device information`,
+										Computed:            true,
+										NestedObject: schema.NestedAttributeObject{
+											Attributes: map[string]schema.Attribute{
 
-											"major": schema.Int64Attribute{
-												Computed: true,
-											},
-											"minor": schema.Int64Attribute{
-												Computed: true,
-											},
-											"uuid": schema.StringAttribute{
-												Computed: true,
+												"name": schema.StringAttribute{
+													MarkdownDescription: `Additional property name`,
+													Computed:            true,
+												},
+												"value": schema.StringAttribute{
+													MarkdownDescription: `Additional property value`,
+													Computed:            true,
+												},
 											},
 										},
 									},
 									"firmware": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `Firmware version of the device`,
+										Computed:            true,
 									},
-									"floor_plan_id": schema.StringAttribute{
-										Computed: true,
+									"imei": schema.StringAttribute{
+										MarkdownDescription: `IMEI of the device, if applicable`,
+										Computed:            true,
 									},
 									"lan_ip": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `LAN IP address of the device`,
+										Computed:            true,
 									},
 									"lat": schema.Float64Attribute{
-										Computed: true,
+										MarkdownDescription: `Latitude of the device`,
+										Computed:            true,
 									},
 									"lng": schema.Float64Attribute{
-										Computed: true,
+										MarkdownDescription: `Longitude of the device`,
+										Computed:            true,
 									},
 									"mac": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `MAC address of the device`,
+										Computed:            true,
 									},
 									"model": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `Model of the device`,
+										Computed:            true,
 									},
 									"name": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `Name of the device`,
+										Computed:            true,
 									},
 									"network_id": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `ID of the network the device belongs to`,
+										Computed:            true,
 									},
 									"notes": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `Notes for the device, limited to 255 characters`,
+										Computed:            true,
+									},
+									"product_type": schema.StringAttribute{
+										MarkdownDescription: `Product type of the device`,
+										Computed:            true,
 									},
 									"serial": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `Serial number of the device`,
+										Computed:            true,
 									},
 									"tags": schema.ListAttribute{
-										Computed:    true,
-										ElementType: types.StringType,
+										MarkdownDescription: `List of tags assigned to the device`,
+										Computed:            true,
+										ElementType:         types.StringType,
 									},
 								},
 							},
 						},
 						"floor_plan_id": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Floor plan ID`,
+							Computed:            true,
 						},
 						"height": schema.Float64Attribute{
-							Computed: true,
+							MarkdownDescription: `The height of your floor plan.`,
+							Computed:            true,
 						},
 						"image_extension": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The format type of the image.`,
+							Computed:            true,
 						},
 						"image_md5": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The file contents (a base 64 encoded string) of your new image. Supported formats are PNG, GIF, and JPG. Note that all images are saved as PNG files, regardless of the format they are uploaded in. If you upload a new image, and you do NOT specify any new geolocation fields ('center, 'topLeftCorner', etc), the floor plan will be recentered with no rotation in order to maintain the aspect ratio of your new image.`,
+							Computed:            true,
 						},
 						"image_url": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The url link for the floor plan image.`,
+							Computed:            true,
 						},
 						"image_url_expires_at": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The time the image url link will expire.`,
+							Computed:            true,
 						},
 						"name": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The name of your floor plan.`,
+							Computed:            true,
 						},
 						"top_left_corner": schema.SingleNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `The longitude and latitude of the top left corner of your floor plan.`,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
 								"lat": schema.Float64Attribute{
-									Computed: true,
+									MarkdownDescription: `Latitude`,
+									Computed:            true,
 								},
 								"lng": schema.Float64Attribute{
-									Computed: true,
+									MarkdownDescription: `Longitude`,
+									Computed:            true,
 								},
 							},
 						},
 						"top_right_corner": schema.SingleNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `The longitude and latitude of the top right corner of your floor plan.`,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
 								"lat": schema.Float64Attribute{
-									Computed: true,
+									MarkdownDescription: `Latitude`,
+									Computed:            true,
 								},
 								"lng": schema.Float64Attribute{
-									Computed: true,
+									MarkdownDescription: `Longitude`,
+									Computed:            true,
 								},
 							},
 						},
-						"width": schema.Int64Attribute{
-							Computed: true,
+						"width": schema.Float64Attribute{
+							MarkdownDescription: `The width of your floor plan.`,
+							Computed:            true,
 						},
 					},
 				},
@@ -467,7 +537,7 @@ type ResponseItemNetworksGetNetworkFloorPlans struct {
 	Name              types.String                                               `tfsdk:"name"`
 	TopLeftCorner     *ResponseItemNetworksGetNetworkFloorPlansTopLeftCorner     `tfsdk:"top_left_corner"`
 	TopRightCorner    *ResponseItemNetworksGetNetworkFloorPlansTopRightCorner    `tfsdk:"top_right_corner"`
-	Width             types.Int64                                                `tfsdk:"width"`
+	Width             types.Float64                                              `tfsdk:"width"`
 }
 
 type ResponseItemNetworksGetNetworkFloorPlansBottomLeftCorner struct {
@@ -486,26 +556,26 @@ type ResponseItemNetworksGetNetworkFloorPlansCenter struct {
 }
 
 type ResponseItemNetworksGetNetworkFloorPlansDevices struct {
-	Address        types.String                                                   `tfsdk:"address"`
-	BeaconIDParams *ResponseItemNetworksGetNetworkFloorPlansDevicesBeaconIdParams `tfsdk:"beacon_id_params"`
-	Firmware       types.String                                                   `tfsdk:"firmware"`
-	FloorPlanID    types.String                                                   `tfsdk:"floor_plan_id"`
-	LanIP          types.String                                                   `tfsdk:"lan_ip"`
-	Lat            types.Float64                                                  `tfsdk:"lat"`
-	Lng            types.Float64                                                  `tfsdk:"lng"`
-	Mac            types.String                                                   `tfsdk:"mac"`
-	Model          types.String                                                   `tfsdk:"model"`
-	Name           types.String                                                   `tfsdk:"name"`
-	NetworkID      types.String                                                   `tfsdk:"network_id"`
-	Notes          types.String                                                   `tfsdk:"notes"`
-	Serial         types.String                                                   `tfsdk:"serial"`
-	Tags           types.List                                                     `tfsdk:"tags"`
+	Address     types.String                                              `tfsdk:"address"`
+	Details     *[]ResponseItemNetworksGetNetworkFloorPlansDevicesDetails `tfsdk:"details"`
+	Firmware    types.String                                              `tfsdk:"firmware"`
+	Imei        types.String                                              `tfsdk:"imei"`
+	LanIP       types.String                                              `tfsdk:"lan_ip"`
+	Lat         types.Float64                                             `tfsdk:"lat"`
+	Lng         types.Float64                                             `tfsdk:"lng"`
+	Mac         types.String                                              `tfsdk:"mac"`
+	Model       types.String                                              `tfsdk:"model"`
+	Name        types.String                                              `tfsdk:"name"`
+	NetworkID   types.String                                              `tfsdk:"network_id"`
+	Notes       types.String                                              `tfsdk:"notes"`
+	ProductType types.String                                              `tfsdk:"product_type"`
+	Serial      types.String                                              `tfsdk:"serial"`
+	Tags        types.List                                                `tfsdk:"tags"`
 }
 
-type ResponseItemNetworksGetNetworkFloorPlansDevicesBeaconIdParams struct {
-	Major types.Int64  `tfsdk:"major"`
-	Minor types.Int64  `tfsdk:"minor"`
-	UUID  types.String `tfsdk:"uuid"`
+type ResponseItemNetworksGetNetworkFloorPlansDevicesDetails struct {
+	Name  types.String `tfsdk:"name"`
+	Value types.String `tfsdk:"value"`
 }
 
 type ResponseItemNetworksGetNetworkFloorPlansTopLeftCorner struct {
@@ -532,7 +602,7 @@ type ResponseNetworksGetNetworkFloorPlan struct {
 	Name              types.String                                          `tfsdk:"name"`
 	TopLeftCorner     *ResponseNetworksGetNetworkFloorPlanTopLeftCorner     `tfsdk:"top_left_corner"`
 	TopRightCorner    *ResponseNetworksGetNetworkFloorPlanTopRightCorner    `tfsdk:"top_right_corner"`
-	Width             types.Int64                                           `tfsdk:"width"`
+	Width             types.Float64                                         `tfsdk:"width"`
 }
 
 type ResponseNetworksGetNetworkFloorPlanBottomLeftCorner struct {
@@ -551,26 +621,26 @@ type ResponseNetworksGetNetworkFloorPlanCenter struct {
 }
 
 type ResponseNetworksGetNetworkFloorPlanDevices struct {
-	Address        types.String                                              `tfsdk:"address"`
-	BeaconIDParams *ResponseNetworksGetNetworkFloorPlanDevicesBeaconIdParams `tfsdk:"beacon_id_params"`
-	Firmware       types.String                                              `tfsdk:"firmware"`
-	FloorPlanID    types.String                                              `tfsdk:"floor_plan_id"`
-	LanIP          types.String                                              `tfsdk:"lan_ip"`
-	Lat            types.Float64                                             `tfsdk:"lat"`
-	Lng            types.Float64                                             `tfsdk:"lng"`
-	Mac            types.String                                              `tfsdk:"mac"`
-	Model          types.String                                              `tfsdk:"model"`
-	Name           types.String                                              `tfsdk:"name"`
-	NetworkID      types.String                                              `tfsdk:"network_id"`
-	Notes          types.String                                              `tfsdk:"notes"`
-	Serial         types.String                                              `tfsdk:"serial"`
-	Tags           types.List                                                `tfsdk:"tags"`
+	Address     types.String                                         `tfsdk:"address"`
+	Details     *[]ResponseNetworksGetNetworkFloorPlanDevicesDetails `tfsdk:"details"`
+	Firmware    types.String                                         `tfsdk:"firmware"`
+	Imei        types.String                                         `tfsdk:"imei"`
+	LanIP       types.String                                         `tfsdk:"lan_ip"`
+	Lat         types.Float64                                        `tfsdk:"lat"`
+	Lng         types.Float64                                        `tfsdk:"lng"`
+	Mac         types.String                                         `tfsdk:"mac"`
+	Model       types.String                                         `tfsdk:"model"`
+	Name        types.String                                         `tfsdk:"name"`
+	NetworkID   types.String                                         `tfsdk:"network_id"`
+	Notes       types.String                                         `tfsdk:"notes"`
+	ProductType types.String                                         `tfsdk:"product_type"`
+	Serial      types.String                                         `tfsdk:"serial"`
+	Tags        types.List                                           `tfsdk:"tags"`
 }
 
-type ResponseNetworksGetNetworkFloorPlanDevicesBeaconIdParams struct {
-	Major types.Int64  `tfsdk:"major"`
-	Minor types.Int64  `tfsdk:"minor"`
-	UUID  types.String `tfsdk:"uuid"`
+type ResponseNetworksGetNetworkFloorPlanDevicesDetails struct {
+	Name  types.String `tfsdk:"name"`
+	Value types.String `tfsdk:"value"`
 }
 
 type ResponseNetworksGetNetworkFloorPlanTopLeftCorner struct {
@@ -651,29 +721,22 @@ func ResponseNetworksGetNetworkFloorPlansItemsToBody(state NetworksFloorPlans, r
 					for i, devices := range *item.Devices {
 						result[i] = ResponseItemNetworksGetNetworkFloorPlansDevices{
 							Address: types.StringValue(devices.Address),
-							BeaconIDParams: func() *ResponseItemNetworksGetNetworkFloorPlansDevicesBeaconIdParams {
-								if devices.BeaconIDParams != nil {
-									return &ResponseItemNetworksGetNetworkFloorPlansDevicesBeaconIdParams{
-										Major: func() types.Int64 {
-											if devices.BeaconIDParams.Major != nil {
-												return types.Int64Value(int64(*devices.BeaconIDParams.Major))
-											}
-											return types.Int64{}
-										}(),
-										Minor: func() types.Int64 {
-											if devices.BeaconIDParams.Minor != nil {
-												return types.Int64Value(int64(*devices.BeaconIDParams.Minor))
-											}
-											return types.Int64{}
-										}(),
-										UUID: types.StringValue(devices.BeaconIDParams.UUID),
+							Details: func() *[]ResponseItemNetworksGetNetworkFloorPlansDevicesDetails {
+								if devices.Details != nil {
+									result := make([]ResponseItemNetworksGetNetworkFloorPlansDevicesDetails, len(*devices.Details))
+									for i, details := range *devices.Details {
+										result[i] = ResponseItemNetworksGetNetworkFloorPlansDevicesDetails{
+											Name:  types.StringValue(details.Name),
+											Value: types.StringValue(details.Value),
+										}
 									}
+									return &result
 								}
-								return &ResponseItemNetworksGetNetworkFloorPlansDevicesBeaconIdParams{}
+								return &[]ResponseItemNetworksGetNetworkFloorPlansDevicesDetails{}
 							}(),
-							Firmware:    types.StringValue(devices.Firmware),
-							FloorPlanID: types.StringValue(devices.FloorPlanID),
-							LanIP:       types.StringValue(devices.LanIP),
+							Firmware: types.StringValue(devices.Firmware),
+							Imei:     types.StringValue(devices.Imei),
+							LanIP:    types.StringValue(devices.LanIP),
 							Lat: func() types.Float64 {
 								if devices.Lat != nil {
 									return types.Float64Value(float64(*devices.Lat))
@@ -686,13 +749,14 @@ func ResponseNetworksGetNetworkFloorPlansItemsToBody(state NetworksFloorPlans, r
 								}
 								return types.Float64{}
 							}(),
-							Mac:       types.StringValue(devices.Mac),
-							Model:     types.StringValue(devices.Model),
-							Name:      types.StringValue(devices.Name),
-							NetworkID: types.StringValue(devices.NetworkID),
-							Notes:     types.StringValue(devices.Notes),
-							Serial:    types.StringValue(devices.Serial),
-							Tags:      StringSliceToList(devices.Tags),
+							Mac:         types.StringValue(devices.Mac),
+							Model:       types.StringValue(devices.Model),
+							Name:        types.StringValue(devices.Name),
+							NetworkID:   types.StringValue(devices.NetworkID),
+							Notes:       types.StringValue(devices.Notes),
+							ProductType: types.StringValue(devices.ProductType),
+							Serial:      types.StringValue(devices.Serial),
+							Tags:        StringSliceToList(devices.Tags),
 						}
 					}
 					return &result
@@ -749,11 +813,11 @@ func ResponseNetworksGetNetworkFloorPlansItemsToBody(state NetworksFloorPlans, r
 				}
 				return &ResponseItemNetworksGetNetworkFloorPlansTopRightCorner{}
 			}(),
-			Width: func() types.Int64 {
+			Width: func() types.Float64 {
 				if item.Width != nil {
-					return types.Int64Value(int64(*item.Width))
+					return types.Float64Value(float64(*item.Width))
 				}
-				return types.Int64{}
+				return types.Float64{}
 			}(),
 		}
 		items = append(items, itemState)
@@ -827,29 +891,22 @@ func ResponseNetworksGetNetworkFloorPlanItemToBody(state NetworksFloorPlans, res
 				for i, devices := range *response.Devices {
 					result[i] = ResponseNetworksGetNetworkFloorPlanDevices{
 						Address: types.StringValue(devices.Address),
-						BeaconIDParams: func() *ResponseNetworksGetNetworkFloorPlanDevicesBeaconIdParams {
-							if devices.BeaconIDParams != nil {
-								return &ResponseNetworksGetNetworkFloorPlanDevicesBeaconIdParams{
-									Major: func() types.Int64 {
-										if devices.BeaconIDParams.Major != nil {
-											return types.Int64Value(int64(*devices.BeaconIDParams.Major))
-										}
-										return types.Int64{}
-									}(),
-									Minor: func() types.Int64 {
-										if devices.BeaconIDParams.Minor != nil {
-											return types.Int64Value(int64(*devices.BeaconIDParams.Minor))
-										}
-										return types.Int64{}
-									}(),
-									UUID: types.StringValue(devices.BeaconIDParams.UUID),
+						Details: func() *[]ResponseNetworksGetNetworkFloorPlanDevicesDetails {
+							if devices.Details != nil {
+								result := make([]ResponseNetworksGetNetworkFloorPlanDevicesDetails, len(*devices.Details))
+								for i, details := range *devices.Details {
+									result[i] = ResponseNetworksGetNetworkFloorPlanDevicesDetails{
+										Name:  types.StringValue(details.Name),
+										Value: types.StringValue(details.Value),
+									}
 								}
+								return &result
 							}
-							return &ResponseNetworksGetNetworkFloorPlanDevicesBeaconIdParams{}
+							return &[]ResponseNetworksGetNetworkFloorPlanDevicesDetails{}
 						}(),
-						Firmware:    types.StringValue(devices.Firmware),
-						FloorPlanID: types.StringValue(devices.FloorPlanID),
-						LanIP:       types.StringValue(devices.LanIP),
+						Firmware: types.StringValue(devices.Firmware),
+						Imei:     types.StringValue(devices.Imei),
+						LanIP:    types.StringValue(devices.LanIP),
 						Lat: func() types.Float64 {
 							if devices.Lat != nil {
 								return types.Float64Value(float64(*devices.Lat))
@@ -862,13 +919,14 @@ func ResponseNetworksGetNetworkFloorPlanItemToBody(state NetworksFloorPlans, res
 							}
 							return types.Float64{}
 						}(),
-						Mac:       types.StringValue(devices.Mac),
-						Model:     types.StringValue(devices.Model),
-						Name:      types.StringValue(devices.Name),
-						NetworkID: types.StringValue(devices.NetworkID),
-						Notes:     types.StringValue(devices.Notes),
-						Serial:    types.StringValue(devices.Serial),
-						Tags:      StringSliceToList(devices.Tags),
+						Mac:         types.StringValue(devices.Mac),
+						Model:       types.StringValue(devices.Model),
+						Name:        types.StringValue(devices.Name),
+						NetworkID:   types.StringValue(devices.NetworkID),
+						Notes:       types.StringValue(devices.Notes),
+						ProductType: types.StringValue(devices.ProductType),
+						Serial:      types.StringValue(devices.Serial),
+						Tags:        StringSliceToList(devices.Tags),
 					}
 				}
 				return &result
@@ -925,11 +983,11 @@ func ResponseNetworksGetNetworkFloorPlanItemToBody(state NetworksFloorPlans, res
 			}
 			return &ResponseNetworksGetNetworkFloorPlanTopRightCorner{}
 		}(),
-		Width: func() types.Int64 {
+		Width: func() types.Float64 {
 			if response.Width != nil {
-				return types.Int64Value(int64(*response.Width))
+				return types.Float64Value(float64(*response.Width))
 			}
-			return types.Int64{}
+			return types.Float64{}
 		}(),
 	}
 	state.Item = &itemState

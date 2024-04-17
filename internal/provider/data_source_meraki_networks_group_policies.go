@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -70,190 +54,259 @@ func (d *NetworksGroupPoliciesDataSource) Schema(_ context.Context, _ datasource
 				Attributes: map[string]schema.Attribute{
 
 					"bandwidth": schema.SingleNestedAttribute{
+						MarkdownDescription: `    The bandwidth settings for clients bound to your group policy.
+`,
 						Computed: true,
 						Attributes: map[string]schema.Attribute{
 
 							"bandwidth_limits": schema.SingleNestedAttribute{
-								Computed: true,
+								MarkdownDescription: `The bandwidth limits object, specifying upload and download speed for clients bound to the group policy. These are only enforced if 'settings' is set to 'custom'.`,
+								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 
 									"limit_down": schema.Int64Attribute{
-										Computed: true,
+										MarkdownDescription: `The maximum download limit (integer, in Kbps). null indicates no limit`,
+										Computed:            true,
 									},
 									"limit_up": schema.Int64Attribute{
-										Computed: true,
+										MarkdownDescription: `The maximum upload limit (integer, in Kbps). null indicates no limit`,
+										Computed:            true,
 									},
 								},
 							},
 							"settings": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `How bandwidth limits are enforced. Can be 'network default', 'ignore' or 'custom'.`,
+								Computed:            true,
 							},
 						},
 					},
 					"bonjour_forwarding": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `The Bonjour settings for your group policy. Only valid if your network has a wireless configuration.`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"rules": schema.SetNestedAttribute{
-								Computed: true,
+								MarkdownDescription: `A list of the Bonjour forwarding rules for your group policy. If 'settings' is set to 'custom', at least one rule must be specified.`,
+								Computed:            true,
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
 
 										"description": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `A description for your Bonjour forwarding rule. Optional.`,
+											Computed:            true,
 										},
 										"services": schema.ListAttribute{
-											Computed:    true,
-											ElementType: types.StringType,
+											MarkdownDescription: `A list of Bonjour services. At least one service must be specified. Available services are 'All Services', 'AirPlay', 'AFP', 'BitTorrent', 'FTP', 'iChat', 'iTunes', 'Printers', 'Samba', 'Scanners' and 'SSH'`,
+											Computed:            true,
+											ElementType:         types.StringType,
 										},
 										"vlan_id": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The ID of the service VLAN. Required.`,
+											Computed:            true,
 										},
 									},
 								},
 							},
 							"settings": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `How Bonjour rules are applied. Can be 'network default', 'ignore' or 'custom'.`,
+								Computed:            true,
 							},
 						},
 					},
 					"content_filtering": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `The content filtering settings for your group policy`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"allowed_url_patterns": schema.SingleNestedAttribute{
-								Computed: true,
+								MarkdownDescription: `Settings for allowed URL patterns`,
+								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 
 									"patterns": schema.ListAttribute{
-										Computed:    true,
-										ElementType: types.StringType,
+										MarkdownDescription: `A list of URL patterns that are allowed`,
+										Computed:            true,
+										ElementType:         types.StringType,
 									},
 									"settings": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `How URL patterns are applied. Can be 'network default', 'append' or 'override'.`,
+										Computed:            true,
 									},
 								},
 							},
 							"blocked_url_categories": schema.SingleNestedAttribute{
-								Computed: true,
+								MarkdownDescription: `Settings for blocked URL categories`,
+								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 
 									"categories": schema.ListAttribute{
-										Computed:    true,
-										ElementType: types.StringType,
+										MarkdownDescription: `A list of URL categories to block`,
+										Computed:            true,
+										ElementType:         types.StringType,
 									},
 									"settings": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `How URL categories are applied. Can be 'network default', 'append' or 'override'.`,
+										Computed:            true,
 									},
 								},
 							},
 							"blocked_url_patterns": schema.SingleNestedAttribute{
-								Computed: true,
+								MarkdownDescription: `Settings for blocked URL patterns`,
+								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 
 									"patterns": schema.ListAttribute{
-										Computed:    true,
-										ElementType: types.StringType,
+										MarkdownDescription: `A list of URL patterns that are blocked`,
+										Computed:            true,
+										ElementType:         types.StringType,
 									},
 									"settings": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `How URL patterns are applied. Can be 'network default', 'append' or 'override'.`,
+										Computed:            true,
 									},
 								},
 							},
 						},
 					},
 					"firewall_and_traffic_shaping": schema.SingleNestedAttribute{
+						MarkdownDescription: `    The firewall and traffic shaping rules and settings for your policy.
+`,
 						Computed: true,
 						Attributes: map[string]schema.Attribute{
 
 							"l3_firewall_rules": schema.SetNestedAttribute{
-								Computed: true,
+								MarkdownDescription: `An ordered array of the L3 firewall rules`,
+								Computed:            true,
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
 
 										"comment": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `Description of the rule (optional)`,
+											Computed:            true,
 										},
 										"dest_cidr": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `Destination IP address (in IP or CIDR notation), a fully-qualified domain name (FQDN, if your network supports it) or 'any'.`,
+											Computed:            true,
 										},
 										"dest_port": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `Destination port (integer in the range 1-65535), a port range (e.g. 8080-9090), or 'any'`,
+											Computed:            true,
 										},
 										"policy": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `'allow' or 'deny' traffic specified by this rule`,
+											Computed:            true,
 										},
 										"protocol": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The type of protocol (must be 'tcp', 'udp', 'icmp', 'icmp6' or 'any')`,
+											Computed:            true,
 										},
 									},
 								},
 							},
 							"l7_firewall_rules": schema.SetNestedAttribute{
-								Computed: true,
+								MarkdownDescription: `An ordered array of L7 firewall rules`,
+								Computed:            true,
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
 
 										"policy": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The policy applied to matching traffic. Must be 'deny'.`,
+											Computed:            true,
 										},
 										"type": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `Type of the L7 Rule. Must be 'application', 'applicationCategory', 'host', 'port' or 'ipRange'`,
+											Computed:            true,
 										},
 										"value": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The 'value' of what you want to block. If 'type' is 'host', 'port' or 'ipRange', 'value' must be a string matching either a hostname (e.g. somewhere.com), a port (e.g. 8080), or an IP range (e.g. 192.1.0.0/16). If 'type' is 'application' or 'applicationCategory', then 'value' must be an object with an ID for the application.`,
+											Computed:            true,
 										},
 									},
 								},
 							},
 							"settings": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `How firewall and traffic shaping rules are enforced. Can be 'network default', 'ignore' or 'custom'.`,
+								Computed:            true,
 							},
 							"traffic_shaping_rules": schema.SetNestedAttribute{
+								MarkdownDescription: `    An array of traffic shaping rules. Rules are applied in the order that
+    they are specified in. An empty list (or null) means no rules. Note that
+    you are allowed a maximum of 8 rules.
+`,
 								Computed: true,
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
 
 										"definitions": schema.SetNestedAttribute{
+											MarkdownDescription: `    A list of objects describing the definitions of your traffic shaping rule. At least one definition is required.
+`,
 											Computed: true,
 											NestedObject: schema.NestedAttributeObject{
 												Attributes: map[string]schema.Attribute{
 
 													"type": schema.StringAttribute{
-														Computed: true,
+														MarkdownDescription: `The type of definition. Can be one of 'application', 'applicationCategory', 'host', 'port', 'ipRange' or 'localNet'.`,
+														Computed:            true,
 													},
 													"value": schema.StringAttribute{
+														MarkdownDescription: `    If "type" is 'host', 'port', 'ipRange' or 'localNet', then "value" must be a string, matching either
+    a hostname (e.g. "somesite.com"), a port (e.g. 8080), or an IP range ("192.1.0.0",
+    "192.1.0.0/16", or "10.1.0.0/16:80"). 'localNet' also supports CIDR notation, excluding
+    custom ports.
+     If "type" is 'application' or 'applicationCategory', then "value" must be an object
+    with the structure { "id": "meraki:layer7/..." }, where "id" is the application category or
+    application ID (for a list of IDs for your network, use the trafficShaping/applicationCategories
+    endpoint).
+`,
 														Computed: true,
 													},
 												},
 											},
 										},
 										"dscp_tag_value": schema.Int64Attribute{
+											MarkdownDescription: `    The DSCP tag applied by your rule. null means 'Do not change DSCP tag'.
+    For a list of possible tag values, use the trafficShaping/dscpTaggingOptions endpoint.
+`,
 											Computed: true,
 										},
 										"pcp_tag_value": schema.Int64Attribute{
+											MarkdownDescription: `    The PCP tag applied by your rule. Can be 0 (lowest priority) through 7 (highest priority).
+    null means 'Do not set PCP tag'.
+`,
 											Computed: true,
 										},
 										"per_client_bandwidth_limits": schema.SingleNestedAttribute{
+											MarkdownDescription: `    An object describing the bandwidth settings for your rule.
+`,
 											Computed: true,
 											Attributes: map[string]schema.Attribute{
 
 												"bandwidth_limits": schema.SingleNestedAttribute{
-													Computed: true,
+													MarkdownDescription: `The bandwidth limits object, specifying the upload ('limitUp') and download ('limitDown') speed in Kbps. These are only enforced if 'settings' is set to 'custom'.`,
+													Computed:            true,
 													Attributes: map[string]schema.Attribute{
 
 														"limit_down": schema.Int64Attribute{
-															Computed: true,
+															MarkdownDescription: `The maximum download limit (integer, in Kbps).`,
+															Computed:            true,
 														},
 														"limit_up": schema.Int64Attribute{
-															Computed: true,
+															MarkdownDescription: `The maximum upload limit (integer, in Kbps).`,
+															Computed:            true,
 														},
 													},
 												},
 												"settings": schema.StringAttribute{
-													Computed: true,
+													MarkdownDescription: `How bandwidth limits are applied by your rule. Can be one of 'network default', 'ignore' or 'custom'.`,
+													Computed:            true,
 												},
 											},
+										},
+										"priority": schema.StringAttribute{
+											MarkdownDescription: `    A string, indicating the priority level for packets bound to your rule.
+    Can be 'low', 'normal' or 'high'.
+`,
+											Computed: true,
 										},
 									},
 								},
@@ -261,137 +314,170 @@ func (d *NetworksGroupPoliciesDataSource) Schema(_ context.Context, _ datasource
 						},
 					},
 					"group_policy_id": schema.StringAttribute{
-						Computed: true,
-					},
-					"name": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The ID of the group policy`,
+						Computed:            true,
 					},
 					"scheduling": schema.SingleNestedAttribute{
+						MarkdownDescription: `    The schedule for the group policy. Schedules are applied to days of the week.
+`,
 						Computed: true,
 						Attributes: map[string]schema.Attribute{
 
 							"enabled": schema.BoolAttribute{
-								Computed: true,
+								MarkdownDescription: `Whether scheduling is enabled (true) or disabled (false). Defaults to false. If true, the schedule objects for each day of the week (monday - sunday) are parsed.`,
+								Computed:            true,
 							},
 							"friday": schema.SingleNestedAttribute{
-								Computed: true,
+								MarkdownDescription: `The schedule object for Friday.`,
+								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 
 									"active": schema.BoolAttribute{
-										Computed: true,
+										MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+										Computed:            true,
 									},
 									"from": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+										Computed:            true,
 									},
 									"to": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+										Computed:            true,
 									},
 								},
 							},
 							"monday": schema.SingleNestedAttribute{
-								Computed: true,
+								MarkdownDescription: `The schedule object for Monday.`,
+								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 
 									"active": schema.BoolAttribute{
-										Computed: true,
+										MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+										Computed:            true,
 									},
 									"from": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+										Computed:            true,
 									},
 									"to": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+										Computed:            true,
 									},
 								},
 							},
 							"saturday": schema.SingleNestedAttribute{
-								Computed: true,
+								MarkdownDescription: `The schedule object for Saturday.`,
+								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 
 									"active": schema.BoolAttribute{
-										Computed: true,
+										MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+										Computed:            true,
 									},
 									"from": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+										Computed:            true,
 									},
 									"to": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+										Computed:            true,
 									},
 								},
 							},
 							"sunday": schema.SingleNestedAttribute{
-								Computed: true,
+								MarkdownDescription: `The schedule object for Sunday.`,
+								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 
 									"active": schema.BoolAttribute{
-										Computed: true,
+										MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+										Computed:            true,
 									},
 									"from": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+										Computed:            true,
 									},
 									"to": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+										Computed:            true,
 									},
 								},
 							},
 							"thursday": schema.SingleNestedAttribute{
-								Computed: true,
+								MarkdownDescription: `The schedule object for Thursday.`,
+								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 
 									"active": schema.BoolAttribute{
-										Computed: true,
+										MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+										Computed:            true,
 									},
 									"from": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+										Computed:            true,
 									},
 									"to": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+										Computed:            true,
 									},
 								},
 							},
 							"tuesday": schema.SingleNestedAttribute{
-								Computed: true,
+								MarkdownDescription: `The schedule object for Tuesday.`,
+								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 
 									"active": schema.BoolAttribute{
-										Computed: true,
+										MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+										Computed:            true,
 									},
 									"from": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+										Computed:            true,
 									},
 									"to": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+										Computed:            true,
 									},
 								},
 							},
 							"wednesday": schema.SingleNestedAttribute{
-								Computed: true,
+								MarkdownDescription: `The schedule object for Wednesday.`,
+								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 
 									"active": schema.BoolAttribute{
-										Computed: true,
+										MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+										Computed:            true,
 									},
 									"from": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+										Computed:            true,
 									},
 									"to": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+										Computed:            true,
 									},
 								},
 							},
 						},
 					},
 					"splash_auth_settings": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Whether clients bound to your policy will bypass splash authorization or behave according to the network's rules. Can be one of 'network default' or 'bypass'. Only available if your network has a wireless configuration.`,
+						Computed:            true,
 					},
 					"vlan_tagging": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `The VLAN tagging settings for your group policy. Only available if your network has a wireless configuration.`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"settings": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `How VLAN tagging is applied. Can be 'network default', 'ignore' or 'custom'.`,
+								Computed:            true,
 							},
 							"vlan_id": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `The ID of the vlan you want to tag. This only applies if 'settings' is set to 'custom'.`,
+								Computed:            true,
 							},
 						},
 					},
@@ -405,190 +491,259 @@ func (d *NetworksGroupPoliciesDataSource) Schema(_ context.Context, _ datasource
 					Attributes: map[string]schema.Attribute{
 
 						"bandwidth": schema.SingleNestedAttribute{
+							MarkdownDescription: `    The bandwidth settings for clients bound to your group policy.
+`,
 							Computed: true,
 							Attributes: map[string]schema.Attribute{
 
 								"bandwidth_limits": schema.SingleNestedAttribute{
-									Computed: true,
+									MarkdownDescription: `The bandwidth limits object, specifying upload and download speed for clients bound to the group policy. These are only enforced if 'settings' is set to 'custom'.`,
+									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"limit_down": schema.Int64Attribute{
-											Computed: true,
+											MarkdownDescription: `The maximum download limit (integer, in Kbps). null indicates no limit`,
+											Computed:            true,
 										},
 										"limit_up": schema.Int64Attribute{
-											Computed: true,
+											MarkdownDescription: `The maximum upload limit (integer, in Kbps). null indicates no limit`,
+											Computed:            true,
 										},
 									},
 								},
 								"settings": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `How bandwidth limits are enforced. Can be 'network default', 'ignore' or 'custom'.`,
+									Computed:            true,
 								},
 							},
 						},
 						"bonjour_forwarding": schema.SingleNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `The Bonjour settings for your group policy. Only valid if your network has a wireless configuration.`,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
 								"rules": schema.SetNestedAttribute{
-									Computed: true,
+									MarkdownDescription: `A list of the Bonjour forwarding rules for your group policy. If 'settings' is set to 'custom', at least one rule must be specified.`,
+									Computed:            true,
 									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 
 											"description": schema.StringAttribute{
-												Computed: true,
+												MarkdownDescription: `A description for your Bonjour forwarding rule. Optional.`,
+												Computed:            true,
 											},
 											"services": schema.ListAttribute{
-												Computed:    true,
-												ElementType: types.StringType,
+												MarkdownDescription: `A list of Bonjour services. At least one service must be specified. Available services are 'All Services', 'AirPlay', 'AFP', 'BitTorrent', 'FTP', 'iChat', 'iTunes', 'Printers', 'Samba', 'Scanners' and 'SSH'`,
+												Computed:            true,
+												ElementType:         types.StringType,
 											},
 											"vlan_id": schema.StringAttribute{
-												Computed: true,
+												MarkdownDescription: `The ID of the service VLAN. Required.`,
+												Computed:            true,
 											},
 										},
 									},
 								},
 								"settings": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `How Bonjour rules are applied. Can be 'network default', 'ignore' or 'custom'.`,
+									Computed:            true,
 								},
 							},
 						},
 						"content_filtering": schema.SingleNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `The content filtering settings for your group policy`,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
 								"allowed_url_patterns": schema.SingleNestedAttribute{
-									Computed: true,
+									MarkdownDescription: `Settings for allowed URL patterns`,
+									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"patterns": schema.ListAttribute{
-											Computed:    true,
-											ElementType: types.StringType,
+											MarkdownDescription: `A list of URL patterns that are allowed`,
+											Computed:            true,
+											ElementType:         types.StringType,
 										},
 										"settings": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `How URL patterns are applied. Can be 'network default', 'append' or 'override'.`,
+											Computed:            true,
 										},
 									},
 								},
 								"blocked_url_categories": schema.SingleNestedAttribute{
-									Computed: true,
+									MarkdownDescription: `Settings for blocked URL categories`,
+									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"categories": schema.ListAttribute{
-											Computed:    true,
-											ElementType: types.StringType,
+											MarkdownDescription: `A list of URL categories to block`,
+											Computed:            true,
+											ElementType:         types.StringType,
 										},
 										"settings": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `How URL categories are applied. Can be 'network default', 'append' or 'override'.`,
+											Computed:            true,
 										},
 									},
 								},
 								"blocked_url_patterns": schema.SingleNestedAttribute{
-									Computed: true,
+									MarkdownDescription: `Settings for blocked URL patterns`,
+									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"patterns": schema.ListAttribute{
-											Computed:    true,
-											ElementType: types.StringType,
+											MarkdownDescription: `A list of URL patterns that are blocked`,
+											Computed:            true,
+											ElementType:         types.StringType,
 										},
 										"settings": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `How URL patterns are applied. Can be 'network default', 'append' or 'override'.`,
+											Computed:            true,
 										},
 									},
 								},
 							},
 						},
 						"firewall_and_traffic_shaping": schema.SingleNestedAttribute{
+							MarkdownDescription: `    The firewall and traffic shaping rules and settings for your policy.
+`,
 							Computed: true,
 							Attributes: map[string]schema.Attribute{
 
 								"l3_firewall_rules": schema.SetNestedAttribute{
-									Computed: true,
+									MarkdownDescription: `An ordered array of the L3 firewall rules`,
+									Computed:            true,
 									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 
 											"comment": schema.StringAttribute{
-												Computed: true,
+												MarkdownDescription: `Description of the rule (optional)`,
+												Computed:            true,
 											},
 											"dest_cidr": schema.StringAttribute{
-												Computed: true,
+												MarkdownDescription: `Destination IP address (in IP or CIDR notation), a fully-qualified domain name (FQDN, if your network supports it) or 'any'.`,
+												Computed:            true,
 											},
 											"dest_port": schema.StringAttribute{
-												Computed: true,
+												MarkdownDescription: `Destination port (integer in the range 1-65535), a port range (e.g. 8080-9090), or 'any'`,
+												Computed:            true,
 											},
 											"policy": schema.StringAttribute{
-												Computed: true,
+												MarkdownDescription: `'allow' or 'deny' traffic specified by this rule`,
+												Computed:            true,
 											},
 											"protocol": schema.StringAttribute{
-												Computed: true,
+												MarkdownDescription: `The type of protocol (must be 'tcp', 'udp', 'icmp', 'icmp6' or 'any')`,
+												Computed:            true,
 											},
 										},
 									},
 								},
 								"l7_firewall_rules": schema.SetNestedAttribute{
-									Computed: true,
+									MarkdownDescription: `An ordered array of L7 firewall rules`,
+									Computed:            true,
 									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 
 											"policy": schema.StringAttribute{
-												Computed: true,
+												MarkdownDescription: `The policy applied to matching traffic. Must be 'deny'.`,
+												Computed:            true,
 											},
 											"type": schema.StringAttribute{
-												Computed: true,
+												MarkdownDescription: `Type of the L7 Rule. Must be 'application', 'applicationCategory', 'host', 'port' or 'ipRange'`,
+												Computed:            true,
 											},
 											"value": schema.StringAttribute{
-												Computed: true,
+												MarkdownDescription: `The 'value' of what you want to block. If 'type' is 'host', 'port' or 'ipRange', 'value' must be a string matching either a hostname (e.g. somewhere.com), a port (e.g. 8080), or an IP range (e.g. 192.1.0.0/16). If 'type' is 'application' or 'applicationCategory', then 'value' must be an object with an ID for the application.`,
+												Computed:            true,
 											},
 										},
 									},
 								},
 								"settings": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `How firewall and traffic shaping rules are enforced. Can be 'network default', 'ignore' or 'custom'.`,
+									Computed:            true,
 								},
 								"traffic_shaping_rules": schema.SetNestedAttribute{
+									MarkdownDescription: `    An array of traffic shaping rules. Rules are applied in the order that
+    they are specified in. An empty list (or null) means no rules. Note that
+    you are allowed a maximum of 8 rules.
+`,
 									Computed: true,
 									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 
 											"definitions": schema.SetNestedAttribute{
+												MarkdownDescription: `    A list of objects describing the definitions of your traffic shaping rule. At least one definition is required.
+`,
 												Computed: true,
 												NestedObject: schema.NestedAttributeObject{
 													Attributes: map[string]schema.Attribute{
 
 														"type": schema.StringAttribute{
-															Computed: true,
+															MarkdownDescription: `The type of definition. Can be one of 'application', 'applicationCategory', 'host', 'port', 'ipRange' or 'localNet'.`,
+															Computed:            true,
 														},
 														"value": schema.StringAttribute{
+															MarkdownDescription: `    If "type" is 'host', 'port', 'ipRange' or 'localNet', then "value" must be a string, matching either
+    a hostname (e.g. "somesite.com"), a port (e.g. 8080), or an IP range ("192.1.0.0",
+    "192.1.0.0/16", or "10.1.0.0/16:80"). 'localNet' also supports CIDR notation, excluding
+    custom ports.
+     If "type" is 'application' or 'applicationCategory', then "value" must be an object
+    with the structure { "id": "meraki:layer7/..." }, where "id" is the application category or
+    application ID (for a list of IDs for your network, use the trafficShaping/applicationCategories
+    endpoint).
+`,
 															Computed: true,
 														},
 													},
 												},
 											},
 											"dscp_tag_value": schema.Int64Attribute{
+												MarkdownDescription: `    The DSCP tag applied by your rule. null means 'Do not change DSCP tag'.
+    For a list of possible tag values, use the trafficShaping/dscpTaggingOptions endpoint.
+`,
 												Computed: true,
 											},
 											"pcp_tag_value": schema.Int64Attribute{
+												MarkdownDescription: `    The PCP tag applied by your rule. Can be 0 (lowest priority) through 7 (highest priority).
+    null means 'Do not set PCP tag'.
+`,
 												Computed: true,
 											},
 											"per_client_bandwidth_limits": schema.SingleNestedAttribute{
+												MarkdownDescription: `    An object describing the bandwidth settings for your rule.
+`,
 												Computed: true,
 												Attributes: map[string]schema.Attribute{
 
 													"bandwidth_limits": schema.SingleNestedAttribute{
-														Computed: true,
+														MarkdownDescription: `The bandwidth limits object, specifying the upload ('limitUp') and download ('limitDown') speed in Kbps. These are only enforced if 'settings' is set to 'custom'.`,
+														Computed:            true,
 														Attributes: map[string]schema.Attribute{
 
 															"limit_down": schema.Int64Attribute{
-																Computed: true,
+																MarkdownDescription: `The maximum download limit (integer, in Kbps).`,
+																Computed:            true,
 															},
 															"limit_up": schema.Int64Attribute{
-																Computed: true,
+																MarkdownDescription: `The maximum upload limit (integer, in Kbps).`,
+																Computed:            true,
 															},
 														},
 													},
 													"settings": schema.StringAttribute{
-														Computed: true,
+														MarkdownDescription: `How bandwidth limits are applied by your rule. Can be one of 'network default', 'ignore' or 'custom'.`,
+														Computed:            true,
 													},
 												},
+											},
+											"priority": schema.StringAttribute{
+												MarkdownDescription: `    A string, indicating the priority level for packets bound to your rule.
+    Can be 'low', 'normal' or 'high'.
+`,
+												Computed: true,
 											},
 										},
 									},
@@ -596,137 +751,170 @@ func (d *NetworksGroupPoliciesDataSource) Schema(_ context.Context, _ datasource
 							},
 						},
 						"group_policy_id": schema.StringAttribute{
-							Computed: true,
-						},
-						"name": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The ID of the group policy`,
+							Computed:            true,
 						},
 						"scheduling": schema.SingleNestedAttribute{
+							MarkdownDescription: `    The schedule for the group policy. Schedules are applied to days of the week.
+`,
 							Computed: true,
 							Attributes: map[string]schema.Attribute{
 
 								"enabled": schema.BoolAttribute{
-									Computed: true,
+									MarkdownDescription: `Whether scheduling is enabled (true) or disabled (false). Defaults to false. If true, the schedule objects for each day of the week (monday - sunday) are parsed.`,
+									Computed:            true,
 								},
 								"friday": schema.SingleNestedAttribute{
-									Computed: true,
+									MarkdownDescription: `The schedule object for Friday.`,
+									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"active": schema.BoolAttribute{
-											Computed: true,
+											MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+											Computed:            true,
 										},
 										"from": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+											Computed:            true,
 										},
 										"to": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+											Computed:            true,
 										},
 									},
 								},
 								"monday": schema.SingleNestedAttribute{
-									Computed: true,
+									MarkdownDescription: `The schedule object for Monday.`,
+									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"active": schema.BoolAttribute{
-											Computed: true,
+											MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+											Computed:            true,
 										},
 										"from": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+											Computed:            true,
 										},
 										"to": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+											Computed:            true,
 										},
 									},
 								},
 								"saturday": schema.SingleNestedAttribute{
-									Computed: true,
+									MarkdownDescription: `The schedule object for Saturday.`,
+									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"active": schema.BoolAttribute{
-											Computed: true,
+											MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+											Computed:            true,
 										},
 										"from": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+											Computed:            true,
 										},
 										"to": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+											Computed:            true,
 										},
 									},
 								},
 								"sunday": schema.SingleNestedAttribute{
-									Computed: true,
+									MarkdownDescription: `The schedule object for Sunday.`,
+									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"active": schema.BoolAttribute{
-											Computed: true,
+											MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+											Computed:            true,
 										},
 										"from": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+											Computed:            true,
 										},
 										"to": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+											Computed:            true,
 										},
 									},
 								},
 								"thursday": schema.SingleNestedAttribute{
-									Computed: true,
+									MarkdownDescription: `The schedule object for Thursday.`,
+									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"active": schema.BoolAttribute{
-											Computed: true,
+											MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+											Computed:            true,
 										},
 										"from": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+											Computed:            true,
 										},
 										"to": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+											Computed:            true,
 										},
 									},
 								},
 								"tuesday": schema.SingleNestedAttribute{
-									Computed: true,
+									MarkdownDescription: `The schedule object for Tuesday.`,
+									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"active": schema.BoolAttribute{
-											Computed: true,
+											MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+											Computed:            true,
 										},
 										"from": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+											Computed:            true,
 										},
 										"to": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+											Computed:            true,
 										},
 									},
 								},
 								"wednesday": schema.SingleNestedAttribute{
-									Computed: true,
+									MarkdownDescription: `The schedule object for Wednesday.`,
+									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"active": schema.BoolAttribute{
-											Computed: true,
+											MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+											Computed:            true,
 										},
 										"from": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+											Computed:            true,
 										},
 										"to": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+											Computed:            true,
 										},
 									},
 								},
 							},
 						},
 						"splash_auth_settings": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Whether clients bound to your policy will bypass splash authorization or behave according to the network's rules. Can be one of 'network default' or 'bypass'. Only available if your network has a wireless configuration.`,
+							Computed:            true,
 						},
 						"vlan_tagging": schema.SingleNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `The VLAN tagging settings for your group policy. Only available if your network has a wireless configuration.`,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
 								"settings": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `How VLAN tagging is applied. Can be 'network default', 'ignore' or 'custom'.`,
+									Computed:            true,
 								},
 								"vlan_id": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The ID of the vlan you want to tag. This only applies if 'settings' is set to 'custom'.`,
+									Computed:            true,
 								},
 							},
 						},
@@ -817,7 +1005,6 @@ type ResponseItemNetworksGetNetworkGroupPolicies struct {
 	ContentFiltering          *ResponseItemNetworksGetNetworkGroupPoliciesContentFiltering          `tfsdk:"content_filtering"`
 	FirewallAndTrafficShaping *ResponseItemNetworksGetNetworkGroupPoliciesFirewallAndTrafficShaping `tfsdk:"firewall_and_traffic_shaping"`
 	GroupPolicyID             types.String                                                          `tfsdk:"group_policy_id"`
-	Name                      types.String                                                          `tfsdk:"name"`
 	Scheduling                *ResponseItemNetworksGetNetworkGroupPoliciesScheduling                `tfsdk:"scheduling"`
 	SplashAuthSettings        types.String                                                          `tfsdk:"splash_auth_settings"`
 	VLANTagging               *ResponseItemNetworksGetNetworkGroupPoliciesVlanTagging               `tfsdk:"vlan_tagging"`
@@ -891,6 +1078,7 @@ type ResponseItemNetworksGetNetworkGroupPoliciesFirewallAndTrafficShapingTraffic
 	DscpTagValue             types.Int64                                                                                                      `tfsdk:"dscp_tag_value"`
 	PcpTagValue              types.Int64                                                                                                      `tfsdk:"pcp_tag_value"`
 	PerClientBandwidthLimits *ResponseItemNetworksGetNetworkGroupPoliciesFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits `tfsdk:"per_client_bandwidth_limits"`
+	Priority                 types.String                                                                                                     `tfsdk:"priority"`
 }
 
 type ResponseItemNetworksGetNetworkGroupPoliciesFirewallAndTrafficShapingTrafficShapingRulesDefinitions struct {
@@ -972,7 +1160,6 @@ type ResponseNetworksGetNetworkGroupPolicy struct {
 	ContentFiltering          *ResponseNetworksGetNetworkGroupPolicyContentFiltering          `tfsdk:"content_filtering"`
 	FirewallAndTrafficShaping *ResponseNetworksGetNetworkGroupPolicyFirewallAndTrafficShaping `tfsdk:"firewall_and_traffic_shaping"`
 	GroupPolicyID             types.String                                                    `tfsdk:"group_policy_id"`
-	Name                      types.String                                                    `tfsdk:"name"`
 	Scheduling                *ResponseNetworksGetNetworkGroupPolicyScheduling                `tfsdk:"scheduling"`
 	SplashAuthSettings        types.String                                                    `tfsdk:"splash_auth_settings"`
 	VLANTagging               *ResponseNetworksGetNetworkGroupPolicyVlanTagging               `tfsdk:"vlan_tagging"`
@@ -1046,6 +1233,7 @@ type ResponseNetworksGetNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapin
 	DscpTagValue             types.Int64                                                                                                `tfsdk:"dscp_tag_value"`
 	PcpTagValue              types.Int64                                                                                                `tfsdk:"pcp_tag_value"`
 	PerClientBandwidthLimits *ResponseNetworksGetNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits `tfsdk:"per_client_bandwidth_limits"`
+	Priority                 types.String                                                                                               `tfsdk:"priority"`
 }
 
 type ResponseNetworksGetNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesDefinitions struct {
@@ -1300,6 +1488,7 @@ func ResponseNetworksGetNetworkGroupPoliciesItemsToBody(state NetworksGroupPolic
 											}
 											return &ResponseItemNetworksGetNetworkGroupPoliciesFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits{}
 										}(),
+										Priority: types.StringValue(trafficShapingRules.Priority),
 									}
 								}
 								return &result
@@ -1311,7 +1500,6 @@ func ResponseNetworksGetNetworkGroupPoliciesItemsToBody(state NetworksGroupPolic
 				return &ResponseItemNetworksGetNetworkGroupPoliciesFirewallAndTrafficShaping{}
 			}(),
 			GroupPolicyID: types.StringValue(item.GroupPolicyID),
-			Name:          types.StringValue(item.Name),
 			Scheduling: func() *ResponseItemNetworksGetNetworkGroupPoliciesScheduling {
 				if item.Scheduling != nil {
 					return &ResponseItemNetworksGetNetworkGroupPoliciesScheduling{
@@ -1623,6 +1811,7 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBody(state NetworksGroupPolicies
 										}
 										return &ResponseNetworksGetNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits{}
 									}(),
+									Priority: types.StringValue(trafficShapingRules.Priority),
 								}
 							}
 							return &result
@@ -1634,7 +1823,6 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBody(state NetworksGroupPolicies
 			return &ResponseNetworksGetNetworkGroupPolicyFirewallAndTrafficShaping{}
 		}(),
 		GroupPolicyID: types.StringValue(response.GroupPolicyID),
-		Name:          types.StringValue(response.Name),
 		Scheduling: func() *ResponseNetworksGetNetworkGroupPolicyScheduling {
 			if response.Scheduling != nil {
 				return &ResponseNetworksGetNetworkGroupPolicyScheduling{

@@ -43,7 +43,7 @@ output "meraki_organizations_adaptive_policy_groups_example" {
 - `description` (String) Description of the group (default: "")
 - `id` (String) id path parameter.
 - `name` (String) Name of the group
-- `policy_objects` (Attributes Set) The policy objects that belong to this group; traffic from addresses specified by these policy objects will be tagged with this group's SGT value if no other tagging scheme is being used (each requires one unique attribute) (default: []) (see [below for nested schema](#nestedatt--policy_objects))
+- `policy_objects` (Attributes Set) The policy objects that belong to this group; traffic from addresses specified by these policy objects will be tagged with this group's SGT value if no other tagging scheme is being used (each requires one unique attribute) () (see [below for nested schema](#nestedatt--policy_objects))
 - `sgt` (Number) SGT value of the group
 
 ### Read-Only
@@ -51,7 +51,7 @@ output "meraki_organizations_adaptive_policy_groups_example" {
 - `created_at` (String)
 - `group_id` (String)
 - `is_default_group` (Boolean)
-- `required_ip_mappings` (List of String)
+- `required_ip_mappings` (Set of String)
 - `updated_at` (String)
 
 <a id="nestedatt--policy_objects"></a>

@@ -1,26 +1,10 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -81,7 +65,7 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 				},
 			},
 			"ibgp_hold_timer": schema.Int64Attribute{
-				MarkdownDescription: `The IBGP holdtimer in seconds. The IBGP holdtimer must be an integer between 12 and 240. When absent, this field is not updated. If no value exists then it defaults to 240.`,
+				MarkdownDescription: `The iBGP holdtimer in seconds. The iBGP holdtimer must be an integer between 12 and 240. When absent, this field is not updated. If no value exists then it defaults to 240.`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
@@ -127,7 +111,7 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 							},
 						},
 						"ebgp_hold_timer": schema.Int64Attribute{
-							MarkdownDescription: `The EBGP hold timer in seconds for each neighbor. The EBGP hold timer must be an integer between 12 and 240.`,
+							MarkdownDescription: `The eBGP hold timer in seconds for each neighbor. The eBGP hold timer must be an integer between 12 and 240.`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
@@ -135,7 +119,7 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 							},
 						},
 						"ebgp_multihop": schema.Int64Attribute{
-							MarkdownDescription: `Configure this if the neighbor is not adjacent. The EBGP multi-hop must be an integer between 1 and 255.`,
+							MarkdownDescription: `Configure this if the neighbor is not adjacent. The eBGP multi-hop must be an integer between 1 and 255.`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
@@ -194,7 +178,7 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 							},
 						},
 						"source_interface": schema.StringAttribute{
-							MarkdownDescription: `The output interface for peering with the remote BGP peer. Valid values are: 'wired0', 'wired1' or 'vlan{VLAN ID}'(e.g. 'vlan123').`,
+							MarkdownDescription: `The output interface for peering with the remote BGP peer. Valid values are: 'wan1', 'wan2' or 'vlan{VLAN ID}'(e.g. 'vlan123').`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
@@ -251,7 +235,6 @@ func (r *NetworksApplianceVpnBgpResource) Create(ctx context.Context, req resour
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceVpnBgp(vvNetworkID)
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
@@ -303,7 +286,7 @@ func (r *NetworksApplianceVpnBgpResource) Create(ctx context.Context, req resour
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceVpnBgpItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -332,7 +315,6 @@ func (r *NetworksApplianceVpnBgpResource) Read(ctx context.Context, req resource
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	responseGet, restyRespGet, err := r.client.Appliance.GetNetworkApplianceVpnBgp(vvNetworkID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -356,7 +338,7 @@ func (r *NetworksApplianceVpnBgpResource) Read(ctx context.Context, req resource
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceVpnBgpItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -378,7 +360,6 @@ func (r *NetworksApplianceVpnBgpResource) Update(ctx context.Context, req resour
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceVpnBgp(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil {
@@ -402,7 +383,7 @@ func (r *NetworksApplianceVpnBgpResource) Update(ctx context.Context, req resour
 
 func (r *NetworksApplianceVpnBgpResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksApplianceVpnBgp", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -443,98 +424,105 @@ type RequestApplianceUpdateNetworkApplianceVpnBgpNeighborsTtlSecurityRs struct {
 
 // FromBody
 func (r *NetworksApplianceVpnBgpRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgp {
+	asNumber := new(int64)
+	if !r.AsNumber.IsUnknown() && !r.AsNumber.IsNull() {
+		*asNumber = r.AsNumber.ValueInt64()
+	} else {
+		asNumber = nil
+	}
+	enabled := new(bool)
+	if !r.Enabled.IsUnknown() && !r.Enabled.IsNull() {
+		*enabled = r.Enabled.ValueBool()
+	} else {
+		enabled = nil
+	}
+	ibgpHoldTimer := new(int64)
+	if !r.IbgpHoldTimer.IsUnknown() && !r.IbgpHoldTimer.IsNull() {
+		*ibgpHoldTimer = r.IbgpHoldTimer.ValueInt64()
+	} else {
+		ibgpHoldTimer = nil
+	}
 	var requestApplianceUpdateNetworkApplianceVpnBgpNeighbors []merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighbors
-
-	for _, rItem1 := range *r.Neighbors {
-		allowTransit := func() *bool {
-			if !rItem1.AllowTransit.IsUnknown() && !rItem1.AllowTransit.IsNull() {
-				return rItem1.AllowTransit.ValueBoolPointer()
-			}
-			return nil
-		}()
-		var requestApplianceUpdateNetworkApplianceVpnBgpNeighborsAuthentication *merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighborsAuthentication
-		if rItem1.Authentication != nil {
-			password := rItem1.Authentication.Password.ValueString()
-			requestApplianceUpdateNetworkApplianceVpnBgpNeighborsAuthentication = &merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighborsAuthentication{
-				Password: password,
-			}
-		}
-
-		ebgpHoldTimer := func() *int64 {
-			if !rItem1.EbgpHoldTimer.IsUnknown() && !rItem1.EbgpHoldTimer.IsNull() {
-				return rItem1.EbgpHoldTimer.ValueInt64Pointer()
-			}
-			return nil
-		}()
-		ebgpMultihop := func() *int64 {
-			if !rItem1.EbgpMultihop.IsUnknown() && !rItem1.EbgpMultihop.IsNull() {
-				return rItem1.EbgpMultihop.ValueInt64Pointer()
-			}
-			return nil
-		}()
-		iP := rItem1.IP.ValueString()
-
-		var requestApplianceUpdateNetworkApplianceVpnBgpNeighborsIPv6 *merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighborsIPv6
-		address := rItem1.IPv6.Address.ValueString()
-		requestApplianceUpdateNetworkApplianceVpnBgpNeighborsIPv6 = &merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighborsIPv6{
-			Address: address,
-		}
-
-		nextHopIP := rItem1.NextHopIP.ValueString()
-		receiveLimit := func() *int64 {
-			if !rItem1.ReceiveLimit.IsUnknown() && !rItem1.ReceiveLimit.IsNull() {
-				return rItem1.ReceiveLimit.ValueInt64Pointer()
-			}
-			return nil
-		}()
-		remoteAsNumber := func() *int64 {
-			if !rItem1.RemoteAsNumber.IsUnknown() && !rItem1.RemoteAsNumber.IsNull() {
-				return rItem1.RemoteAsNumber.ValueInt64Pointer()
-			}
-			return nil
-		}()
-		sourceInterface := rItem1.SourceInterface.ValueString()
-		var requestApplianceUpdateNetworkApplianceVpnBgpNeighborsTtlSecurity *merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighborsTtlSecurity
-		if rItem1.TtlSecurity != nil {
-			enabled := func() *bool {
-				if !rItem1.TtlSecurity.Enabled.IsUnknown() && !rItem1.TtlSecurity.Enabled.IsNull() {
-					return rItem1.TtlSecurity.Enabled.ValueBoolPointer()
+	if r.Neighbors != nil {
+		for _, rItem1 := range *r.Neighbors {
+			allowTransit := func() *bool {
+				if !rItem1.AllowTransit.IsUnknown() && !rItem1.AllowTransit.IsNull() {
+					return rItem1.AllowTransit.ValueBoolPointer()
 				}
 				return nil
 			}()
-			requestApplianceUpdateNetworkApplianceVpnBgpNeighborsTtlSecurity = &merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighborsTtlSecurity{
-				Enabled: enabled,
+			var requestApplianceUpdateNetworkApplianceVpnBgpNeighborsAuthentication *merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighborsAuthentication
+			if rItem1.Authentication != nil {
+				password := rItem1.Authentication.Password.ValueString()
+				requestApplianceUpdateNetworkApplianceVpnBgpNeighborsAuthentication = &merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighborsAuthentication{
+					Password: password,
+				}
 			}
+			ebgpHoldTimer := func() *int64 {
+				if !rItem1.EbgpHoldTimer.IsUnknown() && !rItem1.EbgpHoldTimer.IsNull() {
+					return rItem1.EbgpHoldTimer.ValueInt64Pointer()
+				}
+				return nil
+			}()
+			ebgpMultihop := func() *int64 {
+				if !rItem1.EbgpMultihop.IsUnknown() && !rItem1.EbgpMultihop.IsNull() {
+					return rItem1.EbgpMultihop.ValueInt64Pointer()
+				}
+				return nil
+			}()
+			iP := rItem1.IP.ValueString()
+			var requestApplianceUpdateNetworkApplianceVpnBgpNeighborsIPv6 *merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighborsIPv6
+			if rItem1.IPv6 != nil {
+				address := rItem1.IPv6.Address.ValueString()
+				requestApplianceUpdateNetworkApplianceVpnBgpNeighborsIPv6 = &merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighborsIPv6{
+					Address: address,
+				}
+			}
+			nextHopIP := rItem1.NextHopIP.ValueString()
+			receiveLimit := func() *int64 {
+				if !rItem1.ReceiveLimit.IsUnknown() && !rItem1.ReceiveLimit.IsNull() {
+					return rItem1.ReceiveLimit.ValueInt64Pointer()
+				}
+				return nil
+			}()
+			remoteAsNumber := func() *int64 {
+				if !rItem1.RemoteAsNumber.IsUnknown() && !rItem1.RemoteAsNumber.IsNull() {
+					return rItem1.RemoteAsNumber.ValueInt64Pointer()
+				}
+				return nil
+			}()
+			sourceInterface := rItem1.SourceInterface.ValueString()
+			var requestApplianceUpdateNetworkApplianceVpnBgpNeighborsTtlSecurity *merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighborsTtlSecurity
+			if rItem1.TtlSecurity != nil {
+				enabled := func() *bool {
+					if !rItem1.TtlSecurity.Enabled.IsUnknown() && !rItem1.TtlSecurity.Enabled.IsNull() {
+						return rItem1.TtlSecurity.Enabled.ValueBoolPointer()
+					}
+					return nil
+				}()
+				requestApplianceUpdateNetworkApplianceVpnBgpNeighborsTtlSecurity = &merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighborsTtlSecurity{
+					Enabled: enabled,
+				}
+			}
+			requestApplianceUpdateNetworkApplianceVpnBgpNeighbors = append(requestApplianceUpdateNetworkApplianceVpnBgpNeighbors, merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighbors{
+				AllowTransit:    allowTransit,
+				Authentication:  requestApplianceUpdateNetworkApplianceVpnBgpNeighborsAuthentication,
+				EbgpHoldTimer:   int64ToIntPointer(ebgpHoldTimer),
+				EbgpMultihop:    int64ToIntPointer(ebgpMultihop),
+				IP:              iP,
+				IPv6:            requestApplianceUpdateNetworkApplianceVpnBgpNeighborsIPv6,
+				NextHopIP:       nextHopIP,
+				ReceiveLimit:    int64ToIntPointer(receiveLimit),
+				RemoteAsNumber:  int64ToIntPointer(remoteAsNumber),
+				SourceInterface: sourceInterface,
+				TtlSecurity:     requestApplianceUpdateNetworkApplianceVpnBgpNeighborsTtlSecurity,
+			})
 		}
-
-		requestApplianceUpdateNetworkApplianceVpnBgpNeighbors = append(requestApplianceUpdateNetworkApplianceVpnBgpNeighbors, merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighbors{
-			AllowTransit:    allowTransit,
-			Authentication:  requestApplianceUpdateNetworkApplianceVpnBgpNeighborsAuthentication,
-			EbgpHoldTimer:   int64ToIntPointer(ebgpHoldTimer),
-			EbgpMultihop:    int64ToIntPointer(ebgpMultihop),
-			IP:              iP,
-			IPv6:            requestApplianceUpdateNetworkApplianceVpnBgpNeighborsIPv6,
-			NextHopIP:       nextHopIP,
-			ReceiveLimit:    int64ToIntPointer(receiveLimit),
-			RemoteAsNumber:  int64ToIntPointer(remoteAsNumber),
-			SourceInterface: sourceInterface,
-			TtlSecurity:     requestApplianceUpdateNetworkApplianceVpnBgpNeighborsTtlSecurity,
-		})
 	}
-
-	asNumber := int64ToIntPointer(r.AsNumber.ValueInt64Pointer())
-	enabled := func() *bool {
-		if !r.Enabled.IsUnknown() && !r.Enabled.IsNull() {
-			return r.Enabled.ValueBoolPointer()
-		}
-		return nil
-	}()
-	ibgpHoldTimer := int64ToIntPointer(r.IbgpHoldTimer.ValueInt64Pointer())
-
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgp{
-		AsNumber:      asNumber,
+		AsNumber:      int64ToIntPointer(asNumber),
 		Enabled:       enabled,
-		IbgpHoldTimer: ibgpHoldTimer,
+		IbgpHoldTimer: int64ToIntPointer(ibgpHoldTimer),
 		Neighbors: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighbors {
 			if len(requestApplianceUpdateNetworkApplianceVpnBgpNeighbors) > 0 {
 				return &requestApplianceUpdateNetworkApplianceVpnBgpNeighbors
@@ -542,7 +530,6 @@ func (r *NetworksApplianceVpnBgpRs) toSdkApiRequestUpdate(ctx context.Context) *
 			return nil
 		}(),
 	}
-
 	return &out
 }
 

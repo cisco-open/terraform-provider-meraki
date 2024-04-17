@@ -1,0 +1,1 @@
+terraform import meraki_devices_live_tools_arp_table.example "arp_table_id,serial"

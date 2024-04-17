@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -64,13 +48,15 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Schema(_ context.Contex
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"created_at": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `Time when Early Access Feature was created`,
+				Computed:            true,
 			},
 			"id": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `ID of Early Access Feature`,
+				Computed:            true,
 			},
 			"limit_scope_to_networks": schema.SetAttribute{
-				MarkdownDescription: `A list of network IDs to apply the opt-in to`,
+				MarkdownDescription: `Networks assigned to the Early Access Feature`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
@@ -81,7 +67,6 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Schema(_ context.Contex
 			},
 			"opt_in_id": schema.StringAttribute{
 				MarkdownDescription: `optInId path parameter. Opt in ID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -92,7 +77,7 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Schema(_ context.Contex
 				Required:            true,
 			},
 			"short_name": schema.StringAttribute{
-				MarkdownDescription: `Short name of the early access feature`,
+				MarkdownDescription: `Name of Early Access Feature`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -104,7 +89,6 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Schema(_ context.Contex
 	}
 }
 
-//path params to set ['optInId']
 //path params to assign NOT EDITABLE ['shortName']
 
 func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -282,7 +266,7 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Update(ctx context.Cont
 	vvOptInID := data.OptInID.ValueString()
 	// opt_in_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Organizations.UpdateOrganizationEarlyAccessFeaturesOptIn(vvOrganizationID, vvOptInID, dataRequest)
+	_, restyResp2, err := r.client.Organizations.UpdateOrganizationEarlyAccessFeaturesOptIn(vvOrganizationID, vvOptInID, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(

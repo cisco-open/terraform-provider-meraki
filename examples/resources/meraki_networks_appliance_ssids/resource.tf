@@ -7,6 +7,11 @@ resource "meraki_networks_appliance_ssids" "example" {
 
     enabled = true
   }
+  dot11w = {
+
+    enabled  = true
+    required = true
+  }
   enabled         = true
   encryption_mode = "wpa"
   name            = "My SSID"

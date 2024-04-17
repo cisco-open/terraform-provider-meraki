@@ -33,7 +33,7 @@ output "meraki_organizations_branding_policies_priorities_example" {
 
 ### Optional
 
-- `branding_policy_ids` (List of String) An ordered list of branding policy IDs that determines the priority order of how to apply the policies
+- `branding_policy_ids` (Set of String) An ordered list of branding policy IDs that determines the priority order of how to apply the policies
 
 ## Import
 

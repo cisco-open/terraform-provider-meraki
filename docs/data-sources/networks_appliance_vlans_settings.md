@@ -39,4 +39,4 @@ output "meraki_networks_appliance_vlans_settings_example" {
 
 Read-Only:
 
-- `vlans_enabled` (Boolean)
+- `vlans_enabled` (Boolean) Boolean indicating whether VLANs are enabled (true) or disabled (false) for the network

@@ -21,7 +21,7 @@ resource "meraki_networks_traffic_analysis" "example" {
     type  = "host"
     value = "example.com"
   }]
-  mode       = "detailed"
+  mode       = "disabled"
   network_id = "string"
 }
 

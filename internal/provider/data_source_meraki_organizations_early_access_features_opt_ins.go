@@ -21,7 +21,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -70,60 +70,33 @@ func (d *OrganizationsEarlyAccessFeaturesOptInsDataSource) Schema(_ context.Cont
 				Attributes: map[string]schema.Attribute{
 
 					"created_at": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Time when Early Access Feature was created`,
+						Computed:            true,
 					},
 					"id": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `ID of Early Access Feature`,
+						Computed:            true,
 					},
 					"limit_scope_to_networks": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `Networks assigned to the Early Access Feature`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"id": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `ID of Network`,
+									Computed:            true,
 								},
 								"name": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Name of Network`,
+									Computed:            true,
 								},
 							},
 						},
 					},
 					"short_name": schema.StringAttribute{
-						Computed: true,
-					},
-				},
-			},
-
-			"items": schema.ListNestedAttribute{
-				MarkdownDescription: `Array of ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptIns`,
-				Computed:            true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-
-						"created_at": schema.StringAttribute{
-							Computed: true,
-						},
-						"id": schema.StringAttribute{
-							Computed: true,
-						},
-						"limit_scope_to_networks": schema.SetNestedAttribute{
-							Computed: true,
-							NestedObject: schema.NestedAttributeObject{
-								Attributes: map[string]schema.Attribute{
-
-									"id": schema.StringAttribute{
-										Computed: true,
-									},
-									"name": schema.StringAttribute{
-										Computed: true,
-									},
-								},
-							},
-						},
-						"short_name": schema.StringAttribute{
-							Computed: true,
-						},
+						MarkdownDescription: `Name of Early Access Feature`,
+						Computed:            true,
 					},
 				},
 			},
@@ -161,13 +134,6 @@ func (d *OrganizationsEarlyAccessFeaturesOptInsDataSource) Read(ctx context.Cont
 			return
 		}
 
-		organizationsEarlyAccessFeaturesOptIns = ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInsItemsToBody(organizationsEarlyAccessFeaturesOptIns, response1)
-		diags = resp.State.Set(ctx, &organizationsEarlyAccessFeaturesOptIns)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-
 	}
 	if selectedMethod == 2 {
 		log.Printf("[DEBUG] Selected method: GetOrganizationEarlyAccessFeaturesOptIn")
@@ -199,22 +165,9 @@ func (d *OrganizationsEarlyAccessFeaturesOptInsDataSource) Read(ctx context.Cont
 
 // structs
 type OrganizationsEarlyAccessFeaturesOptIns struct {
-	OrganizationID types.String                                                         `tfsdk:"organization_id"`
-	OptInID        types.String                                                         `tfsdk:"opt_in_id"`
-	Items          *[]ResponseItemOrganizationsGetOrganizationEarlyAccessFeaturesOptIns `tfsdk:"items"`
-	Item           *ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptIn        `tfsdk:"item"`
-}
-
-type ResponseItemOrganizationsGetOrganizationEarlyAccessFeaturesOptIns struct {
-	CreatedAt            types.String                                                                             `tfsdk:"created_at"`
-	ID                   types.String                                                                             `tfsdk:"id"`
-	LimitScopeToNetworks *[]ResponseItemOrganizationsGetOrganizationEarlyAccessFeaturesOptInsLimitScopeToNetworks `tfsdk:"limit_scope_to_networks"`
-	ShortName            types.String                                                                             `tfsdk:"short_name"`
-}
-
-type ResponseItemOrganizationsGetOrganizationEarlyAccessFeaturesOptInsLimitScopeToNetworks struct {
-	ID   types.String `tfsdk:"id"`
-	Name types.String `tfsdk:"name"`
+	OrganizationID types.String                                                  `tfsdk:"organization_id"`
+	OptInID        types.String                                                  `tfsdk:"opt_in_id"`
+	Item           *ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptIn `tfsdk:"item"`
 }
 
 type ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptIn struct {
@@ -230,33 +183,6 @@ type ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInLimitScopeToNet
 }
 
 // ToBody
-func ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInsItemsToBody(state OrganizationsEarlyAccessFeaturesOptIns, response *merakigosdk.ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptIns) OrganizationsEarlyAccessFeaturesOptIns {
-	var items []ResponseItemOrganizationsGetOrganizationEarlyAccessFeaturesOptIns
-	for _, item := range *response {
-		itemState := ResponseItemOrganizationsGetOrganizationEarlyAccessFeaturesOptIns{
-			CreatedAt: types.StringValue(item.CreatedAt),
-			ID:        types.StringValue(item.ID),
-			LimitScopeToNetworks: func() *[]ResponseItemOrganizationsGetOrganizationEarlyAccessFeaturesOptInsLimitScopeToNetworks {
-				if item.LimitScopeToNetworks != nil {
-					result := make([]ResponseItemOrganizationsGetOrganizationEarlyAccessFeaturesOptInsLimitScopeToNetworks, len(*item.LimitScopeToNetworks))
-					for i, limitScopeToNetworks := range *item.LimitScopeToNetworks {
-						result[i] = ResponseItemOrganizationsGetOrganizationEarlyAccessFeaturesOptInsLimitScopeToNetworks{
-							ID:   types.StringValue(limitScopeToNetworks.ID),
-							Name: types.StringValue(limitScopeToNetworks.Name),
-						}
-					}
-					return &result
-				}
-				return &[]ResponseItemOrganizationsGetOrganizationEarlyAccessFeaturesOptInsLimitScopeToNetworks{}
-			}(),
-			ShortName: types.StringValue(item.ShortName),
-		}
-		items = append(items, itemState)
-	}
-	state.Items = &items
-	return state
-}
-
 func ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInItemToBody(state OrganizationsEarlyAccessFeaturesOptIns, response *merakigosdk.ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptIn) OrganizationsEarlyAccessFeaturesOptIns {
 	itemState := ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptIn{
 		CreatedAt: types.StringValue(response.CreatedAt),

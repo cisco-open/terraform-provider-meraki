@@ -38,9 +38,21 @@ output "meraki_networks_devices_claim_example" {
 - `network_id` (String) networkId path parameter. Network ID
 - `parameters` (Attributes) (see [below for nested schema](#nestedatt--parameters))
 
+### Read-Only
+
+- `item` (Attributes) (see [below for nested schema](#nestedatt--item))
+
 <a id="nestedatt--parameters"></a>
 ### Nested Schema for `parameters`
 
 Optional:
 
 - `serials` (List of String) A list of serials of devices to claim
+
+
+<a id="nestedatt--item"></a>
+### Nested Schema for `item`
+
+Read-Only:
+
+- `serials` (List of String) The serials of the devices

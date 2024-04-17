@@ -77,7 +77,9 @@ output "meraki_organizations_devices_example" {
 Read-Only:
 
 - `address` (String) Physical address of the device
+- `details` (Attributes Set) Additional device information (see [below for nested schema](#nestedatt--items--details))
 - `firmware` (String) Firmware version of the device
+- `imei` (String) IMEI of the device, if applicable
 - `lan_ip` (String) LAN IP address of the device
 - `lat` (Number) Latitude of the device
 - `lng` (Number) Longitude of the device
@@ -89,3 +91,11 @@ Read-Only:
 - `product_type` (String) Product type of the device
 - `serial` (String) Serial number of the device
 - `tags` (List of String) List of tags assigned to the device
+
+<a id="nestedatt--items--details"></a>
+### Nested Schema for `items.details`
+
+Read-Only:
+
+- `name` (String) Additional property name
+- `value` (String) Additional property value

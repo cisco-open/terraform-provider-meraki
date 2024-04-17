@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -74,22 +58,28 @@ func (d *NetworksSwitchStacksRoutingStaticRoutesDataSource) Schema(_ context.Con
 				Attributes: map[string]schema.Attribute{
 
 					"advertise_via_ospf_enabled": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Option to advertise static routes via OSPF`,
+						Computed:            true,
 					},
 					"name": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The name or description of the layer 3 static route`,
+						Computed:            true,
 					},
 					"next_hop_ip": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: ` The IP address of the router to which traffic for this destination network should be sent`,
+						Computed:            true,
 					},
 					"prefer_over_ospf_routes_enabled": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Option to prefer static routes over OSPF routes`,
+						Computed:            true,
 					},
 					"static_route_id": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The identifier of a layer 3 static route`,
+						Computed:            true,
 					},
 					"subnet": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The IP address of the subnetwork specified in CIDR notation (ex. 1.2.3.0/24)`,
+						Computed:            true,
 					},
 				},
 			},
@@ -101,22 +91,28 @@ func (d *NetworksSwitchStacksRoutingStaticRoutesDataSource) Schema(_ context.Con
 					Attributes: map[string]schema.Attribute{
 
 						"advertise_via_ospf_enabled": schema.BoolAttribute{
-							Computed: true,
+							MarkdownDescription: `Option to advertise static routes via OSPF`,
+							Computed:            true,
 						},
 						"name": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The name or description of the layer 3 static route`,
+							Computed:            true,
 						},
 						"next_hop_ip": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: ` The IP address of the router to which traffic for this destination network should be sent`,
+							Computed:            true,
 						},
 						"prefer_over_ospf_routes_enabled": schema.BoolAttribute{
-							Computed: true,
+							MarkdownDescription: `Option to prefer static routes over OSPF routes`,
+							Computed:            true,
 						},
 						"static_route_id": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The identifier of a layer 3 static route`,
+							Computed:            true,
 						},
 						"subnet": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The IP address of the subnetwork specified in CIDR notation (ex. 1.2.3.0/24)`,
+							Computed:            true,
 						},
 					},
 				},

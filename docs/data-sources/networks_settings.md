@@ -39,22 +39,12 @@ output "meraki_networks_settings_example" {
 
 Read-Only:
 
-- `client_privacy` (Attributes) Privacy settings (see [below for nested schema](#nestedatt--item--client_privacy))
 - `fips` (Attributes) A hash of FIPS options applied to the Network (see [below for nested schema](#nestedatt--item--fips))
 - `local_status_page` (Attributes) A hash of Local Status page(s)' authentication options applied to the Network. (see [below for nested schema](#nestedatt--item--local_status_page))
 - `local_status_page_enabled` (Boolean) Enables / disables the local device status pages (<a target='_blank' href='http://my.meraki.com/'>my.meraki.com, </a><a target='_blank' href='http://ap.meraki.com/'>ap.meraki.com, </a><a target='_blank' href='http://switch.meraki.com/'>switch.meraki.com, </a><a target='_blank' href='http://wired.meraki.com/'>wired.meraki.com</a>). Optional (defaults to false)
 - `named_vlans` (Attributes) A hash of Named VLANs options applied to the Network. (see [below for nested schema](#nestedatt--item--named_vlans))
 - `remote_status_page_enabled` (Boolean) Enables / disables access to the device status page (<a target='_blank'>http://[device's LAN IP])</a>. Optional. Can only be set if localStatusPageEnabled is set to true
 - `secure_port` (Attributes) A hash of SecureConnect options applied to the Network. (see [below for nested schema](#nestedatt--item--secure_port))
-
-<a id="nestedatt--item--client_privacy"></a>
-### Nested Schema for `item.client_privacy`
-
-Read-Only:
-
-- `expire_data_before` (String) The date to expire the data before
-- `expire_data_older_than` (Number) The number of days, weeks, or months in Epoch time to expire the data before
-
 
 <a id="nestedatt--item--fips"></a>
 ### Nested Schema for `item.fips`

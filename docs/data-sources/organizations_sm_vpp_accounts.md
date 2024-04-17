@@ -50,8 +50,31 @@ output "meraki_organizations_sm_vpp_accounts_example" {
 
 Read-Only:
 
+- `allowed_admins` (String) The allowed admins for the VPP account
+- `assignable_network_ids` (List of String) The network IDs of the assignable networks for the VPP account
+- `assignable_networks` (String) The assignable networks for the VPP account
+- `content_token` (String) The VPP service token
+- `email` (String) The email address associated with the VPP account
 - `id` (String) The id of the VPP Account
+- `last_force_synced_at` (String) The last time the VPP account was force synced
+- `last_synced_at` (String) The last time the VPP account was synced
+- `name` (String) The name of the VPP account
+- `network_id_admins` (String) The network IDs of the admins for the VPP account
+- `parsed_token` (Attributes) The parsed VPP service token (see [below for nested schema](#nestedatt--item--parsed_token))
+- `vpp_account_id` (String) The id of the VPP Account
+- `vpp_location_id` (String) The VPP location ID
+- `vpp_location_name` (String) The VPP location name
 - `vpp_service_token` (String) The VPP Account's Service Token
+
+<a id="nestedatt--item--parsed_token"></a>
+### Nested Schema for `item.parsed_token`
+
+Read-Only:
+
+- `expires_at` (String) The expiration time of the token
+- `hashed_token` (String) The hashed token
+- `org_name` (String) The organization name
+
 
 
 <a id="nestedatt--items"></a>
@@ -59,5 +82,27 @@ Read-Only:
 
 Read-Only:
 
+- `allowed_admins` (String) The allowed admins for the VPP account
+- `assignable_network_ids` (List of String) The network IDs of the assignable networks for the VPP account
+- `assignable_networks` (String) The assignable networks for the VPP account
+- `content_token` (String) The VPP service token
+- `email` (String) The email address associated with the VPP account
 - `id` (String) The id of the VPP Account
+- `last_force_synced_at` (String) The last time the VPP account was force synced
+- `last_synced_at` (String) The last time the VPP account was synced
+- `name` (String) The name of the VPP account
+- `network_id_admins` (String) The network IDs of the admins for the VPP account
+- `parsed_token` (Attributes) The parsed VPP service token (see [below for nested schema](#nestedatt--items--parsed_token))
+- `vpp_account_id` (String) The id of the VPP Account
+- `vpp_location_id` (String) The VPP location ID
+- `vpp_location_name` (String) The VPP location name
 - `vpp_service_token` (String) The VPP Account's Service Token
+
+<a id="nestedatt--items--parsed_token"></a>
+### Nested Schema for `items.parsed_token`
+
+Read-Only:
+
+- `expires_at` (String) The expiration time of the token
+- `hashed_token` (String) The hashed token
+- `org_name` (String) The organization name

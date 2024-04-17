@@ -1,33 +1,21 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -96,20 +84,36 @@ func (r *NetworksWirelessSettingsResource) Schema(_ context.Context, _ resource.
 			"named_vlans": schema.SingleNestedAttribute{
 				MarkdownDescription: `Named VLAN settings for wireless networks.`,
 				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 
 					"pool_dhcp_monitoring": schema.SingleNestedAttribute{
 						MarkdownDescription: `Named VLAN Pool DHCP Monitoring settings.`,
 						Computed:            true,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 
 							"duration": schema.Int64Attribute{
 								MarkdownDescription: `The duration in minutes that devices will refrain from using dirty VLANs before adding them back to the pool.`,
 								Computed:            true,
+								Optional:            true,
+								PlanModifiers: []planmodifier.Int64{
+									int64planmodifier.UseStateForUnknown(),
+								},
 							},
 							"enabled": schema.BoolAttribute{
 								MarkdownDescription: `Whether or not devices using named VLAN pools should remove dirty VLANs from the pool, thereby preventing clients from being assigned to VLANs where they would be unable to obtain an IP address via DHCP`,
 								Computed:            true,
+								Optional:            true,
+								PlanModifiers: []planmodifier.Bool{
+									boolplanmodifier.UseStateForUnknown(),
+								},
 							},
 						},
 					},
@@ -119,12 +123,37 @@ func (r *NetworksWirelessSettingsResource) Schema(_ context.Context, _ resource.
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"upgrade_strategy": schema.StringAttribute{
+			"regulatory_domain": schema.SingleNestedAttribute{
+				MarkdownDescription: `Regulatory domain information for this network.`,
+				Computed:            true,
+				Attributes: map[string]schema.Attribute{
+
+					"country_code": schema.StringAttribute{
+						MarkdownDescription: `The country code of the regulatory domain.`,
+						Computed:            true,
+					},
+					"name": schema.StringAttribute{
+						MarkdownDescription: `The name of the regulatory domain for this network.`,
+						Computed:            true,
+					},
+					"permits6e": schema.BoolAttribute{
+						MarkdownDescription: `Whether or not the regulatory domain for this network permits Wifi 6E.`,
+						Computed:            true,
+					},
+				},
+			},
+			"upgradestrategy": schema.StringAttribute{
 				MarkdownDescription: `The upgrade strategy to apply to the network. Must be one of 'minimizeUpgradeTime' or 'minimizeClientDowntime'. Requires firmware version MR 26.8 or higher'`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"minimizeClientDowntime",
+						"minimizeUpgradeTime",
+					),
 				},
 			},
 		},
@@ -151,7 +180,6 @@ func (r *NetworksWirelessSettingsResource) Create(ctx context.Context, req resou
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSettings(vvNetworkID)
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
@@ -203,7 +231,7 @@ func (r *NetworksWirelessSettingsResource) Create(ctx context.Context, req resou
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSettingsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -232,7 +260,6 @@ func (r *NetworksWirelessSettingsResource) Read(ctx context.Context, req resourc
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	responseGet, restyRespGet, err := r.client.Wireless.GetNetworkWirelessSettings(vvNetworkID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -256,7 +283,7 @@ func (r *NetworksWirelessSettingsResource) Read(ctx context.Context, req resourc
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSettingsItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -278,7 +305,6 @@ func (r *NetworksWirelessSettingsResource) Update(ctx context.Context, req resou
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSettings(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
@@ -302,19 +328,20 @@ func (r *NetworksWirelessSettingsResource) Update(ctx context.Context, req resou
 
 func (r *NetworksWirelessSettingsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksWirelessSettings", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
 // TF Structs Schema
 type NetworksWirelessSettingsRs struct {
-	NetworkID                types.String                                            `tfsdk:"network_id"`
-	IPv6BridgeEnabled        types.Bool                                              `tfsdk:"ipv6_bridge_enabled"`
-	LedLightsOn              types.Bool                                              `tfsdk:"led_lights_on"`
-	LocationAnalyticsEnabled types.Bool                                              `tfsdk:"location_analytics_enabled"`
-	MeshingEnabled           types.Bool                                              `tfsdk:"meshing_enabled"`
-	NamedVLANs               *ResponseWirelessGetNetworkWirelessSettingsNamedVlansRs `tfsdk:"named_vlans"`
-	Upgradestrategy          types.String                                            `tfsdk:"upgrade_strategy"`
+	NetworkID                types.String                                                  `tfsdk:"network_id"`
+	IPv6BridgeEnabled        types.Bool                                                    `tfsdk:"ipv6_bridge_enabled"`
+	LedLightsOn              types.Bool                                                    `tfsdk:"led_lights_on"`
+	LocationAnalyticsEnabled types.Bool                                                    `tfsdk:"location_analytics_enabled"`
+	MeshingEnabled           types.Bool                                                    `tfsdk:"meshing_enabled"`
+	NamedVLANs               *ResponseWirelessGetNetworkWirelessSettingsNamedVlansRs       `tfsdk:"named_vlans"`
+	RegulatoryDomain         *ResponseWirelessGetNetworkWirelessSettingsRegulatoryDomainRs `tfsdk:"regulatory_domain"`
+	Upgradestrategy          types.String                                                  `tfsdk:"upgrade_strategy"`
 }
 
 type ResponseWirelessGetNetworkWirelessSettingsNamedVlansRs struct {
@@ -324,6 +351,12 @@ type ResponseWirelessGetNetworkWirelessSettingsNamedVlansRs struct {
 type ResponseWirelessGetNetworkWirelessSettingsNamedVlansPoolDhcpMonitoringRs struct {
 	Duration types.Int64 `tfsdk:"duration"`
 	Enabled  types.Bool  `tfsdk:"enabled"`
+}
+
+type ResponseWirelessGetNetworkWirelessSettingsRegulatoryDomainRs struct {
+	CountryCode types.String `tfsdk:"country_code"`
+	Name        types.String `tfsdk:"name"`
+	Permits6E   types.Bool   `tfsdk:"permits6e"`
 }
 
 // FromBody
@@ -353,6 +386,31 @@ func (r *NetworksWirelessSettingsRs) toSdkApiRequestUpdate(ctx context.Context) 
 	} else {
 		meshingEnabled = nil
 	}
+	var requestWirelessUpdateNetworkWirelessSettingsNamedVLANs *merakigosdk.RequestWirelessUpdateNetworkWirelessSettingsNamedVLANs
+	if r.NamedVLANs != nil {
+		var requestWirelessUpdateNetworkWirelessSettingsNamedVLANsPoolDhcpMonitoring *merakigosdk.RequestWirelessUpdateNetworkWirelessSettingsNamedVLANsPoolDhcpMonitoring
+		if r.NamedVLANs.PoolDhcpMonitoring != nil {
+			duration := func() *int64 {
+				if !r.NamedVLANs.PoolDhcpMonitoring.Duration.IsUnknown() && !r.NamedVLANs.PoolDhcpMonitoring.Duration.IsNull() {
+					return r.NamedVLANs.PoolDhcpMonitoring.Duration.ValueInt64Pointer()
+				}
+				return nil
+			}()
+			enabled := func() *bool {
+				if !r.NamedVLANs.PoolDhcpMonitoring.Enabled.IsUnknown() && !r.NamedVLANs.PoolDhcpMonitoring.Enabled.IsNull() {
+					return r.NamedVLANs.PoolDhcpMonitoring.Enabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			requestWirelessUpdateNetworkWirelessSettingsNamedVLANsPoolDhcpMonitoring = &merakigosdk.RequestWirelessUpdateNetworkWirelessSettingsNamedVLANsPoolDhcpMonitoring{
+				Duration: int64ToIntPointer(duration),
+				Enabled:  enabled,
+			}
+		}
+		requestWirelessUpdateNetworkWirelessSettingsNamedVLANs = &merakigosdk.RequestWirelessUpdateNetworkWirelessSettingsNamedVLANs{
+			PoolDhcpMonitoring: requestWirelessUpdateNetworkWirelessSettingsNamedVLANsPoolDhcpMonitoring,
+		}
+	}
 	upgradestrategy := new(string)
 	if !r.Upgradestrategy.IsUnknown() && !r.Upgradestrategy.IsNull() {
 		*upgradestrategy = r.Upgradestrategy.ValueString()
@@ -364,6 +422,7 @@ func (r *NetworksWirelessSettingsRs) toSdkApiRequestUpdate(ctx context.Context) 
 		LedLightsOn:              ledLightsOn,
 		LocationAnalyticsEnabled: locationAnalyticsEnabled,
 		MeshingEnabled:           meshingEnabled,
+		NamedVLANs:               requestWirelessUpdateNetworkWirelessSettingsNamedVLANs,
 		Upgradestrategy:          *upgradestrategy,
 	}
 	return &out
@@ -421,6 +480,21 @@ func ResponseWirelessGetNetworkWirelessSettingsItemToBodyRs(state NetworksWirele
 				}
 			}
 			return &ResponseWirelessGetNetworkWirelessSettingsNamedVlansRs{}
+		}(),
+		RegulatoryDomain: func() *ResponseWirelessGetNetworkWirelessSettingsRegulatoryDomainRs {
+			if response.RegulatoryDomain != nil {
+				return &ResponseWirelessGetNetworkWirelessSettingsRegulatoryDomainRs{
+					CountryCode: types.StringValue(response.RegulatoryDomain.CountryCode),
+					Name:        types.StringValue(response.RegulatoryDomain.Name),
+					Permits6E: func() types.Bool {
+						if response.RegulatoryDomain.Permits6E != nil {
+							return types.BoolValue(*response.RegulatoryDomain.Permits6E)
+						}
+						return types.Bool{}
+					}(),
+				}
+			}
+			return &ResponseWirelessGetNetworkWirelessSettingsRegulatoryDomainRs{}
 		}(),
 		Upgradestrategy: types.StringValue(response.Upgradestrategy),
 	}

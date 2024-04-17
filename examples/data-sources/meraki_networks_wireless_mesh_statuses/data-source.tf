@@ -8,5 +8,5 @@ data "meraki_networks_wireless_mesh_statuses" "example" {
 }
 
 output "meraki_networks_wireless_mesh_statuses_example" {
-  value = data.meraki_networks_wireless_mesh_statuses.example.item
+  value = data.meraki_networks_wireless_mesh_statuses.example.items
 }

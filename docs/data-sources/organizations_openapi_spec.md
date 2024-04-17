@@ -16,6 +16,7 @@ description: |-
 data "meraki_organizations_openapi_spec" "example" {
 
   organization_id = "string"
+  version         = 1
 }
 
 output "meraki_organizations_openapi_spec_example" {
@@ -29,6 +30,10 @@ output "meraki_organizations_openapi_spec_example" {
 ### Required
 
 - `organization_id` (String) organizationId path parameter. Organization ID
+
+### Optional
+
+- `version` (Number) version query parameter. OpenAPI Specification version to return. Default is 2
 
 ### Read-Only
 

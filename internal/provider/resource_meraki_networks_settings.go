@@ -1,26 +1,10 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -62,21 +46,6 @@ func (r *NetworksSettingsResource) Metadata(_ context.Context, req resource.Meta
 func (r *NetworksSettingsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"client_privacy": schema.SingleNestedAttribute{
-				MarkdownDescription: `Privacy settings`,
-				Computed:            true,
-				Attributes: map[string]schema.Attribute{
-
-					"expire_data_before": schema.StringAttribute{
-						MarkdownDescription: `The date to expire the data before`,
-						Computed:            true,
-					},
-					"expire_data_older_than": schema.Int64Attribute{
-						MarkdownDescription: `The number of days, weeks, or months in Epoch time to expire the data before`,
-						Computed:            true,
-					},
-				},
-			},
 			"fips": schema.SingleNestedAttribute{
 				MarkdownDescription: `A hash of FIPS options applied to the Network`,
 				Computed:            true,
@@ -126,9 +95,6 @@ func (r *NetworksSettingsResource) Schema(_ context.Context, _ resource.SchemaRe
 							"username": schema.StringAttribute{
 								MarkdownDescription: `The username used for Local Status Page(s).`,
 								Computed:            true,
-								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.UseStateForUnknown(),
-								},
 							},
 						},
 					},
@@ -145,11 +111,19 @@ func (r *NetworksSettingsResource) Schema(_ context.Context, _ resource.SchemaRe
 			"named_vlans": schema.SingleNestedAttribute{
 				MarkdownDescription: `A hash of Named VLANs options applied to the Network.`,
 				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Enables / disables Named VLANs on the Network.`,
 						Computed:            true,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
 					},
 				},
 			},
@@ -208,7 +182,6 @@ func (r *NetworksSettingsResource) Create(ctx context.Context, req resource.Crea
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkSettings(vvNetworkID)
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
@@ -260,7 +233,7 @@ func (r *NetworksSettingsResource) Create(ctx context.Context, req resource.Crea
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkSettingsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -289,7 +262,6 @@ func (r *NetworksSettingsResource) Read(ctx context.Context, req resource.ReadRe
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	responseGet, restyRespGet, err := r.client.Networks.GetNetworkSettings(vvNetworkID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -313,7 +285,7 @@ func (r *NetworksSettingsResource) Read(ctx context.Context, req resource.ReadRe
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkSettingsItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -335,7 +307,6 @@ func (r *NetworksSettingsResource) Update(ctx context.Context, req resource.Upda
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkSettings(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
@@ -359,25 +330,19 @@ func (r *NetworksSettingsResource) Update(ctx context.Context, req resource.Upda
 
 func (r *NetworksSettingsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksSettings", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
 // TF Structs Schema
 type NetworksSettingsRs struct {
 	NetworkID               types.String                                         `tfsdk:"network_id"`
-	ClientPrivacy           *ResponseNetworksGetNetworkSettingsClientPrivacyRs   `tfsdk:"client_privacy"`
 	Fips                    *ResponseNetworksGetNetworkSettingsFipsRs            `tfsdk:"fips"`
 	LocalStatusPage         *ResponseNetworksGetNetworkSettingsLocalStatusPageRs `tfsdk:"local_status_page"`
 	LocalStatusPageEnabled  types.Bool                                           `tfsdk:"local_status_page_enabled"`
 	NamedVLANs              *ResponseNetworksGetNetworkSettingsNamedVlansRs      `tfsdk:"named_vlans"`
 	RemoteStatusPageEnabled types.Bool                                           `tfsdk:"remote_status_page_enabled"`
 	SecurePort              *ResponseNetworksGetNetworkSettingsSecurePortRs      `tfsdk:"secure_port"`
-}
-
-type ResponseNetworksGetNetworkSettingsClientPrivacyRs struct {
-	ExpireDataBefore    types.String `tfsdk:"expire_data_before"`
-	ExpireDataOlderThan types.Int64  `tfsdk:"expire_data_older_than"`
 }
 
 type ResponseNetworksGetNetworkSettingsFipsRs struct {
@@ -430,6 +395,18 @@ func (r *NetworksSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *merakig
 	} else {
 		localStatusPageEnabled = nil
 	}
+	var requestNetworksUpdateNetworkSettingsNamedVLANs *merakigosdk.RequestNetworksUpdateNetworkSettingsNamedVLANs
+	if r.NamedVLANs != nil {
+		enabled := func() *bool {
+			if !r.NamedVLANs.Enabled.IsUnknown() && !r.NamedVLANs.Enabled.IsNull() {
+				return r.NamedVLANs.Enabled.ValueBoolPointer()
+			}
+			return nil
+		}()
+		requestNetworksUpdateNetworkSettingsNamedVLANs = &merakigosdk.RequestNetworksUpdateNetworkSettingsNamedVLANs{
+			Enabled: enabled,
+		}
+	}
 	remoteStatusPageEnabled := new(bool)
 	if !r.RemoteStatusPageEnabled.IsUnknown() && !r.RemoteStatusPageEnabled.IsNull() {
 		*remoteStatusPageEnabled = r.RemoteStatusPageEnabled.ValueBool()
@@ -451,6 +428,7 @@ func (r *NetworksSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *merakig
 	out := merakigosdk.RequestNetworksUpdateNetworkSettings{
 		LocalStatusPage:         requestNetworksUpdateNetworkSettingsLocalStatusPage,
 		LocalStatusPageEnabled:  localStatusPageEnabled,
+		NamedVLANs:              requestNetworksUpdateNetworkSettingsNamedVLANs,
 		RemoteStatusPageEnabled: remoteStatusPageEnabled,
 		SecurePort:              requestNetworksUpdateNetworkSettingsSecurePort,
 	}
@@ -460,20 +438,6 @@ func (r *NetworksSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *merakig
 // From gosdk to TF Structs Schema
 func ResponseNetworksGetNetworkSettingsItemToBodyRs(state NetworksSettingsRs, response *merakigosdk.ResponseNetworksGetNetworkSettings, is_read bool) NetworksSettingsRs {
 	itemState := NetworksSettingsRs{
-		ClientPrivacy: func() *ResponseNetworksGetNetworkSettingsClientPrivacyRs {
-			if response.ClientPrivacy != nil {
-				return &ResponseNetworksGetNetworkSettingsClientPrivacyRs{
-					ExpireDataBefore: types.StringValue(response.ClientPrivacy.ExpireDataBefore),
-					ExpireDataOlderThan: func() types.Int64 {
-						if response.ClientPrivacy.ExpireDataOlderThan != nil {
-							return types.Int64Value(int64(*response.ClientPrivacy.ExpireDataOlderThan))
-						}
-						return types.Int64{}
-					}(),
-				}
-			}
-			return &ResponseNetworksGetNetworkSettingsClientPrivacyRs{}
-		}(),
 		Fips: func() *ResponseNetworksGetNetworkSettingsFipsRs {
 			if response.Fips != nil {
 				return &ResponseNetworksGetNetworkSettingsFipsRs{
@@ -547,16 +511,6 @@ func ResponseNetworksGetNetworkSettingsItemToBodyRs(state NetworksSettingsRs, re
 			return &ResponseNetworksGetNetworkSettingsSecurePortRs{}
 		}(),
 	}
-	if state.LocalStatusPage != nil {
-		if state.LocalStatusPage.Authentication != nil {
-			if state.LocalStatusPage != nil {
-				if !state.LocalStatusPage.Authentication.Username.IsUnknown() {
-					itemState.LocalStatusPage.Authentication = state.LocalStatusPage.Authentication
-				}
-			}
-		}
-	}
-
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksSettingsRs)
 	}

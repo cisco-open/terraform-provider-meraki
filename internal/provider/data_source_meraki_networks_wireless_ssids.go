@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -70,130 +54,172 @@ func (d *NetworksWirelessSSIDsDataSource) Schema(_ context.Context, _ datasource
 				Attributes: map[string]schema.Attribute{
 
 					"admin_splash_url": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `URL for the admin splash page`,
+						Computed:            true,
 					},
 					"auth_mode": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The association control method for the SSID`,
+						Computed:            true,
 					},
 					"availability_tags": schema.ListAttribute{
-						Computed:    true,
-						ElementType: types.StringType,
+						MarkdownDescription: `List of tags for this SSID. If availableOnAllAps is false, then the SSID is only broadcast by APs with tags matching any of the tags in this list`,
+						Computed:            true,
+						ElementType:         types.StringType,
 					},
 					"available_on_all_aps": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Whether all APs broadcast the SSID or if it's restricted to APs matching any availability tags`,
+						Computed:            true,
 					},
 					"band_selection": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The client-serving radio frequencies of this SSID in the default indoor RF profile`,
+						Computed:            true,
 					},
 					"enabled": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Whether or not the SSID is enabled`,
+						Computed:            true,
 					},
 					"encryption_mode": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The psk encryption mode for the SSID`,
+						Computed:            true,
 					},
 					"ip_assignment_mode": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The client IP assignment mode`,
+						Computed:            true,
+					},
+					"local_auth": schema.BoolAttribute{
+						MarkdownDescription: `Extended local auth flag for Enterprise NAC`,
+						Computed:            true,
 					},
 					"mandatory_dhcp_enabled": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Whether clients connecting to this SSID must use the IP address assigned by the DHCP server`,
+						Computed:            true,
 					},
 					"min_bitrate": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `The minimum bitrate in Mbps of this SSID in the default indoor RF profile`,
+						Computed:            true,
 					},
 					"name": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The name of the SSID`,
+						Computed:            true,
 					},
 					"number": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `Unique identifier of the SSID`,
+						Computed:            true,
 					},
 					"per_client_bandwidth_limit_down": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `The download bandwidth limit in Kbps. (0 represents no limit.)`,
+						Computed:            true,
 					},
 					"per_client_bandwidth_limit_up": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `The upload bandwidth limit in Kbps. (0 represents no limit.)`,
+						Computed:            true,
 					},
 					"per_ssid_bandwidth_limit_down": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `The total download bandwidth limit in Kbps (0 represents no limit)`,
+						Computed:            true,
 					},
 					"per_ssid_bandwidth_limit_up": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `The total upload bandwidth limit in Kbps (0 represents no limit)`,
+						Computed:            true,
 					},
 					"radius_accounting_enabled": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Whether or not RADIUS accounting is enabled`,
+						Computed:            true,
 					},
 					"radius_accounting_servers": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `List of RADIUS accounting 802.1X servers to be used for authentication`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"ca_certificate": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Certificate used for authorization for the RADSEC Server`,
+									Computed:            true,
 								},
 								"host": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `IP address (or FQDN) to which the APs will send RADIUS accounting messages`,
+									Computed:            true,
 								},
 								"open_roaming_certificate_id": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `The ID of the Openroaming Certificate attached to radius server`,
+									Computed:            true,
 								},
 								"port": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `Port on the RADIUS server that is listening for accounting messages`,
+									Computed:            true,
 								},
 							},
 						},
 					},
 					"radius_attribute_for_group_policies": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `RADIUS attribute used to look up group policies`,
+						Computed:            true,
 					},
 					"radius_enabled": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Whether RADIUS authentication is enabled`,
+						Computed:            true,
 					},
 					"radius_failover_policy": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Policy which determines how authentication requests should be handled in the event that all of the configured RADIUS servers are unreachable`,
+						Computed:            true,
 					},
 					"radius_load_balancing_policy": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Policy which determines which RADIUS server will be contacted first in an authentication attempt, and the ordering of any necessary retry attempts`,
+						Computed:            true,
 					},
 					"radius_servers": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `List of RADIUS 802.1X servers to be used for authentication`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"ca_certificate": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Certificate used for authorization for the RADSEC Server`,
+									Computed:            true,
 								},
 								"host": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `IP address (or FQDN) of your RADIUS server`,
+									Computed:            true,
 								},
 								"open_roaming_certificate_id": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `The ID of the Openroaming Certificate attached to radius server`,
+									Computed:            true,
 								},
 								"port": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `UDP port the RADIUS server listens on for Access-requests`,
+									Computed:            true,
 								},
 							},
 						},
 					},
 					"splash_page": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The type of splash page for the SSID`,
+						Computed:            true,
 					},
 					"splash_timeout": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Splash page timeout`,
+						Computed:            true,
 					},
 					"ssid_admin_accessible": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `SSID Administrator access status`,
+						Computed:            true,
 					},
 					"visible": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Whether the SSID is advertised or hidden by the AP`,
+						Computed:            true,
 					},
 					"walled_garden_enabled": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Allow users to access a configurable list of IP ranges prior to sign-on`,
+						Computed:            true,
 					},
 					"walled_garden_ranges": schema.ListAttribute{
-						Computed:    true,
-						ElementType: types.StringType,
+						MarkdownDescription: `Domain names and IP address ranges available in Walled Garden mode`,
+						Computed:            true,
+						ElementType:         types.StringType,
 					},
 					"wpa_encryption_mode": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The types of WPA encryption`,
+						Computed:            true,
 					},
 				},
 			},
@@ -205,130 +231,172 @@ func (d *NetworksWirelessSSIDsDataSource) Schema(_ context.Context, _ datasource
 					Attributes: map[string]schema.Attribute{
 
 						"admin_splash_url": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `URL for the admin splash page`,
+							Computed:            true,
 						},
 						"auth_mode": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The association control method for the SSID`,
+							Computed:            true,
 						},
 						"availability_tags": schema.ListAttribute{
-							Computed:    true,
-							ElementType: types.StringType,
+							MarkdownDescription: `List of tags for this SSID. If availableOnAllAps is false, then the SSID is only broadcast by APs with tags matching any of the tags in this list`,
+							Computed:            true,
+							ElementType:         types.StringType,
 						},
 						"available_on_all_aps": schema.BoolAttribute{
-							Computed: true,
+							MarkdownDescription: `Whether all APs broadcast the SSID or if it's restricted to APs matching any availability tags`,
+							Computed:            true,
 						},
 						"band_selection": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The client-serving radio frequencies of this SSID in the default indoor RF profile`,
+							Computed:            true,
 						},
 						"enabled": schema.BoolAttribute{
-							Computed: true,
+							MarkdownDescription: `Whether or not the SSID is enabled`,
+							Computed:            true,
 						},
 						"encryption_mode": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The psk encryption mode for the SSID`,
+							Computed:            true,
 						},
 						"ip_assignment_mode": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The client IP assignment mode`,
+							Computed:            true,
+						},
+						"local_auth": schema.BoolAttribute{
+							MarkdownDescription: `Extended local auth flag for Enterprise NAC`,
+							Computed:            true,
 						},
 						"mandatory_dhcp_enabled": schema.BoolAttribute{
-							Computed: true,
+							MarkdownDescription: `Whether clients connecting to this SSID must use the IP address assigned by the DHCP server`,
+							Computed:            true,
 						},
 						"min_bitrate": schema.Int64Attribute{
-							Computed: true,
+							MarkdownDescription: `The minimum bitrate in Mbps of this SSID in the default indoor RF profile`,
+							Computed:            true,
 						},
 						"name": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The name of the SSID`,
+							Computed:            true,
 						},
 						"number": schema.Int64Attribute{
-							Computed: true,
+							MarkdownDescription: `Unique identifier of the SSID`,
+							Computed:            true,
 						},
 						"per_client_bandwidth_limit_down": schema.Int64Attribute{
-							Computed: true,
+							MarkdownDescription: `The download bandwidth limit in Kbps. (0 represents no limit.)`,
+							Computed:            true,
 						},
 						"per_client_bandwidth_limit_up": schema.Int64Attribute{
-							Computed: true,
+							MarkdownDescription: `The upload bandwidth limit in Kbps. (0 represents no limit.)`,
+							Computed:            true,
 						},
 						"per_ssid_bandwidth_limit_down": schema.Int64Attribute{
-							Computed: true,
+							MarkdownDescription: `The total download bandwidth limit in Kbps (0 represents no limit)`,
+							Computed:            true,
 						},
 						"per_ssid_bandwidth_limit_up": schema.Int64Attribute{
-							Computed: true,
+							MarkdownDescription: `The total upload bandwidth limit in Kbps (0 represents no limit)`,
+							Computed:            true,
 						},
 						"radius_accounting_enabled": schema.BoolAttribute{
-							Computed: true,
+							MarkdownDescription: `Whether or not RADIUS accounting is enabled`,
+							Computed:            true,
 						},
 						"radius_accounting_servers": schema.SetNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `List of RADIUS accounting 802.1X servers to be used for authentication`,
+							Computed:            true,
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 
 									"ca_certificate": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `Certificate used for authorization for the RADSEC Server`,
+										Computed:            true,
 									},
 									"host": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `IP address (or FQDN) to which the APs will send RADIUS accounting messages`,
+										Computed:            true,
 									},
 									"open_roaming_certificate_id": schema.Int64Attribute{
-										Computed: true,
+										MarkdownDescription: `The ID of the Openroaming Certificate attached to radius server`,
+										Computed:            true,
 									},
 									"port": schema.Int64Attribute{
-										Computed: true,
+										MarkdownDescription: `Port on the RADIUS server that is listening for accounting messages`,
+										Computed:            true,
 									},
 								},
 							},
 						},
 						"radius_attribute_for_group_policies": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `RADIUS attribute used to look up group policies`,
+							Computed:            true,
 						},
 						"radius_enabled": schema.BoolAttribute{
-							Computed: true,
+							MarkdownDescription: `Whether RADIUS authentication is enabled`,
+							Computed:            true,
 						},
 						"radius_failover_policy": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Policy which determines how authentication requests should be handled in the event that all of the configured RADIUS servers are unreachable`,
+							Computed:            true,
 						},
 						"radius_load_balancing_policy": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Policy which determines which RADIUS server will be contacted first in an authentication attempt, and the ordering of any necessary retry attempts`,
+							Computed:            true,
 						},
 						"radius_servers": schema.SetNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `List of RADIUS 802.1X servers to be used for authentication`,
+							Computed:            true,
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 
 									"ca_certificate": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `Certificate used for authorization for the RADSEC Server`,
+										Computed:            true,
 									},
 									"host": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `IP address (or FQDN) of your RADIUS server`,
+										Computed:            true,
 									},
 									"open_roaming_certificate_id": schema.Int64Attribute{
-										Computed: true,
+										MarkdownDescription: `The ID of the Openroaming Certificate attached to radius server`,
+										Computed:            true,
 									},
 									"port": schema.Int64Attribute{
-										Computed: true,
+										MarkdownDescription: `UDP port the RADIUS server listens on for Access-requests`,
+										Computed:            true,
 									},
 								},
 							},
 						},
 						"splash_page": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The type of splash page for the SSID`,
+							Computed:            true,
 						},
 						"splash_timeout": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Splash page timeout`,
+							Computed:            true,
 						},
 						"ssid_admin_accessible": schema.BoolAttribute{
-							Computed: true,
+							MarkdownDescription: `SSID Administrator access status`,
+							Computed:            true,
 						},
 						"visible": schema.BoolAttribute{
-							Computed: true,
+							MarkdownDescription: `Whether the SSID is advertised or hidden by the AP`,
+							Computed:            true,
 						},
 						"walled_garden_enabled": schema.BoolAttribute{
-							Computed: true,
+							MarkdownDescription: `Allow users to access a configurable list of IP ranges prior to sign-on`,
+							Computed:            true,
 						},
 						"walled_garden_ranges": schema.ListAttribute{
-							Computed:    true,
-							ElementType: types.StringType,
+							MarkdownDescription: `Domain names and IP address ranges available in Walled Garden mode`,
+							Computed:            true,
+							ElementType:         types.StringType,
 						},
 						"wpa_encryption_mode": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The types of WPA encryption`,
+							Computed:            true,
 						},
 					},
 				},
@@ -420,6 +488,7 @@ type ResponseItemWirelessGetNetworkWirelessSsids struct {
 	Enabled                         types.Bool                                                            `tfsdk:"enabled"`
 	EncryptionMode                  types.String                                                          `tfsdk:"encryption_mode"`
 	IPAssignmentMode                types.String                                                          `tfsdk:"ip_assignment_mode"`
+	LocalAuth                       types.Bool                                                            `tfsdk:"local_auth"`
 	MandatoryDhcpEnabled            types.Bool                                                            `tfsdk:"mandatory_dhcp_enabled"`
 	MinBitrate                      types.Int64                                                           `tfsdk:"min_bitrate"`
 	Name                            types.String                                                          `tfsdk:"name"`
@@ -467,6 +536,7 @@ type ResponseWirelessGetNetworkWirelessSsid struct {
 	Enabled                         types.Bool                                                       `tfsdk:"enabled"`
 	EncryptionMode                  types.String                                                     `tfsdk:"encryption_mode"`
 	IPAssignmentMode                types.String                                                     `tfsdk:"ip_assignment_mode"`
+	LocalAuth                       types.Bool                                                       `tfsdk:"local_auth"`
 	MandatoryDhcpEnabled            types.Bool                                                       `tfsdk:"mandatory_dhcp_enabled"`
 	MinBitrate                      types.Int64                                                      `tfsdk:"min_bitrate"`
 	Name                            types.String                                                     `tfsdk:"name"`
@@ -528,6 +598,12 @@ func ResponseWirelessGetNetworkWirelessSSIDsItemsToBody(state NetworksWirelessSS
 			}(),
 			EncryptionMode:   types.StringValue(item.EncryptionMode),
 			IPAssignmentMode: types.StringValue(item.IPAssignmentMode),
+			LocalAuth: func() types.Bool {
+				if item.LocalAuth != nil {
+					return types.BoolValue(*item.LocalAuth)
+				}
+				return types.Bool{}
+			}(),
 			MandatoryDhcpEnabled: func() types.Bool {
 				if item.MandatoryDhcpEnabled != nil {
 					return types.BoolValue(*item.MandatoryDhcpEnabled)
@@ -685,6 +761,12 @@ func ResponseWirelessGetNetworkWirelessSSIDItemToBody(state NetworksWirelessSSID
 		}(),
 		EncryptionMode:   types.StringValue(response.EncryptionMode),
 		IPAssignmentMode: types.StringValue(response.IPAssignmentMode),
+		LocalAuth: func() types.Bool {
+			if response.LocalAuth != nil {
+				return types.BoolValue(*response.LocalAuth)
+			}
+			return types.Bool{}
+		}(),
 		MandatoryDhcpEnabled: func() types.Bool {
 			if response.MandatoryDhcpEnabled != nil {
 				return types.BoolValue(*response.MandatoryDhcpEnabled)

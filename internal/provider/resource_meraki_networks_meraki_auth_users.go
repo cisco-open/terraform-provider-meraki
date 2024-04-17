@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,8 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -32,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -72,6 +58,13 @@ func (r *NetworksMerakiAuthUsersResource) Schema(_ context.Context, _ resource.S
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 					SuppressDiffString(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"802.1X",
+						"Client VPN",
+						"Guest",
+					),
 				},
 			},
 			"authorizations": schema.SetNestedAttribute{
@@ -151,7 +144,6 @@ func (r *NetworksMerakiAuthUsersResource) Schema(_ context.Context, _ resource.S
 			},
 			"meraki_auth_user_id": schema.StringAttribute{
 				MarkdownDescription: `merakiAuthUserId path parameter. Meraki auth user ID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -205,7 +197,6 @@ func (r *NetworksMerakiAuthUsersResource) Create(ctx context.Context, req resour
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvName := data.Name.ValueString()
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkMerakiAuthUsers(vvNetworkID)
@@ -228,7 +219,7 @@ func (r *NetworksMerakiAuthUsersResource) Create(ctx context.Context, req resour
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter MerakiAuthUserID",
-					"Error",
+					err.Error(),
 				)
 				return
 			}
@@ -285,7 +276,7 @@ func (r *NetworksMerakiAuthUsersResource) Create(ctx context.Context, req resour
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter MerakiAuthUserID",
-				"Error",
+				err.Error(),
 			)
 			return
 		}
@@ -339,9 +330,7 @@ func (r *NetworksMerakiAuthUsersResource) Read(ctx context.Context, req resource
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvMerakiAuthUserID := data.MerakiAuthUserID.ValueString()
-	// meraki_user_id
 	responseGet, restyRespGet, err := r.client.Networks.GetNetworkMerakiAuthUser(vvNetworkID, vvMerakiAuthUserID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -365,7 +354,7 @@ func (r *NetworksMerakiAuthUsersResource) Read(ctx context.Context, req resource
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkMerakiAuthUserItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -398,7 +387,6 @@ func (r *NetworksMerakiAuthUsersResource) Update(ctx context.Context, req resour
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvMerakiAuthUserID := data.MerakiAuthUserID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkMerakiAuthUser(vvNetworkID, vvMerakiAuthUserID, dataRequest)
@@ -440,7 +428,7 @@ func (r *NetworksMerakiAuthUsersResource) Delete(ctx context.Context, req resour
 
 	vvNetworkID := state.NetworkID.ValueString()
 	vvMerakiAuthUserID := state.MerakiAuthUserID.ValueString()
-	_, err := r.client.Networks.DeleteNetworkMerakiAuthUser(vvNetworkID, vvMerakiAuthUserID)
+	_, err := r.client.Networks.DeleteNetworkMerakiAuthUser(vvNetworkID, vvMerakiAuthUserID, nil)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Failure when executing DeleteNetworkMerakiAuthUser", err.Error())

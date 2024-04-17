@@ -15,8 +15,9 @@ description: |-
 ```terraform
 resource "meraki_networks_snmp" "example" {
 
-  access     = "users"
-  network_id = "string"
+  access           = "users"
+  community_string = "sample"
+  network_id       = "string"
   users = [{
 
     passphrase = "hunter2"
@@ -39,16 +40,16 @@ output "meraki_networks_snmp_example" {
 ### Optional
 
 - `access` (String) The type of SNMP access. Can be one of 'none' (disabled), 'community' (V1/V2c), or 'users' (V3).
-- `community_string` (String) The SNMP community string. Only relevant if 'access' is set to 'community'.
-- `users` (Attributes Set) The list of SNMP users. Only relevant if 'access' is set to 'users'. (see [below for nested schema](#nestedatt--users))
+- `community_string` (String) SNMP community string if access is 'community'.
+- `users` (Attributes Set) SNMP settings if access is 'users'. (see [below for nested schema](#nestedatt--users))
 
 <a id="nestedatt--users"></a>
 ### Nested Schema for `users`
 
 Optional:
 
-- `passphrase` (String) The passphrase for the SNMP user. Required.
-- `username` (String) The username for the SNMP user. Required.
+- `passphrase` (String) The passphrase for the SNMP user.
+- `username` (String) The username for the SNMP user.
 
 ## Import
 

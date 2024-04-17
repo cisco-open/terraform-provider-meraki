@@ -1,27 +1,12 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -29,8 +14,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -65,17 +52,21 @@ func (r *DevicesManagementInterfaceResource) Schema(_ context.Context, _ resourc
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"ddns_hostnames": schema.SingleNestedAttribute{
-				Computed: true,
+				MarkdownDescription: `Dynamic DNS hostnames.`,
+				Computed:            true,
 				Attributes: map[string]schema.Attribute{
 
 					"active_ddns_hostname": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Active dynamic DNS hostname.`,
+						Computed:            true,
 					},
 					"ddns_hostname_wan1": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `WAN 1 dynamic DNS hostname.`,
+						Computed:            true,
 					},
 					"ddns_hostname_wan2": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `WAN 2 dynamic DNS hostname.`,
+						Computed:            true,
 					},
 				},
 			},
@@ -101,6 +92,7 @@ func (r *DevicesManagementInterfaceResource) Schema(_ context.Context, _ resourc
 						},
 
 						ElementType: types.StringType,
+						Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
 					},
 					"static_gateway_ip": schema.StringAttribute{
 						MarkdownDescription: `The IP of the gateway on the WAN.`,
@@ -149,6 +141,13 @@ func (r *DevicesManagementInterfaceResource) Schema(_ context.Context, _ resourc
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"disabled",
+								"enabled",
+								"not configured",
+							),
+						},
 					},
 				},
 			},
@@ -168,7 +167,7 @@ func (r *DevicesManagementInterfaceResource) Schema(_ context.Context, _ resourc
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
 						},
-
+						Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
 						ElementType: types.StringType,
 					},
 					"static_gateway_ip": schema.StringAttribute{
@@ -217,6 +216,13 @@ func (r *DevicesManagementInterfaceResource) Schema(_ context.Context, _ resourc
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
+						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"disabled",
+								"enabled",
+								"not configured",
+							),
 						},
 					},
 				},
@@ -245,7 +251,6 @@ func (r *DevicesManagementInterfaceResource) Create(ctx context.Context, req res
 	}
 	//Has Paths
 	vvSerial := data.Serial.ValueString()
-	// serial
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Devices.GetDeviceManagementInterface(vvSerial)
 	//Have Create
@@ -271,9 +276,9 @@ func (r *DevicesManagementInterfaceResource) Create(ctx context.Context, req res
 		resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 		return
 	}
-	restyResp2, err := r.client.Devices.RebootDevice(vvSerial)
+	response, restyResp2, err := r.client.Devices.RebootDevice(vvSerial)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing RebootDevice",
@@ -304,7 +309,7 @@ func (r *DevicesManagementInterfaceResource) Create(ctx context.Context, req res
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseDevicesGetDeviceManagementInterfaceItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -333,7 +338,6 @@ func (r *DevicesManagementInterfaceResource) Read(ctx context.Context, req resou
 	// Has Item2
 
 	vvSerial := data.Serial.ValueString()
-	// serial
 	responseGet, restyRespGet, err := r.client.Devices.GetDeviceManagementInterface(vvSerial)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -357,7 +361,7 @@ func (r *DevicesManagementInterfaceResource) Read(ctx context.Context, req resou
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseDevicesGetDeviceManagementInterfaceItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -379,10 +383,9 @@ func (r *DevicesManagementInterfaceResource) Update(ctx context.Context, req res
 
 	//Path Params
 	vvSerial := data.Serial.ValueString()
-	// serial
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Devices.UpdateDeviceManagementInterface(vvSerial, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Devices.UpdateDeviceManagementInterface(vvSerial, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceManagementInterface",
@@ -403,7 +406,7 @@ func (r *DevicesManagementInterfaceResource) Update(ctx context.Context, req res
 
 func (r *DevicesManagementInterfaceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting DevicesManagementInterface", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -432,13 +435,13 @@ type ResponseDevicesGetDeviceManagementInterfaceWan1Rs struct {
 }
 
 type ResponseDevicesGetDeviceManagementInterfaceWan2Rs struct {
-	UsingStaticIP    types.Bool   `tfsdk:"using_static_ip"`
-	VLAN             types.Int64  `tfsdk:"vlan"`
-	WanEnabled       types.String `tfsdk:"wan_enabled"`
 	StaticDNS        types.Set    `tfsdk:"static_dns"`
 	StaticGatewayIP  types.String `tfsdk:"static_gateway_ip"`
 	StaticIP         types.String `tfsdk:"static_ip"`
 	StaticSubnetMask types.String `tfsdk:"static_subnet_mask"`
+	UsingStaticIP    types.Bool   `tfsdk:"using_static_ip"`
+	VLAN             types.Int64  `tfsdk:"vlan"`
+	WanEnabled       types.String `tfsdk:"wan_enabled"`
 }
 
 // FromBody
@@ -446,7 +449,7 @@ func (r *DevicesManagementInterfaceRs) toSdkApiRequestUpdate(ctx context.Context
 	var requestDevicesUpdateDeviceManagementInterfaceWan1 *merakigosdk.RequestDevicesUpdateDeviceManagementInterfaceWan1
 	if r.Wan1 != nil {
 		var staticDNS []string = nil
-
+		//Hoola aqui
 		r.Wan1.StaticDNS.ElementsAs(ctx, &staticDNS, false)
 		staticGatewayIP := r.Wan1.StaticGatewayIP.ValueString()
 		staticIP := r.Wan1.StaticIP.ValueString()
@@ -477,7 +480,7 @@ func (r *DevicesManagementInterfaceRs) toSdkApiRequestUpdate(ctx context.Context
 	var requestDevicesUpdateDeviceManagementInterfaceWan2 *merakigosdk.RequestDevicesUpdateDeviceManagementInterfaceWan2
 	if r.Wan2 != nil {
 		var staticDNS []string = nil
-
+		//Hoola aqui
 		r.Wan2.StaticDNS.ElementsAs(ctx, &staticDNS, false)
 		staticGatewayIP := r.Wan2.StaticGatewayIP.ValueString()
 		staticIP := r.Wan2.StaticIP.ValueString()
@@ -552,6 +555,10 @@ func ResponseDevicesGetDeviceManagementInterfaceItemToBodyRs(state DevicesManage
 		Wan2: func() *ResponseDevicesGetDeviceManagementInterfaceWan2Rs {
 			if response.Wan2 != nil {
 				return &ResponseDevicesGetDeviceManagementInterfaceWan2Rs{
+					StaticDNS:        StringSliceToSet(response.Wan2.StaticDNS),
+					StaticGatewayIP:  types.StringValue(response.Wan2.StaticGatewayIP),
+					StaticIP:         types.StringValue(response.Wan2.StaticIP),
+					StaticSubnetMask: types.StringValue(response.Wan2.StaticSubnetMask),
 					UsingStaticIP: func() types.Bool {
 						if response.Wan2.UsingStaticIP != nil {
 							return types.BoolValue(*response.Wan2.UsingStaticIP)

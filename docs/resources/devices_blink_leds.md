@@ -59,6 +59,6 @@ Optional:
 
 Read-Only:
 
-- `duration` (Number)
-- `duty` (Number)
-- `period` (Number)
+- `duration` (Number) The duration in seconds. Will be between 5 and 120. Default is 20 seconds
+- `duty` (Number) The duty cycle as the percent active. Will be between 10 and 90. Default is 50
+- `period` (Number) The period in milliseconds. Will be between 100 and 1000. Default is 160 milliseconds

@@ -39,6 +39,6 @@ output "meraki_devices_switch_warm_spare_example" {
 
 Read-Only:
 
-- `enabled` (Boolean)
-- `primary_serial` (String)
-- `spare_serial` (String)
+- `enabled` (Boolean) Enable or disable warm spare for a switch
+- `primary_serial` (String) Serial number of the primary switch
+- `spare_serial` (String) Serial number of the warm spare switch

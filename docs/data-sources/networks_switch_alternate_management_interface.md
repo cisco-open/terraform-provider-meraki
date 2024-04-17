@@ -39,17 +39,17 @@ output "meraki_networks_switch_alternate_management_interface_example" {
 
 Read-Only:
 
-- `enabled` (Boolean)
-- `protocols` (List of String)
-- `switches` (Attributes Set) (see [below for nested schema](#nestedatt--item--switches))
-- `vlan_id` (Number)
+- `enabled` (Boolean) Boolean value to enable or disable AMI configuration. If enabled, VLAN and protocols must be set
+- `protocols` (List of String) Can be one or more of the following values: 'radius', 'snmp' or 'syslog'
+- `switches` (Attributes Set) Array of switch serial number and IP assignment. If parameter is present, it cannot have empty body. Note: switches parameter is not applicable for template networks, in other words, do not put 'switches' in the body when updating template networks. Also, an empty 'switches' array will remove all previous assignments (see [below for nested schema](#nestedatt--item--switches))
+- `vlan_id` (Number) Alternate management VLAN, must be between 1 and 4094
 
 <a id="nestedatt--item--switches"></a>
 ### Nested Schema for `item.switches`
 
 Read-Only:
 
-- `alternate_management_ip` (String)
-- `gateway` (String)
-- `serial` (String)
-- `subnet_mask` (String)
+- `alternate_management_ip` (String) Switch alternative management IP. To remove a prior IP setting, provide an empty string
+- `gateway` (String) Switch gateway must be in IP format. Only and must be specified for Polaris switches
+- `serial` (String) Switch serial number
+- `subnet_mask` (String) Switch subnet mask must be in IP format. Only and must be specified for Polaris switches

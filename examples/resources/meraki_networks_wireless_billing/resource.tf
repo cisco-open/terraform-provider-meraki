@@ -7,10 +7,11 @@ resource "meraki_networks_wireless_billing" "example" {
 
     bandwidth_limits = {
 
-      limit_down = 1000
-      limit_up   = 1000
+      limit_down = 1000000
+      limit_up   = 1000000
     }
-    price      = 5
+    id         = "1"
+    price      = 5.0
     time_limit = "1 hour"
   }]
 }

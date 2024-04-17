@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -95,6 +79,21 @@ func (d *OrganizationsUplinksStatusesDataSource) Schema(_ context.Context, _ dat
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
+						"high_availability": schema.SingleNestedAttribute{
+							MarkdownDescription: `Device High Availability Capabilities`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"enabled": schema.BoolAttribute{
+									MarkdownDescription: `Indicates whether High Availability is enabled for the device. For devices that do not support HA, this will be 'false'`,
+									Computed:            true,
+								},
+								"role": schema.StringAttribute{
+									MarkdownDescription: `The HA role of the device on the network. For devices that do not support HA, this will be 'primary'`,
+									Computed:            true,
+								},
+							},
+						},
 						"last_reported_at": schema.StringAttribute{
 							MarkdownDescription: `Last reported time for the device`,
 							Computed:            true,
@@ -258,11 +257,17 @@ type OrganizationsUplinksStatuses struct {
 }
 
 type ResponseItemOrganizationsGetOrganizationUplinksStatuses struct {
-	LastReportedAt types.String                                                      `tfsdk:"last_reported_at"`
-	Model          types.String                                                      `tfsdk:"model"`
-	NetworkID      types.String                                                      `tfsdk:"network_id"`
-	Serial         types.String                                                      `tfsdk:"serial"`
-	Uplinks        *[]ResponseItemOrganizationsGetOrganizationUplinksStatusesUplinks `tfsdk:"uplinks"`
+	HighAvailability *ResponseItemOrganizationsGetOrganizationUplinksStatusesHighAvailability `tfsdk:"high_availability"`
+	LastReportedAt   types.String                                                             `tfsdk:"last_reported_at"`
+	Model            types.String                                                             `tfsdk:"model"`
+	NetworkID        types.String                                                             `tfsdk:"network_id"`
+	Serial           types.String                                                             `tfsdk:"serial"`
+	Uplinks          *[]ResponseItemOrganizationsGetOrganizationUplinksStatusesUplinks        `tfsdk:"uplinks"`
+}
+
+type ResponseItemOrganizationsGetOrganizationUplinksStatusesHighAvailability struct {
+	Enabled types.Bool   `tfsdk:"enabled"`
+	Role    types.String `tfsdk:"role"`
 }
 
 type ResponseItemOrganizationsGetOrganizationUplinksStatusesUplinks struct {
@@ -294,6 +299,20 @@ func ResponseOrganizationsGetOrganizationUplinksStatusesItemsToBody(state Organi
 	var items []ResponseItemOrganizationsGetOrganizationUplinksStatuses
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationUplinksStatuses{
+			HighAvailability: func() *ResponseItemOrganizationsGetOrganizationUplinksStatusesHighAvailability {
+				if item.HighAvailability != nil {
+					return &ResponseItemOrganizationsGetOrganizationUplinksStatusesHighAvailability{
+						Enabled: func() types.Bool {
+							if item.HighAvailability.Enabled != nil {
+								return types.BoolValue(*item.HighAvailability.Enabled)
+							}
+							return types.Bool{}
+						}(),
+						Role: types.StringValue(item.HighAvailability.Role),
+					}
+				}
+				return &ResponseItemOrganizationsGetOrganizationUplinksStatusesHighAvailability{}
+			}(),
 			LastReportedAt: types.StringValue(item.LastReportedAt),
 			Model:          types.StringValue(item.Model),
 			NetworkID:      types.StringValue(item.NetworkID),

@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -66,31 +50,50 @@ func (d *NetworksSwitchRoutingMulticastDataSource) Schema(_ context.Context, _ d
 				Attributes: map[string]schema.Attribute{
 
 					"default_settings": schema.SingleNestedAttribute{
+						MarkdownDescription: `Default multicast setting for entire network. IGMP snooping and Flood unknown
+      multicast traffic settings are enabled by default.`,
 						Computed: true,
 						Attributes: map[string]schema.Attribute{
 
 							"flood_unknown_multicast_traffic_enabled": schema.BoolAttribute{
-								Computed: true,
+								MarkdownDescription: `Flood unknown multicast traffic enabled for the entire network`,
+								Computed:            true,
 							},
 							"igmp_snooping_enabled": schema.BoolAttribute{
-								Computed: true,
+								MarkdownDescription: `IGMP snooping enabled for the entire network`,
+								Computed:            true,
 							},
 						},
 					},
 					"overrides": schema.SetNestedAttribute{
+						MarkdownDescription: `Array of paired switches/stacks/profiles and corresponding multicast settings.
+      An empty array will clear the multicast settings.`,
 						Computed: true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"flood_unknown_multicast_traffic_enabled": schema.BoolAttribute{
-									Computed: true,
+									MarkdownDescription: `Flood unknown multicast traffic enabled for switches, switch stacks or switch templates`,
+									Computed:            true,
 								},
 								"igmp_snooping_enabled": schema.BoolAttribute{
-									Computed: true,
+									MarkdownDescription: `IGMP snooping enabled for switches, switch stacks or switch templates`,
+									Computed:            true,
+								},
+								"stacks": schema.ListAttribute{
+									MarkdownDescription: `(optional) List of switch stack ids for non-template network`,
+									Computed:            true,
+									ElementType:         types.StringType,
+								},
+								"switch_profiles": schema.ListAttribute{
+									MarkdownDescription: `(optional) List of switch templates ids for template network`,
+									Computed:            true,
+									ElementType:         types.StringType,
 								},
 								"switches": schema.ListAttribute{
-									Computed:    true,
-									ElementType: types.StringType,
+									MarkdownDescription: `(optional) List of switch serials for non-template network`,
+									Computed:            true,
+									ElementType:         types.StringType,
 								},
 							},
 						},
@@ -155,6 +158,8 @@ type ResponseSwitchGetNetworkSwitchRoutingMulticastDefaultSettings struct {
 type ResponseSwitchGetNetworkSwitchRoutingMulticastOverrides struct {
 	FloodUnknownMulticastTrafficEnabled types.Bool `tfsdk:"flood_unknown_multicast_traffic_enabled"`
 	IgmpSnoopingEnabled                 types.Bool `tfsdk:"igmp_snooping_enabled"`
+	Stacks                              types.List `tfsdk:"stacks"`
+	SwitchProfiles                      types.List `tfsdk:"switch_profiles"`
 	Switches                            types.List `tfsdk:"switches"`
 }
 
@@ -197,7 +202,9 @@ func ResponseSwitchGetNetworkSwitchRoutingMulticastItemToBody(state NetworksSwit
 							}
 							return types.Bool{}
 						}(),
-						Switches: StringSliceToList(overrides.Switches),
+						Stacks:         StringSliceToList(overrides.Stacks),
+						SwitchProfiles: StringSliceToList(overrides.SwitchProfiles),
+						Switches:       StringSliceToList(overrides.Switches),
 					}
 				}
 				return &result

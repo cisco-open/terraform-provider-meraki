@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -66,25 +50,31 @@ func (d *NetworksApplianceSecurityIntrusionDataSource) Schema(_ context.Context,
 				Attributes: map[string]schema.Attribute{
 
 					"ids_rulesets": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Intrusion detection ruleset`,
+						Computed:            true,
 					},
 					"mode": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Intrusion detection mode`,
+						Computed:            true,
 					},
 					"protected_networks": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `Networks included in and excluded from the detection engine`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"excluded_cidr": schema.ListAttribute{
-								Computed:    true,
-								ElementType: types.StringType,
+								MarkdownDescription: `List of IP addresses or subnets being excluded from protection`,
+								Computed:            true,
+								ElementType:         types.StringType,
 							},
 							"included_cidr": schema.ListAttribute{
-								Computed:    true,
-								ElementType: types.StringType,
+								MarkdownDescription: `List of IP addresses or subnets being protected`,
+								Computed:            true,
+								ElementType:         types.StringType,
 							},
 							"use_default": schema.BoolAttribute{
-								Computed: true,
+								MarkdownDescription: `Whether special IPv4 addresses should be used (see: https://tools.ietf.org/html/rfc5735)`,
+								Computed:            true,
 							},
 						},
 					},

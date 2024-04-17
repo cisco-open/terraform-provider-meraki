@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -67,7 +51,7 @@ func (r *NetworksClientsPolicyResource) Schema(_ context.Context, _ resource.Sch
 				Required:            true,
 			},
 			"device_policy": schema.StringAttribute{
-				MarkdownDescription: `The policy to assign. Can be 'Whitelisted', 'Blocked', 'Normal' or 'Group policy'. Required.`,
+				MarkdownDescription: `The name of the client's policy`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -75,7 +59,7 @@ func (r *NetworksClientsPolicyResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"group_policy_id": schema.StringAttribute{
-				MarkdownDescription: `[optional] If 'devicePolicy' is set to 'Group policy' this param is used to specify the group policy ID.`,
+				MarkdownDescription: `The group policy identifier of the client`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -83,7 +67,8 @@ func (r *NetworksClientsPolicyResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"mac": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `The MAC address of the client`,
+				Computed:            true,
 			},
 			"network_id": schema.StringAttribute{
 				MarkdownDescription: `networkId path parameter. Network ID`,
@@ -113,7 +98,6 @@ func (r *NetworksClientsPolicyResource) Create(ctx context.Context, req resource
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvClientID := data.ClientID.ValueString()
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkClientPolicy(vvNetworkID, vvClientID)
@@ -133,9 +117,9 @@ func (r *NetworksClientsPolicyResource) Create(ctx context.Context, req resource
 		return
 	}
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Networks.UpdateNetworkClientPolicy(vvNetworkID, vvClientID, dataRequest)
+	response, restyResp2, err := r.client.Networks.UpdateNetworkClientPolicy(vvNetworkID, vvClientID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkClientPolicy",
@@ -166,7 +150,7 @@ func (r *NetworksClientsPolicyResource) Create(ctx context.Context, req resource
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkClientPolicyItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -195,9 +179,7 @@ func (r *NetworksClientsPolicyResource) Read(ctx context.Context, req resource.R
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvClientID := data.ClientID.ValueString()
-	// client_id
 	responseGet, restyRespGet, err := r.client.Networks.GetNetworkClientPolicy(vvNetworkID, vvClientID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -221,7 +203,7 @@ func (r *NetworksClientsPolicyResource) Read(ctx context.Context, req resource.R
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkClientPolicyItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -254,11 +236,10 @@ func (r *NetworksClientsPolicyResource) Update(ctx context.Context, req resource
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvClientID := data.ClientID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Networks.UpdateNetworkClientPolicy(vvNetworkID, vvClientID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Networks.UpdateNetworkClientPolicy(vvNetworkID, vvClientID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkClientPolicy",
@@ -279,7 +260,7 @@ func (r *NetworksClientsPolicyResource) Update(ctx context.Context, req resource
 
 func (r *NetworksClientsPolicyResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksClientsPolicy", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 

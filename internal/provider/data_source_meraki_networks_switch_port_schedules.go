@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -69,149 +53,151 @@ func (d *NetworksSwitchPortSchedulesDataSource) Schema(_ context.Context, _ data
 					Attributes: map[string]schema.Attribute{
 
 						"id": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Switch port schedule ID`,
+							Computed:            true,
 						},
 						"name": schema.StringAttribute{
-							MarkdownDescription: `The name for your port schedule. Required`,
+							MarkdownDescription: `Switch port schedule name`,
+							Computed:            true,
+						},
+						"network_id": schema.StringAttribute{
+							MarkdownDescription: `Network ID`,
 							Computed:            true,
 						},
 						"port_schedule": schema.SingleNestedAttribute{
-							MarkdownDescription: `    The schedule for switch port scheduling. Schedules are applied to days of the week.
-    When it's empty, default schedule with all days of a week are configured.
-    Any unspecified day in the schedule is added as a default schedule configuration of the day.
-`,
-							Computed: true,
+							MarkdownDescription: `Port schedule`,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
 								"friday": schema.SingleNestedAttribute{
-									MarkdownDescription: `The schedule object for Friday.`,
+									MarkdownDescription: `Friday schedule`,
 									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"active": schema.BoolAttribute{
-											MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+											MarkdownDescription: `Whether the schedule is active or inactive`,
 											Computed:            true,
 										},
 										"from": schema.StringAttribute{
-											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+											MarkdownDescription: `The time, from '00:00' to '24:00'`,
 											Computed:            true,
 										},
 										"to": schema.StringAttribute{
-											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+											MarkdownDescription: `The time, from '00:00' to '24:00'`,
 											Computed:            true,
 										},
 									},
 								},
 								"monday": schema.SingleNestedAttribute{
-									MarkdownDescription: `The schedule object for Monday.`,
+									MarkdownDescription: `Monday schedule`,
 									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"active": schema.BoolAttribute{
-											MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+											MarkdownDescription: `Whether the schedule is active or inactive`,
 											Computed:            true,
 										},
 										"from": schema.StringAttribute{
-											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+											MarkdownDescription: `The time, from '00:00' to '24:00'`,
 											Computed:            true,
 										},
 										"to": schema.StringAttribute{
-											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+											MarkdownDescription: `The time, from '00:00' to '24:00'`,
 											Computed:            true,
 										},
 									},
 								},
 								"saturday": schema.SingleNestedAttribute{
-									MarkdownDescription: `The schedule object for Saturday.`,
+									MarkdownDescription: `Saturday schedule`,
 									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"active": schema.BoolAttribute{
-											MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+											MarkdownDescription: `Whether the schedule is active or inactive`,
 											Computed:            true,
 										},
 										"from": schema.StringAttribute{
-											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+											MarkdownDescription: `The time, from '00:00' to '24:00'`,
 											Computed:            true,
 										},
 										"to": schema.StringAttribute{
-											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+											MarkdownDescription: `The time, from '00:00' to '24:00'`,
 											Computed:            true,
 										},
 									},
 								},
 								"sunday": schema.SingleNestedAttribute{
-									MarkdownDescription: `The schedule object for Sunday.`,
+									MarkdownDescription: `Sunday schedule`,
 									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"active": schema.BoolAttribute{
-											MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+											MarkdownDescription: `Whether the schedule is active or inactive`,
 											Computed:            true,
 										},
 										"from": schema.StringAttribute{
-											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+											MarkdownDescription: `The time, from '00:00' to '24:00'`,
 											Computed:            true,
 										},
 										"to": schema.StringAttribute{
-											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+											MarkdownDescription: `The time, from '00:00' to '24:00'`,
 											Computed:            true,
 										},
 									},
 								},
 								"thursday": schema.SingleNestedAttribute{
-									MarkdownDescription: `The schedule object for Thursday.`,
+									MarkdownDescription: `Thursday schedule`,
 									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"active": schema.BoolAttribute{
-											MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+											MarkdownDescription: `Whether the schedule is active or inactive`,
 											Computed:            true,
 										},
 										"from": schema.StringAttribute{
-											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+											MarkdownDescription: `The time, from '00:00' to '24:00'`,
 											Computed:            true,
 										},
 										"to": schema.StringAttribute{
-											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+											MarkdownDescription: `The time, from '00:00' to '24:00'`,
 											Computed:            true,
 										},
 									},
 								},
 								"tuesday": schema.SingleNestedAttribute{
-									MarkdownDescription: `The schedule object for Tuesday.`,
+									MarkdownDescription: `Tuesday schedule`,
 									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"active": schema.BoolAttribute{
-											MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+											MarkdownDescription: `Whether the schedule is active or inactive`,
 											Computed:            true,
 										},
 										"from": schema.StringAttribute{
-											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+											MarkdownDescription: `The time, from '00:00' to '24:00'`,
 											Computed:            true,
 										},
 										"to": schema.StringAttribute{
-											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+											MarkdownDescription: `The time, from '00:00' to '24:00'`,
 											Computed:            true,
 										},
 									},
 								},
 								"wednesday": schema.SingleNestedAttribute{
-									MarkdownDescription: `The schedule object for Wednesday.`,
+									MarkdownDescription: `Wednesday schedule`,
 									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"active": schema.BoolAttribute{
-											MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+											MarkdownDescription: `Whether the schedule is active or inactive`,
 											Computed:            true,
 										},
 										"from": schema.StringAttribute{
-											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+											MarkdownDescription: `The time, from '00:00' to '24:00'`,
 											Computed:            true,
 										},
 										"to": schema.StringAttribute{
-											MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+											MarkdownDescription: `The time, from '00:00' to '24:00'`,
 											Computed:            true,
 										},
 									},
@@ -269,6 +255,7 @@ type NetworksSwitchPortSchedules struct {
 type ResponseItemSwitchGetNetworkSwitchPortSchedules struct {
 	ID           types.String                                                 `tfsdk:"id"`
 	Name         types.String                                                 `tfsdk:"name"`
+	NetworkID    types.String                                                 `tfsdk:"network_id"`
 	PortSchedule *ResponseItemSwitchGetNetworkSwitchPortSchedulesPortSchedule `tfsdk:"port_schedule"`
 }
 
@@ -329,8 +316,9 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemsToBody(state NetworksSwitch
 	var items []ResponseItemSwitchGetNetworkSwitchPortSchedules
 	for _, item := range *response {
 		itemState := ResponseItemSwitchGetNetworkSwitchPortSchedules{
-			ID:   types.StringValue(item.ID),
-			Name: types.StringValue(item.Name),
+			ID:        types.StringValue(item.ID),
+			Name:      types.StringValue(item.Name),
+			NetworkID: types.StringValue(item.NetworkID),
 			PortSchedule: func() *ResponseItemSwitchGetNetworkSwitchPortSchedulesPortSchedule {
 				if item.PortSchedule != nil {
 					return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortSchedule{

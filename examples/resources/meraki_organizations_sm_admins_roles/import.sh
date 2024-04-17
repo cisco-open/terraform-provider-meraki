@@ -1,0 +1,1 @@
+terraform import meraki_organizations_sm_admins_roles.example "organization_id,role_id"

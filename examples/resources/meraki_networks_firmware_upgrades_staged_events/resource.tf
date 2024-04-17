@@ -14,6 +14,16 @@ resource "meraki_networks_firmware_upgrades_staged_events" "example" {
         }
       }
     }
+    switch_catalyst = {
+
+      next_upgrade = {
+
+        to_version = {
+
+          id = "4321"
+        }
+      }
+    }
   }
   stages = [{
 

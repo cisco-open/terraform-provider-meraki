@@ -39,18 +39,18 @@ output "meraki_organizations_appliance_vpn_vpn_firewall_rules_example" {
 
 Read-Only:
 
-- `rules` (Attributes Set) (see [below for nested schema](#nestedatt--item--rules))
+- `rules` (Attributes Set) An ordered array of the firewall rules (not including the default rule) (see [below for nested schema](#nestedatt--item--rules))
 
 <a id="nestedatt--item--rules"></a>
 ### Nested Schema for `item.rules`
 
 Read-Only:
 
-- `comment` (String)
-- `dest_cidr` (String)
-- `dest_port` (String)
-- `policy` (String)
-- `protocol` (String)
-- `src_cidr` (String)
-- `src_port` (String)
-- `syslog_enabled` (Boolean)
+- `comment` (String) Description of the rule (optional)
+- `dest_cidr` (String) Comma-separated list of destination IP address(es) (in IP or CIDR notation), fully-qualified domain names (FQDN) or 'any'
+- `dest_port` (String) Comma-separated list of destination port(s) (integer in the range 1-65535), or 'any'
+- `policy` (String) 'allow' or 'deny' traffic specified by this rule
+- `protocol` (String) The type of protocol (must be 'tcp', 'udp', 'icmp', 'icmp6' or 'any')
+- `src_cidr` (String) Comma-separated list of source IP address(es) (in IP or CIDR notation), or 'any' (note: FQDN not supported for source addresses)
+- `src_port` (String) Comma-separated list of source port(s) (integer in the range 1-65535), or 'any'
+- `syslog_enabled` (Boolean) Log this rule to syslog (true or false, boolean value) - only applicable if a syslog has been configured (optional)

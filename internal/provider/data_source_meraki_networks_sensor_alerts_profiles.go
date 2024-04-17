@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -76,15 +60,15 @@ func (d *NetworksSensorAlertsProfilesDataSource) Schema(_ context.Context, _ dat
 							Attributes: map[string]schema.Attribute{
 
 								"direction": schema.StringAttribute{
-									MarkdownDescription: `If 'above', an alert will be sent when a sensor reads above the threshold. If 'below', an alert will be sent when a sensor reads below the threshold. Only applicable for temperature and humidity thresholds.`,
+									MarkdownDescription: `If 'above', an alert will be sent when a sensor reads above the threshold. If 'below', an alert will be sent when a sensor reads below the threshold. Only applicable for temperature, humidity, realPower, apparentPower, powerFactor, voltage, current, and frequency thresholds.`,
 									Computed:            true,
 								},
 								"duration": schema.Int64Attribute{
-									MarkdownDescription: `Length of time in seconds that the triggering state must persist before an alert is sent. Available options are 0 seconds, 1 minute, 2 minutes, 3 minutes, 4 minutes, 5 minutes, 10 minutes, 15 minutes, 30 minutes, and 1 hour. Default is 0.`,
+									MarkdownDescription: `Length of time in seconds that the triggering state must persist before an alert is sent. Available options are 0 seconds, 1 minute, 2 minutes, 3 minutes, 4 minutes, 5 minutes, 10 minutes, 15 minutes, 30 minutes, 1 hour, 2 hours, 4 hours, and 8 hours. Default is 0.`,
 									Computed:            true,
 								},
 								"metric": schema.StringAttribute{
-									MarkdownDescription: `The type of sensor metric that will be monitored for changes. Available metrics are door, humidity, indoorAirQuality, noise, pm25, temperature, tvoc, and water.`,
+									MarkdownDescription: `The type of sensor metric that will be monitored for changes. Available metrics are apparentPower, co2, current, door, frequency, humidity, indoorAirQuality, noise, pm25, powerFactor, realPower, temperature, tvoc, upstreamPower, voltage, and water.`,
 									Computed:            true,
 								},
 								"threshold": schema.SingleNestedAttribute{
@@ -92,6 +76,28 @@ func (d *NetworksSensorAlertsProfilesDataSource) Schema(_ context.Context, _ dat
 									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
+										"apparent_power": schema.SingleNestedAttribute{
+											MarkdownDescription: `Apparent power threshold. 'draw' must be provided.`,
+											Computed:            true,
+											Attributes: map[string]schema.Attribute{
+
+												"draw": schema.Float64Attribute{
+													MarkdownDescription: `Alerting threshold in volt-amps. Must be between 0 and 3750.`,
+													Computed:            true,
+												},
+											},
+										},
+										"current": schema.SingleNestedAttribute{
+											MarkdownDescription: `Electrical current threshold. 'level' must be provided.`,
+											Computed:            true,
+											Attributes: map[string]schema.Attribute{
+
+												"draw": schema.Float64Attribute{
+													MarkdownDescription: `Alerting threshold in amps. Must be between 0 and 15.`,
+													Computed:            true,
+												},
+											},
+										},
 										"door": schema.SingleNestedAttribute{
 											MarkdownDescription: `Door open threshold. 'open' must be provided and set to true.`,
 											Computed:            true,
@@ -99,6 +105,17 @@ func (d *NetworksSensorAlertsProfilesDataSource) Schema(_ context.Context, _ dat
 
 												"open": schema.BoolAttribute{
 													MarkdownDescription: `Alerting threshold for a door open event. Must be set to true.`,
+													Computed:            true,
+												},
+											},
+										},
+										"frequency": schema.SingleNestedAttribute{
+											MarkdownDescription: `Electrical frequency threshold. 'level' must be provided.`,
+											Computed:            true,
+											Attributes: map[string]schema.Attribute{
+
+												"level": schema.Float64Attribute{
+													MarkdownDescription: `Alerting threshold in hertz. Must be between 0 and 60.`,
 													Computed:            true,
 												},
 											},
@@ -170,6 +187,28 @@ func (d *NetworksSensorAlertsProfilesDataSource) Schema(_ context.Context, _ dat
 												},
 											},
 										},
+										"power_factor": schema.SingleNestedAttribute{
+											MarkdownDescription: `Power factor threshold. 'percentage' must be provided.`,
+											Computed:            true,
+											Attributes: map[string]schema.Attribute{
+
+												"percentage": schema.Int64Attribute{
+													MarkdownDescription: `Alerting threshold as the ratio of active power to apparent power. Must be between 0 and 100.`,
+													Computed:            true,
+												},
+											},
+										},
+										"real_power": schema.SingleNestedAttribute{
+											MarkdownDescription: `Real power threshold. 'draw' must be provided.`,
+											Computed:            true,
+											Attributes: map[string]schema.Attribute{
+
+												"draw": schema.Float64Attribute{
+													MarkdownDescription: `Alerting threshold in watts. Must be between 0 and 3750.`,
+													Computed:            true,
+												},
+											},
+										},
 										"temperature": schema.SingleNestedAttribute{
 											MarkdownDescription: `Temperature threshold. One of 'celsius', 'fahrenheit', or 'quality' must be provided.`,
 											Computed:            true,
@@ -204,6 +243,28 @@ func (d *NetworksSensorAlertsProfilesDataSource) Schema(_ context.Context, _ dat
 												},
 											},
 										},
+										"upstream_power": schema.SingleNestedAttribute{
+											MarkdownDescription: `Upstream power threshold. 'outageDetected' must be provided and set to true.`,
+											Computed:            true,
+											Attributes: map[string]schema.Attribute{
+
+												"outage_detected": schema.BoolAttribute{
+													MarkdownDescription: `Alerting threshold for an upstream power event. Must be set to true.`,
+													Computed:            true,
+												},
+											},
+										},
+										"voltage": schema.SingleNestedAttribute{
+											MarkdownDescription: `Voltage threshold. 'level' must be provided.`,
+											Computed:            true,
+											Attributes: map[string]schema.Attribute{
+
+												"level": schema.Float64Attribute{
+													MarkdownDescription: `Alerting threshold in volts. Must be between 0 and 250.`,
+													Computed:            true,
+												},
+											},
+										},
 										"water": schema.SingleNestedAttribute{
 											MarkdownDescription: `Water detection threshold. 'present' must be provided and set to true.`,
 											Computed:            true,
@@ -229,7 +290,7 @@ func (d *NetworksSensorAlertsProfilesDataSource) Schema(_ context.Context, _ dat
 						Computed:            true,
 					},
 					"recipients": schema.SingleNestedAttribute{
-						MarkdownDescription: `List of recipients that will recieve the alert.`,
+						MarkdownDescription: `List of recipients that will receive the alert.`,
 						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
@@ -286,15 +347,15 @@ func (d *NetworksSensorAlertsProfilesDataSource) Schema(_ context.Context, _ dat
 								Attributes: map[string]schema.Attribute{
 
 									"direction": schema.StringAttribute{
-										MarkdownDescription: `If 'above', an alert will be sent when a sensor reads above the threshold. If 'below', an alert will be sent when a sensor reads below the threshold. Only applicable for temperature and humidity thresholds.`,
+										MarkdownDescription: `If 'above', an alert will be sent when a sensor reads above the threshold. If 'below', an alert will be sent when a sensor reads below the threshold. Only applicable for temperature, humidity, realPower, apparentPower, powerFactor, voltage, current, and frequency thresholds.`,
 										Computed:            true,
 									},
 									"duration": schema.Int64Attribute{
-										MarkdownDescription: `Length of time in seconds that the triggering state must persist before an alert is sent. Available options are 0 seconds, 1 minute, 2 minutes, 3 minutes, 4 minutes, 5 minutes, 10 minutes, 15 minutes, 30 minutes, and 1 hour. Default is 0.`,
+										MarkdownDescription: `Length of time in seconds that the triggering state must persist before an alert is sent. Available options are 0 seconds, 1 minute, 2 minutes, 3 minutes, 4 minutes, 5 minutes, 10 minutes, 15 minutes, 30 minutes, 1 hour, 2 hours, 4 hours, and 8 hours. Default is 0.`,
 										Computed:            true,
 									},
 									"metric": schema.StringAttribute{
-										MarkdownDescription: `The type of sensor metric that will be monitored for changes. Available metrics are door, humidity, indoorAirQuality, noise, pm25, temperature, tvoc, and water.`,
+										MarkdownDescription: `The type of sensor metric that will be monitored for changes. Available metrics are apparentPower, co2, current, door, frequency, humidity, indoorAirQuality, noise, pm25, powerFactor, realPower, temperature, tvoc, upstreamPower, voltage, and water.`,
 										Computed:            true,
 									},
 									"threshold": schema.SingleNestedAttribute{
@@ -302,6 +363,28 @@ func (d *NetworksSensorAlertsProfilesDataSource) Schema(_ context.Context, _ dat
 										Computed:            true,
 										Attributes: map[string]schema.Attribute{
 
+											"apparent_power": schema.SingleNestedAttribute{
+												MarkdownDescription: `Apparent power threshold. 'draw' must be provided.`,
+												Computed:            true,
+												Attributes: map[string]schema.Attribute{
+
+													"draw": schema.Float64Attribute{
+														MarkdownDescription: `Alerting threshold in volt-amps. Must be between 0 and 3750.`,
+														Computed:            true,
+													},
+												},
+											},
+											"current": schema.SingleNestedAttribute{
+												MarkdownDescription: `Electrical current threshold. 'level' must be provided.`,
+												Computed:            true,
+												Attributes: map[string]schema.Attribute{
+
+													"draw": schema.Float64Attribute{
+														MarkdownDescription: `Alerting threshold in amps. Must be between 0 and 15.`,
+														Computed:            true,
+													},
+												},
+											},
 											"door": schema.SingleNestedAttribute{
 												MarkdownDescription: `Door open threshold. 'open' must be provided and set to true.`,
 												Computed:            true,
@@ -309,6 +392,17 @@ func (d *NetworksSensorAlertsProfilesDataSource) Schema(_ context.Context, _ dat
 
 													"open": schema.BoolAttribute{
 														MarkdownDescription: `Alerting threshold for a door open event. Must be set to true.`,
+														Computed:            true,
+													},
+												},
+											},
+											"frequency": schema.SingleNestedAttribute{
+												MarkdownDescription: `Electrical frequency threshold. 'level' must be provided.`,
+												Computed:            true,
+												Attributes: map[string]schema.Attribute{
+
+													"level": schema.Float64Attribute{
+														MarkdownDescription: `Alerting threshold in hertz. Must be between 0 and 60.`,
 														Computed:            true,
 													},
 												},
@@ -380,6 +474,28 @@ func (d *NetworksSensorAlertsProfilesDataSource) Schema(_ context.Context, _ dat
 													},
 												},
 											},
+											"power_factor": schema.SingleNestedAttribute{
+												MarkdownDescription: `Power factor threshold. 'percentage' must be provided.`,
+												Computed:            true,
+												Attributes: map[string]schema.Attribute{
+
+													"percentage": schema.Int64Attribute{
+														MarkdownDescription: `Alerting threshold as the ratio of active power to apparent power. Must be between 0 and 100.`,
+														Computed:            true,
+													},
+												},
+											},
+											"real_power": schema.SingleNestedAttribute{
+												MarkdownDescription: `Real power threshold. 'draw' must be provided.`,
+												Computed:            true,
+												Attributes: map[string]schema.Attribute{
+
+													"draw": schema.Float64Attribute{
+														MarkdownDescription: `Alerting threshold in watts. Must be between 0 and 3750.`,
+														Computed:            true,
+													},
+												},
+											},
 											"temperature": schema.SingleNestedAttribute{
 												MarkdownDescription: `Temperature threshold. One of 'celsius', 'fahrenheit', or 'quality' must be provided.`,
 												Computed:            true,
@@ -414,6 +530,28 @@ func (d *NetworksSensorAlertsProfilesDataSource) Schema(_ context.Context, _ dat
 													},
 												},
 											},
+											"upstream_power": schema.SingleNestedAttribute{
+												MarkdownDescription: `Upstream power threshold. 'outageDetected' must be provided and set to true.`,
+												Computed:            true,
+												Attributes: map[string]schema.Attribute{
+
+													"outage_detected": schema.BoolAttribute{
+														MarkdownDescription: `Alerting threshold for an upstream power event. Must be set to true.`,
+														Computed:            true,
+													},
+												},
+											},
+											"voltage": schema.SingleNestedAttribute{
+												MarkdownDescription: `Voltage threshold. 'level' must be provided.`,
+												Computed:            true,
+												Attributes: map[string]schema.Attribute{
+
+													"level": schema.Float64Attribute{
+														MarkdownDescription: `Alerting threshold in volts. Must be between 0 and 250.`,
+														Computed:            true,
+													},
+												},
+											},
 											"water": schema.SingleNestedAttribute{
 												MarkdownDescription: `Water detection threshold. 'present' must be provided and set to true.`,
 												Computed:            true,
@@ -439,7 +577,7 @@ func (d *NetworksSensorAlertsProfilesDataSource) Schema(_ context.Context, _ dat
 							Computed:            true,
 						},
 						"recipients": schema.SingleNestedAttribute{
-							MarkdownDescription: `List of recipients that will recieve the alert.`,
+							MarkdownDescription: `List of recipients that will receive the alert.`,
 							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
@@ -578,18 +716,37 @@ type ResponseItemSensorGetNetworkSensorAlertsProfilesConditions struct {
 }
 
 type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThreshold struct {
+	ApparentPower    *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdApparentPower    `tfsdk:"apparent_power"`
+	Current          *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdCurrent          `tfsdk:"current"`
 	Door             *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdDoor             `tfsdk:"door"`
+	Frequency        *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdFrequency        `tfsdk:"frequency"`
 	Humidity         *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdHumidity         `tfsdk:"humidity"`
 	IndoorAirQuality *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdIndoorAirQuality `tfsdk:"indoor_air_quality"`
 	Noise            *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdNoise            `tfsdk:"noise"`
 	Pm25             *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdPm25             `tfsdk:"pm25"`
+	PowerFactor      *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdPowerFactor      `tfsdk:"power_factor"`
+	RealPower        *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdRealPower        `tfsdk:"real_power"`
 	Temperature      *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdTemperature      `tfsdk:"temperature"`
 	Tvoc             *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdTvoc             `tfsdk:"tvoc"`
+	UpstreamPower    *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdUpstreamPower    `tfsdk:"upstream_power"`
+	Voltage          *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdVoltage          `tfsdk:"voltage"`
 	Water            *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdWater            `tfsdk:"water"`
+}
+
+type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdApparentPower struct {
+	Draw types.Float64 `tfsdk:"draw"`
+}
+
+type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdCurrent struct {
+	Draw types.Float64 `tfsdk:"draw"`
 }
 
 type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdDoor struct {
 	Open types.Bool `tfsdk:"open"`
+}
+
+type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdFrequency struct {
+	Level types.Float64 `tfsdk:"level"`
 }
 
 type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdHumidity struct {
@@ -616,6 +773,14 @@ type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdPm25 str
 	Quality       types.String `tfsdk:"quality"`
 }
 
+type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdPowerFactor struct {
+	Percentage types.Int64 `tfsdk:"percentage"`
+}
+
+type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdRealPower struct {
+	Draw types.Float64 `tfsdk:"draw"`
+}
+
 type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdTemperature struct {
 	Celsius    types.Float64 `tfsdk:"celsius"`
 	Fahrenheit types.Float64 `tfsdk:"fahrenheit"`
@@ -625,6 +790,14 @@ type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdTemperat
 type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdTvoc struct {
 	Concentration types.Int64  `tfsdk:"concentration"`
 	Quality       types.String `tfsdk:"quality"`
+}
+
+type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdUpstreamPower struct {
+	OutageDetected types.Bool `tfsdk:"outage_detected"`
+}
+
+type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdVoltage struct {
+	Level types.Float64 `tfsdk:"level"`
 }
 
 type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdWater struct {
@@ -659,18 +832,37 @@ type ResponseSensorGetNetworkSensorAlertsProfileConditions struct {
 }
 
 type ResponseSensorGetNetworkSensorAlertsProfileConditionsThreshold struct {
+	ApparentPower    *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdApparentPower    `tfsdk:"apparent_power"`
+	Current          *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCurrent          `tfsdk:"current"`
 	Door             *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdDoor             `tfsdk:"door"`
+	Frequency        *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdFrequency        `tfsdk:"frequency"`
 	Humidity         *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdHumidity         `tfsdk:"humidity"`
 	IndoorAirQuality *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdIndoorAirQuality `tfsdk:"indoor_air_quality"`
 	Noise            *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdNoise            `tfsdk:"noise"`
 	Pm25             *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdPm25             `tfsdk:"pm25"`
+	PowerFactor      *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdPowerFactor      `tfsdk:"power_factor"`
+	RealPower        *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdRealPower        `tfsdk:"real_power"`
 	Temperature      *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdTemperature      `tfsdk:"temperature"`
 	Tvoc             *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdTvoc             `tfsdk:"tvoc"`
+	UpstreamPower    *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdUpstreamPower    `tfsdk:"upstream_power"`
+	Voltage          *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdVoltage          `tfsdk:"voltage"`
 	Water            *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdWater            `tfsdk:"water"`
+}
+
+type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdApparentPower struct {
+	Draw types.Float64 `tfsdk:"draw"`
+}
+
+type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCurrent struct {
+	Draw types.Float64 `tfsdk:"draw"`
 }
 
 type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdDoor struct {
 	Open types.Bool `tfsdk:"open"`
+}
+
+type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdFrequency struct {
+	Level types.Float64 `tfsdk:"level"`
 }
 
 type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdHumidity struct {
@@ -697,6 +889,14 @@ type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdPm25 struct {
 	Quality       types.String `tfsdk:"quality"`
 }
 
+type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdPowerFactor struct {
+	Percentage types.Int64 `tfsdk:"percentage"`
+}
+
+type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdRealPower struct {
+	Draw types.Float64 `tfsdk:"draw"`
+}
+
 type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdTemperature struct {
 	Celsius    types.Float64 `tfsdk:"celsius"`
 	Fahrenheit types.Float64 `tfsdk:"fahrenheit"`
@@ -706,6 +906,14 @@ type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdTemperature s
 type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdTvoc struct {
 	Concentration types.Int64  `tfsdk:"concentration"`
 	Quality       types.String `tfsdk:"quality"`
+}
+
+type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdUpstreamPower struct {
+	OutageDetected types.Bool `tfsdk:"outage_detected"`
+}
+
+type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdVoltage struct {
+	Level types.Float64 `tfsdk:"level"`
 }
 
 type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdWater struct {
@@ -744,6 +952,32 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 							Threshold: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThreshold {
 								if conditions.Threshold != nil {
 									return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThreshold{
+										ApparentPower: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdApparentPower {
+											if conditions.Threshold.ApparentPower != nil {
+												return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdApparentPower{
+													Draw: func() types.Float64 {
+														if conditions.Threshold.ApparentPower.Draw != nil {
+															return types.Float64Value(float64(*conditions.Threshold.ApparentPower.Draw))
+														}
+														return types.Float64{}
+													}(),
+												}
+											}
+											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdApparentPower{}
+										}(),
+										Current: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdCurrent {
+											if conditions.Threshold.Current != nil {
+												return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdCurrent{
+													Draw: func() types.Float64 {
+														if conditions.Threshold.Current.Draw != nil {
+															return types.Float64Value(float64(*conditions.Threshold.Current.Draw))
+														}
+														return types.Float64{}
+													}(),
+												}
+											}
+											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdCurrent{}
+										}(),
 										Door: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdDoor {
 											if conditions.Threshold.Door != nil {
 												return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdDoor{
@@ -756,6 +990,19 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 												}
 											}
 											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdDoor{}
+										}(),
+										Frequency: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdFrequency {
+											if conditions.Threshold.Frequency != nil {
+												return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdFrequency{
+													Level: func() types.Float64 {
+														if conditions.Threshold.Frequency.Level != nil {
+															return types.Float64Value(float64(*conditions.Threshold.Frequency.Level))
+														}
+														return types.Float64{}
+													}(),
+												}
+											}
+											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdFrequency{}
 										}(),
 										Humidity: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdHumidity {
 											if conditions.Threshold.Humidity != nil {
@@ -820,6 +1067,32 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 											}
 											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdPm25{}
 										}(),
+										PowerFactor: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdPowerFactor {
+											if conditions.Threshold.PowerFactor != nil {
+												return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdPowerFactor{
+													Percentage: func() types.Int64 {
+														if conditions.Threshold.PowerFactor.Percentage != nil {
+															return types.Int64Value(int64(*conditions.Threshold.PowerFactor.Percentage))
+														}
+														return types.Int64{}
+													}(),
+												}
+											}
+											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdPowerFactor{}
+										}(),
+										RealPower: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdRealPower {
+											if conditions.Threshold.RealPower != nil {
+												return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdRealPower{
+													Draw: func() types.Float64 {
+														if conditions.Threshold.RealPower.Draw != nil {
+															return types.Float64Value(float64(*conditions.Threshold.RealPower.Draw))
+														}
+														return types.Float64{}
+													}(),
+												}
+											}
+											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdRealPower{}
+										}(),
 										Temperature: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdTemperature {
 											if conditions.Threshold.Temperature != nil {
 												return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdTemperature{
@@ -853,6 +1126,32 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 												}
 											}
 											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdTvoc{}
+										}(),
+										UpstreamPower: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdUpstreamPower {
+											if conditions.Threshold.UpstreamPower != nil {
+												return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdUpstreamPower{
+													OutageDetected: func() types.Bool {
+														if conditions.Threshold.UpstreamPower.OutageDetected != nil {
+															return types.BoolValue(*conditions.Threshold.UpstreamPower.OutageDetected)
+														}
+														return types.Bool{}
+													}(),
+												}
+											}
+											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdUpstreamPower{}
+										}(),
+										Voltage: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdVoltage {
+											if conditions.Threshold.Voltage != nil {
+												return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdVoltage{
+													Level: func() types.Float64 {
+														if conditions.Threshold.Voltage.Level != nil {
+															return types.Float64Value(float64(*conditions.Threshold.Voltage.Level))
+														}
+														return types.Float64{}
+													}(),
+												}
+											}
+											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdVoltage{}
 										}(),
 										Water: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdWater {
 											if conditions.Threshold.Water != nil {
@@ -924,6 +1223,32 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 						Threshold: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThreshold {
 							if conditions.Threshold != nil {
 								return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThreshold{
+									ApparentPower: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdApparentPower {
+										if conditions.Threshold.ApparentPower != nil {
+											return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdApparentPower{
+												Draw: func() types.Float64 {
+													if conditions.Threshold.ApparentPower.Draw != nil {
+														return types.Float64Value(float64(*conditions.Threshold.ApparentPower.Draw))
+													}
+													return types.Float64{}
+												}(),
+											}
+										}
+										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdApparentPower{}
+									}(),
+									Current: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCurrent {
+										if conditions.Threshold.Current != nil {
+											return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCurrent{
+												Draw: func() types.Float64 {
+													if conditions.Threshold.Current.Draw != nil {
+														return types.Float64Value(float64(*conditions.Threshold.Current.Draw))
+													}
+													return types.Float64{}
+												}(),
+											}
+										}
+										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCurrent{}
+									}(),
 									Door: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdDoor {
 										if conditions.Threshold.Door != nil {
 											return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdDoor{
@@ -936,6 +1261,19 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 											}
 										}
 										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdDoor{}
+									}(),
+									Frequency: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdFrequency {
+										if conditions.Threshold.Frequency != nil {
+											return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdFrequency{
+												Level: func() types.Float64 {
+													if conditions.Threshold.Frequency.Level != nil {
+														return types.Float64Value(float64(*conditions.Threshold.Frequency.Level))
+													}
+													return types.Float64{}
+												}(),
+											}
+										}
+										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdFrequency{}
 									}(),
 									Humidity: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdHumidity {
 										if conditions.Threshold.Humidity != nil {
@@ -1000,6 +1338,32 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 										}
 										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdPm25{}
 									}(),
+									PowerFactor: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdPowerFactor {
+										if conditions.Threshold.PowerFactor != nil {
+											return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdPowerFactor{
+												Percentage: func() types.Int64 {
+													if conditions.Threshold.PowerFactor.Percentage != nil {
+														return types.Int64Value(int64(*conditions.Threshold.PowerFactor.Percentage))
+													}
+													return types.Int64{}
+												}(),
+											}
+										}
+										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdPowerFactor{}
+									}(),
+									RealPower: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdRealPower {
+										if conditions.Threshold.RealPower != nil {
+											return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdRealPower{
+												Draw: func() types.Float64 {
+													if conditions.Threshold.RealPower.Draw != nil {
+														return types.Float64Value(float64(*conditions.Threshold.RealPower.Draw))
+													}
+													return types.Float64{}
+												}(),
+											}
+										}
+										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdRealPower{}
+									}(),
 									Temperature: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdTemperature {
 										if conditions.Threshold.Temperature != nil {
 											return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdTemperature{
@@ -1033,6 +1397,32 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 											}
 										}
 										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdTvoc{}
+									}(),
+									UpstreamPower: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdUpstreamPower {
+										if conditions.Threshold.UpstreamPower != nil {
+											return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdUpstreamPower{
+												OutageDetected: func() types.Bool {
+													if conditions.Threshold.UpstreamPower.OutageDetected != nil {
+														return types.BoolValue(*conditions.Threshold.UpstreamPower.OutageDetected)
+													}
+													return types.Bool{}
+												}(),
+											}
+										}
+										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdUpstreamPower{}
+									}(),
+									Voltage: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdVoltage {
+										if conditions.Threshold.Voltage != nil {
+											return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdVoltage{
+												Level: func() types.Float64 {
+													if conditions.Threshold.Voltage.Level != nil {
+														return types.Float64Value(float64(*conditions.Threshold.Voltage.Level))
+													}
+													return types.Float64{}
+												}(),
+											}
+										}
+										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdVoltage{}
 									}(),
 									Water: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdWater {
 										if conditions.Threshold.Water != nil {

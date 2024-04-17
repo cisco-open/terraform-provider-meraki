@@ -15,6 +15,9 @@ description: |-
 ```terraform
 data "meraki_organizations" "example" {
 
+  ending_before  = "string"
+  per_page       = 1
+  starting_after = "string"
 }
 
 output "meraki_organizations_example" {
@@ -36,7 +39,10 @@ output "meraki_organizations_example" {
 
 ### Optional
 
+- `ending_before` (String) endingBefore query parameter. A token used by the server to indicate the end of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.
 - `organization_id` (String) organizationId path parameter. Organization ID
+- `per_page` (Number) perPage query parameter. The number of entries per page returned. Acceptable range is 3 9000. Default is 9000.
+- `starting_after` (String) startingAfter query parameter. A token used by the server to indicate the start of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.
 
 ### Read-Only
 
@@ -93,7 +99,7 @@ Read-Only:
 
 Read-Only:
 
-- `details` (Attributes Set) Details related to organization management, possibly empty (see [below for nested schema](#nestedatt--item--management--details))
+- `details` (Attributes Set) Details related to organization management, possibly empty. Details may be named 'MSP ID', 'IP restriction mode for API', or 'IP restriction mode for dashboard', if the organization admin has configured any. (see [below for nested schema](#nestedatt--item--management--details))
 
 <a id="nestedatt--item--management--details"></a>
 ### Nested Schema for `item.management.details`
@@ -156,7 +162,7 @@ Read-Only:
 
 Read-Only:
 
-- `details` (Attributes Set) Details related to organization management, possibly empty (see [below for nested schema](#nestedatt--items--management--details))
+- `details` (Attributes Set) Details related to organization management, possibly empty. Details may be named 'MSP ID', 'IP restriction mode for API', or 'IP restriction mode for dashboard', if the organization admin has configured any. (see [below for nested schema](#nestedatt--items--management--details))
 
 <a id="nestedatt--items--management--details"></a>
 ### Nested Schema for `items.management.details`

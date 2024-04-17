@@ -23,14 +23,20 @@ resource "meraki_networks_mqtt_brokers" "example" {
 
     authentication = {
 
-      username = "Username"
+      password = "*****"
+      username = "milesmeraki"
     }
-    host = "1.1.1.1"
+    host = "1.2.3.4"
     name = "MQTT_Broker_1"
-    port = 1234
+    port = 443
     security = {
 
       mode = "tls"
+      tls = {
+
+        ca_certificate   = "*****"
+        verify_hostnames = true
+      }
     }
   }
 }
@@ -48,16 +54,29 @@ output "meraki_networks_mqtt_brokers_example" {
 - `network_id` (String) networkId path parameter. Network ID
 - `parameters` (Attributes) (see [below for nested schema](#nestedatt--parameters))
 
+### Read-Only
+
+- `item` (Attributes) (see [below for nested schema](#nestedatt--item))
+
 <a id="nestedatt--parameters"></a>
 ### Nested Schema for `parameters`
 
 Optional:
 
-- `authentication` (String) Name of the Auth.
+- `authentication` (Attributes) Authentication settings of the MQTT broker (see [below for nested schema](#nestedatt--parameters--authentication))
 - `host` (String) Host name/IP address where the MQTT broker runs.
 - `name` (String) Name of the MQTT broker.
 - `port` (Number) Host port though which the MQTT broker can be reached.
 - `security` (Attributes) Security settings of the MQTT broker. (see [below for nested schema](#nestedatt--parameters--security))
+
+<a id="nestedatt--parameters--authentication"></a>
+### Nested Schema for `parameters.authentication`
+
+Optional:
+
+- `password` (String, Sensitive) Password for the MQTT broker.
+- `username` (String) Username for the MQTT broker.
+
 
 <a id="nestedatt--parameters--security"></a>
 ### Nested Schema for `parameters.security`
@@ -65,12 +84,51 @@ Optional:
 Optional:
 
 - `mode` (String) Security protocol of the MQTT broker.
-- `security` (Attributes) TLS settings of the MQTT broker. (see [below for nested schema](#nestedatt--parameters--security--security))
+- `tls` (Attributes) TLS settings of the MQTT broker. (see [below for nested schema](#nestedatt--parameters--security--tls))
 
-<a id="nestedatt--parameters--security--security"></a>
-### Nested Schema for `parameters.security.security`
+<a id="nestedatt--parameters--security--tls"></a>
+### Nested Schema for `parameters.security.tls`
 
 Optional:
 
 - `ca_certificate` (String) CA Certificate of the MQTT broker.
+- `verify_hostnames` (Boolean) Whether the TLS hostname verification is enabled for the MQTT broker.
+
+
+
+
+<a id="nestedatt--item"></a>
+### Nested Schema for `item`
+
+Read-Only:
+
+- `authentication` (Attributes) Authentication settings of the MQTT broker (see [below for nested schema](#nestedatt--item--authentication))
+- `host` (String) Host name/IP address where the MQTT broker runs.
+- `id` (String) ID of the MQTT Broker.
+- `name` (String) Name of the MQTT Broker.
+- `port` (Number) Host port though which the MQTT broker can be reached.
+- `security` (Attributes) Security settings of the MQTT broker. (see [below for nested schema](#nestedatt--item--security))
+
+<a id="nestedatt--item--authentication"></a>
+### Nested Schema for `item.authentication`
+
+Read-Only:
+
+- `username` (String) Username for the MQTT broker.
+
+
+<a id="nestedatt--item--security"></a>
+### Nested Schema for `item.security`
+
+Read-Only:
+
+- `mode` (String) Security protocol of the MQTT broker.
+- `tls` (Attributes) TLS settings of the MQTT broker. (see [below for nested schema](#nestedatt--item--security--tls))
+
+<a id="nestedatt--item--security--tls"></a>
+### Nested Schema for `item.security.tls`
+
+Read-Only:
+
+- `has_ca_certificate` (Boolean) Indicates whether the CA certificate is set
 - `verify_hostnames` (Boolean) Whether the TLS hostname verification is enabled for the MQTT broker.

@@ -66,7 +66,7 @@ output "meraki_organizations_inventory_devices_example" {
 - `ending_before` (String) endingBefore query parameter. A token used by the server to indicate the end of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.
 - `macs` (List of String) macs query parameter. Search for devices in inventory based on mac addresses.
 - `models` (List of String) models query parameter. Search for devices in inventory based on model.
-- `network_ids` (List of String) networkIds query parameter. Search for devices in inventory based on network ids.
+- `network_ids` (List of String) networkIds query parameter. Search for devices in inventory based on network ids. Use explicit 'null' value to get available devices only.
 - `order_numbers` (List of String) orderNumbers query parameter. Search for devices in inventory based on order numbers.
 - `organization_id` (String) organizationId path parameter. Organization ID
 - `per_page` (Number) perPage query parameter. The number of entries per page returned. Acceptable range is 3 1000. Default is 1000.
@@ -90,6 +90,8 @@ output "meraki_organizations_inventory_devices_example" {
 Read-Only:
 
 - `claimed_at` (String) Claimed time of the device
+- `country_code` (String) Country/region code from device, network, or store order
+- `details` (Attributes Set) Additional device information (see [below for nested schema](#nestedatt--item--details))
 - `license_expiration_date` (String) License expiration date of the device
 - `mac` (String) MAC address of the device
 - `model` (String) Model type of the device
@@ -99,6 +101,15 @@ Read-Only:
 - `product_type` (String) Product type of the device
 - `serial` (String) Serial number of the device
 - `tags` (List of String) Device tags
+
+<a id="nestedatt--item--details"></a>
+### Nested Schema for `item.details`
+
+Read-Only:
+
+- `name` (String) Additional property name
+- `value` (String) Additional property value
+
 
 
 <a id="nestedatt--items"></a>
@@ -107,6 +118,8 @@ Read-Only:
 Read-Only:
 
 - `claimed_at` (String) Claimed time of the device
+- `country_code` (String) Country/region code from device, network, or store order
+- `details` (Attributes Set) Additional device information (see [below for nested schema](#nestedatt--items--details))
 - `license_expiration_date` (String) License expiration date of the device
 - `mac` (String) MAC address of the device
 - `model` (String) Model type of the device
@@ -116,3 +129,11 @@ Read-Only:
 - `product_type` (String) Product type of the device
 - `serial` (String) Serial number of the device
 - `tags` (List of String) Device tags
+
+<a id="nestedatt--items--details"></a>
+### Nested Schema for `items.details`
+
+Read-Only:
+
+- `name` (String) Additional property name
+- `value` (String) Additional property value

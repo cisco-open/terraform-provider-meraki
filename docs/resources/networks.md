@@ -15,13 +15,12 @@ description: |-
 ```terraform
 resource "meraki_networks" "example" {
 
-  copy_from_network_id = "N_24329156"
-  name                 = "Main Office"
-  notes                = "Additional description of the network"
-  organization_id      = "string"
-  product_types        = ["appliance", "switch", "wireless"]
-  tags                 = ["tag1", "tag2"]
-  time_zone            = "America/Los_Angeles"
+  name            = "Main Office"
+  notes           = "Additional description of the network"
+  organization_id = "string"
+  product_types   = ["appliance", "switch", "wireless"]
+  tags            = ["tag1", "tag2"]
+  time_zone       = "America/Los_Angeles"
 }
 
 output "meraki_networks_example" {
@@ -42,8 +41,8 @@ output "meraki_networks_example" {
 - `name` (String) Network name
 - `network_id` (String) networkId path parameter. Network ID
 - `notes` (String) Notes for the network
-- `product_types` (List of String) List of the product types that the network supports
-- `tags` (List of String) Network tags
+- `product_types` (Set of String) List of the product types that the network supports
+- `tags` (Set of String) Network tags
 - `time_zone` (String) Timezone of the network
 
 ### Read-Only

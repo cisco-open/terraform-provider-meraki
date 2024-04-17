@@ -29,7 +29,7 @@ data "meraki_organizations_devices_statuses" "example" {
 }
 
 output "meraki_organizations_devices_statuses_example" {
-  value = data.meraki_organizations_devices_statuses.example.item
+  value = data.meraki_organizations_devices_statuses.example.items
 }
 ```
 
@@ -55,14 +55,14 @@ output "meraki_organizations_devices_statuses_example" {
 
 ### Read-Only
 
-- `item` (Attributes) (see [below for nested schema](#nestedatt--item))
+- `items` (Attributes List) Array of ResponseOrganizationsGetOrganizationDevicesStatuses (see [below for nested schema](#nestedatt--items))
 
-<a id="nestedatt--item"></a>
-### Nested Schema for `item`
+<a id="nestedatt--items"></a>
+### Nested Schema for `items`
 
 Read-Only:
 
-- `components` (Attributes) Components (see [below for nested schema](#nestedatt--item--components))
+- `components` (Attributes) Components (see [below for nested schema](#nestedatt--items--components))
 - `gateway` (String) IP Gateway
 - `ip_type` (String) IP Type
 - `lan_ip` (String) LAN IP Address
@@ -79,9 +79,28 @@ Read-Only:
 - `status` (String) Device Status
 - `tags` (List of String) Tags
 
-<a id="nestedatt--item--components"></a>
-### Nested Schema for `item.components`
+<a id="nestedatt--items--components"></a>
+### Nested Schema for `items.components`
 
 Read-Only:
 
-- `power_supplies` (List of String) Power Supplies
+- `power_supplies` (Attributes Set) Power Supplies (see [below for nested schema](#nestedatt--items--components--power_supplies))
+
+<a id="nestedatt--items--components--power_supplies"></a>
+### Nested Schema for `items.components.power_supplies`
+
+Read-Only:
+
+- `model` (String) Model of the power supply
+- `poe` (Attributes) PoE info of the power supply (see [below for nested schema](#nestedatt--items--components--power_supplies--poe))
+- `serial` (String) Serial of the power supply
+- `slot` (Number) Slot the power supply is in
+- `status` (String) Status of the power supply
+
+<a id="nestedatt--items--components--power_supplies--poe"></a>
+### Nested Schema for `items.components.power_supplies.status`
+
+Read-Only:
+
+- `maximum` (Number) Maximum PoE this power supply can provide when connected to the current switch model
+- `unit` (String) Unit of the PoE maximum

@@ -70,4 +70,4 @@ Read-Only:
 Read-Only:
 
 - `code` (Number) Response status code of the API response
-- `count_r` (Number) Number of records that match the status code
+- `count` (Number) Number of records that match the status code

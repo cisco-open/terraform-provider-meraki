@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -70,22 +54,38 @@ func (d *NetworksWirelessSSIDsBonjourForwardingDataSource) Schema(_ context.Cont
 				Attributes: map[string]schema.Attribute{
 
 					"enabled": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `If true, Bonjour forwarding is enabled on the SSID.`,
+						Computed:            true,
+					},
+					"exception": schema.SingleNestedAttribute{
+						MarkdownDescription: `Bonjour forwarding exception`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"enabled": schema.BoolAttribute{
+								MarkdownDescription: `If true, Bonjour forwarding exception is enabled on this SSID. Exception is required to enable L2 isolation and Bonjour forwarding to work together.`,
+								Computed:            true,
+							},
+						},
 					},
 					"rules": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `Bonjour forwarding rules`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"description": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Desctiption of the bonjour forwarding rule`,
+									Computed:            true,
 								},
 								"services": schema.ListAttribute{
-									Computed:    true,
-									ElementType: types.StringType,
+									MarkdownDescription: `A list of Bonjour services. At least one service must be specified. Available services are 'All Services', 'AirPlay', 'AFP', 'BitTorrent', 'FTP', 'iChat', 'iTunes', 'Printers', 'Samba', 'Scanners' and 'SSH'`,
+									Computed:            true,
+									ElementType:         types.StringType,
 								},
 								"vlan_id": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The ID of the service VLAN. Required`,
+									Computed:            true,
 								},
 							},
 						},
@@ -140,8 +140,13 @@ type NetworksWirelessSSIDsBonjourForwarding struct {
 }
 
 type ResponseWirelessGetNetworkWirelessSsidBonjourForwarding struct {
-	Enabled types.Bool                                                      `tfsdk:"enabled"`
-	Rules   *[]ResponseWirelessGetNetworkWirelessSsidBonjourForwardingRules `tfsdk:"rules"`
+	Enabled   types.Bool                                                        `tfsdk:"enabled"`
+	Exception *ResponseWirelessGetNetworkWirelessSsidBonjourForwardingException `tfsdk:"exception"`
+	Rules     *[]ResponseWirelessGetNetworkWirelessSsidBonjourForwardingRules   `tfsdk:"rules"`
+}
+
+type ResponseWirelessGetNetworkWirelessSsidBonjourForwardingException struct {
+	Enabled types.Bool `tfsdk:"enabled"`
 }
 
 type ResponseWirelessGetNetworkWirelessSsidBonjourForwardingRules struct {
@@ -158,6 +163,19 @@ func ResponseWirelessGetNetworkWirelessSSIDBonjourForwardingItemToBody(state Net
 				return types.BoolValue(*response.Enabled)
 			}
 			return types.Bool{}
+		}(),
+		Exception: func() *ResponseWirelessGetNetworkWirelessSsidBonjourForwardingException {
+			if response.Exception != nil {
+				return &ResponseWirelessGetNetworkWirelessSsidBonjourForwardingException{
+					Enabled: func() types.Bool {
+						if response.Exception.Enabled != nil {
+							return types.BoolValue(*response.Exception.Enabled)
+						}
+						return types.Bool{}
+					}(),
+				}
+			}
+			return &ResponseWirelessGetNetworkWirelessSsidBonjourForwardingException{}
 		}(),
 		Rules: func() *[]ResponseWirelessGetNetworkWirelessSsidBonjourForwardingRules {
 			if response.Rules != nil {

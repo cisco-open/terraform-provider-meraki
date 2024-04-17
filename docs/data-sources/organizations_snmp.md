@@ -39,10 +39,12 @@ output "meraki_organizations_snmp_example" {
 
 Read-Only:
 
-- `hostname` (String)
-- `peer_ips` (List of String)
-- `port` (Number)
-- `v2c_enabled` (Boolean)
-- `v3_auth_mode` (String)
-- `v3_enabled` (Boolean)
-- `v3_priv_mode` (String)
+- `hostname` (String) The hostname of the SNMP server.
+- `peer_ips` (List of String) The list of IPv4 addresses that are allowed to access the SNMP server.
+- `port` (Number) The port of the SNMP server.
+- `v2_community_string` (String) The community string for SNMP version 2c, if enabled.
+- `v2c_enabled` (Boolean) Boolean indicating whether SNMP version 2c is enabled for the organization.
+- `v3_auth_mode` (String) The SNMP version 3 authentication mode. Can be either 'MD5' or 'SHA'.
+- `v3_enabled` (Boolean) Boolean indicating whether SNMP version 3 is enabled for the organization.
+- `v3_priv_mode` (String) The SNMP version 3 privacy mode. Can be either 'DES' or 'AES128'.
+- `v3_user` (String) The user for SNMP version 3, if enabled.

@@ -15,5 +15,5 @@ data "meraki_organizations_devices_statuses" "example" {
 }
 
 output "meraki_organizations_devices_statuses_example" {
-  value = data.meraki_organizations_devices_statuses.example.item
+  value = data.meraki_organizations_devices_statuses.example.items
 }

@@ -47,13 +47,21 @@ Read-Only:
 
 Read-Only:
 
+- `apparent_power` (Number) Number of sensors that are currently alerting due to apparent power readings
+- `co2` (Number) Number of sensors that are currently alerting due to CO2 readings
+- `current` (Number) Number of sensors that are currently alerting due to electrical current readings
 - `door` (Number) Number of sensors that are currently alerting due to an open door
+- `frequency` (Number) Number of sensors that are currently alerting due to frequency readings
 - `humidity` (Number) Number of sensors that are currently alerting due to humidity readings
 - `indoor_air_quality` (Number) Number of sensors that are currently alerting due to indoor air quality readings
 - `noise` (Attributes) Object containing the number of sensors that are currently alerting due to noise readings (see [below for nested schema](#nestedatt--item--counts--noise))
 - `pm25` (Number) Number of sensors that are currently alerting due to PM2.5 readings
+- `power_factor` (Number) Number of sensors that are currently alerting due to power factor readings
+- `real_power` (Number) Number of sensors that are currently alerting due to real power readings
 - `temperature` (Number) Number of sensors that are currently alerting due to temperature readings
 - `tvoc` (Number) Number of sensors that are currently alerting due to TVOC readings
+- `upstream_power` (Number) Number of sensors that are currently alerting due to an upstream power outage
+- `voltage` (Number) Number of sensors that are currently alerting due to voltage readings
 - `water` (Number) Number of sensors that are currently alerting due to the presence of water
 
 <a id="nestedatt--item--counts--noise"></a>

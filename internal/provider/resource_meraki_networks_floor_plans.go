@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -146,70 +130,90 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 				},
 			},
 			"devices": schema.SetNestedAttribute{
-				Computed: true,
+				MarkdownDescription: `List of devices for the floorplan`,
+				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"address": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Physical address of the device`,
+							Computed:            true,
 						},
-						"beacon_id_params": schema.SingleNestedAttribute{
-							Computed: true,
-							Attributes: map[string]schema.Attribute{
+						"details": schema.SetNestedAttribute{
+							MarkdownDescription: `Additional device information`,
+							Computed:            true,
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
 
-								"major": schema.Int64Attribute{
-									Computed: true,
-								},
-								"minor": schema.Int64Attribute{
-									Computed: true,
-								},
-								"uuid": schema.StringAttribute{
-									Computed: true,
+									"name": schema.StringAttribute{
+										MarkdownDescription: `Additional property name`,
+										Computed:            true,
+									},
+									"value": schema.StringAttribute{
+										MarkdownDescription: `Additional property value`,
+										Computed:            true,
+									},
 								},
 							},
 						},
 						"firmware": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Firmware version of the device`,
+							Computed:            true,
 						},
-						"floor_plan_id": schema.StringAttribute{
-							Computed: true,
+						"imei": schema.StringAttribute{
+							MarkdownDescription: `IMEI of the device, if applicable`,
+							Computed:            true,
 						},
 						"lan_ip": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `LAN IP address of the device`,
+							Computed:            true,
 						},
 						"lat": schema.Float64Attribute{
-							Computed: true,
+							MarkdownDescription: `Latitude of the device`,
+							Computed:            true,
 						},
 						"lng": schema.Float64Attribute{
-							Computed: true,
+							MarkdownDescription: `Longitude of the device`,
+							Computed:            true,
 						},
 						"mac": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `MAC address of the device`,
+							Computed:            true,
 						},
 						"model": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Model of the device`,
+							Computed:            true,
 						},
 						"name": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Name of the device`,
+							Computed:            true,
 						},
 						"network_id": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `ID of the network the device belongs to`,
+							Computed:            true,
 						},
 						"notes": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Notes for the device, limited to 255 characters`,
+							Computed:            true,
+						},
+						"product_type": schema.StringAttribute{
+							MarkdownDescription: `Product type of the device`,
+							Computed:            true,
 						},
 						"serial": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Serial number of the device`,
+							Computed:            true,
 						},
 						"tags": schema.SetAttribute{
-							Computed:    true,
-							ElementType: types.StringType,
+							MarkdownDescription: `List of tags assigned to the device`,
+							Computed:            true,
+							ElementType:         types.StringType,
 						},
 					},
 				},
 			},
 			"floor_plan_id": schema.StringAttribute{
-				MarkdownDescription: `floorPlanId path parameter. Floor plan ID`,
+				MarkdownDescription: `Floor plan ID`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -217,7 +221,8 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 				},
 			},
 			"height": schema.Float64Attribute{
-				Computed: true,
+				MarkdownDescription: `The height of your floor plan.`,
+				Computed:            true,
 			},
 			"image_contents": schema.StringAttribute{
 				MarkdownDescription: `The file contents (a base 64 encoded string) of your image. Supported formats are PNG, GIF, and JPG. Note that all images are saved as PNG files, regardless of the format they are uploaded in.`,
@@ -228,16 +233,20 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 				},
 			},
 			"image_extension": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `The format type of the image.`,
+				Computed:            true,
 			},
 			"image_md5": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `The file contents (a base 64 encoded string) of your new image. Supported formats are PNG, GIF, and JPG. Note that all images are saved as PNG files, regardless of the format they are uploaded in. If you upload a new image, and you do NOT specify any new geolocation fields ('center, 'topLeftCorner', etc), the floor plan will be recentered with no rotation in order to maintain the aspect ratio of your new image.`,
+				Computed:            true,
 			},
 			"image_url": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `The url link for the floor plan image.`,
+				Computed:            true,
 			},
 			"image_url_expires_at": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `The time the image url link will expire.`,
+				Computed:            true,
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name of your floor plan.`,
@@ -305,8 +314,9 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 					},
 				},
 			},
-			"width": schema.Int64Attribute{
-				Computed: true,
+			"width": schema.Float64Attribute{
+				MarkdownDescription: `The width of your floor plan.`,
+				Computed:            true,
 			},
 		},
 	}
@@ -334,7 +344,6 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvName := data.Name.ValueString()
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkFloorPlans(vvNetworkID)
@@ -357,7 +366,7 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter FloorPlanID",
-					"Error",
+					err.Error(),
 				)
 				return
 			}
@@ -372,9 +381,9 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 		}
 	}
 	dataRequest := data.toSdkApiRequestCreate(ctx)
-	restyResp2, err := r.client.Networks.CreateNetworkFloorPlan(vvNetworkID, dataRequest)
+	response, restyResp2, err := r.client.Networks.CreateNetworkFloorPlan(vvNetworkID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkFloorPlan",
@@ -414,7 +423,7 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter FloorPlanID",
-				"Error",
+				err.Error(),
 			)
 			return
 		}
@@ -468,9 +477,7 @@ func (r *NetworksFloorPlansResource) Read(ctx context.Context, req resource.Read
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvFloorPlanID := data.FloorPlanID.ValueString()
-	// floor_plan_id
 	responseGet, restyRespGet, err := r.client.Networks.GetNetworkFloorPlan(vvNetworkID, vvFloorPlanID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -494,7 +501,7 @@ func (r *NetworksFloorPlansResource) Read(ctx context.Context, req resource.Read
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkFloorPlanItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -527,11 +534,10 @@ func (r *NetworksFloorPlansResource) Update(ctx context.Context, req resource.Up
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvFloorPlanID := data.FloorPlanID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Networks.UpdateNetworkFloorPlan(vvNetworkID, vvFloorPlanID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Networks.UpdateNetworkFloorPlan(vvNetworkID, vvFloorPlanID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkFloorPlan",
@@ -569,7 +575,7 @@ func (r *NetworksFloorPlansResource) Delete(ctx context.Context, req resource.De
 
 	vvNetworkID := state.NetworkID.ValueString()
 	vvFloorPlanID := state.FloorPlanID.ValueString()
-	_, err := r.client.Networks.DeleteNetworkFloorPlan(vvNetworkID, vvFloorPlanID)
+	_, _, err := r.client.Networks.DeleteNetworkFloorPlan(vvNetworkID, vvFloorPlanID)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Failure when executing DeleteNetworkFloorPlan", err.Error())
@@ -596,7 +602,7 @@ type NetworksFloorPlansRs struct {
 	Name              types.String                                            `tfsdk:"name"`
 	TopLeftCorner     *ResponseNetworksGetNetworkFloorPlanTopLeftCornerRs     `tfsdk:"top_left_corner"`
 	TopRightCorner    *ResponseNetworksGetNetworkFloorPlanTopRightCornerRs    `tfsdk:"top_right_corner"`
-	Width             types.Int64                                             `tfsdk:"width"`
+	Width             types.Float64                                           `tfsdk:"width"`
 	ImageContents     types.String                                            `tfsdk:"image_contents"`
 }
 
@@ -616,26 +622,26 @@ type ResponseNetworksGetNetworkFloorPlanCenterRs struct {
 }
 
 type ResponseNetworksGetNetworkFloorPlanDevicesRs struct {
-	Address        types.String                                                `tfsdk:"address"`
-	BeaconIDParams *ResponseNetworksGetNetworkFloorPlanDevicesBeaconIdParamsRs `tfsdk:"beacon_id_params"`
-	Firmware       types.String                                                `tfsdk:"firmware"`
-	FloorPlanID    types.String                                                `tfsdk:"floor_plan_id"`
-	LanIP          types.String                                                `tfsdk:"lan_ip"`
-	Lat            types.Float64                                               `tfsdk:"lat"`
-	Lng            types.Float64                                               `tfsdk:"lng"`
-	Mac            types.String                                                `tfsdk:"mac"`
-	Model          types.String                                                `tfsdk:"model"`
-	Name           types.String                                                `tfsdk:"name"`
-	NetworkID      types.String                                                `tfsdk:"network_id"`
-	Notes          types.String                                                `tfsdk:"notes"`
-	Serial         types.String                                                `tfsdk:"serial"`
-	Tags           types.Set                                                   `tfsdk:"tags"`
+	Address     types.String                                           `tfsdk:"address"`
+	Details     *[]ResponseNetworksGetNetworkFloorPlanDevicesDetailsRs `tfsdk:"details"`
+	Firmware    types.String                                           `tfsdk:"firmware"`
+	Imei        types.String                                           `tfsdk:"imei"`
+	LanIP       types.String                                           `tfsdk:"lan_ip"`
+	Lat         types.Float64                                          `tfsdk:"lat"`
+	Lng         types.Float64                                          `tfsdk:"lng"`
+	Mac         types.String                                           `tfsdk:"mac"`
+	Model       types.String                                           `tfsdk:"model"`
+	Name        types.String                                           `tfsdk:"name"`
+	NetworkID   types.String                                           `tfsdk:"network_id"`
+	Notes       types.String                                           `tfsdk:"notes"`
+	ProductType types.String                                           `tfsdk:"product_type"`
+	Serial      types.String                                           `tfsdk:"serial"`
+	Tags        types.Set                                              `tfsdk:"tags"`
 }
 
-type ResponseNetworksGetNetworkFloorPlanDevicesBeaconIdParamsRs struct {
-	Major types.Int64  `tfsdk:"major"`
-	Minor types.Int64  `tfsdk:"minor"`
-	UUID  types.String `tfsdk:"uuid"`
+type ResponseNetworksGetNetworkFloorPlanDevicesDetailsRs struct {
+	Name  types.String `tfsdk:"name"`
+	Value types.String `tfsdk:"value"`
 }
 
 type ResponseNetworksGetNetworkFloorPlanTopLeftCornerRs struct {
@@ -856,29 +862,22 @@ func ResponseNetworksGetNetworkFloorPlanItemToBodyRs(state NetworksFloorPlansRs,
 				for i, devices := range *response.Devices {
 					result[i] = ResponseNetworksGetNetworkFloorPlanDevicesRs{
 						Address: types.StringValue(devices.Address),
-						BeaconIDParams: func() *ResponseNetworksGetNetworkFloorPlanDevicesBeaconIdParamsRs {
-							if devices.BeaconIDParams != nil {
-								return &ResponseNetworksGetNetworkFloorPlanDevicesBeaconIdParamsRs{
-									Major: func() types.Int64 {
-										if devices.BeaconIDParams.Major != nil {
-											return types.Int64Value(int64(*devices.BeaconIDParams.Major))
-										}
-										return types.Int64{}
-									}(),
-									Minor: func() types.Int64 {
-										if devices.BeaconIDParams.Minor != nil {
-											return types.Int64Value(int64(*devices.BeaconIDParams.Minor))
-										}
-										return types.Int64{}
-									}(),
-									UUID: types.StringValue(devices.BeaconIDParams.UUID),
+						Details: func() *[]ResponseNetworksGetNetworkFloorPlanDevicesDetailsRs {
+							if devices.Details != nil {
+								result := make([]ResponseNetworksGetNetworkFloorPlanDevicesDetailsRs, len(*devices.Details))
+								for i, details := range *devices.Details {
+									result[i] = ResponseNetworksGetNetworkFloorPlanDevicesDetailsRs{
+										Name:  types.StringValue(details.Name),
+										Value: types.StringValue(details.Value),
+									}
 								}
+								return &result
 							}
-							return &ResponseNetworksGetNetworkFloorPlanDevicesBeaconIdParamsRs{}
+							return &[]ResponseNetworksGetNetworkFloorPlanDevicesDetailsRs{}
 						}(),
-						Firmware:    types.StringValue(devices.Firmware),
-						FloorPlanID: types.StringValue(devices.FloorPlanID),
-						LanIP:       types.StringValue(devices.LanIP),
+						Firmware: types.StringValue(devices.Firmware),
+						Imei:     types.StringValue(devices.Imei),
+						LanIP:    types.StringValue(devices.LanIP),
 						Lat: func() types.Float64 {
 							if devices.Lat != nil {
 								return types.Float64Value(float64(*devices.Lat))
@@ -891,13 +890,14 @@ func ResponseNetworksGetNetworkFloorPlanItemToBodyRs(state NetworksFloorPlansRs,
 							}
 							return types.Float64{}
 						}(),
-						Mac:       types.StringValue(devices.Mac),
-						Model:     types.StringValue(devices.Model),
-						Name:      types.StringValue(devices.Name),
-						NetworkID: types.StringValue(devices.NetworkID),
-						Notes:     types.StringValue(devices.Notes),
-						Serial:    types.StringValue(devices.Serial),
-						Tags:      StringSliceToSet(devices.Tags),
+						Mac:         types.StringValue(devices.Mac),
+						Model:       types.StringValue(devices.Model),
+						Name:        types.StringValue(devices.Name),
+						NetworkID:   types.StringValue(devices.NetworkID),
+						Notes:       types.StringValue(devices.Notes),
+						ProductType: types.StringValue(devices.ProductType),
+						Serial:      types.StringValue(devices.Serial),
+						Tags:        StringSliceToSet(devices.Tags),
 					}
 				}
 				return &result
@@ -954,11 +954,11 @@ func ResponseNetworksGetNetworkFloorPlanItemToBodyRs(state NetworksFloorPlansRs,
 			}
 			return &ResponseNetworksGetNetworkFloorPlanTopRightCornerRs{}
 		}(),
-		Width: func() types.Int64 {
+		Width: func() types.Float64 {
 			if response.Width != nil {
-				return types.Int64Value(int64(*response.Width))
+				return types.Float64Value(float64(*response.Width))
 			}
-			return types.Int64{}
+			return types.Float64{}
 		}(),
 	}
 	if is_read {

@@ -759,7 +759,6 @@ func changeStructUnknowns(a interface{}, b interface{}) interface{} {
 	}
 
 	resultStruct := reflect.New(valueA.Type()).Elem()
-	log.Printf("Type1: ", valueA.Kind())
 	if valueA.Kind() == reflect.Slice && valueB.Kind() == reflect.Slice {
 		lenA := valueA.Len()
 		lenB := valueB.Len()
@@ -805,7 +804,6 @@ func changeStructUnknowns(a interface{}, b interface{}) interface{} {
 		} else {
 			if valueA.Field(i).Type() != reflect.TypeOf(types.String{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Bool{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Int64{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Float64{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Set{}) {
 				// log.Printf("Entre 3 %v to field %v\n", fieldValueB.Interface(), fieldName)
-				log.Printf("Type: ", valueA.Field(i).Type())
 				nestedResult := changeStructUnknowns(fieldValueA.Interface(), fieldValueB.Interface())
 				fieldValueBPtr := reflect.New(fieldValueB.Type())
 				fieldValueBPtr.Elem().Set(reflect.ValueOf(nestedResult))

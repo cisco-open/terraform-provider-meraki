@@ -206,8 +206,7 @@ func (r *NetworksApplianceVLANsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: `The VLAN ID of the VLAN`,
-				Computed:            true,
-				Optional:            true,
+				Required:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 					SuppressDiffString(),
@@ -406,14 +405,6 @@ func (r *NetworksApplianceVLANsResource) Schema(_ context.Context, _ resource.Sc
 					),
 				},
 			},
-			"vlan_id": schema.StringAttribute{
-				MarkdownDescription: `vlanId path parameter. Vlan ID`,
-				Computed:            true,
-				Optional:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
 			"vpn_nat_subnet": schema.StringAttribute{
 				MarkdownDescription: `The translated VPN subnet if VPN and VPN subnet translation are enabled on the VLAN`,
 				Computed:            true,
@@ -450,43 +441,34 @@ func (r *NetworksApplianceVLANsResource) Create(ctx context.Context, req resourc
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	// network_id
-	vvName := data.Name.ValueString()
+	vvID := data.ID.ValueString()
 	//Items
-	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceVLANs(vvNetworkID)
+	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceVLAN(vvNetworkID, vvID)
 	//Have Create
 	if err != nil || restyResp1 == nil {
 		if restyResp1.StatusCode() != 404 {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceVLANs",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
 	}
+
 	if responseVerifyItem != nil {
-		responseStruct := structToMap(responseVerifyItem)
-		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
-		if result != nil {
-			result2 := result.(map[string]interface{})
-			vvVLANID := strconv.Itoa(*result2["ID"].(*int))
-			r.client.Appliance.UpdateNetworkApplianceVLAN(vvNetworkID, vvVLANID, data.toSdkApiRequestUpdate(ctx))
-			responseVerifyItem2, _, _ := r.client.Appliance.GetNetworkApplianceVLAN(vvNetworkID, vvVLANID)
-			if responseVerifyItem2 != nil {
-				data = ResponseApplianceGetNetworkApplianceVLANItemToBodyRs(data, responseVerifyItem2, false)
-				// Path params update assigned
-				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-				return
-			}
-		}
+		data = ResponseApplianceGetNetworkApplianceVLANItemToBodyRs(data, responseVerifyItem, false)
+		resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+		return
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Appliance.CreateNetworkApplianceVLAN(vvNetworkID, dataRequest)
 
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkApplianceVLAN",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -497,14 +479,14 @@ func (r *NetworksApplianceVLANsResource) Create(ctx context.Context, req resourc
 		return
 	}
 	//Items
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceVLANs(vvNetworkID)
+	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceVLAN(vvNetworkID, vvID)
 	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceVLANs",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -514,43 +496,18 @@ func (r *NetworksApplianceVLANsResource) Create(ctx context.Context, req resourc
 		)
 		return
 	}
-	responseStruct := structToMap(responseGet)
-	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
-	if result != nil {
-		result2 := result.(map[string]interface{})
-		vvVLANID, ok := result2["ID"].(string)
-		if !ok {
-			resp.Diagnostics.AddError(
-				"Failure when parsing path parameter VLANID",
-				err.Error(),
-			)
-			return
-		}
-		responseVerifyItem2, restyRespGet, err := r.client.Appliance.GetNetworkApplianceVLAN(vvNetworkID, vvVLANID)
-		if responseVerifyItem2 != nil && err == nil {
-			data = ResponseApplianceGetNetworkApplianceVLANItemToBodyRs(data, responseVerifyItem2, false)
-			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-			return
-		} else {
-			if restyRespGet != nil {
-				resp.Diagnostics.AddError(
-					"Failure when executing GetNetworkApplianceVLAN",
-					err.Error(),
-				)
-				return
-			}
+	if responseGet != nil {
+		data = ResponseApplianceGetNetworkApplianceVLANItemToBodyRs(data, responseGet, false)
+		resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+		return
+	} else {
+		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceVLAN",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
-	} else {
-		resp.Diagnostics.AddError(
-			"Error in result.",
-			"Error in result.",
-		)
-		return
 	}
 }
 
@@ -636,7 +593,7 @@ func (r *NetworksApplianceVLANsResource) Update(ctx context.Context, req resourc
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
 	// network_id
-	vvVLANID := data.VLANID.ValueString()
+	vvVLANID := data.ID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceVLAN(vvNetworkID, vvVLANID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
@@ -676,7 +633,7 @@ func (r *NetworksApplianceVLANsResource) Delete(ctx context.Context, req resourc
 	}
 
 	vvNetworkID := state.NetworkID.ValueString()
-	vvVLANID := state.VLANID.ValueString()
+	vvVLANID := state.ID.ValueString()
 	_, err := r.client.Appliance.DeleteNetworkApplianceVLAN(vvNetworkID, vvVLANID)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -691,7 +648,6 @@ func (r *NetworksApplianceVLANsResource) Delete(ctx context.Context, req resourc
 // TF Structs Schema
 type NetworksApplianceVLANsRs struct {
 	NetworkID              types.String                                             `tfsdk:"network_id"`
-	VLANID                 types.String                                             `tfsdk:"vlan_id"`
 	ApplianceIP            types.String                                             `tfsdk:"appliance_ip"`
 	Cidr                   types.String                                             `tfsdk:"cidr"`
 	DhcpBootFilename       types.String                                             `tfsdk:"dhcp_boot_filename"`
@@ -877,11 +833,6 @@ func (r *NetworksApplianceVLANsRs) toSdkApiRequestCreate(ctx context.Context) *m
 	return &out
 }
 func (r *NetworksApplianceVLANsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateNetworkApplianceVLAN {
-	if r.IPv6 != nil {
-		log.Printf("ResquestUpdate: %v", *r.IPv6.PrefixAssignments)
-	} else {
-		log.Printf("ResquestUpdate: nil")
-	}
 
 	applianceIP := ""
 	if !r.ApplianceIP.IsUnknown() && !r.ApplianceIP.IsNull() {

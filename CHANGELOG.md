@@ -59,8 +59,11 @@ FEATURES:
 * **New Data Source** `meraki_organizations_wireless_devices_channel_utilization_history_by_device_by_interval`
 * **New Data Source** `meraki_organizations_wireless_devices_channel_utilization_history_by_network_by_interval`
 * **New Data Source** `meraki_organizations_wireless_devices_packet_loss_by_client`
-* **New Data Source** `meraki_organizations_wireless_devices_packet_loss_by_device`
+* **New Data Source** `meraki_organizations_ wireless_devices_packet_loss_by_device`
 * **New Data Source** `meraki_organizations_wireless_devices_packet_loss_by_network`
+
+BUGFIXES:
+* `meraki_networks_appliance_vlans`, `id` parameter now is required for create context.
 
 ## 0.1.0-alpha (March 26, 2024)
 FEATURES:

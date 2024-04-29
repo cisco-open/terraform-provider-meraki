@@ -64,6 +64,7 @@ FEATURES:
 
 BUGFIXES:
 * `meraki_networks_appliance_vlans`, `id` parameter now is required for create context.
+* `meraki_devices_management_interface` resource seems to be broken #12. [FIXED]
 
 ## 0.1.0-alpha (March 26, 2024)
 FEATURES:

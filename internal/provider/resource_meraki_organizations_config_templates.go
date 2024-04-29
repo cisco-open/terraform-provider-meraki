@@ -53,15 +53,15 @@ func (r *OrganizationsConfigTemplatesResource) Schema(_ context.Context, _ resou
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"copy_from_network_id": schema.StringAttribute{
-				MarkdownDescription: `The ID of the network or config template to copy configuration from`,
-				Computed:            true,
-				Optional:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-					SuppressDiffString(),
-				},
-			},
+			// "copy_from_network_id": schema.StringAttribute{
+			// 	MarkdownDescription: `The ID of the network or config template to copy configuration from`,
+			// 	Computed:            true,
+			// 	Optional:            true,
+			// 	PlanModifiers: []planmodifier.String{
+			// 		stringplanmodifier.UseStateForUnknown(),
+			// 		SuppressDiffString(),
+			// 	},
+			// },
 			"id": schema.StringAttribute{
 				MarkdownDescription: `The ID of the network or config template to copy configuration from`,
 				Computed:            true,

@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -69,52 +53,65 @@ func (d *OrganizationsAlertsProfilesDataSource) Schema(_ context.Context, _ data
 					Attributes: map[string]schema.Attribute{
 
 						"alert_condition": schema.SingleNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `The conditions that determine if the alert triggers`,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
 								"bit_rate_bps": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `The threshold the metric must cross to be valid for alerting. Used only for WAN Utilization alerts.`,
+									Computed:            true,
 								},
 								"duration": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `The total duration in seconds that the threshold should be crossed before alerting`,
+									Computed:            true,
 								},
 								"interface": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The uplink observed for the alert`,
+									Computed:            true,
 								},
 								"window": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `The look back period in seconds for sensing the alert`,
+									Computed:            true,
 								},
 							},
 						},
 						"description": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `User supplied description of the alert`,
+							Computed:            true,
 						},
 						"enabled": schema.BoolAttribute{
-							Computed: true,
+							MarkdownDescription: `Is the alert config enabled`,
+							Computed:            true,
 						},
 						"id": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The alert config ID`,
+							Computed:            true,
 						},
 						"network_tags": schema.ListAttribute{
-							Computed:    true,
-							ElementType: types.StringType,
+							MarkdownDescription: `Networks with these tags will be monitored for the alert`,
+							Computed:            true,
+							ElementType:         types.StringType,
 						},
 						"recipients": schema.SingleNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `List of recipients that will recieve the alert.`,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
 								"emails": schema.ListAttribute{
-									Computed:    true,
-									ElementType: types.StringType,
+									MarkdownDescription: `A list of emails that will receive information about the alert`,
+									Computed:            true,
+									ElementType:         types.StringType,
 								},
 								"http_server_ids": schema.ListAttribute{
-									Computed:    true,
-									ElementType: types.StringType,
+									MarkdownDescription: `A list base64 encoded urls of webhook endpoints that will receive information about the alert`,
+									Computed:            true,
+									ElementType:         types.StringType,
 								},
 							},
 						},
 						"type": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The alert type`,
+							Computed:            true,
 						},
 					},
 				},

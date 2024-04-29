@@ -1,29 +1,13 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 import (
 	"context"
 	"os"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -31,6 +15,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+)
+
+const (
+	CUSTOM_USER_AGENT = "MerakiTerraform/1.47.0 Cisco"
 )
 
 // terraform-provider-meraki
@@ -148,7 +136,6 @@ func (p *MerakiProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	baseURL := os.Getenv("MERAKI_BASE_URL")
 	merakiDashboardApiKey := os.Getenv("MERAKI_DASHBOARD_API_KEY")
 	debug := os.Getenv("MERAKI_DEBUG")
-	customUserAgent := os.Getenv("MERAKI_USER_AGENT")
 
 	if !data.BaseURL.IsNull() && !data.BaseURL.IsUnknown() {
 		baseURL = data.BaseURL.ValueString()
@@ -160,15 +147,13 @@ func (p *MerakiProvider) Configure(ctx context.Context, req provider.ConfigureRe
 		debug = data.Debug.ValueString()
 	}
 
-	customUserAgent = "MerakiTerraform/1.0.0 Cisco"
-
 	// if !data.SSLVerify.IsNull() {
 	// 	sslVerify = data.SSLVerify.ValueString()
 	// }
 
 	// Create a new Meraki client using the configuration values
 	client, err := merakigosdk.NewClientWithOptionsAndRequests(baseURL,
-		merakiDashboardApiKey, debug, requestPerSecond,
+		merakiDashboardApiKey, debug, CUSTOM_USER_AGENT, requestPerSecond,
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -178,7 +163,7 @@ func (p *MerakiProvider) Configure(ctx context.Context, req provider.ConfigureRe
 		return
 	}
 	// client.RestyClient().SetLogger(createLogger())
-	client.SetUserAgent(customUserAgent)
+	// client.SetUserAgent(customUserAgent)
 	dataClient := MerakiProviderData{Client: client}
 
 	resp.DataSourceData = dataClient
@@ -196,8 +181,6 @@ func New(version string) func() provider.Provider {
 
 func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewDevicesLiveToolsPingResource,
-		NewDevicesLiveToolsPingDeviceResource,
 		NewOrganizationsResource,
 		NewOrganizationsAdminsResource,
 		NewDevicesResource,
@@ -210,6 +193,8 @@ func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewDevicesCellularSimsResource,
 		NewDevicesCellularGatewayLanResource,
 		NewDevicesCellularGatewayPortForwardingRulesResource,
+		NewDevicesLiveToolsPingResource,
+		NewDevicesLiveToolsPingDeviceResource,
 		NewDevicesManagementInterfaceResource,
 		NewDevicesSensorRelationshipsResource,
 		NewDevicesSwitchPortsResource,
@@ -267,6 +252,7 @@ func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewNetworksSensorAlertsProfilesResource,
 		NewNetworksSensorMqttBrokersResource,
 		NewNetworksSettingsResource,
+		NewNetworksSmBypassActivationLockAttemptsResource,
 		NewNetworksSmTargetGroupsResource,
 		NewNetworksSNMPResource,
 		NewNetworksSwitchAccessControlListsResource,
@@ -326,14 +312,23 @@ func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewOrganizationsConfigTemplatesSwitchProfilesPortsResource,
 		NewOrganizationsEarlyAccessFeaturesOptInsResource,
 		NewOrganizationsInsightMonitoredMediaServersResource,
+		NewOrganizationsInventoryOnboardingCloudMonitoringImportsResource,
 		NewOrganizationsLicensesResource,
 		NewOrganizationsLoginSecurityResource,
 		NewOrganizationsPolicyObjectsGroupsResource,
 		NewOrganizationsPolicyObjectsResource,
 		NewOrganizationsSamlResource,
-		// NewOrganizationsSamlIDpsResource,
+		NewOrganizationsSamlIDpsResource,
 		NewOrganizationsSamlRolesResource,
 		NewOrganizationsSNMPResource,
+		NewDevicesApplianceRadioSettingsResource,
+		NewDevicesLiveToolsArpTableResource,
+		NewDevicesLiveToolsWakeOnLanResource,
+		NewNetworksApplianceRfProfilesResource,
+		NewNetworksVLANProfilesResource,
+		NewNetworksWirelessEthernetPortsProfilesResource,
+		NewOrganizationsCameraRolesResource,
+		NewOrganizationsSmAdminsRolesResource,
 		NewDevicesApplianceVmxAuthenticationTokenResource,
 		NewDevicesBlinkLedsResource,
 		NewDevicesCameraGenerateSnapshotResource,
@@ -350,7 +345,6 @@ func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewNetworksFirmwareUpgradesStagedEventsRollbacksResource,
 		NewNetworksMqttBrokersResource,
 		NewNetworksPiiRequestsDeleteResource,
-		// NewNetworksSmBypassActivationLockAttemptsResource,
 		NewNetworksSmDevicesCheckinResource,
 		NewNetworksSmDevicesFieldsResource,
 		NewNetworksSmDevicesLockResource,
@@ -368,7 +362,6 @@ func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewOrganizationsCloneResource,
 		NewOrganizationsInventoryClaimResource,
 		NewOrganizationsInventoryOnboardingCloudMonitoringExportEventsResource,
-		// NewOrganizationsInventoryOnboardingCloudMonitoringImportsResource,
 		NewOrganizationsInventoryOnboardingCloudMonitoringPrepareResource,
 		NewOrganizationsInventoryReleaseResource,
 		NewOrganizationsLicensesAssignSeatsResource,
@@ -379,6 +372,21 @@ func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewOrganizationsNetworksCombineResource,
 		NewOrganizationsSwitchDevicesCloneResource,
 		NewOrganizationsUsersResource,
+		NewAdministeredLicensingSubscriptionSubscriptionsClaimResource,
+		NewAdministeredLicensingSubscriptionSubscriptionsClaimKeyValidateResource,
+		NewAdministeredLicensingSubscriptionSubscriptionsBindResource,
+		NewDevicesWirelessAlternateManagementInterfaceIPv6Resource,
+		NewNetworksApplianceTrafficShapingVpnExclusionsResource,
+		NewNetworksSmDevicesRebootResource,
+		NewNetworksSmDevicesShutdownResource,
+		NewNetworksSmDevicesInstallAppsResource,
+		NewNetworksSmDevicesUninstallAppsResource,
+		NewNetworksVLANProfilesAssignmentsReassignResource,
+		NewNetworksWirelessEthernetPortsProfilesAssignResource,
+		NewNetworksWirelessEthernetPortsProfilesSetDefaultResource,
+		NewOrganizationsSmSentryPoliciesAssignmentsResource,
+		NewDevicesLiveToolsCableResource,
+		NewDevicesLiveToolsThroughputTestResource,
 	}
 }
 
@@ -482,7 +490,7 @@ func (p *MerakiProvider) DataSources(ctx context.Context) []func() datasource.Da
 		NewNetworksSensorMqttBrokersDataSource,
 		NewNetworksSensorRelationshipsDataSource,
 		NewNetworksSettingsDataSource,
-		// NewNetworksSmBypassActivationLockAttemptsInfoDataSource,
+		NewNetworksSmBypassActivationLockAttemptsDataSource,
 		NewNetworksSmDevicesDataSource,
 		NewNetworksSmDevicesCellularUsageHistoryDataSource,
 		NewNetworksSmDevicesCertsDataSource,
@@ -515,7 +523,7 @@ func (p *MerakiProvider) DataSources(ctx context.Context) []func() datasource.Da
 		NewNetworksSwitchPortSchedulesDataSource,
 		NewNetworksSwitchQosRulesOrderDataSource,
 		NewNetworksSwitchRoutingMulticastDataSource,
-		// NewNetworksSwitchRoutingMulticastRendezvousPointsDataSource,
+		NewNetworksSwitchRoutingMulticastRendezvousPointsDataSource,
 		NewNetworksSwitchRoutingOspfDataSource,
 		NewNetworksSwitchSettingsDataSource,
 		NewNetworksSwitchStacksDataSource,
@@ -600,7 +608,7 @@ func (p *MerakiProvider) DataSources(ctx context.Context) []func() datasource.Da
 		NewOrganizationsInsightApplicationsDataSource,
 		NewOrganizationsInsightMonitoredMediaServersDataSource,
 		NewOrganizationsInventoryDevicesDataSource,
-		// NewOrganizationsInventoryOnboardingCloudMonitoringImportsInfoDataSource,
+		NewOrganizationsInventoryOnboardingCloudMonitoringImportsDataSource,
 		NewOrganizationsInventoryOnboardingCloudMonitoringNetworksDataSource,
 		NewOrganizationsLicensesDataSource,
 		NewOrganizationsLicensesOverviewDataSource,
@@ -627,6 +635,39 @@ func (p *MerakiProvider) DataSources(ctx context.Context) []func() datasource.Da
 		NewOrganizationsSwitchPortsBySwitchDataSource,
 		NewOrganizationsUplinksStatusesDataSource,
 		NewOrganizationsWebhooksLogsDataSource,
-		// NewOrganizationsWirelessDevicesEthernetStatusesDataSource,
+		NewOrganizationsWirelessDevicesEthernetStatusesDataSource,
+		NewAdministeredLicensingSubscriptionEntitlementsDataSource,
+		NewAdministeredLicensingSubscriptionSubscriptionsDataSource,
+		NewAdministeredLicensingSubscriptionSubscriptionsComplianceStatusesDataSource,
+		NewDevicesApplianceRadioSettingsDataSource,
+		NewDevicesLiveToolsArpTableDataSource,
+		NewDevicesLiveToolsCableTestDataSource,
+		NewDevicesLiveToolsThroughputTestDataSource,
+		NewDevicesLiveToolsWakeOnLanDataSource,
+		NewNetworksApplianceRfProfilesDataSource,
+		NewNetworksVLANProfilesDataSource,
+		NewNetworksVLANProfilesAssignmentsByDeviceDataSource,
+		NewNetworksWirelessEthernetPortsProfilesDataSource,
+		NewOrganizationsApplianceTrafficShapingVpnExclusionsByNetworkDataSource,
+		NewOrganizationsApplianceUplinksStatusesOverviewDataSource,
+		NewOrganizationsApplianceUplinksUsageByNetworkDataSource,
+		NewOrganizationsCameraBoundariesAreasByDeviceDataSource,
+		NewOrganizationsCameraBoundariesLinesByDeviceDataSource,
+		NewOrganizationsCameraDetectionsHistoryByBoundaryByIntervalDataSource,
+		NewOrganizationsCameraPermissionsDataSource,
+		NewOrganizationsCameraRolesDataSource,
+		NewOrganizationsDevicesAvailabilitiesChangeHistoryDataSource,
+		NewOrganizationsDevicesBootsHistoryDataSource,
+		NewOrganizationsSmAdminsRolesDataSource,
+		NewOrganizationsSmSentryPoliciesAssignmentsByNetworkDataSource,
+		NewOrganizationsSummaryTopNetworksByStatusDataSource,
+		NewOrganizationsWebhooksCallbacksStatusesDataSource,
+		NewOrganizationsWirelessDevicesChannelUtilizationByDeviceDataSource,
+		NewOrganizationsWirelessDevicesChannelUtilizationByNetworkDataSource,
+		NewOrganizationsWirelessDevicesChannelUtilizationHistoryByDeviceByIntervalDataSource,
+		NewOrganizationsWirelessDevicesChannelUtilizationHistoryByNetworkByIntervalDataSource,
+		NewOrganizationsWirelessDevicesPacketLossByClientDataSource,
+		NewOrganizationsWirelessDevicesPacketLossByDeviceDataSource,
+		NewOrganizationsWirelessDevicesPacketLossByNetworkDataSource,
 	}
 }

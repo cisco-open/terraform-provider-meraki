@@ -1,31 +1,13 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -147,7 +129,7 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Create(ctx context.Context, r
 	// organization_id
 	vvName := data.Name.ValueString()
 	//Items
-	responseVerifyItem, restyResp1, err := getAllItemsOrganizationsPolicyObjectsGroups(*r.client, vvOrganizationID)
+	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationPolicyObjects(vvOrganizationID, nil)
 	//Have Create
 	if err != nil || restyResp1 == nil {
 		if restyResp1.StatusCode() != 404 {
@@ -167,7 +149,7 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Create(ctx context.Context, r
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter PolicyObjectGroupID",
-					"Error",
+					err.Error(),
 				)
 				return
 			}
@@ -182,7 +164,7 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Create(ctx context.Context, r
 		}
 	}
 	dataRequest := data.toSdkApiRequestCreate(ctx)
-	restyResp2, err := r.client.Organizations.CreateOrganizationPolicyObjectsGroup(vvOrganizationID, dataRequest)
+	_, restyResp2, err := r.client.Organizations.CreateOrganizationPolicyObjectsGroup(vvOrganizationID, dataRequest)
 
 	if err != nil || restyResp2 == nil {
 		if restyResp1 != nil {
@@ -199,7 +181,7 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Create(ctx context.Context, r
 		return
 	}
 	//Items
-	responseGet, restyResp1, err := getAllItemsOrganizationsPolicyObjectsGroups(*r.client, vvOrganizationID)
+	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationPolicyObjects(vvOrganizationID, nil)
 	// Has item and has items
 
 	if err != nil || responseGet == nil {
@@ -224,7 +206,7 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Create(ctx context.Context, r
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter PolicyObjectGroupID",
-				"Error",
+				err.Error(),
 			)
 			return
 		}
@@ -340,7 +322,7 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Update(ctx context.Context, r
 	// organization_id
 	vvPolicyObjectGroupID := data.PolicyObjectGroupID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Organizations.UpdateOrganizationPolicyObjectsGroup(vvOrganizationID, vvPolicyObjectGroupID, dataRequest)
+	_, restyResp2, err := r.client.Organizations.UpdateOrganizationPolicyObjectsGroup(vvOrganizationID, vvPolicyObjectGroupID, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
@@ -452,44 +434,11 @@ func ResponseOrganizationsGetOrganizationPolicyObjectsGroupItemToBodyRs(state Or
 		ID:         types.StringValue(response.ID),
 		Name:       types.StringValue(response.Name),
 		NetworkIDs: StringSliceToSet(response.NetworkIDs),
-		ObjectIDs:  StringSliceToSet(response.ObjectIDs),
+		ObjectIDs:  StringSliceToSetInt(response.ObjectIDs),
 		UpdatedAt:  types.StringValue(response.UpdatedAt),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsPolicyObjectsGroupsRs)
 	}
 	return mergeInterfaces(state, itemState, true).(OrganizationsPolicyObjectsGroupsRs)
-}
-
-func getAllItemsOrganizationsPolicyObjectsGroups(client merakigosdk.Client, organizationId string) (merakigosdk.ResponseOrganizationsGetOrganizationPolicyObjectsGroups, *resty.Response, error) {
-	var all_response merakigosdk.ResponseOrganizationsGetOrganizationPolicyObjectsGroups
-	response, r2, er := client.Organizations.GetOrganizationPolicyObjectsGroups(organizationId, &merakigosdk.GetOrganizationPolicyObjectsGroupsQueryParams{
-		PerPage: 1000,
-	})
-	count := 0
-	all_response = append(all_response, *response...)
-	for len(*response) >= 1000 {
-		count += 1
-		fmt.Println(count)
-		links := strings.Split(r2.Header().Get("Link"), ",")
-		var link string
-		if count > 1 {
-			link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[2], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
-		} else {
-			link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[1], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
-		}
-		myUrl, _ := url.Parse(link)
-		params, _ := url.ParseQuery(myUrl.RawQuery)
-		if params["endingBefore"] != nil {
-			response, r2, er = client.Organizations.GetOrganizationPolicyObjectsGroups(organizationId, &merakigosdk.GetOrganizationPolicyObjectsGroupsQueryParams{
-				PerPage:      1000,
-				EndingBefore: params["endingBefore"][0],
-			})
-			all_response = append(all_response, *response...)
-		} else {
-			break
-		}
-	}
-
-	return all_response, r2, er
 }

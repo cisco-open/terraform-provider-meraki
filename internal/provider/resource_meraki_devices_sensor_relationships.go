@@ -1,26 +1,10 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -164,7 +148,7 @@ func (r *DevicesSensorRelationshipsResource) Create(ctx context.Context, req res
 	//Has Paths
 	vvSerial := data.Serial.ValueString()
 	// serial
-	//Reviw This  Has Item Not item
+	//Reviw This  Has Item Not response
 	//Esta bien
 
 	//Items
@@ -196,7 +180,7 @@ func (r *DevicesSensorRelationshipsResource) Create(ctx context.Context, req res
 	}
 	//Items
 	responseGet, restyResp1, err := r.client.Sensor.GetDeviceSensorRelationships(vvSerial)
-	// Has only items
+	// Has only responses
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -221,14 +205,14 @@ func (r *DevicesSensorRelationshipsResource) Create(ctx context.Context, req res
 func (r *DevicesSensorRelationshipsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data DevicesSensorRelationshipsRs
 
-	var item types.Object
+	var response types.Object
 
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &response)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
+	resp.Diagnostics.Append(response.As(ctx, &data, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty:    true,
 		UnhandledUnknownAsEmpty: true,
 	})...)
@@ -310,8 +294,8 @@ func (r *DevicesSensorRelationshipsResource) Delete(ctx context.Context, req res
 type DevicesSensorRelationshipsRs struct {
 	Serial types.String `tfsdk:"serial"`
 	//TIENE ITEMS
-	Livestream   *[]ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRs `tfsdk:"livestream"`
-	LivestreamRs *ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRs   `tfsdk:"livestream_request"`
+	Livestream   *ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRs `tfsdk:"livestream"`
+	LivestreamRs *ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRs `tfsdk:"livestream_request"`
 }
 
 type ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRs struct {
@@ -353,31 +337,29 @@ func (r *DevicesSensorRelationshipsRs) toSdkApiRequestUpdate(ctx context.Context
 
 // From gosdk to TF Structs Schema
 func ResponseSensorGetDeviceSensorRelationshipsItemsToBodyRs(state DevicesSensorRelationshipsRs, response *merakigosdk.ResponseSensorGetDeviceSensorRelationships, is_read bool) DevicesSensorRelationshipsRs {
-	var items []ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRs
+
 	var newItem ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRs
-	for _, item := range *response {
-		newItem = func() ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRs {
-			if item.Livestream != nil {
-				return ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRs{
-					RelatedDevices: func() *[]ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRelatedDevicesRs {
-						if item.Livestream.RelatedDevices != nil {
-							result := make([]ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRelatedDevicesRs, len(*item.Livestream.RelatedDevices))
-							for i, relatedDevices := range *item.Livestream.RelatedDevices {
-								result[i] = ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRelatedDevicesRs{
-									ProductType: types.StringValue(relatedDevices.ProductType),
-									Serial:      types.StringValue(relatedDevices.Serial),
-								}
+
+	newItem = func() ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRs {
+		if response.Livestream != nil {
+			return ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRs{
+				RelatedDevices: func() *[]ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRelatedDevicesRs {
+					if response.Livestream.RelatedDevices != nil {
+						result := make([]ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRelatedDevicesRs, len(*response.Livestream.RelatedDevices))
+						for i, relatedDevices := range *response.Livestream.RelatedDevices {
+							result[i] = ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRelatedDevicesRs{
+								ProductType: types.StringValue(relatedDevices.ProductType),
+								Serial:      types.StringValue(relatedDevices.Serial),
 							}
-							return &result
 						}
-						return &[]ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRelatedDevicesRs{}
-					}(),
-				}
+						return &result
+					}
+					return &[]ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRelatedDevicesRs{}
+				}(),
 			}
-			return ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRs{}
-		}()
-		items = append(items, newItem)
-	}
-	state.Livestream = &items
+		}
+		return ResponseItemSensorGetDeviceSensorRelationshipsLivestreamRs{}
+	}()
+	state.Livestream = &newItem
 	return state
 }

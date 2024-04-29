@@ -41,6 +41,6 @@ output "meraki_networks_clients_policy_example" {
 
 Read-Only:
 
-- `device_policy` (String)
-- `group_policy_id` (String)
-- `mac` (String)
+- `device_policy` (String) The name of the client's policy
+- `group_policy_id` (String) The group policy identifier of the client
+- `mac` (String) The MAC address of the client

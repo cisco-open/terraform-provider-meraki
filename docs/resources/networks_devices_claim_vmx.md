@@ -38,9 +38,43 @@ output "meraki_networks_devices_claim_vmx_example" {
 - `network_id` (String) networkId path parameter. Network ID
 - `parameters` (Attributes) (see [below for nested schema](#nestedatt--parameters))
 
+### Read-Only
+
+- `item` (Attributes) (see [below for nested schema](#nestedatt--item))
+
 <a id="nestedatt--parameters"></a>
 ### Nested Schema for `parameters`
 
 Optional:
 
-- `size` (String) The size of the vMX you claim. It can be one of: small, medium, large, 100
+- `size` (String) The size of the vMX you claim. It can be one of: small, medium, large, xlarge, 100
+
+
+<a id="nestedatt--item"></a>
+### Nested Schema for `item`
+
+Read-Only:
+
+- `address` (String) Physical address of the device
+- `details` (Attributes Set) Additional device information (see [below for nested schema](#nestedatt--item--details))
+- `firmware` (String) Firmware version of the device
+- `imei` (String) IMEI of the device, if applicable
+- `lan_ip` (String) LAN IP address of the device
+- `lat` (Number) Latitude of the device
+- `lng` (Number) Longitude of the device
+- `mac` (String) MAC address of the device
+- `model` (String) Model of the device
+- `name` (String) Name of the device
+- `network_id` (String) ID of the network the device belongs to
+- `notes` (String) Notes for the device, limited to 255 characters
+- `product_type` (String) Product type of the device
+- `serial` (String) Serial number of the device
+- `tags` (List of String) List of tags assigned to the device
+
+<a id="nestedatt--item--details"></a>
+### Nested Schema for `item.details`
+
+Read-Only:
+
+- `name` (String) Additional property name
+- `value` (String) Additional property value

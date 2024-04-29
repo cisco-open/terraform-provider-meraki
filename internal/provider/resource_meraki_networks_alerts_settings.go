@@ -1,26 +1,10 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -93,17 +77,15 @@ func (r *NetworksAlertsSettingsResource) Schema(_ context.Context, _ resource.Sc
 								"emails": schema.SetAttribute{
 									MarkdownDescription: `A list of emails that will receive information about the alert`,
 									Computed:            true,
-									Optional:            true,
 									PlanModifiers: []planmodifier.Set{
 										setplanmodifier.UseStateForUnknown(),
 									},
-									// Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
+
 									ElementType: types.StringType,
 								},
 								"http_server_ids": schema.SetAttribute{
 									MarkdownDescription: `A list of HTTP server IDs to send a Webhook to for this alert`,
 									Computed:            true,
-									Optional:            true,
 									PlanModifiers: []planmodifier.Set{
 										setplanmodifier.UseStateForUnknown(),
 									},
@@ -194,6 +176,7 @@ func (r *NetworksAlertsSettingsResource) Schema(_ context.Context, _ resource.Sc
 									PlanModifiers: []planmodifier.Set{
 										setplanmodifier.UseStateForUnknown(),
 									},
+
 									ElementType: types.StringType,
 								},
 								"http_server_ids": schema.SetAttribute{
@@ -276,7 +259,7 @@ func (r *NetworksAlertsSettingsResource) Schema(_ context.Context, _ resource.Sc
 						},
 					},
 					"emails": schema.SetAttribute{
-						MarkdownDescription: `A list of emails that will recieve the alert(s).`,
+						MarkdownDescription: `A list of emails that will receive the alert(s).`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Set{
@@ -334,7 +317,6 @@ func (r *NetworksAlertsSettingsResource) Create(ctx context.Context, req resourc
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkAlertsSettings(vvNetworkID)
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
@@ -386,7 +368,7 @@ func (r *NetworksAlertsSettingsResource) Create(ctx context.Context, req resourc
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkAlertsSettingsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -415,7 +397,6 @@ func (r *NetworksAlertsSettingsResource) Read(ctx context.Context, req resource.
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	responseGet, restyRespGet, err := r.client.Networks.GetNetworkAlertsSettings(vvNetworkID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -439,7 +420,7 @@ func (r *NetworksAlertsSettingsResource) Read(ctx context.Context, req resource.
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkAlertsSettingsItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -461,7 +442,6 @@ func (r *NetworksAlertsSettingsResource) Update(ctx context.Context, req resourc
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Networks.UpdateNetworkAlertsSettings(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil {
@@ -485,7 +465,7 @@ func (r *NetworksAlertsSettingsResource) Update(ctx context.Context, req resourc
 
 func (r *NetworksAlertsSettingsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksAlertsSettings", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -495,6 +475,7 @@ type NetworksAlertsSettingsRs struct {
 	Alerts              *[]ResponseNetworksGetNetworkAlertsSettingsAlertsRs            `tfsdk:"alerts"`
 	AlertsResponse      *[]ResponseNetworksGetNetworkAlertsSettingsAlertsRs            `tfsdk:"alerts_response"`
 	DefaultDestinations *ResponseNetworksGetNetworkAlertsSettingsDefaultDestinationsRs `tfsdk:"default_destinations"`
+	Muting              *RequestNetworksUpdateNetworkAlertsSettingsMutingRs            `tfsdk:"muting"`
 }
 
 type ResponseNetworksGetNetworkAlertsSettingsAlertsRs struct {
@@ -524,6 +505,14 @@ type ResponseNetworksGetNetworkAlertsSettingsDefaultDestinationsRs struct {
 	SNMP          types.Bool `tfsdk:"snmp"`
 }
 
+type RequestNetworksUpdateNetworkAlertsSettingsMutingRs struct {
+	ByPortSchedules *RequestNetworksUpdateNetworkAlertsSettingsMutingByPortSchedulesRs `tfsdk:"by_port_schedules"`
+}
+
+type RequestNetworksUpdateNetworkAlertsSettingsMutingByPortSchedulesRs struct {
+	Enabled types.Bool `tfsdk:"enabled"`
+}
+
 // FromBody
 func (r *NetworksAlertsSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestNetworksUpdateNetworkAlertsSettings {
 	var requestNetworksUpdateNetworkAlertsSettingsAlerts []merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsAlerts
@@ -538,10 +527,10 @@ func (r *NetworksAlertsSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 					return nil
 				}()
 				var emails []string = nil
-
+				//Hoola aqui
 				rItem1.AlertDestinations.Emails.ElementsAs(ctx, &emails, false)
 				var httpServerIDs []string = nil
-
+				//Hoola aqui
 				rItem1.AlertDestinations.HTTPServerIDs.ElementsAs(ctx, &httpServerIDs, false)
 				sNMP := func() *bool {
 					if !rItem1.AlertDestinations.SNMP.IsUnknown() && !rItem1.AlertDestinations.SNMP.IsNull() {
@@ -588,7 +577,6 @@ func (r *NetworksAlertsSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 					Threshold: int64ToIntPointer(threshold),
 				}
 			}
-
 			typeR := rItem1.Type.ValueString()
 			requestNetworksUpdateNetworkAlertsSettingsAlerts = append(requestNetworksUpdateNetworkAlertsSettingsAlerts, merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsAlerts{
 				AlertDestinations: requestNetworksUpdateNetworkAlertsSettingsAlertsAlertDestinations,
@@ -607,10 +595,10 @@ func (r *NetworksAlertsSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 			return nil
 		}()
 		var emails []string = nil
-
+		//Hoola aqui
 		r.DefaultDestinations.Emails.ElementsAs(ctx, &emails, false)
 		var httpServerIDs []string = nil
-
+		//Hoola aqui
 		r.DefaultDestinations.HTTPServerIDs.ElementsAs(ctx, &httpServerIDs, false)
 		sNMP := func() *bool {
 			if !r.DefaultDestinations.SNMP.IsUnknown() && !r.DefaultDestinations.SNMP.IsNull() {
@@ -625,6 +613,24 @@ func (r *NetworksAlertsSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 			SNMP:          sNMP,
 		}
 	}
+	var requestNetworksUpdateNetworkAlertsSettingsMuting *merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsMuting
+	if r.Muting != nil {
+		var requestNetworksUpdateNetworkAlertsSettingsMutingByPortSchedules *merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsMutingByPortSchedules
+		if r.Muting.ByPortSchedules != nil {
+			enabled := func() *bool {
+				if !r.Muting.ByPortSchedules.Enabled.IsUnknown() && !r.Muting.ByPortSchedules.Enabled.IsNull() {
+					return r.Muting.ByPortSchedules.Enabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			requestNetworksUpdateNetworkAlertsSettingsMutingByPortSchedules = &merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsMutingByPortSchedules{
+				Enabled: enabled,
+			}
+		}
+		requestNetworksUpdateNetworkAlertsSettingsMuting = &merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsMuting{
+			ByPortSchedules: requestNetworksUpdateNetworkAlertsSettingsMutingByPortSchedules,
+		}
+	}
 	out := merakigosdk.RequestNetworksUpdateNetworkAlertsSettings{
 		Alerts: func() *[]merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsAlerts {
 			if len(requestNetworksUpdateNetworkAlertsSettingsAlerts) > 0 {
@@ -633,6 +639,7 @@ func (r *NetworksAlertsSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 			return nil
 		}(),
 		DefaultDestinations: requestNetworksUpdateNetworkAlertsSettingsDefaultDestinations,
+		Muting:              requestNetworksUpdateNetworkAlertsSettingsMuting,
 	}
 	return &out
 }

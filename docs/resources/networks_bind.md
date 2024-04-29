@@ -39,6 +39,10 @@ output "meraki_networks_bind_example" {
 - `network_id` (String) networkId path parameter. Network ID
 - `parameters` (Attributes) (see [below for nested schema](#nestedatt--parameters))
 
+### Read-Only
+
+- `item` (Attributes) (see [below for nested schema](#nestedatt--item))
+
 <a id="nestedatt--parameters"></a>
 ### Nested Schema for `parameters`
 
@@ -46,3 +50,21 @@ Optional:
 
 - `auto_bind` (Boolean) Optional boolean indicating whether the network's switches should automatically bind to profiles of the same model. Defaults to false if left unspecified. This option only affects switch networks and switch templates. Auto-bind is not valid unless the switch template has at least one profile and has at most one profile per switch model.
 - `config_template_id` (String) The ID of the template to which the network should be bound.
+
+
+<a id="nestedatt--item"></a>
+### Nested Schema for `item`
+
+Read-Only:
+
+- `config_template_id` (String) ID of the config template the network is being bound to
+- `enrollment_string` (String) Enrollment string for the network
+- `id` (String) Network ID
+- `is_bound_to_config_template` (Boolean) If the network is bound to a config template
+- `name` (String) Network name
+- `notes` (String) Notes for the network
+- `organization_id` (String) Organization ID
+- `product_types` (List of String) List of the product types that the network supports
+- `tags` (List of String) Network tags
+- `time_zone` (String) Timezone of the network
+- `url` (String) URL to the network Dashboard UI

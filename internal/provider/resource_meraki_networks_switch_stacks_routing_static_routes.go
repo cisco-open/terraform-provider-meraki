@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -64,7 +48,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Schema(_ context.Conte
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"advertise_via_ospf_enabled": schema.BoolAttribute{
-				MarkdownDescription: `Option to advertise static route via OSPF`,
+				MarkdownDescription: `Option to advertise static routes via OSPF`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
@@ -72,7 +56,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Schema(_ context.Conte
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: `Name or description for layer 3 static route`,
+				MarkdownDescription: `The name or description of the layer 3 static route`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -84,7 +68,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Schema(_ context.Conte
 				Required:            true,
 			},
 			"next_hop_ip": schema.StringAttribute{
-				MarkdownDescription: `IP address of the next hop device to which the device sends its traffic for the subnet`,
+				MarkdownDescription: ` The IP address of the router to which traffic for this destination network should be sent`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -92,7 +76,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Schema(_ context.Conte
 				},
 			},
 			"prefer_over_ospf_routes_enabled": schema.BoolAttribute{
-				MarkdownDescription: `Option to prefer static route over OSPF routes`,
+				MarkdownDescription: `Option to prefer static routes over OSPF routes`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
@@ -100,7 +84,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Schema(_ context.Conte
 				},
 			},
 			"static_route_id": schema.StringAttribute{
-				MarkdownDescription: `staticRouteId path parameter. Static route ID`,
+				MarkdownDescription: `The identifier of a layer 3 static route`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -108,7 +92,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Schema(_ context.Conte
 				},
 			},
 			"subnet": schema.StringAttribute{
-				MarkdownDescription: `The subnet which is routed via this static route and should be specified in CIDR notation (ex. 1.2.3.0/24)`,
+				MarkdownDescription: `The IP address of the subnetwork specified in CIDR notation (ex. 1.2.3.0/24)`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -145,7 +129,6 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Create(ctx context.Con
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvSwitchStackID := data.SwitchStackID.ValueString()
 	vvName := data.Name.ValueString()
 	//Items
@@ -169,7 +152,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Create(ctx context.Con
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter StaticRouteID",
-					"Error",
+					err.Error(),
 				)
 				return
 			}
@@ -184,9 +167,9 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Create(ctx context.Con
 		}
 	}
 	dataRequest := data.toSdkApiRequestCreate(ctx)
-	restyResp2, err := r.client.Switch.CreateNetworkSwitchStackRoutingStaticRoute(vvNetworkID, vvSwitchStackID, dataRequest)
+	response, restyResp2, err := r.client.Switch.CreateNetworkSwitchStackRoutingStaticRoute(vvNetworkID, vvSwitchStackID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchStackRoutingStaticRoute",
@@ -226,7 +209,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Create(ctx context.Con
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter StaticRouteID",
-				"Error",
+				err.Error(),
 			)
 			return
 		}
@@ -280,11 +263,8 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Read(ctx context.Conte
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvSwitchStackID := data.SwitchStackID.ValueString()
-	// switch_stack_id
 	vvStaticRouteID := data.StaticRouteID.ValueString()
-	// static_route_id
 	responseGet, restyRespGet, err := r.client.Switch.GetNetworkSwitchStackRoutingStaticRoute(vvNetworkID, vvSwitchStackID, vvStaticRouteID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -308,7 +288,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Read(ctx context.Conte
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchStackRoutingStaticRouteItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -343,12 +323,11 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Update(ctx context.Con
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvSwitchStackID := data.SwitchStackID.ValueString()
 	vvStaticRouteID := data.StaticRouteID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Switch.UpdateNetworkSwitchStackRoutingStaticRoute(vvNetworkID, vvSwitchStackID, vvStaticRouteID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchStackRoutingStaticRoute(vvNetworkID, vvSwitchStackID, vvStaticRouteID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStackRoutingStaticRoute",

@@ -39,12 +39,12 @@ output "meraki_networks_switch_stacks_routing_static_routes_example" {
 
 ### Optional
 
-- `advertise_via_ospf_enabled` (Boolean) Option to advertise static route via OSPF
-- `name` (String) Name or description for layer 3 static route
-- `next_hop_ip` (String) IP address of the next hop device to which the device sends its traffic for the subnet
-- `prefer_over_ospf_routes_enabled` (Boolean) Option to prefer static route over OSPF routes
-- `static_route_id` (String) staticRouteId path parameter. Static route ID
-- `subnet` (String) The subnet which is routed via this static route and should be specified in CIDR notation (ex. 1.2.3.0/24)
+- `advertise_via_ospf_enabled` (Boolean) Option to advertise static routes via OSPF
+- `name` (String) The name or description of the layer 3 static route
+- `next_hop_ip` (String) The IP address of the router to which traffic for this destination network should be sent
+- `prefer_over_ospf_routes_enabled` (Boolean) Option to prefer static routes over OSPF routes
+- `static_route_id` (String) The identifier of a layer 3 static route
+- `subnet` (String) The IP address of the subnetwork specified in CIDR notation (ex. 1.2.3.0/24)
 
 ## Import
 

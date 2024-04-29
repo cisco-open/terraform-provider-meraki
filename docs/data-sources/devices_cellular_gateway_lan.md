@@ -39,20 +39,20 @@ output "meraki_devices_cellular_gateway_lan_example" {
 
 Read-Only:
 
-- `device_lan_ip` (String)
-- `device_name` (String)
-- `device_subnet` (String)
-- `fixed_ip_assignments` (Attributes Set) (see [below for nested schema](#nestedatt--item--fixed_ip_assignments))
-- `reserved_ip_ranges` (Attributes Set) (see [below for nested schema](#nestedatt--item--reserved_ip_ranges))
+- `device_lan_ip` (String) Lan IP of the MG
+- `device_name` (String) Name of the MG.
+- `device_subnet` (String) Subnet configuration of the MG.
+- `fixed_ip_assignments` (Attributes Set) list of all fixed IP assignments for a single MG (see [below for nested schema](#nestedatt--item--fixed_ip_assignments))
+- `reserved_ip_ranges` (Attributes Set) list of all reserved IP ranges for a single MG (see [below for nested schema](#nestedatt--item--reserved_ip_ranges))
 
 <a id="nestedatt--item--fixed_ip_assignments"></a>
 ### Nested Schema for `item.fixed_ip_assignments`
 
 Read-Only:
 
-- `ip` (String)
-- `mac` (String)
-- `name` (String)
+- `ip` (String) The IP address you want to assign to a specific server or device
+- `mac` (String) The MAC address of the server or device that hosts the internal resource that you wish to receive the specified IP address
+- `name` (String) A descriptive name of the assignment
 
 
 <a id="nestedatt--item--reserved_ip_ranges"></a>
@@ -60,6 +60,6 @@ Read-Only:
 
 Read-Only:
 
-- `comment` (String)
-- `end` (String)
-- `start` (String)
+- `comment` (String) Comment explaining the reserved IP range
+- `end` (String) Ending IP included in the reserved range of IPs
+- `start` (String) Starting IP included in the reserved range of IPs

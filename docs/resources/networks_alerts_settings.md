@@ -58,6 +58,10 @@ output "meraki_networks_alerts_settings_example" {
 - `alerts` (Attributes Set) Alert-specific configuration for each type. Only alerts that pertain to the network can be updated. (see [below for nested schema](#nestedatt--alerts))
 - `default_destinations` (Attributes) The network-wide destinations for all alerts on the network. (see [below for nested schema](#nestedatt--default_destinations))
 
+### Read-Only
+
+- `alerts_response` (Attributes Set) Alert-specific configuration for each type. Only alerts that pertain to the network can be updated. (see [below for nested schema](#nestedatt--alerts_response))
+
 <a id="nestedatt--alerts"></a>
 ### Nested Schema for `alerts`
 
@@ -74,16 +78,18 @@ Optional:
 Optional:
 
 - `all_admins` (Boolean) If true, then all network admins will receive emails for this alert
-- `emails` (List of String) A list of emails that will receive information about the alert
-- `http_server_ids` (List of String) A list of HTTP server IDs to send a Webhook to for this alert
+- `emails` (Set of String) A list of emails that will receive information about the alert
+- `http_server_ids` (Set of String) A list of HTTP server IDs to send a Webhook to for this alert
 - `snmp` (Boolean) If true, then an SNMP trap will be sent for this alert if there is an SNMP trap server configured for this network
 
 
 <a id="nestedatt--alerts--filters"></a>
 ### Nested Schema for `alerts.filters`
 
-Read-Only:
+Optional:
 
+- `period` (Number)
+- `threshold` (Number)
 - `timeout` (Number)
 
 
@@ -94,9 +100,40 @@ Read-Only:
 Optional:
 
 - `all_admins` (Boolean) If true, then all network admins will receive emails.
-- `emails` (List of String) A list of emails that will recieve the alert(s).
-- `http_server_ids` (List of String) A list of HTTP server IDs to send a Webhook to
+- `emails` (Set of String) A list of emails that will receive the alert(s).
+- `http_server_ids` (Set of String) A list of HTTP server IDs to send a Webhook to
 - `snmp` (Boolean) If true, then an SNMP trap will be sent if there is an SNMP trap server configured for this network.
+
+
+<a id="nestedatt--alerts_response"></a>
+### Nested Schema for `alerts_response`
+
+Read-Only:
+
+- `alert_destinations` (Attributes) A hash of destinations for this specific alert (see [below for nested schema](#nestedatt--alerts_response--alert_destinations))
+- `enabled` (Boolean) A boolean depicting if the alert is turned on or off
+- `filters` (Attributes) A hash of specific configuration data for the alert. Only filters specific to the alert will be updated. (see [below for nested schema](#nestedatt--alerts_response--filters))
+- `type` (String) The type of alert
+
+<a id="nestedatt--alerts_response--alert_destinations"></a>
+### Nested Schema for `alerts_response.alert_destinations`
+
+Read-Only:
+
+- `all_admins` (Boolean) If true, then all network admins will receive emails for this alert
+- `emails` (Set of String) A list of emails that will receive information about the alert
+- `http_server_ids` (Set of String) A list of HTTP server IDs to send a Webhook to for this alert
+- `snmp` (Boolean) If true, then an SNMP trap will be sent for this alert if there is an SNMP trap server configured for this network
+
+
+<a id="nestedatt--alerts_response--filters"></a>
+### Nested Schema for `alerts_response.filters`
+
+Read-Only:
+
+- `period` (Number)
+- `threshold` (Number)
+- `timeout` (Number)
 
 ## Import
 

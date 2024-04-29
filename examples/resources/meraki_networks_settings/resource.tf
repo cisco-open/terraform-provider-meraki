@@ -9,7 +9,11 @@ resource "meraki_networks_settings" "example" {
       password = "miles123"
     }
   }
-  local_status_page_enabled  = true
+  local_status_page_enabled = true
+  named_vlans = {
+
+    enabled = true
+  }
   network_id                 = "string"
   remote_status_page_enabled = true
   secure_port = {

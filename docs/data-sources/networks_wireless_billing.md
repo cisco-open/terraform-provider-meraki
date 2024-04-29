@@ -39,23 +39,23 @@ output "meraki_networks_wireless_billing_example" {
 
 Read-Only:
 
-- `currency` (String)
-- `plans` (Attributes Set) (see [below for nested schema](#nestedatt--item--plans))
+- `currency` (String) The currency code of this node group's billing plans
+- `plans` (Attributes Set) Array of billing plans in the node group. (Can configure a maximum of 5) (see [below for nested schema](#nestedatt--item--plans))
 
 <a id="nestedatt--item--plans"></a>
 ### Nested Schema for `item.plans`
 
 Read-Only:
 
-- `bandwidth_limits` (Attributes) (see [below for nested schema](#nestedatt--item--plans--bandwidth_limits))
-- `id` (String)
-- `price` (Number)
-- `time_limit` (String)
+- `bandwidth_limits` (Attributes) The uplink bandwidth settings for the pricing plan. (see [below for nested schema](#nestedatt--item--plans--bandwidth_limits))
+- `id` (String) The id of the pricing plan to update.
+- `price` (Number) The price of the billing plan.
+- `time_limit` (String) The time limit of the pricing plan in minutes.
 
 <a id="nestedatt--item--plans--bandwidth_limits"></a>
 ### Nested Schema for `item.plans.bandwidth_limits`
 
 Read-Only:
 
-- `limit_down` (Number)
-- `limit_up` (Number)
+- `limit_down` (Number) The maximum download limit (integer, in Kbps).
+- `limit_up` (Number) The maximum upload limit (integer, in Kbps).

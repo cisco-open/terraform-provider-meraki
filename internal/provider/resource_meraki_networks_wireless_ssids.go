@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -24,8 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -35,6 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -70,6 +56,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 		Attributes: map[string]schema.Attribute{
 			"active_directory": schema.SingleNestedAttribute{
 				MarkdownDescription: `The current setting for Active Directory. Only valid if splashPage is 'Password-protected with Active Directory'`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -78,6 +65,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 
 					"credentials": schema.SingleNestedAttribute{
 						MarkdownDescription: `(Optional) The credentials of the user account to be used by the AP to bind to your Active Directory server. The Active Directory account should have permissions on all your Active Directory servers. Only valid if the splashPage is 'Password-protected with Active Directory'.`,
+						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -86,6 +74,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 
 							"logon_name": schema.StringAttribute{
 								MarkdownDescription: `The logon name of the Active Directory account.`,
+								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -94,6 +83,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 							"password": schema.StringAttribute{
 								MarkdownDescription: `The password to the Active Directory user account.`,
 								Sensitive:           true,
+								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -112,7 +102,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 							Attributes: map[string]schema.Attribute{
 
 								"host": schema.StringAttribute{
-									MarkdownDescription: `IP address of your Active Directory server.`,
+									MarkdownDescription: `IP address (or FQDN) of your Active Directory server.`,
 									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
@@ -140,6 +130,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"adult_content_filtering_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating whether or not adult content will be blocked`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -147,6 +138,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"ap_tags_and_vlan_ids": schema.SetNestedAttribute{
 				MarkdownDescription: `The list of tags and VLAN IDs used for VLAN tagging. This param is only valid when the ipAssignmentMode is 'Bridge mode' or 'Layer 3 roaming'`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
@@ -156,6 +148,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 
 						"tags": schema.SetAttribute{
 							MarkdownDescription: `Array of AP tags`,
+							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Set{
 								setplanmodifier.UseStateForUnknown(),
@@ -165,6 +158,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 						},
 						"vlan_id": schema.Int64Attribute{
 							MarkdownDescription: `Numerical identifier that is assigned to the VLAN`,
+							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -174,15 +168,32 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"auth_mode": schema.StringAttribute{
-				MarkdownDescription: `The association control method for the SSID ('open', 'open-enhanced', 'psk', 'open-with-radius', 'open-with-nac', '8021x-meraki', '8021x-nac', '8021x-radius', '8021x-google', '8021x-localradius', 'ipsk-with-radius' or 'ipsk-without-radius')`,
+				MarkdownDescription: `The association control method for the SSID`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"8021x-google",
+						"8021x-localradius",
+						"8021x-meraki",
+						"8021x-nac",
+						"8021x-radius",
+						"ipsk-with-nac",
+						"ipsk-with-radius",
+						"ipsk-without-radius",
+						"open",
+						"open-enhanced",
+						"open-with-nac",
+						"open-with-radius",
+						"psk",
+					),
+				},
 			},
 			"availability_tags": schema.SetAttribute{
-				MarkdownDescription: `Accepts a list of tags for this SSID. If availableOnAllAps is false, then the SSID will only be broadcast by APs with tags matching any of the tags in this list.`,
+				MarkdownDescription: `List of tags for this SSID. If availableOnAllAps is false, then the SSID is only broadcast by APs with tags matching any of the tags in this list`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
@@ -192,7 +203,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				ElementType: types.StringType,
 			},
 			"available_on_all_aps": schema.BoolAttribute{
-				MarkdownDescription: `Boolean indicating whether all APs should broadcast the SSID or if it should be restricted to APs matching any availability tags. Can only be false if the SSID has availability tags.`,
+				MarkdownDescription: `Whether all APs broadcast the SSID or if it's restricted to APs matching any availability tags`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
@@ -200,15 +211,23 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"band_selection": schema.StringAttribute{
-				MarkdownDescription: `The client-serving radio frequencies of this SSID in the default indoor RF profile. ('Dual band operation', '5 GHz band only' or 'Dual band operation with Band Steering')`,
+				MarkdownDescription: `The client-serving radio frequencies of this SSID in the default indoor RF profile`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"5 GHz band only",
+						"Dual band operation",
+						"Dual band operation with Band Steering",
+					),
+				},
 			},
 			"concentrator_network_id": schema.StringAttribute{
 				MarkdownDescription: `The concentrator to use when the ipAssignmentMode is 'Layer 3 roaming with a concentrator' or 'VPN'.`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -216,6 +235,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"default_vlan_id": schema.Int64Attribute{
 				MarkdownDescription: `The default VLAN ID used for 'all other APs'. This param is only valid when the ipAssignmentMode is 'Bridge mode' or 'Layer 3 roaming'`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -223,6 +243,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"disassociate_clients_on_vpn_failover": schema.BoolAttribute{
 				MarkdownDescription: `Disassociate clients when 'VPN' concentrator failover occurs in order to trigger clients to re-associate and generate new DHCP requests. This param is only valid if ipAssignmentMode is 'VPN'.`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -230,6 +251,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"dns_rewrite": schema.SingleNestedAttribute{
 				MarkdownDescription: `DNS servers rewrite settings`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -238,6 +260,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 
 					"dns_custom_nameservers": schema.SetAttribute{
 						MarkdownDescription: `User specified DNS servers (up to two servers)`,
+						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
@@ -247,6 +270,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 					},
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Boolean indicating whether or not DNS server rewrite is enabled. If disabled, upstream DNS will be used`,
+						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -256,6 +280,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"dot11r": schema.SingleNestedAttribute{
 				MarkdownDescription: `The current setting for 802.11r`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -264,6 +289,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 
 					"adaptive": schema.BoolAttribute{
 						MarkdownDescription: `(Optional) Whether 802.11r is adaptive or not.`,
+						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -271,6 +297,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 					},
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Whether 802.11r is enabled or not.`,
+						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -280,6 +307,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"dot11w": schema.SingleNestedAttribute{
 				MarkdownDescription: `The current setting for Protected Management Frames (802.11w).`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -288,6 +316,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Whether 802.11w is enabled or not.`,
+						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -295,6 +324,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 					},
 					"required": schema.BoolAttribute{
 						MarkdownDescription: `(Optional) Whether 802.11w is required or not.`,
+						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -311,22 +341,36 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"encryption_mode": schema.StringAttribute{
-				MarkdownDescription: `The psk encryption mode for the SSID ('wep' or 'wpa'). This param is only valid if the authMode is 'psk'`,
+				MarkdownDescription: `The psk encryption mode for the SSID`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"wep",
+						"wpa",
+					),
+				},
 			},
 			"enterprise_admin_access": schema.StringAttribute{
 				MarkdownDescription: `Whether or not an SSID is accessible by 'enterprise' administrators ('access disabled' or 'access enabled')`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"access disabled",
+						"access enabled",
+					),
+				},
 			},
 			"gre": schema.SingleNestedAttribute{
 				MarkdownDescription: `Ethernet over GRE settings`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -335,6 +379,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 
 					"concentrator": schema.SingleNestedAttribute{
 						MarkdownDescription: `The EoGRE concentrator's settings`,
+						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -343,6 +388,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 
 							"host": schema.StringAttribute{
 								MarkdownDescription: `The EoGRE concentrator's IP or FQDN. This param is required when ipAssignmentMode is 'Ethernet over GRE'.`,
+								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -352,6 +398,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 					},
 					"key": schema.Int64Attribute{
 						MarkdownDescription: `Optional numerical identifier that will add the GRE key field to the GRE header. Used to identify an individual traffic flow within a tunnel.`,
+						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -360,15 +407,26 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"ip_assignment_mode": schema.StringAttribute{
-				MarkdownDescription: `The client IP assignment mode ('NAT mode', 'Bridge mode', 'Layer 3 roaming', 'Ethernet over GRE', 'Layer 3 roaming with a concentrator' or 'VPN')`,
+				MarkdownDescription: `The client IP assignment mode`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"Bridge mode",
+						"Ethernet over GRE",
+						"Layer 3 roaming",
+						"Layer 3 roaming with a concentrator",
+						"NAT mode",
+						"VPN",
+					),
+				},
 			},
 			"lan_isolation_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating whether Layer 2 LAN isolation should be enabled or disabled. Only configurable when ipAssignmentMode is 'Bridge mode'.`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -376,6 +434,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"ldap": schema.SingleNestedAttribute{
 				MarkdownDescription: `The current setting for LDAP. Only valid if splashPage is 'Password-protected with LDAP'.`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -448,7 +507,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 							Attributes: map[string]schema.Attribute{
 
 								"host": schema.StringAttribute{
-									MarkdownDescription: `IP address of your LDAP server.`,
+									MarkdownDescription: `IP address (or FQDN) of your LDAP server.`,
 									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
@@ -468,8 +527,13 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 					},
 				},
 			},
+			"local_auth": schema.BoolAttribute{
+				MarkdownDescription: `Extended local auth flag for Enterprise NAC`,
+				Computed:            true,
+			},
 			"local_radius": schema.SingleNestedAttribute{
 				MarkdownDescription: `The current setting for Local Authentication, a built-in RADIUS server on the access point. Only valid if authMode is '8021x-localradius'.`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -478,6 +542,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 
 					"cache_timeout": schema.Int64Attribute{
 						MarkdownDescription: `The duration (in seconds) for which LDAP and OCSP lookups are cached.`,
+						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -485,6 +550,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 					},
 					"certificate_authentication": schema.SingleNestedAttribute{
 						MarkdownDescription: `The current setting for certificate verification.`,
+						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -493,6 +559,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 
 							"client_root_ca_certificate": schema.SingleNestedAttribute{
 								MarkdownDescription: `The Client CA Certificate used to sign the client certificate.`,
+								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Object{
 									objectplanmodifier.UseStateForUnknown(),
@@ -501,6 +568,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 
 									"contents": schema.StringAttribute{
 										MarkdownDescription: `The contents of the Client CA Certificate. Must be in PEM or DER format.`,
+										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -510,6 +578,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 							},
 							"enabled": schema.BoolAttribute{
 								MarkdownDescription: `Whether or not to use EAP-TLS certificate-based authentication to validate wireless clients.`,
+								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -517,6 +586,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 							},
 							"ocsp_responder_url": schema.StringAttribute{
 								MarkdownDescription: `(Optional) The URL of the OCSP responder to verify client certificate status.`,
+								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -524,6 +594,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 							},
 							"use_ldap": schema.BoolAttribute{
 								MarkdownDescription: `Whether or not to verify the certificate with LDAP.`,
+								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -531,6 +602,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 							},
 							"use_ocsp": schema.BoolAttribute{
 								MarkdownDescription: `Whether or not to verify the certificate with OCSP.`,
+								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -560,7 +632,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"mandatory_dhcp_enabled": schema.BoolAttribute{
-				MarkdownDescription: `If true, Mandatory DHCP will enforce that clients connecting to this SSID must use the IP address assigned by the DHCP server. Clients who use a static IP address won't be able to associate.`,
+				MarkdownDescription: `Whether clients connecting to this SSID must use the IP address assigned by the DHCP server`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
@@ -568,7 +640,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"min_bitrate": schema.Int64Attribute{
-				MarkdownDescription: `The minimum bitrate in Mbps of this SSID in the default indoor RF profile. ('1', '2', '5.5', '6', '9', '11', '12', '18', '24', '36', '48' or '54')`,
+				MarkdownDescription: `The minimum bitrate in Mbps of this SSID in the default indoor RF profile`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
@@ -584,17 +656,125 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"named_vlans": schema.SingleNestedAttribute{
+				MarkdownDescription: `Named VLAN settings.`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
+				Attributes: map[string]schema.Attribute{
+
+					"radius": schema.SingleNestedAttribute{
+						MarkdownDescription: `RADIUS settings. This param is only valid when authMode is 'open-with-radius' and ipAssignmentMode is not 'NAT mode'.`,
+						Computed:            true,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseStateForUnknown(),
+						},
+						Attributes: map[string]schema.Attribute{
+
+							"guest_vlan": schema.SingleNestedAttribute{
+								MarkdownDescription: `Guest VLAN settings. Used to direct traffic to a guest VLAN when none of the RADIUS servers are reachable or a client receives access-reject from the RADIUS server.`,
+								Computed:            true,
+								Optional:            true,
+								PlanModifiers: []planmodifier.Object{
+									objectplanmodifier.UseStateForUnknown(),
+								},
+								Attributes: map[string]schema.Attribute{
+
+									"enabled": schema.BoolAttribute{
+										MarkdownDescription: `Whether or not RADIUS guest named VLAN is enabled.`,
+										Computed:            true,
+										Optional:            true,
+										PlanModifiers: []planmodifier.Bool{
+											boolplanmodifier.UseStateForUnknown(),
+										},
+									},
+									"name": schema.StringAttribute{
+										MarkdownDescription: `RADIUS guest VLAN name.`,
+										Computed:            true,
+										Optional:            true,
+										PlanModifiers: []planmodifier.String{
+											stringplanmodifier.UseStateForUnknown(),
+										},
+									},
+								},
+							},
+						},
+					},
+					"tagging": schema.SingleNestedAttribute{
+						MarkdownDescription: `VLAN tagging settings. This param is only valid when ipAssignmentMode is 'Bridge mode' or 'Layer 3 roaming'.`,
+						Computed:            true,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseStateForUnknown(),
+						},
+						Attributes: map[string]schema.Attribute{
+
+							"by_ap_tags": schema.SetNestedAttribute{
+								MarkdownDescription: `The list of AP tags and VLAN names used for named VLAN tagging. If an AP has a tag matching one in the list, then traffic on this SSID will be directed to use the VLAN name associated to the tag.`,
+								Computed:            true,
+								Optional:            true,
+								PlanModifiers: []planmodifier.Set{
+									setplanmodifier.UseStateForUnknown(),
+								},
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+
+										"tags": schema.SetAttribute{
+											MarkdownDescription: `List of AP tags.`,
+											Computed:            true,
+											Optional:            true,
+											PlanModifiers: []planmodifier.Set{
+												setplanmodifier.UseStateForUnknown(),
+											},
+
+											ElementType: types.StringType,
+										},
+										"vlan_name": schema.StringAttribute{
+											MarkdownDescription: `VLAN name that will be used to tag traffic.`,
+											Computed:            true,
+											Optional:            true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.UseStateForUnknown(),
+											},
+										},
+									},
+								},
+							},
+							"default_vlan_name": schema.StringAttribute{
+								MarkdownDescription: `The default VLAN name used to tag traffic in the absence of a matching AP tag.`,
+								Computed:            true,
+								Optional:            true,
+								PlanModifiers: []planmodifier.String{
+									stringplanmodifier.UseStateForUnknown(),
+								},
+							},
+							"enabled": schema.BoolAttribute{
+								MarkdownDescription: `Whether or not traffic should be directed to use specific VLAN names.`,
+								Computed:            true,
+								Optional:            true,
+								PlanModifiers: []planmodifier.Bool{
+									boolplanmodifier.UseStateForUnknown(),
+								},
+							},
+						},
+					},
+				},
+			},
 			"network_id": schema.StringAttribute{
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
 			"number": schema.Int64Attribute{
-				MarkdownDescription: `number path parameter.`,
+				MarkdownDescription: `Unique identifier of the SSID`,
 				Required:            true,
 				//            Differents_types: `   parameter: schema.TypeString, item: schema.TypeInt`,
 			},
 			"oauth": schema.SingleNestedAttribute{
 				MarkdownDescription: `The OAuth settings of this SSID. Only valid if splashPage is 'Google OAuth'.`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -603,6 +783,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 
 					"allowed_domains": schema.SetAttribute{
 						MarkdownDescription: `(Optional) The list of domains allowed access to the network.`,
+						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
@@ -629,7 +810,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"per_ssid_bandwidth_limit_down": schema.Int64Attribute{
-				MarkdownDescription: `The total download bandwidth limit in Kbps. (0 represents no limit.)`,
+				MarkdownDescription: `The total download bandwidth limit in Kbps (0 represents no limit)`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
@@ -637,7 +818,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"per_ssid_bandwidth_limit_up": schema.Int64Attribute{
-				MarkdownDescription: `The total upload bandwidth limit in Kbps. (0 represents no limit.)`,
+				MarkdownDescription: `The total upload bandwidth limit in Kbps (0 represents no limit)`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
@@ -652,7 +833,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"radius_accounting_enabled": schema.BoolAttribute{
-				MarkdownDescription: `Whether or not RADIUS accounting is enabled. This param is only valid if the authMode is 'open-with-radius', '8021x-radius' or 'ipsk-with-radius'`,
+				MarkdownDescription: `Whether or not RADIUS accounting is enabled`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
@@ -661,13 +842,14 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"radius_accounting_interim_interval": schema.Int64Attribute{
 				MarkdownDescription: `The interval (in seconds) in which accounting information is updated and sent to the RADIUS accounting server.`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
 			},
 			"radius_accounting_servers": schema.SetNestedAttribute{
-				MarkdownDescription: `The RADIUS accounting 802.1X servers to be used for authentication. This param is only valid if the authMode is 'open-with-radius', '8021x-radius' or 'ipsk-with-radius' and radiusAccountingEnabled is 'true'`,
+				MarkdownDescription: `List of RADIUS accounting 802.1X servers to be used for authentication`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
@@ -685,7 +867,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 							},
 						},
 						"host": schema.StringAttribute{
-							MarkdownDescription: `IP address to which the APs will send RADIUS accounting messages`,
+							MarkdownDescription: `IP address (or FQDN) to which the APs will send RADIUS accounting messages`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
@@ -693,7 +875,8 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 							},
 						},
 						"open_roaming_certificate_id": schema.Int64Attribute{
-							Computed: true,
+							MarkdownDescription: `The ID of the Openroaming Certificate attached to radius server`,
+							Computed:            true,
 						},
 						"port": schema.Int64Attribute{
 							MarkdownDescription: `Port on the RADIUS server that is listening for accounting messages`,
@@ -723,15 +906,24 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"radius_attribute_for_group_policies": schema.StringAttribute{
-				MarkdownDescription: `Specify the RADIUS attribute used to look up group policies ('Filter-Id', 'Reply-Message', 'Airespace-ACL-Name' or 'Aruba-User-Role'). Access points must receive this attribute in the RADIUS Access-Accept message`,
+				MarkdownDescription: `RADIUS attribute used to look up group policies`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"Airespace-ACL-Name",
+						"Aruba-User-Role",
+						"Filter-Id",
+						"Reply-Message",
+					),
+				},
 			},
 			"radius_authentication_nas_id": schema.StringAttribute{
 				MarkdownDescription: `The template of the NAS identifier to be used for RADIUS authentication (ex. $NODE_MAC$:$VAP_NUM$).`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -739,6 +931,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"radius_called_station_id": schema.StringAttribute{
 				MarkdownDescription: `The template of the called station identifier to be used for RADIUS (ex. $NODE_MAC$:$VAP_NUM$).`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -746,27 +939,33 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"radius_coa_enabled": schema.BoolAttribute{
 				MarkdownDescription: `If true, Meraki devices will act as a RADIUS Dynamic Authorization Server and will respond to RADIUS Change-of-Authorization and Disconnect messages sent by the RADIUS server.`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"radius_enabled": schema.BoolAttribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.UseStateForUnknown(),
-				},
+				MarkdownDescription: `Whether RADIUS authentication is enabled`,
+				Computed:            true,
 			},
 			"radius_failover_policy": schema.StringAttribute{
-				MarkdownDescription: `This policy determines how authentication requests should be handled in the event that all of the configured RADIUS servers are unreachable ('Deny access' or 'Allow access')`,
+				MarkdownDescription: `Policy which determines how authentication requests should be handled in the event that all of the configured RADIUS servers are unreachable`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"Allow access",
+						"Deny access",
+					),
+				},
 			},
 			"radius_fallback_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Whether or not higher priority RADIUS servers should be retried after 60 seconds.`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -774,6 +973,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"radius_guest_vlan_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Whether or not RADIUS Guest VLAN is enabled. This param is only valid if the authMode is 'open-with-radius' and addressing mode is not set to 'isolated' or 'nat' mode`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -781,21 +981,29 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"radius_guest_vlan_id": schema.Int64Attribute{
 				MarkdownDescription: `VLAN ID of the RADIUS Guest VLAN. This param is only valid if the authMode is 'open-with-radius' and addressing mode is not set to 'isolated' or 'nat' mode`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
 			},
 			"radius_load_balancing_policy": schema.StringAttribute{
-				MarkdownDescription: `This policy determines which RADIUS server will be contacted first in an authentication attempt and the ordering of any necessary retry attempts ('Strict priority order' or 'Round robin')`,
+				MarkdownDescription: `Policy which determines which RADIUS server will be contacted first in an authentication attempt, and the ordering of any necessary retry attempts`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"Round robin",
+						"Strict priority order",
+					),
+				},
 			},
 			"radius_override": schema.BoolAttribute{
 				MarkdownDescription: `If true, the RADIUS response can override VLAN tag. This is not valid when ipAssignmentMode is 'NAT mode'.`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -803,6 +1011,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"radius_proxy_enabled": schema.BoolAttribute{
 				MarkdownDescription: `If true, Meraki devices will proxy RADIUS messages through the Meraki cloud to the configured RADIUS auth and accounting servers.`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -810,6 +1019,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"radius_server_attempts_limit": schema.Int64Attribute{
 				MarkdownDescription: `The maximum number of transmit attempts after which a RADIUS server is failed over (must be between 1-5).`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -817,6 +1027,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"radius_server_timeout": schema.Int64Attribute{
 				MarkdownDescription: `The amount of time for which a RADIUS client waits for a reply from the RADIUS server (must be between 1-10 seconds).`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -932,6 +1143,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"radius_testing_enabled": schema.BoolAttribute{
 				MarkdownDescription: `If true, Meraki devices will periodically send Access-Request messages to configured RADIUS servers using identity 'meraki_8021x_test' to ensure that the RADIUS servers are reachable.`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -939,6 +1151,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"secondary_concentrator_network_id": schema.StringAttribute{
 				MarkdownDescription: `The secondary concentrator to use when the ipAssignmentMode is 'VPN'. If configured, the APs will switch to using this concentrator if the primary concentrator is unreachable. This param is optional. ('disabled' represents no secondary concentrator.)`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -946,6 +1159,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"speed_burst": schema.SingleNestedAttribute{
 				MarkdownDescription: `The SpeedBurst setting for this SSID'`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -972,34 +1186,49 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				ElementType: types.StringType,
 			},
 			"splash_page": schema.StringAttribute{
-				MarkdownDescription: `The type of splash page for the SSID ('None', 'Click-through splash page', 'Billing', 'Password-protected with Meraki RADIUS', 'Password-protected with custom RADIUS', 'Password-protected with Active Directory', 'Password-protected with LDAP', 'SMS authentication', 'Systems Manager Sentry', 'Facebook Wi-Fi', 'Google OAuth', 'Sponsored guest', 'Cisco ISE' or 'Google Apps domain'). This attribute is not supported for template children.`,
+				MarkdownDescription: `The type of splash page for the SSID`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"Billing",
+						"Cisco ISE",
+						"Click-through splash page",
+						"Facebook Wi-Fi",
+						"Google Apps domain",
+						"Google OAuth",
+						"None",
+						"Password-protected with Active Directory",
+						"Password-protected with LDAP",
+						"Password-protected with Meraki RADIUS",
+						"Password-protected with custom RADIUS",
+						"SMS authentication",
+						"Sponsored guest",
+						"Systems Manager Sentry",
+					),
+				},
 			},
 			"splash_timeout": schema.StringAttribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
+				MarkdownDescription: `Splash page timeout`,
+				Computed:            true,
 			},
 			"ssid_admin_accessible": schema.BoolAttribute{
-				Computed: true,
-				PlanModifiers: []planmodifier.Bool{
-					boolplanmodifier.UseStateForUnknown(),
-				},
+				MarkdownDescription: `SSID Administrator access status`,
+				Computed:            true,
 			},
 			"use_vlan_tagging": schema.BoolAttribute{
 				MarkdownDescription: `Whether or not traffic should be directed to use specific VLANs. This param is only valid if the ipAssignmentMode is 'Bridge mode' or 'Layer 3 roaming'`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"visible": schema.BoolAttribute{
-				MarkdownDescription: `Boolean indicating whether APs should advertise or hide this SSID. APs will only broadcast this SSID if set to true`,
+				MarkdownDescription: `Whether the SSID is advertised or hidden by the AP`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
@@ -1008,21 +1237,22 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"vlan_id": schema.Int64Attribute{
 				MarkdownDescription: `The VLAN ID used for VLAN tagging. This param is only valid when the ipAssignmentMode is 'Layer 3 roaming with a concentrator' or 'VPN'`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
 			},
 			"walled_garden_enabled": schema.BoolAttribute{
-				MarkdownDescription: `Allow access to a configurable list of IP ranges, which users may access prior to sign-on.`,
-				Optional:            true,
+				MarkdownDescription: `Allow users to access a configurable list of IP ranges prior to sign-on`,
 				Computed:            true,
+				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"walled_garden_ranges": schema.SetAttribute{
-				MarkdownDescription: `Specify your walled garden by entering an array of addresses, ranges using CIDR notation, domain names, and domain wildcards (e.g. '192.168.1.1/24', '192.168.37.10/32', 'www.yahoo.com', '*.google.com']). Meraki's splash page is automatically included in your walled garden.`,
+				MarkdownDescription: `Domain names and IP address ranges available in Walled Garden mode`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
@@ -1032,11 +1262,21 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				ElementType: types.StringType,
 			},
 			"wpa_encryption_mode": schema.StringAttribute{
-				MarkdownDescription: `The types of WPA encryption. ('WPA1 only', 'WPA1 and WPA2', 'WPA2 only', 'WPA3 Transition Mode', 'WPA3 only' or 'WPA3 192-bit Security')`,
+				MarkdownDescription: `The types of WPA encryption`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"WPA1 and WPA2",
+						"WPA1 only",
+						"WPA2 only",
+						"WPA3 192-bit Security",
+						"WPA3 Transition Mode",
+						"WPA3 only",
+					),
 				},
 			},
 		},
@@ -1086,9 +1326,9 @@ func (r *NetworksWirelessSSIDsResource) Create(ctx context.Context, req resource
 		return
 	}
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSID(vvNetworkID, vvNumber, dataRequest)
+	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSID(vvNetworkID, vvNumber, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSID",
@@ -1175,7 +1415,7 @@ func (r *NetworksWirelessSSIDsResource) Read(ctx context.Context, req resource.R
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSSIDItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -1212,8 +1452,8 @@ func (r *NetworksWirelessSSIDsResource) Update(ctx context.Context, req resource
 	a := int(data.Number.ValueInt64())
 	vvNumber := strconv.Itoa(a)
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSID(vvNetworkID, vvNumber, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSID(vvNetworkID, vvNumber, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSID",
@@ -1234,7 +1474,7 @@ func (r *NetworksWirelessSSIDsResource) Update(ctx context.Context, req resource
 
 func (r *NetworksWirelessSSIDsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksWirelessSSIDs", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -1250,6 +1490,7 @@ type NetworksWirelessSSIDsRs struct {
 	Enabled                          types.Bool                                                         `tfsdk:"enabled"`
 	EncryptionMode                   types.String                                                       `tfsdk:"encryption_mode"`
 	IPAssignmentMode                 types.String                                                       `tfsdk:"ip_assignment_mode"`
+	LocalAuth                        types.Bool                                                         `tfsdk:"local_auth"`
 	MandatoryDhcpEnabled             types.Bool                                                         `tfsdk:"mandatory_dhcp_enabled"`
 	MinBitrate                       types.Int64                                                        `tfsdk:"min_bitrate"`
 	Name                             types.String                                                       `tfsdk:"name"`
@@ -1286,6 +1527,7 @@ type NetworksWirelessSSIDsRs struct {
 	LanIsolationEnabled              types.Bool                                                         `tfsdk:"lan_isolation_enabled"`
 	Ldap                             *RequestWirelessUpdateNetworkWirelessSsidLdapRs                    `tfsdk:"ldap"`
 	LocalRadius                      *RequestWirelessUpdateNetworkWirelessSsidLocalRadiusRs             `tfsdk:"local_radius"`
+	NamedVLANs                       *RequestWirelessUpdateNetworkWirelessSsidNamedVlansRs              `tfsdk:"named_vlans"`
 	Oauth                            *RequestWirelessUpdateNetworkWirelessSsidOauthRs                   `tfsdk:"oauth"`
 	Psk                              types.String                                                       `tfsdk:"psk"`
 	RadiusAccountingInterimInterval  types.Int64                                                        `tfsdk:"radius_accounting_interim_interval"`
@@ -1412,6 +1654,31 @@ type RequestWirelessUpdateNetworkWirelessSsidLocalRadiusPasswordAuthenticationRs
 	Enabled types.Bool `tfsdk:"enabled"`
 }
 
+type RequestWirelessUpdateNetworkWirelessSsidNamedVlansRs struct {
+	Radius  *RequestWirelessUpdateNetworkWirelessSsidNamedVlansRadiusRs  `tfsdk:"radius"`
+	Tagging *RequestWirelessUpdateNetworkWirelessSsidNamedVlansTaggingRs `tfsdk:"tagging"`
+}
+
+type RequestWirelessUpdateNetworkWirelessSsidNamedVlansRadiusRs struct {
+	GuestVLAN *RequestWirelessUpdateNetworkWirelessSsidNamedVlansRadiusGuestVlanRs `tfsdk:"guest_vlan"`
+}
+
+type RequestWirelessUpdateNetworkWirelessSsidNamedVlansRadiusGuestVlanRs struct {
+	Enabled types.Bool   `tfsdk:"enabled"`
+	Name    types.String `tfsdk:"name"`
+}
+
+type RequestWirelessUpdateNetworkWirelessSsidNamedVlansTaggingRs struct {
+	ByApTags        *[]RequestWirelessUpdateNetworkWirelessSsidNamedVlansTaggingByApTagsRs `tfsdk:"by_ap_tags"`
+	DefaultVLANName types.String                                                           `tfsdk:"default_vlan_name"`
+	Enabled         types.Bool                                                             `tfsdk:"enabled"`
+}
+
+type RequestWirelessUpdateNetworkWirelessSsidNamedVlansTaggingByApTagsRs struct {
+	Tags     types.Set    `tfsdk:"tags"`
+	VLANName types.String `tfsdk:"vlan_name"`
+}
+
 type RequestWirelessUpdateNetworkWirelessSsidOauthRs struct {
 	AllowedDomains types.Set `tfsdk:"allowed_domains"`
 }
@@ -1470,7 +1737,7 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 	if r.ApTagsAndVLANIDs != nil {
 		for _, rItem1 := range *r.ApTagsAndVLANIDs {
 			var tags []string = nil
-
+			//Hoola aqui
 			rItem1.Tags.ElementsAs(ctx, &tags, false)
 			vLANID := func() *int64 {
 				if !rItem1.VLANID.IsUnknown() && !rItem1.VLANID.IsNull() {
@@ -1525,7 +1792,7 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 	var requestWirelessUpdateNetworkWirelessSSIDDNSRewrite *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDDNSRewrite
 	if r.DNSRewrite != nil {
 		var dnsCustomNameservers []string = nil
-
+		//Hoola aqui
 		r.DNSRewrite.DNSCustomNameservers.ElementsAs(ctx, &dnsCustomNameservers, false)
 		enabled := func() *bool {
 			if !r.DNSRewrite.Enabled.IsUnknown() && !r.DNSRewrite.Enabled.IsNull() {
@@ -1759,10 +2026,70 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 	} else {
 		name = &emptyString
 	}
+	var requestWirelessUpdateNetworkWirelessSSIDNamedVLANs *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDNamedVLANs
+	if r.NamedVLANs != nil {
+		var requestWirelessUpdateNetworkWirelessSSIDNamedVLANsRadius *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDNamedVLANsRadius
+		if r.NamedVLANs.Radius != nil {
+			var requestWirelessUpdateNetworkWirelessSSIDNamedVLANsRadiusGuestVLAN *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDNamedVLANsRadiusGuestVLAN
+			if r.NamedVLANs.Radius.GuestVLAN != nil {
+				enabled := func() *bool {
+					if !r.NamedVLANs.Radius.GuestVLAN.Enabled.IsUnknown() && !r.NamedVLANs.Radius.GuestVLAN.Enabled.IsNull() {
+						return r.NamedVLANs.Radius.GuestVLAN.Enabled.ValueBoolPointer()
+					}
+					return nil
+				}()
+				name := r.NamedVLANs.Radius.GuestVLAN.Name.ValueString()
+				requestWirelessUpdateNetworkWirelessSSIDNamedVLANsRadiusGuestVLAN = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDNamedVLANsRadiusGuestVLAN{
+					Enabled: enabled,
+					Name:    name,
+				}
+			}
+			requestWirelessUpdateNetworkWirelessSSIDNamedVLANsRadius = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDNamedVLANsRadius{
+				GuestVLAN: requestWirelessUpdateNetworkWirelessSSIDNamedVLANsRadiusGuestVLAN,
+			}
+		}
+		var requestWirelessUpdateNetworkWirelessSSIDNamedVLANsTagging *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDNamedVLANsTagging
+		if r.NamedVLANs.Tagging != nil {
+			var requestWirelessUpdateNetworkWirelessSSIDNamedVLANsTaggingByApTags []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDNamedVLANsTaggingByApTags
+			if r.NamedVLANs.Tagging.ByApTags != nil {
+				for _, rItem1 := range *r.NamedVLANs.Tagging.ByApTags { //NamedVLANs.Tagging.ByApTags// name: byApTags
+					var tags []string = nil
+					//Hoola aqui
+					rItem1.Tags.ElementsAs(ctx, &tags, false)
+					vLANName := rItem1.VLANName.ValueString()
+					requestWirelessUpdateNetworkWirelessSSIDNamedVLANsTaggingByApTags = append(requestWirelessUpdateNetworkWirelessSSIDNamedVLANsTaggingByApTags, merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDNamedVLANsTaggingByApTags{
+						Tags:     tags,
+						VLANName: vLANName,
+					})
+				}
+			}
+			defaultVLANName := r.NamedVLANs.Tagging.DefaultVLANName.ValueString()
+			enabled := func() *bool {
+				if !r.NamedVLANs.Tagging.Enabled.IsUnknown() && !r.NamedVLANs.Tagging.Enabled.IsNull() {
+					return r.NamedVLANs.Tagging.Enabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			requestWirelessUpdateNetworkWirelessSSIDNamedVLANsTagging = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDNamedVLANsTagging{
+				ByApTags: func() *[]merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDNamedVLANsTaggingByApTags {
+					if len(requestWirelessUpdateNetworkWirelessSSIDNamedVLANsTaggingByApTags) > 0 {
+						return &requestWirelessUpdateNetworkWirelessSSIDNamedVLANsTaggingByApTags
+					}
+					return nil
+				}(),
+				DefaultVLANName: defaultVLANName,
+				Enabled:         enabled,
+			}
+		}
+		requestWirelessUpdateNetworkWirelessSSIDNamedVLANs = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDNamedVLANs{
+			Radius:  requestWirelessUpdateNetworkWirelessSSIDNamedVLANsRadius,
+			Tagging: requestWirelessUpdateNetworkWirelessSSIDNamedVLANsTagging,
+		}
+	}
 	var requestWirelessUpdateNetworkWirelessSSIDOauth *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDOauth
 	if r.Oauth != nil {
 		var allowedDomains []string = nil
-
+		//Hoola aqui
 		r.Oauth.AllowedDomains.ElementsAs(ctx, &allowedDomains, false)
 		requestWirelessUpdateNetworkWirelessSSIDOauth = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDOauth{
 			AllowedDomains: allowedDomains,
@@ -1942,7 +2269,7 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 			requestWirelessUpdateNetworkWirelessSSIDRadiusServers = append(requestWirelessUpdateNetworkWirelessSSIDRadiusServers, merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDRadiusServers{
 				CaCertificate:            caCertificate,
 				Host:                     host,
-				OpenRoamingCertificateID: int64ToIntPointer(openRoamingCertificateID),
+				OpenRoamingCertificateID: int64ToIntPointer3(openRoamingCertificateID),
 				Port:                     int64ToIntPointer(port),
 				RadsecEnabled:            radsecEnabled,
 				Secret:                   secret,
@@ -2043,6 +2370,7 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 		MandatoryDhcpEnabled:             mandatoryDhcpEnabled,
 		MinBitrate:                       minBitrate,
 		Name:                             *name,
+		NamedVLANs:                       requestWirelessUpdateNetworkWirelessSSIDNamedVLANs,
 		Oauth:                            requestWirelessUpdateNetworkWirelessSSIDOauth,
 		PerClientBandwidthLimitDown:      int64ToIntPointer(perClientBandwidthLimitDown),
 		PerClientBandwidthLimitUp:        int64ToIntPointer(perClientBandwidthLimitUp),
@@ -2112,6 +2440,12 @@ func ResponseWirelessGetNetworkWirelessSSIDItemToBodyRs(state NetworksWirelessSS
 		}(),
 		EncryptionMode:   types.StringValue(response.EncryptionMode),
 		IPAssignmentMode: types.StringValue(response.IPAssignmentMode),
+		LocalAuth: func() types.Bool {
+			if response.LocalAuth != nil {
+				return types.BoolValue(*response.LocalAuth)
+			}
+			return types.Bool{}
+		}(),
 		MandatoryDhcpEnabled: func() types.Bool {
 			if response.MandatoryDhcpEnabled != nil {
 				return types.BoolValue(*response.MandatoryDhcpEnabled)

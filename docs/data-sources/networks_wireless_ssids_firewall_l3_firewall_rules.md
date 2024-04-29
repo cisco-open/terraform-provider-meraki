@@ -41,15 +41,15 @@ output "meraki_networks_wireless_ssids_firewall_l3_firewall_rules_example" {
 
 Read-Only:
 
-- `rules` (Attributes Set) (see [below for nested schema](#nestedatt--item--rules))
+- `rules` (Attributes Set) An ordered array of the firewall rules for this SSID (not including the local LAN access rule or the default rule). (see [below for nested schema](#nestedatt--item--rules))
 
 <a id="nestedatt--item--rules"></a>
 ### Nested Schema for `item.rules`
 
 Read-Only:
 
-- `comment` (String)
-- `dest_cidr` (String)
-- `dest_port` (String)
-- `policy` (String)
-- `protocol` (String)
+- `comment` (String) Description of the rule (optional)
+- `dest_cidr` (String) Comma-separated list of destination IP address(es) (in IP or CIDR notation), fully-qualified domain names (FQDN) or 'any'
+- `dest_port` (String) Comma-separated list of destination port(s) (integer in the range 1-65535), or 'any'
+- `policy` (String) 'allow' or 'deny' traffic specified by this rule
+- `protocol` (String) The type of protocol (must be 'tcp', 'udp', 'icmp', 'icmp6' or 'any')

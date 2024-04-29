@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE ACTION
@@ -21,7 +5,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -61,7 +45,6 @@ func (r *NetworksSmUserAccessDevicesDeleteResource) Metadata(_ context.Context, 
 func (r *NetworksSmUserAccessDevicesDeleteResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-
 			"network_id": schema.StringAttribute{
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
@@ -99,7 +82,6 @@ func (r *NetworksSmUserAccessDevicesDeleteResource) Create(ctx context.Context, 
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvUserAccessDeviceID := data.UserAccessDeviceID.ValueString()
 	restyResp1, err := r.client.Sm.DeleteNetworkSmUserAccessDevice(vvNetworkID, vvUserAccessDeviceID)
 
@@ -118,22 +100,23 @@ func (r *NetworksSmUserAccessDevicesDeleteResource) Create(ctx context.Context, 
 		return
 	}
 	//Item
-
-	// data2 := ResponseSmDeleteNetworkSmUserAccessDevice(data, response)
+	// //entro aqui 2
+	// data = ResponseSmDeleteNetworkSmUserAccessDevice(data, response)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
 func (r *NetworksSmUserAccessDevicesDeleteResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *NetworksSmUserAccessDevicesDeleteResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *NetworksSmUserAccessDevicesDeleteResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -145,11 +128,3 @@ type NetworksSmUserAccessDevicesDelete struct {
 }
 
 //FromBody
-
-//ToBody
-// func ResponseSmDeleteNetworkSmUserAccessDeviceItemToBody(state NetworksSmUserAccessDevicesDelete, response *merakigosdk.) NetworksSmUserAccessDevicesDelete {
-// 	itemState := {
-// 	}
-// 	state.Item = &itemState
-// 	return state
-// }

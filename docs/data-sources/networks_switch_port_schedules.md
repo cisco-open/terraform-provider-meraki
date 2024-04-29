@@ -39,33 +39,32 @@ output "meraki_networks_switch_port_schedules_example" {
 
 Read-Only:
 
-- `id` (String)
-- `name` (String) The name for your port schedule. Required
-- `port_schedule` (Attributes) The schedule for switch port scheduling. Schedules are applied to days of the week.
-    When it's empty, default schedule with all days of a week are configured.
-    Any unspecified day in the schedule is added as a default schedule configuration of the day. (see [below for nested schema](#nestedatt--items--port_schedule))
+- `id` (String) Switch port schedule ID
+- `name` (String) Switch port schedule name
+- `network_id` (String) Network ID
+- `port_schedule` (Attributes) Port schedule (see [below for nested schema](#nestedatt--items--port_schedule))
 
 <a id="nestedatt--items--port_schedule"></a>
 ### Nested Schema for `items.port_schedule`
 
 Read-Only:
 
-- `friday` (Attributes) The schedule object for Friday. (see [below for nested schema](#nestedatt--items--port_schedule--friday))
-- `monday` (Attributes) The schedule object for Monday. (see [below for nested schema](#nestedatt--items--port_schedule--monday))
-- `saturday` (Attributes) The schedule object for Saturday. (see [below for nested schema](#nestedatt--items--port_schedule--saturday))
-- `sunday` (Attributes) The schedule object for Sunday. (see [below for nested schema](#nestedatt--items--port_schedule--sunday))
-- `thursday` (Attributes) The schedule object for Thursday. (see [below for nested schema](#nestedatt--items--port_schedule--thursday))
-- `tuesday` (Attributes) The schedule object for Tuesday. (see [below for nested schema](#nestedatt--items--port_schedule--tuesday))
-- `wednesday` (Attributes) The schedule object for Wednesday. (see [below for nested schema](#nestedatt--items--port_schedule--wednesday))
+- `friday` (Attributes) Friday schedule (see [below for nested schema](#nestedatt--items--port_schedule--friday))
+- `monday` (Attributes) Monday schedule (see [below for nested schema](#nestedatt--items--port_schedule--monday))
+- `saturday` (Attributes) Saturday schedule (see [below for nested schema](#nestedatt--items--port_schedule--saturday))
+- `sunday` (Attributes) Sunday schedule (see [below for nested schema](#nestedatt--items--port_schedule--sunday))
+- `thursday` (Attributes) Thursday schedule (see [below for nested schema](#nestedatt--items--port_schedule--thursday))
+- `tuesday` (Attributes) Tuesday schedule (see [below for nested schema](#nestedatt--items--port_schedule--tuesday))
+- `wednesday` (Attributes) Wednesday schedule (see [below for nested schema](#nestedatt--items--port_schedule--wednesday))
 
 <a id="nestedatt--items--port_schedule--friday"></a>
 ### Nested Schema for `items.port_schedule.friday`
 
 Read-Only:
 
-- `active` (Boolean) Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.
-- `from` (String) The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.
-- `to` (String) The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.
+- `active` (Boolean) Whether the schedule is active or inactive
+- `from` (String) The time, from '00:00' to '24:00'
+- `to` (String) The time, from '00:00' to '24:00'
 
 
 <a id="nestedatt--items--port_schedule--monday"></a>
@@ -73,9 +72,9 @@ Read-Only:
 
 Read-Only:
 
-- `active` (Boolean) Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.
-- `from` (String) The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.
-- `to` (String) The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.
+- `active` (Boolean) Whether the schedule is active or inactive
+- `from` (String) The time, from '00:00' to '24:00'
+- `to` (String) The time, from '00:00' to '24:00'
 
 
 <a id="nestedatt--items--port_schedule--saturday"></a>
@@ -83,9 +82,9 @@ Read-Only:
 
 Read-Only:
 
-- `active` (Boolean) Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.
-- `from` (String) The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.
-- `to` (String) The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.
+- `active` (Boolean) Whether the schedule is active or inactive
+- `from` (String) The time, from '00:00' to '24:00'
+- `to` (String) The time, from '00:00' to '24:00'
 
 
 <a id="nestedatt--items--port_schedule--sunday"></a>
@@ -93,9 +92,9 @@ Read-Only:
 
 Read-Only:
 
-- `active` (Boolean) Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.
-- `from` (String) The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.
-- `to` (String) The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.
+- `active` (Boolean) Whether the schedule is active or inactive
+- `from` (String) The time, from '00:00' to '24:00'
+- `to` (String) The time, from '00:00' to '24:00'
 
 
 <a id="nestedatt--items--port_schedule--thursday"></a>
@@ -103,9 +102,9 @@ Read-Only:
 
 Read-Only:
 
-- `active` (Boolean) Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.
-- `from` (String) The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.
-- `to` (String) The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.
+- `active` (Boolean) Whether the schedule is active or inactive
+- `from` (String) The time, from '00:00' to '24:00'
+- `to` (String) The time, from '00:00' to '24:00'
 
 
 <a id="nestedatt--items--port_schedule--tuesday"></a>
@@ -113,9 +112,9 @@ Read-Only:
 
 Read-Only:
 
-- `active` (Boolean) Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.
-- `from` (String) The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.
-- `to` (String) The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.
+- `active` (Boolean) Whether the schedule is active or inactive
+- `from` (String) The time, from '00:00' to '24:00'
+- `to` (String) The time, from '00:00' to '24:00'
 
 
 <a id="nestedatt--items--port_schedule--wednesday"></a>
@@ -123,6 +122,6 @@ Read-Only:
 
 Read-Only:
 
-- `active` (Boolean) Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.
-- `from` (String) The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.
-- `to` (String) The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.
+- `active` (Boolean) Whether the schedule is active or inactive
+- `from` (String) The time, from '00:00' to '24:00'
+- `to` (String) The time, from '00:00' to '24:00'

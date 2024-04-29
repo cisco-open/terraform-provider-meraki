@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -70,51 +54,80 @@ func (d *NetworksWirelessSSIDsTrafficShapingRulesDataSource) Schema(_ context.Co
 				Attributes: map[string]schema.Attribute{
 
 					"default_rules_enabled": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Whether default traffic shaping rules are enabled (true) or disabled (false). There are 4 default rules, which can be seen on your network's traffic shaping page. Note that default rules count against the rule limit of 8.`,
+						Computed:            true,
 					},
 					"rules": schema.SetNestedAttribute{
+						MarkdownDescription: `    An array of traffic shaping rules. Rules are applied in the order that
+    they are specified in. An empty list (or null) means no rules. Note that
+    you are allowed a maximum of 8 rules.
+`,
 						Computed: true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"definitions": schema.SetNestedAttribute{
+									MarkdownDescription: `    A list of objects describing the definitions of your traffic shaping rule. At least one definition is required.
+`,
 									Computed: true,
 									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 
 											"type": schema.StringAttribute{
-												Computed: true,
+												MarkdownDescription: `The type of definition. Can be one of 'application', 'applicationCategory', 'host', 'port', 'ipRange' or 'localNet'.`,
+												Computed:            true,
 											},
 											"value": schema.StringAttribute{
+												MarkdownDescription: `    If "type" is 'host', 'port', 'ipRange' or 'localNet', then "value" must be a string, matching either
+    a hostname (e.g. "somesite.com"), a port (e.g. 8080), or an IP range ("192.1.0.0",
+    "192.1.0.0/16", or "10.1.0.0/16:80"). 'localNet' also supports CIDR notation, excluding
+    custom ports.
+     If "type" is 'application' or 'applicationCategory', then "value" must be an object
+    with the structure { "id": "meraki:layer7/..." }, where "id" is the application category or
+    application ID (for a list of IDs for your network, use the trafficShaping/applicationCategories
+    endpoint).
+`,
 												Computed: true,
 											},
 										},
 									},
 								},
 								"dscp_tag_value": schema.Int64Attribute{
+									MarkdownDescription: `    The DSCP tag applied by your rule. null means 'Do not change DSCP tag'.
+    For a list of possible tag values, use the trafficShaping/dscpTaggingOptions endpoint.
+`,
 									Computed: true,
 								},
 								"pcp_tag_value": schema.Int64Attribute{
+									MarkdownDescription: `    The PCP tag applied by your rule. Can be 0 (lowest priority) through 7 (highest priority).
+    null means 'Do not set PCP tag'.
+`,
 									Computed: true,
 								},
 								"per_client_bandwidth_limits": schema.SingleNestedAttribute{
+									MarkdownDescription: `    An object describing the bandwidth settings for your rule.
+`,
 									Computed: true,
 									Attributes: map[string]schema.Attribute{
 
 										"bandwidth_limits": schema.SingleNestedAttribute{
-											Computed: true,
+											MarkdownDescription: `The bandwidth limits object, specifying the upload ('limitUp') and download ('limitDown') speed in Kbps. These are only enforced if 'settings' is set to 'custom'.`,
+											Computed:            true,
 											Attributes: map[string]schema.Attribute{
 
 												"limit_down": schema.Int64Attribute{
-													Computed: true,
+													MarkdownDescription: `The maximum download limit (integer, in Kbps).`,
+													Computed:            true,
 												},
 												"limit_up": schema.Int64Attribute{
-													Computed: true,
+													MarkdownDescription: `The maximum upload limit (integer, in Kbps).`,
+													Computed:            true,
 												},
 											},
 										},
 										"settings": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `How bandwidth limits are applied by your rule. Can be one of 'network default', 'ignore' or 'custom'.`,
+											Computed:            true,
 										},
 									},
 								},
@@ -122,7 +135,8 @@ func (d *NetworksWirelessSSIDsTrafficShapingRulesDataSource) Schema(_ context.Co
 						},
 					},
 					"traffic_shaping_enabled": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Whether traffic shaping rules are applied to clients on your SSID.`,
+						Computed:            true,
 					},
 				},
 			},

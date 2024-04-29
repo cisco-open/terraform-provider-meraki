@@ -44,7 +44,8 @@ Read-Only:
 - `location_analytics_enabled` (Boolean) Toggle for enabling or disabling location analytics for your network
 - `meshing_enabled` (Boolean) Toggle for enabling or disabling meshing in a network
 - `named_vlans` (Attributes) Named VLAN settings for wireless networks. (see [below for nested schema](#nestedatt--item--named_vlans))
-- `upgrade_strategy` (String) The upgrade strategy to apply to the network. Must be one of 'minimizeUpgradeTime' or 'minimizeClientDowntime'. Requires firmware version MR 26.8 or higher'
+- `regulatory_domain` (Attributes) Regulatory domain information for this network. (see [below for nested schema](#nestedatt--item--regulatory_domain))
+- `upgradestrategy` (String) The upgrade strategy to apply to the network. Must be one of 'minimizeUpgradeTime' or 'minimizeClientDowntime'. Requires firmware version MR 26.8 or higher'
 
 <a id="nestedatt--item--named_vlans"></a>
 ### Nested Schema for `item.named_vlans`
@@ -60,3 +61,14 @@ Read-Only:
 
 - `duration` (Number) The duration in minutes that devices will refrain from using dirty VLANs before adding them back to the pool.
 - `enabled` (Boolean) Whether or not devices using named VLAN pools should remove dirty VLANs from the pool, thereby preventing clients from being assigned to VLANs where they would be unable to obtain an IP address via DHCP
+
+
+
+<a id="nestedatt--item--regulatory_domain"></a>
+### Nested Schema for `item.regulatory_domain`
+
+Read-Only:
+
+- `country_code` (String) The country code of the regulatory domain.
+- `name` (String) The name of the regulatory domain for this network.
+- `permits6e` (Boolean) Whether or not the regulatory domain for this network permits Wifi 6E.

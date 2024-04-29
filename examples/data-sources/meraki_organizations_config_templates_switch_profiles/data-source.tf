@@ -6,5 +6,5 @@ data "meraki_organizations_config_templates_switch_profiles" "example" {
 }
 
 output "meraki_organizations_config_templates_switch_profiles_example" {
-  value = data.meraki_organizations_config_templates_switch_profiles.example.item
+  value = data.meraki_organizations_config_templates_switch_profiles.example.items
 }

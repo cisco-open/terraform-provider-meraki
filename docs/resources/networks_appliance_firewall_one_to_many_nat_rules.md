@@ -62,7 +62,7 @@ Optional:
 
 Optional:
 
-- `allowed_ips` (List of String) Remote IP addresses or ranges that are permitted to access the internal resource via this port forwarding rule, or 'any'
+- `allowed_ips` (Set of String) Remote IP addresses or ranges that are permitted to access the internal resource via this port forwarding rule, or 'any'
 - `local_ip` (String) Local IP address to which traffic will be forwarded
 - `local_port` (String) Destination port of the forwarded traffic that will be sent from the MX to the specified host on the LAN. If you simply wish to forward the traffic without translating the port, this should be the same as the Public port
 - `name` (String) A description of the rule

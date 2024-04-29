@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,8 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -32,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -169,6 +155,13 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"Enhanced",
+										"High",
+										"Standard",
+									),
+								},
 							},
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1280x720' or '1920x1080'.`,
@@ -176,6 +169,12 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"1280x720",
+										"1920x1080",
+									),
 								},
 							},
 						},
@@ -196,6 +195,13 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"Enhanced",
+										"High",
+										"Standard",
+									),
+								},
 							},
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1280x720' or '1920x1080'.`,
@@ -203,6 +209,12 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"1280x720",
+										"1920x1080",
+									),
 								},
 							},
 						},
@@ -223,13 +235,27 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"Enhanced",
+										"High",
+										"Standard",
+									),
+								},
 							},
 							"resolution": schema.StringAttribute{
-								MarkdownDescription: `Resolution of the camera. Can be one of '1080x1080' or '2688x1512'.`,
+								MarkdownDescription: `Resolution of the camera. Can be one of '1920x1080', '2688x1512' or '3840x2160'.`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"1920x1080",
+										"2688x1512",
+										"3840x2160",
+									),
 								},
 							},
 						},
@@ -250,6 +276,13 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"Enhanced",
+										"High",
+										"Standard",
+									),
+								},
 							},
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1280x720'.`,
@@ -257,6 +290,11 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"1280x720",
+									),
 								},
 							},
 						},
@@ -277,6 +315,13 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"Enhanced",
+										"High",
+										"Standard",
+									),
+								},
 							},
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1280x720', '1920x1080' or '2688x1512'.`,
@@ -284,6 +329,13 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"1280x720",
+										"1920x1080",
+										"2688x1512",
+									),
 								},
 							},
 						},
@@ -304,13 +356,26 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"Enhanced",
+										"High",
+										"Standard",
+									),
+								},
 							},
 							"resolution": schema.StringAttribute{
-								MarkdownDescription: `Resolution of the camera. Can be one of '1080x1080' or '2058x2058'.`,
+								MarkdownDescription: `Resolution of the camera. Can be one of '1080x1080' or '2112x2112'.`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"1080x1080",
+										"2112x2112",
+									),
 								},
 							},
 						},
@@ -331,13 +396,27 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"Enhanced",
+										"High",
+										"Standard",
+									),
+								},
 							},
 							"resolution": schema.StringAttribute{
-								MarkdownDescription: `Resolution of the camera. Can be one of '1080x1080' or '2112x2112'.`,
+								MarkdownDescription: `Resolution of the camera. Can be one of '1080x1080', '2112x2112' or '2880x2880'.`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"1080x1080",
+										"2112x2112",
+										"2880x2880",
+									),
 								},
 							},
 						},
@@ -358,6 +437,13 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"Enhanced",
+										"High",
+										"Standard",
+									),
+								},
 							},
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1280x720', '1920x1080', '2688x1512' or '3840x2160'.`,
@@ -365,6 +451,14 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"1280x720",
+										"1920x1080",
+										"2688x1512",
+										"3840x2160",
+									),
 								},
 							},
 						},
@@ -385,6 +479,13 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"Enhanced",
+										"High",
+										"Standard",
+									),
+								},
 							},
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1920x1080' or '2688x1512'.`,
@@ -392,6 +493,12 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"1920x1080",
+										"2688x1512",
+									),
 								},
 							},
 						},
@@ -412,6 +519,13 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"Enhanced",
+										"High",
+										"Standard",
+									),
+								},
 							},
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1920x1080', '2688x1512' or '3840x2160'.`,
@@ -419,6 +533,13 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"1920x1080",
+										"2688x1512",
+										"3840x2160",
+									),
 								},
 							},
 						},
@@ -439,6 +560,13 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"Enhanced",
+										"High",
+										"Standard",
+									),
+								},
 							},
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1080x1080' or '2112x2112'.`,
@@ -446,6 +574,12 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"1080x1080",
+										"2112x2112",
+									),
 								},
 							},
 						},
@@ -466,6 +600,13 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"Enhanced",
+										"High",
+										"Standard",
+									),
+								},
 							},
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1080x1080', '2112x2112' or '2880x2880'.`,
@@ -473,6 +614,13 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"1080x1080",
+										"2112x2112",
+										"2880x2880",
+									),
 								},
 							},
 						},
@@ -505,7 +653,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Create(ctx context.Cont
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvName := data.Name.ValueString()
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Camera.GetNetworkCameraQualityRetentionProfiles(vvNetworkID)
@@ -528,7 +675,7 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Create(ctx context.Cont
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter QualityRetentionProfileID",
-					"Error",
+					err.Error(),
 				)
 				return
 			}
@@ -585,7 +732,7 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Create(ctx context.Cont
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter QualityRetentionProfileID",
-				"Error",
+				err.Error(),
 			)
 			return
 		}
@@ -639,9 +786,7 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Read(ctx context.Contex
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvQualityRetentionProfileID := data.QualityRetentionProfileID.ValueString()
-	// qualityRetention_profile_id
 	responseGet, restyRespGet, err := r.client.Camera.GetNetworkCameraQualityRetentionProfile(vvNetworkID, vvQualityRetentionProfileID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -665,7 +810,7 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Read(ctx context.Contex
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -698,7 +843,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Update(ctx context.Cont
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvQualityRetentionProfileID := data.QualityRetentionProfileID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Camera.UpdateNetworkCameraQualityRetentionProfile(vvNetworkID, vvQualityRetentionProfileID, dataRequest)
@@ -763,8 +907,8 @@ type NetworksCameraQualityRetentionProfilesRs struct {
 	MotionDetectorVersion          types.Int64                                                           `tfsdk:"motion_detector_version"`
 	Name                           types.String                                                          `tfsdk:"name"`
 	RestrictedBandwidthModeEnabled types.Bool                                                            `tfsdk:"restricted_bandwidth_mode_enabled"`
-	VideoSettings                  *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsRs `tfsdk:"video_settings"`
 	ScheduleID                     types.String                                                          `tfsdk:"schedule_id"`
+	VideoSettings                  *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsRs `tfsdk:"video_settings"`
 }
 
 type ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsRs struct {
@@ -1262,6 +1406,7 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBodyRs(state Net
 			}
 			return types.Bool{}
 		}(),
+		ScheduleID: types.StringValue(response.ScheduleID),
 		VideoSettings: func() *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsRs {
 			if response.VideoSettings != nil {
 				return &ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsRs{

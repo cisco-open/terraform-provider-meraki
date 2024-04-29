@@ -37,7 +37,7 @@ output "meraki_devices_camera_video_settings_example" {
 
 ### Read-Only
 
-- `rtsp_url` (String)
+- `rtsp_url` (String) External rstp url. Will only be returned if external rtsp stream is exposed
 
 ## Import
 

@@ -50,9 +50,12 @@ Read-Only:
 
 - `access_end_at` (String) time that access ends
 - `access_start_at` (String) time that access starts
+- `additional_email_text` (String) Optional email text
 - `id` (String) device ID
 - `name` (String) device name
+- `notify_time_before_access_ends` (Number) Time before access expiration reminder email sends
 - `scope` (String) scope
+- `send_expiration_emails` (Boolean) Send Email Notifications
 - `ssid_name` (String) SSID name
 - `tags` (List of String) device tags
 - `timebound_type` (String) type of access period, either a static range or a dynamic period

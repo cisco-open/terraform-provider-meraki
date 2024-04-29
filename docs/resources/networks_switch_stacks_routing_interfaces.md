@@ -53,29 +53,29 @@ output "meraki_networks_switch_stacks_routing_interfaces_example" {
 
 ### Optional
 
-- `default_gateway` (String) The next hop for any traffic that isn't going to a directly connected subnet or over a static route. This IP address must exist in a subnet with a routed interface.
-- `interface_id` (String) interfaceId path parameter. Interface ID
-- `interface_ip` (String) The IP address this switch stack will use for layer 3 routing on this VLAN or subnet. This cannot be the same as the switch's management IP.
-- `ipv6` (Attributes) The IPv6 settings of the interface. (see [below for nested schema](#nestedatt--ipv6))
-- `multicast_routing` (String) Enable multicast support if, multicast routing between VLANs is required. Options are, 'disabled', 'enabled' or 'IGMP snooping querier'. Default is 'disabled'.
-- `name` (String) A friendly name or description for the interface or VLAN.
-- `ospf_settings` (Attributes) The OSPF routing settings of the interface. (see [below for nested schema](#nestedatt--ospf_settings))
-- `subnet` (String) The network that this routed interface is on, in CIDR notation (ex. 10.1.1.0/24).
-- `vlan_id` (Number) The VLAN this routed interface is on. VLAN must be between 1 and 4094.
+- `default_gateway` (String) IPv4 default gateway
+- `interface_id` (String) The id
+- `interface_ip` (String) IPv4 address
+- `ipv6` (Attributes) IPv6 addressing (see [below for nested schema](#nestedatt--ipv6))
+- `multicast_routing` (String) Multicast routing status
+- `name` (String) The name
+- `ospf_settings` (Attributes) IPv4 OSPF Settings (see [below for nested schema](#nestedatt--ospf_settings))
+- `subnet` (String) IPv4 subnet
+- `vlan_id` (Number) VLAN id
 
 ### Read-Only
 
-- `ospf_v3` (Attributes) (see [below for nested schema](#nestedatt--ospf_v3))
+- `ospf_v3` (Attributes) IPv6 OSPF Settings (see [below for nested schema](#nestedatt--ospf_v3))
 
 <a id="nestedatt--ipv6"></a>
 ### Nested Schema for `ipv6`
 
 Optional:
 
-- `address` (String) The IPv6 address of the interface. Required if assignmentMode is 'static'. Must not be included if assignmentMode is 'eui-64'.
-- `assignment_mode` (String) The IPv6 assignment mode for the interface. Can be either 'eui-64' or 'static'.
-- `gateway` (String) The IPv6 default gateway of the interface. Required if prefix is defined and this is the first interface with IPv6 configured for the stack.
-- `prefix` (String) The IPv6 prefix of the interface. Required if IPv6 object is included.
+- `address` (String) IPv6 address
+- `assignment_mode` (String) Assignment mode
+- `gateway` (String) IPv6 gateway
+- `prefix` (String) IPv6 subnet
 
 
 <a id="nestedatt--ospf_settings"></a>
@@ -83,9 +83,9 @@ Optional:
 
 Optional:
 
-- `area` (String) The OSPF area to which this interface should belong. Can be either 'disabled' or the identifier of an existing OSPF area. Defaults to 'disabled'.
-- `cost` (Number) The path cost for this interface. Defaults to 1, but can be increased up to 65535 to give lower priority.
-- `is_passive_enabled` (Boolean) When enabled, OSPF will not run on the interface, but the subnet will still be advertised.
+- `area` (String) Area id
+- `cost` (Number) OSPF Cost
+- `is_passive_enabled` (Boolean) Disable sending Hello packets on this interface's IPv4 area
 
 
 <a id="nestedatt--ospf_v3"></a>
@@ -93,9 +93,9 @@ Optional:
 
 Read-Only:
 
-- `area` (String)
-- `cost` (Number)
-- `is_passive_enabled` (Boolean)
+- `area` (String) Area id
+- `cost` (Number) OSPF Cost
+- `is_passive_enabled` (Boolean) Disable sending Hello packets on this interface's IPv6 area
 
 ## Import
 

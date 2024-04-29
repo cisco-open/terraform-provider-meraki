@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -61,6 +45,11 @@ func (d *NetworksSmProfilesDataSource) Schema(_ context.Context, _ datasource.Sc
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
+			"payload_types": schema.ListAttribute{
+				MarkdownDescription: `payloadTypes query parameter. Filter by payload types`,
+				Optional:            true,
+				ElementType:         types.StringType,
+			},
 
 			"items": schema.ListNestedAttribute{
 				MarkdownDescription: `Array of ResponseSmGetNetworkSmProfiles`,
@@ -79,6 +68,11 @@ func (d *NetworksSmProfilesDataSource) Schema(_ context.Context, _ datasource.Sc
 						"name": schema.StringAttribute{
 							MarkdownDescription: `Name of a profile.`,
 							Computed:            true,
+						},
+						"payload_types": schema.ListAttribute{
+							MarkdownDescription: `Payloads in the profile.`,
+							Computed:            true,
+							ElementType:         types.StringType,
 						},
 						"scope": schema.StringAttribute{
 							MarkdownDescription: `Scope of a profile.`,
@@ -107,8 +101,11 @@ func (d *NetworksSmProfilesDataSource) Read(ctx context.Context, req datasource.
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetNetworkSmProfiles")
 		vvNetworkID := networksSmProfiles.NetworkID.ValueString()
+		queryParams1 := merakigosdk.GetNetworkSmProfilesQueryParams{}
 
-		response1, restyResp1, err := d.client.Sm.GetNetworkSmProfiles(vvNetworkID)
+		queryParams1.PayloadTypes = elementsToStrings(ctx, networksSmProfiles.PayloadTypes)
+
+		response1, restyResp1, err := d.client.Sm.GetNetworkSmProfiles(vvNetworkID, &queryParams1)
 
 		if err != nil || response1 == nil {
 			if restyResp1 != nil {
@@ -133,16 +130,18 @@ func (d *NetworksSmProfilesDataSource) Read(ctx context.Context, req datasource.
 
 // structs
 type NetworksSmProfiles struct {
-	NetworkID types.String                          `tfsdk:"network_id"`
-	Items     *[]ResponseItemSmGetNetworkSmProfiles `tfsdk:"items"`
+	NetworkID    types.String                          `tfsdk:"network_id"`
+	PayloadTypes types.List                            `tfsdk:"payload_types"`
+	Items        *[]ResponseItemSmGetNetworkSmProfiles `tfsdk:"items"`
 }
 
 type ResponseItemSmGetNetworkSmProfiles struct {
-	Description types.String `tfsdk:"description"`
-	ID          types.String `tfsdk:"id"`
-	Name        types.String `tfsdk:"name"`
-	Scope       types.String `tfsdk:"scope"`
-	Tags        types.List   `tfsdk:"tags"`
+	Description  types.String `tfsdk:"description"`
+	ID           types.String `tfsdk:"id"`
+	Name         types.String `tfsdk:"name"`
+	PayloadTypes types.List   `tfsdk:"payload_types"`
+	Scope        types.String `tfsdk:"scope"`
+	Tags         types.List   `tfsdk:"tags"`
 }
 
 // ToBody
@@ -150,11 +149,12 @@ func ResponseSmGetNetworkSmProfilesItemsToBody(state NetworksSmProfiles, respons
 	var items []ResponseItemSmGetNetworkSmProfiles
 	for _, item := range *response {
 		itemState := ResponseItemSmGetNetworkSmProfiles{
-			Description: types.StringValue(item.Description),
-			ID:          types.StringValue(item.ID),
-			Name:        types.StringValue(item.Name),
-			Scope:       types.StringValue(item.Scope),
-			Tags:        StringSliceToList(item.Tags),
+			Description:  types.StringValue(item.Description),
+			ID:           types.StringValue(item.ID),
+			Name:         types.StringValue(item.Name),
+			PayloadTypes: StringSliceToList(item.PayloadTypes),
+			Scope:        types.StringValue(item.Scope),
+			Tags:         StringSliceToList(item.Tags),
 		}
 		items = append(items, itemState)
 	}

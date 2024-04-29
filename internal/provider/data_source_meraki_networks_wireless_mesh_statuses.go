@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -73,31 +57,41 @@ func (d *NetworksWirelessMeshStatusesDataSource) Schema(_ context.Context, _ dat
 				MarkdownDescription: `startingAfter query parameter. A token used by the server to indicate the start of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.`,
 				Optional:            true,
 			},
-			"item": schema.SingleNestedAttribute{
-				Computed: true,
-				Attributes: map[string]schema.Attribute{
 
-					"latest_mesh_performance": schema.SingleNestedAttribute{
-						Computed: true,
-						Attributes: map[string]schema.Attribute{
+			"items": schema.ListNestedAttribute{
+				MarkdownDescription: `Array of ResponseWirelessGetNetworkWirelessMeshStatuses`,
+				Computed:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
 
-							"mbps": schema.Int64Attribute{
-								Computed: true,
-							},
-							"metric": schema.Int64Attribute{
-								Computed: true,
-							},
-							"usage_percentage": schema.StringAttribute{
-								Computed: true,
+						"latest_mesh_performance": schema.SingleNestedAttribute{
+							MarkdownDescription: `Current metrics on how the mesh is performing.`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"mbps": schema.Int64Attribute{
+									MarkdownDescription: `Average Mbps.`,
+									Computed:            true,
+								},
+								"metric": schema.Int64Attribute{
+									MarkdownDescription: `Represents the quality of the entire route from the repeater access point to its gateway access point.`,
+									Computed:            true,
+								},
+								"usage_percentage": schema.StringAttribute{
+									MarkdownDescription: `Mesh utilization as a percentage.`,
+									Computed:            true,
+								},
 							},
 						},
-					},
-					"mesh_route": schema.ListAttribute{
-						Computed:    true,
-						ElementType: types.StringType,
-					},
-					"serial": schema.StringAttribute{
-						Computed: true,
+						"mesh_route": schema.ListAttribute{
+							MarkdownDescription: `List of device serials that make up the mesh.`,
+							Computed:            true,
+							ElementType:         types.StringType,
+						},
+						"serial": schema.StringAttribute{
+							MarkdownDescription: `The serial number for the device.`,
+							Computed:            true,
+						},
 					},
 				},
 			},
@@ -135,7 +129,7 @@ func (d *NetworksWirelessMeshStatusesDataSource) Read(ctx context.Context, req d
 			return
 		}
 
-		networksWirelessMeshStatuses = ResponseWirelessGetNetworkWirelessMeshStatusesItemToBody(networksWirelessMeshStatuses, response1)
+		networksWirelessMeshStatuses = ResponseWirelessGetNetworkWirelessMeshStatusesItemsToBody(networksWirelessMeshStatuses, response1)
 		diags = resp.State.Set(ctx, &networksWirelessMeshStatuses)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
@@ -147,51 +141,55 @@ func (d *NetworksWirelessMeshStatusesDataSource) Read(ctx context.Context, req d
 
 // structs
 type NetworksWirelessMeshStatuses struct {
-	NetworkID     types.String                                    `tfsdk:"network_id"`
-	PerPage       types.Int64                                     `tfsdk:"per_page"`
-	StartingAfter types.String                                    `tfsdk:"starting_after"`
-	EndingBefore  types.String                                    `tfsdk:"ending_before"`
-	Item          *ResponseWirelessGetNetworkWirelessMeshStatuses `tfsdk:"item"`
+	NetworkID     types.String                                          `tfsdk:"network_id"`
+	PerPage       types.Int64                                           `tfsdk:"per_page"`
+	StartingAfter types.String                                          `tfsdk:"starting_after"`
+	EndingBefore  types.String                                          `tfsdk:"ending_before"`
+	Items         *[]ResponseItemWirelessGetNetworkWirelessMeshStatuses `tfsdk:"items"`
 }
 
-type ResponseWirelessGetNetworkWirelessMeshStatuses struct {
-	LatestMeshPerformance *ResponseWirelessGetNetworkWirelessMeshStatusesLatestMeshPerformance `tfsdk:"latest_mesh_performance"`
-	MeshRoute             types.List                                                           `tfsdk:"mesh_route"`
-	Serial                types.String                                                         `tfsdk:"serial"`
+type ResponseItemWirelessGetNetworkWirelessMeshStatuses struct {
+	LatestMeshPerformance *ResponseItemWirelessGetNetworkWirelessMeshStatusesLatestMeshPerformance `tfsdk:"latest_mesh_performance"`
+	MeshRoute             types.List                                                               `tfsdk:"mesh_route"`
+	Serial                types.String                                                             `tfsdk:"serial"`
 }
 
-type ResponseWirelessGetNetworkWirelessMeshStatusesLatestMeshPerformance struct {
+type ResponseItemWirelessGetNetworkWirelessMeshStatusesLatestMeshPerformance struct {
 	Mbps            types.Int64  `tfsdk:"mbps"`
 	Metric          types.Int64  `tfsdk:"metric"`
 	UsagePercentage types.String `tfsdk:"usage_percentage"`
 }
 
 // ToBody
-func ResponseWirelessGetNetworkWirelessMeshStatusesItemToBody(state NetworksWirelessMeshStatuses, response *merakigosdk.ResponseWirelessGetNetworkWirelessMeshStatuses) NetworksWirelessMeshStatuses {
-	itemState := ResponseWirelessGetNetworkWirelessMeshStatuses{
-		LatestMeshPerformance: func() *ResponseWirelessGetNetworkWirelessMeshStatusesLatestMeshPerformance {
-			if response.LatestMeshPerformance != nil {
-				return &ResponseWirelessGetNetworkWirelessMeshStatusesLatestMeshPerformance{
-					Mbps: func() types.Int64 {
-						if response.LatestMeshPerformance.Mbps != nil {
-							return types.Int64Value(int64(*response.LatestMeshPerformance.Mbps))
-						}
-						return types.Int64{}
-					}(),
-					Metric: func() types.Int64 {
-						if response.LatestMeshPerformance.Metric != nil {
-							return types.Int64Value(int64(*response.LatestMeshPerformance.Metric))
-						}
-						return types.Int64{}
-					}(),
-					UsagePercentage: types.StringValue(response.LatestMeshPerformance.UsagePercentage),
+func ResponseWirelessGetNetworkWirelessMeshStatusesItemsToBody(state NetworksWirelessMeshStatuses, response *merakigosdk.ResponseWirelessGetNetworkWirelessMeshStatuses) NetworksWirelessMeshStatuses {
+	var items []ResponseItemWirelessGetNetworkWirelessMeshStatuses
+	for _, item := range *response {
+		itemState := ResponseItemWirelessGetNetworkWirelessMeshStatuses{
+			LatestMeshPerformance: func() *ResponseItemWirelessGetNetworkWirelessMeshStatusesLatestMeshPerformance {
+				if item.LatestMeshPerformance != nil {
+					return &ResponseItemWirelessGetNetworkWirelessMeshStatusesLatestMeshPerformance{
+						Mbps: func() types.Int64 {
+							if item.LatestMeshPerformance.Mbps != nil {
+								return types.Int64Value(int64(*item.LatestMeshPerformance.Mbps))
+							}
+							return types.Int64{}
+						}(),
+						Metric: func() types.Int64 {
+							if item.LatestMeshPerformance.Metric != nil {
+								return types.Int64Value(int64(*item.LatestMeshPerformance.Metric))
+							}
+							return types.Int64{}
+						}(),
+						UsagePercentage: types.StringValue(item.LatestMeshPerformance.UsagePercentage),
+					}
 				}
-			}
-			return &ResponseWirelessGetNetworkWirelessMeshStatusesLatestMeshPerformance{}
-		}(),
-		MeshRoute: StringSliceToList(response.MeshRoute),
-		Serial:    types.StringValue(response.Serial),
+				return &ResponseItemWirelessGetNetworkWirelessMeshStatusesLatestMeshPerformance{}
+			}(),
+			MeshRoute: StringSliceToList(item.MeshRoute),
+			Serial:    types.StringValue(item.Serial),
+		}
+		items = append(items, itemState)
 	}
-	state.Item = &itemState
+	state.Items = &items
 	return state
 }

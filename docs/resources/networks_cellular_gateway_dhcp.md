@@ -36,7 +36,7 @@ output "meraki_networks_cellular_gateway_dhcp_example" {
 ### Optional
 
 - `dhcp_lease_time` (String) DHCP Lease time for all MG in the network.
-- `dns_custom_nameservers` (List of String) List of fixed IPs representing the the DNS Name servers when the mode is 'custom'.
+- `dns_custom_nameservers` (Set of String) List of fixed IPs representing the the DNS Name servers when the mode is 'custom'.
 - `dns_nameservers` (String) DNS name servers mode for all MG in the network.
 
 ## Import

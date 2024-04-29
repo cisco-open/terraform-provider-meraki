@@ -11,6 +11,8 @@ resource "meraki_networks_switch_routing_multicast" "example" {
 
     flood_unknown_multicast_traffic_enabled = true
     igmp_snooping_enabled                   = true
+    stacks                                  = ["789102", "123456", "129102"]
+    switch_profiles                         = ["1234", "4567"]
     switches                                = ["Q234-ABCD-0001", "Q234-ABCD-0002", "Q234-ABCD-0003"]
   }]
 }

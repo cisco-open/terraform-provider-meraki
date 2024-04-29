@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -69,8 +53,76 @@ func (d *OrganizationsSmVppAccountsDataSource) Schema(_ context.Context, _ datas
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
+					"allowed_admins": schema.StringAttribute{
+						MarkdownDescription: `The allowed admins for the VPP account`,
+						Computed:            true,
+					},
+					"assignable_network_ids": schema.ListAttribute{
+						MarkdownDescription: `The network IDs of the assignable networks for the VPP account`,
+						Computed:            true,
+						ElementType:         types.StringType,
+					},
+					"assignable_networks": schema.StringAttribute{
+						MarkdownDescription: `The assignable networks for the VPP account`,
+						Computed:            true,
+					},
+					"content_token": schema.StringAttribute{
+						MarkdownDescription: `The VPP service token`,
+						Computed:            true,
+					},
+					"email": schema.StringAttribute{
+						MarkdownDescription: `The email address associated with the VPP account`,
+						Computed:            true,
+					},
 					"id": schema.StringAttribute{
 						MarkdownDescription: `The id of the VPP Account`,
+						Computed:            true,
+					},
+					"last_force_synced_at": schema.StringAttribute{
+						MarkdownDescription: `The last time the VPP account was force synced`,
+						Computed:            true,
+					},
+					"last_synced_at": schema.StringAttribute{
+						MarkdownDescription: `The last time the VPP account was synced`,
+						Computed:            true,
+					},
+					"name": schema.StringAttribute{
+						MarkdownDescription: `The name of the VPP account`,
+						Computed:            true,
+					},
+					"network_id_admins": schema.StringAttribute{
+						MarkdownDescription: `The network IDs of the admins for the VPP account`,
+						Computed:            true,
+					},
+					"parsed_token": schema.SingleNestedAttribute{
+						MarkdownDescription: `The parsed VPP service token`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"expires_at": schema.StringAttribute{
+								MarkdownDescription: `The expiration time of the token`,
+								Computed:            true,
+							},
+							"hashed_token": schema.StringAttribute{
+								MarkdownDescription: `The hashed token`,
+								Computed:            true,
+							},
+							"org_name": schema.StringAttribute{
+								MarkdownDescription: `The organization name`,
+								Computed:            true,
+							},
+						},
+					},
+					"vpp_account_id": schema.StringAttribute{
+						MarkdownDescription: `The id of the VPP Account`,
+						Computed:            true,
+					},
+					"vpp_location_id": schema.StringAttribute{
+						MarkdownDescription: `The VPP location ID`,
+						Computed:            true,
+					},
+					"vpp_location_name": schema.StringAttribute{
+						MarkdownDescription: `The VPP location name`,
 						Computed:            true,
 					},
 					"vpp_service_token": schema.StringAttribute{
@@ -86,8 +138,76 @@ func (d *OrganizationsSmVppAccountsDataSource) Schema(_ context.Context, _ datas
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
+						"allowed_admins": schema.StringAttribute{
+							MarkdownDescription: `The allowed admins for the VPP account`,
+							Computed:            true,
+						},
+						"assignable_network_ids": schema.ListAttribute{
+							MarkdownDescription: `The network IDs of the assignable networks for the VPP account`,
+							Computed:            true,
+							ElementType:         types.StringType,
+						},
+						"assignable_networks": schema.StringAttribute{
+							MarkdownDescription: `The assignable networks for the VPP account`,
+							Computed:            true,
+						},
+						"content_token": schema.StringAttribute{
+							MarkdownDescription: `The VPP service token`,
+							Computed:            true,
+						},
+						"email": schema.StringAttribute{
+							MarkdownDescription: `The email address associated with the VPP account`,
+							Computed:            true,
+						},
 						"id": schema.StringAttribute{
 							MarkdownDescription: `The id of the VPP Account`,
+							Computed:            true,
+						},
+						"last_force_synced_at": schema.StringAttribute{
+							MarkdownDescription: `The last time the VPP account was force synced`,
+							Computed:            true,
+						},
+						"last_synced_at": schema.StringAttribute{
+							MarkdownDescription: `The last time the VPP account was synced`,
+							Computed:            true,
+						},
+						"name": schema.StringAttribute{
+							MarkdownDescription: `The name of the VPP account`,
+							Computed:            true,
+						},
+						"network_id_admins": schema.StringAttribute{
+							MarkdownDescription: `The network IDs of the admins for the VPP account`,
+							Computed:            true,
+						},
+						"parsed_token": schema.SingleNestedAttribute{
+							MarkdownDescription: `The parsed VPP service token`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"expires_at": schema.StringAttribute{
+									MarkdownDescription: `The expiration time of the token`,
+									Computed:            true,
+								},
+								"hashed_token": schema.StringAttribute{
+									MarkdownDescription: `The hashed token`,
+									Computed:            true,
+								},
+								"org_name": schema.StringAttribute{
+									MarkdownDescription: `The organization name`,
+									Computed:            true,
+								},
+							},
+						},
+						"vpp_account_id": schema.StringAttribute{
+							MarkdownDescription: `The id of the VPP Account`,
+							Computed:            true,
+						},
+						"vpp_location_id": schema.StringAttribute{
+							MarkdownDescription: `The VPP location ID`,
+							Computed:            true,
+						},
+						"vpp_location_name": schema.StringAttribute{
+							MarkdownDescription: `The VPP location name`,
 							Computed:            true,
 						},
 						"vpp_service_token": schema.StringAttribute{
@@ -176,13 +296,51 @@ type OrganizationsSmVppAccounts struct {
 }
 
 type ResponseItemSmGetOrganizationSmVppAccounts struct {
-	ID              types.String `tfsdk:"id"`
-	VppServiceToken types.String `tfsdk:"vpp_service_token"`
+	AllowedAdmins        types.String                                           `tfsdk:"allowed_admins"`
+	AssignableNetworkIDs types.List                                             `tfsdk:"assignable_network_ids"`
+	AssignableNetworks   types.String                                           `tfsdk:"assignable_networks"`
+	ContentToken         types.String                                           `tfsdk:"content_token"`
+	Email                types.String                                           `tfsdk:"email"`
+	ID                   types.String                                           `tfsdk:"id"`
+	LastForceSyncedAt    types.String                                           `tfsdk:"last_force_synced_at"`
+	LastSyncedAt         types.String                                           `tfsdk:"last_synced_at"`
+	Name                 types.String                                           `tfsdk:"name"`
+	NetworkIDAdmins      types.String                                           `tfsdk:"network_id_admins"`
+	ParsedToken          *ResponseItemSmGetOrganizationSmVppAccountsParsedToken `tfsdk:"parsed_token"`
+	VppAccountID         types.String                                           `tfsdk:"vpp_account_id"`
+	VppLocationID        types.String                                           `tfsdk:"vpp_location_id"`
+	VppLocationName      types.String                                           `tfsdk:"vpp_location_name"`
+	VppServiceToken      types.String                                           `tfsdk:"vpp_service_token"`
+}
+
+type ResponseItemSmGetOrganizationSmVppAccountsParsedToken struct {
+	ExpiresAt   types.String `tfsdk:"expires_at"`
+	HashedToken types.String `tfsdk:"hashed_token"`
+	OrgName     types.String `tfsdk:"org_name"`
 }
 
 type ResponseSmGetOrganizationSmVppAccount struct {
-	ID              types.String `tfsdk:"id"`
-	VppServiceToken types.String `tfsdk:"vpp_service_token"`
+	AllowedAdmins        types.String                                      `tfsdk:"allowed_admins"`
+	AssignableNetworkIDs types.List                                        `tfsdk:"assignable_network_ids"`
+	AssignableNetworks   types.String                                      `tfsdk:"assignable_networks"`
+	ContentToken         types.String                                      `tfsdk:"content_token"`
+	Email                types.String                                      `tfsdk:"email"`
+	ID                   types.String                                      `tfsdk:"id"`
+	LastForceSyncedAt    types.String                                      `tfsdk:"last_force_synced_at"`
+	LastSyncedAt         types.String                                      `tfsdk:"last_synced_at"`
+	Name                 types.String                                      `tfsdk:"name"`
+	NetworkIDAdmins      types.String                                      `tfsdk:"network_id_admins"`
+	ParsedToken          *ResponseSmGetOrganizationSmVppAccountParsedToken `tfsdk:"parsed_token"`
+	VppAccountID         types.String                                      `tfsdk:"vpp_account_id"`
+	VppLocationID        types.String                                      `tfsdk:"vpp_location_id"`
+	VppLocationName      types.String                                      `tfsdk:"vpp_location_name"`
+	VppServiceToken      types.String                                      `tfsdk:"vpp_service_token"`
+}
+
+type ResponseSmGetOrganizationSmVppAccountParsedToken struct {
+	ExpiresAt   types.String `tfsdk:"expires_at"`
+	HashedToken types.String `tfsdk:"hashed_token"`
+	OrgName     types.String `tfsdk:"org_name"`
 }
 
 // ToBody
@@ -190,7 +348,29 @@ func ResponseSmGetOrganizationSmVppAccountsItemsToBody(state OrganizationsSmVppA
 	var items []ResponseItemSmGetOrganizationSmVppAccounts
 	for _, item := range *response {
 		itemState := ResponseItemSmGetOrganizationSmVppAccounts{
-			ID:              types.StringValue(item.ID),
+			AllowedAdmins:        types.StringValue(item.AllowedAdmins),
+			AssignableNetworkIDs: StringSliceToList(item.AssignableNetworkIDs),
+			AssignableNetworks:   types.StringValue(item.AssignableNetworks),
+			ContentToken:         types.StringValue(item.ContentToken),
+			Email:                types.StringValue(item.Email),
+			ID:                   types.StringValue(item.ID),
+			LastForceSyncedAt:    types.StringValue(item.LastForceSyncedAt),
+			LastSyncedAt:         types.StringValue(item.LastSyncedAt),
+			Name:                 types.StringValue(item.Name),
+			NetworkIDAdmins:      types.StringValue(item.NetworkIDAdmins),
+			ParsedToken: func() *ResponseItemSmGetOrganizationSmVppAccountsParsedToken {
+				if item.ParsedToken != nil {
+					return &ResponseItemSmGetOrganizationSmVppAccountsParsedToken{
+						ExpiresAt:   types.StringValue(item.ParsedToken.ExpiresAt),
+						HashedToken: types.StringValue(item.ParsedToken.HashedToken),
+						OrgName:     types.StringValue(item.ParsedToken.OrgName),
+					}
+				}
+				return &ResponseItemSmGetOrganizationSmVppAccountsParsedToken{}
+			}(),
+			VppAccountID:    types.StringValue(item.VppAccountID),
+			VppLocationID:   types.StringValue(item.VppLocationID),
+			VppLocationName: types.StringValue(item.VppLocationName),
 			VppServiceToken: types.StringValue(item.VppServiceToken),
 		}
 		items = append(items, itemState)
@@ -201,7 +381,29 @@ func ResponseSmGetOrganizationSmVppAccountsItemsToBody(state OrganizationsSmVppA
 
 func ResponseSmGetOrganizationSmVppAccountItemToBody(state OrganizationsSmVppAccounts, response *merakigosdk.ResponseSmGetOrganizationSmVppAccount) OrganizationsSmVppAccounts {
 	itemState := ResponseSmGetOrganizationSmVppAccount{
-		ID:              types.StringValue(response.ID),
+		AllowedAdmins:        types.StringValue(response.AllowedAdmins),
+		AssignableNetworkIDs: StringSliceToList(response.AssignableNetworkIDs),
+		AssignableNetworks:   types.StringValue(response.AssignableNetworks),
+		ContentToken:         types.StringValue(response.ContentToken),
+		Email:                types.StringValue(response.Email),
+		ID:                   types.StringValue(response.ID),
+		LastForceSyncedAt:    types.StringValue(response.LastForceSyncedAt),
+		LastSyncedAt:         types.StringValue(response.LastSyncedAt),
+		Name:                 types.StringValue(response.Name),
+		NetworkIDAdmins:      types.StringValue(response.NetworkIDAdmins),
+		ParsedToken: func() *ResponseSmGetOrganizationSmVppAccountParsedToken {
+			if response.ParsedToken != nil {
+				return &ResponseSmGetOrganizationSmVppAccountParsedToken{
+					ExpiresAt:   types.StringValue(response.ParsedToken.ExpiresAt),
+					HashedToken: types.StringValue(response.ParsedToken.HashedToken),
+					OrgName:     types.StringValue(response.ParsedToken.OrgName),
+				}
+			}
+			return &ResponseSmGetOrganizationSmVppAccountParsedToken{}
+		}(),
+		VppAccountID:    types.StringValue(response.VppAccountID),
+		VppLocationID:   types.StringValue(response.VppLocationID),
+		VppLocationName: types.StringValue(response.VppLocationName),
 		VppServiceToken: types.StringValue(response.VppServiceToken),
 	}
 	state.Item = &itemState

@@ -56,6 +56,7 @@ Read-Only:
 - `splash_timeout` (Number) Splash timeout in minutes.
 - `splash_url` (String) The custom splash URL of the click-through splash page.
 - `ssid_number` (Number) SSID number
+- `theme_id` (String) The id of the selected splash theme.
 - `use_redirect_url` (Boolean) The Boolean indicating whether the the user will be redirected to the custom redirect URL after the splash page.
 - `use_splash_url` (Boolean) Boolean indicating whether the users will be redirected to the custom splash url
 - `welcome_message` (String) The welcome message for the users on the splash page.

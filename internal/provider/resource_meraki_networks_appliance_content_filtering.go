@@ -1,33 +1,19 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -62,13 +48,14 @@ func (r *NetworksApplianceContentFilteringResource) Schema(_ context.Context, _ 
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"allowed_url_patterns": schema.SetAttribute{
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
-				},
 				MarkdownDescription: `A list of URL patterns that are allowed`,
 				Computed:            true,
 				Optional:            true,
-				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+
+				ElementType: types.StringType,
 			},
 			"blocked_url_categories": schema.SetNestedAttribute{
 				PlanModifiers: []planmodifier.Set{
@@ -94,22 +81,24 @@ func (r *NetworksApplianceContentFilteringResource) Schema(_ context.Context, _ 
 				},
 			},
 			"blocked_url_categories_rs": schema.SetAttribute{
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
-				},
 				MarkdownDescription: `A list of URL categories to block`,
 				Computed:            true,
 				Optional:            true,
-				ElementType:         types.StringType,
-			},
-			"blocked_url_patterns": schema.SetAttribute{
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
+
+				ElementType: types.StringType,
+			},
+			"blocked_url_patterns": schema.SetAttribute{
 				MarkdownDescription: `A list of URL patterns that are blocked`,
 				Computed:            true,
 				Optional:            true,
-				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+
+				ElementType: types.StringType,
 			},
 			"network_id": schema.StringAttribute{
 				PlanModifiers: []planmodifier.String{
@@ -119,12 +108,18 @@ func (r *NetworksApplianceContentFilteringResource) Schema(_ context.Context, _ 
 				Required:            true,
 			},
 			"url_category_list_size": schema.StringAttribute{
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 				MarkdownDescription: `URL category list size which is either 'topSites' or 'fullList'`,
 				Computed:            true,
 				Optional:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"fullList",
+						"topSites",
+					),
+				},
 			},
 		},
 	}
@@ -150,7 +145,6 @@ func (r *NetworksApplianceContentFilteringResource) Create(ctx context.Context, 
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceContentFiltering(vvNetworkID)
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
@@ -202,7 +196,7 @@ func (r *NetworksApplianceContentFilteringResource) Create(ctx context.Context, 
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceContentFilteringItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -231,7 +225,6 @@ func (r *NetworksApplianceContentFilteringResource) Read(ctx context.Context, re
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	responseGet, restyRespGet, err := r.client.Appliance.GetNetworkApplianceContentFiltering(vvNetworkID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -255,7 +248,7 @@ func (r *NetworksApplianceContentFilteringResource) Read(ctx context.Context, re
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceContentFilteringItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -277,7 +270,6 @@ func (r *NetworksApplianceContentFilteringResource) Update(ctx context.Context, 
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceContentFiltering(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil {
@@ -301,7 +293,7 @@ func (r *NetworksApplianceContentFilteringResource) Update(ctx context.Context, 
 
 func (r *NetworksApplianceContentFilteringResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksApplianceContentFiltering", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -325,7 +317,6 @@ func (r *NetworksApplianceContentFilteringRs) toSdkApiRequestUpdate(ctx context.
 	emptyString := ""
 	var allowedURLPatterns []string = nil
 	r.AllowedURLPatterns.ElementsAs(ctx, &allowedURLPatterns, false)
-	//TODO Inconsistence
 	var blockedURLCategories []string = nil
 	r.BlockedURLCategoriesRs.ElementsAs(ctx, &blockedURLCategories, false)
 	var blockedURLPatterns []string = nil

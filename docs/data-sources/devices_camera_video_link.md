@@ -45,3 +45,4 @@ output "meraki_devices_camera_video_link_example" {
 Read-Only:
 
 - `url` (String)
+- `vision_url` (String)

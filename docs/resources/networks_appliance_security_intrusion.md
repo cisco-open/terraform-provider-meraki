@@ -40,18 +40,18 @@ output "meraki_networks_appliance_security_intrusion_example" {
 
 ### Optional
 
-- `ids_rulesets` (String) Set the detection ruleset 'connectivity'/'balanced'/'security' (optional - omitting will leave current config unchanged). Default value is 'balanced' if none currently saved
-- `mode` (String) Set mode to 'disabled'/'detection'/'prevention' (optional - omitting will leave current config unchanged)
-- `protected_networks` (Attributes) Set the included/excluded networks from the intrusion engine (optional - omitting will leave current config unchanged). This is available only in 'passthrough' mode (see [below for nested schema](#nestedatt--protected_networks))
+- `ids_rulesets` (String) Intrusion detection ruleset
+- `mode` (String) Intrusion detection mode
+- `protected_networks` (Attributes) Networks included in and excluded from the detection engine (see [below for nested schema](#nestedatt--protected_networks))
 
 <a id="nestedatt--protected_networks"></a>
 ### Nested Schema for `protected_networks`
 
 Optional:
 
-- `excluded_cidr` (List of String) list of IP addresses or subnets being excluded from protection (required if 'useDefault' is false)
-- `included_cidr` (List of String) list of IP addresses or subnets being protected (required if 'useDefault' is false)
-- `use_default` (Boolean) true/false whether to use special IPv4 addresses: https://tools.ietf.org/html/rfc5735 (required). Default value is true if none currently saved
+- `excluded_cidr` (Set of String) List of IP addresses or subnets being excluded from protection
+- `included_cidr` (Set of String) List of IP addresses or subnets being protected
+- `use_default` (Boolean) Whether special IPv4 addresses should be used (see: https://tools.ietf.org/html/rfc5735)
 
 ## Import
 

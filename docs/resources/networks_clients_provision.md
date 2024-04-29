@@ -28,6 +28,88 @@ resource "meraki_networks_clients_provision" "example" {
     }]
     device_policy   = "Group policy"
     group_policy_id = "101"
+    policies_by_security_appliance = {
+
+      device_policy = "Normal"
+    }
+    policies_by_ssid = {
+
+      status_0 = {
+
+        device_policy   = "Group policy"
+        group_policy_id = "101"
+      }
+      status_1 = {
+
+        device_policy   = "Group policy"
+        group_policy_id = "101"
+      }
+      status_10 = {
+
+        device_policy   = "Group policy"
+        group_policy_id = "101"
+      }
+      status_11 = {
+
+        device_policy   = "Group policy"
+        group_policy_id = "101"
+      }
+      status_12 = {
+
+        device_policy   = "Group policy"
+        group_policy_id = "101"
+      }
+      status_13 = {
+
+        device_policy   = "Group policy"
+        group_policy_id = "101"
+      }
+      status_14 = {
+
+        device_policy   = "Group policy"
+        group_policy_id = "101"
+      }
+      status_2 = {
+
+        device_policy   = "Group policy"
+        group_policy_id = "101"
+      }
+      status_3 = {
+
+        device_policy   = "Group policy"
+        group_policy_id = "101"
+      }
+      status_4 = {
+
+        device_policy   = "Group policy"
+        group_policy_id = "101"
+      }
+      status_5 = {
+
+        device_policy   = "Group policy"
+        group_policy_id = "101"
+      }
+      status_6 = {
+
+        device_policy   = "Group policy"
+        group_policy_id = "101"
+      }
+      status_7 = {
+
+        device_policy   = "Group policy"
+        group_policy_id = "101"
+      }
+      status_8 = {
+
+        device_policy   = "Group policy"
+        group_policy_id = "101"
+      }
+      status_9 = {
+
+        device_policy   = "Group policy"
+        group_policy_id = "101"
+      }
+    }
   }
 }
 
@@ -43,6 +125,10 @@ output "meraki_networks_clients_provision_example" {
 
 - `network_id` (String) networkId path parameter. Network ID
 - `parameters` (Attributes) (see [below for nested schema](#nestedatt--parameters))
+
+### Read-Only
+
+- `item` (Attributes) (see [below for nested schema](#nestedatt--item))
 
 <a id="nestedatt--parameters"></a>
 ### Nested Schema for `parameters`
@@ -226,3 +312,25 @@ Optional:
 
 - `device_policy` (String) The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.
 - `group_policy_id` (String) The ID of the desired group policy to apply to the client. Required if 'devicePolicy' is set to "Group policy". Otherwise this is ignored.
+
+
+
+
+<a id="nestedatt--item"></a>
+### Nested Schema for `item`
+
+Read-Only:
+
+- `clients` (Attributes Set) The list of clients to provision (see [below for nested schema](#nestedatt--item--clients))
+- `device_policy` (String) The name of the client's policy
+- `group_policy_id` (String) The group policy identifier of the client
+
+<a id="nestedatt--item--clients"></a>
+### Nested Schema for `item.clients`
+
+Read-Only:
+
+- `client_id` (String) The identifier of the client
+- `mac` (String) The MAC address of the client
+- `message` (String) The client's display message if its group policy is 'Blocked'
+- `name` (String) The name of the client

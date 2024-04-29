@@ -42,7 +42,7 @@ output "meraki_organizations_sensor_readings_history_example" {
 ### Optional
 
 - `ending_before` (String) endingBefore query parameter. A token used by the server to indicate the end of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.
-- `metrics` (List of String) metrics query parameter. Types of sensor readings to retrieve. If no metrics are supplied, all available types of readings will be retrieved. Allowed values are battery, button, door, humidity, indoorAirQuality, noise, pm25, temperature, tvoc, and water.
+- `metrics` (List of String) metrics query parameter. Types of sensor readings to retrieve. If no metrics are supplied, all available types of readings will be retrieved. Allowed values are apparentPower, battery, button, co2, current, door, downstreamPower, frequency, humidity, indoorAirQuality, noise, pm25, powerFactor, realPower, remoteLockoutSwitch, temperature, tvoc, voltage, and water.
 - `network_ids` (List of String) networkIds query parameter. Optional parameter to filter readings by network.
 - `per_page` (Number) perPage query parameter. The number of entries per page returned. Acceptable range is 3 1000. Default is 1000.
 - `serials` (List of String) serials query parameter. Optional parameter to filter readings by sensor.
@@ -60,20 +60,37 @@ output "meraki_organizations_sensor_readings_history_example" {
 
 Read-Only:
 
+- `apparent_power` (Attributes) Reading for the 'apparentPower' metric. This will only be present if the 'metric' property equals 'apparentPower'. (see [below for nested schema](#nestedatt--items--apparent_power))
 - `battery` (Attributes) Reading for the 'battery' metric. This will only be present if the 'metric' property equals 'battery'. (see [below for nested schema](#nestedatt--items--battery))
 - `button` (Attributes) Reading for the 'button' metric. This will only be present if the 'metric' property equals 'button'. (see [below for nested schema](#nestedatt--items--button))
+- `co2` (Attributes) Reading for the 'co2' metric. This will only be present if the 'metric' property equals 'co2'. (see [below for nested schema](#nestedatt--items--co2))
+- `current` (Attributes) Reading for the 'current' metric. This will only be present if the 'metric' property equals 'current'. (see [below for nested schema](#nestedatt--items--current))
 - `door` (Attributes) Reading for the 'door' metric. This will only be present if the 'metric' property equals 'door'. (see [below for nested schema](#nestedatt--items--door))
+- `downstream_power` (Attributes) Reading for the 'downstreamPower' metric. This will only be present if the 'metric' property equals 'downstreamPower'. (see [below for nested schema](#nestedatt--items--downstream_power))
+- `frequency` (Attributes) Reading for the 'frequency' metric. This will only be present if the 'metric' property equals 'frequency'. (see [below for nested schema](#nestedatt--items--frequency))
 - `humidity` (Attributes) Reading for the 'humidity' metric. This will only be present if the 'metric' property equals 'humidity'. (see [below for nested schema](#nestedatt--items--humidity))
 - `indoor_air_quality` (Attributes) Reading for the 'indoorAirQuality' metric. This will only be present if the 'metric' property equals 'indoorAirQuality'. (see [below for nested schema](#nestedatt--items--indoor_air_quality))
 - `metric` (String) Type of sensor reading.
 - `network` (Attributes) Network to which the sensor belongs. (see [below for nested schema](#nestedatt--items--network))
 - `noise` (Attributes) Reading for the 'noise' metric. This will only be present if the 'metric' property equals 'noise'. (see [below for nested schema](#nestedatt--items--noise))
 - `pm25` (Attributes) Reading for the 'pm25' metric. This will only be present if the 'metric' property equals 'pm25'. (see [below for nested schema](#nestedatt--items--pm25))
+- `power_factor` (Attributes) Reading for the 'powerFactor' metric. This will only be present if the 'metric' property equals 'powerFactor'. (see [below for nested schema](#nestedatt--items--power_factor))
+- `real_power` (Attributes) Reading for the 'realPower' metric. This will only be present if the 'metric' property equals 'realPower'. (see [below for nested schema](#nestedatt--items--real_power))
+- `remote_lockout_switch` (Attributes) Reading for the 'remoteLockoutSwitch' metric. This will only be present if the 'metric' property equals 'remoteLockoutSwitch'. (see [below for nested schema](#nestedatt--items--remote_lockout_switch))
 - `serial` (String) Serial number of the sensor that took the reading.
 - `temperature` (Attributes) Reading for the 'temperature' metric. This will only be present if the 'metric' property equals 'temperature'. (see [below for nested schema](#nestedatt--items--temperature))
 - `ts` (String) Time at which the reading occurred, in ISO8601 format.
 - `tvoc` (Attributes) Reading for the 'tvoc' metric. This will only be present if the 'metric' property equals 'tvoc'. (see [below for nested schema](#nestedatt--items--tvoc))
+- `voltage` (Attributes) Reading for the 'voltage' metric. This will only be present if the 'metric' property equals 'voltage'. (see [below for nested schema](#nestedatt--items--voltage))
 - `water` (Attributes) Reading for the 'water' metric. This will only be present if the 'metric' property equals 'water'. (see [below for nested schema](#nestedatt--items--water))
+
+<a id="nestedatt--items--apparent_power"></a>
+### Nested Schema for `items.apparent_power`
+
+Read-Only:
+
+- `draw` (Number) Apparent power reading in volt-amperes.
+
 
 <a id="nestedatt--items--battery"></a>
 ### Nested Schema for `items.battery`
@@ -91,12 +108,44 @@ Read-Only:
 - `press_type` (String) Type of button press that occurred.
 
 
+<a id="nestedatt--items--co2"></a>
+### Nested Schema for `items.co2`
+
+Read-Only:
+
+- `concentration` (Number) CO2 reading in parts per million.
+
+
+<a id="nestedatt--items--current"></a>
+### Nested Schema for `items.current`
+
+Read-Only:
+
+- `draw` (Number) Electrical current reading in amperes.
+
+
 <a id="nestedatt--items--door"></a>
 ### Nested Schema for `items.door`
 
 Read-Only:
 
 - `open` (Boolean) True if the door is open.
+
+
+<a id="nestedatt--items--downstream_power"></a>
+### Nested Schema for `items.downstream_power`
+
+Read-Only:
+
+- `enabled` (Boolean) True if power is turned on to the device that is connected downstream of the MT40 power monitor.
+
+
+<a id="nestedatt--items--frequency"></a>
+### Nested Schema for `items.frequency`
+
+Read-Only:
+
+- `level` (Number) Electrical current frequency reading in hertz.
 
 
 <a id="nestedatt--items--humidity"></a>
@@ -148,6 +197,30 @@ Read-Only:
 - `concentration` (Number) PM2.5 reading in micrograms per cubic meter.
 
 
+<a id="nestedatt--items--power_factor"></a>
+### Nested Schema for `items.power_factor`
+
+Read-Only:
+
+- `percentage` (Number) Power factor reading as a percentage.
+
+
+<a id="nestedatt--items--real_power"></a>
+### Nested Schema for `items.real_power`
+
+Read-Only:
+
+- `draw` (Number) Real power reading in watts.
+
+
+<a id="nestedatt--items--remote_lockout_switch"></a>
+### Nested Schema for `items.remote_lockout_switch`
+
+Read-Only:
+
+- `locked` (Boolean) True if power controls are disabled via the MT40's physical remote lockout switch.
+
+
 <a id="nestedatt--items--temperature"></a>
 ### Nested Schema for `items.temperature`
 
@@ -163,6 +236,14 @@ Read-Only:
 Read-Only:
 
 - `concentration` (Number) TVOC reading in micrograms per cubic meter.
+
+
+<a id="nestedatt--items--voltage"></a>
+### Nested Schema for `items.voltage`
+
+Read-Only:
+
+- `level` (Number) Voltage reading in volts.
 
 
 <a id="nestedatt--items--water"></a>

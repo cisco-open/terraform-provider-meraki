@@ -181,7 +181,7 @@ Optional:
 
 Optional:
 
-- `addresses` (List of String) Up to 2 nameserver addresses to use, ordered in priority from highest to lowest priority.
+- `addresses` (Set of String) Up to 2 nameserver addresses to use, ordered in priority from highest to lowest priority.
 
 
 
@@ -200,7 +200,7 @@ Optional:
 
 Optional:
 
-- `addresses` (List of String) Up to 2 nameserver addresses to use, ordered in priority from highest to lowest priority.
+- `addresses` (Set of String) Up to 2 nameserver addresses to use, ordered in priority from highest to lowest priority.
 
 
 
@@ -267,7 +267,7 @@ Optional:
 
 Optional:
 
-- `addresses` (List of String) Up to 2 nameserver addresses to use, ordered in priority from highest to lowest priority.
+- `addresses` (Set of String) Up to 2 nameserver addresses to use, ordered in priority from highest to lowest priority.
 
 
 
@@ -286,7 +286,7 @@ Optional:
 
 Optional:
 
-- `addresses` (List of String) Up to 2 nameserver addresses to use, ordered in priority from highest to lowest priority.
+- `addresses` (Set of String) Up to 2 nameserver addresses to use, ordered in priority from highest to lowest priority.
 
 
 

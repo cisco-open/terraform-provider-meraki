@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -23,7 +7,7 @@ import (
 	"net/url"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -41,7 +25,6 @@ import (
 var (
 	_ resource.Resource              = &DevicesResource{}
 	_ resource.ResourceWithConfigure = &DevicesResource{}
-	// _ resource.ResourceWithImportState = &DevicesResource{}
 )
 
 func NewDevicesResource() resource.Resource {
@@ -69,30 +52,33 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"address": schema.StringAttribute{
-				MarkdownDescription: `The address of a device`,
+				MarkdownDescription: `Physical address of the device`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"beacon_id_params": schema.SingleNestedAttribute{
-				Computed: true,
-				Attributes: map[string]schema.Attribute{
+			"details": schema.SetNestedAttribute{
+				MarkdownDescription: `Additional device information`,
+				Computed:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
 
-					"major": schema.Int64Attribute{
-						Computed: true,
-					},
-					"minor": schema.Int64Attribute{
-						Computed: true,
-					},
-					"uuid": schema.StringAttribute{
-						Computed: true,
+						"name": schema.StringAttribute{
+							MarkdownDescription: `Additional property name`,
+							Computed:            true,
+						},
+						"value": schema.StringAttribute{
+							MarkdownDescription: `Additional property value`,
+							Computed:            true,
+						},
 					},
 				},
 			},
 			"firmware": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `Firmware version of the device`,
+				Computed:            true,
 			},
 			"floor_plan_id": schema.StringAttribute{
 				MarkdownDescription: `The floor plan to associate to this device. null disassociates the device from the floorplan.`,
@@ -102,11 +88,16 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"imei": schema.StringAttribute{
+				MarkdownDescription: `IMEI of the device, if applicable`,
+				Computed:            true,
+			},
 			"lan_ip": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `LAN IP address of the device`,
+				Computed:            true,
 			},
 			"lat": schema.Float64Attribute{
-				MarkdownDescription: `The latitude of a device`,
+				MarkdownDescription: `Latitude of the device`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Float64{
@@ -114,7 +105,7 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				},
 			},
 			"lng": schema.Float64Attribute{
-				MarkdownDescription: `The longitude of a device`,
+				MarkdownDescription: `Longitude of the device`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Float64{
@@ -122,15 +113,12 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				},
 			},
 			"mac": schema.StringAttribute{
-				MarkdownDescription: `Mac.`,
+				MarkdownDescription: `MAC address of the device`,
 				Computed:            true,
-				Optional:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"model": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `Model of the device`,
+				Computed:            true,
 			},
 			"move_map_marker": schema.BoolAttribute{
 				MarkdownDescription: `Whether or not to set the latitude and longitude of a device based on the new address. Only applies when lat and lng are not specified.`,
@@ -141,7 +129,7 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: `The name of a device`,
+				MarkdownDescription: `Name of the device`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -149,10 +137,11 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				},
 			},
 			"network_id": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `ID of the network the device belongs to`,
+				Computed:            true,
 			},
 			"notes": schema.StringAttribute{
-				MarkdownDescription: `The notes for the device. String. Limited to 255 characters.`,
+				MarkdownDescription: `Notes for the device, limited to 255 characters`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -163,12 +152,16 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			// 	MarkdownDescription: `organizationId path parameter. Organization ID`,
 			// 	Required:            true,
 			// },
+			"product_type": schema.StringAttribute{
+				MarkdownDescription: `Product type of the device`,
+				Computed:            true,
+			},
 			"serial": schema.StringAttribute{
-				MarkdownDescription: `serial path parameter.`,
+				MarkdownDescription: `Serial number of the device`,
 				Required:            true,
 			},
 			"switch_profile_id": schema.StringAttribute{
-				MarkdownDescription: `The ID of a switch profile to bind to the device (for available switch profiles, see the 'Switch Profiles' endpoint). Use null to unbind the switch device from the current profile. For a device to be bindable to a switch profile, it must (1) be a switch, and (2) belong to a network that is bound to a configuration template.`,
+				MarkdownDescription: `The ID of a switch template to bind to the device (for available switch templates, see the 'Switch Templates' endpoint). Use null to unbind the switch device from the current profile. For a device to be bindable to a switch template, it must (1) be a switch, and (2) belong to a network that is bound to a configuration template.`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -176,7 +169,7 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				},
 			},
 			"tags": schema.SetAttribute{
-				MarkdownDescription: `The list of tags of a device`,
+				MarkdownDescription: `List of tags assigned to the device`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
@@ -213,7 +206,6 @@ func (r *DevicesResource) Create(ctx context.Context, req resource.CreateRequest
 	// vvOrganizationID := data.OrganizationID.ValueString()
 	// organization_id
 	vvSerial := data.Serial.ValueString()
-	// serial
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Devices.GetDevice(vvSerial)
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
@@ -294,7 +286,6 @@ func (r *DevicesResource) Read(ctx context.Context, req resource.ReadRequest, re
 	// Has Item2
 
 	vvSerial := data.Serial.ValueString()
-	// serial
 	responseGet, restyRespGet, err := r.client.Devices.GetDevice(vvSerial)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -318,7 +309,7 @@ func (r *DevicesResource) Read(ctx context.Context, req resource.ReadRequest, re
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseDevicesGetDeviceItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -340,7 +331,6 @@ func (r *DevicesResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	//Path Params
 	vvSerial := data.Serial.ValueString()
-	// serial
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Devices.UpdateDevice(vvSerial, dataRequest)
 	if err != nil || restyResp2 == nil {
@@ -364,35 +354,35 @@ func (r *DevicesResource) Update(ctx context.Context, req resource.UpdateRequest
 
 func (r *DevicesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting Devices", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
 // TF Structs Schema
 type DevicesRs struct {
-	Serial types.String `tfsdk:"serial"`
-	// OrganizationID  types.String                              `tfsdk:"organization_id"`
-	Address         types.String                              `tfsdk:"address"`
-	BeaconIDParams  *ResponseDevicesGetDeviceBeaconIdParamsRs `tfsdk:"beacon_id_params"`
-	Firmware        types.String                              `tfsdk:"firmware"`
-	FloorPlanID     types.String                              `tfsdk:"floor_plan_id"`
-	LanIP           types.String                              `tfsdk:"lan_ip"`
-	Lat             types.Float64                             `tfsdk:"lat"`
-	Lng             types.Float64                             `tfsdk:"lng"`
-	Mac             types.String                              `tfsdk:"mac"`
-	Model           types.String                              `tfsdk:"model"`
-	Name            types.String                              `tfsdk:"name"`
-	NetworkID       types.String                              `tfsdk:"network_id"`
-	Notes           types.String                              `tfsdk:"notes"`
-	Tags            types.Set                                 `tfsdk:"tags"`
-	MoveMapMarker   types.Bool                                `tfsdk:"move_map_marker"`
-	SwitchProfileID types.String                              `tfsdk:"switch_profile_id"`
+	Serial          types.String                         `tfsdk:"serial"`
+	Address         types.String                         `tfsdk:"address"`
+	Details         *[]ResponseDevicesGetDeviceDetailsRs `tfsdk:"details"`
+	Firmware        types.String                         `tfsdk:"firmware"`
+	Imei            types.String                         `tfsdk:"imei"`
+	LanIP           types.String                         `tfsdk:"lan_ip"`
+	Lat             types.Float64                        `tfsdk:"lat"`
+	Lng             types.Float64                        `tfsdk:"lng"`
+	Mac             types.String                         `tfsdk:"mac"`
+	Model           types.String                         `tfsdk:"model"`
+	Name            types.String                         `tfsdk:"name"`
+	NetworkID       types.String                         `tfsdk:"network_id"`
+	Notes           types.String                         `tfsdk:"notes"`
+	ProductType     types.String                         `tfsdk:"product_type"`
+	Tags            types.Set                            `tfsdk:"tags"`
+	FloorPlanID     types.String                         `tfsdk:"floor_plan_id"`
+	MoveMapMarker   types.Bool                           `tfsdk:"move_map_marker"`
+	SwitchProfileID types.String                         `tfsdk:"switch_profile_id"`
 }
 
-type ResponseDevicesGetDeviceBeaconIdParamsRs struct {
-	Major types.Int64  `tfsdk:"major"`
-	Minor types.Int64  `tfsdk:"minor"`
-	UUID  types.String `tfsdk:"uuid"`
+type ResponseDevicesGetDeviceDetailsRs struct {
+	Name  types.String `tfsdk:"name"`
+	Value types.String `tfsdk:"value"`
 }
 
 // FromBody
@@ -421,12 +411,6 @@ func (r *DevicesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.Requ
 		*lng = r.Lng.ValueFloat64()
 	} else {
 		lng = nil
-	}
-	mac := new(string)
-	if !r.Mac.IsUnknown() && !r.Mac.IsNull() {
-		*mac = r.Mac.ValueString()
-	} else {
-		mac = &emptyString
 	}
 	moveMapMarker := new(bool)
 	if !r.MoveMapMarker.IsUnknown() && !r.MoveMapMarker.IsNull() {
@@ -459,7 +443,6 @@ func (r *DevicesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.Requ
 		FloorPlanID:     *floorPlanID,
 		Lat:             lat,
 		Lng:             lng,
-		Mac:             *mac,
 		MoveMapMarker:   moveMapMarker,
 		Name:            *name,
 		Notes:           *notes,
@@ -473,29 +456,22 @@ func (r *DevicesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.Requ
 func ResponseDevicesGetDeviceItemToBodyRs(state DevicesRs, response *merakigosdk.ResponseDevicesGetDevice, is_read bool) DevicesRs {
 	itemState := DevicesRs{
 		Address: types.StringValue(response.Address),
-		BeaconIDParams: func() *ResponseDevicesGetDeviceBeaconIdParamsRs {
-			if response.BeaconIDParams != nil {
-				return &ResponseDevicesGetDeviceBeaconIdParamsRs{
-					Major: func() types.Int64 {
-						if response.BeaconIDParams.Major != nil {
-							return types.Int64Value(int64(*response.BeaconIDParams.Major))
-						}
-						return types.Int64{}
-					}(),
-					Minor: func() types.Int64 {
-						if response.BeaconIDParams.Minor != nil {
-							return types.Int64Value(int64(*response.BeaconIDParams.Minor))
-						}
-						return types.Int64{}
-					}(),
-					UUID: types.StringValue(response.BeaconIDParams.UUID),
+		Details: func() *[]ResponseDevicesGetDeviceDetailsRs {
+			if response.Details != nil {
+				result := make([]ResponseDevicesGetDeviceDetailsRs, len(*response.Details))
+				for i, details := range *response.Details {
+					result[i] = ResponseDevicesGetDeviceDetailsRs{
+						Name:  types.StringValue(details.Name),
+						Value: types.StringValue(details.Value),
+					}
 				}
+				return &result
 			}
-			return &ResponseDevicesGetDeviceBeaconIdParamsRs{}
+			return &[]ResponseDevicesGetDeviceDetailsRs{}
 		}(),
-		Firmware:    types.StringValue(response.Firmware),
-		FloorPlanID: types.StringValue(response.FloorPlanID),
-		LanIP:       types.StringValue(response.LanIP),
+		Firmware: types.StringValue(response.Firmware),
+		Imei:     types.StringValue(response.Imei),
+		LanIP:    types.StringValue(response.LanIP),
 		Lat: func() types.Float64 {
 			if response.Lat != nil {
 				return types.Float64Value(float64(*response.Lat))
@@ -508,13 +484,14 @@ func ResponseDevicesGetDeviceItemToBodyRs(state DevicesRs, response *merakigosdk
 			}
 			return types.Float64{}
 		}(),
-		Mac:       types.StringValue(response.Mac),
-		Model:     types.StringValue(response.Model),
-		Name:      types.StringValue(response.Name),
-		NetworkID: types.StringValue(response.NetworkID),
-		Notes:     types.StringValue(response.Notes),
-		Serial:    types.StringValue(response.Serial),
-		Tags:      StringSliceToSet(response.Tags),
+		Mac:         types.StringValue(response.Mac),
+		Model:       types.StringValue(response.Model),
+		Name:        types.StringValue(response.Name),
+		NetworkID:   types.StringValue(response.NetworkID),
+		Notes:       types.StringValue(response.Notes),
+		ProductType: types.StringValue(response.ProductType),
+		Serial:      types.StringValue(response.Serial),
+		Tags:        StringSliceToSet(response.Tags),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(DevicesRs)

@@ -1,9 +1,9 @@
 terraform {
   required_providers {
     meraki = {
-      version = "0.1.0-alpha"
+      version = "0.2.0-alpha"
       source  = "hashicorp.com/edu/meraki"
-      # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-open/meraki" to use downloaded version from registry
+      # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
   }
 }
@@ -12,8 +12,8 @@ provider "meraki" {
 }
 
 variable "my_network_id" {
-  type                      = string
-  default                   = "L_828099381482775374" # site 1
+  type    = string
+  default = "L_828099381482775374" # site 1
 }
 
 ################################################################

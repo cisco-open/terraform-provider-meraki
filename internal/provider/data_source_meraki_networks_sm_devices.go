@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -68,7 +52,7 @@ func (d *NetworksSmDevicesDataSource) Schema(_ context.Context, _ datasource.Sch
     ownerEmail, ownerUsername, osBuild, publicIp, phoneNumber, diskInfoJson, deviceCapacity, isManaged, hadMdm, isSupervised, meid, imei, iccid,
     simCarrierNetwork, cellularDataUsed, isHotspotEnabled, createdAt, batteryEstCharge, quarantined, avName, avRunning, asName, fwName,
     isRooted, loginRequired, screenLockEnabled, screenLockDelay, autoLoginDisabled, autoTags, hasMdm, hasDesktopAgent, diskEncryptionEnabled,
-    hardwareEncryptionCaps, passCodeLock, usesHardwareKeystore, androidSecurityPatchVersion, and url.`,
+    hardwareEncryptionCaps, passCodeLock, usesHardwareKeystore, androidSecurityPatchVersion, cellular, and url.`,
 				Optional:    true,
 				ElementType: types.StringType,
 			},
@@ -98,6 +82,16 @@ func (d *NetworksSmDevicesDataSource) Schema(_ context.Context, _ datasource.Sch
 			"starting_after": schema.StringAttribute{
 				MarkdownDescription: `startingAfter query parameter. A token used by the server to indicate the start of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.`,
 				Optional:            true,
+			},
+			"system_types": schema.ListAttribute{
+				MarkdownDescription: `systemTypes query parameter. Filter devices by system type(s).`,
+				Optional:            true,
+				ElementType:         types.StringType,
+			},
+			"uuids": schema.ListAttribute{
+				MarkdownDescription: `uuids query parameter. Filter devices by uuid(s).`,
+				Optional:            true,
+				ElementType:         types.StringType,
 			},
 			"wifi_macs": schema.ListAttribute{
 				MarkdownDescription: `wifiMacs query parameter. Filter devices by wifi mac(s).`,
@@ -184,6 +178,8 @@ func (d *NetworksSmDevicesDataSource) Read(ctx context.Context, req datasource.R
 		queryParams1.WifiMacs = elementsToStrings(ctx, networksSmDevices.WifiMacs)
 		queryParams1.Serials = elementsToStrings(ctx, networksSmDevices.Serials)
 		queryParams1.IDs = elementsToStrings(ctx, networksSmDevices.IDs)
+		queryParams1.UUIDs = elementsToStrings(ctx, networksSmDevices.UUIDs)
+		queryParams1.SystemTypes = elementsToStrings(ctx, networksSmDevices.SystemTypes)
 		queryParams1.Scope = elementsToStrings(ctx, networksSmDevices.Scope)
 		queryParams1.PerPage = int(networksSmDevices.PerPage.ValueInt64())
 		queryParams1.StartingAfter = networksSmDevices.StartingAfter.ValueString()
@@ -219,6 +215,8 @@ type NetworksSmDevices struct {
 	WifiMacs      types.List                           `tfsdk:"wifi_macs"`
 	Serials       types.List                           `tfsdk:"serials"`
 	IDs           types.List                           `tfsdk:"ids"`
+	UUIDs         types.List                           `tfsdk:"uuids"`
+	SystemTypes   types.List                           `tfsdk:"system_types"`
 	Scope         types.List                           `tfsdk:"scope"`
 	PerPage       types.Int64                          `tfsdk:"per_page"`
 	StartingAfter types.String                         `tfsdk:"starting_after"`

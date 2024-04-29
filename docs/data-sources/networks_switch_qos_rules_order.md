@@ -50,14 +50,14 @@ output "meraki_networks_switch_qos_rules_order_example" {
 
 Read-Only:
 
-- `dscp` (Number)
-- `dst_port` (Number)
-- `dst_port_range` (String)
-- `id` (String)
-- `protocol` (String)
-- `src_port` (Number)
-- `src_port_range` (String)
-- `vlan` (Number)
+- `dscp` (Number) DSCP tag. Set this to -1 to trust incoming DSCP. Default value is 0
+- `dst_port` (Number) The destination port of the incoming packet. Applicable only if protocol is TCP or UDP.
+- `dst_port_range` (String) The destination port range of the incoming packet. Applicable only if protocol is set to TCP or UDP. Example: 70-80
+- `id` (String) Qos Rule id
+- `protocol` (String) The protocol of the incoming packet. Can be one of "ANY", "TCP" or "UDP". Default value is "ANY"
+- `src_port` (Number) The source port of the incoming packet. Applicable only if protocol is TCP or UDP.
+- `src_port_range` (String) The source port range of the incoming packet. Applicable only if protocol is set to TCP or UDP. Example: 70-80
+- `vlan` (Number) The VLAN of the incoming packet. A null value will match any VLAN.
 
 
 <a id="nestedatt--items"></a>

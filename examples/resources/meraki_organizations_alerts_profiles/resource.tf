@@ -6,6 +6,10 @@ resource "meraki_organizations_alerts_profiles" "example" {
     bit_rate_bps = 10000
     duration     = 60
     interface    = "wan1"
+    jitter_ms    = 100
+    latency_ms   = 100
+    loss_ratio   = 0.1
+    mos          = 3.5
     window       = 600
   }
   description     = "WAN 1 high utilization"

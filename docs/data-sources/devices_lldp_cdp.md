@@ -40,7 +40,7 @@ output "meraki_devices_lldp_cdp_example" {
 Read-Only:
 
 - `ports` (Attributes) (see [below for nested schema](#nestedatt--item--ports))
-- `source_mac` (String)
+- `source_mac` (String) Source MAC address
 
 <a id="nestedatt--item--ports"></a>
 ### Nested Schema for `item.ports`

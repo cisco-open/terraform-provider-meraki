@@ -33,7 +33,7 @@ output "meraki_networks_appliance_vlans_settings_example" {
 
 ### Optional
 
-- `vlans_enabled` (Boolean) Boolean indicating whether to enable (true) or disable (false) VLANs for the network
+- `vlans_enabled` (Boolean) Boolean indicating whether VLANs are enabled (true) or disabled (false) for the network
 
 ## Import
 

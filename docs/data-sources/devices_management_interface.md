@@ -39,18 +39,18 @@ output "meraki_devices_management_interface_example" {
 
 Read-Only:
 
-- `ddns_hostnames` (Attributes) (see [below for nested schema](#nestedatt--item--ddns_hostnames))
-- `wan1` (Attributes) (see [below for nested schema](#nestedatt--item--wan1))
-- `wan2` (Attributes) (see [below for nested schema](#nestedatt--item--wan2))
+- `ddns_hostnames` (Attributes) Dynamic DNS hostnames. (see [below for nested schema](#nestedatt--item--ddns_hostnames))
+- `wan1` (Attributes) WAN 1 settings (see [below for nested schema](#nestedatt--item--wan1))
+- `wan2` (Attributes) WAN 2 settings (only for MX devices) (see [below for nested schema](#nestedatt--item--wan2))
 
 <a id="nestedatt--item--ddns_hostnames"></a>
 ### Nested Schema for `item.ddns_hostnames`
 
 Read-Only:
 
-- `active_ddns_hostname` (String)
-- `ddns_hostname_wan1` (String)
-- `ddns_hostname_wan2` (String)
+- `active_ddns_hostname` (String) Active dynamic DNS hostname.
+- `ddns_hostname_wan1` (String) WAN 1 dynamic DNS hostname.
+- `ddns_hostname_wan2` (String) WAN 2 dynamic DNS hostname.
 
 
 <a id="nestedatt--item--wan1"></a>
@@ -58,13 +58,13 @@ Read-Only:
 
 Read-Only:
 
-- `static_dns` (List of String)
-- `static_gateway_ip` (String)
-- `static_ip` (String)
-- `static_subnet_mask` (String)
-- `using_static_ip` (Boolean)
-- `vlan` (Number)
-- `wan_enabled` (String)
+- `static_dns` (List of String) Up to two DNS IPs.
+- `static_gateway_ip` (String) The IP of the gateway on the WAN.
+- `static_ip` (String) The IP the device should use on the WAN.
+- `static_subnet_mask` (String) The subnet mask for the WAN.
+- `using_static_ip` (Boolean) Configure the interface to have static IP settings or use DHCP.
+- `vlan` (Number) The VLAN that management traffic should be tagged with. Applies whether usingStaticIp is true or false.
+- `wan_enabled` (String) Enable or disable the interface (only for MX devices). Valid values are 'enabled', 'disabled', and 'not configured'.
 
 
 <a id="nestedatt--item--wan2"></a>
@@ -72,6 +72,10 @@ Read-Only:
 
 Read-Only:
 
-- `using_static_ip` (Boolean)
-- `vlan` (Number)
-- `wan_enabled` (String)
+- `static_dns` (List of String) Up to two DNS IPs.
+- `static_gateway_ip` (String) The IP of the gateway on the WAN.
+- `static_ip` (String) The IP the device should use on the WAN.
+- `static_subnet_mask` (String) The subnet mask for the WAN.
+- `using_static_ip` (Boolean) Configure the interface to have static IP settings or use DHCP.
+- `vlan` (Number) The VLAN that management traffic should be tagged with. Applies whether usingStaticIp is true or false.
+- `wan_enabled` (String) Enable or disable the interface (only for MX devices). Valid values are 'enabled', 'disabled', and 'not configured'.

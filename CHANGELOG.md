@@ -1,3 +1,71 @@
+## 0.2.0-alpha (April 16, 2024)
+FEATURES:
+* Provider supports v1.44.1 of Meraki Dashboard API.
+* **New Resource** `meraki_administered_licensing_subscription_subscriptions_bind`
+* **New Resource** `meraki_administered_licensing_subscription_subscriptions_claim`
+* **New Resource** `meraki_administered_licensing_subscription_subscriptions_claim_key_validate`
+* **New Resource** `meraki_devices_appliance_radio_settings`
+* **New Resource** `meraki_devices_live_tools_arp_table`
+* **New Resource** `meraki_devices_live_tools_cable_test`
+* **New Resource** `meraki_devices_live_tools_ping`
+* **New Resource** `meraki_devices_live_tools_throughput_test`
+* **New Resource** `meraki_devices_live_tools_ping_device`
+* **New Resource** `meraki_devices_live_tools_wake_on_lan`
+* **New Resource** `meraki_devices_wireless_alternate_management_interface_ipv6`
+* **New Resource** `meraki_networks_appliance_rf_profiles`
+* **New Resource** `meraki_networks_appliance_traffic_shaping_vpn_exclusions`
+* **New Resource** `meraki_networks_sm_devices_install_apps`
+* **New Resource** `meraki_networks_sm_devices_reboot`
+* **New Resource** `meraki_networks_sm_devices_shutdown`
+* **New Resource** `meraki_networks_sm_devices_uninstall_apps`
+* **New Resource** `meraki_networks_vlan_profiles`
+* **New Resource** `meraki_networks_vlan_profiles_assignments_reassign`
+* **New Resource** `meraki_networks_wireless_ethernet_ports_profiles`
+* **New Resource** `meraki_networks_wireless_ethernet_ports_profiles_assign`
+* **New Resource** `meraki_networks_wireless_ethernet_ports_profiles_set_default`
+* **New Resource** `meraki_organizations_camera_roles`
+* **New Resource** `meraki_organizations_sm_admins_roles`
+* **New Resource** `meraki_organizations_sm_sentry_policies_assignments`
+* **New Data Source** `meraki_administered_licensing_subscription_entitlements`
+* **New Data Source** `meraki_administered_licensing_subscription_subscriptions`
+* **New Data Source** `meraki_administered_licensing_subscription_subscriptions_compliance_statuses`
+* **New Data Source** `meraki_devices_appliance_radio_settings`
+* **New Data Source** `meraki_devices_live_tools_arp_table`
+* **New Data Source** `meraki_devices_live_tools_cable_test`
+* **New Data Source** `meraki_devices_live_tools_ping`
+* **New Data Source** `meraki_devices_live_tools_ping_device`
+* **New Data Source** `meraki_devices_live_tools_wake_on_lan`
+* **New Data Source** `meraki_networks_appliance_rf_profiles`
+* **New Data Source** `meraki_networks_vlan_profiles`
+* **New Data Source** `meraki_networks_vlan_profiles_assignments_by_device`
+* **New Data Source** `meraki_networks_wireless_ethernet_ports_profiles`
+* **New Data Source** `meraki_organizations_appliance_traffic_shaping_vpn_exclusions_by_network`
+* **New Data Source** `meraki_organizations_appliance_uplinks_statuses_overview`
+* **New Data Source** `meraki_organizations_appliance_uplinks_usage_by_network`
+* **New Data Source** `meraki_organizations_camera_boundaries_areas_by_device`
+* **New Data Source** `meraki_organizations_camera_boundaries_lines_by_device`
+* **New Data Source** `meraki_organizations_camera_detections_history_by_boundary_by_interval`
+* **New Data Source** `meraki_organizations_camera_permissions`
+* **New Data Source** `meraki_organizations_camera_roles`
+* **New Data Source** `meraki_organizations_devices_availabilities_change_history`
+* **New Data Source** `meraki_organizations_devices_boots_history`
+* **New Data Source** `meraki_organizations_inventory_onboarding_cloud_monitoring_imports_info`
+* **New Data Source** `meraki_organizations_sm_admins_roles`
+* **New Data Source** `meraki_organizations_sm_sentry_policies_assignments_by_network`
+* **New Data Source** `meraki_organizations_summary_top_networks_by_status`
+* **New Data Source** `meraki_organizations_webhooks_callbacks_statuses`
+* **New Data Source** `meraki_organizations_wireless_devices_channel_utilization_by_device`
+* **New Data Source** `meraki_organizations_wireless_devices_channel_utilization_by_network`
+* **New Data Source** `meraki_organizations_wireless_devices_channel_utilization_history_by_device_by_interval`
+* **New Data Source** `meraki_organizations_wireless_devices_channel_utilization_history_by_network_by_interval`
+* **New Data Source** `meraki_organizations_wireless_devices_packet_loss_by_client`
+* **New Data Source** `meraki_organizations_ wireless_devices_packet_loss_by_device`
+* **New Data Source** `meraki_organizations_wireless_devices_packet_loss_by_network`
+
+BUGFIXES:
+* `meraki_networks_appliance_vlans`, `id` parameter now is required for create context.
+* `meraki_devices_management_interface` resource seems to be broken #12. [FIXED]
+
 ## 0.1.0-alpha (March 26, 2024)
 FEATURES:
 * **New Data Source:** `meraki_administered_identities_me`

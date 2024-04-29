@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -89,8 +73,24 @@ func (d *NetworksSensorAlertsOverviewByMetricDataSource) Schema(_ context.Contex
 							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
+								"apparent_power": schema.Int64Attribute{
+									MarkdownDescription: `Number of sensor alerts that occurred due to apparent power readings`,
+									Computed:            true,
+								},
+								"co2": schema.Int64Attribute{
+									MarkdownDescription: `Number of sensors that are currently alerting due to CO2 readings`,
+									Computed:            true,
+								},
+								"current": schema.Int64Attribute{
+									MarkdownDescription: `Number of sensor alerts that occurred due to electrical current readings`,
+									Computed:            true,
+								},
 								"door": schema.Int64Attribute{
 									MarkdownDescription: `Number of sensor alerts that occurred due to an open door`,
+									Computed:            true,
+								},
+								"frequency": schema.Int64Attribute{
+									MarkdownDescription: `Number of sensor alerts that occurred due to frequency readings`,
 									Computed:            true,
 								},
 								"humidity": schema.Int64Attribute{
@@ -116,12 +116,28 @@ func (d *NetworksSensorAlertsOverviewByMetricDataSource) Schema(_ context.Contex
 									MarkdownDescription: `Number of sensor alerts that occurred due to PM2.5 readings`,
 									Computed:            true,
 								},
+								"power_factor": schema.Int64Attribute{
+									MarkdownDescription: `Number of sensor alerts that occurred due to power factor readings`,
+									Computed:            true,
+								},
+								"real_power": schema.Int64Attribute{
+									MarkdownDescription: `Number of sensor alerts that occurred due to real power readings`,
+									Computed:            true,
+								},
 								"temperature": schema.Int64Attribute{
 									MarkdownDescription: `Number of sensor alerts that occurred due to temperature readings`,
 									Computed:            true,
 								},
 								"tvoc": schema.Int64Attribute{
 									MarkdownDescription: `Number of sensor alerts that occurred due to TVOC readings`,
+									Computed:            true,
+								},
+								"upstream_power": schema.Int64Attribute{
+									MarkdownDescription: `Number of sensor alerts that occurred due to upstream power outages`,
+									Computed:            true,
+								},
+								"voltage": schema.Int64Attribute{
+									MarkdownDescription: `Number of sensor alerts that occurred due to voltage readings`,
 									Computed:            true,
 								},
 								"water": schema.Int64Attribute{
@@ -203,13 +219,21 @@ type ResponseItemSensorGetNetworkSensorAlertsOverviewByMetric struct {
 }
 
 type ResponseItemSensorGetNetworkSensorAlertsOverviewByMetricCounts struct {
+	ApparentPower    types.Int64                                                          `tfsdk:"apparent_power"`
+	Co2              types.Int64                                                          `tfsdk:"co2"`
+	Current          types.Int64                                                          `tfsdk:"current"`
 	Door             types.Int64                                                          `tfsdk:"door"`
+	Frequency        types.Int64                                                          `tfsdk:"frequency"`
 	Humidity         types.Int64                                                          `tfsdk:"humidity"`
 	IndoorAirQuality types.Int64                                                          `tfsdk:"indoor_air_quality"`
 	Noise            *ResponseItemSensorGetNetworkSensorAlertsOverviewByMetricCountsNoise `tfsdk:"noise"`
 	Pm25             types.Int64                                                          `tfsdk:"pm25"`
+	PowerFactor      types.Int64                                                          `tfsdk:"power_factor"`
+	RealPower        types.Int64                                                          `tfsdk:"real_power"`
 	Temperature      types.Int64                                                          `tfsdk:"temperature"`
 	Tvoc             types.Int64                                                          `tfsdk:"tvoc"`
+	UpstreamPower    types.Int64                                                          `tfsdk:"upstream_power"`
+	Voltage          types.Int64                                                          `tfsdk:"voltage"`
 	Water            types.Int64                                                          `tfsdk:"water"`
 }
 
@@ -225,9 +249,33 @@ func ResponseSensorGetNetworkSensorAlertsOverviewByMetricItemsToBody(state Netwo
 			Counts: func() *ResponseItemSensorGetNetworkSensorAlertsOverviewByMetricCounts {
 				if item.Counts != nil {
 					return &ResponseItemSensorGetNetworkSensorAlertsOverviewByMetricCounts{
+						ApparentPower: func() types.Int64 {
+							if item.Counts.ApparentPower != nil {
+								return types.Int64Value(int64(*item.Counts.ApparentPower))
+							}
+							return types.Int64{}
+						}(),
+						Co2: func() types.Int64 {
+							if item.Counts.Co2 != nil {
+								return types.Int64Value(int64(*item.Counts.Co2))
+							}
+							return types.Int64{}
+						}(),
+						Current: func() types.Int64 {
+							if item.Counts.Current != nil {
+								return types.Int64Value(int64(*item.Counts.Current))
+							}
+							return types.Int64{}
+						}(),
 						Door: func() types.Int64 {
 							if item.Counts.Door != nil {
 								return types.Int64Value(int64(*item.Counts.Door))
+							}
+							return types.Int64{}
+						}(),
+						Frequency: func() types.Int64 {
+							if item.Counts.Frequency != nil {
+								return types.Int64Value(int64(*item.Counts.Frequency))
 							}
 							return types.Int64{}
 						}(),
@@ -262,6 +310,18 @@ func ResponseSensorGetNetworkSensorAlertsOverviewByMetricItemsToBody(state Netwo
 							}
 							return types.Int64{}
 						}(),
+						PowerFactor: func() types.Int64 {
+							if item.Counts.PowerFactor != nil {
+								return types.Int64Value(int64(*item.Counts.PowerFactor))
+							}
+							return types.Int64{}
+						}(),
+						RealPower: func() types.Int64 {
+							if item.Counts.RealPower != nil {
+								return types.Int64Value(int64(*item.Counts.RealPower))
+							}
+							return types.Int64{}
+						}(),
 						Temperature: func() types.Int64 {
 							if item.Counts.Temperature != nil {
 								return types.Int64Value(int64(*item.Counts.Temperature))
@@ -271,6 +331,18 @@ func ResponseSensorGetNetworkSensorAlertsOverviewByMetricItemsToBody(state Netwo
 						Tvoc: func() types.Int64 {
 							if item.Counts.Tvoc != nil {
 								return types.Int64Value(int64(*item.Counts.Tvoc))
+							}
+							return types.Int64{}
+						}(),
+						UpstreamPower: func() types.Int64 {
+							if item.Counts.UpstreamPower != nil {
+								return types.Int64Value(int64(*item.Counts.UpstreamPower))
+							}
+							return types.Int64{}
+						}(),
+						Voltage: func() types.Int64 {
+							if item.Counts.Voltage != nil {
+								return types.Int64Value(int64(*item.Counts.Voltage))
 							}
 							return types.Int64{}
 						}(),

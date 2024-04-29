@@ -15,12 +15,20 @@ description: |-
 ```terraform
 resource "meraki_networks_switch_settings" "example" {
 
+  mac_blocklist = {
+
+    enabled = false
+  }
   network_id = "string"
   power_exceptions = [{
 
     power_type = "string"
     serial     = "string"
   }]
+  uplink_client_sampling = {
+
+    enabled = false
+  }
   use_combined_power = false
   vlan               = 1
 }
@@ -39,9 +47,19 @@ output "meraki_networks_switch_settings_example" {
 
 ### Optional
 
+- `mac_blocklist` (Attributes) MAC blocklist (see [below for nested schema](#nestedatt--mac_blocklist))
 - `power_exceptions` (Attributes Set) Exceptions on a per switch basis to "useCombinedPower" (see [below for nested schema](#nestedatt--power_exceptions))
+- `uplink_client_sampling` (Attributes) Uplink client sampling (see [below for nested schema](#nestedatt--uplink_client_sampling))
 - `use_combined_power` (Boolean) The use Combined Power as the default behavior of secondary power supplies on supported devices.
 - `vlan` (Number) Management VLAN
+
+<a id="nestedatt--mac_blocklist"></a>
+### Nested Schema for `mac_blocklist`
+
+Optional:
+
+- `enabled` (Boolean) Enable MAC blocklist for switches in the network
+
 
 <a id="nestedatt--power_exceptions"></a>
 ### Nested Schema for `power_exceptions`
@@ -50,6 +68,14 @@ Optional:
 
 - `power_type` (String) Per switch exception (combined, redundant, useNetworkSetting)
 - `serial` (String) Serial number of the switch
+
+
+<a id="nestedatt--uplink_client_sampling"></a>
+### Nested Schema for `uplink_client_sampling`
+
+Optional:
+
+- `enabled` (Boolean) Enable client sampling on uplink
 
 ## Import
 

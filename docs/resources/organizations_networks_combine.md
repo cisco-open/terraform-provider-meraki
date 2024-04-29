@@ -72,7 +72,7 @@ Read-Only:
 - `name` (String) Network name
 - `notes` (String) Notes for the network
 - `organization_id` (String) Organization ID
-- `product_types` (List of String) List of the product types that the network supports
-- `tags` (List of String) Network tags
+- `product_types` (Set of String) List of the product types that the network supports
+- `tags` (Set of String) Network tags
 - `time_zone` (String) Timezone of the network
 - `url` (String) URL to the network Dashboard UI

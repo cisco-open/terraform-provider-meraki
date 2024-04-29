@@ -21,6 +21,11 @@ resource "meraki_networks_appliance_ssids" "example" {
 
     enabled = true
   }
+  dot11w = {
+
+    enabled  = true
+    required = true
+  }
   enabled         = true
   encryption_mode = "wpa"
   name            = "My SSID"
@@ -55,6 +60,7 @@ output "meraki_networks_appliance_ssids_example" {
 - `auth_mode` (String) The association control method for the SSID.
 - `default_vlan_id` (Number) The VLAN ID of the VLAN associated to this SSID.
 - `dhcp_enforced_deauthentication` (Attributes) DHCP Enforced Deauthentication enables the disassociation of wireless clients in addition to Mandatory DHCP. This param is only valid on firmware versions >= MX 17.0 where the associated LAN has Mandatory DHCP Enabled (see [below for nested schema](#nestedatt--dhcp_enforced_deauthentication))
+- `dot11w` (Attributes) The current setting for Protected Management Frames (802.11w). (see [below for nested schema](#nestedatt--dot11w))
 - `enabled` (Boolean) Whether or not the SSID is enabled.
 - `encryption_mode` (String) The psk encryption mode for the SSID.
 - `name` (String) The name of the SSID.
@@ -62,6 +68,10 @@ output "meraki_networks_appliance_ssids_example" {
 - `radius_servers` (Attributes Set) The RADIUS 802.1x servers to be used for authentication. (see [below for nested schema](#nestedatt--radius_servers))
 - `visible` (Boolean) Boolean indicating whether the MX should advertise or hide this SSID.
 - `wpa_encryption_mode` (String) WPA encryption mode for the SSID.
+
+### Read-Only
+
+- `radius_servers_response` (Attributes Set) The RADIUS 802.1x servers to be used for authentication. (see [below for nested schema](#nestedatt--radius_servers_response))
 
 <a id="nestedatt--dhcp_enforced_deauthentication"></a>
 ### Nested Schema for `dhcp_enforced_deauthentication`
@@ -71,10 +81,29 @@ Optional:
 - `enabled` (Boolean) Enable DCHP Enforced Deauthentication on the SSID.
 
 
+<a id="nestedatt--dot11w"></a>
+### Nested Schema for `dot11w`
+
+Optional:
+
+- `enabled` (Boolean) Whether 802.11w is enabled or not.
+- `required` (Boolean) (Optional) Whether 802.11w is required or not.
+
+
 <a id="nestedatt--radius_servers"></a>
 ### Nested Schema for `radius_servers`
 
 Optional:
+
+- `host` (String) The IP address of your RADIUS server.
+- `port` (Number) The UDP port your RADIUS servers listens on for Access-requests.
+- `secret` (String) The RADIUS client shared secret.
+
+
+<a id="nestedatt--radius_servers_response"></a>
+### Nested Schema for `radius_servers_response`
+
+Read-Only:
 
 - `host` (String) The IP address of your RADIUS server.
 - `port` (Number) The UDP port your RADIUS servers listens on for Access-requests.

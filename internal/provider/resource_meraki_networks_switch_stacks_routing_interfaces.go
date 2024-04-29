@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,8 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -32,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -66,7 +52,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"default_gateway": schema.StringAttribute{
-				MarkdownDescription: `The next hop for any traffic that isn't going to a directly connected subnet or over a static route. This IP address must exist in a subnet with a routed interface.`,
+				MarkdownDescription: `IPv4 default gateway`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -74,7 +60,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 				},
 			},
 			"interface_id": schema.StringAttribute{
-				MarkdownDescription: `interfaceId path parameter. Interface ID`,
+				MarkdownDescription: `The id`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -82,7 +68,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 				},
 			},
 			"interface_ip": schema.StringAttribute{
-				MarkdownDescription: `The IP address this switch stack will use for layer 3 routing on this VLAN or subnet. This cannot be the same as the switch's management IP.`,
+				MarkdownDescription: `IPv4 address`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -90,7 +76,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 				},
 			},
 			"ipv6": schema.SingleNestedAttribute{
-				MarkdownDescription: `The IPv6 settings of the interface.`,
+				MarkdownDescription: `IPv6 addressing`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
@@ -99,7 +85,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 				Attributes: map[string]schema.Attribute{
 
 					"address": schema.StringAttribute{
-						MarkdownDescription: `The IPv6 address of the interface. Required if assignmentMode is 'static'. Must not be included if assignmentMode is 'eui-64'.`,
+						MarkdownDescription: `IPv6 address`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
@@ -107,7 +93,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 						},
 					},
 					"assignment_mode": schema.StringAttribute{
-						MarkdownDescription: `The IPv6 assignment mode for the interface. Can be either 'eui-64' or 'static'.`,
+						MarkdownDescription: `Assignment mode`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
@@ -115,7 +101,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 						},
 					},
 					"gateway": schema.StringAttribute{
-						MarkdownDescription: `The IPv6 default gateway of the interface. Required if prefix is defined and this is the first interface with IPv6 configured for the stack.`,
+						MarkdownDescription: `IPv6 gateway`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
@@ -123,7 +109,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 						},
 					},
 					"prefix": schema.StringAttribute{
-						MarkdownDescription: `The IPv6 prefix of the interface. Required if IPv6 object is included.`,
+						MarkdownDescription: `IPv6 subnet`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
@@ -133,15 +119,22 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 				},
 			},
 			"multicast_routing": schema.StringAttribute{
-				MarkdownDescription: `Enable multicast support if, multicast routing between VLANs is required. Options are, 'disabled', 'enabled' or 'IGMP snooping querier'. Default is 'disabled'.`,
+				MarkdownDescription: `Multicast routing status`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"IGMP snooping querier",
+						"disabled",
+						"enabled",
+					),
+				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: `A friendly name or description for the interface or VLAN.`,
+				MarkdownDescription: `The name`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -153,7 +146,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 				Required:            true,
 			},
 			"ospf_settings": schema.SingleNestedAttribute{
-				MarkdownDescription: `The OSPF routing settings of the interface.`,
+				MarkdownDescription: `IPv4 OSPF Settings`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
@@ -162,7 +155,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 				Attributes: map[string]schema.Attribute{
 
 					"area": schema.StringAttribute{
-						MarkdownDescription: `The OSPF area to which this interface should belong. Can be either 'disabled' or the identifier of an existing OSPF area. Defaults to 'disabled'.`,
+						MarkdownDescription: `Area id`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
@@ -170,7 +163,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 						},
 					},
 					"cost": schema.Int64Attribute{
-						MarkdownDescription: `The path cost for this interface. Defaults to 1, but can be increased up to 65535 to give lower priority.`,
+						MarkdownDescription: `OSPF Cost`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
@@ -178,7 +171,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 						},
 					},
 					"is_passive_enabled": schema.BoolAttribute{
-						MarkdownDescription: `When enabled, OSPF will not run on the interface, but the subnet will still be advertised.`,
+						MarkdownDescription: `Disable sending Hello packets on this interface's IPv4 area`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
@@ -188,22 +181,26 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 				},
 			},
 			"ospf_v3": schema.SingleNestedAttribute{
-				Computed: true,
+				MarkdownDescription: `IPv6 OSPF Settings`,
+				Computed:            true,
 				Attributes: map[string]schema.Attribute{
 
 					"area": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Area id`,
+						Computed:            true,
 					},
 					"cost": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `OSPF Cost`,
+						Computed:            true,
 					},
 					"is_passive_enabled": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Disable sending Hello packets on this interface's IPv6 area`,
+						Computed:            true,
 					},
 				},
 			},
 			"subnet": schema.StringAttribute{
-				MarkdownDescription: `The network that this routed interface is on, in CIDR notation (ex. 10.1.1.0/24).`,
+				MarkdownDescription: `IPv4 subnet`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -215,7 +212,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 				Required:            true,
 			},
 			"vlan_id": schema.Int64Attribute{
-				MarkdownDescription: `The VLAN this routed interface is on. VLAN must be between 1 and 4094.`,
+				MarkdownDescription: `VLAN id`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
@@ -248,7 +245,6 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Create(ctx context.Conte
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvSwitchStackID := data.SwitchStackID.ValueString()
 	vvName := data.Name.ValueString()
 	//Items
@@ -272,7 +268,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Create(ctx context.Conte
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter InterfaceID",
-					"Error",
+					err.Error(),
 				)
 				return
 			}
@@ -287,9 +283,9 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Create(ctx context.Conte
 		}
 	}
 	dataRequest := data.toSdkApiRequestCreate(ctx)
-	restyResp2, err := r.client.Switch.CreateNetworkSwitchStackRoutingInterface(vvNetworkID, vvSwitchStackID, dataRequest)
+	response, restyResp2, err := r.client.Switch.CreateNetworkSwitchStackRoutingInterface(vvNetworkID, vvSwitchStackID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchStackRoutingInterface",
@@ -329,7 +325,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Create(ctx context.Conte
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter InterfaceID",
-				"Error",
+				err.Error(),
 			)
 			return
 		}
@@ -383,11 +379,8 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Read(ctx context.Context
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvSwitchStackID := data.SwitchStackID.ValueString()
-	// switch_stack_id
 	vvInterfaceID := data.InterfaceID.ValueString()
-	// interface_id
 	responseGet, restyRespGet, err := r.client.Switch.GetNetworkSwitchStackRoutingInterface(vvNetworkID, vvSwitchStackID, vvInterfaceID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -411,7 +404,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Read(ctx context.Context
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchStackRoutingInterfaceItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -446,12 +439,11 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Update(ctx context.Conte
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvSwitchStackID := data.SwitchStackID.ValueString()
 	vvInterfaceID := data.InterfaceID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Switch.UpdateNetworkSwitchStackRoutingInterface(vvNetworkID, vvSwitchStackID, vvInterfaceID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchStackRoutingInterface(vvNetworkID, vvSwitchStackID, vvInterfaceID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStackRoutingInterface",

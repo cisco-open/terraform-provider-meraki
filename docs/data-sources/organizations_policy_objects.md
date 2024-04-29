@@ -22,18 +22,6 @@ data "meraki_organizations_policy_objects" "example" {
 }
 
 output "meraki_organizations_policy_objects_example" {
-  value = data.meraki_organizations_policy_objects.example.items
-}
-
-data "meraki_organizations_policy_objects" "example" {
-
-  ending_before   = "string"
-  organization_id = "string"
-  per_page        = 1
-  starting_after  = "string"
-}
-
-output "meraki_organizations_policy_objects_example" {
   value = data.meraki_organizations_policy_objects.example.item
 }
 ```
@@ -52,35 +40,18 @@ output "meraki_organizations_policy_objects_example" {
 ### Read-Only
 
 - `item` (Attributes) (see [below for nested schema](#nestedatt--item))
-- `items` (Attributes List) Array of ResponseOrganizationsGetOrganizationPolicyObjects (see [below for nested schema](#nestedatt--items))
 
 <a id="nestedatt--item"></a>
 ### Nested Schema for `item`
 
 Read-Only:
 
-- `category` (String)
-- `cidr` (String)
-- `created_at` (String)
-- `group_ids` (List of String)
-- `id` (String)
-- `name` (String)
-- `network_ids` (List of String)
-- `type` (String)
-- `updated_at` (String)
-
-
-<a id="nestedatt--items"></a>
-### Nested Schema for `items`
-
-Read-Only:
-
-- `category` (String)
-- `cidr` (String)
-- `created_at` (String)
-- `group_ids` (List of String)
-- `id` (String)
-- `name` (String)
-- `network_ids` (List of String)
-- `type` (String)
-- `updated_at` (String)
+- `category` (String) Category of a policy object (one of: adaptivePolicy, network)
+- `cidr` (String) CIDR Value of a policy object
+- `created_at` (String) Time Stamp of policy object creation.
+- `group_ids` (List of String) The IDs of policy object groups the policy object belongs to.
+- `id` (String) Policy object ID
+- `name` (String) Name of policy object (alphanumeric, space, dash, or underscore characters only).
+- `network_ids` (List of String) The IDs of the networks that use the policy object.
+- `type` (String) Type of a policy object (one of: adaptivePolicyIpv4Cidr, cidr, fqdn, ipAndMask)
+- `updated_at` (String) Time Stamp of policy object updation.

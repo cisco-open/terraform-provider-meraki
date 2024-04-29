@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -70,31 +54,40 @@ func (d *NetworksPiiRequestsDataSource) Schema(_ context.Context, _ datasource.S
 				Attributes: map[string]schema.Attribute{
 
 					"completed_at": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `The request's completion time`,
+						Computed:            true,
 					},
 					"created_at": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `The request's creation time`,
+						Computed:            true,
 					},
 					"datasets": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The stringified array of datasets related to the provided key that should be deleted.`,
+						Computed:            true,
 					},
 					"id": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The network or organization identifier`,
+						Computed:            true,
 					},
 					"mac": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The MAC address of the PII request`,
+						Computed:            true,
 					},
 					"network_id": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The network identifier`,
+						Computed:            true,
 					},
 					"organization_wide": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `If the data returned is organization-wide. False indicates the data is network-wide.`,
+						Computed:            true,
 					},
 					"status": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The status of the PII request`,
+						Computed:            true,
 					},
 					"type": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The type of PII request`,
+						Computed:            true,
 					},
 				},
 			},
@@ -106,31 +99,40 @@ func (d *NetworksPiiRequestsDataSource) Schema(_ context.Context, _ datasource.S
 					Attributes: map[string]schema.Attribute{
 
 						"completed_at": schema.Int64Attribute{
-							Computed: true,
+							MarkdownDescription: `The request's completion time`,
+							Computed:            true,
 						},
 						"created_at": schema.Int64Attribute{
-							Computed: true,
+							MarkdownDescription: `The request's creation time`,
+							Computed:            true,
 						},
 						"datasets": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The stringified array of datasets related to the provided key that should be deleted.`,
+							Computed:            true,
 						},
 						"id": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The network or organization identifier`,
+							Computed:            true,
 						},
 						"mac": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The MAC address of the PII request`,
+							Computed:            true,
 						},
 						"network_id": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The network identifier`,
+							Computed:            true,
 						},
 						"organization_wide": schema.BoolAttribute{
-							Computed: true,
+							MarkdownDescription: `If the data returned is organization-wide. False indicates the data is network-wide.`,
+							Computed:            true,
 						},
 						"status": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The status of the PII request`,
+							Computed:            true,
 						},
 						"type": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The type of PII request`,
+							Computed:            true,
 						},
 					},
 				},

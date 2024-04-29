@@ -45,9 +45,26 @@ output "meraki_networks_switch_access_control_lists_example" {
 ### Optional
 
 - `rules` (Attributes Set) An ordered array of the access control list rules (see [below for nested schema](#nestedatt--rules))
+- `rules_response` (Attributes Set) An ordered array of the access control list rules (see [below for nested schema](#nestedatt--rules_response))
 
 <a id="nestedatt--rules"></a>
 ### Nested Schema for `rules`
+
+Optional:
+
+- `comment` (String) Description of the rule (optional)
+- `dst_cidr` (String) Destination IP address (in IP or CIDR notation)
+- `dst_port` (String) Destination port
+- `ip_version` (String) IP address version
+- `policy` (String) 'allow' or 'deny' traffic specified by this rule
+- `protocol` (String) The type of protocol
+- `src_cidr` (String) Source IP address (in IP or CIDR notation)
+- `src_port` (String) Source port
+- `vlan` (String) ncoming traffic VLAN
+
+
+<a id="nestedatt--rules_response"></a>
+### Nested Schema for `rules_response`
 
 Optional:
 

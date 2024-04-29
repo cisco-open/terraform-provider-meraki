@@ -86,6 +86,7 @@ resource "meraki_networks_group_policies" "example" {
         }
         settings = "custom"
       }
+      priority = "normal"
     }]
   }
   name       = "No video streaming"
@@ -107,15 +108,15 @@ resource "meraki_networks_group_policies" "example" {
     }
     saturday = {
 
-      active = false
-      from   = "0:00"
-      to     = "24:00"
+      active = true
+      from   = "9:00"
+      to     = "17:00"
     }
     sunday = {
 
-      active = false
-      from   = "0:00"
-      to     = "24:00"
+      active = true
+      from   = "9:00"
+      to     = "17:00"
     }
     thursday = {
 
@@ -162,7 +163,7 @@ output "meraki_networks_group_policies_example" {
 - `bonjour_forwarding` (Attributes) The Bonjour settings for your group policy. Only valid if your network has a wireless configuration. (see [below for nested schema](#nestedatt--bonjour_forwarding))
 - `content_filtering` (Attributes) The content filtering settings for your group policy (see [below for nested schema](#nestedatt--content_filtering))
 - `firewall_and_traffic_shaping` (Attributes) The firewall and traffic shaping rules and settings for your policy. (see [below for nested schema](#nestedatt--firewall_and_traffic_shaping))
-- `group_policy_id` (String) groupPolicyId path parameter. Group policy ID
+- `group_policy_id` (String) The ID of the group policy
 - `name` (String) The name for your group policy. Required.
 - `scheduling` (Attributes) The schedule for the group policy. Schedules are applied to days of the week. (see [below for nested schema](#nestedatt--scheduling))
 - `splash_auth_settings` (String) Whether clients bound to your policy will bypass splash authorization or behave according to the network's rules. Can be one of 'network default' or 'bypass'. Only available if your network has a wireless configuration.
@@ -200,7 +201,7 @@ Optional:
 Optional:
 
 - `description` (String) A description for your Bonjour forwarding rule. Optional.
-- `services` (List of String) A list of Bonjour services. At least one service must be specified. Available services are 'All Services', 'AirPlay', 'AFP', 'BitTorrent', 'FTP', 'iChat', 'iTunes', 'Printers', 'Samba', 'Scanners' and 'SSH'
+- `services` (Set of String) A list of Bonjour services. At least one service must be specified. Available services are 'All Services', 'AirPlay', 'AFP', 'BitTorrent', 'FTP', 'iChat', 'iTunes', 'Printers', 'Samba', 'Scanners' and 'SSH'
 - `vlan_id` (String) The ID of the service VLAN. Required.
 
 
@@ -219,7 +220,7 @@ Optional:
 
 Optional:
 
-- `patterns` (List of String) A list of URL patterns that are allowed
+- `patterns` (Set of String) A list of URL patterns that are allowed
 - `settings` (String) How URL patterns are applied. Can be 'network default', 'append' or 'override'.
 
 
@@ -228,7 +229,7 @@ Optional:
 
 Optional:
 
-- `categories` (List of String) A list of URL categories to block
+- `categories` (Set of String) A list of URL categories to block
 - `settings` (String) How URL categories are applied. Can be 'network default', 'append' or 'override'.
 
 
@@ -237,7 +238,7 @@ Optional:
 
 Optional:
 
-- `patterns` (List of String) A list of URL patterns that are blocked
+- `patterns` (Set of String) A list of URL patterns that are blocked
 - `settings` (String) How URL patterns are applied. Can be 'network default', 'append' or 'override'.
 
 

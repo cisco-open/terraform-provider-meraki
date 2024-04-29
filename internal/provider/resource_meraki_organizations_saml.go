@@ -1,26 +1,10 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -96,7 +80,6 @@ func (r *OrganizationsSamlResource) Create(ctx context.Context, req resource.Cre
 	}
 	//Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationSaml(vvOrganizationID)
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
@@ -148,7 +131,7 @@ func (r *OrganizationsSamlResource) Create(ctx context.Context, req resource.Cre
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseOrganizationsGetOrganizationSamlItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -177,7 +160,6 @@ func (r *OrganizationsSamlResource) Read(ctx context.Context, req resource.ReadR
 	// Has Item2
 
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
 	responseGet, restyRespGet, err := r.client.Organizations.GetOrganizationSaml(vvOrganizationID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -201,7 +183,7 @@ func (r *OrganizationsSamlResource) Read(ctx context.Context, req resource.ReadR
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseOrganizationsGetOrganizationSamlItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -223,7 +205,6 @@ func (r *OrganizationsSamlResource) Update(ctx context.Context, req resource.Upd
 
 	//Path Params
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationSaml(vvOrganizationID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
@@ -247,7 +228,7 @@ func (r *OrganizationsSamlResource) Update(ctx context.Context, req resource.Upd
 
 func (r *OrganizationsSamlResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting OrganizationsSaml", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 

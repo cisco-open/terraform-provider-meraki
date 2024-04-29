@@ -39,12 +39,12 @@ output "meraki_networks_cellular_gateway_uplink_example" {
 
 Read-Only:
 
-- `bandwidth_limits` (Attributes) (see [below for nested schema](#nestedatt--item--bandwidth_limits))
+- `bandwidth_limits` (Attributes) The bandwidth settings for the 'cellular' uplink (see [below for nested schema](#nestedatt--item--bandwidth_limits))
 
 <a id="nestedatt--item--bandwidth_limits"></a>
 ### Nested Schema for `item.bandwidth_limits`
 
 Read-Only:
 
-- `limit_down` (Number)
-- `limit_up` (Number)
+- `limit_down` (Number) The maximum download limit (integer, in Kbps). 'null' indicates no limit.
+- `limit_up` (Number) The maximum upload limit (integer, in Kbps). 'null' indicates no limit.

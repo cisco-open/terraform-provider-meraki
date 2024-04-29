@@ -21,6 +21,19 @@ resource "meraki_devices_live_tools_ping" "example" {
   serial = "string"
   parameters = {
 
+    callback = {
+
+      http_server = {
+
+        id = "aHR0cHM6Ly93d3cuZXhhbXBsZS5jb20vd2ViaG9va3M="
+      }
+      payload_template = {
+
+        id = "wpt_2100"
+      }
+      shared_secret = "secret"
+      url           = "https://webhook.site/28efa24e-f830-4d9f-a12b-fbb9e5035031"
+    }
     count  = 2
     target = "75.75.75.75"
   }
@@ -48,8 +61,36 @@ output "meraki_devices_live_tools_ping_example" {
 
 Optional:
 
+- `callback` (Attributes) Details for the callback. Please include either an httpServerId OR url and sharedSecret (see [below for nested schema](#nestedatt--parameters--callback))
 - `count` (Number) Count parameter to pass to ping. [1..5], default 5
 - `target` (String) FQDN, IPv4 or IPv6 address
+
+<a id="nestedatt--parameters--callback"></a>
+### Nested Schema for `parameters.callback`
+
+Optional:
+
+- `http_server` (Attributes) The webhook receiver used for the callback webhook. (see [below for nested schema](#nestedatt--parameters--callback--http_server))
+- `payload_template` (Attributes) The payload template of the webhook used for the callback (see [below for nested schema](#nestedatt--parameters--callback--payload_template))
+- `shared_secret` (String) A shared secret that will be included in the requests sent to the callback URL. It can be used to verify that the request was sent by Meraki. If using this field, please also specify an url.
+- `url` (String) The callback URL for the webhook target. If using this field, please also specify a sharedSecret.
+
+<a id="nestedatt--parameters--callback--http_server"></a>
+### Nested Schema for `parameters.callback.http_server`
+
+Optional:
+
+- `id` (String) The webhook receiver ID that will receive information. If specifying this, please leave the url and sharedSecret fields blank.
+
+
+<a id="nestedatt--parameters--callback--payload_template"></a>
+### Nested Schema for `parameters.callback.payload_template`
+
+Optional:
+
+- `id` (String) The ID of the payload template. Defaults to 'wpt_00005' for the Callback (included) template.
+
+
 
 
 <a id="nestedatt--item"></a>
@@ -57,10 +98,21 @@ Optional:
 
 Read-Only:
 
+- `callback` (Attributes) Information for callback used to send back results (see [below for nested schema](#nestedatt--item--callback))
 - `ping_id` (String) Id to check the status of your ping request.
 - `request` (Attributes) Ping request parameters (see [below for nested schema](#nestedatt--item--request))
 - `status` (String) Status of the ping request.
 - `url` (String) GET this url to check the status of your ping request.
+
+<a id="nestedatt--item--callback"></a>
+### Nested Schema for `item.callback`
+
+Read-Only:
+
+- `id` (String) The ID of the callback. To check the status of the callback, use this ID in a request to /webhooks/callbacks/statuses/{id}
+- `status` (String) The status of the callback
+- `url` (String) The callback URL for the webhook target. This was either provided in the original request or comes from a configured webhook receiver
+
 
 <a id="nestedatt--item--request"></a>
 ### Nested Schema for `item.request`
@@ -70,3 +122,11 @@ Read-Only:
 - `count` (Number) Number of pings to send
 - `serial` (String) Device serial number
 - `target` (String) IP address or FQDN to ping
+
+## Import
+
+Import is supported using the following syntax:
+
+```shell
+terraform import meraki_devices_live_tools_ping.example "id,serial"
+```

@@ -41,6 +41,6 @@ output "meraki_networks_appliance_firewall_firewalled_services_example" {
 
 Read-Only:
 
-- `access` (String)
-- `allowed_ips` (List of String)
-- `service` (String)
+- `access` (String) A string indicating the rule for which IPs are allowed to use the specified service
+- `allowed_ips` (List of String) An array of allowed IPs that can access the service
+- `service` (String) Appliance service name

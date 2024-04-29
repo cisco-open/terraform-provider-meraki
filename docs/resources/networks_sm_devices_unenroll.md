@@ -35,3 +35,14 @@ output "meraki_networks_sm_devices_unenroll_example" {
 
 - `device_id` (String) deviceId path parameter. Device ID
 - `network_id` (String) networkId path parameter. Network ID
+
+### Read-Only
+
+- `item` (Attributes) (see [below for nested schema](#nestedatt--item))
+
+<a id="nestedatt--item"></a>
+### Nested Schema for `item`
+
+Read-Only:
+
+- `success` (Boolean) Boolean indicating whether the operation was completed successfully.

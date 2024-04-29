@@ -67,7 +67,7 @@ output "meraki_networks_appliance_vlans_example" {
 - `dhcp_handling` (String) The appliance's handling of DHCP requests on this VLAN. One of: 'Run a DHCP server', 'Relay DHCP to another server' or 'Do not respond to DHCP requests'
 - `dhcp_lease_time` (String) The term of DHCP leases if the appliance is running a DHCP server on this VLAN. One of: '30 minutes', '1 hour', '4 hours', '12 hours', '1 day' or '1 week'
 - `dhcp_options` (Attributes Set) The list of DHCP options that will be included in DHCP responses. Each object in the list should have "code", "type", and "value" properties. (see [below for nested schema](#nestedatt--dhcp_options))
-- `dhcp_relay_server_ips` (List of String) The IPs of the DHCP servers that DHCP requests should be relayed to
+- `dhcp_relay_server_ips` (Set of String) The IPs of the DHCP servers that DHCP requests should be relayed to
 - `dns_nameservers` (String) The DNS nameservers used for DHCP responses, either "upstream_dns", "google_dns", "opendns", or a newline seperated string of IP addresses or domain names
 - `group_policy_id` (String) The id of the desired group policy to apply to the VLAN
 - `id` (String) The VLAN ID of the VLAN
@@ -118,7 +118,7 @@ Optional:
 
 Optional:
 
-- `interfaces` (List of String) Interfaces associated with the prefix
+- `interfaces` (Set of String) Interfaces associated with the prefix
 - `type` (String) Type of the origin
 
 

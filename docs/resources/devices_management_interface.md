@@ -28,9 +28,13 @@ resource "meraki_devices_management_interface" "example" {
   }
   wan2 = {
 
-    using_static_ip = false
-    vlan            = 2
-    wan_enabled     = "enabled"
+    static_dns         = ["1.2.3.2", "1.2.3.3"]
+    static_gateway_ip  = "1.2.3.1"
+    static_ip          = "1.2.3.4"
+    static_subnet_mask = "255.255.255.0"
+    using_static_ip    = false
+    vlan               = 2
+    wan_enabled        = "enabled"
   }
 }
 
@@ -53,14 +57,14 @@ output "meraki_devices_management_interface_example" {
 
 ### Read-Only
 
-- `ddns_hostnames` (Attributes) (see [below for nested schema](#nestedatt--ddns_hostnames))
+- `ddns_hostnames` (Attributes) Dynamic DNS hostnames. (see [below for nested schema](#nestedatt--ddns_hostnames))
 
 <a id="nestedatt--wan1"></a>
 ### Nested Schema for `wan1`
 
 Optional:
 
-- `static_dns` (List of String) Up to two DNS IPs.
+- `static_dns` (Set of String) Up to two DNS IPs.
 - `static_gateway_ip` (String) The IP of the gateway on the WAN.
 - `static_ip` (String) The IP the device should use on the WAN.
 - `static_subnet_mask` (String) The subnet mask for the WAN.
@@ -74,7 +78,7 @@ Optional:
 
 Optional:
 
-- `static_dns` (List of String) Up to two DNS IPs.
+- `static_dns` (Set of String) Up to two DNS IPs.
 - `static_gateway_ip` (String) The IP of the gateway on the WAN.
 - `static_ip` (String) The IP the device should use on the WAN.
 - `static_subnet_mask` (String) The subnet mask for the WAN.
@@ -88,9 +92,9 @@ Optional:
 
 Read-Only:
 
-- `active_ddns_hostname` (String)
-- `ddns_hostname_wan1` (String)
-- `ddns_hostname_wan2` (String)
+- `active_ddns_hostname` (String) Active dynamic DNS hostname.
+- `ddns_hostname_wan1` (String) WAN 1 dynamic DNS hostname.
+- `ddns_hostname_wan2` (String) WAN 2 dynamic DNS hostname.
 
 ## Import
 

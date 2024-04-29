@@ -18,8 +18,8 @@ resource "meraki_networks_appliance_firewall_l7_firewall_rules" "example2" {
 
   network_id = "string"
   rules = [{
-    policy = "deny"
-    type = "blockedCountries"
+    policy     = "deny"
+    type       = "blockedCountries"
     value_list = ["IT", "IL", "US"]
   }]
 }

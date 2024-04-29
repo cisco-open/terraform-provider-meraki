@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -23,7 +7,7 @@ import (
 	"net/url"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -71,6 +55,7 @@ func (r *NetworksResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 			// 	Optional:            true,
 			// 	PlanModifiers: []planmodifier.String{
 			// 		stringplanmodifier.UseStateForUnknown(),
+			// 		SuppressDiffString(),
 			// 	},
 			// },
 			"enrollment_string": schema.StringAttribute{
@@ -177,7 +162,6 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 	}
 	//Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
 	vvName := data.Name.ValueString()
 	//Items
 	responseVerifyItem, restyResp1, err := getAllItemsNetworks(*r.client, vvOrganizationID)
@@ -200,7 +184,7 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter NetworkID",
-					"Error",
+					err.Error(),
 				)
 				return
 			}
@@ -258,7 +242,7 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter NetworkID",
-				"Error",
+				err.Error(),
 			)
 			return
 		}
@@ -336,7 +320,7 @@ func (r *NetworksResource) Read(ctx context.Context, req resource.ReadRequest, r
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -533,9 +517,6 @@ func getAllItemsNetworks(client merakigosdk.Client, organizationId string) (mera
 	response, r2, er := client.Organizations.GetOrganizationNetworks(organizationId, &merakigosdk.GetOrganizationNetworksQueryParams{
 		PerPage: 1000,
 	})
-	if er != nil {
-		return all_response, r2, er
-	}
 	count := 0
 	all_response = append(all_response, *response...)
 	for len(*response) >= 1000 {

@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE ACTION
@@ -21,7 +5,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -61,12 +45,50 @@ func (r *NetworksClientsProvisionResource) Metadata(_ context.Context, req resou
 func (r *NetworksClientsProvisionResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-
 			"network_id": schema.StringAttribute{
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"item": schema.SingleNestedAttribute{
+				Computed: true,
+				Attributes: map[string]schema.Attribute{
+
+					"clients": schema.SetNestedAttribute{
+						MarkdownDescription: `The list of clients to provision`,
+						Computed:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+
+								"client_id": schema.StringAttribute{
+									MarkdownDescription: `The identifier of the client`,
+									Computed:            true,
+								},
+								"mac": schema.StringAttribute{
+									MarkdownDescription: `The MAC address of the client`,
+									Computed:            true,
+								},
+								"message": schema.StringAttribute{
+									MarkdownDescription: `The client's display message if its group policy is 'Blocked'`,
+									Computed:            true,
+								},
+								"name": schema.StringAttribute{
+									MarkdownDescription: `The name of the client`,
+									Computed:            true,
+								},
+							},
+						},
+					},
+					"device_policy": schema.StringAttribute{
+						MarkdownDescription: `The name of the client's policy`,
+						Computed:            true,
+					},
+					"group_policy_id": schema.StringAttribute{
+						MarkdownDescription: `The group policy identifier of the client`,
+						Computed:            true,
+					},
 				},
 			},
 			"parameters": schema.SingleNestedAttribute{
@@ -523,11 +545,10 @@ func (r *NetworksClientsProvisionResource) Create(ctx context.Context, req resou
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	dataRequest := data.toSdkApiRequestCreate(ctx)
-	restyResp1, err := r.client.Networks.ProvisionNetworkClients(vvNetworkID, dataRequest)
+	response, restyResp1, err := r.client.Networks.ProvisionNetworkClients(vvNetworkID, dataRequest)
 
-	if err != nil {
+	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing ProvisionNetworkClients",
@@ -542,29 +563,43 @@ func (r *NetworksClientsProvisionResource) Create(ctx context.Context, req resou
 		return
 	}
 	//Item
-
-	// data2 := ResponseNetworksProvisionNetworkClients(data, response)
+	data = ResponseNetworksProvisionNetworkClientsItemToBody(data, response)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
 func (r *NetworksClientsProvisionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *NetworksClientsProvisionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *NetworksClientsProvisionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
 // TF Structs Schema
 type NetworksClientsProvision struct {
 	NetworkID  types.String                              `tfsdk:"network_id"`
+	Item       *ResponseNetworksProvisionNetworkClients  `tfsdk:"item"`
 	Parameters *RequestNetworksProvisionNetworkClientsRs `tfsdk:"parameters"`
+}
+
+type ResponseNetworksProvisionNetworkClients struct {
+	Clients       *[]ResponseNetworksProvisionNetworkClientsClients `tfsdk:"clients"`
+	DevicePolicy  types.String                                      `tfsdk:"device_policy"`
+	GroupPolicyID types.String                                      `tfsdk:"group_policy_id"`
+}
+
+type ResponseNetworksProvisionNetworkClientsClients struct {
+	ClientID types.String `tfsdk:"client_id"`
+	Mac      types.String `tfsdk:"mac"`
+	Message  types.String `tfsdk:"message"`
+	Name     types.String `tfsdk:"name"`
 }
 
 type RequestNetworksProvisionNetworkClientsRs struct {
@@ -881,4 +916,27 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 	return &out
 }
 
-//ToBody
+// ToBody
+func ResponseNetworksProvisionNetworkClientsItemToBody(state NetworksClientsProvision, response *merakigosdk.ResponseNetworksProvisionNetworkClients) NetworksClientsProvision {
+	itemState := ResponseNetworksProvisionNetworkClients{
+		Clients: func() *[]ResponseNetworksProvisionNetworkClientsClients {
+			if response.Clients != nil {
+				result := make([]ResponseNetworksProvisionNetworkClientsClients, len(*response.Clients))
+				for i, clients := range *response.Clients {
+					result[i] = ResponseNetworksProvisionNetworkClientsClients{
+						ClientID: types.StringValue(clients.ClientID),
+						Mac:      types.StringValue(clients.Mac),
+						Message:  types.StringValue(clients.Message),
+						Name:     types.StringValue(clients.Name),
+					}
+				}
+				return &result
+			}
+			return &[]ResponseNetworksProvisionNetworkClientsClients{}
+		}(),
+		DevicePolicy:  types.StringValue(response.DevicePolicy),
+		GroupPolicyID: types.StringValue(response.GroupPolicyID),
+	}
+	state.Item = &itemState
+	return state
+}

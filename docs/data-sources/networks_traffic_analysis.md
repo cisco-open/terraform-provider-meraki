@@ -39,14 +39,16 @@ output "meraki_networks_traffic_analysis_example" {
 
 Read-Only:
 
-- `custom_pie_chart_items` (Attributes Set) (see [below for nested schema](#nestedatt--item--custom_pie_chart_items))
-- `mode` (String)
+- `custom_pie_chart_items` (Attributes Set) The list of items that make up the custom pie chart for traffic reporting. (see [below for nested schema](#nestedatt--item--custom_pie_chart_items))
+- `mode` (String) The traffic analysis mode for the network. Can be one of 'disabled' (do not collect traffic types),
+    'basic' (collect generic traffic categories), or 'detailed' (collect destination hostnames).
 
 <a id="nestedatt--item--custom_pie_chart_items"></a>
 ### Nested Schema for `item.custom_pie_chart_items`
 
 Read-Only:
 
-- `name` (String)
-- `type` (String)
-- `value` (String)
+- `name` (String) The name of the custom pie chart item.
+- `type` (String) The signature type for the custom pie chart item. Can be one of 'host', 'port' or 'ipRange'.
+- `value` (String) The value of the custom pie chart item. Valid syntax depends on the signature type of the chart item
+    (see sample request/response for more details).

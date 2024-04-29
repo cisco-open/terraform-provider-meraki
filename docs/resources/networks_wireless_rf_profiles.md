@@ -19,6 +19,10 @@ resource "meraki_networks_wireless_rf_profiles" "example" {
 
     band_operation_mode   = "dual"
     band_steering_enabled = true
+    bands = {
+
+      enabled = ["2.4", "5"]
+    }
   }
   band_selection_type      = "ap"
   client_balancing_enabled = true
@@ -31,6 +35,14 @@ resource "meraki_networks_wireless_rf_profiles" "example" {
     rxsop               = -95
     valid_auto_channels = [36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 149, 153, 157, 161, 165]
   }
+  flex_radios = {
+
+    by_model = [{
+
+      bands = ["5"]
+      model = "MR34"
+    }]
+  }
   min_bitrate_type = "band"
   name             = "Main Office"
   network_id       = "string"
@@ -40,91 +52,151 @@ resource "meraki_networks_wireless_rf_profiles" "example" {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
-      min_bitrate           = 11
+      bands = {
+
+        enabled = ["2.4", "5"]
+      }
+      min_bitrate = 11.0
     }
     status_1 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
-      min_bitrate           = 11
+      bands = {
+
+        enabled = ["2.4", "5"]
+      }
+      min_bitrate = 11.0
     }
     status_10 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
-      min_bitrate           = 11
+      bands = {
+
+        enabled = ["2.4", "5"]
+      }
+      min_bitrate = 11.0
     }
     status_11 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
-      min_bitrate           = 11
+      bands = {
+
+        enabled = ["2.4", "5"]
+      }
+      min_bitrate = 11.0
     }
     status_12 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
-      min_bitrate           = 11
+      bands = {
+
+        enabled = ["2.4", "5"]
+      }
+      min_bitrate = 11.0
     }
     status_13 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
-      min_bitrate           = 11
+      bands = {
+
+        enabled = ["2.4", "5"]
+      }
+      min_bitrate = 11.0
     }
     status_14 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
-      min_bitrate           = 11
+      bands = {
+
+        enabled = ["2.4", "5"]
+      }
+      min_bitrate = 11.0
     }
     status_2 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
-      min_bitrate           = 11
+      bands = {
+
+        enabled = ["2.4", "5"]
+      }
+      min_bitrate = 11.0
     }
     status_3 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
-      min_bitrate           = 11
+      bands = {
+
+        enabled = ["2.4", "5"]
+      }
+      min_bitrate = 11.0
     }
     status_4 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
-      min_bitrate           = 11
+      bands = {
+
+        enabled = ["2.4", "5"]
+      }
+      min_bitrate = 11.0
     }
     status_5 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
-      min_bitrate           = 11
+      bands = {
+
+        enabled = ["2.4", "5"]
+      }
+      min_bitrate = 11.0
     }
     status_6 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
-      min_bitrate           = 11
+      bands = {
+
+        enabled = ["2.4", "5"]
+      }
+      min_bitrate = 11.0
     }
     status_7 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
-      min_bitrate           = 11
+      bands = {
+
+        enabled = ["2.4", "5"]
+      }
+      min_bitrate = 11.0
     }
     status_8 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
-      min_bitrate           = 11
+      bands = {
+
+        enabled = ["2.4", "5"]
+      }
+      min_bitrate = 11.0
     }
     status_9 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
-      min_bitrate           = 11
+      bands = {
+
+        enabled = ["2.4", "5"]
+      }
+      min_bitrate = 11.0
     }
   }
   six_ghz_settings = {
@@ -144,7 +216,7 @@ resource "meraki_networks_wireless_rf_profiles" "example" {
 
     ax_enabled          = true
     max_power           = 30
-    min_bitrate         = 11
+    min_bitrate         = 11.0
     min_power           = 5
     rxsop               = -95
     valid_auto_channels = [1, 6, 11]
@@ -161,7 +233,7 @@ output "meraki_networks_wireless_rf_profiles_example" {
 
 ### Required
 
-- `network_id` (String) networkId path parameter. Network ID
+- `network_id` (String) The network ID of the RF Profile
 
 ### Optional
 
@@ -169,26 +241,35 @@ output "meraki_networks_wireless_rf_profiles_example" {
 - `band_selection_type` (String) Band selection can be set to either 'ssid' or 'ap'. This param is required on creation.
 - `client_balancing_enabled` (Boolean) Steers client to best available access point. Can be either true or false. Defaults to true.
 - `five_ghz_settings` (Attributes) Settings related to 5Ghz band (see [below for nested schema](#nestedatt--five_ghz_settings))
+- `flex_radios` (Attributes) Flex radio settings. (see [below for nested schema](#nestedatt--flex_radios))
 - `min_bitrate_type` (String) Minimum bitrate can be set to either 'band' or 'ssid'. Defaults to band.
 - `name` (String) The name of the new profile. Must be unique. This param is required on creation.
 - `per_ssid_settings` (Attributes) Per-SSID radio settings by number. (see [below for nested schema](#nestedatt--per_ssid_settings))
 - `rf_profile_id` (String) rfProfileId path parameter. Rf profile ID
-- `six_ghz_settings` (Attributes) Settings related to 6Ghz band (see [below for nested schema](#nestedatt--six_ghz_settings))
+- `six_ghz_settings` (Attributes) Settings related to 6Ghz band. Only applicable to networks with 6Ghz capable APs (see [below for nested schema](#nestedatt--six_ghz_settings))
 - `transmission` (Attributes) Settings related to radio transmission. (see [below for nested schema](#nestedatt--transmission))
 - `two_four_ghz_settings` (Attributes) Settings related to 2.4Ghz band (see [below for nested schema](#nestedatt--two_four_ghz_settings))
 
 ### Read-Only
 
-- `afc_enabled` (Boolean)
-- `id` (String) The ID of this resource.
+- `id` (String) The name of the new profile. Must be unique.
 
 <a id="nestedatt--ap_band_settings"></a>
 ### Nested Schema for `ap_band_settings`
 
 Optional:
 
-- `band_operation_mode` (String) Choice between 'dual', '2.4ghz' or '5ghz'. Defaults to dual.
+- `band_operation_mode` (String) Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'. Defaults to dual.
 - `band_steering_enabled` (Boolean) Steers client to most open band. Can be either true or false. Defaults to true.
+- `bands` (Attributes) Settings related to all bands (see [below for nested schema](#nestedatt--ap_band_settings--bands))
+
+<a id="nestedatt--ap_band_settings--bands"></a>
+### Nested Schema for `ap_band_settings.bands`
+
+Optional:
+
+- `enabled` (Set of String) List of enabled bands. Can include ["2.4", "5", "6", "disabled"
+
 
 
 <a id="nestedatt--five_ghz_settings"></a>
@@ -201,7 +282,24 @@ Optional:
 - `min_bitrate` (Number) Sets min bitrate (Mbps) of 5Ghz band. Can be one of '6', '9', '12', '18', '24', '36', '48' or '54'. Defaults to 12.
 - `min_power` (Number) Sets min power (dBm) of 5Ghz band. Can be integer between 2 and 30. Defaults to 8.
 - `rxsop` (Number) The RX-SOP level controls the sensitivity of the radio. It is strongly recommended to use RX-SOP only after consulting a wireless expert. RX-SOP can be configured in the range of -65 to -95 (dBm). A value of null will reset this to the default.
-- `valid_auto_channels` (List of String) Sets valid auto channels for 5Ghz band. Can be one of '36', '40', '44', '48', '52', '56', '60', '64', '100', '104', '108', '112', '116', '120', '124', '128', '132', '136', '140', '144', '149', '153', '157', '161' or '165'.Defaults to [36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 149, 153, 157, 161, 165].
+- `valid_auto_channels` (Set of Number) Sets valid auto channels for 5Ghz band. Can be one of '36', '40', '44', '48', '52', '56', '60', '64', '100', '104', '108', '112', '116', '120', '124', '128', '132', '136', '140', '144', '149', '153', '157', '161' or '165'.Defaults to [36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 149, 153, 157, 161, 165].
+
+
+<a id="nestedatt--flex_radios"></a>
+### Nested Schema for `flex_radios`
+
+Optional:
+
+- `by_model` (Attributes Set) Flex radios by model. (see [below for nested schema](#nestedatt--flex_radios--by_model))
+
+<a id="nestedatt--flex_radios--by_model"></a>
+### Nested Schema for `flex_radios.by_model`
+
+Optional:
+
+- `bands` (Set of String) Band to use for each flex radio. For example, ['6'] will set the AP's first flex radio to 6 GHz
+- `model` (String) Model of the AP
+
 
 
 <a id="nestedatt--per_ssid_settings"></a>
@@ -230,13 +328,22 @@ Optional:
 
 Optional:
 
-- `band_operation_mode` (String) Choice between 'dual', '2.4ghz' or '5ghz'.
+- `band_operation_mode` (String) Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
 - `band_steering_enabled` (Boolean) Steers client to most open band between 2.4 GHz and 5 GHz. Can be either true or false.
+- `bands` (Attributes) Settings related to all bands (see [below for nested schema](#nestedatt--per_ssid_settings--status_0--bands))
 - `min_bitrate` (Number) Sets min bitrate (Mbps) of this SSID. Can be one of '1', '2', '5.5', '6', '9', '11', '12', '18', '24', '36', '48' or '54'.
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Name of SSID
+
+<a id="nestedatt--per_ssid_settings--status_0--bands"></a>
+### Nested Schema for `per_ssid_settings.status_0.bands`
+
+Optional:
+
+- `enabled` (Set of String) List of enabled bands. Can include ["2.4", "5", "6", "disabled"
+
 
 
 <a id="nestedatt--per_ssid_settings--status_1"></a>
@@ -244,13 +351,22 @@ Read-Only:
 
 Optional:
 
-- `band_operation_mode` (String) Choice between 'dual', '2.4ghz' or '5ghz'.
+- `band_operation_mode` (String) Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
 - `band_steering_enabled` (Boolean) Steers client to most open band between 2.4 GHz and 5 GHz. Can be either true or false.
+- `bands` (Attributes) Settings related to all bands (see [below for nested schema](#nestedatt--per_ssid_settings--status_1--bands))
 - `min_bitrate` (Number) Sets min bitrate (Mbps) of this SSID. Can be one of '1', '2', '5.5', '6', '9', '11', '12', '18', '24', '36', '48' or '54'.
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Name of SSID
+
+<a id="nestedatt--per_ssid_settings--status_1--bands"></a>
+### Nested Schema for `per_ssid_settings.status_1.bands`
+
+Optional:
+
+- `enabled` (Set of String) List of enabled bands. Can include ["2.4", "5", "6", "disabled"
+
 
 
 <a id="nestedatt--per_ssid_settings--status_10"></a>
@@ -258,13 +374,22 @@ Read-Only:
 
 Optional:
 
-- `band_operation_mode` (String) Choice between 'dual', '2.4ghz' or '5ghz'.
+- `band_operation_mode` (String) Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
 - `band_steering_enabled` (Boolean) Steers client to most open band between 2.4 GHz and 5 GHz. Can be either true or false.
+- `bands` (Attributes) Settings related to all bands (see [below for nested schema](#nestedatt--per_ssid_settings--status_10--bands))
 - `min_bitrate` (Number) Sets min bitrate (Mbps) of this SSID. Can be one of '1', '2', '5.5', '6', '9', '11', '12', '18', '24', '36', '48' or '54'.
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Name of SSID
+
+<a id="nestedatt--per_ssid_settings--status_10--bands"></a>
+### Nested Schema for `per_ssid_settings.status_10.bands`
+
+Optional:
+
+- `enabled` (Set of String) List of enabled bands. Can include ["2.4", "5", "6", "disabled"
+
 
 
 <a id="nestedatt--per_ssid_settings--status_11"></a>
@@ -272,13 +397,22 @@ Read-Only:
 
 Optional:
 
-- `band_operation_mode` (String) Choice between 'dual', '2.4ghz' or '5ghz'.
+- `band_operation_mode` (String) Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
 - `band_steering_enabled` (Boolean) Steers client to most open band between 2.4 GHz and 5 GHz. Can be either true or false.
+- `bands` (Attributes) Settings related to all bands (see [below for nested schema](#nestedatt--per_ssid_settings--status_11--bands))
 - `min_bitrate` (Number) Sets min bitrate (Mbps) of this SSID. Can be one of '1', '2', '5.5', '6', '9', '11', '12', '18', '24', '36', '48' or '54'.
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Name of SSID
+
+<a id="nestedatt--per_ssid_settings--status_11--bands"></a>
+### Nested Schema for `per_ssid_settings.status_11.bands`
+
+Optional:
+
+- `enabled` (Set of String) List of enabled bands. Can include ["2.4", "5", "6", "disabled"
+
 
 
 <a id="nestedatt--per_ssid_settings--status_12"></a>
@@ -286,13 +420,22 @@ Read-Only:
 
 Optional:
 
-- `band_operation_mode` (String) Choice between 'dual', '2.4ghz' or '5ghz'.
+- `band_operation_mode` (String) Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
 - `band_steering_enabled` (Boolean) Steers client to most open band between 2.4 GHz and 5 GHz. Can be either true or false.
+- `bands` (Attributes) Settings related to all bands (see [below for nested schema](#nestedatt--per_ssid_settings--status_12--bands))
 - `min_bitrate` (Number) Sets min bitrate (Mbps) of this SSID. Can be one of '1', '2', '5.5', '6', '9', '11', '12', '18', '24', '36', '48' or '54'.
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Name of SSID
+
+<a id="nestedatt--per_ssid_settings--status_12--bands"></a>
+### Nested Schema for `per_ssid_settings.status_12.bands`
+
+Optional:
+
+- `enabled` (Set of String) List of enabled bands. Can include ["2.4", "5", "6", "disabled"
+
 
 
 <a id="nestedatt--per_ssid_settings--status_13"></a>
@@ -300,13 +443,22 @@ Read-Only:
 
 Optional:
 
-- `band_operation_mode` (String) Choice between 'dual', '2.4ghz' or '5ghz'.
+- `band_operation_mode` (String) Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
 - `band_steering_enabled` (Boolean) Steers client to most open band between 2.4 GHz and 5 GHz. Can be either true or false.
+- `bands` (Attributes) Settings related to all bands (see [below for nested schema](#nestedatt--per_ssid_settings--status_13--bands))
 - `min_bitrate` (Number) Sets min bitrate (Mbps) of this SSID. Can be one of '1', '2', '5.5', '6', '9', '11', '12', '18', '24', '36', '48' or '54'.
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Name of SSID
+
+<a id="nestedatt--per_ssid_settings--status_13--bands"></a>
+### Nested Schema for `per_ssid_settings.status_13.bands`
+
+Optional:
+
+- `enabled` (Set of String) List of enabled bands. Can include ["2.4", "5", "6", "disabled"
+
 
 
 <a id="nestedatt--per_ssid_settings--status_14"></a>
@@ -314,13 +466,22 @@ Read-Only:
 
 Optional:
 
-- `band_operation_mode` (String) Choice between 'dual', '2.4ghz' or '5ghz'.
+- `band_operation_mode` (String) Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
 - `band_steering_enabled` (Boolean) Steers client to most open band between 2.4 GHz and 5 GHz. Can be either true or false.
+- `bands` (Attributes) Settings related to all bands (see [below for nested schema](#nestedatt--per_ssid_settings--status_14--bands))
 - `min_bitrate` (Number) Sets min bitrate (Mbps) of this SSID. Can be one of '1', '2', '5.5', '6', '9', '11', '12', '18', '24', '36', '48' or '54'.
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Name of SSID
+
+<a id="nestedatt--per_ssid_settings--status_14--bands"></a>
+### Nested Schema for `per_ssid_settings.status_14.bands`
+
+Optional:
+
+- `enabled` (Set of String) List of enabled bands. Can include ["2.4", "5", "6", "disabled"
+
 
 
 <a id="nestedatt--per_ssid_settings--status_2"></a>
@@ -328,13 +489,22 @@ Read-Only:
 
 Optional:
 
-- `band_operation_mode` (String) Choice between 'dual', '2.4ghz' or '5ghz'.
+- `band_operation_mode` (String) Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
 - `band_steering_enabled` (Boolean) Steers client to most open band between 2.4 GHz and 5 GHz. Can be either true or false.
+- `bands` (Attributes) Settings related to all bands (see [below for nested schema](#nestedatt--per_ssid_settings--status_2--bands))
 - `min_bitrate` (Number) Sets min bitrate (Mbps) of this SSID. Can be one of '1', '2', '5.5', '6', '9', '11', '12', '18', '24', '36', '48' or '54'.
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Name of SSID
+
+<a id="nestedatt--per_ssid_settings--status_2--bands"></a>
+### Nested Schema for `per_ssid_settings.status_2.bands`
+
+Optional:
+
+- `enabled` (Set of String) List of enabled bands. Can include ["2.4", "5", "6", "disabled"
+
 
 
 <a id="nestedatt--per_ssid_settings--status_3"></a>
@@ -342,13 +512,22 @@ Read-Only:
 
 Optional:
 
-- `band_operation_mode` (String) Choice between 'dual', '2.4ghz' or '5ghz'.
+- `band_operation_mode` (String) Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
 - `band_steering_enabled` (Boolean) Steers client to most open band between 2.4 GHz and 5 GHz. Can be either true or false.
+- `bands` (Attributes) Settings related to all bands (see [below for nested schema](#nestedatt--per_ssid_settings--status_3--bands))
 - `min_bitrate` (Number) Sets min bitrate (Mbps) of this SSID. Can be one of '1', '2', '5.5', '6', '9', '11', '12', '18', '24', '36', '48' or '54'.
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Name of SSID
+
+<a id="nestedatt--per_ssid_settings--status_3--bands"></a>
+### Nested Schema for `per_ssid_settings.status_3.bands`
+
+Optional:
+
+- `enabled` (Set of String) List of enabled bands. Can include ["2.4", "5", "6", "disabled"
+
 
 
 <a id="nestedatt--per_ssid_settings--status_4"></a>
@@ -356,13 +535,22 @@ Read-Only:
 
 Optional:
 
-- `band_operation_mode` (String) Choice between 'dual', '2.4ghz' or '5ghz'.
+- `band_operation_mode` (String) Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
 - `band_steering_enabled` (Boolean) Steers client to most open band between 2.4 GHz and 5 GHz. Can be either true or false.
+- `bands` (Attributes) Settings related to all bands (see [below for nested schema](#nestedatt--per_ssid_settings--status_4--bands))
 - `min_bitrate` (Number) Sets min bitrate (Mbps) of this SSID. Can be one of '1', '2', '5.5', '6', '9', '11', '12', '18', '24', '36', '48' or '54'.
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Name of SSID
+
+<a id="nestedatt--per_ssid_settings--status_4--bands"></a>
+### Nested Schema for `per_ssid_settings.status_4.bands`
+
+Optional:
+
+- `enabled` (Set of String) List of enabled bands. Can include ["2.4", "5", "6", "disabled"
+
 
 
 <a id="nestedatt--per_ssid_settings--status_5"></a>
@@ -370,13 +558,22 @@ Read-Only:
 
 Optional:
 
-- `band_operation_mode` (String) Choice between 'dual', '2.4ghz' or '5ghz'.
+- `band_operation_mode` (String) Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
 - `band_steering_enabled` (Boolean) Steers client to most open band between 2.4 GHz and 5 GHz. Can be either true or false.
+- `bands` (Attributes) Settings related to all bands (see [below for nested schema](#nestedatt--per_ssid_settings--status_5--bands))
 - `min_bitrate` (Number) Sets min bitrate (Mbps) of this SSID. Can be one of '1', '2', '5.5', '6', '9', '11', '12', '18', '24', '36', '48' or '54'.
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Name of SSID
+
+<a id="nestedatt--per_ssid_settings--status_5--bands"></a>
+### Nested Schema for `per_ssid_settings.status_5.bands`
+
+Optional:
+
+- `enabled` (Set of String) List of enabled bands. Can include ["2.4", "5", "6", "disabled"
+
 
 
 <a id="nestedatt--per_ssid_settings--status_6"></a>
@@ -384,13 +581,22 @@ Read-Only:
 
 Optional:
 
-- `band_operation_mode` (String) Choice between 'dual', '2.4ghz' or '5ghz'.
+- `band_operation_mode` (String) Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
 - `band_steering_enabled` (Boolean) Steers client to most open band between 2.4 GHz and 5 GHz. Can be either true or false.
+- `bands` (Attributes) Settings related to all bands (see [below for nested schema](#nestedatt--per_ssid_settings--status_6--bands))
 - `min_bitrate` (Number) Sets min bitrate (Mbps) of this SSID. Can be one of '1', '2', '5.5', '6', '9', '11', '12', '18', '24', '36', '48' or '54'.
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Name of SSID
+
+<a id="nestedatt--per_ssid_settings--status_6--bands"></a>
+### Nested Schema for `per_ssid_settings.status_6.bands`
+
+Optional:
+
+- `enabled` (Set of String) List of enabled bands. Can include ["2.4", "5", "6", "disabled"
+
 
 
 <a id="nestedatt--per_ssid_settings--status_7"></a>
@@ -398,13 +604,22 @@ Read-Only:
 
 Optional:
 
-- `band_operation_mode` (String) Choice between 'dual', '2.4ghz' or '5ghz'.
+- `band_operation_mode` (String) Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
 - `band_steering_enabled` (Boolean) Steers client to most open band between 2.4 GHz and 5 GHz. Can be either true or false.
+- `bands` (Attributes) Settings related to all bands (see [below for nested schema](#nestedatt--per_ssid_settings--status_7--bands))
 - `min_bitrate` (Number) Sets min bitrate (Mbps) of this SSID. Can be one of '1', '2', '5.5', '6', '9', '11', '12', '18', '24', '36', '48' or '54'.
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Name of SSID
+
+<a id="nestedatt--per_ssid_settings--status_7--bands"></a>
+### Nested Schema for `per_ssid_settings.status_7.bands`
+
+Optional:
+
+- `enabled` (Set of String) List of enabled bands. Can include ["2.4", "5", "6", "disabled"
+
 
 
 <a id="nestedatt--per_ssid_settings--status_8"></a>
@@ -412,13 +627,22 @@ Read-Only:
 
 Optional:
 
-- `band_operation_mode` (String) Choice between 'dual', '2.4ghz' or '5ghz'.
+- `band_operation_mode` (String) Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
 - `band_steering_enabled` (Boolean) Steers client to most open band between 2.4 GHz and 5 GHz. Can be either true or false.
+- `bands` (Attributes) Settings related to all bands (see [below for nested schema](#nestedatt--per_ssid_settings--status_8--bands))
 - `min_bitrate` (Number) Sets min bitrate (Mbps) of this SSID. Can be one of '1', '2', '5.5', '6', '9', '11', '12', '18', '24', '36', '48' or '54'.
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Name of SSID
+
+<a id="nestedatt--per_ssid_settings--status_8--bands"></a>
+### Nested Schema for `per_ssid_settings.status_8.bands`
+
+Optional:
+
+- `enabled` (Set of String) List of enabled bands. Can include ["2.4", "5", "6", "disabled"
+
 
 
 <a id="nestedatt--per_ssid_settings--status_9"></a>
@@ -426,13 +650,22 @@ Read-Only:
 
 Optional:
 
-- `band_operation_mode` (String) Choice between 'dual', '2.4ghz' or '5ghz'.
+- `band_operation_mode` (String) Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
 - `band_steering_enabled` (Boolean) Steers client to most open band between 2.4 GHz and 5 GHz. Can be either true or false.
+- `bands` (Attributes) Settings related to all bands (see [below for nested schema](#nestedatt--per_ssid_settings--status_9--bands))
 - `min_bitrate` (Number) Sets min bitrate (Mbps) of this SSID. Can be one of '1', '2', '5.5', '6', '9', '11', '12', '18', '24', '36', '48' or '54'.
 
 Read-Only:
 
-- `name` (String)
+- `name` (String) Name of SSID
+
+<a id="nestedatt--per_ssid_settings--status_9--bands"></a>
+### Nested Schema for `per_ssid_settings.status_9.bands`
+
+Optional:
+
+- `enabled` (Set of String) List of enabled bands. Can include ["2.4", "5", "6", "disabled"
+
 
 
 
@@ -441,16 +674,12 @@ Read-Only:
 
 Optional:
 
-- `channel_width` (String) Sets channel width (MHz) for 6Ghz band. Can be one of '0', '20', '40', '80' or '160'. Defaults to 0.
+- `channel_width` (String) Sets channel width (MHz) for 6Ghz band. Can be one of '0', '20', '40', '80' or '160'. Defaults to auto.
 - `max_power` (Number) Sets max power (dBm) of 6Ghz band. Can be integer between 2 and 30. Defaults to 30.
 - `min_bitrate` (Number) Sets min bitrate (Mbps) of 6Ghz band. Can be one of '6', '9', '12', '18', '24', '36', '48' or '54'. Defaults to 12.
 - `min_power` (Number) Sets min power (dBm) of 6Ghz band. Can be integer between 2 and 30. Defaults to 8.
 - `rxsop` (Number) The RX-SOP level controls the sensitivity of the radio. It is strongly recommended to use RX-SOP only after consulting a wireless expert. RX-SOP can be configured in the range of -65 to -95 (dBm). A value of null will reset this to the default.
-- `valid_auto_channels` (List of String) Sets valid auto channels for 6Ghz band. Can be one of '1', '5', '9', '13', '17', '21', '25', '29', '33', '37', '41', '45', '49', '53', '57', '61', '65', '69', '73', '77', '81', '85', '89', '93', '97', '101', '105', '109', '113', '117', '121', '125', '129', '133', '137', '141', '145', '149', '153', '157', '161', '165', '169', '173', '177', '181', '185', '189', '193', '197', '201', '205', '209', '213', '217', '221', '225', '229' or '233'.Defaults to [1, 5, 9, 13, 17, 21, 25, 29, 33, 37, 41, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81, 85, 89, 93, 97, 101, 105, 109, 113, 117, 121, 125, 129, 133, 137, 141, 145, 149, 153, 157, 161, 165, 169, 173, 177, 181, 185, 189, 193, 197, 201, 205, 209, 213, 217, 221, 225, 229, 233].
-
-Read-Only:
-
-- `afc_enabled` (Boolean)
+- `valid_auto_channels` (Set of Number) Sets valid auto channels for 6Ghz band. Can be one of '1', '5', '9', '13', '17', '21', '25', '29', '33', '37', '41', '45', '49', '53', '57', '61', '65', '69', '73', '77', '81', '85', '89', '93', '97', '101', '105', '109', '113', '117', '121', '125', '129', '133', '137', '141', '145', '149', '153', '157', '161', '165', '169', '173', '177', '181', '185', '189', '193', '197', '201', '205', '209', '213', '217', '221', '225', '229' or '233'. Defaults to auto.
 
 
 <a id="nestedatt--transmission"></a>
@@ -471,7 +700,7 @@ Optional:
 - `min_bitrate` (Number) Sets min bitrate (Mbps) of 2.4Ghz band. Can be one of '1', '2', '5.5', '6', '9', '11', '12', '18', '24', '36', '48' or '54'. Defaults to 11.
 - `min_power` (Number) Sets min power (dBm) of 2.4Ghz band. Can be integer between 2 and 30. Defaults to 5.
 - `rxsop` (Number) The RX-SOP level controls the sensitivity of the radio. It is strongly recommended to use RX-SOP only after consulting a wireless expert. RX-SOP can be configured in the range of -65 to -95 (dBm). A value of null will reset this to the default.
-- `valid_auto_channels` (List of String) Sets valid auto channels for 2.4Ghz band. Can be one of '1', '6' or '11'. Defaults to [1, 6, 11].
+- `valid_auto_channels` (Set of Number) Sets valid auto channels for 2.4Ghz band. Can be one of '1', '6' or '11'. Defaults to [1, 6, 11].
 
 ## Import
 

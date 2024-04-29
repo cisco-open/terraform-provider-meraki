@@ -39,25 +39,27 @@ output "meraki_networks_switch_dhcp_server_policy_example" {
 
 Read-Only:
 
-- `alerts` (Attributes) (see [below for nested schema](#nestedatt--item--alerts))
-- `allowed_servers` (List of String)
-- `arp_inspection` (Attributes) (see [below for nested schema](#nestedatt--item--arp_inspection))
-- `blocked_servers` (List of String)
-- `default_policy` (String)
+- `alerts` (Attributes) Email alert settings for DHCP servers (see [below for nested schema](#nestedatt--item--alerts))
+- `allowed_servers` (List of String) List the MAC addresses of DHCP servers to permit on the network when defaultPolicy is set
+      to block.An empty array will clear the entries.
+- `arp_inspection` (Attributes) Dynamic ARP Inspection settings (see [below for nested schema](#nestedatt--item--arp_inspection))
+- `blocked_servers` (List of String) List the MAC addresses of DHCP servers to block on the network when defaultPolicy is set
+      to allow.An empty array will clear the entries.
+- `default_policy` (String) 'allow' or 'block' new DHCP servers. Default value is 'allow'.
 
 <a id="nestedatt--item--alerts"></a>
 ### Nested Schema for `item.alerts`
 
 Read-Only:
 
-- `email` (Attributes) (see [below for nested schema](#nestedatt--item--alerts--email))
+- `email` (Attributes) Alert settings for DHCP servers (see [below for nested schema](#nestedatt--item--alerts--email))
 
 <a id="nestedatt--item--alerts--email"></a>
 ### Nested Schema for `item.alerts.email`
 
 Read-Only:
 
-- `enabled` (Boolean)
+- `enabled` (Boolean) When enabled, send an email if a new DHCP server is seen. Default value is false.
 
 
 
@@ -66,5 +68,5 @@ Read-Only:
 
 Read-Only:
 
-- `enabled` (Boolean)
-- `unsupported_models` (List of String)
+- `enabled` (Boolean) Enable or disable Dynamic ARP Inspection on the network. Default value is false.
+- `unsupported_models` (List of String) List of switch models that does not support dynamic ARP inspection

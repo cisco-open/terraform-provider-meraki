@@ -1,26 +1,10 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -76,9 +60,8 @@ func (r *NetworksSwitchStpResource) Schema(_ context.Context, _ resource.SchemaR
 				},
 			},
 			"stp_bridge_priority_response": schema.SetNestedAttribute{
-				MarkdownDescription: `STP bridge priority for switches/stacks or switch profiles. An empty array will clear the STP bridge priority settings.`,
+				MarkdownDescription: `STP bridge priority for switches/stacks or switch templates. An empty array will clear the STP bridge priority settings.`,
 				Computed:            true,
-				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
@@ -88,7 +71,6 @@ func (r *NetworksSwitchStpResource) Schema(_ context.Context, _ resource.SchemaR
 						"stacks": schema.SetAttribute{
 							MarkdownDescription: `List of stack IDs`,
 							Computed:            true,
-
 							PlanModifiers: []planmodifier.Set{
 								setplanmodifier.UseStateForUnknown(),
 							},
@@ -97,14 +79,14 @@ func (r *NetworksSwitchStpResource) Schema(_ context.Context, _ resource.SchemaR
 							Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
 						},
 						"stp_priority": schema.Int64Attribute{
-							MarkdownDescription: `STP priority for switch, stacks, or switch profiles`,
+							MarkdownDescription: `STP priority for switch, stacks, or switch templates`,
 							Computed:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
 							},
 						},
 						"switch_profiles": schema.SetAttribute{
-							MarkdownDescription: `List of switch profile IDs`,
+							MarkdownDescription: `List of switch template IDs`,
 							Computed:            true,
 							PlanModifiers: []planmodifier.Set{
 								setplanmodifier.UseStateForUnknown(),
@@ -125,8 +107,7 @@ func (r *NetworksSwitchStpResource) Schema(_ context.Context, _ resource.SchemaR
 				},
 			},
 			"stp_bridge_priority": schema.SetNestedAttribute{
-				MarkdownDescription: `STP bridge priority for switches/stacks or switch profiles. An empty array will clear the STP bridge priority settings.`,
-				Computed:            true,
+				MarkdownDescription: `STP bridge priority for switches/stacks or switch templates. An empty array will clear the STP bridge priority settings.`,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
@@ -207,10 +188,8 @@ func (r *NetworksSwitchStpResource) Create(ctx context.Context, req resource.Cre
 		)
 		return
 	}
-
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchStp(vvNetworkID)
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
@@ -262,7 +241,7 @@ func (r *NetworksSwitchStpResource) Create(ctx context.Context, req resource.Cre
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchStpItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -299,7 +278,6 @@ func (r *NetworksSwitchStpResource) Read(ctx context.Context, req resource.ReadR
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	responseGet, restyRespGet, err := r.client.Switch.GetNetworkSwitchStp(vvNetworkID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -323,7 +301,7 @@ func (r *NetworksSwitchStpResource) Read(ctx context.Context, req resource.ReadR
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchStpItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -345,7 +323,6 @@ func (r *NetworksSwitchStpResource) Update(ctx context.Context, req resource.Upd
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Switch.UpdateNetworkSwitchStp(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil {
@@ -369,7 +346,7 @@ func (r *NetworksSwitchStpResource) Update(ctx context.Context, req resource.Upd
 
 func (r *NetworksSwitchStpResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksSwitchStp", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -400,7 +377,7 @@ func (r *NetworksSwitchStpRs) toSdkApiRequestUpdate(ctx context.Context) *meraki
 	if r.StpBridgePriority != nil {
 		for _, rItem1 := range *r.StpBridgePriority {
 			var stacks []string = nil
-
+			//Hoola aqui
 			rItem1.Stacks.ElementsAs(ctx, &stacks, false)
 			stpPriority := func() *int64 {
 				if !rItem1.StpPriority.IsUnknown() && !rItem1.StpPriority.IsNull() {
@@ -409,10 +386,10 @@ func (r *NetworksSwitchStpRs) toSdkApiRequestUpdate(ctx context.Context) *meraki
 				return nil
 			}()
 			var switchProfiles []string = nil
-
+			//Hoola aqui
 			rItem1.SwitchProfiles.ElementsAs(ctx, &switchProfiles, false)
 			var switches []string = nil
-
+			//Hoola aqui
 			rItem1.Switches.ElementsAs(ctx, &switches, false)
 			requestSwitchUpdateNetworkSwitchStpStpBridgePriority = append(requestSwitchUpdateNetworkSwitchStpStpBridgePriority, merakigosdk.RequestSwitchUpdateNetworkSwitchStpStpBridgePriority{
 				Stacks:         stacks,
@@ -443,7 +420,7 @@ func ResponseSwitchGetNetworkSwitchStpItemToBodyRs(state NetworksSwitchStpRs, re
 			}
 			return types.Bool{}
 		}(),
-		StpBridgePriorityResponse: func() *[]ResponseSwitchGetNetworkSwitchStpStpBridgePriorityRs {
+		StpBridgePriority: func() *[]ResponseSwitchGetNetworkSwitchStpStpBridgePriorityRs {
 			if response.StpBridgePriority != nil {
 				result := make([]ResponseSwitchGetNetworkSwitchStpStpBridgePriorityRs, len(*response.StpBridgePriority))
 				var localStacks basetypes.SetValue

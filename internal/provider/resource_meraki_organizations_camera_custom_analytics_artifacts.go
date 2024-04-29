@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -63,7 +47,7 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Schema(_ context.C
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"artifact_id": schema.StringAttribute{
-				MarkdownDescription: `artifactId path parameter. Artifact ID`,
+				MarkdownDescription: `Custom analytics artifact ID`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -71,7 +55,7 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Schema(_ context.C
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: `Unique name of the artifact`,
+				MarkdownDescription: `Custom analytics artifact name`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -79,15 +63,21 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Schema(_ context.C
 				},
 			},
 			"organization_id": schema.StringAttribute{
-				MarkdownDescription: `organizationId path parameter. Organization ID`,
+				MarkdownDescription: `Organization ID`,
 				Required:            true,
 			},
 			"status": schema.SingleNestedAttribute{
-				Computed: true,
+				MarkdownDescription: `Custom analytics artifact status`,
+				Computed:            true,
 				Attributes: map[string]schema.Attribute{
 
+					"message": schema.StringAttribute{
+						MarkdownDescription: `Status message`,
+						Computed:            true,
+					},
 					"type": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Status type`,
+						Computed:            true,
 					},
 				},
 			},
@@ -145,7 +135,7 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Create(ctx context
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter ArtifactID",
-					"Error",
+					err.Error(),
 				)
 				return
 			}
@@ -160,7 +150,7 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Create(ctx context
 		}
 	}
 	dataRequest := data.toSdkApiRequestCreate(ctx)
-	restyResp2, err := r.client.Camera.CreateOrganizationCameraCustomAnalyticsArtifact(vvOrganizationID, dataRequest)
+	_, restyResp2, err := r.client.Camera.CreateOrganizationCameraCustomAnalyticsArtifact(vvOrganizationID, dataRequest)
 
 	if err != nil || restyResp2 == nil {
 		if restyResp1 != nil {
@@ -202,7 +192,7 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Create(ctx context
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter ArtifactID",
-				"Error",
+				err.Error(),
 			)
 			return
 		}
@@ -359,7 +349,8 @@ type OrganizationsCameraCustomAnalyticsArtifactsRs struct {
 }
 
 type ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactStatusRs struct {
-	Type types.String `tfsdk:"type"`
+	Message types.String `tfsdk:"message"`
+	Type    types.String `tfsdk:"type"`
 }
 
 // FromBody
@@ -386,7 +377,8 @@ func ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactItemToBodyRs(stat
 		Status: func() *ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactStatusRs {
 			if response.Status != nil {
 				return &ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactStatusRs{
-					Type: types.StringValue(response.Status.Type),
+					Message: types.StringValue(response.Status.Message),
+					Type:    types.StringValue(response.Status.Type),
 				}
 			}
 			return &ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactStatusRs{}

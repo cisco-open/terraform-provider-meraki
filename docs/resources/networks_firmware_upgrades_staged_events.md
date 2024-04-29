@@ -28,6 +28,16 @@ resource "meraki_networks_firmware_upgrades_staged_events" "example" {
         }
       }
     }
+    switch_catalyst = {
+
+      next_upgrade = {
+
+        to_version = {
+
+          id = "4321"
+        }
+      }
+    }
   }
   stages = [{
 
@@ -69,6 +79,7 @@ output "meraki_networks_firmware_upgrades_staged_events_example" {
 Optional:
 
 - `switch` (Attributes) The Switch network to be updated (see [below for nested schema](#nestedatt--products--switch))
+- `switch_catalyst` (Attributes) Version information for the switch network being upgraded (see [below for nested schema](#nestedatt--products--switch_catalyst))
 
 <a id="nestedatt--products--switch"></a>
 ### Nested Schema for `products.switch`
@@ -94,6 +105,30 @@ Optional:
 Read-Only:
 
 - `short_name` (String) Firmware version short name
+
+
+
+
+<a id="nestedatt--products--switch_catalyst"></a>
+### Nested Schema for `products.switch_catalyst`
+
+Optional:
+
+- `next_upgrade` (Attributes) The next upgrade version for the switch network (see [below for nested schema](#nestedatt--products--switch_catalyst--next_upgrade))
+
+<a id="nestedatt--products--switch_catalyst--next_upgrade"></a>
+### Nested Schema for `products.switch_catalyst.next_upgrade`
+
+Optional:
+
+- `to_version` (Attributes) The version to be updated to for switch Catalyst devices (see [below for nested schema](#nestedatt--products--switch_catalyst--next_upgrade--to_version))
+
+<a id="nestedatt--products--switch_catalyst--next_upgrade--to_version"></a>
+### Nested Schema for `products.switch_catalyst.next_upgrade.to_version`
+
+Optional:
+
+- `id` (String) The version ID
 
 
 

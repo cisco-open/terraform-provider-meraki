@@ -60,6 +60,7 @@ Read-Only:
 
 Read-Only:
 
+- `cdp` (String)
 - `client_vpn_connections` (Attributes Set) (see [below for nested schema](#nestedatt--item--records--client_vpn_connections))
 - `description` (String)
 - `first_seen` (Number)
@@ -72,6 +73,7 @@ Read-Only:
 - `sm_installed` (Boolean)
 - `ssid` (String)
 - `status` (String)
+- `switchport` (String)
 - `user` (String)
 - `vlan` (String)
 - `wireless_capabilities` (String)

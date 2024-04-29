@@ -1,35 +1,22 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -63,6 +50,25 @@ func (r *NetworksSwitchSettingsResource) Metadata(_ context.Context, req resourc
 func (r *NetworksSwitchSettingsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"mac_blocklist": schema.SingleNestedAttribute{
+				MarkdownDescription: `MAC blocklist`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
+				Attributes: map[string]schema.Attribute{
+
+					"enabled": schema.BoolAttribute{
+						MarkdownDescription: `Enable MAC blocklist for switches in the network`,
+						Computed:            true,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
+					},
+				},
+			},
 			"network_id": schema.StringAttribute{
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
@@ -84,6 +90,13 @@ func (r *NetworksSwitchSettingsResource) Schema(_ context.Context, _ resource.Sc
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"combined",
+									"redundant",
+									"useNetworkSetting",
+								),
+							},
 						},
 						"serial": schema.StringAttribute{
 							MarkdownDescription: `Serial number of the switch`,
@@ -92,6 +105,25 @@ func (r *NetworksSwitchSettingsResource) Schema(_ context.Context, _ resource.Sc
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
+						},
+					},
+				},
+			},
+			"uplink_client_sampling": schema.SingleNestedAttribute{
+				MarkdownDescription: `Uplink client sampling`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
+				Attributes: map[string]schema.Attribute{
+
+					"enabled": schema.BoolAttribute{
+						MarkdownDescription: `Enable client sampling on uplink`,
+						Computed:            true,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
 						},
 					},
 				},
@@ -136,7 +168,6 @@ func (r *NetworksSwitchSettingsResource) Create(ctx context.Context, req resourc
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchSettings(vvNetworkID)
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
@@ -188,7 +219,7 @@ func (r *NetworksSwitchSettingsResource) Create(ctx context.Context, req resourc
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchSettingsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -217,7 +248,6 @@ func (r *NetworksSwitchSettingsResource) Read(ctx context.Context, req resource.
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	responseGet, restyRespGet, err := r.client.Switch.GetNetworkSwitchSettings(vvNetworkID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -241,7 +271,7 @@ func (r *NetworksSwitchSettingsResource) Read(ctx context.Context, req resource.
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchSettingsItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -263,7 +293,6 @@ func (r *NetworksSwitchSettingsResource) Update(ctx context.Context, req resourc
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchSettings(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
@@ -287,16 +316,22 @@ func (r *NetworksSwitchSettingsResource) Update(ctx context.Context, req resourc
 
 func (r *NetworksSwitchSettingsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksSwitchSettings", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
 // TF Structs Schema
 type NetworksSwitchSettingsRs struct {
-	NetworkID        types.String                                               `tfsdk:"network_id"`
-	PowerExceptions  *[]ResponseSwitchGetNetworkSwitchSettingsPowerExceptionsRs `tfsdk:"power_exceptions"`
-	UseCombinedPower types.Bool                                                 `tfsdk:"use_combined_power"`
-	VLAN             types.Int64                                                `tfsdk:"vlan"`
+	NetworkID            types.String                                                  `tfsdk:"network_id"`
+	MacBlocklist         *ResponseSwitchGetNetworkSwitchSettingsMacBlocklistRs         `tfsdk:"mac_blocklist"`
+	PowerExceptions      *[]ResponseSwitchGetNetworkSwitchSettingsPowerExceptionsRs    `tfsdk:"power_exceptions"`
+	UplinkClientSampling *ResponseSwitchGetNetworkSwitchSettingsUplinkClientSamplingRs `tfsdk:"uplink_client_sampling"`
+	UseCombinedPower     types.Bool                                                    `tfsdk:"use_combined_power"`
+	VLAN                 types.Int64                                                   `tfsdk:"vlan"`
+}
+
+type ResponseSwitchGetNetworkSwitchSettingsMacBlocklistRs struct {
+	Enabled types.Bool `tfsdk:"enabled"`
 }
 
 type ResponseSwitchGetNetworkSwitchSettingsPowerExceptionsRs struct {
@@ -304,8 +339,24 @@ type ResponseSwitchGetNetworkSwitchSettingsPowerExceptionsRs struct {
 	Serial    types.String `tfsdk:"serial"`
 }
 
+type ResponseSwitchGetNetworkSwitchSettingsUplinkClientSamplingRs struct {
+	Enabled types.Bool `tfsdk:"enabled"`
+}
+
 // FromBody
 func (r *NetworksSwitchSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestSwitchUpdateNetworkSwitchSettings {
+	var requestSwitchUpdateNetworkSwitchSettingsMacBlocklist *merakigosdk.RequestSwitchUpdateNetworkSwitchSettingsMacBlocklist
+	if r.MacBlocklist != nil {
+		enabled := func() *bool {
+			if !r.MacBlocklist.Enabled.IsUnknown() && !r.MacBlocklist.Enabled.IsNull() {
+				return r.MacBlocklist.Enabled.ValueBoolPointer()
+			}
+			return nil
+		}()
+		requestSwitchUpdateNetworkSwitchSettingsMacBlocklist = &merakigosdk.RequestSwitchUpdateNetworkSwitchSettingsMacBlocklist{
+			Enabled: enabled,
+		}
+	}
 	var requestSwitchUpdateNetworkSwitchSettingsPowerExceptions []merakigosdk.RequestSwitchUpdateNetworkSwitchSettingsPowerExceptions
 	if r.PowerExceptions != nil {
 		for _, rItem1 := range *r.PowerExceptions {
@@ -315,6 +366,18 @@ func (r *NetworksSwitchSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 				PowerType: powerType,
 				Serial:    serial,
 			})
+		}
+	}
+	var requestSwitchUpdateNetworkSwitchSettingsUplinkClientSampling *merakigosdk.RequestSwitchUpdateNetworkSwitchSettingsUplinkClientSampling
+	if r.UplinkClientSampling != nil {
+		enabled := func() *bool {
+			if !r.UplinkClientSampling.Enabled.IsUnknown() && !r.UplinkClientSampling.Enabled.IsNull() {
+				return r.UplinkClientSampling.Enabled.ValueBoolPointer()
+			}
+			return nil
+		}()
+		requestSwitchUpdateNetworkSwitchSettingsUplinkClientSampling = &merakigosdk.RequestSwitchUpdateNetworkSwitchSettingsUplinkClientSampling{
+			Enabled: enabled,
 		}
 	}
 	useCombinedPower := new(bool)
@@ -330,14 +393,16 @@ func (r *NetworksSwitchSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 		vLAN = nil
 	}
 	out := merakigosdk.RequestSwitchUpdateNetworkSwitchSettings{
+		MacBlocklist: requestSwitchUpdateNetworkSwitchSettingsMacBlocklist,
 		PowerExceptions: func() *[]merakigosdk.RequestSwitchUpdateNetworkSwitchSettingsPowerExceptions {
 			if len(requestSwitchUpdateNetworkSwitchSettingsPowerExceptions) > 0 {
 				return &requestSwitchUpdateNetworkSwitchSettingsPowerExceptions
 			}
 			return nil
 		}(),
-		UseCombinedPower: useCombinedPower,
-		VLAN:             int64ToIntPointer(vLAN),
+		UplinkClientSampling: requestSwitchUpdateNetworkSwitchSettingsUplinkClientSampling,
+		UseCombinedPower:     useCombinedPower,
+		VLAN:                 int64ToIntPointer(vLAN),
 	}
 	return &out
 }
@@ -345,6 +410,19 @@ func (r *NetworksSwitchSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 // From gosdk to TF Structs Schema
 func ResponseSwitchGetNetworkSwitchSettingsItemToBodyRs(state NetworksSwitchSettingsRs, response *merakigosdk.ResponseSwitchGetNetworkSwitchSettings, is_read bool) NetworksSwitchSettingsRs {
 	itemState := NetworksSwitchSettingsRs{
+		MacBlocklist: func() *ResponseSwitchGetNetworkSwitchSettingsMacBlocklistRs {
+			if response.MacBlocklist != nil {
+				return &ResponseSwitchGetNetworkSwitchSettingsMacBlocklistRs{
+					Enabled: func() types.Bool {
+						if response.MacBlocklist.Enabled != nil {
+							return types.BoolValue(*response.MacBlocklist.Enabled)
+						}
+						return types.Bool{}
+					}(),
+				}
+			}
+			return &ResponseSwitchGetNetworkSwitchSettingsMacBlocklistRs{}
+		}(),
 		PowerExceptions: func() *[]ResponseSwitchGetNetworkSwitchSettingsPowerExceptionsRs {
 			if response.PowerExceptions != nil {
 				result := make([]ResponseSwitchGetNetworkSwitchSettingsPowerExceptionsRs, len(*response.PowerExceptions))
@@ -357,6 +435,19 @@ func ResponseSwitchGetNetworkSwitchSettingsItemToBodyRs(state NetworksSwitchSett
 				return &result
 			}
 			return &[]ResponseSwitchGetNetworkSwitchSettingsPowerExceptionsRs{}
+		}(),
+		UplinkClientSampling: func() *ResponseSwitchGetNetworkSwitchSettingsUplinkClientSamplingRs {
+			if response.UplinkClientSampling != nil {
+				return &ResponseSwitchGetNetworkSwitchSettingsUplinkClientSamplingRs{
+					Enabled: func() types.Bool {
+						if response.UplinkClientSampling.Enabled != nil {
+							return types.BoolValue(*response.UplinkClientSampling.Enabled)
+						}
+						return types.Bool{}
+					}(),
+				}
+			}
+			return &ResponseSwitchGetNetworkSwitchSettingsUplinkClientSamplingRs{}
 		}(),
 		UseCombinedPower: func() types.Bool {
 			if response.UseCombinedPower != nil {

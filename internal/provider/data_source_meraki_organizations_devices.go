@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -148,8 +132,29 @@ func (d *OrganizationsDevicesDataSource) Schema(_ context.Context, _ datasource.
 							MarkdownDescription: `Physical address of the device`,
 							Computed:            true,
 						},
+						"details": schema.SetNestedAttribute{
+							MarkdownDescription: `Additional device information`,
+							Computed:            true,
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+
+									"name": schema.StringAttribute{
+										MarkdownDescription: `Additional property name`,
+										Computed:            true,
+									},
+									"value": schema.StringAttribute{
+										MarkdownDescription: `Additional property value`,
+										Computed:            true,
+									},
+								},
+							},
+						},
 						"firmware": schema.StringAttribute{
 							MarkdownDescription: `Firmware version of the device`,
+							Computed:            true,
+						},
+						"imei": schema.StringAttribute{
+							MarkdownDescription: `IMEI of the device, if applicable`,
 							Computed:            true,
 						},
 						"lan_ip": schema.StringAttribute{
@@ -281,13 +286,50 @@ type OrganizationsDevices struct {
 	Items                     *[]ResponseItemOrganizationsGetOrganizationDevices `tfsdk:"items"`
 }
 
+type ResponseItemOrganizationsGetOrganizationDevices struct {
+	Address     types.String                                              `tfsdk:"address"`
+	Details     *[]ResponseItemOrganizationsGetOrganizationDevicesDetails `tfsdk:"details"`
+	Firmware    types.String                                              `tfsdk:"firmware"`
+	Imei        types.String                                              `tfsdk:"imei"`
+	LanIP       types.String                                              `tfsdk:"lan_ip"`
+	Lat         types.Float64                                             `tfsdk:"lat"`
+	Lng         types.Float64                                             `tfsdk:"lng"`
+	Mac         types.String                                              `tfsdk:"mac"`
+	Model       types.String                                              `tfsdk:"model"`
+	Name        types.String                                              `tfsdk:"name"`
+	NetworkID   types.String                                              `tfsdk:"network_id"`
+	Notes       types.String                                              `tfsdk:"notes"`
+	ProductType types.String                                              `tfsdk:"product_type"`
+	Serial      types.String                                              `tfsdk:"serial"`
+	Tags        types.List                                                `tfsdk:"tags"`
+}
+
+type ResponseItemOrganizationsGetOrganizationDevicesDetails struct {
+	Name  types.String `tfsdk:"name"`
+	Value types.String `tfsdk:"value"`
+}
+
 // ToBody
 func ResponseOrganizationsGetOrganizationDevicesItemsToBody(state OrganizationsDevices, response *merakigosdk.ResponseOrganizationsGetOrganizationDevices) OrganizationsDevices {
 	var items []ResponseItemOrganizationsGetOrganizationDevices
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationDevices{
-			Address:  types.StringValue(item.Address),
+			Address: types.StringValue(item.Address),
+			Details: func() *[]ResponseItemOrganizationsGetOrganizationDevicesDetails {
+				if item.Details != nil {
+					result := make([]ResponseItemOrganizationsGetOrganizationDevicesDetails, len(*item.Details))
+					for i, details := range *item.Details {
+						result[i] = ResponseItemOrganizationsGetOrganizationDevicesDetails{
+							Name:  types.StringValue(details.Name),
+							Value: types.StringValue(details.Value),
+						}
+					}
+					return &result
+				}
+				return &[]ResponseItemOrganizationsGetOrganizationDevicesDetails{}
+			}(),
 			Firmware: types.StringValue(item.Firmware),
+			Imei:     types.StringValue(item.Imei),
 			LanIP:    types.StringValue(item.LanIP),
 			Lat: func() types.Float64 {
 				if item.Lat != nil {

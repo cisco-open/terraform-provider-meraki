@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -107,82 +91,121 @@ func (d *OrganizationsDevicesStatusesDataSource) Schema(_ context.Context, _ dat
 				MarkdownDescription: `tagsFilterType query parameter. An optional parameter of value 'withAnyTags' or 'withAllTags' to indicate whether to return devices which contain ANY or ALL of the included tags. If no type is included, 'withAnyTags' will be selected.`,
 				Optional:            true,
 			},
-			"item": schema.SingleNestedAttribute{
-				Computed: true,
-				Attributes: map[string]schema.Attribute{
 
-					"components": schema.SingleNestedAttribute{
-						MarkdownDescription: `Components`,
-						Computed:            true,
-						Attributes: map[string]schema.Attribute{
+			"items": schema.ListNestedAttribute{
+				MarkdownDescription: `Array of ResponseOrganizationsGetOrganizationDevicesStatuses`,
+				Computed:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
 
-							"power_supplies": schema.ListAttribute{
-								MarkdownDescription: `Power Supplies`,
-								Computed:            true,
-								ElementType:         types.StringType,
+						"components": schema.SingleNestedAttribute{
+							MarkdownDescription: `Components`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"power_supplies": schema.SetNestedAttribute{
+									MarkdownDescription: `Power Supplies`,
+									Computed:            true,
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
+
+											"model": schema.StringAttribute{
+												MarkdownDescription: `Model of the power supply`,
+												Computed:            true,
+											},
+											"poe": schema.SingleNestedAttribute{
+												MarkdownDescription: `PoE info of the power supply`,
+												Computed:            true,
+												Attributes: map[string]schema.Attribute{
+
+													"maximum": schema.Int64Attribute{
+														MarkdownDescription: `Maximum PoE this power supply can provide when connected to the current switch model`,
+														Computed:            true,
+													},
+													"unit": schema.StringAttribute{
+														MarkdownDescription: `Unit of the PoE maximum`,
+														Computed:            true,
+													},
+												},
+											},
+											"serial": schema.StringAttribute{
+												MarkdownDescription: `Serial of the power supply`,
+												Computed:            true,
+											},
+											"slot": schema.Int64Attribute{
+												MarkdownDescription: `Slot the power supply is in`,
+												Computed:            true,
+											},
+											"status": schema.StringAttribute{
+												MarkdownDescription: `Status of the power supply`,
+												Computed:            true,
+											},
+										},
+									},
+								},
 							},
 						},
-					},
-					"gateway": schema.StringAttribute{
-						MarkdownDescription: `IP Gateway`,
-						Computed:            true,
-					},
-					"ip_type": schema.StringAttribute{
-						MarkdownDescription: `IP Type`,
-						Computed:            true,
-					},
-					"lan_ip": schema.StringAttribute{
-						MarkdownDescription: `LAN IP Address`,
-						Computed:            true,
-					},
-					"last_reported_at": schema.StringAttribute{
-						MarkdownDescription: `Device Last Reported Location`,
-						Computed:            true,
-					},
-					"mac": schema.StringAttribute{
-						MarkdownDescription: `MAC Address`,
-						Computed:            true,
-					},
-					"model": schema.StringAttribute{
-						MarkdownDescription: `Model`,
-						Computed:            true,
-					},
-					"name": schema.StringAttribute{
-						MarkdownDescription: `Device Name`,
-						Computed:            true,
-					},
-					"network_id": schema.StringAttribute{
-						MarkdownDescription: `Network ID`,
-						Computed:            true,
-					},
-					"primary_dns": schema.StringAttribute{
-						MarkdownDescription: `Primary DNS`,
-						Computed:            true,
-					},
-					"product_type": schema.StringAttribute{
-						MarkdownDescription: `Product Type`,
-						Computed:            true,
-					},
-					"public_ip": schema.StringAttribute{
-						MarkdownDescription: `Public IP Address`,
-						Computed:            true,
-					},
-					"secondary_dns": schema.StringAttribute{
-						MarkdownDescription: `Secondary DNS`,
-						Computed:            true,
-					},
-					"serial": schema.StringAttribute{
-						MarkdownDescription: `Device Serial Number`,
-						Computed:            true,
-					},
-					"status": schema.StringAttribute{
-						MarkdownDescription: `Device Status`,
-						Computed:            true,
-					},
-					"tags": schema.ListAttribute{
-						MarkdownDescription: `Tags`,
-						Computed:            true,
-						ElementType:         types.StringType,
+						"gateway": schema.StringAttribute{
+							MarkdownDescription: `IP Gateway`,
+							Computed:            true,
+						},
+						"ip_type": schema.StringAttribute{
+							MarkdownDescription: `IP Type`,
+							Computed:            true,
+						},
+						"lan_ip": schema.StringAttribute{
+							MarkdownDescription: `LAN IP Address`,
+							Computed:            true,
+						},
+						"last_reported_at": schema.StringAttribute{
+							MarkdownDescription: `Device Last Reported Location`,
+							Computed:            true,
+						},
+						"mac": schema.StringAttribute{
+							MarkdownDescription: `MAC Address`,
+							Computed:            true,
+						},
+						"model": schema.StringAttribute{
+							MarkdownDescription: `Model`,
+							Computed:            true,
+						},
+						"name": schema.StringAttribute{
+							MarkdownDescription: `Device Name`,
+							Computed:            true,
+						},
+						"network_id": schema.StringAttribute{
+							MarkdownDescription: `Network ID`,
+							Computed:            true,
+						},
+						"primary_dns": schema.StringAttribute{
+							MarkdownDescription: `Primary DNS`,
+							Computed:            true,
+						},
+						"product_type": schema.StringAttribute{
+							MarkdownDescription: `Product Type`,
+							Computed:            true,
+						},
+						"public_ip": schema.StringAttribute{
+							MarkdownDescription: `Public IP Address`,
+							Computed:            true,
+						},
+						"secondary_dns": schema.StringAttribute{
+							MarkdownDescription: `Secondary DNS`,
+							Computed:            true,
+						},
+						"serial": schema.StringAttribute{
+							MarkdownDescription: `Device Serial Number`,
+							Computed:            true,
+						},
+						"status": schema.StringAttribute{
+							MarkdownDescription: `Device Status`,
+							Computed:            true,
+						},
+						"tags": schema.ListAttribute{
+							MarkdownDescription: `Tags`,
+							Computed:            true,
+							ElementType:         types.StringType,
+						},
 					},
 				},
 			},
@@ -227,7 +250,7 @@ func (d *OrganizationsDevicesStatusesDataSource) Read(ctx context.Context, req d
 			return
 		}
 
-		organizationsDevicesStatuses = ResponseOrganizationsGetOrganizationDevicesStatusesItemToBody(organizationsDevicesStatuses, response1)
+		organizationsDevicesStatuses = ResponseOrganizationsGetOrganizationDevicesStatusesItemsToBody(organizationsDevicesStatuses, response1)
 		diags = resp.State.Set(ctx, &organizationsDevicesStatuses)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
@@ -239,70 +262,120 @@ func (d *OrganizationsDevicesStatusesDataSource) Read(ctx context.Context, req d
 
 // structs
 type OrganizationsDevicesStatuses struct {
-	OrganizationID types.String                                         `tfsdk:"organization_id"`
-	PerPage        types.Int64                                          `tfsdk:"per_page"`
-	StartingAfter  types.String                                         `tfsdk:"starting_after"`
-	EndingBefore   types.String                                         `tfsdk:"ending_before"`
-	NetworkIDs     types.List                                           `tfsdk:"network_ids"`
-	Serials        types.List                                           `tfsdk:"serials"`
-	Statuses       types.List                                           `tfsdk:"statuses"`
-	ProductTypes   types.List                                           `tfsdk:"product_types"`
-	Models         types.List                                           `tfsdk:"models"`
-	Tags           types.List                                           `tfsdk:"tags"`
-	TagsFilterType types.String                                         `tfsdk:"tags_filter_type"`
-	Item           *ResponseOrganizationsGetOrganizationDevicesStatuses `tfsdk:"item"`
+	OrganizationID types.String                                               `tfsdk:"organization_id"`
+	PerPage        types.Int64                                                `tfsdk:"per_page"`
+	StartingAfter  types.String                                               `tfsdk:"starting_after"`
+	EndingBefore   types.String                                               `tfsdk:"ending_before"`
+	NetworkIDs     types.List                                                 `tfsdk:"network_ids"`
+	Serials        types.List                                                 `tfsdk:"serials"`
+	Statuses       types.List                                                 `tfsdk:"statuses"`
+	ProductTypes   types.List                                                 `tfsdk:"product_types"`
+	Models         types.List                                                 `tfsdk:"models"`
+	Tags           types.List                                                 `tfsdk:"tags"`
+	TagsFilterType types.String                                               `tfsdk:"tags_filter_type"`
+	Items          *[]ResponseItemOrganizationsGetOrganizationDevicesStatuses `tfsdk:"items"`
 }
 
-type ResponseOrganizationsGetOrganizationDevicesStatuses struct {
-	Components     *ResponseOrganizationsGetOrganizationDevicesStatusesComponents `tfsdk:"components"`
-	Gateway        types.String                                                   `tfsdk:"gateway"`
-	IPType         types.String                                                   `tfsdk:"ip_type"`
-	LanIP          types.String                                                   `tfsdk:"lan_ip"`
-	LastReportedAt types.String                                                   `tfsdk:"last_reported_at"`
-	Mac            types.String                                                   `tfsdk:"mac"`
-	Model          types.String                                                   `tfsdk:"model"`
-	Name           types.String                                                   `tfsdk:"name"`
-	NetworkID      types.String                                                   `tfsdk:"network_id"`
-	PrimaryDNS     types.String                                                   `tfsdk:"primary_dns"`
-	ProductType    types.String                                                   `tfsdk:"product_type"`
-	PublicIP       types.String                                                   `tfsdk:"public_ip"`
-	SecondaryDNS   types.String                                                   `tfsdk:"secondary_dns"`
-	Serial         types.String                                                   `tfsdk:"serial"`
-	Status         types.String                                                   `tfsdk:"status"`
-	Tags           types.List                                                     `tfsdk:"tags"`
+type ResponseItemOrganizationsGetOrganizationDevicesStatuses struct {
+	Components     *ResponseItemOrganizationsGetOrganizationDevicesStatusesComponents `tfsdk:"components"`
+	Gateway        types.String                                                       `tfsdk:"gateway"`
+	IPType         types.String                                                       `tfsdk:"ip_type"`
+	LanIP          types.String                                                       `tfsdk:"lan_ip"`
+	LastReportedAt types.String                                                       `tfsdk:"last_reported_at"`
+	Mac            types.String                                                       `tfsdk:"mac"`
+	Model          types.String                                                       `tfsdk:"model"`
+	Name           types.String                                                       `tfsdk:"name"`
+	NetworkID      types.String                                                       `tfsdk:"network_id"`
+	PrimaryDNS     types.String                                                       `tfsdk:"primary_dns"`
+	ProductType    types.String                                                       `tfsdk:"product_type"`
+	PublicIP       types.String                                                       `tfsdk:"public_ip"`
+	SecondaryDNS   types.String                                                       `tfsdk:"secondary_dns"`
+	Serial         types.String                                                       `tfsdk:"serial"`
+	Status         types.String                                                       `tfsdk:"status"`
+	Tags           types.List                                                         `tfsdk:"tags"`
 }
 
-type ResponseOrganizationsGetOrganizationDevicesStatusesComponents struct {
-	PowerSupplies types.List `tfsdk:"power_supplies"`
+type ResponseItemOrganizationsGetOrganizationDevicesStatusesComponents struct {
+	PowerSupplies *[]ResponseItemOrganizationsGetOrganizationDevicesStatusesComponentsPowerSupplies `tfsdk:"power_supplies"`
+}
+
+type ResponseItemOrganizationsGetOrganizationDevicesStatusesComponentsPowerSupplies struct {
+	Model  types.String                                                                       `tfsdk:"model"`
+	Poe    *ResponseItemOrganizationsGetOrganizationDevicesStatusesComponentsPowerSuppliesPoe `tfsdk:"poe"`
+	Serial types.String                                                                       `tfsdk:"serial"`
+	Slot   types.Int64                                                                        `tfsdk:"slot"`
+	Status types.String                                                                       `tfsdk:"status"`
+}
+
+type ResponseItemOrganizationsGetOrganizationDevicesStatusesComponentsPowerSuppliesPoe struct {
+	Maximum types.Int64  `tfsdk:"maximum"`
+	Unit    types.String `tfsdk:"unit"`
 }
 
 // ToBody
-func ResponseOrganizationsGetOrganizationDevicesStatusesItemToBody(state OrganizationsDevicesStatuses, response *merakigosdk.ResponseOrganizationsGetOrganizationDevicesStatuses) OrganizationsDevicesStatuses {
-	itemState := ResponseOrganizationsGetOrganizationDevicesStatuses{
-		Components: func() *ResponseOrganizationsGetOrganizationDevicesStatusesComponents {
-			if response.Components != nil {
-				return &ResponseOrganizationsGetOrganizationDevicesStatusesComponents{
-					PowerSupplies: StringSliceToList(response.Components.PowerSupplies),
+func ResponseOrganizationsGetOrganizationDevicesStatusesItemsToBody(state OrganizationsDevicesStatuses, response *merakigosdk.ResponseOrganizationsGetOrganizationDevicesStatuses) OrganizationsDevicesStatuses {
+	var items []ResponseItemOrganizationsGetOrganizationDevicesStatuses
+	for _, item := range *response {
+		itemState := ResponseItemOrganizationsGetOrganizationDevicesStatuses{
+			Components: func() *ResponseItemOrganizationsGetOrganizationDevicesStatusesComponents {
+				if item.Components != nil {
+					return &ResponseItemOrganizationsGetOrganizationDevicesStatusesComponents{
+						PowerSupplies: func() *[]ResponseItemOrganizationsGetOrganizationDevicesStatusesComponentsPowerSupplies {
+							if item.Components.PowerSupplies != nil {
+								result := make([]ResponseItemOrganizationsGetOrganizationDevicesStatusesComponentsPowerSupplies, len(*item.Components.PowerSupplies))
+								for i, powerSupplies := range *item.Components.PowerSupplies {
+									result[i] = ResponseItemOrganizationsGetOrganizationDevicesStatusesComponentsPowerSupplies{
+										Model: types.StringValue(powerSupplies.Model),
+										Poe: func() *ResponseItemOrganizationsGetOrganizationDevicesStatusesComponentsPowerSuppliesPoe {
+											if powerSupplies.Poe != nil {
+												return &ResponseItemOrganizationsGetOrganizationDevicesStatusesComponentsPowerSuppliesPoe{
+													Maximum: func() types.Int64 {
+														if powerSupplies.Poe.Maximum != nil {
+															return types.Int64Value(int64(*powerSupplies.Poe.Maximum))
+														}
+														return types.Int64{}
+													}(),
+													Unit: types.StringValue(powerSupplies.Poe.Unit),
+												}
+											}
+											return &ResponseItemOrganizationsGetOrganizationDevicesStatusesComponentsPowerSuppliesPoe{}
+										}(),
+										Serial: types.StringValue(powerSupplies.Serial),
+										Slot: func() types.Int64 {
+											if powerSupplies.Slot != nil {
+												return types.Int64Value(int64(*powerSupplies.Slot))
+											}
+											return types.Int64{}
+										}(),
+										Status: types.StringValue(powerSupplies.Status),
+									}
+								}
+								return &result
+							}
+							return &[]ResponseItemOrganizationsGetOrganizationDevicesStatusesComponentsPowerSupplies{}
+						}(),
+					}
 				}
-			}
-			return &ResponseOrganizationsGetOrganizationDevicesStatusesComponents{}
-		}(),
-		Gateway:        types.StringValue(response.Gateway),
-		IPType:         types.StringValue(response.IPType),
-		LanIP:          types.StringValue(response.LanIP),
-		LastReportedAt: types.StringValue(response.LastReportedAt),
-		Mac:            types.StringValue(response.Mac),
-		Model:          types.StringValue(response.Model),
-		Name:           types.StringValue(response.Name),
-		NetworkID:      types.StringValue(response.NetworkID),
-		PrimaryDNS:     types.StringValue(response.PrimaryDNS),
-		ProductType:    types.StringValue(response.ProductType),
-		PublicIP:       types.StringValue(response.PublicIP),
-		SecondaryDNS:   types.StringValue(response.SecondaryDNS),
-		Serial:         types.StringValue(response.Serial),
-		Status:         types.StringValue(response.Status),
-		Tags:           StringSliceToList(response.Tags),
+				return &ResponseItemOrganizationsGetOrganizationDevicesStatusesComponents{}
+			}(),
+			Gateway:        types.StringValue(item.Gateway),
+			IPType:         types.StringValue(item.IPType),
+			LanIP:          types.StringValue(item.LanIP),
+			LastReportedAt: types.StringValue(item.LastReportedAt),
+			Mac:            types.StringValue(item.Mac),
+			Model:          types.StringValue(item.Model),
+			Name:           types.StringValue(item.Name),
+			NetworkID:      types.StringValue(item.NetworkID),
+			PrimaryDNS:     types.StringValue(item.PrimaryDNS),
+			ProductType:    types.StringValue(item.ProductType),
+			PublicIP:       types.StringValue(item.PublicIP),
+			SecondaryDNS:   types.StringValue(item.SecondaryDNS),
+			Serial:         types.StringValue(item.Serial),
+			Status:         types.StringValue(item.Status),
+			Tags:           StringSliceToList(item.Tags),
+		}
+		items = append(items, itemState)
 	}
-	state.Item = &itemState
+	state.Items = &items
 	return state
 }

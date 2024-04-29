@@ -19,8 +19,16 @@ resource "meraki_networks_wireless_settings" "example" {
   led_lights_on              = false
   location_analytics_enabled = false
   meshing_enabled            = true
-  network_id                 = "string"
-  upgradestrategy            = "minimizeUpgradeTime"
+  named_vlans = {
+
+    pool_dhcp_monitoring = {
+
+      duration = 5
+      enabled  = true
+    }
+  }
+  network_id      = "string"
+  upgradestrategy = "minimizeUpgradeTime"
 }
 
 output "meraki_networks_wireless_settings_example" {
@@ -41,26 +49,38 @@ output "meraki_networks_wireless_settings_example" {
 - `led_lights_on` (Boolean) Toggle for enabling or disabling LED lights on all APs in the network (making them run dark)
 - `location_analytics_enabled` (Boolean) Toggle for enabling or disabling location analytics for your network
 - `meshing_enabled` (Boolean) Toggle for enabling or disabling meshing in a network
-- `upgrade_strategy` (String) The upgrade strategy to apply to the network. Must be one of 'minimizeUpgradeTime' or 'minimizeClientDowntime'. Requires firmware version MR 26.8 or higher'
+- `named_vlans` (Attributes) Named VLAN settings for wireless networks. (see [below for nested schema](#nestedatt--named_vlans))
+- `upgradestrategy` (String) The upgrade strategy to apply to the network. Must be one of 'minimizeUpgradeTime' or 'minimizeClientDowntime'. Requires firmware version MR 26.8 or higher'
 
 ### Read-Only
 
-- `named_vlans` (Attributes) Named VLAN settings for wireless networks. (see [below for nested schema](#nestedatt--named_vlans))
+- `regulatory_domain` (Attributes) Regulatory domain information for this network. (see [below for nested schema](#nestedatt--regulatory_domain))
 
 <a id="nestedatt--named_vlans"></a>
 ### Nested Schema for `named_vlans`
 
-Read-Only:
+Optional:
 
 - `pool_dhcp_monitoring` (Attributes) Named VLAN Pool DHCP Monitoring settings. (see [below for nested schema](#nestedatt--named_vlans--pool_dhcp_monitoring))
 
 <a id="nestedatt--named_vlans--pool_dhcp_monitoring"></a>
 ### Nested Schema for `named_vlans.pool_dhcp_monitoring`
 
-Read-Only:
+Optional:
 
 - `duration` (Number) The duration in minutes that devices will refrain from using dirty VLANs before adding them back to the pool.
 - `enabled` (Boolean) Whether or not devices using named VLAN pools should remove dirty VLANs from the pool, thereby preventing clients from being assigned to VLANs where they would be unable to obtain an IP address via DHCP
+
+
+
+<a id="nestedatt--regulatory_domain"></a>
+### Nested Schema for `regulatory_domain`
+
+Read-Only:
+
+- `country_code` (String) The country code of the regulatory domain.
+- `name` (String) The name of the regulatory domain for this network.
+- `permits6e` (Boolean) Whether or not the regulatory domain for this network permits Wifi 6E.
 
 ## Import
 

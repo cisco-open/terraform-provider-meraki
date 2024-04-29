@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -72,7 +56,7 @@ func (d *OrganizationsInventoryDevicesDataSource) Schema(_ context.Context, _ da
 				ElementType:         types.StringType,
 			},
 			"network_ids": schema.ListAttribute{
-				MarkdownDescription: `networkIds query parameter. Search for devices in inventory based on network ids.`,
+				MarkdownDescription: `networkIds query parameter. Search for devices in inventory based on network ids. Use explicit 'null' value to get available devices only.`,
 				Optional:            true,
 				ElementType:         types.StringType,
 			},
@@ -132,6 +116,27 @@ func (d *OrganizationsInventoryDevicesDataSource) Schema(_ context.Context, _ da
 						MarkdownDescription: `Claimed time of the device`,
 						Computed:            true,
 					},
+					"country_code": schema.StringAttribute{
+						MarkdownDescription: `Country/region code from device, network, or store order`,
+						Computed:            true,
+					},
+					"details": schema.SetNestedAttribute{
+						MarkdownDescription: `Additional device information`,
+						Computed:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+
+								"name": schema.StringAttribute{
+									MarkdownDescription: `Additional property name`,
+									Computed:            true,
+								},
+								"value": schema.StringAttribute{
+									MarkdownDescription: `Additional property value`,
+									Computed:            true,
+								},
+							},
+						},
+					},
 					"license_expiration_date": schema.StringAttribute{
 						MarkdownDescription: `License expiration date of the device`,
 						Computed:            true,
@@ -181,6 +186,27 @@ func (d *OrganizationsInventoryDevicesDataSource) Schema(_ context.Context, _ da
 						"claimed_at": schema.StringAttribute{
 							MarkdownDescription: `Claimed time of the device`,
 							Computed:            true,
+						},
+						"country_code": schema.StringAttribute{
+							MarkdownDescription: `Country/region code from device, network, or store order`,
+							Computed:            true,
+						},
+						"details": schema.SetNestedAttribute{
+							MarkdownDescription: `Additional device information`,
+							Computed:            true,
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+
+									"name": schema.StringAttribute{
+										MarkdownDescription: `Additional property name`,
+										Computed:            true,
+									},
+									"value": schema.StringAttribute{
+										MarkdownDescription: `Additional property value`,
+										Computed:            true,
+									},
+								},
+							},
 						},
 						"license_expiration_date": schema.StringAttribute{
 							MarkdownDescription: `License expiration date of the device`,
@@ -329,29 +355,43 @@ type OrganizationsInventoryDevices struct {
 }
 
 type ResponseItemOrganizationsGetOrganizationInventoryDevices struct {
-	ClaimedAt             types.String `tfsdk:"claimed_at"`
-	LicenseExpirationDate types.String `tfsdk:"license_expiration_date"`
-	Mac                   types.String `tfsdk:"mac"`
-	Model                 types.String `tfsdk:"model"`
-	Name                  types.String `tfsdk:"name"`
-	NetworkID             types.String `tfsdk:"network_id"`
-	OrderNumber           types.String `tfsdk:"order_number"`
-	ProductType           types.String `tfsdk:"product_type"`
-	Serial                types.String `tfsdk:"serial"`
-	Tags                  types.List   `tfsdk:"tags"`
+	ClaimedAt             types.String                                                       `tfsdk:"claimed_at"`
+	CountryCode           types.String                                                       `tfsdk:"country_code"`
+	Details               *[]ResponseItemOrganizationsGetOrganizationInventoryDevicesDetails `tfsdk:"details"`
+	LicenseExpirationDate types.String                                                       `tfsdk:"license_expiration_date"`
+	Mac                   types.String                                                       `tfsdk:"mac"`
+	Model                 types.String                                                       `tfsdk:"model"`
+	Name                  types.String                                                       `tfsdk:"name"`
+	NetworkID             types.String                                                       `tfsdk:"network_id"`
+	OrderNumber           types.String                                                       `tfsdk:"order_number"`
+	ProductType           types.String                                                       `tfsdk:"product_type"`
+	Serial                types.String                                                       `tfsdk:"serial"`
+	Tags                  types.List                                                         `tfsdk:"tags"`
+}
+
+type ResponseItemOrganizationsGetOrganizationInventoryDevicesDetails struct {
+	Name  types.String `tfsdk:"name"`
+	Value types.String `tfsdk:"value"`
 }
 
 type ResponseOrganizationsGetOrganizationInventoryDevice struct {
-	ClaimedAt             types.String `tfsdk:"claimed_at"`
-	LicenseExpirationDate types.String `tfsdk:"license_expiration_date"`
-	Mac                   types.String `tfsdk:"mac"`
-	Model                 types.String `tfsdk:"model"`
-	Name                  types.String `tfsdk:"name"`
-	NetworkID             types.String `tfsdk:"network_id"`
-	OrderNumber           types.String `tfsdk:"order_number"`
-	ProductType           types.String `tfsdk:"product_type"`
-	Serial                types.String `tfsdk:"serial"`
-	Tags                  types.List   `tfsdk:"tags"`
+	ClaimedAt             types.String                                                  `tfsdk:"claimed_at"`
+	CountryCode           types.String                                                  `tfsdk:"country_code"`
+	Details               *[]ResponseOrganizationsGetOrganizationInventoryDeviceDetails `tfsdk:"details"`
+	LicenseExpirationDate types.String                                                  `tfsdk:"license_expiration_date"`
+	Mac                   types.String                                                  `tfsdk:"mac"`
+	Model                 types.String                                                  `tfsdk:"model"`
+	Name                  types.String                                                  `tfsdk:"name"`
+	NetworkID             types.String                                                  `tfsdk:"network_id"`
+	OrderNumber           types.String                                                  `tfsdk:"order_number"`
+	ProductType           types.String                                                  `tfsdk:"product_type"`
+	Serial                types.String                                                  `tfsdk:"serial"`
+	Tags                  types.List                                                    `tfsdk:"tags"`
+}
+
+type ResponseOrganizationsGetOrganizationInventoryDeviceDetails struct {
+	Name  types.String `tfsdk:"name"`
+	Value types.String `tfsdk:"value"`
 }
 
 // ToBody
@@ -359,7 +399,21 @@ func ResponseOrganizationsGetOrganizationInventoryDevicesItemsToBody(state Organ
 	var items []ResponseItemOrganizationsGetOrganizationInventoryDevices
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationInventoryDevices{
-			ClaimedAt:             types.StringValue(item.ClaimedAt),
+			ClaimedAt:   types.StringValue(item.ClaimedAt),
+			CountryCode: types.StringValue(item.CountryCode),
+			Details: func() *[]ResponseItemOrganizationsGetOrganizationInventoryDevicesDetails {
+				if item.Details != nil {
+					result := make([]ResponseItemOrganizationsGetOrganizationInventoryDevicesDetails, len(*item.Details))
+					for i, details := range *item.Details {
+						result[i] = ResponseItemOrganizationsGetOrganizationInventoryDevicesDetails{
+							Name:  types.StringValue(details.Name),
+							Value: types.StringValue(details.Value),
+						}
+					}
+					return &result
+				}
+				return &[]ResponseItemOrganizationsGetOrganizationInventoryDevicesDetails{}
+			}(),
 			LicenseExpirationDate: types.StringValue(item.LicenseExpirationDate),
 			Mac:                   types.StringValue(item.Mac),
 			Model:                 types.StringValue(item.Model),
@@ -378,7 +432,21 @@ func ResponseOrganizationsGetOrganizationInventoryDevicesItemsToBody(state Organ
 
 func ResponseOrganizationsGetOrganizationInventoryDeviceItemToBody(state OrganizationsInventoryDevices, response *merakigosdk.ResponseOrganizationsGetOrganizationInventoryDevice) OrganizationsInventoryDevices {
 	itemState := ResponseOrganizationsGetOrganizationInventoryDevice{
-		ClaimedAt:             types.StringValue(response.ClaimedAt),
+		ClaimedAt:   types.StringValue(response.ClaimedAt),
+		CountryCode: types.StringValue(response.CountryCode),
+		Details: func() *[]ResponseOrganizationsGetOrganizationInventoryDeviceDetails {
+			if response.Details != nil {
+				result := make([]ResponseOrganizationsGetOrganizationInventoryDeviceDetails, len(*response.Details))
+				for i, details := range *response.Details {
+					result[i] = ResponseOrganizationsGetOrganizationInventoryDeviceDetails{
+						Name:  types.StringValue(details.Name),
+						Value: types.StringValue(details.Value),
+					}
+				}
+				return &result
+			}
+			return &[]ResponseOrganizationsGetOrganizationInventoryDeviceDetails{}
+		}(),
 		LicenseExpirationDate: types.StringValue(response.LicenseExpirationDate),
 		Mac:                   types.StringValue(response.Mac),
 		Model:                 types.StringValue(response.Model),

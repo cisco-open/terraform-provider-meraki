@@ -15,7 +15,11 @@ description: |-
 ```terraform
 resource "meraki_networks_wireless_ssids_bonjour_forwarding" "example" {
 
-  enabled    = true
+  enabled = true
+  exception = {
+
+    enabled = true
+  }
   network_id = "string"
   number     = "string"
   rules = [{
@@ -41,17 +45,26 @@ output "meraki_networks_wireless_ssids_bonjour_forwarding_example" {
 
 ### Optional
 
-- `enabled` (Boolean) If true, Bonjour forwarding is enabled on this SSID.
-- `rules` (Attributes Set) List of bonjour forwarding rules. (see [below for nested schema](#nestedatt--rules))
+- `enabled` (Boolean) If true, Bonjour forwarding is enabled on the SSID.
+- `exception` (Attributes) Bonjour forwarding exception (see [below for nested schema](#nestedatt--exception))
+- `rules` (Attributes Set) Bonjour forwarding rules (see [below for nested schema](#nestedatt--rules))
+
+<a id="nestedatt--exception"></a>
+### Nested Schema for `exception`
+
+Optional:
+
+- `enabled` (Boolean) If true, Bonjour forwarding exception is enabled on this SSID. Exception is required to enable L2 isolation and Bonjour forwarding to work together.
+
 
 <a id="nestedatt--rules"></a>
 ### Nested Schema for `rules`
 
 Optional:
 
-- `description` (String) A description for your Bonjour forwarding rule. Optional.
-- `services` (List of String) A list of Bonjour services. At least one service must be specified. Available services are 'All Services', 'AirPlay', 'AFP', 'BitTorrent', 'FTP', 'iChat', 'iTunes', 'Printers', 'Samba', 'Scanners' and 'SSH'
-- `vlan_id` (String) The ID of the service VLAN. Required.
+- `description` (String) Desctiption of the bonjour forwarding rule
+- `services` (Set of String) A list of Bonjour services. At least one service must be specified. Available services are 'All Services', 'AirPlay', 'AFP', 'BitTorrent', 'FTP', 'iChat', 'iTunes', 'Printers', 'Samba', 'Scanners' and 'SSH'
+- `vlan_id` (String) The ID of the service VLAN. Required
 
 ## Import
 

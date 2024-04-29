@@ -77,6 +77,7 @@ resource "meraki_networks_wireless_ssids_splash_settings" "example" {
   }
   splash_timeout   = 1440
   splash_url       = "https://www.custom_splash_url.com"
+  theme_id         = "c3ddcb4f16785ee747ab5ffc10867d6c8ea704be"
   use_redirect_url = true
   use_splash_url   = true
   welcome_message  = "Welcome!"
@@ -109,6 +110,7 @@ output "meraki_networks_wireless_ssids_splash_settings_example" {
 - `splash_prepaid_front` (Attributes) The prepaid front image used in the splash page. (see [below for nested schema](#nestedatt--splash_prepaid_front))
 - `splash_timeout` (Number) Splash timeout in minutes.
 - `splash_url` (String) The custom splash URL of the click-through splash page.
+- `theme_id` (String) The id of the selected splash theme.
 - `use_redirect_url` (Boolean) The Boolean indicating whether the the user will be redirected to the custom redirect URL after the splash page.
 - `use_splash_url` (Boolean) Boolean indicating whether the users will be redirected to the custom splash url
 - `welcome_message` (String) The welcome message for the users on the splash page.
@@ -152,7 +154,7 @@ Optional:
 
 Optional:
 
-- `enforced_systems` (List of String) The system types that the Sentry enforces.
+- `enforced_systems` (Set of String) The system types that the Sentry enforces.
 - `strength` (String) The strength of the enforcement of selected system types.
 - `systems_manager_network` (Attributes) Systems Manager network targeted for sentry enrollment. (see [below for nested schema](#nestedatt--sentry_enrollment--systems_manager_network))
 

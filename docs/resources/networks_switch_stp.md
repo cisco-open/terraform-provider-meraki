@@ -39,17 +39,32 @@ output "meraki_networks_switch_stp_example" {
 ### Optional
 
 - `rstp_enabled` (Boolean) The spanning tree protocol status in network
-- `stp_bridge_priority` (Attributes Set) STP bridge priority for switches/stacks or switch profiles. An empty array will clear the STP bridge priority settings. (see [below for nested schema](#nestedatt--stp_bridge_priority))
+- `stp_bridge_priority` (Attributes Set) STP bridge priority for switches/stacks or switch templates. An empty array will clear the STP bridge priority settings. (see [below for nested schema](#nestedatt--stp_bridge_priority))
+
+### Read-Only
+
+- `stp_bridge_priority_response` (Attributes Set) STP bridge priority for switches/stacks or switch templates. An empty array will clear the STP bridge priority settings. (see [below for nested schema](#nestedatt--stp_bridge_priority_response))
 
 <a id="nestedatt--stp_bridge_priority"></a>
 ### Nested Schema for `stp_bridge_priority`
 
 Optional:
 
-- `stacks` (List of String) List of stack IDs
+- `stacks` (Set of String) List of stack IDs
 - `stp_priority` (Number) STP priority for switch, stacks, or switch profiles
-- `switch_profiles` (List of String) List of switch profile IDs
-- `switches` (List of String) List of switch serial numbers
+- `switch_profiles` (Set of String) List of switch profile IDs
+- `switches` (Set of String) List of switch serial numbers
+
+
+<a id="nestedatt--stp_bridge_priority_response"></a>
+### Nested Schema for `stp_bridge_priority_response`
+
+Read-Only:
+
+- `stacks` (Set of String) List of stack IDs
+- `stp_priority` (Number) STP priority for switch, stacks, or switch templates
+- `switch_profiles` (Set of String) List of switch template IDs
+- `switches` (Set of String) List of switch serial numbers
 
 ## Import
 

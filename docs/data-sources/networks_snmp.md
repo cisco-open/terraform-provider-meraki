@@ -39,13 +39,14 @@ output "meraki_networks_snmp_example" {
 
 Read-Only:
 
-- `access` (String)
-- `users` (Attributes Set) (see [below for nested schema](#nestedatt--item--users))
+- `access` (String) The type of SNMP access. Can be one of 'none' (disabled), 'community' (V1/V2c), or 'users' (V3).
+- `community_string` (String) SNMP community string if access is 'community'.
+- `users` (Attributes Set) SNMP settings if access is 'users'. (see [below for nested schema](#nestedatt--item--users))
 
 <a id="nestedatt--item--users"></a>
 ### Nested Schema for `item.users`
 
 Read-Only:
 
-- `passphrase` (String)
-- `username` (String)
+- `passphrase` (String) The passphrase for the SNMP user.
+- `username` (String) The username for the SNMP user.

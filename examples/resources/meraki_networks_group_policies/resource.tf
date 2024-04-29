@@ -72,6 +72,7 @@ resource "meraki_networks_group_policies" "example" {
         }
         settings = "custom"
       }
+      priority = "normal"
     }]
   }
   name       = "No video streaming"
@@ -93,15 +94,15 @@ resource "meraki_networks_group_policies" "example" {
     }
     saturday = {
 
-      active = false
-      from   = "0:00"
-      to     = "24:00"
+      active = true
+      from   = "9:00"
+      to     = "17:00"
     }
     sunday = {
 
-      active = false
-      from   = "0:00"
-      to     = "24:00"
+      active = true
+      from   = "9:00"
+      to     = "17:00"
     }
     thursday = {
 

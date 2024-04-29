@@ -90,7 +90,7 @@ Optional:
 Optional:
 
 - `quality` (String) Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
-- `resolution` (String) Resolution of the camera. Can be one of '1080x1080' or '2688x1512'.
+- `resolution` (String) Resolution of the camera. Can be one of '1920x1080', '2688x1512' or '3840x2160'.
 
 
 <a id="nestedatt--video_settings--m_v21_m_v71"></a>
@@ -117,7 +117,7 @@ Optional:
 Optional:
 
 - `quality` (String) Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
-- `resolution` (String) Resolution of the camera. Can be one of '1080x1080' or '2058x2058'.
+- `resolution` (String) Resolution of the camera. Can be one of '1080x1080' or '2112x2112'.
 
 
 <a id="nestedatt--video_settings--m_v33"></a>
@@ -126,7 +126,7 @@ Optional:
 Optional:
 
 - `quality` (String) Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
-- `resolution` (String) Resolution of the camera. Can be one of '1080x1080' or '2112x2112'.
+- `resolution` (String) Resolution of the camera. Can be one of '1080x1080', '2112x2112' or '2880x2880'.
 
 
 <a id="nestedatt--video_settings--m_v52"></a>

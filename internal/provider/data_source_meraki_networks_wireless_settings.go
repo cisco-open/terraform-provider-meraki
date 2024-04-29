@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -103,7 +87,26 @@ func (d *NetworksWirelessSettingsDataSource) Schema(_ context.Context, _ datasou
 							},
 						},
 					},
-					"upgrade_strategy": schema.StringAttribute{
+					"regulatory_domain": schema.SingleNestedAttribute{
+						MarkdownDescription: `Regulatory domain information for this network.`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"country_code": schema.StringAttribute{
+								MarkdownDescription: `The country code of the regulatory domain.`,
+								Computed:            true,
+							},
+							"name": schema.StringAttribute{
+								MarkdownDescription: `The name of the regulatory domain for this network.`,
+								Computed:            true,
+							},
+							"permits6e": schema.BoolAttribute{
+								MarkdownDescription: `Whether or not the regulatory domain for this network permits Wifi 6E.`,
+								Computed:            true,
+							},
+						},
+					},
+					"upgradestrategy": schema.StringAttribute{
 						MarkdownDescription: `The upgrade strategy to apply to the network. Must be one of 'minimizeUpgradeTime' or 'minimizeClientDowntime'. Requires firmware version MR 26.8 or higher'`,
 						Computed:            true,
 					},
@@ -155,12 +158,13 @@ type NetworksWirelessSettings struct {
 }
 
 type ResponseWirelessGetNetworkWirelessSettings struct {
-	IPv6BridgeEnabled        types.Bool                                            `tfsdk:"ipv6_bridge_enabled"`
-	LedLightsOn              types.Bool                                            `tfsdk:"led_lights_on"`
-	LocationAnalyticsEnabled types.Bool                                            `tfsdk:"location_analytics_enabled"`
-	MeshingEnabled           types.Bool                                            `tfsdk:"meshing_enabled"`
-	NamedVLANs               *ResponseWirelessGetNetworkWirelessSettingsNamedVlans `tfsdk:"named_vlans"`
-	Upgradestrategy          types.String                                          `tfsdk:"upgrade_strategy"`
+	IPv6BridgeEnabled        types.Bool                                                  `tfsdk:"ipv6_bridge_enabled"`
+	LedLightsOn              types.Bool                                                  `tfsdk:"led_lights_on"`
+	LocationAnalyticsEnabled types.Bool                                                  `tfsdk:"location_analytics_enabled"`
+	MeshingEnabled           types.Bool                                                  `tfsdk:"meshing_enabled"`
+	NamedVLANs               *ResponseWirelessGetNetworkWirelessSettingsNamedVlans       `tfsdk:"named_vlans"`
+	RegulatoryDomain         *ResponseWirelessGetNetworkWirelessSettingsRegulatoryDomain `tfsdk:"regulatory_domain"`
+	Upgradestrategy          types.String                                                `tfsdk:"upgrade_strategy"`
 }
 
 type ResponseWirelessGetNetworkWirelessSettingsNamedVlans struct {
@@ -170,6 +174,12 @@ type ResponseWirelessGetNetworkWirelessSettingsNamedVlans struct {
 type ResponseWirelessGetNetworkWirelessSettingsNamedVlansPoolDhcpMonitoring struct {
 	Duration types.Int64 `tfsdk:"duration"`
 	Enabled  types.Bool  `tfsdk:"enabled"`
+}
+
+type ResponseWirelessGetNetworkWirelessSettingsRegulatoryDomain struct {
+	CountryCode types.String `tfsdk:"country_code"`
+	Name        types.String `tfsdk:"name"`
+	Permits6E   types.Bool   `tfsdk:"permits6e"`
 }
 
 // ToBody
@@ -224,6 +234,21 @@ func ResponseWirelessGetNetworkWirelessSettingsItemToBody(state NetworksWireless
 				}
 			}
 			return &ResponseWirelessGetNetworkWirelessSettingsNamedVlans{}
+		}(),
+		RegulatoryDomain: func() *ResponseWirelessGetNetworkWirelessSettingsRegulatoryDomain {
+			if response.RegulatoryDomain != nil {
+				return &ResponseWirelessGetNetworkWirelessSettingsRegulatoryDomain{
+					CountryCode: types.StringValue(response.RegulatoryDomain.CountryCode),
+					Name:        types.StringValue(response.RegulatoryDomain.Name),
+					Permits6E: func() types.Bool {
+						if response.RegulatoryDomain.Permits6E != nil {
+							return types.BoolValue(*response.RegulatoryDomain.Permits6E)
+						}
+						return types.Bool{}
+					}(),
+				}
+			}
+			return &ResponseWirelessGetNetworkWirelessSettingsRegulatoryDomain{}
 		}(),
 		Upgradestrategy: types.StringValue(response.Upgradestrategy),
 	}

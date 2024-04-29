@@ -36,13 +36,13 @@ output "meraki_organizations_insight_monitored_media_servers_example" {
 ### Optional
 
 - `address` (String) The IP address (IPv4 only) or hostname of the media server to monitor
-- `best_effort_monitoring_enabled` (Boolean) Indicates that if the media server doesn't respond to ICMP pings, the nearest hop will be used in its stead.
+- `best_effort_monitoring_enabled` (Boolean) Indicates that if the media server doesn't respond to ICMP pings, the nearest hop will be used in its stead
 - `monitored_media_server_id` (String) monitoredMediaServerId path parameter. Monitored media server ID
 - `name` (String) The name of the VoIP provider
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) Monitored media server id
 
 ## Import
 

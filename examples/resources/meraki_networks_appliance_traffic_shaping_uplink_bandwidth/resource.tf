@@ -5,8 +5,8 @@ resource "meraki_networks_appliance_traffic_shaping_uplink_bandwidth" "example" 
 
     cellular = {
 
-      limit_down = 51200
-      limit_up   = 51200
+      limit_down = 1000000
+      limit_up   = 1000000
     }
     wan1 = {
 

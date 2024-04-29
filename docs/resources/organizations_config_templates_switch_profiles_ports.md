@@ -61,38 +61,40 @@ output "meraki_organizations_config_templates_switch_profiles_ports_example" {
 
 - `config_template_id` (String) configTemplateId path parameter. Config template ID
 - `organization_id` (String) organizationId path parameter. Organization ID
-- `port_id` (String) The identifier of the switch profile port.
+- `port_id` (String) The identifier of the switch template port.
 - `profile_id` (String) profileId path parameter. Profile ID
 
 ### Optional
 
-- `access_policy_number` (Number) The number of a custom access policy to configure on the switch profile port. Only applicable when 'accessPolicyType' is 'Custom access policy'.
-- `access_policy_type` (String) The type of the access policy of the switch profile port. Only applicable to access ports. Can be one of 'Open', 'Custom access policy', 'MAC allow list' or 'Sticky MAC allow list'.
-- `allowed_vlans` (String) The VLANs allowed on the switch profile port. Only applicable to trunk ports.
+- `access_policy_number` (Number) The number of a custom access policy to configure on the switch template port. Only applicable when 'accessPolicyType' is 'Custom access policy'.
+- `access_policy_type` (String) The type of the access policy of the switch template port. Only applicable to access ports. Can be one of 'Open', 'Custom access policy', 'MAC allow list' or 'Sticky MAC allow list'.
+- `allowed_vlans` (String) The VLANs allowed on the switch template port. Only applicable to trunk ports.
 - `dai_trusted` (Boolean) If true, ARP packets for this port will be considered trusted, and Dynamic ARP Inspection will allow the traffic.
-- `enabled` (Boolean) The status of the switch profile port.
+- `enabled` (Boolean) The status of the switch template port.
 - `flexible_stacking_enabled` (Boolean) For supported switches (e.g. MS420/MS425), whether or not the port has flexible stacking enabled.
-- `isolation_enabled` (Boolean) The isolation status of the switch profile port.
-- `link_negotiation` (String) The link speed for the switch profile port.
-- `mac_allow_list` (List of String) Only devices with MAC addresses specified in this list will have access to this port. Up to 20 MAC addresses can be defined. Only applicable when 'accessPolicyType' is 'MAC allow list'.
-- `name` (String) The name of the switch profile port.
-- `poe_enabled` (Boolean) The PoE status of the switch profile port.
+- `isolation_enabled` (Boolean) The isolation status of the switch template port.
+- `link_negotiation` (String) The link speed for the switch template port.
+- `mac_allow_list` (Set of String) Only devices with MAC addresses specified in this list will have access to this port. Up to 20 MAC addresses can be defined. Only applicable when 'accessPolicyType' is 'MAC allow list'.
+- `name` (String) The name of the switch template port.
+- `poe_enabled` (Boolean) The PoE status of the switch template port.
 - `port_schedule_id` (String) The ID of the port schedule. A value of null will clear the port schedule.
 - `profile` (Attributes) Profile attributes (see [below for nested schema](#nestedatt--profile))
 - `rstp_enabled` (Boolean) The rapid spanning tree protocol status.
-- `sticky_mac_allow_list` (List of String) The initial list of MAC addresses for sticky Mac allow list. Only applicable when 'accessPolicyType' is 'Sticky MAC allow list'.
+- `sticky_mac_allow_list` (Set of String) The initial list of MAC addresses for sticky Mac allow list. Only applicable when 'accessPolicyType' is 'Sticky MAC allow list'.
 - `sticky_mac_allow_list_limit` (Number) The maximum number of MAC addresses for sticky MAC allow list. Only applicable when 'accessPolicyType' is 'Sticky MAC allow list'.
-- `storm_control_enabled` (Boolean) The storm control status of the switch profile port.
+- `storm_control_enabled` (Boolean) The storm control status of the switch template port.
 - `stp_guard` (String) The state of the STP guard ('disabled', 'root guard', 'bpdu guard' or 'loop guard').
-- `tags` (List of String) The list of tags of the switch profile port.
-- `type` (String) The type of the switch profile port ('trunk' or 'access').
+- `tags` (Set of String) The list of tags of the switch template port.
+- `type` (String) The type of the switch template port ('trunk' or 'access').
 - `udld` (String) The action to take when Unidirectional Link is detected (Alert only, Enforce). Default configuration is Alert only.
-- `vlan` (Number) The VLAN of the switch profile port. A null value will clear the value set for trunk ports.
-- `voice_vlan` (Number) The voice VLAN of the switch profile port. Only applicable to access ports.
+- `vlan` (Number) The VLAN of the switch template port. For a trunk port, this is the native VLAN. A null value will clear the value set for trunk ports.
+- `voice_vlan` (Number) The voice VLAN of the switch template port. Only applicable to access ports.
 
 ### Read-Only
 
-- `link_negotiation_capabilities` (List of String) Available link speeds for the switch profile port.
+- `link_negotiation_capabilities` (Set of String) Available link speeds for the switch template port.
+- `mirror` (Attributes) Port mirror (see [below for nested schema](#nestedatt--mirror))
+- `module` (Attributes) Expansion module (see [below for nested schema](#nestedatt--module))
 
 <a id="nestedatt--profile"></a>
 ### Nested Schema for `profile`
@@ -102,6 +104,22 @@ Optional:
 - `enabled` (Boolean) When enabled, override this port's configuration with a port profile.
 - `id` (String) When enabled, the ID of the port profile used to override the port's configuration.
 - `iname` (String) When enabled, the IName of the profile.
+
+
+<a id="nestedatt--mirror"></a>
+### Nested Schema for `mirror`
+
+Read-Only:
+
+- `mode` (String) The port mirror mode. Can be one of ('Destination port', 'Source port' or 'Not mirroring traffic').
+
+
+<a id="nestedatt--module"></a>
+### Nested Schema for `module`
+
+Read-Only:
+
+- `model` (String) The model of the expansion module.
 
 ## Import
 

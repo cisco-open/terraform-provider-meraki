@@ -49,9 +49,9 @@ output "meraki_devices_cellular_gateway_lan_example" {
 
 ### Read-Only
 
-- `device_lan_ip` (String)
-- `device_name` (String)
-- `device_subnet` (String)
+- `device_lan_ip` (String) Lan IP of the MG
+- `device_name` (String) Name of the MG.
+- `device_subnet` (String) Subnet configuration of the MG.
 
 <a id="nestedatt--fixed_ip_assignments"></a>
 ### Nested Schema for `fixed_ip_assignments`

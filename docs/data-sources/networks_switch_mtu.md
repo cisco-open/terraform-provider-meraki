@@ -40,7 +40,7 @@ output "meraki_networks_switch_mtu_example" {
 Read-Only:
 
 - `default_mtu_size` (Number) MTU size for the entire network. Default value is 9578.
-- `overrides` (Attributes Set) Override MTU size for individual switches or switch profiles.
+- `overrides` (Attributes Set) Override MTU size for individual switches or switch templates.
       An empty array will clear overrides. (see [below for nested schema](#nestedatt--item--overrides))
 
 <a id="nestedatt--item--overrides"></a>
@@ -48,6 +48,6 @@ Read-Only:
 
 Read-Only:
 
-- `mtu_size` (Number) MTU size for the switches or switch profiles.
-- `switch_profiles` (List of String) List of switch profile IDs. Applicable only for template network.
+- `mtu_size` (Number) MTU size for the switches or switch templates.
+- `switch_profiles` (List of String) List of switch template IDs. Applicable only for template network.
 - `switches` (List of String) List of switch serials. Applicable only for switch network.

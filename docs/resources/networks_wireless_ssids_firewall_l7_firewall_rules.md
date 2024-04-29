@@ -40,7 +40,7 @@ output "meraki_networks_wireless_ssids_firewall_l7_firewall_rules_example" {
 
 ### Optional
 
-- `rules` (Attributes Set) An array of L7 firewall rules for this SSID. Rules will get applied in the same order user has specified in request. Empty array will clear the L7 firewall rule configuration. (see [below for nested schema](#nestedatt--rules))
+- `rules` (Attributes Set) An ordered array of the firewall rules for this SSID (not including the local LAN access rule or the default rule). (see [below for nested schema](#nestedatt--rules))
 
 <a id="nestedatt--rules"></a>
 ### Nested Schema for `rules`

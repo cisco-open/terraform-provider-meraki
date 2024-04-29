@@ -1,27 +1,12 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -32,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -91,11 +77,19 @@ func (r *OrganizationsAlertsProfilesResource) Schema(_ context.Context, _ resour
 						},
 					},
 					"interface": schema.StringAttribute{
-						MarkdownDescription: `The uplink observed for the alert.  interface must be one of the following: wan1, wan2, cellular`,
+						MarkdownDescription: `The uplink observed for the alert`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
+						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"cellular",
+								"wan1",
+								"wan2",
+								"wan3",
+							),
 						},
 					},
 					"jitter_ms": schema.Int64Attribute{
@@ -218,6 +212,18 @@ func (r *OrganizationsAlertsProfilesResource) Schema(_ context.Context, _ resour
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"appOutage",
+						"voipJitter",
+						"voipMos",
+						"voipPacketLoss",
+						"wanLatency",
+						"wanPacketLoss",
+						"wanStatus",
+						"wanUtilization",
+					),
 				},
 			},
 		},
@@ -405,7 +411,7 @@ func (r *OrganizationsAlertsProfilesResource) Update(ctx context.Context, req re
 	// organization_id
 	vvAlertConfigID := data.AlertConfigID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Organizations.UpdateOrganizationAlertsProfile(vvOrganizationID, vvAlertConfigID, dataRequest)
+	_, restyResp2, err := r.client.Organizations.UpdateOrganizationAlertsProfile(vvOrganizationID, vvAlertConfigID, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(

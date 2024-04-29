@@ -1,0 +1,1 @@
+terraform import meraki_networks_appliance_rf_profiles.example "network_id,rf_profile_id"

@@ -22,18 +22,6 @@ data "meraki_organizations_policy_objects_groups" "example" {
 }
 
 output "meraki_organizations_policy_objects_groups_example" {
-  value = data.meraki_organizations_policy_objects_groups.example.items
-}
-
-data "meraki_organizations_policy_objects_groups" "example" {
-
-  ending_before   = "string"
-  organization_id = "string"
-  per_page        = 1
-  starting_after  = "string"
-}
-
-output "meraki_organizations_policy_objects_groups_example" {
   value = data.meraki_organizations_policy_objects_groups.example.item
 }
 ```
@@ -52,31 +40,16 @@ output "meraki_organizations_policy_objects_groups_example" {
 ### Read-Only
 
 - `item` (Attributes) (see [below for nested schema](#nestedatt--item))
-- `items` (Attributes List) Array of ResponseOrganizationsGetOrganizationPolicyObjectsGroups (see [below for nested schema](#nestedatt--items))
 
 <a id="nestedatt--item"></a>
 ### Nested Schema for `item`
 
 Read-Only:
 
-- `category` (String)
-- `created_at` (String)
-- `id` (String)
-- `name` (String)
-- `network_ids` (List of String)
-- `object_ids` (List of String)
-- `updated_at` (String)
-
-
-<a id="nestedatt--items"></a>
-### Nested Schema for `items`
-
-Read-Only:
-
-- `category` (String)
-- `created_at` (String)
-- `id` (String)
-- `name` (String)
-- `network_ids` (List of String)
-- `object_ids` (List of String)
-- `updated_at` (String)
+- `category` (String) Type of object groups. (NetworkObjectGroup, GeoLocationGroup, PortObjectGroup, ApplicationGroup)
+- `created_at` (String) Time Stamp of policy object creation.
+- `id` (String) Policy object ID
+- `name` (String) Name of the Policy object group.
+- `network_ids` (List of String) Network ID's associated with the policy objects.
+- `object_ids` (Set of String) Policy objects associated with Network Object Group or Port Object Group
+- `updated_at` (String) Time Stamp of policy object updation.

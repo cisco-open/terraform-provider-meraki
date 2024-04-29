@@ -15,7 +15,8 @@ description: |-
 ```terraform
 data "meraki_networks_sm_profiles" "example" {
 
-  network_id = "string"
+  network_id    = "string"
+  payload_types = ["string"]
 }
 
 output "meraki_networks_sm_profiles_example" {
@@ -30,6 +31,10 @@ output "meraki_networks_sm_profiles_example" {
 
 - `network_id` (String) networkId path parameter. Network ID
 
+### Optional
+
+- `payload_types` (List of String) payloadTypes query parameter. Filter by payload types
+
 ### Read-Only
 
 - `items` (Attributes List) Array of ResponseSmGetNetworkSmProfiles (see [below for nested schema](#nestedatt--items))
@@ -42,5 +47,6 @@ Read-Only:
 - `description` (String) Description of a profile.
 - `id` (String) ID of a profile.
 - `name` (String) Name of a profile.
+- `payload_types` (List of String) Payloads in the profile.
 - `scope` (String) Scope of a profile.
 - `tags` (List of String) Tags of a profile.

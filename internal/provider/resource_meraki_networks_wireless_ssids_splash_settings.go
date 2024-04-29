@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,8 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -33,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -143,6 +129,13 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"default",
+						"open",
+						"restricted",
+					),
+				},
 			},
 			"guest_sponsorship": schema.SingleNestedAttribute{
 				MarkdownDescription: `Details associated with guest sponsored splash`,
@@ -228,6 +221,13 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"click-through",
+								"focused",
+								"strict",
+							),
+						},
 					},
 					"systems_manager_network": schema.SingleNestedAttribute{
 						MarkdownDescription: `Systems Manager network targeted for sentry enrollment.`,
@@ -291,6 +291,13 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"gif",
+										"jpg",
+										"png",
+									),
+								},
 							},
 						},
 					},
@@ -344,6 +351,13 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"gif",
+										"jpg",
+										"png",
+									),
 								},
 							},
 						},
@@ -403,6 +417,13 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"gif",
+										"jpg",
+										"png",
+									),
+								},
 							},
 						},
 					},
@@ -435,6 +456,14 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 			"ssid_number": schema.Int64Attribute{
 				MarkdownDescription: `SSID number`,
 				Computed:            true,
+			},
+			"theme_id": schema.StringAttribute{
+				MarkdownDescription: `The id of the selected splash theme.`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"use_redirect_url": schema.BoolAttribute{
 				MarkdownDescription: `The Boolean indicating whether the the user will be redirected to the custom redirect URL after the splash page.`,
@@ -484,7 +513,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Create(ctx context.Context
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvNumber := data.Number.ValueString()
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDSplashSettings(vvNetworkID, vvNumber)
@@ -537,7 +565,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Create(ctx context.Context
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -566,9 +594,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Read(ctx context.Context, 
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvNumber := data.Number.ValueString()
-	// number
 	responseGet, restyRespGet, err := r.client.Wireless.GetNetworkWirelessSSIDSplashSettings(vvNetworkID, vvNumber)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -592,7 +618,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Read(ctx context.Context, 
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -625,7 +651,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Update(ctx context.Context
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvNumber := data.Number.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDSplashSettings(vvNetworkID, vvNumber, dataRequest)
@@ -650,7 +675,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Update(ctx context.Context
 
 func (r *NetworksWirelessSSIDsSplashSettingsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksWirelessSSIDsSplashSettings", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -673,6 +698,7 @@ type NetworksWirelessSSIDsSplashSettingsRs struct {
 	SplashTimeout                   types.Int64                                                               `tfsdk:"splash_timeout"`
 	SplashURL                       types.String                                                              `tfsdk:"splash_url"`
 	SSIDNumber                      types.Int64                                                               `tfsdk:"ssid_number"`
+	ThemeID                         types.String                                                              `tfsdk:"theme_id"`
 	UseRedirectURL                  types.Bool                                                                `tfsdk:"use_redirect_url"`
 	UseSplashURL                    types.Bool                                                                `tfsdk:"use_splash_url"`
 	WelcomeMessage                  types.String                                                              `tfsdk:"welcome_message"`
@@ -825,7 +851,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsRs) toSdkApiRequestUpdate(ctx contex
 	var requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSentryEnrollment *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsSentryEnrollment
 	if r.SentryEnrollment != nil {
 		var enforcedSystems []string = nil
-
+		//Hoola aqui
 		r.SentryEnrollment.EnforcedSystems.ElementsAs(ctx, &enforcedSystems, false)
 		strength := r.SentryEnrollment.Strength.ValueString()
 		var requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSentryEnrollmentSystemsManagerNetwork *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsSentryEnrollmentSystemsManagerNetwork
@@ -910,6 +936,12 @@ func (r *NetworksWirelessSSIDsSplashSettingsRs) toSdkApiRequestUpdate(ctx contex
 	} else {
 		splashURL = &emptyString
 	}
+	themeID := new(string)
+	if !r.ThemeID.IsUnknown() && !r.ThemeID.IsNull() {
+		*themeID = r.ThemeID.ValueString()
+	} else {
+		themeID = &emptyString
+	}
 	useRedirectURL := new(bool)
 	if !r.UseRedirectURL.IsUnknown() && !r.UseRedirectURL.IsNull() {
 		*useRedirectURL = r.UseRedirectURL.ValueBool()
@@ -941,6 +973,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsRs) toSdkApiRequestUpdate(ctx contex
 		SplashPrepaidFront:              requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashPrepaidFront,
 		SplashTimeout:                   int64ToIntPointer(splashTimeout),
 		SplashURL:                       *splashURL,
+		ThemeID:                         *themeID,
 		UseRedirectURL:                  useRedirectURL,
 		UseSplashURL:                    useSplashURL,
 		WelcomeMessage:                  *welcomeMessage,
@@ -1089,6 +1122,7 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(state Netw
 			}
 			return types.Int64{}
 		}(),
+		ThemeID: types.StringValue(response.ThemeID),
 		UseRedirectURL: func() types.Bool {
 			if response.UseRedirectURL != nil {
 				return types.BoolValue(*response.UseRedirectURL)

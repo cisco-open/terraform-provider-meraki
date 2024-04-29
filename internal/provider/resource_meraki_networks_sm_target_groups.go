@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -62,8 +46,12 @@ func (r *NetworksSmTargetGroupsResource) Metadata(_ context.Context, req resourc
 func (r *NetworksSmTargetGroupsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				MarkdownDescription: `The ID of this target group.`,
+				Computed:            true,
+			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: `The name of this target group`,
+				MarkdownDescription: `The name of this target group.`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -75,26 +63,24 @@ func (r *NetworksSmTargetGroupsResource) Schema(_ context.Context, _ resource.Sc
 				Required:            true,
 			},
 			"scope": schema.StringAttribute{
-				MarkdownDescription: `The scope and tag options of the target group. Comma separated values beginning with one of withAny, withAll, withoutAny, withoutAll, all, none, followed by tags. Default to none if empty.`,
+				MarkdownDescription: `The scope of the target group.`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"tags": schema.StringAttribute{
-				Computed: true,
+			"tags": schema.SetAttribute{
+				MarkdownDescription: `The tags of the target group.`,
+				Computed:            true,
+				ElementType:         types.StringType,
 			},
 			"target_group_id": schema.StringAttribute{
 				MarkdownDescription: `targetGroupId path parameter. Target group ID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-			},
-			"type": schema.StringAttribute{
-				Computed: true,
 			},
 		},
 	}
@@ -122,7 +108,6 @@ func (r *NetworksSmTargetGroupsResource) Create(ctx context.Context, req resourc
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvName := data.Name.ValueString()
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Sm.GetNetworkSmTargetGroups(vvNetworkID, nil)
@@ -145,7 +130,7 @@ func (r *NetworksSmTargetGroupsResource) Create(ctx context.Context, req resourc
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter TargetGroupID",
-					"Error",
+					err.Error(),
 				)
 				return
 			}
@@ -160,9 +145,9 @@ func (r *NetworksSmTargetGroupsResource) Create(ctx context.Context, req resourc
 		}
 	}
 	dataRequest := data.toSdkApiRequestCreate(ctx)
-	restyResp2, err := r.client.Sm.CreateNetworkSmTargetGroup(vvNetworkID, dataRequest)
+	response, restyResp2, err := r.client.Sm.CreateNetworkSmTargetGroup(vvNetworkID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSmTargetGroup",
@@ -202,7 +187,7 @@ func (r *NetworksSmTargetGroupsResource) Create(ctx context.Context, req resourc
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter TargetGroupID",
-				"Error",
+				err.Error(),
 			)
 			return
 		}
@@ -256,9 +241,7 @@ func (r *NetworksSmTargetGroupsResource) Read(ctx context.Context, req resource.
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvTargetGroupID := data.TargetGroupID.ValueString()
-	// target_group_id
 	responseGet, restyRespGet, err := r.client.Sm.GetNetworkSmTargetGroup(vvNetworkID, vvTargetGroupID, nil)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -282,7 +265,7 @@ func (r *NetworksSmTargetGroupsResource) Read(ctx context.Context, req resource.
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseSmGetNetworkSmTargetGroupItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -315,11 +298,10 @@ func (r *NetworksSmTargetGroupsResource) Update(ctx context.Context, req resourc
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvTargetGroupID := data.TargetGroupID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Sm.UpdateNetworkSmTargetGroup(vvNetworkID, vvTargetGroupID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Sm.UpdateNetworkSmTargetGroup(vvNetworkID, vvTargetGroupID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSmTargetGroup",
@@ -372,10 +354,10 @@ func (r *NetworksSmTargetGroupsResource) Delete(ctx context.Context, req resourc
 type NetworksSmTargetGroupsRs struct {
 	NetworkID     types.String `tfsdk:"network_id"`
 	TargetGroupID types.String `tfsdk:"target_group_id"`
+	ID            types.String `tfsdk:"id"`
 	Name          types.String `tfsdk:"name"`
 	Scope         types.String `tfsdk:"scope"`
-	Tags          types.String `tfsdk:"tags"`
-	Type          types.String `tfsdk:"type"`
+	Tags          types.Set    `tfsdk:"tags"`
 }
 
 // FromBody
@@ -423,10 +405,10 @@ func (r *NetworksSmTargetGroupsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 // From gosdk to TF Structs Schema
 func ResponseSmGetNetworkSmTargetGroupItemToBodyRs(state NetworksSmTargetGroupsRs, response *merakigosdk.ResponseSmGetNetworkSmTargetGroup, is_read bool) NetworksSmTargetGroupsRs {
 	itemState := NetworksSmTargetGroupsRs{
+		ID:    types.StringValue(response.ID),
 		Name:  types.StringValue(response.Name),
 		Scope: types.StringValue(response.Scope),
-		Tags:  types.StringValue(response.Tags),
-		Type:  types.StringValue(response.Type),
+		Tags:  StringSliceToSet(response.Tags),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksSmTargetGroupsRs)

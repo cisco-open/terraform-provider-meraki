@@ -40,9 +40,23 @@ output "meraki_networks_switch_stacks_remove_example" {
 - `parameters` (Attributes) (see [below for nested schema](#nestedatt--parameters))
 - `switch_stack_id` (String) switchStackId path parameter. Switch stack ID
 
+### Read-Only
+
+- `item` (Attributes) (see [below for nested schema](#nestedatt--item))
+
 <a id="nestedatt--parameters"></a>
 ### Nested Schema for `parameters`
 
 Optional:
 
 - `serial` (String) The serial of the switch to be removed
+
+
+<a id="nestedatt--item"></a>
+### Nested Schema for `item`
+
+Read-Only:
+
+- `id` (String) ID of the Switch stack
+- `name` (String) Name of the Switch stack
+- `serials` (List of String) Serials of the switches in the switch stack

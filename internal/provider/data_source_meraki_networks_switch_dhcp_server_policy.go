@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -66,43 +50,54 @@ func (d *NetworksSwitchDhcpServerPolicyDataSource) Schema(_ context.Context, _ d
 				Attributes: map[string]schema.Attribute{
 
 					"alerts": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `Email alert settings for DHCP servers`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"email": schema.SingleNestedAttribute{
-								Computed: true,
+								MarkdownDescription: `Alert settings for DHCP servers`,
+								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 
 									"enabled": schema.BoolAttribute{
-										Computed: true,
+										MarkdownDescription: `When enabled, send an email if a new DHCP server is seen. Default value is false.`,
+										Computed:            true,
 									},
 								},
 							},
 						},
 					},
 					"allowed_servers": schema.ListAttribute{
+						MarkdownDescription: `List the MAC addresses of DHCP servers to permit on the network when defaultPolicy is set
+      to block.An empty array will clear the entries.`,
 						Computed:    true,
 						ElementType: types.StringType,
 					},
 					"arp_inspection": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `Dynamic ARP Inspection settings`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"enabled": schema.BoolAttribute{
-								Computed: true,
+								MarkdownDescription: `Enable or disable Dynamic ARP Inspection on the network. Default value is false.`,
+								Computed:            true,
 							},
 							"unsupported_models": schema.ListAttribute{
-								Computed:    true,
-								ElementType: types.StringType,
+								MarkdownDescription: `List of switch models that does not support dynamic ARP inspection`,
+								Computed:            true,
+								ElementType:         types.StringType,
 							},
 						},
 					},
 					"blocked_servers": schema.ListAttribute{
+						MarkdownDescription: `List the MAC addresses of DHCP servers to block on the network when defaultPolicy is set
+      to allow.An empty array will clear the entries.`,
 						Computed:    true,
 						ElementType: types.StringType,
 					},
 					"default_policy": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `'allow' or 'block' new DHCP servers. Default value is 'allow'.`,
+						Computed:            true,
 					},
 				},
 			},

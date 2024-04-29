@@ -1,9 +1,9 @@
 
 resource "meraki_networks_sm_target_groups" "example" {
 
-  name       = "My target group"
+  name       = "Target group name"
   network_id = "string"
-  scope      = "none"
+  scope      = "withAny, tag1, tag2"
 }
 
 output "meraki_networks_sm_target_groups_example" {

@@ -82,7 +82,7 @@ output "meraki_organizations_branding_policies_example" {
 Optional:
 
 - `applies_to` (String) Which kinds of admins this policy applies to. Can be one of 'All organization admins', 'All enterprise admins', 'All network admins', 'All admins of networks...', 'All admins of networks tagged...', 'Specific admins...', 'All admins' or 'All SAML admins'.
-- `values` (List of String) If 'appliesTo' is set to one of 'Specific admins...', 'All admins of networks...' or 'All admins of networks tagged...', then you must specify this 'values' property to provide the set of
+- `values` (Set of String) If 'appliesTo' is set to one of 'Specific admins...', 'All admins of networks...' or 'All admins of networks tagged...', then you must specify this 'values' property to provide the set of
       entities to apply the branding policy to. For 'Specific admins...', specify an array of admin IDs. For 'All admins of
       networks...', specify an array of network IDs and/or configuration template IDs. For 'All admins of networks tagged...',
       specify an array of tag names.

@@ -68,8 +68,8 @@ Optional:
 - `ipsec_policies_preset` (String) One of the following available presets: 'default', 'aws', 'azure'. If this is provided, the 'ipsecPolicies' parameter is ignored.
 - `local_id` (String) [optional] The local ID is used to identify the MX to the peer. This will apply to all MXs this peer applies to.
 - `name` (String) The name of the VPN peer
-- `network_tags` (List of String) A list of network tags that will connect with this peer. Use ['all'] for all networks. Use ['none'] for no networks. If not included, the default is ['all'].
-- `private_subnets` (List of String) The list of the private subnets of the VPN peer
+- `network_tags` (Set of String) A list of network tags that will connect with this peer. Use ['all'] for all networks. Use ['none'] for no networks. If not included, the default is ['all'].
+- `private_subnets` (Set of String) The list of the private subnets of the VPN peer
 - `public_ip` (String) [optional] The public IP of the VPN peer
 - `remote_id` (String) [optional] The remote ID is used to identify the connecting VPN peer. This can either be a valid IPv4 Address, FQDN or User FQDN.
 - `secret` (String) The shared secret with the VPN peer
@@ -79,15 +79,15 @@ Optional:
 
 Optional:
 
-- `child_auth_algo` (List of String) This is the authentication algorithms to be used in Phase 2. The value should be an array with one of the following algorithms: 'sha256', 'sha1', 'md5'
-- `child_cipher_algo` (List of String) This is the cipher algorithms to be used in Phase 2. The value should be an array with one or more of the following algorithms: 'aes256', 'aes192', 'aes128', 'tripledes', 'des', 'null'
+- `child_auth_algo` (Set of String) This is the authentication algorithms to be used in Phase 2. The value should be an array with one of the following algorithms: 'sha256', 'sha1', 'md5'
+- `child_cipher_algo` (Set of String) This is the cipher algorithms to be used in Phase 2. The value should be an array with one or more of the following algorithms: 'aes256', 'aes192', 'aes128', 'tripledes', 'des', 'null'
 - `child_lifetime` (Number) The lifetime of the Phase 2 SA in seconds.
-- `child_pfs_group` (List of String) This is the Diffie-Hellman group to be used for Perfect Forward Secrecy in Phase 2. The value should be an array with one of the following values: 'disabled','group14', 'group5', 'group2', 'group1'
-- `ike_auth_algo` (List of String) This is the authentication algorithm to be used in Phase 1. The value should be an array with one of the following algorithms: 'sha256', 'sha1', 'md5'
-- `ike_cipher_algo` (List of String) This is the cipher algorithm to be used in Phase 1. The value should be an array with one of the following algorithms: 'aes256', 'aes192', 'aes128', 'tripledes', 'des'
-- `ike_diffie_hellman_group` (List of String) This is the Diffie-Hellman group to be used in Phase 1. The value should be an array with one of the following algorithms: 'group14', 'group5', 'group2', 'group1'
+- `child_pfs_group` (Set of String) This is the Diffie-Hellman group to be used for Perfect Forward Secrecy in Phase 2. The value should be an array with one of the following values: 'disabled','group14', 'group5', 'group2', 'group1'
+- `ike_auth_algo` (Set of String) This is the authentication algorithm to be used in Phase 1. The value should be an array with one of the following algorithms: 'sha256', 'sha1', 'md5'
+- `ike_cipher_algo` (Set of String) This is the cipher algorithm to be used in Phase 1. The value should be an array with one of the following algorithms: 'aes256', 'aes192', 'aes128', 'tripledes', 'des'
+- `ike_diffie_hellman_group` (Set of String) This is the Diffie-Hellman group to be used in Phase 1. The value should be an array with one of the following algorithms: 'group14', 'group5', 'group2', 'group1'
 - `ike_lifetime` (Number) The lifetime of the Phase 1 SA in seconds.
-- `ike_prf_algo` (List of String) [optional] This is the pseudo-random function to be used in IKE_SA. The value should be an array with one of the following algorithms: 'prfsha256', 'prfsha1', 'prfmd5', 'default'. The 'default' option can be used to default to the Authentication algorithm.
+- `ike_prf_algo` (Set of String) [optional] This is the pseudo-random function to be used in IKE_SA. The value should be an array with one of the following algorithms: 'prfsha256', 'prfsha1', 'prfmd5', 'default'. The 'default' option can be used to default to the Authentication algorithm.
 
 ## Import
 

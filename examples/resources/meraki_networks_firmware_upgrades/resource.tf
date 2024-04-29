@@ -64,6 +64,18 @@ resource "meraki_networks_firmware_upgrades" "example" {
       }
       participate_in_next_beta_release = false
     }
+    switch_catalyst = {
+
+      next_upgrade = {
+
+        time = "2019-03-17T17:22:52Z"
+        to_version = {
+
+          id = "1234"
+        }
+      }
+      participate_in_next_beta_release = false
+    }
     wireless = {
 
       next_upgrade = {

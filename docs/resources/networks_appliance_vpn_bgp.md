@@ -46,7 +46,7 @@ output "meraki_networks_appliance_vpn_bgp_example" {
 
 - `as_number` (Number) An Autonomous System Number (ASN) is required if you are to run BGP and peer with another BGP Speaker outside of the Auto VPN domain. This ASN will be applied to the entire Auto VPN domain. The entire 4-byte ASN range is supported. So, the ASN must be an integer between 1 and 4294967295. When absent, this field is not updated. If no value exists then it defaults to 64512.
 - `enabled` (Boolean) Boolean value to enable or disable the BGP configuration. When BGP is enabled, the asNumber (ASN) will be autopopulated with the preconfigured ASN at other Hubs or a default value if there is no ASN configured.
-- `ibgp_hold_timer` (Number) The IBGP holdtimer in seconds. The IBGP holdtimer must be an integer between 12 and 240. When absent, this field is not updated. If no value exists then it defaults to 240.
+- `ibgp_hold_timer` (Number) The iBGP holdtimer in seconds. The iBGP holdtimer must be an integer between 12 and 240. When absent, this field is not updated. If no value exists then it defaults to 240.
 - `neighbors` (Attributes Set) List of BGP neighbors. This list replaces the existing set of neighbors. When absent, this field is not updated. (see [below for nested schema](#nestedatt--neighbors))
 
 <a id="nestedatt--neighbors"></a>
@@ -56,14 +56,14 @@ Optional:
 
 - `allow_transit` (Boolean) When this feature is on, the Meraki device will advertise routes learned from other Autonomous Systems, thereby allowing traffic between Autonomous Systems to transit this AS. When absent, it defaults to false.
 - `authentication` (Attributes) Authentication settings between BGP peers. (see [below for nested schema](#nestedatt--neighbors--authentication))
-- `ebgp_hold_timer` (Number) The EBGP hold timer in seconds for each neighbor. The EBGP hold timer must be an integer between 12 and 240.
-- `ebgp_multihop` (Number) Configure this if the neighbor is not adjacent. The EBGP multi-hop must be an integer between 1 and 255.
+- `ebgp_hold_timer` (Number) The eBGP hold timer in seconds for each neighbor. The eBGP hold timer must be an integer between 12 and 240.
+- `ebgp_multihop` (Number) Configure this if the neighbor is not adjacent. The eBGP multi-hop must be an integer between 1 and 255.
 - `ip` (String) The IPv4 address of the neighbor
 - `ipv6` (Attributes) Information regarding IPv6 address of the neighbor, Required if *ip* is not present. (see [below for nested schema](#nestedatt--neighbors--ipv6))
 - `next_hop_ip` (String) The IPv4 address of the remote BGP peer that will establish a TCP session with the local MX.
 - `receive_limit` (Number) The receive limit is the maximum number of routes that can be received from any BGP peer. The receive limit must be an integer between 0 and 4294967295. When absent, it defaults to 0.
 - `remote_as_number` (Number) Remote ASN of the neighbor. The remote ASN must be an integer between 1 and 4294967295.
-- `source_interface` (String) The output interface for peering with the remote BGP peer. Valid values are: 'wired0', 'wired1' or 'vlan{VLAN ID}'(e.g. 'vlan123').
+- `source_interface` (String) The output interface for peering with the remote BGP peer. Valid values are: 'wan1', 'wan2' or 'vlan{VLAN ID}'(e.g. 'vlan123').
 - `ttl_security` (Attributes) Settings for BGP TTL security to protect BGP peering sessions from forged IP attacks. (see [below for nested schema](#nestedatt--neighbors--ttl_security))
 
 <a id="nestedatt--neighbors--authentication"></a>

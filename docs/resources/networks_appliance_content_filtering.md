@@ -36,9 +36,9 @@ output "meraki_networks_appliance_content_filtering_example" {
 
 ### Optional
 
-- `allowed_url_patterns` (List of String) A list of URL patterns that are allowed
-- `blocked_url_categories_rs` (List of String) A list of URL categories to block
-- `blocked_url_patterns` (List of String) A list of URL patterns that are blocked
+- `allowed_url_patterns` (Set of String) A list of URL patterns that are allowed
+- `blocked_url_categories_rs` (Set of String) A list of URL categories to block
+- `blocked_url_patterns` (Set of String) A list of URL patterns that are blocked
 - `url_category_list_size` (String) URL category list size which is either 'topSites' or 'fullList'
 
 ### Read-Only

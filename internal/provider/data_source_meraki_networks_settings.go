@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -65,21 +49,6 @@ func (d *NetworksSettingsDataSource) Schema(_ context.Context, _ datasource.Sche
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"client_privacy": schema.SingleNestedAttribute{
-						MarkdownDescription: `Privacy settings`,
-						Computed:            true,
-						Attributes: map[string]schema.Attribute{
-
-							"expire_data_before": schema.StringAttribute{
-								MarkdownDescription: `The date to expire the data before`,
-								Computed:            true,
-							},
-							"expire_data_older_than": schema.Int64Attribute{
-								MarkdownDescription: `The number of days, weeks, or months in Epoch time to expire the data before`,
-								Computed:            true,
-							},
-						},
-					},
 					"fips": schema.SingleNestedAttribute{
 						MarkdownDescription: `A hash of FIPS options applied to the Network`,
 						Computed:            true,
@@ -191,18 +160,12 @@ type NetworksSettings struct {
 }
 
 type ResponseNetworksGetNetworkSettings struct {
-	ClientPrivacy           *ResponseNetworksGetNetworkSettingsClientPrivacy   `tfsdk:"client_privacy"`
 	Fips                    *ResponseNetworksGetNetworkSettingsFips            `tfsdk:"fips"`
 	LocalStatusPage         *ResponseNetworksGetNetworkSettingsLocalStatusPage `tfsdk:"local_status_page"`
 	LocalStatusPageEnabled  types.Bool                                         `tfsdk:"local_status_page_enabled"`
 	NamedVLANs              *ResponseNetworksGetNetworkSettingsNamedVlans      `tfsdk:"named_vlans"`
 	RemoteStatusPageEnabled types.Bool                                         `tfsdk:"remote_status_page_enabled"`
 	SecurePort              *ResponseNetworksGetNetworkSettingsSecurePort      `tfsdk:"secure_port"`
-}
-
-type ResponseNetworksGetNetworkSettingsClientPrivacy struct {
-	ExpireDataBefore    types.String `tfsdk:"expire_data_before"`
-	ExpireDataOlderThan types.Int64  `tfsdk:"expire_data_older_than"`
 }
 
 type ResponseNetworksGetNetworkSettingsFips struct {
@@ -229,20 +192,6 @@ type ResponseNetworksGetNetworkSettingsSecurePort struct {
 // ToBody
 func ResponseNetworksGetNetworkSettingsItemToBody(state NetworksSettings, response *merakigosdk.ResponseNetworksGetNetworkSettings) NetworksSettings {
 	itemState := ResponseNetworksGetNetworkSettings{
-		ClientPrivacy: func() *ResponseNetworksGetNetworkSettingsClientPrivacy {
-			if response.ClientPrivacy != nil {
-				return &ResponseNetworksGetNetworkSettingsClientPrivacy{
-					ExpireDataBefore: types.StringValue(response.ClientPrivacy.ExpireDataBefore),
-					ExpireDataOlderThan: func() types.Int64 {
-						if response.ClientPrivacy.ExpireDataOlderThan != nil {
-							return types.Int64Value(int64(*response.ClientPrivacy.ExpireDataOlderThan))
-						}
-						return types.Int64{}
-					}(),
-				}
-			}
-			return &ResponseNetworksGetNetworkSettingsClientPrivacy{}
-		}(),
 		Fips: func() *ResponseNetworksGetNetworkSettingsFips {
 			if response.Fips != nil {
 				return &ResponseNetworksGetNetworkSettingsFips{

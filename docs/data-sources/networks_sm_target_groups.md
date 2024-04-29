@@ -53,10 +53,10 @@ output "meraki_networks_sm_target_groups_example" {
 
 Read-Only:
 
-- `name` (String)
-- `scope` (String)
-- `tags` (String)
-- `type` (String)
+- `id` (String) The ID of this target group.
+- `name` (String) The name of this target group.
+- `scope` (String) The scope of the target group.
+- `tags` (List of String) The tags of the target group.
 
 
 <a id="nestedatt--items"></a>
@@ -64,7 +64,7 @@ Read-Only:
 
 Read-Only:
 
-- `name` (String)
-- `scope` (String)
-- `tags` (String)
-- `type` (String)
+- `id` (String) The ID of this target group.
+- `name` (String) The name of this target group.
+- `scope` (String) The scope of the target group.
+- `tags` (List of String) The tags of the target group.

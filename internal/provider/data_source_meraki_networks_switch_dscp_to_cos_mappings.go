@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -66,18 +50,22 @@ func (d *NetworksSwitchDscpToCosMappingsDataSource) Schema(_ context.Context, _ 
 				Attributes: map[string]schema.Attribute{
 
 					"mappings": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `An array of DSCP to CoS mappings. An empty array will reset the mappings to default.`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"cos": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `The actual layer-2 CoS queue the DSCP value is mapped to. These are not bits set on outgoing frames. Value can be in the range of 0 to 5 inclusive.`,
+									Computed:            true,
 								},
 								"dscp": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `The Differentiated Services Code Point (DSCP) tag in the IP header that will be mapped to a particular Class-of-Service (CoS) queue. Value can be in the range of 0 to 63 inclusive.`,
+									Computed:            true,
 								},
 								"title": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Label for the mapping (optional).`,
+									Computed:            true,
 								},
 							},
 						},

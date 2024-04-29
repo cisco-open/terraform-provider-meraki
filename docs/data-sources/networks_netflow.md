@@ -39,8 +39,8 @@ output "meraki_networks_netflow_example" {
 
 Read-Only:
 
-- `collector_ip` (String)
-- `collector_port` (Number)
-- `eta_dst_port` (Number)
-- `eta_enabled` (Boolean)
-- `reporting_enabled` (Boolean)
+- `collector_ip` (String) The IPv4 address of the NetFlow collector.
+- `collector_port` (Number) The port that the NetFlow collector will be listening on.
+- `eta_dst_port` (Number) The port that the Encrypted Traffic Analytics collector will be listening on.
+- `eta_enabled` (Boolean) Boolean indicating whether Encrypted Traffic Analytics is enabled (true) or disabled (false).
+- `reporting_enabled` (Boolean) Boolean indicating whether NetFlow traffic reporting is enabled (true) or disabled (false).

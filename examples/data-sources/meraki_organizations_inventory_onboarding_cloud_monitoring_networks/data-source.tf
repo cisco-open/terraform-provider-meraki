@@ -5,6 +5,7 @@ data "meraki_organizations_inventory_onboarding_cloud_monitoring_networks" "exam
   ending_before   = "string"
   organization_id = "string"
   per_page        = 1
+  search          = "string"
   starting_after  = "string"
 }
 

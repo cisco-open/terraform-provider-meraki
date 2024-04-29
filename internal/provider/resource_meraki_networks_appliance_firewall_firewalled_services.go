@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,14 +6,16 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -64,15 +50,22 @@ func (r *NetworksApplianceFirewallFirewalledServicesResource) Schema(_ context.C
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"access": schema.StringAttribute{
-				MarkdownDescription: `A string indicating the rule for which IPs are allowed to use the specified service. Acceptable values are "blocked" (no remote IPs can access the service), "restricted" (only allowed IPs can access the service), and "unrestriced" (any remote IP can access the service). This field is required`,
+				MarkdownDescription: `A string indicating the rule for which IPs are allowed to use the specified service`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"blocked",
+						"restricted",
+						"unrestricted",
+					),
+				},
 			},
 			"allowed_ips": schema.SetAttribute{
-				MarkdownDescription: `An array of allowed IPs that can access the service. This field is required if "access" is set to "restricted". Otherwise this field is ignored`,
+				MarkdownDescription: `An array of allowed IPs that can access the service`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
@@ -86,7 +79,7 @@ func (r *NetworksApplianceFirewallFirewalledServicesResource) Schema(_ context.C
 				Required:            true,
 			},
 			"service": schema.StringAttribute{
-				MarkdownDescription: `service path parameter.`,
+				MarkdownDescription: `Appliance service name`,
 				Required:            true,
 			},
 		},
@@ -113,7 +106,6 @@ func (r *NetworksApplianceFirewallFirewalledServicesResource) Create(ctx context
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvService := data.Service.ValueString()
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallFirewalledService(vvNetworkID, vvService)
@@ -166,7 +158,7 @@ func (r *NetworksApplianceFirewallFirewalledServicesResource) Create(ctx context
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceFirewallFirewalledServiceItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -195,9 +187,7 @@ func (r *NetworksApplianceFirewallFirewalledServicesResource) Read(ctx context.C
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvService := data.Service.ValueString()
-	// service
 	responseGet, restyRespGet, err := r.client.Appliance.GetNetworkApplianceFirewallFirewalledService(vvNetworkID, vvService)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -221,7 +211,7 @@ func (r *NetworksApplianceFirewallFirewalledServicesResource) Read(ctx context.C
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceFirewallFirewalledServiceItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -254,7 +244,6 @@ func (r *NetworksApplianceFirewallFirewalledServicesResource) Update(ctx context
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvService := data.Service.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallFirewalledService(vvNetworkID, vvService, dataRequest)
@@ -279,7 +268,7 @@ func (r *NetworksApplianceFirewallFirewalledServicesResource) Update(ctx context
 
 func (r *NetworksApplianceFirewallFirewalledServicesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksApplianceFirewallFirewalledServices", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 

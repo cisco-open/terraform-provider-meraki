@@ -1,9 +1,9 @@
 terraform {
   required_providers {
     meraki = {
-      version = "0.1.0-alpha"
+      version = "0.2.0-alpha"
       source  = "hashicorp.com/edu/meraki"
-      # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-open/meraki" to use downloaded version from registry
+      # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
   }
 }
@@ -13,7 +13,7 @@ provider "meraki" {
 
 
 resource "meraki_networks_appliance_vlans_settings" "example" {
-  provider      = meraki
+
   network_id    = "L_828099381482771185"
   vlans_enabled = true
 }
@@ -23,12 +23,12 @@ output "meraki_networks_appliance_vlans_settings_example" {
 }
 
 resource "meraki_networks_appliance_vlans" "example" {
-  provider     = meraki
+
   network_id   = "L_828099381482771185"
   appliance_ip = "192.168.2.2"
   # cidr         = "192.168.2.1/24"
-  name         = "VLAN Terraform"
-  subnet       = "192.168.2.0/24"
+  name   = "VLAN Terraform"
+  subnet = "192.168.2.0/24"
   # id = 1001
   depends_on = [meraki_networks_appliance_vlans_settings.example]
 }
@@ -39,7 +39,7 @@ output "meraki_networks_appliance_vlans_example" {
 
 
 resource "meraki_networks_appliance_ssids" "example" {
-  provider        = meraki
+
   auth_mode       = "8021x-radius"
   default_vlan_id = 1001
   enabled         = true
@@ -67,9 +67,9 @@ resource "meraki_networks_appliance_ssids" "example" {
   visible             = true
   wpa_encryption_mode = "WPA2 only"
   depends_on          = [meraki_networks_appliance_vlans_settings.example, meraki_networks_appliance_vlans.example]
-    lifecycle {
+  lifecycle {
     ignore_changes = [radius_servers]
-  }  
+  }
 }
 
 output "meraki_networks_appliance_ssids_example" {
@@ -77,7 +77,7 @@ output "meraki_networks_appliance_ssids_example" {
 }
 
 resource "meraki_networks_appliance_traffic_shaping" "example" {
-  provider = meraki
+
 
   global_bandwidth_limits = {
 
@@ -90,7 +90,7 @@ resource "meraki_networks_appliance_traffic_shaping" "example" {
 }
 
 resource "meraki_networks_appliance_firewall_l3_firewall_rules" "example" {
-  provider = meraki
+
 
 
   network_id = "L_828099381482771185"
@@ -120,15 +120,15 @@ resource "meraki_networks_appliance_firewall_l3_firewall_rules" "example" {
       dest_cidr      = "Any"
       dest_port      = "Any"
       policy         = "allow"
-      protocol       = "Any"
+      protocol       = "any"
       src_cidr       = "Any"
       src_port       = "Any"
       syslog_enabled = true
   }, ]
   depends_on = [meraki_networks_appliance_traffic_shaping.example]
-    lifecycle {
+  lifecycle {
     ignore_changes = [rules]
-  }  
+  }
 }
 
 output "meraki_networks_appliance_firewall_l3_firewall_rules_example" {
@@ -136,13 +136,13 @@ output "meraki_networks_appliance_firewall_l3_firewall_rules_example" {
 }
 
 # resource "meraki_networks_appliance_firewall_l7_firewall_rules" "example" {
-#     provider = meraki
+#     
 
 
 
 
 #       network_id = "L_828099381482771185"
-#       rules =[{
+#       rules == [{
 
 #         policy = "deny"
 #         type = "applicationCategory"
@@ -156,7 +156,7 @@ output "meraki_networks_appliance_firewall_l3_firewall_rules_example" {
 # }
 
 # resource "meraki_networks_appliance_ports" "example" {
-#     provider = meraki  
+#       
 #     # allowed_vlans = "a"
 #     # drop_untagged_traffic=false
 #     enabled = true

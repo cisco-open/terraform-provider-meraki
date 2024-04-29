@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -57,17 +41,29 @@ func (d *OrganizationsFirmwareUpgradesDataSource) Metadata(_ context.Context, re
 func (d *OrganizationsFirmwareUpgradesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"ending_before": schema.StringAttribute{
+				MarkdownDescription: `endingBefore query parameter. A token used by the server to indicate the end of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.`,
+				Optional:            true,
+			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
 				Required:            true,
 			},
-			"product_type": schema.ListAttribute{
-				MarkdownDescription: `productType query parameter. The product type in a given upgrade ID`,
+			"per_page": schema.Int64Attribute{
+				MarkdownDescription: `perPage query parameter. The number of entries per page returned. Acceptable range is 3 1000. Default is 1000.`,
+				Optional:            true,
+			},
+			"product_types": schema.ListAttribute{
+				MarkdownDescription: `productTypes query parameter. Optional parameter to filter the upgrade by product type.`,
 				Optional:            true,
 				ElementType:         types.StringType,
 			},
+			"starting_after": schema.StringAttribute{
+				MarkdownDescription: `startingAfter query parameter. A token used by the server to indicate the start of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.`,
+				Optional:            true,
+			},
 			"status": schema.ListAttribute{
-				MarkdownDescription: `status query parameter. The status of an upgrade `,
+				MarkdownDescription: `status query parameter. Optional parameter to filter the upgrade by status.`,
 				Optional:            true,
 				ElementType:         types.StringType,
 			},
@@ -87,6 +83,10 @@ func (d *OrganizationsFirmwareUpgradesDataSource) Schema(_ context.Context, _ da
 							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
+								"firmware": schema.StringAttribute{
+									MarkdownDescription: `Firmware name`,
+									Computed:            true,
+								},
 								"id": schema.StringAttribute{
 									MarkdownDescription: `Firmware version ID`,
 									Computed:            true,
@@ -120,7 +120,7 @@ func (d *OrganizationsFirmwareUpgradesDataSource) Schema(_ context.Context, _ da
 								},
 							},
 						},
-						"product_type": schema.StringAttribute{
+						"product_types": schema.StringAttribute{
 							MarkdownDescription: `product upgraded [wireless, appliance, switch, systemsManager, camera, cellularGateway, sensor]`,
 							Computed:            true,
 						},
@@ -137,6 +137,10 @@ func (d *OrganizationsFirmwareUpgradesDataSource) Schema(_ context.Context, _ da
 							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
+								"firmware": schema.StringAttribute{
+									MarkdownDescription: `Firmware name`,
+									Computed:            true,
+								},
 								"id": schema.StringAttribute{
 									MarkdownDescription: `Firmware version ID`,
 									Computed:            true,
@@ -183,8 +187,11 @@ func (d *OrganizationsFirmwareUpgradesDataSource) Read(ctx context.Context, req 
 		vvOrganizationID := organizationsFirmwareUpgrades.OrganizationID.ValueString()
 		queryParams1 := merakigosdk.GetOrganizationFirmwareUpgradesQueryParams{}
 
+		queryParams1.PerPage = int(organizationsFirmwareUpgrades.PerPage.ValueInt64())
+		queryParams1.StartingAfter = organizationsFirmwareUpgrades.StartingAfter.ValueString()
+		queryParams1.EndingBefore = organizationsFirmwareUpgrades.EndingBefore.ValueString()
 		queryParams1.Status = elementsToStrings(ctx, organizationsFirmwareUpgrades.Status)
-		queryParams1.ProductType = elementsToStrings(ctx, organizationsFirmwareUpgrades.ProductType)
+		queryParams1.ProductTypes = elementsToStrings(ctx, organizationsFirmwareUpgrades.ProductTypes)
 
 		response1, restyResp1, err := d.client.Organizations.GetOrganizationFirmwareUpgrades(vvOrganizationID, &queryParams1)
 
@@ -212,8 +219,11 @@ func (d *OrganizationsFirmwareUpgradesDataSource) Read(ctx context.Context, req 
 // structs
 type OrganizationsFirmwareUpgrades struct {
 	OrganizationID types.String                                                `tfsdk:"organization_id"`
+	PerPage        types.Int64                                                 `tfsdk:"per_page"`
+	StartingAfter  types.String                                                `tfsdk:"starting_after"`
+	EndingBefore   types.String                                                `tfsdk:"ending_before"`
 	Status         types.List                                                  `tfsdk:"status"`
-	ProductType    types.List                                                  `tfsdk:"product_type"`
+	ProductTypes   types.List                                                  `tfsdk:"product_types"`
 	Items          *[]ResponseItemOrganizationsGetOrganizationFirmwareUpgrades `tfsdk:"items"`
 }
 
@@ -221,7 +231,7 @@ type ResponseItemOrganizationsGetOrganizationFirmwareUpgrades struct {
 	CompletedAt    types.String                                                         `tfsdk:"completed_at"`
 	FromVersion    *ResponseItemOrganizationsGetOrganizationFirmwareUpgradesFromVersion `tfsdk:"from_version"`
 	Network        *ResponseItemOrganizationsGetOrganizationFirmwareUpgradesNetwork     `tfsdk:"network"`
-	ProductType    types.String                                                         `tfsdk:"product_type"`
+	ProductTypes   types.String                                                         `tfsdk:"product_types"`
 	Status         types.String                                                         `tfsdk:"status"`
 	Time           types.String                                                         `tfsdk:"time"`
 	ToVersion      *ResponseItemOrganizationsGetOrganizationFirmwareUpgradesToVersion   `tfsdk:"to_version"`
@@ -230,6 +240,7 @@ type ResponseItemOrganizationsGetOrganizationFirmwareUpgrades struct {
 }
 
 type ResponseItemOrganizationsGetOrganizationFirmwareUpgradesFromVersion struct {
+	Firmware    types.String `tfsdk:"firmware"`
 	ID          types.String `tfsdk:"id"`
 	ReleaseDate types.String `tfsdk:"release_date"`
 	ReleaseType types.String `tfsdk:"release_type"`
@@ -242,6 +253,7 @@ type ResponseItemOrganizationsGetOrganizationFirmwareUpgradesNetwork struct {
 }
 
 type ResponseItemOrganizationsGetOrganizationFirmwareUpgradesToVersion struct {
+	Firmware    types.String `tfsdk:"firmware"`
 	ID          types.String `tfsdk:"id"`
 	ReleaseDate types.String `tfsdk:"release_date"`
 	ReleaseType types.String `tfsdk:"release_type"`
@@ -257,6 +269,7 @@ func ResponseOrganizationsGetOrganizationFirmwareUpgradesItemsToBody(state Organ
 			FromVersion: func() *ResponseItemOrganizationsGetOrganizationFirmwareUpgradesFromVersion {
 				if item.FromVersion != nil {
 					return &ResponseItemOrganizationsGetOrganizationFirmwareUpgradesFromVersion{
+						Firmware:    types.StringValue(item.FromVersion.Firmware),
 						ID:          types.StringValue(item.FromVersion.ID),
 						ReleaseDate: types.StringValue(item.FromVersion.ReleaseDate),
 						ReleaseType: types.StringValue(item.FromVersion.ReleaseType),
@@ -274,12 +287,13 @@ func ResponseOrganizationsGetOrganizationFirmwareUpgradesItemsToBody(state Organ
 				}
 				return &ResponseItemOrganizationsGetOrganizationFirmwareUpgradesNetwork{}
 			}(),
-			ProductType: types.StringValue(item.ProductType),
-			Status:      types.StringValue(item.Status),
-			Time:        types.StringValue(item.Time),
+			ProductTypes: types.StringValue(item.ProductTypes),
+			Status:       types.StringValue(item.Status),
+			Time:         types.StringValue(item.Time),
 			ToVersion: func() *ResponseItemOrganizationsGetOrganizationFirmwareUpgradesToVersion {
 				if item.ToVersion != nil {
 					return &ResponseItemOrganizationsGetOrganizationFirmwareUpgradesToVersion{
+						Firmware:    types.StringValue(item.ToVersion.Firmware),
 						ID:          types.StringValue(item.ToVersion.ID),
 						ReleaseDate: types.StringValue(item.ToVersion.ReleaseDate),
 						ReleaseType: types.StringValue(item.ToVersion.ReleaseType),

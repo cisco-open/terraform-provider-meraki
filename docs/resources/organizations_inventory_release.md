@@ -38,9 +38,21 @@ output "meraki_organizations_inventory_release_example" {
 - `organization_id` (String) organizationId path parameter. Organization ID
 - `parameters` (Attributes) (see [below for nested schema](#nestedatt--parameters))
 
+### Read-Only
+
+- `item` (Attributes) (see [below for nested schema](#nestedatt--item))
+
 <a id="nestedatt--parameters"></a>
 ### Nested Schema for `parameters`
 
 Optional:
 
 - `serials` (List of String) Serials of the devices that should be released
+
+
+<a id="nestedatt--item"></a>
+### Nested Schema for `item`
+
+Read-Only:
+
+- `serials` (List of String) Serials of the devices that were released

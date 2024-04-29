@@ -39,8 +39,8 @@ output "meraki_devices_camera_custom_analytics_example" {
 
 ### Optional
 
-- `artifact_id` (String) The ID of the custom analytics artifact
-- `enabled` (Boolean) Enable custom analytics
+- `artifact_id` (String) Custom analytics artifact ID
+- `enabled` (Boolean) Whether custom analytics is enabled
 - `parameters` (Attributes Set) Parameters for the custom analytics workload (see [below for nested schema](#nestedatt--parameters))
 
 <a id="nestedatt--parameters"></a>

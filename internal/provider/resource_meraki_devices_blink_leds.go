@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE ACTION
@@ -21,7 +5,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -62,7 +46,6 @@ func (r *DevicesBlinkLedsResource) Metadata(_ context.Context, req resource.Meta
 func (r *DevicesBlinkLedsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-
 			"serial": schema.StringAttribute{
 				MarkdownDescription: `serial path parameter.`,
 				Required:            true,
@@ -75,13 +58,16 @@ func (r *DevicesBlinkLedsResource) Schema(_ context.Context, _ resource.SchemaRe
 				Attributes: map[string]schema.Attribute{
 
 					"duration": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `The duration in seconds. Will be between 5 and 120. Default is 20 seconds`,
+						Computed:            true,
 					},
 					"duty": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `The duty cycle as the percent active. Will be between 10 and 90. Default is 50`,
+						Computed:            true,
 					},
 					"period": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `The period in milliseconds. Will be between 100 and 1000. Default is 160 milliseconds`,
+						Computed:            true,
 					},
 				},
 			},
@@ -137,7 +123,6 @@ func (r *DevicesBlinkLedsResource) Create(ctx context.Context, req resource.Crea
 	}
 	//Has Paths
 	vvSerial := data.Serial.ValueString()
-	// serial
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Devices.BlinkDeviceLeds(vvSerial, dataRequest)
 
@@ -156,21 +141,22 @@ func (r *DevicesBlinkLedsResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 	//Item
-	data2 := ResponseDevicesBlinkDeviceLedsItemToBody(data, response)
+	data = ResponseDevicesBlinkDeviceLedsItemToBody(data, response)
 
-	diags := resp.State.Set(ctx, &data2)
+	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
 func (r *DevicesBlinkLedsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *DevicesBlinkLedsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *DevicesBlinkLedsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 

@@ -44,6 +44,10 @@ output "meraki_organizations_claim_example" {
 - `organization_id` (String) organizationId path parameter. Organization ID
 - `parameters` (Attributes) (see [below for nested schema](#nestedatt--parameters))
 
+### Read-Only
+
+- `item` (Attributes) (see [below for nested schema](#nestedatt--item))
+
 <a id="nestedatt--parameters"></a>
 ### Nested Schema for `parameters`
 
@@ -60,3 +64,22 @@ Optional:
 
 - `key` (String) The key of the license
 - `mode` (String) Either 'renew' or 'addDevices'. 'addDevices' will increase the license limit, while 'renew' will extend the amount of time until expiration. Defaults to 'addDevices'. All licenses must be claimed with the same mode, and at most one renewal can be claimed at a time. This parameter is legacy and does not apply to organizations with per-device licensing enabled.
+
+
+
+<a id="nestedatt--item"></a>
+### Nested Schema for `item`
+
+Read-Only:
+
+- `licenses` (Attributes Set) The licenses claimed (see [below for nested schema](#nestedatt--item--licenses))
+- `orders` (List of String) The numbers of the orders claimed
+- `serials` (List of String) The serials of the devices claimed
+
+<a id="nestedatt--item--licenses"></a>
+### Nested Schema for `item.licenses`
+
+Read-Only:
+
+- `key` (String) The key of the license
+- `mode` (String) The mode of the license

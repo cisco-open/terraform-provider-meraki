@@ -1,33 +1,19 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -87,6 +73,13 @@ func (r *NetworksTrafficAnalysisResource) Schema(_ context.Context, _ resource.S
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"host",
+									"ipRange",
+									"port",
+								),
+							},
 						},
 						"value": schema.StringAttribute{
 							MarkdownDescription: `    The value of the custom pie chart item. Valid syntax depends on the signature type of the chart item
@@ -109,6 +102,13 @@ func (r *NetworksTrafficAnalysisResource) Schema(_ context.Context, _ resource.S
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"basic",
+						"detailed",
+						"disabled",
+					),
 				},
 			},
 			"network_id": schema.StringAttribute{
@@ -139,7 +139,6 @@ func (r *NetworksTrafficAnalysisResource) Create(ctx context.Context, req resour
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkTrafficAnalysis(vvNetworkID)
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
@@ -158,9 +157,9 @@ func (r *NetworksTrafficAnalysisResource) Create(ctx context.Context, req resour
 		return
 	}
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Networks.UpdateNetworkTrafficAnalysis(vvNetworkID, dataRequest)
+	response, restyResp2, err := r.client.Networks.UpdateNetworkTrafficAnalysis(vvNetworkID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkTrafficAnalysis",
@@ -191,7 +190,7 @@ func (r *NetworksTrafficAnalysisResource) Create(ctx context.Context, req resour
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkTrafficAnalysisItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -220,7 +219,6 @@ func (r *NetworksTrafficAnalysisResource) Read(ctx context.Context, req resource
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	responseGet, restyRespGet, err := r.client.Networks.GetNetworkTrafficAnalysis(vvNetworkID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -244,7 +242,7 @@ func (r *NetworksTrafficAnalysisResource) Read(ctx context.Context, req resource
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkTrafficAnalysisItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -266,10 +264,9 @@ func (r *NetworksTrafficAnalysisResource) Update(ctx context.Context, req resour
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Networks.UpdateNetworkTrafficAnalysis(vvNetworkID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Networks.UpdateNetworkTrafficAnalysis(vvNetworkID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkTrafficAnalysis",
@@ -290,7 +287,7 @@ func (r *NetworksTrafficAnalysisResource) Update(ctx context.Context, req resour
 
 func (r *NetworksTrafficAnalysisResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksTrafficAnalysis", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 

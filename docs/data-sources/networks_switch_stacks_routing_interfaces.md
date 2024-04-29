@@ -53,26 +53,26 @@ output "meraki_networks_switch_stacks_routing_interfaces_example" {
 
 Read-Only:
 
-- `default_gateway` (String)
-- `interface_id` (String)
-- `interface_ip` (String)
-- `ipv6` (Attributes) (see [below for nested schema](#nestedatt--item--ipv6))
-- `multicast_routing` (String)
-- `name` (String)
-- `ospf_settings` (Attributes) (see [below for nested schema](#nestedatt--item--ospf_settings))
-- `ospf_v3` (Attributes) (see [below for nested schema](#nestedatt--item--ospf_v3))
-- `subnet` (String)
-- `vlan_id` (Number)
+- `default_gateway` (String) IPv4 default gateway
+- `interface_id` (String) The id
+- `interface_ip` (String) IPv4 address
+- `ipv6` (Attributes) IPv6 addressing (see [below for nested schema](#nestedatt--item--ipv6))
+- `multicast_routing` (String) Multicast routing status
+- `name` (String) The name
+- `ospf_settings` (Attributes) IPv4 OSPF Settings (see [below for nested schema](#nestedatt--item--ospf_settings))
+- `ospf_v3` (Attributes) IPv6 OSPF Settings (see [below for nested schema](#nestedatt--item--ospf_v3))
+- `subnet` (String) IPv4 subnet
+- `vlan_id` (Number) VLAN id
 
 <a id="nestedatt--item--ipv6"></a>
 ### Nested Schema for `item.ipv6`
 
 Read-Only:
 
-- `address` (String)
-- `assignment_mode` (String)
-- `gateway` (String)
-- `prefix` (String)
+- `address` (String) IPv6 address
+- `assignment_mode` (String) Assignment mode
+- `gateway` (String) IPv6 gateway
+- `prefix` (String) IPv6 subnet
 
 
 <a id="nestedatt--item--ospf_settings"></a>
@@ -80,9 +80,9 @@ Read-Only:
 
 Read-Only:
 
-- `area` (String)
-- `cost` (Number)
-- `is_passive_enabled` (Boolean)
+- `area` (String) Area id
+- `cost` (Number) OSPF Cost
+- `is_passive_enabled` (Boolean) Disable sending Hello packets on this interface's IPv4 area
 
 
 <a id="nestedatt--item--ospf_v3"></a>
@@ -90,9 +90,9 @@ Read-Only:
 
 Read-Only:
 
-- `area` (String)
-- `cost` (Number)
-- `is_passive_enabled` (Boolean)
+- `area` (String) Area id
+- `cost` (Number) OSPF Cost
+- `is_passive_enabled` (Boolean) Disable sending Hello packets on this interface's IPv6 area
 
 
 
@@ -101,26 +101,26 @@ Read-Only:
 
 Read-Only:
 
-- `default_gateway` (String)
-- `interface_id` (String)
-- `interface_ip` (String)
-- `ipv6` (Attributes) (see [below for nested schema](#nestedatt--items--ipv6))
-- `multicast_routing` (String)
-- `name` (String)
-- `ospf_settings` (Attributes) (see [below for nested schema](#nestedatt--items--ospf_settings))
-- `ospf_v3` (Attributes) (see [below for nested schema](#nestedatt--items--ospf_v3))
-- `subnet` (String)
-- `vlan_id` (Number)
+- `default_gateway` (String) IPv4 default gateway
+- `interface_id` (String) The id
+- `interface_ip` (String) IPv4 address
+- `ipv6` (Attributes) IPv6 addressing (see [below for nested schema](#nestedatt--items--ipv6))
+- `multicast_routing` (String) Multicast routing status
+- `name` (String) The name
+- `ospf_settings` (Attributes) IPv4 OSPF Settings (see [below for nested schema](#nestedatt--items--ospf_settings))
+- `ospf_v3` (Attributes) IPv6 OSPF Settings (see [below for nested schema](#nestedatt--items--ospf_v3))
+- `subnet` (String) IPv4 subnet
+- `vlan_id` (Number) VLAN id
 
 <a id="nestedatt--items--ipv6"></a>
 ### Nested Schema for `items.ipv6`
 
 Read-Only:
 
-- `address` (String)
-- `assignment_mode` (String)
-- `gateway` (String)
-- `prefix` (String)
+- `address` (String) IPv6 address
+- `assignment_mode` (String) Assignment mode
+- `gateway` (String) IPv6 gateway
+- `prefix` (String) IPv6 subnet
 
 
 <a id="nestedatt--items--ospf_settings"></a>
@@ -128,9 +128,9 @@ Read-Only:
 
 Read-Only:
 
-- `area` (String)
-- `cost` (Number)
-- `is_passive_enabled` (Boolean)
+- `area` (String) Area id
+- `cost` (Number) OSPF Cost
+- `is_passive_enabled` (Boolean) Disable sending Hello packets on this interface's IPv4 area
 
 
 <a id="nestedatt--items--ospf_v3"></a>
@@ -138,6 +138,6 @@ Read-Only:
 
 Read-Only:
 
-- `area` (String)
-- `cost` (Number)
-- `is_passive_enabled` (Boolean)
+- `area` (String) Area id
+- `cost` (Number) OSPF Cost
+- `is_passive_enabled` (Boolean) Disable sending Hello packets on this interface's IPv6 area

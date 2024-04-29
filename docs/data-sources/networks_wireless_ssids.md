@@ -50,46 +50,47 @@ output "meraki_networks_wireless_ssids_example" {
 
 Read-Only:
 
-- `admin_splash_url` (String)
-- `auth_mode` (String)
-- `availability_tags` (List of String)
-- `available_on_all_aps` (Boolean)
-- `band_selection` (String)
-- `enabled` (Boolean)
-- `encryption_mode` (String)
-- `ip_assignment_mode` (String)
-- `mandatory_dhcp_enabled` (Boolean)
-- `min_bitrate` (Number)
-- `name` (String)
-- `number` (Number)
-- `per_client_bandwidth_limit_down` (Number)
-- `per_client_bandwidth_limit_up` (Number)
-- `per_ssid_bandwidth_limit_down` (Number)
-- `per_ssid_bandwidth_limit_up` (Number)
-- `radius_accounting_enabled` (Boolean)
-- `radius_accounting_servers` (Attributes Set) (see [below for nested schema](#nestedatt--item--radius_accounting_servers))
-- `radius_attribute_for_group_policies` (String)
-- `radius_enabled` (Boolean)
-- `radius_failover_policy` (String)
-- `radius_load_balancing_policy` (String)
-- `radius_servers` (Attributes Set) (see [below for nested schema](#nestedatt--item--radius_servers))
-- `splash_page` (String)
-- `splash_timeout` (String)
-- `ssid_admin_accessible` (Boolean)
-- `visible` (Boolean)
-- `walled_garden_enabled` (Boolean)
-- `walled_garden_ranges` (List of String)
-- `wpa_encryption_mode` (String)
+- `admin_splash_url` (String) URL for the admin splash page
+- `auth_mode` (String) The association control method for the SSID
+- `availability_tags` (List of String) List of tags for this SSID. If availableOnAllAps is false, then the SSID is only broadcast by APs with tags matching any of the tags in this list
+- `available_on_all_aps` (Boolean) Whether all APs broadcast the SSID or if it's restricted to APs matching any availability tags
+- `band_selection` (String) The client-serving radio frequencies of this SSID in the default indoor RF profile
+- `enabled` (Boolean) Whether or not the SSID is enabled
+- `encryption_mode` (String) The psk encryption mode for the SSID
+- `ip_assignment_mode` (String) The client IP assignment mode
+- `local_auth` (Boolean) Extended local auth flag for Enterprise NAC
+- `mandatory_dhcp_enabled` (Boolean) Whether clients connecting to this SSID must use the IP address assigned by the DHCP server
+- `min_bitrate` (Number) The minimum bitrate in Mbps of this SSID in the default indoor RF profile
+- `name` (String) The name of the SSID
+- `number` (Number) Unique identifier of the SSID
+- `per_client_bandwidth_limit_down` (Number) The download bandwidth limit in Kbps. (0 represents no limit.)
+- `per_client_bandwidth_limit_up` (Number) The upload bandwidth limit in Kbps. (0 represents no limit.)
+- `per_ssid_bandwidth_limit_down` (Number) The total download bandwidth limit in Kbps (0 represents no limit)
+- `per_ssid_bandwidth_limit_up` (Number) The total upload bandwidth limit in Kbps (0 represents no limit)
+- `radius_accounting_enabled` (Boolean) Whether or not RADIUS accounting is enabled
+- `radius_accounting_servers` (Attributes Set) List of RADIUS accounting 802.1X servers to be used for authentication (see [below for nested schema](#nestedatt--item--radius_accounting_servers))
+- `radius_attribute_for_group_policies` (String) RADIUS attribute used to look up group policies
+- `radius_enabled` (Boolean) Whether RADIUS authentication is enabled
+- `radius_failover_policy` (String) Policy which determines how authentication requests should be handled in the event that all of the configured RADIUS servers are unreachable
+- `radius_load_balancing_policy` (String) Policy which determines which RADIUS server will be contacted first in an authentication attempt, and the ordering of any necessary retry attempts
+- `radius_servers` (Attributes Set) List of RADIUS 802.1X servers to be used for authentication (see [below for nested schema](#nestedatt--item--radius_servers))
+- `splash_page` (String) The type of splash page for the SSID
+- `splash_timeout` (String) Splash page timeout
+- `ssid_admin_accessible` (Boolean) SSID Administrator access status
+- `visible` (Boolean) Whether the SSID is advertised or hidden by the AP
+- `walled_garden_enabled` (Boolean) Allow users to access a configurable list of IP ranges prior to sign-on
+- `walled_garden_ranges` (List of String) Domain names and IP address ranges available in Walled Garden mode
+- `wpa_encryption_mode` (String) The types of WPA encryption
 
 <a id="nestedatt--item--radius_accounting_servers"></a>
 ### Nested Schema for `item.radius_accounting_servers`
 
 Read-Only:
 
-- `ca_certificate` (String)
-- `host` (String)
-- `open_roaming_certificate_id` (Number)
-- `port` (Number)
+- `ca_certificate` (String) Certificate used for authorization for the RADSEC Server
+- `host` (String) IP address (or FQDN) to which the APs will send RADIUS accounting messages
+- `open_roaming_certificate_id` (Number) The ID of the Openroaming Certificate attached to radius server
+- `port` (Number) Port on the RADIUS server that is listening for accounting messages
 
 
 <a id="nestedatt--item--radius_servers"></a>
@@ -97,10 +98,10 @@ Read-Only:
 
 Read-Only:
 
-- `ca_certificate` (String)
-- `host` (String)
-- `open_roaming_certificate_id` (Number)
-- `port` (Number)
+- `ca_certificate` (String) Certificate used for authorization for the RADSEC Server
+- `host` (String) IP address (or FQDN) of your RADIUS server
+- `open_roaming_certificate_id` (Number) The ID of the Openroaming Certificate attached to radius server
+- `port` (Number) UDP port the RADIUS server listens on for Access-requests
 
 
 
@@ -109,46 +110,47 @@ Read-Only:
 
 Read-Only:
 
-- `admin_splash_url` (String)
-- `auth_mode` (String)
-- `availability_tags` (List of String)
-- `available_on_all_aps` (Boolean)
-- `band_selection` (String)
-- `enabled` (Boolean)
-- `encryption_mode` (String)
-- `ip_assignment_mode` (String)
-- `mandatory_dhcp_enabled` (Boolean)
-- `min_bitrate` (Number)
-- `name` (String)
-- `number` (Number)
-- `per_client_bandwidth_limit_down` (Number)
-- `per_client_bandwidth_limit_up` (Number)
-- `per_ssid_bandwidth_limit_down` (Number)
-- `per_ssid_bandwidth_limit_up` (Number)
-- `radius_accounting_enabled` (Boolean)
-- `radius_accounting_servers` (Attributes Set) (see [below for nested schema](#nestedatt--items--radius_accounting_servers))
-- `radius_attribute_for_group_policies` (String)
-- `radius_enabled` (Boolean)
-- `radius_failover_policy` (String)
-- `radius_load_balancing_policy` (String)
-- `radius_servers` (Attributes Set) (see [below for nested schema](#nestedatt--items--radius_servers))
-- `splash_page` (String)
-- `splash_timeout` (String)
-- `ssid_admin_accessible` (Boolean)
-- `visible` (Boolean)
-- `walled_garden_enabled` (Boolean)
-- `walled_garden_ranges` (List of String)
-- `wpa_encryption_mode` (String)
+- `admin_splash_url` (String) URL for the admin splash page
+- `auth_mode` (String) The association control method for the SSID
+- `availability_tags` (List of String) List of tags for this SSID. If availableOnAllAps is false, then the SSID is only broadcast by APs with tags matching any of the tags in this list
+- `available_on_all_aps` (Boolean) Whether all APs broadcast the SSID or if it's restricted to APs matching any availability tags
+- `band_selection` (String) The client-serving radio frequencies of this SSID in the default indoor RF profile
+- `enabled` (Boolean) Whether or not the SSID is enabled
+- `encryption_mode` (String) The psk encryption mode for the SSID
+- `ip_assignment_mode` (String) The client IP assignment mode
+- `local_auth` (Boolean) Extended local auth flag for Enterprise NAC
+- `mandatory_dhcp_enabled` (Boolean) Whether clients connecting to this SSID must use the IP address assigned by the DHCP server
+- `min_bitrate` (Number) The minimum bitrate in Mbps of this SSID in the default indoor RF profile
+- `name` (String) The name of the SSID
+- `number` (Number) Unique identifier of the SSID
+- `per_client_bandwidth_limit_down` (Number) The download bandwidth limit in Kbps. (0 represents no limit.)
+- `per_client_bandwidth_limit_up` (Number) The upload bandwidth limit in Kbps. (0 represents no limit.)
+- `per_ssid_bandwidth_limit_down` (Number) The total download bandwidth limit in Kbps (0 represents no limit)
+- `per_ssid_bandwidth_limit_up` (Number) The total upload bandwidth limit in Kbps (0 represents no limit)
+- `radius_accounting_enabled` (Boolean) Whether or not RADIUS accounting is enabled
+- `radius_accounting_servers` (Attributes Set) List of RADIUS accounting 802.1X servers to be used for authentication (see [below for nested schema](#nestedatt--items--radius_accounting_servers))
+- `radius_attribute_for_group_policies` (String) RADIUS attribute used to look up group policies
+- `radius_enabled` (Boolean) Whether RADIUS authentication is enabled
+- `radius_failover_policy` (String) Policy which determines how authentication requests should be handled in the event that all of the configured RADIUS servers are unreachable
+- `radius_load_balancing_policy` (String) Policy which determines which RADIUS server will be contacted first in an authentication attempt, and the ordering of any necessary retry attempts
+- `radius_servers` (Attributes Set) List of RADIUS 802.1X servers to be used for authentication (see [below for nested schema](#nestedatt--items--radius_servers))
+- `splash_page` (String) The type of splash page for the SSID
+- `splash_timeout` (String) Splash page timeout
+- `ssid_admin_accessible` (Boolean) SSID Administrator access status
+- `visible` (Boolean) Whether the SSID is advertised or hidden by the AP
+- `walled_garden_enabled` (Boolean) Allow users to access a configurable list of IP ranges prior to sign-on
+- `walled_garden_ranges` (List of String) Domain names and IP address ranges available in Walled Garden mode
+- `wpa_encryption_mode` (String) The types of WPA encryption
 
 <a id="nestedatt--items--radius_accounting_servers"></a>
 ### Nested Schema for `items.radius_accounting_servers`
 
 Read-Only:
 
-- `ca_certificate` (String)
-- `host` (String)
-- `open_roaming_certificate_id` (Number)
-- `port` (Number)
+- `ca_certificate` (String) Certificate used for authorization for the RADSEC Server
+- `host` (String) IP address (or FQDN) to which the APs will send RADIUS accounting messages
+- `open_roaming_certificate_id` (Number) The ID of the Openroaming Certificate attached to radius server
+- `port` (Number) Port on the RADIUS server that is listening for accounting messages
 
 
 <a id="nestedatt--items--radius_servers"></a>
@@ -156,7 +158,7 @@ Read-Only:
 
 Read-Only:
 
-- `ca_certificate` (String)
-- `host` (String)
-- `open_roaming_certificate_id` (Number)
-- `port` (Number)
+- `ca_certificate` (String) Certificate used for authorization for the RADSEC Server
+- `host` (String) IP address (or FQDN) of your RADIUS server
+- `open_roaming_certificate_id` (Number) The ID of the Openroaming Certificate attached to radius server
+- `port` (Number) UDP port the RADIUS server listens on for Access-requests

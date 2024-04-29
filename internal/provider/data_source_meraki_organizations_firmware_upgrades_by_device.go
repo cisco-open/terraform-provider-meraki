@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -66,11 +50,6 @@ func (d *OrganizationsFirmwareUpgradesByDeviceDataSource) Schema(_ context.Conte
 				Optional:            true,
 				ElementType:         types.StringType,
 			},
-			"firmware_upgrade_ids": schema.ListAttribute{
-				MarkdownDescription: `firmwareUpgradeIds query parameter. Optional parameter to filter by firmware upgrade ids.`,
-				Optional:            true,
-				ElementType:         types.StringType,
-			},
 			"macs": schema.ListAttribute{
 				MarkdownDescription: `macs query parameter. Optional parameter to filter by one or more MAC addresses belonging to devices. All devices returned belong to MAC addresses that are an exact match.`,
 				Optional:            true,
@@ -86,7 +65,7 @@ func (d *OrganizationsFirmwareUpgradesByDeviceDataSource) Schema(_ context.Conte
 				Required:            true,
 			},
 			"per_page": schema.Int64Attribute{
-				MarkdownDescription: `perPage query parameter. The number of entries per page returned. Acceptable range is 3 50. Default is 50.`,
+				MarkdownDescription: `perPage query parameter. The number of entries per page returned. Acceptable range is 3 1000. Default is 50.`,
 				Optional:            true,
 			},
 			"serials": schema.ListAttribute{
@@ -97,6 +76,11 @@ func (d *OrganizationsFirmwareUpgradesByDeviceDataSource) Schema(_ context.Conte
 			"starting_after": schema.StringAttribute{
 				MarkdownDescription: `startingAfter query parameter. A token used by the server to indicate the start of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.`,
 				Optional:            true,
+			},
+			"upgradestatuses": schema.ListAttribute{
+				MarkdownDescription: `upgradeStatuses query parameter. Optional parameter to filter by firmware upgrade statuses.`,
+				Optional:            true,
+				ElementType:         types.StringType,
 			},
 
 			"items": schema.ListNestedAttribute{
@@ -230,8 +214,8 @@ func (d *OrganizationsFirmwareUpgradesByDeviceDataSource) Read(ctx context.Conte
 		queryParams1.NetworkIDs = elementsToStrings(ctx, organizationsFirmwareUpgradesByDevice.NetworkIDs)
 		queryParams1.Serials = elementsToStrings(ctx, organizationsFirmwareUpgradesByDevice.Serials)
 		queryParams1.Macs = elementsToStrings(ctx, organizationsFirmwareUpgradesByDevice.Macs)
-		queryParams1.FirmwareUpgradeIDs = elementsToStrings(ctx, organizationsFirmwareUpgradesByDevice.FirmwareUpgradeIDs)
 		queryParams1.FirmwareUpgradeBatchIDs = elementsToStrings(ctx, organizationsFirmwareUpgradesByDevice.FirmwareUpgradeBatchIDs)
+		queryParams1.Upgradestatuses = elementsToStrings(ctx, organizationsFirmwareUpgradesByDevice.Upgradestatuses)
 
 		response1, restyResp1, err := d.client.Organizations.GetOrganizationFirmwareUpgradesByDevice(vvOrganizationID, &queryParams1)
 
@@ -265,8 +249,8 @@ type OrganizationsFirmwareUpgradesByDevice struct {
 	NetworkIDs              types.List                                                          `tfsdk:"network_ids"`
 	Serials                 types.List                                                          `tfsdk:"serials"`
 	Macs                    types.List                                                          `tfsdk:"macs"`
-	FirmwareUpgradeIDs      types.List                                                          `tfsdk:"firmware_upgrade_ids"`
 	FirmwareUpgradeBatchIDs types.List                                                          `tfsdk:"firmware_upgrade_batch_ids"`
+	Upgradestatuses         types.List                                                          `tfsdk:"upgradestatuses"`
 	Items                   *[]ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDevice `tfsdk:"items"`
 }
 

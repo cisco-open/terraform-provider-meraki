@@ -1,30 +1,15 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -83,12 +68,12 @@ func (r *NetworksSyslogServersResource) Schema(_ context.Context, _ resource.Sch
 								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
-						"port": schema.StringAttribute{
+						"port": schema.Int64Attribute{
 							MarkdownDescription: `The port of the syslog server`,
 							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.Int64{
+								int64planmodifier.UseStateForUnknown(),
 							},
 						},
 						"roles": schema.SetAttribute{
@@ -128,7 +113,6 @@ func (r *NetworksSyslogServersResource) Create(ctx context.Context, req resource
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkSyslogServers(vvNetworkID)
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
@@ -180,7 +164,7 @@ func (r *NetworksSyslogServersResource) Create(ctx context.Context, req resource
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkSyslogServersItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -209,7 +193,6 @@ func (r *NetworksSyslogServersResource) Read(ctx context.Context, req resource.R
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	responseGet, restyRespGet, err := r.client.Networks.GetNetworkSyslogServers(vvNetworkID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -233,7 +216,7 @@ func (r *NetworksSyslogServersResource) Read(ctx context.Context, req resource.R
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkSyslogServersItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -255,7 +238,6 @@ func (r *NetworksSyslogServersResource) Update(ctx context.Context, req resource
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkSyslogServers(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
@@ -279,7 +261,7 @@ func (r *NetworksSyslogServersResource) Update(ctx context.Context, req resource
 
 func (r *NetworksSyslogServersResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksSyslogServers", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -291,7 +273,7 @@ type NetworksSyslogServersRs struct {
 
 type ResponseNetworksGetNetworkSyslogServersServersRs struct {
 	Host  types.String `tfsdk:"host"`
-	Port  types.String `tfsdk:"port"`
+	Port  types.Int64  `tfsdk:"port"`
 	Roles types.Set    `tfsdk:"roles"`
 }
 
@@ -301,13 +283,18 @@ func (r *NetworksSyslogServersRs) toSdkApiRequestUpdate(ctx context.Context) *me
 	if r.Servers != nil {
 		for _, rItem1 := range *r.Servers {
 			host := rItem1.Host.ValueString()
-			port := rItem1.Port.ValueString()
+			port := func() *int64 {
+				if !rItem1.Port.IsUnknown() && !rItem1.Port.IsNull() {
+					return rItem1.Port.ValueInt64Pointer()
+				}
+				return nil
+			}()
 			var roles []string = nil
-
+			//Hoola aqui
 			rItem1.Roles.ElementsAs(ctx, &roles, false)
 			requestNetworksUpdateNetworkSyslogServersServers = append(requestNetworksUpdateNetworkSyslogServersServers, merakigosdk.RequestNetworksUpdateNetworkSyslogServersServers{
 				Host:  host,
-				Port:  port,
+				Port:  int64ToIntPointer(port),
 				Roles: roles,
 			})
 		}
@@ -331,8 +318,13 @@ func ResponseNetworksGetNetworkSyslogServersItemToBodyRs(state NetworksSyslogSer
 				result := make([]ResponseNetworksGetNetworkSyslogServersServersRs, len(*response.Servers))
 				for i, servers := range *response.Servers {
 					result[i] = ResponseNetworksGetNetworkSyslogServersServersRs{
-						Host:  types.StringValue(servers.Host),
-						Port:  types.StringValue(servers.Port),
+						Host: types.StringValue(servers.Host),
+						Port: func() types.Int64 {
+							if servers.Port != nil {
+								return types.Int64Value(int64(*servers.Port))
+							}
+							return types.Int64{}
+						}(),
 						Roles: StringSliceToSet(servers.Roles),
 					}
 				}

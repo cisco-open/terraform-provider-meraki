@@ -23,7 +23,11 @@ resource "meraki_networks_settings" "example" {
       password = "miles123"
     }
   }
-  local_status_page_enabled  = true
+  local_status_page_enabled = true
+  named_vlans = {
+
+    enabled = true
+  }
   network_id                 = "string"
   remote_status_page_enabled = true
   secure_port = {
@@ -48,14 +52,13 @@ output "meraki_networks_settings_example" {
 
 - `local_status_page` (Attributes) A hash of Local Status page(s)' authentication options applied to the Network. (see [below for nested schema](#nestedatt--local_status_page))
 - `local_status_page_enabled` (Boolean) Enables / disables the local device status pages (<a target='_blank' href='http://my.meraki.com/'>my.meraki.com, </a><a target='_blank' href='http://ap.meraki.com/'>ap.meraki.com, </a><a target='_blank' href='http://switch.meraki.com/'>switch.meraki.com, </a><a target='_blank' href='http://wired.meraki.com/'>wired.meraki.com</a>). Optional (defaults to false)
+- `named_vlans` (Attributes) A hash of Named VLANs options applied to the Network. (see [below for nested schema](#nestedatt--named_vlans))
 - `remote_status_page_enabled` (Boolean) Enables / disables access to the device status page (<a target='_blank'>http://[device's LAN IP])</a>. Optional. Can only be set if localStatusPageEnabled is set to true
 - `secure_port` (Attributes) A hash of SecureConnect options applied to the Network. (see [below for nested schema](#nestedatt--secure_port))
 
 ### Read-Only
 
-- `client_privacy` (Attributes) Privacy settings (see [below for nested schema](#nestedatt--client_privacy))
 - `fips` (Attributes) A hash of FIPS options applied to the Network (see [below for nested schema](#nestedatt--fips))
-- `named_vlans` (Attributes) A hash of Named VLANs options applied to the Network. (see [below for nested schema](#nestedatt--named_vlans))
 
 <a id="nestedatt--local_status_page"></a>
 ### Nested Schema for `local_status_page`
@@ -78,6 +81,14 @@ Read-Only:
 
 
 
+<a id="nestedatt--named_vlans"></a>
+### Nested Schema for `named_vlans`
+
+Optional:
+
+- `enabled` (Boolean) Enables / disables Named VLANs on the Network.
+
+
 <a id="nestedatt--secure_port"></a>
 ### Nested Schema for `secure_port`
 
@@ -86,29 +97,12 @@ Optional:
 - `enabled` (Boolean) Enables / disables SecureConnect on the network. Optional.
 
 
-<a id="nestedatt--client_privacy"></a>
-### Nested Schema for `client_privacy`
-
-Read-Only:
-
-- `expire_data_before` (String) The date to expire the data before
-- `expire_data_older_than` (Number) The number of days, weeks, or months in Epoch time to expire the data before
-
-
 <a id="nestedatt--fips"></a>
 ### Nested Schema for `fips`
 
 Read-Only:
 
 - `enabled` (Boolean) Enables / disables FIPS on the network.
-
-
-<a id="nestedatt--named_vlans"></a>
-### Nested Schema for `named_vlans`
-
-Read-Only:
-
-- `enabled` (Boolean) Enables / disables Named VLANs on the Network.
 
 ## Import
 

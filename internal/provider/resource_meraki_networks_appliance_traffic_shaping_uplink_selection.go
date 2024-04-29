@@ -1,27 +1,12 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -31,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -78,6 +64,12 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"wan1",
+						"wan2",
+					),
 				},
 			},
 			"failover_and_failback": schema.SingleNestedAttribute{
@@ -139,6 +131,12 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"poorPerformance",
+									"uplinkDown",
+								),
+							},
 						},
 						"performance_class": schema.SingleNestedAttribute{
 							MarkdownDescription: `Performance class setting for uplink preference rule`,
@@ -156,6 +154,11 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
 									},
+									Validators: []validator.String{
+										stringvalidator.OneOf(
+											"VoIP",
+										),
+									},
 								},
 								"custom_performance_class_id": schema.StringAttribute{
 									MarkdownDescription: `ID of created custom performance class, must be present when performanceClass type is "custom"`,
@@ -172,6 +175,12 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
 									},
+									Validators: []validator.String{
+										stringvalidator.OneOf(
+											"builtin",
+											"custom",
+										),
+									},
 								},
 							},
 						},
@@ -181,6 +190,15 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
+							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"bestForVoIP",
+									"defaultUplink",
+									"loadBalancing",
+									"wan1",
+									"wan2",
+								),
 							},
 						},
 						"traffic_filters": schema.SetNestedAttribute{
@@ -199,6 +217,13 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 										Optional:            true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
+										},
+										Validators: []validator.String{
+											stringvalidator.OneOf(
+												"application",
+												"applicationCategory",
+												"custom",
+											),
 										},
 									},
 									"value": schema.SingleNestedAttribute{
@@ -284,6 +309,15 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
 												},
+												Validators: []validator.String{
+													stringvalidator.OneOf(
+														"any",
+														"icmp",
+														"icmp6",
+														"tcp",
+														"udp",
+													),
+												},
 											},
 											"source": schema.SingleNestedAttribute{
 												MarkdownDescription: `Source of 'custom' type traffic filter`,
@@ -361,6 +395,12 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"wan1",
+									"wan2",
+								),
+							},
 						},
 						"traffic_filters": schema.SetNestedAttribute{
 							MarkdownDescription: `Traffic filters`,
@@ -378,6 +418,11 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 										Optional:            true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
+										},
+										Validators: []validator.String{
+											stringvalidator.OneOf(
+												"custom",
+											),
 										},
 									},
 									"value": schema.SingleNestedAttribute{
@@ -422,6 +467,14 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 												Optional:            true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
+												},
+												Validators: []validator.String{
+													stringvalidator.OneOf(
+														"any",
+														"icmp6",
+														"tcp",
+														"udp",
+													),
 												},
 											},
 											"source": schema.SingleNestedAttribute{
@@ -499,7 +552,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Create(ctx cont
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceTrafficShapingUplinkSelection(vvNetworkID)
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
@@ -551,7 +603,7 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Create(ctx cont
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -580,7 +632,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Read(ctx contex
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	responseGet, restyRespGet, err := r.client.Appliance.GetNetworkApplianceTrafficShapingUplinkSelection(vvNetworkID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -604,7 +655,7 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Read(ctx contex
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -626,7 +677,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Update(ctx cont
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceTrafficShapingUplinkSelection(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
@@ -650,7 +700,7 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Update(ctx cont
 
 func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksApplianceTrafficShapingUplinkSelection", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 

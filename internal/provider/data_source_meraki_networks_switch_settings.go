@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -65,6 +49,17 @@ func (d *NetworksSwitchSettingsDataSource) Schema(_ context.Context, _ datasourc
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
+					"mac_blocklist": schema.SingleNestedAttribute{
+						MarkdownDescription: `MAC blocklist`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"enabled": schema.BoolAttribute{
+								MarkdownDescription: `Enable MAC blocklist for switches in the network`,
+								Computed:            true,
+							},
+						},
+					},
 					"power_exceptions": schema.SetNestedAttribute{
 						MarkdownDescription: `Exceptions on a per switch basis to "useCombinedPower"`,
 						Computed:            true,
@@ -79,6 +74,17 @@ func (d *NetworksSwitchSettingsDataSource) Schema(_ context.Context, _ datasourc
 									MarkdownDescription: `Serial number of the switch`,
 									Computed:            true,
 								},
+							},
+						},
+					},
+					"uplink_client_sampling": schema.SingleNestedAttribute{
+						MarkdownDescription: `Uplink client sampling`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"enabled": schema.BoolAttribute{
+								MarkdownDescription: `Enable client sampling on uplink`,
+								Computed:            true,
 							},
 						},
 					},
@@ -138,9 +144,15 @@ type NetworksSwitchSettings struct {
 }
 
 type ResponseSwitchGetNetworkSwitchSettings struct {
-	PowerExceptions  *[]ResponseSwitchGetNetworkSwitchSettingsPowerExceptions `tfsdk:"power_exceptions"`
-	UseCombinedPower types.Bool                                               `tfsdk:"use_combined_power"`
-	VLAN             types.Int64                                              `tfsdk:"vlan"`
+	MacBlocklist         *ResponseSwitchGetNetworkSwitchSettingsMacBlocklist         `tfsdk:"mac_blocklist"`
+	PowerExceptions      *[]ResponseSwitchGetNetworkSwitchSettingsPowerExceptions    `tfsdk:"power_exceptions"`
+	UplinkClientSampling *ResponseSwitchGetNetworkSwitchSettingsUplinkClientSampling `tfsdk:"uplink_client_sampling"`
+	UseCombinedPower     types.Bool                                                  `tfsdk:"use_combined_power"`
+	VLAN                 types.Int64                                                 `tfsdk:"vlan"`
+}
+
+type ResponseSwitchGetNetworkSwitchSettingsMacBlocklist struct {
+	Enabled types.Bool `tfsdk:"enabled"`
 }
 
 type ResponseSwitchGetNetworkSwitchSettingsPowerExceptions struct {
@@ -148,9 +160,26 @@ type ResponseSwitchGetNetworkSwitchSettingsPowerExceptions struct {
 	Serial    types.String `tfsdk:"serial"`
 }
 
+type ResponseSwitchGetNetworkSwitchSettingsUplinkClientSampling struct {
+	Enabled types.Bool `tfsdk:"enabled"`
+}
+
 // ToBody
 func ResponseSwitchGetNetworkSwitchSettingsItemToBody(state NetworksSwitchSettings, response *merakigosdk.ResponseSwitchGetNetworkSwitchSettings) NetworksSwitchSettings {
 	itemState := ResponseSwitchGetNetworkSwitchSettings{
+		MacBlocklist: func() *ResponseSwitchGetNetworkSwitchSettingsMacBlocklist {
+			if response.MacBlocklist != nil {
+				return &ResponseSwitchGetNetworkSwitchSettingsMacBlocklist{
+					Enabled: func() types.Bool {
+						if response.MacBlocklist.Enabled != nil {
+							return types.BoolValue(*response.MacBlocklist.Enabled)
+						}
+						return types.Bool{}
+					}(),
+				}
+			}
+			return &ResponseSwitchGetNetworkSwitchSettingsMacBlocklist{}
+		}(),
 		PowerExceptions: func() *[]ResponseSwitchGetNetworkSwitchSettingsPowerExceptions {
 			if response.PowerExceptions != nil {
 				result := make([]ResponseSwitchGetNetworkSwitchSettingsPowerExceptions, len(*response.PowerExceptions))
@@ -163,6 +192,19 @@ func ResponseSwitchGetNetworkSwitchSettingsItemToBody(state NetworksSwitchSettin
 				return &result
 			}
 			return &[]ResponseSwitchGetNetworkSwitchSettingsPowerExceptions{}
+		}(),
+		UplinkClientSampling: func() *ResponseSwitchGetNetworkSwitchSettingsUplinkClientSampling {
+			if response.UplinkClientSampling != nil {
+				return &ResponseSwitchGetNetworkSwitchSettingsUplinkClientSampling{
+					Enabled: func() types.Bool {
+						if response.UplinkClientSampling.Enabled != nil {
+							return types.BoolValue(*response.UplinkClientSampling.Enabled)
+						}
+						return types.Bool{}
+					}(),
+				}
+			}
+			return &ResponseSwitchGetNetworkSwitchSettingsUplinkClientSampling{}
 		}(),
 		UseCombinedPower: func() types.Bool {
 			if response.UseCombinedPower != nil {

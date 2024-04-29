@@ -63,8 +63,8 @@ Optional:
 
 Optional:
 
-- `allowed_ips` (List of String) An array of ranges of WAN IP addresses that are allowed to make inbound connections on the specified ports or port ranges, or 'any'
-- `destination_ports` (List of String) An array of ports or port ranges that will be forwarded to the host on the LAN
+- `allowed_ips` (Set of String) An array of ranges of WAN IP addresses that are allowed to make inbound connections on the specified ports or port ranges, or 'any'
+- `destination_ports` (Set of String) An array of ports or port ranges that will be forwarded to the host on the LAN
 - `protocol` (String) Either of the following: 'tcp', 'udp', 'icmp-ping' or 'any'
 
 ## Import

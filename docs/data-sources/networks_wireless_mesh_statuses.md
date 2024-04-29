@@ -22,7 +22,7 @@ data "meraki_networks_wireless_mesh_statuses" "example" {
 }
 
 output "meraki_networks_wireless_mesh_statuses_example" {
-  value = data.meraki_networks_wireless_mesh_statuses.example.item
+  value = data.meraki_networks_wireless_mesh_statuses.example.items
 }
 ```
 
@@ -41,22 +41,22 @@ output "meraki_networks_wireless_mesh_statuses_example" {
 
 ### Read-Only
 
-- `item` (Attributes) (see [below for nested schema](#nestedatt--item))
+- `items` (Attributes List) Array of ResponseWirelessGetNetworkWirelessMeshStatuses (see [below for nested schema](#nestedatt--items))
 
-<a id="nestedatt--item"></a>
-### Nested Schema for `item`
-
-Read-Only:
-
-- `latest_mesh_performance` (Attributes) (see [below for nested schema](#nestedatt--item--latest_mesh_performance))
-- `mesh_route` (List of String)
-- `serial` (String)
-
-<a id="nestedatt--item--latest_mesh_performance"></a>
-### Nested Schema for `item.latest_mesh_performance`
+<a id="nestedatt--items"></a>
+### Nested Schema for `items`
 
 Read-Only:
 
-- `mbps` (Number)
-- `metric` (Number)
-- `usage_percentage` (String)
+- `latest_mesh_performance` (Attributes) Current metrics on how the mesh is performing. (see [below for nested schema](#nestedatt--items--latest_mesh_performance))
+- `mesh_route` (List of String) List of device serials that make up the mesh.
+- `serial` (String) The serial number for the device.
+
+<a id="nestedatt--items--latest_mesh_performance"></a>
+### Nested Schema for `items.latest_mesh_performance`
+
+Read-Only:
+
+- `mbps` (Number) Average Mbps.
+- `metric` (Number) Represents the quality of the entire route from the repeater access point to its gateway access point.
+- `usage_percentage` (String) Mesh utilization as a percentage.

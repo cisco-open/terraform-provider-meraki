@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,12 +6,13 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -65,11 +50,30 @@ func (r *NetworksWirelessSSIDsBonjourForwardingResource) Schema(_ context.Contex
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"enabled": schema.BoolAttribute{
-				MarkdownDescription: `If true, Bonjour forwarding is enabled on this SSID.`,
+				MarkdownDescription: `If true, Bonjour forwarding is enabled on the SSID.`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"exception": schema.SingleNestedAttribute{
+				MarkdownDescription: `Bonjour forwarding exception`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
+				Attributes: map[string]schema.Attribute{
+
+					"enabled": schema.BoolAttribute{
+						MarkdownDescription: `If true, Bonjour forwarding exception is enabled on this SSID. Exception is required to enable L2 isolation and Bonjour forwarding to work together.`,
+						Computed:            true,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
+					},
 				},
 			},
 			"network_id": schema.StringAttribute{
@@ -81,7 +85,7 @@ func (r *NetworksWirelessSSIDsBonjourForwardingResource) Schema(_ context.Contex
 				Required:            true,
 			},
 			"rules": schema.SetNestedAttribute{
-				MarkdownDescription: `List of bonjour forwarding rules.`,
+				MarkdownDescription: `Bonjour forwarding rules`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
@@ -91,7 +95,7 @@ func (r *NetworksWirelessSSIDsBonjourForwardingResource) Schema(_ context.Contex
 					Attributes: map[string]schema.Attribute{
 
 						"description": schema.StringAttribute{
-							MarkdownDescription: `A description for your Bonjour forwarding rule. Optional.`,
+							MarkdownDescription: `Desctiption of the bonjour forwarding rule`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
@@ -109,7 +113,7 @@ func (r *NetworksWirelessSSIDsBonjourForwardingResource) Schema(_ context.Contex
 							ElementType: types.StringType,
 						},
 						"vlan_id": schema.StringAttribute{
-							MarkdownDescription: `The ID of the service VLAN. Required.`,
+							MarkdownDescription: `The ID of the service VLAN. Required`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
@@ -143,7 +147,6 @@ func (r *NetworksWirelessSSIDsBonjourForwardingResource) Create(ctx context.Cont
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvNumber := data.Number.ValueString()
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDBonjourForwarding(vvNetworkID, vvNumber)
@@ -163,9 +166,9 @@ func (r *NetworksWirelessSSIDsBonjourForwardingResource) Create(ctx context.Cont
 		return
 	}
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDBonjourForwarding(vvNetworkID, vvNumber, dataRequest)
+	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDBonjourForwarding(vvNetworkID, vvNumber, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDBonjourForwarding",
@@ -196,7 +199,7 @@ func (r *NetworksWirelessSSIDsBonjourForwardingResource) Create(ctx context.Cont
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSSIDBonjourForwardingItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -225,9 +228,7 @@ func (r *NetworksWirelessSSIDsBonjourForwardingResource) Read(ctx context.Contex
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvNumber := data.Number.ValueString()
-	// number
 	responseGet, restyRespGet, err := r.client.Wireless.GetNetworkWirelessSSIDBonjourForwarding(vvNetworkID, vvNumber)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -251,7 +252,7 @@ func (r *NetworksWirelessSSIDsBonjourForwardingResource) Read(ctx context.Contex
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSSIDBonjourForwardingItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -284,11 +285,10 @@ func (r *NetworksWirelessSSIDsBonjourForwardingResource) Update(ctx context.Cont
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvNumber := data.Number.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDBonjourForwarding(vvNetworkID, vvNumber, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDBonjourForwarding(vvNetworkID, vvNumber, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDBonjourForwarding",
@@ -309,16 +309,21 @@ func (r *NetworksWirelessSSIDsBonjourForwardingResource) Update(ctx context.Cont
 
 func (r *NetworksWirelessSSIDsBonjourForwardingResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksWirelessSSIDsBonjourForwarding", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
 // TF Structs Schema
 type NetworksWirelessSSIDsBonjourForwardingRs struct {
-	NetworkID types.String                                                      `tfsdk:"network_id"`
-	Number    types.String                                                      `tfsdk:"number"`
-	Enabled   types.Bool                                                        `tfsdk:"enabled"`
-	Rules     *[]ResponseWirelessGetNetworkWirelessSsidBonjourForwardingRulesRs `tfsdk:"rules"`
+	NetworkID types.String                                                        `tfsdk:"network_id"`
+	Number    types.String                                                        `tfsdk:"number"`
+	Enabled   types.Bool                                                          `tfsdk:"enabled"`
+	Exception *ResponseWirelessGetNetworkWirelessSsidBonjourForwardingExceptionRs `tfsdk:"exception"`
+	Rules     *[]ResponseWirelessGetNetworkWirelessSsidBonjourForwardingRulesRs   `tfsdk:"rules"`
+}
+
+type ResponseWirelessGetNetworkWirelessSsidBonjourForwardingExceptionRs struct {
+	Enabled types.Bool `tfsdk:"enabled"`
 }
 
 type ResponseWirelessGetNetworkWirelessSsidBonjourForwardingRulesRs struct {
@@ -335,12 +340,24 @@ func (r *NetworksWirelessSSIDsBonjourForwardingRs) toSdkApiRequestUpdate(ctx con
 	} else {
 		enabled = nil
 	}
+	var requestWirelessUpdateNetworkWirelessSSIDBonjourForwardingException *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDBonjourForwardingException
+	if r.Exception != nil {
+		enabled := func() *bool {
+			if !r.Exception.Enabled.IsUnknown() && !r.Exception.Enabled.IsNull() {
+				return r.Exception.Enabled.ValueBoolPointer()
+			}
+			return nil
+		}()
+		requestWirelessUpdateNetworkWirelessSSIDBonjourForwardingException = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDBonjourForwardingException{
+			Enabled: enabled,
+		}
+	}
 	var requestWirelessUpdateNetworkWirelessSSIDBonjourForwardingRules []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDBonjourForwardingRules
 	if r.Rules != nil {
 		for _, rItem1 := range *r.Rules {
 			description := rItem1.Description.ValueString()
 			var services []string = nil
-
+			//Hoola aqui
 			rItem1.Services.ElementsAs(ctx, &services, false)
 			vLANID := rItem1.VLANID.ValueString()
 			requestWirelessUpdateNetworkWirelessSSIDBonjourForwardingRules = append(requestWirelessUpdateNetworkWirelessSSIDBonjourForwardingRules, merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDBonjourForwardingRules{
@@ -351,7 +368,8 @@ func (r *NetworksWirelessSSIDsBonjourForwardingRs) toSdkApiRequestUpdate(ctx con
 		}
 	}
 	out := merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDBonjourForwarding{
-		Enabled: enabled,
+		Enabled:   enabled,
+		Exception: requestWirelessUpdateNetworkWirelessSSIDBonjourForwardingException,
 		Rules: func() *[]merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDBonjourForwardingRules {
 			if len(requestWirelessUpdateNetworkWirelessSSIDBonjourForwardingRules) > 0 {
 				return &requestWirelessUpdateNetworkWirelessSSIDBonjourForwardingRules
@@ -370,6 +388,19 @@ func ResponseWirelessGetNetworkWirelessSSIDBonjourForwardingItemToBodyRs(state N
 				return types.BoolValue(*response.Enabled)
 			}
 			return types.Bool{}
+		}(),
+		Exception: func() *ResponseWirelessGetNetworkWirelessSsidBonjourForwardingExceptionRs {
+			if response.Exception != nil {
+				return &ResponseWirelessGetNetworkWirelessSsidBonjourForwardingExceptionRs{
+					Enabled: func() types.Bool {
+						if response.Exception.Enabled != nil {
+							return types.BoolValue(*response.Exception.Enabled)
+						}
+						return types.Bool{}
+					}(),
+				}
+			}
+			return &ResponseWirelessGetNetworkWirelessSsidBonjourForwardingExceptionRs{}
 		}(),
 		Rules: func() *[]ResponseWirelessGetNetworkWirelessSsidBonjourForwardingRulesRs {
 			if response.Rules != nil {

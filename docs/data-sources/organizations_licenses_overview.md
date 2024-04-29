@@ -39,13 +39,145 @@ output "meraki_organizations_licenses_overview_example" {
 
 Read-Only:
 
-- `expiration_date` (String)
-- `licensed_device_counts` (Attributes) (see [below for nested schema](#nestedatt--item--licensed_device_counts))
-- `status` (String)
+- `expiration_date` (String) License expiration date (Co-termination licensing only)
+- `license_count` (Number) Total number of licenses (Per-device licensing only)
+- `license_types` (Attributes Set) Data by license type (Per-device licensing only) (see [below for nested schema](#nestedatt--item--license_types))
+- `licensed_device_counts` (String) License counts (Co-termination licensing only)
+- `states` (Attributes) Aggregated data for licenses by state (Per-device licensing only) (see [below for nested schema](#nestedatt--item--states))
+- `status` (String) License status (Co-termination licensing only)
+- `systems_manager` (Attributes) Aggregated data for Systems Manager licenses (Per-device licensing only) (see [below for nested schema](#nestedatt--item--systems_manager))
 
-<a id="nestedatt--item--licensed_device_counts"></a>
-### Nested Schema for `item.licensed_device_counts`
+<a id="nestedatt--item--license_types"></a>
+### Nested Schema for `item.license_types`
 
 Read-Only:
 
-- `ms` (Number)
+- `counts` (Attributes) Aggregated count data for the license type (see [below for nested schema](#nestedatt--item--license_types--counts))
+- `license_type` (String) License type
+
+<a id="nestedatt--item--license_types--counts"></a>
+### Nested Schema for `item.license_types.counts`
+
+Read-Only:
+
+- `unassigned` (Number) The number of unassigned licenses
+
+
+
+<a id="nestedatt--item--states"></a>
+### Nested Schema for `item.states`
+
+Read-Only:
+
+- `active` (Attributes) Data for active licenses (see [below for nested schema](#nestedatt--item--states--active))
+- `expired` (Attributes) Data for expired licenses (see [below for nested schema](#nestedatt--item--states--expired))
+- `expiring` (Attributes) Data for expiring licenses (see [below for nested schema](#nestedatt--item--states--expiring))
+- `recently_queued` (Attributes) Data for recently queued licenses (see [below for nested schema](#nestedatt--item--states--recently_queued))
+- `unused` (Attributes) Data for unused licenses (see [below for nested schema](#nestedatt--item--states--unused))
+- `unused_active` (Attributes) Data for unused, active licenses (see [below for nested schema](#nestedatt--item--states--unused_active))
+
+<a id="nestedatt--item--states--active"></a>
+### Nested Schema for `item.states.active`
+
+Read-Only:
+
+- `count` (Number) The number of active licenses
+
+
+<a id="nestedatt--item--states--expired"></a>
+### Nested Schema for `item.states.expired`
+
+Read-Only:
+
+- `count` (Number) The number of expired licenses
+
+
+<a id="nestedatt--item--states--expiring"></a>
+### Nested Schema for `item.states.expiring`
+
+Read-Only:
+
+- `count` (Number) The number of expiring licenses
+- `critical` (Attributes) Data for the critical threshold (see [below for nested schema](#nestedatt--item--states--expiring--critical))
+- `warning` (Attributes) Data for the warning threshold (see [below for nested schema](#nestedatt--item--states--expiring--warning))
+
+<a id="nestedatt--item--states--expiring--critical"></a>
+### Nested Schema for `item.states.expiring.warning`
+
+Read-Only:
+
+- `expiring_count` (Number) The number of licenses that will expire in this window
+- `threshold_in_days` (Number) The number of days from now denoting the critical threshold for an expiring license
+
+
+<a id="nestedatt--item--states--expiring--warning"></a>
+### Nested Schema for `item.states.expiring.warning`
+
+Read-Only:
+
+- `expiring_count` (Number) The number of licenses that will expire in this window
+- `threshold_in_days` (Number) The number of days from now denoting the warning threshold for an expiring license
+
+
+
+<a id="nestedatt--item--states--recently_queued"></a>
+### Nested Schema for `item.states.recently_queued`
+
+Read-Only:
+
+- `count` (Number) The number of recently queued licenses
+
+
+<a id="nestedatt--item--states--unused"></a>
+### Nested Schema for `item.states.unused`
+
+Read-Only:
+
+- `count` (Number) The number of unused licenses
+- `soonest_activation` (Attributes) Information about the soonest forthcoming license activation (see [below for nested schema](#nestedatt--item--states--unused--soonest_activation))
+
+<a id="nestedatt--item--states--unused--soonest_activation"></a>
+### Nested Schema for `item.states.unused.soonest_activation`
+
+Read-Only:
+
+- `activation_date` (String) The soonest license activation date
+- `to_activate_count` (Number) The number of licenses that will activate on this date
+
+
+
+<a id="nestedatt--item--states--unused_active"></a>
+### Nested Schema for `item.states.unused_active`
+
+Read-Only:
+
+- `count` (Number) The number of unused, active licenses
+- `oldest_activation` (Attributes) Information about the oldest historical license activation (see [below for nested schema](#nestedatt--item--states--unused_active--oldest_activation))
+
+<a id="nestedatt--item--states--unused_active--oldest_activation"></a>
+### Nested Schema for `item.states.unused_active.oldest_activation`
+
+Read-Only:
+
+- `activation_date` (String) The oldest license activation date
+- `active_count` (Number) The number of licenses that activated on this date
+
+
+
+
+<a id="nestedatt--item--systems_manager"></a>
+### Nested Schema for `item.systems_manager`
+
+Read-Only:
+
+- `counts` (Attributes) Aggregated license count data for Systems Manager (see [below for nested schema](#nestedatt--item--systems_manager--counts))
+
+<a id="nestedatt--item--systems_manager--counts"></a>
+### Nested Schema for `item.systems_manager.counts`
+
+Read-Only:
+
+- `active_seats` (Number) The number of Systems Manager seats in use
+- `orgwide_enrolled_devices` (Number) The total number of enrolled Systems Manager devices
+- `total_seats` (Number) The total number of Systems Manager seats
+- `unassigned_seats` (Number) The number of unused Systems Manager seats

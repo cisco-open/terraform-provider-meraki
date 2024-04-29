@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -74,73 +58,93 @@ func (d *NetworksSwitchStacksRoutingInterfacesDataSource) Schema(_ context.Conte
 				Attributes: map[string]schema.Attribute{
 
 					"default_gateway": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `IPv4 default gateway`,
+						Computed:            true,
 					},
 					"interface_id": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The id`,
+						Computed:            true,
 					},
 					"interface_ip": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `IPv4 address`,
+						Computed:            true,
 					},
 					"ipv6": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `IPv6 addressing`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"address": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `IPv6 address`,
+								Computed:            true,
 							},
 							"assignment_mode": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `Assignment mode`,
+								Computed:            true,
 							},
 							"gateway": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `IPv6 gateway`,
+								Computed:            true,
 							},
 							"prefix": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `IPv6 subnet`,
+								Computed:            true,
 							},
 						},
 					},
 					"multicast_routing": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Multicast routing status`,
+						Computed:            true,
 					},
 					"name": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The name`,
+						Computed:            true,
 					},
 					"ospf_settings": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `IPv4 OSPF Settings`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"area": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `Area id`,
+								Computed:            true,
 							},
 							"cost": schema.Int64Attribute{
-								Computed: true,
+								MarkdownDescription: `OSPF Cost`,
+								Computed:            true,
 							},
 							"is_passive_enabled": schema.BoolAttribute{
-								Computed: true,
+								MarkdownDescription: `Disable sending Hello packets on this interface's IPv4 area`,
+								Computed:            true,
 							},
 						},
 					},
 					"ospf_v3": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `IPv6 OSPF Settings`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"area": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `Area id`,
+								Computed:            true,
 							},
 							"cost": schema.Int64Attribute{
-								Computed: true,
+								MarkdownDescription: `OSPF Cost`,
+								Computed:            true,
 							},
 							"is_passive_enabled": schema.BoolAttribute{
-								Computed: true,
+								MarkdownDescription: `Disable sending Hello packets on this interface's IPv6 area`,
+								Computed:            true,
 							},
 						},
 					},
 					"subnet": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `IPv4 subnet`,
+						Computed:            true,
 					},
 					"vlan_id": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `VLAN id`,
+						Computed:            true,
 					},
 				},
 			},
@@ -152,73 +156,93 @@ func (d *NetworksSwitchStacksRoutingInterfacesDataSource) Schema(_ context.Conte
 					Attributes: map[string]schema.Attribute{
 
 						"default_gateway": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `IPv4 default gateway`,
+							Computed:            true,
 						},
 						"interface_id": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The id`,
+							Computed:            true,
 						},
 						"interface_ip": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `IPv4 address`,
+							Computed:            true,
 						},
 						"ipv6": schema.SingleNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `IPv6 addressing`,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
 								"address": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `IPv6 address`,
+									Computed:            true,
 								},
 								"assignment_mode": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Assignment mode`,
+									Computed:            true,
 								},
 								"gateway": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `IPv6 gateway`,
+									Computed:            true,
 								},
 								"prefix": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `IPv6 subnet`,
+									Computed:            true,
 								},
 							},
 						},
 						"multicast_routing": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Multicast routing status`,
+							Computed:            true,
 						},
 						"name": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The name`,
+							Computed:            true,
 						},
 						"ospf_settings": schema.SingleNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `IPv4 OSPF Settings`,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
 								"area": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Area id`,
+									Computed:            true,
 								},
 								"cost": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `OSPF Cost`,
+									Computed:            true,
 								},
 								"is_passive_enabled": schema.BoolAttribute{
-									Computed: true,
+									MarkdownDescription: `Disable sending Hello packets on this interface's IPv4 area`,
+									Computed:            true,
 								},
 							},
 						},
 						"ospf_v3": schema.SingleNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `IPv6 OSPF Settings`,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
 								"area": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Area id`,
+									Computed:            true,
 								},
 								"cost": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `OSPF Cost`,
+									Computed:            true,
 								},
 								"is_passive_enabled": schema.BoolAttribute{
-									Computed: true,
+									MarkdownDescription: `Disable sending Hello packets on this interface's IPv6 area`,
+									Computed:            true,
 								},
 							},
 						},
 						"subnet": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `IPv4 subnet`,
+							Computed:            true,
 						},
 						"vlan_id": schema.Int64Attribute{
-							Computed: true,
+							MarkdownDescription: `VLAN id`,
+							Computed:            true,
 						},
 					},
 				},

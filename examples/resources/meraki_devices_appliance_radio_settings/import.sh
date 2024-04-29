@@ -1,0 +1,1 @@
+terraform import meraki_devices_appliance_radio_settings.example "serial"

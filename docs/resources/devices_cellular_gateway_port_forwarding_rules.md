@@ -49,7 +49,7 @@ output "meraki_devices_cellular_gateway_port_forwarding_rules_example" {
 Optional:
 
 - `access` (String) *any* or *restricted*. Specify the right to make inbound connections on the specified ports or port ranges. If *restricted*, a list of allowed IPs is mandatory.
-- `allowed_ips` (List of String) An array of ranges of WAN IP addresses that are allowed to make inbound connections on the specified ports or port ranges.
+- `allowed_ips` (Set of String) An array of ranges of WAN IP addresses that are allowed to make inbound connections on the specified ports or port ranges.
 - `lan_ip` (String) The IP address of the server or device that hosts the internal resource that you wish to make available on the WAN
 - `local_port` (String) A port or port ranges that will receive the forwarded traffic from the WAN
 - `name` (String) A descriptive name for the rule

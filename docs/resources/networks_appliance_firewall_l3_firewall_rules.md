@@ -46,10 +46,29 @@ output "meraki_networks_appliance_firewall_l3_firewall_rules_example" {
 - `rules` (Attributes Set) An ordered array of the firewall rules (not including the default rule) (see [below for nested schema](#nestedatt--rules))
 - `syslog_default_rule` (Boolean) Log the special default rule (boolean value - enable only if you've configured a syslog server) (optional)
 
+### Read-Only
+
+- `rules_response` (Attributes Set) An ordered array of the firewall rules (not including the default rule) (see [below for nested schema](#nestedatt--rules_response))
+
 <a id="nestedatt--rules"></a>
 ### Nested Schema for `rules`
 
 Optional:
+
+- `comment` (String) Description of the rule (optional)
+- `dest_cidr` (String) Comma-separated list of destination IP address(es) (in IP or CIDR notation), fully-qualified domain names (FQDN) or 'any'
+- `dest_port` (String) Comma-separated list of destination port(s) (integer in the range 1-65535), or 'any'
+- `policy` (String) 'allow' or 'deny' traffic specified by this rule
+- `protocol` (String) The type of protocol (must be 'tcp', 'udp', 'icmp', 'icmp6' or 'any')
+- `src_cidr` (String) Comma-separated list of source IP address(es) (in IP or CIDR notation), or 'any' (note: FQDN not supported for source addresses)
+- `src_port` (String) Comma-separated list of source port(s) (integer in the range 1-65535), or 'any'
+- `syslog_enabled` (Boolean) Log this rule to syslog (true or false, boolean value) - only applicable if a syslog has been configured (optional)
+
+
+<a id="nestedatt--rules_response"></a>
+### Nested Schema for `rules_response`
+
+Read-Only:
 
 - `comment` (String) Description of the rule (optional)
 - `dest_cidr` (String) Comma-separated list of destination IP address(es) (in IP or CIDR notation), fully-qualified domain names (FQDN) or 'any'

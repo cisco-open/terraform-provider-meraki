@@ -50,8 +50,8 @@ output "meraki_networks_switch_stacks_example" {
 
 Read-Only:
 
-- `id` (String) Switch stacks id
-- `name` (String) Switch stacks name
+- `id` (String) ID of the Switch stack
+- `name` (String) Name of the Switch stack
 - `serials` (List of String) Serials of the switches in the switch stack
 
 
@@ -60,6 +60,6 @@ Read-Only:
 
 Read-Only:
 
-- `id` (String)
-- `name` (String)
-- `serials` (List of String)
+- `id` (String) ID of the Switch stack
+- `name` (String) Name of the Switch stack
+- `serials` (List of String) Serials of the switches in the switch stack

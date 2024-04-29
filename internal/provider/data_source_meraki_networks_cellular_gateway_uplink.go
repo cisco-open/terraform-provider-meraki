@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -66,14 +50,17 @@ func (d *NetworksCellularGatewayUplinkDataSource) Schema(_ context.Context, _ da
 				Attributes: map[string]schema.Attribute{
 
 					"bandwidth_limits": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `The bandwidth settings for the 'cellular' uplink`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"limit_down": schema.Int64Attribute{
-								Computed: true,
+								MarkdownDescription: `The maximum download limit (integer, in Kbps). 'null' indicates no limit.`,
+								Computed:            true,
 							},
 							"limit_up": schema.Int64Attribute{
-								Computed: true,
+								MarkdownDescription: `The maximum upload limit (integer, in Kbps). 'null' indicates no limit.`,
+								Computed:            true,
 							},
 						},
 					},

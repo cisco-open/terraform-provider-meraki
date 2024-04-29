@@ -100,7 +100,7 @@ Read-Only:
 
 Read-Only:
 
-- `details` (Attributes Set) Details related to organization management, possibly empty (see [below for nested schema](#nestedatt--item--management--details))
+- `details` (Attributes Set) Details related to organization management, possibly empty. Details may be named 'MSP ID', 'IP restriction mode for API', or 'IP restriction mode for dashboard', if the organization admin has configured any. (see [below for nested schema](#nestedatt--item--management--details))
 
 <a id="nestedatt--item--management--details"></a>
 ### Nested Schema for `item.management.details`

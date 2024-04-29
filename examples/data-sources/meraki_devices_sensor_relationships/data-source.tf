@@ -5,5 +5,5 @@ data "meraki_devices_sensor_relationships" "example" {
 }
 
 output "meraki_devices_sensor_relationships_example" {
-  value = data.meraki_devices_sensor_relationships.example.items
+  value = data.meraki_devices_sensor_relationships.example.item
 }

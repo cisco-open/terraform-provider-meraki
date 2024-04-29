@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -82,60 +66,35 @@ func (d *OrganizationsPolicyObjectsGroupsDataSource) Schema(_ context.Context, _
 				Attributes: map[string]schema.Attribute{
 
 					"category": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Type of object groups. (NetworkObjectGroup, GeoLocationGroup, PortObjectGroup, ApplicationGroup)`,
+						Computed:            true,
 					},
 					"created_at": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Time Stamp of policy object creation.`,
+						Computed:            true,
 					},
 					"id": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Policy object ID`,
+						Computed:            true,
 					},
 					"name": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Name of the Policy object group.`,
+						Computed:            true,
 					},
 					"network_ids": schema.ListAttribute{
-						Computed:    true,
-						ElementType: types.StringType,
+						MarkdownDescription: `Network ID's associated with the policy objects.`,
+						Computed:            true,
+						ElementType:         types.StringType,
 					},
-					"object_ids": schema.ListAttribute{
-						Computed:    true,
-						ElementType: types.StringType,
+					"object_ids": schema.SetAttribute{
+						MarkdownDescription: `Policy objects associated with Network Object Group or Port Object Group`,
+						Computed:            true,
+						ElementType:         types.StringType, //TODO FINAL ELSE param_schema.Elem.Type para revisar
+						// {'Type': 'schema.TypeInt'}
 					},
 					"updated_at": schema.StringAttribute{
-						Computed: true,
-					},
-				},
-			},
-
-			"items": schema.ListNestedAttribute{
-				MarkdownDescription: `Array of ResponseOrganizationsGetOrganizationPolicyObjectsGroups`,
-				Computed:            true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-
-						"category": schema.StringAttribute{
-							Computed: true,
-						},
-						"created_at": schema.StringAttribute{
-							Computed: true,
-						},
-						"id": schema.StringAttribute{
-							Computed: true,
-						},
-						"name": schema.StringAttribute{
-							Computed: true,
-						},
-						"network_ids": schema.ListAttribute{
-							Computed:    true,
-							ElementType: types.StringType,
-						},
-						"object_ids": schema.ListAttribute{
-							Computed:    true,
-							ElementType: types.StringType,
-						},
-						"updated_at": schema.StringAttribute{
-							Computed: true,
-						},
+						MarkdownDescription: `Time Stamp of policy object updation.`,
+						Computed:            true,
 					},
 				},
 			},
@@ -178,13 +137,6 @@ func (d *OrganizationsPolicyObjectsGroupsDataSource) Read(ctx context.Context, r
 			return
 		}
 
-		organizationsPolicyObjectsGroups = ResponseOrganizationsGetOrganizationPolicyObjectsGroupsItemsToBody(organizationsPolicyObjectsGroups, response1)
-		diags = resp.State.Set(ctx, &organizationsPolicyObjectsGroups)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-
 	}
 	if selectedMethod == 2 {
 		log.Printf("[DEBUG] Selected method: GetOrganizationPolicyObjectsGroup")
@@ -216,23 +168,12 @@ func (d *OrganizationsPolicyObjectsGroupsDataSource) Read(ctx context.Context, r
 
 // structs
 type OrganizationsPolicyObjectsGroups struct {
-	OrganizationID      types.String                                                   `tfsdk:"organization_id"`
-	PerPage             types.Int64                                                    `tfsdk:"per_page"`
-	StartingAfter       types.String                                                   `tfsdk:"starting_after"`
-	EndingBefore        types.String                                                   `tfsdk:"ending_before"`
-	PolicyObjectGroupID types.String                                                   `tfsdk:"policy_object_group_id"`
-	Items               *[]ResponseItemOrganizationsGetOrganizationPolicyObjectsGroups `tfsdk:"items"`
-	Item                *ResponseOrganizationsGetOrganizationPolicyObjectsGroup        `tfsdk:"item"`
-}
-
-type ResponseItemOrganizationsGetOrganizationPolicyObjectsGroups struct {
-	Category   types.String `tfsdk:"category"`
-	CreatedAt  types.String `tfsdk:"created_at"`
-	ID         types.String `tfsdk:"id"`
-	Name       types.String `tfsdk:"name"`
-	NetworkIDs types.List   `tfsdk:"network_ids"`
-	ObjectIDs  types.List   `tfsdk:"object_ids"`
-	UpdatedAt  types.String `tfsdk:"updated_at"`
+	OrganizationID      types.String                                            `tfsdk:"organization_id"`
+	PerPage             types.Int64                                             `tfsdk:"per_page"`
+	StartingAfter       types.String                                            `tfsdk:"starting_after"`
+	EndingBefore        types.String                                            `tfsdk:"ending_before"`
+	PolicyObjectGroupID types.String                                            `tfsdk:"policy_object_group_id"`
+	Item                *ResponseOrganizationsGetOrganizationPolicyObjectsGroup `tfsdk:"item"`
 }
 
 type ResponseOrganizationsGetOrganizationPolicyObjectsGroup struct {
@@ -240,38 +181,20 @@ type ResponseOrganizationsGetOrganizationPolicyObjectsGroup struct {
 	CreatedAt  types.String `tfsdk:"created_at"`
 	ID         types.String `tfsdk:"id"`
 	Name       types.String `tfsdk:"name"`
-	NetworkIDs types.List   `tfsdk:"network_ids"`
-	ObjectIDs  types.List   `tfsdk:"object_ids"`
+	NetworkIDs types.Set    `tfsdk:"network_ids"`
+	ObjectIDs  types.Set    `tfsdk:"object_ids"`
 	UpdatedAt  types.String `tfsdk:"updated_at"`
 }
 
 // ToBody
-func ResponseOrganizationsGetOrganizationPolicyObjectsGroupsItemsToBody(state OrganizationsPolicyObjectsGroups, response *merakigosdk.ResponseOrganizationsGetOrganizationPolicyObjectsGroups) OrganizationsPolicyObjectsGroups {
-	var items []ResponseItemOrganizationsGetOrganizationPolicyObjectsGroups
-	for _, item := range *response {
-		itemState := ResponseItemOrganizationsGetOrganizationPolicyObjectsGroups{
-			Category:   types.StringValue(item.Category),
-			CreatedAt:  types.StringValue(item.CreatedAt),
-			ID:         types.StringValue(item.ID),
-			Name:       types.StringValue(item.Name),
-			NetworkIDs: StringSliceToList(item.NetworkIDs),
-			ObjectIDs:  StringSliceToList(item.ObjectIDs),
-			UpdatedAt:  types.StringValue(item.UpdatedAt),
-		}
-		items = append(items, itemState)
-	}
-	state.Items = &items
-	return state
-}
-
 func ResponseOrganizationsGetOrganizationPolicyObjectsGroupItemToBody(state OrganizationsPolicyObjectsGroups, response *merakigosdk.ResponseOrganizationsGetOrganizationPolicyObjectsGroup) OrganizationsPolicyObjectsGroups {
 	itemState := ResponseOrganizationsGetOrganizationPolicyObjectsGroup{
 		Category:   types.StringValue(response.Category),
 		CreatedAt:  types.StringValue(response.CreatedAt),
 		ID:         types.StringValue(response.ID),
 		Name:       types.StringValue(response.Name),
-		NetworkIDs: StringSliceToList(response.NetworkIDs),
-		ObjectIDs:  StringSliceToList(response.ObjectIDs),
+		NetworkIDs: StringSliceToSet(response.NetworkIDs),
+		ObjectIDs:  StringSliceToSetInt(response.ObjectIDs),
 		UpdatedAt:  types.StringValue(response.UpdatedAt),
 	}
 	state.Item = &itemState

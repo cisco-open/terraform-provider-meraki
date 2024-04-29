@@ -41,14 +41,23 @@ output "meraki_networks_wireless_ssids_bonjour_forwarding_example" {
 
 Read-Only:
 
-- `enabled` (Boolean)
-- `rules` (Attributes Set) (see [below for nested schema](#nestedatt--item--rules))
+- `enabled` (Boolean) If true, Bonjour forwarding is enabled on the SSID.
+- `exception` (Attributes) Bonjour forwarding exception (see [below for nested schema](#nestedatt--item--exception))
+- `rules` (Attributes Set) Bonjour forwarding rules (see [below for nested schema](#nestedatt--item--rules))
+
+<a id="nestedatt--item--exception"></a>
+### Nested Schema for `item.exception`
+
+Read-Only:
+
+- `enabled` (Boolean) If true, Bonjour forwarding exception is enabled on this SSID. Exception is required to enable L2 isolation and Bonjour forwarding to work together.
+
 
 <a id="nestedatt--item--rules"></a>
 ### Nested Schema for `item.rules`
 
 Read-Only:
 
-- `description` (String)
-- `services` (List of String)
-- `vlan_id` (String)
+- `description` (String) Desctiption of the bonjour forwarding rule
+- `services` (List of String) A list of Bonjour services. At least one service must be specified. Available services are 'All Services', 'AirPlay', 'AFP', 'BitTorrent', 'FTP', 'iChat', 'iTunes', 'Printers', 'Samba', 'Scanners' and 'SSH'
+- `vlan_id` (String) The ID of the service VLAN. Required

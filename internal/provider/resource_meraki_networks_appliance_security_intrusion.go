@@ -1,27 +1,12 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -30,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -64,19 +50,33 @@ func (r *NetworksApplianceSecurityIntrusionResource) Schema(_ context.Context, _
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"ids_rulesets": schema.StringAttribute{
-				MarkdownDescription: `Set the detection ruleset 'connectivity'/'balanced'/'security' (optional - omitting will leave current config unchanged). Default value is 'balanced' if none currently saved`,
+				MarkdownDescription: `Intrusion detection ruleset`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"balanced",
+						"connectivity",
+						"security",
+					),
+				},
 			},
 			"mode": schema.StringAttribute{
-				MarkdownDescription: `Set mode to 'disabled'/'detection'/'prevention' (optional - omitting will leave current config unchanged)`,
+				MarkdownDescription: `Intrusion detection mode`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"detection",
+						"disabled",
+						"prevention",
+					),
 				},
 			},
 			"network_id": schema.StringAttribute{
@@ -84,7 +84,7 @@ func (r *NetworksApplianceSecurityIntrusionResource) Schema(_ context.Context, _
 				Required:            true,
 			},
 			"protected_networks": schema.SingleNestedAttribute{
-				MarkdownDescription: `Set the included/excluded networks from the intrusion engine (optional - omitting will leave current config unchanged). This is available only in 'passthrough' mode`,
+				MarkdownDescription: `Networks included in and excluded from the detection engine`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
@@ -93,7 +93,7 @@ func (r *NetworksApplianceSecurityIntrusionResource) Schema(_ context.Context, _
 				Attributes: map[string]schema.Attribute{
 
 					"excluded_cidr": schema.SetAttribute{
-						MarkdownDescription: `list of IP addresses or subnets being excluded from protection (required if 'useDefault' is false)`,
+						MarkdownDescription: `List of IP addresses or subnets being excluded from protection`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Set{
@@ -103,7 +103,7 @@ func (r *NetworksApplianceSecurityIntrusionResource) Schema(_ context.Context, _
 						ElementType: types.StringType,
 					},
 					"included_cidr": schema.SetAttribute{
-						MarkdownDescription: `list of IP addresses or subnets being protected (required if 'useDefault' is false)`,
+						MarkdownDescription: `List of IP addresses or subnets being protected`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Set{
@@ -113,7 +113,7 @@ func (r *NetworksApplianceSecurityIntrusionResource) Schema(_ context.Context, _
 						ElementType: types.StringType,
 					},
 					"use_default": schema.BoolAttribute{
-						MarkdownDescription: `true/false whether to use special IPv4 addresses: https://tools.ietf.org/html/rfc5735 (required). Default value is true if none currently saved`,
+						MarkdownDescription: `Whether special IPv4 addresses should be used (see: https://tools.ietf.org/html/rfc5735)`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
@@ -146,7 +146,6 @@ func (r *NetworksApplianceSecurityIntrusionResource) Create(ctx context.Context,
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceSecurityIntrusion(vvNetworkID)
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
@@ -165,9 +164,9 @@ func (r *NetworksApplianceSecurityIntrusionResource) Create(ctx context.Context,
 		return
 	}
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceSecurityIntrusion(vvNetworkID, dataRequest)
+	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceSecurityIntrusion(vvNetworkID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceSecurityIntrusion",
@@ -198,7 +197,7 @@ func (r *NetworksApplianceSecurityIntrusionResource) Create(ctx context.Context,
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceSecurityIntrusionItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -227,7 +226,6 @@ func (r *NetworksApplianceSecurityIntrusionResource) Read(ctx context.Context, r
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	responseGet, restyRespGet, err := r.client.Appliance.GetNetworkApplianceSecurityIntrusion(vvNetworkID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -251,7 +249,7 @@ func (r *NetworksApplianceSecurityIntrusionResource) Read(ctx context.Context, r
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceSecurityIntrusionItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -273,10 +271,9 @@ func (r *NetworksApplianceSecurityIntrusionResource) Update(ctx context.Context,
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceSecurityIntrusion(vvNetworkID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceSecurityIntrusion(vvNetworkID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceSecurityIntrusion",
@@ -297,7 +294,7 @@ func (r *NetworksApplianceSecurityIntrusionResource) Update(ctx context.Context,
 
 func (r *NetworksApplianceSecurityIntrusionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksApplianceSecurityIntrusion", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -333,10 +330,10 @@ func (r *NetworksApplianceSecurityIntrusionRs) toSdkApiRequestUpdate(ctx context
 	var requestApplianceUpdateNetworkApplianceSecurityIntrusionProtectedNetworks *merakigosdk.RequestApplianceUpdateNetworkApplianceSecurityIntrusionProtectedNetworks
 	if r.ProtectedNetworks != nil {
 		var excludedCidr []string = nil
-
+		//Hoola aqui
 		r.ProtectedNetworks.ExcludedCidr.ElementsAs(ctx, &excludedCidr, false)
 		var includedCidr []string = nil
-
+		//Hoola aqui
 		r.ProtectedNetworks.IncludedCidr.ElementsAs(ctx, &includedCidr, false)
 		useDefault := func() *bool {
 			if !r.ProtectedNetworks.UseDefault.IsUnknown() && !r.ProtectedNetworks.UseDefault.IsNull() {

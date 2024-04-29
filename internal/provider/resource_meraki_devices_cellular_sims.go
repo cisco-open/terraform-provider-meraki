@@ -1,35 +1,22 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -82,6 +69,14 @@ func (r *DevicesCellularSimsResource) Schema(_ context.Context, _ resource.Schem
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
+						},
+					},
+					"timeout": schema.Int64Attribute{
+						MarkdownDescription: `Failover timeout in seconds (optional)`,
+						Computed:            true,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Int64{
+							int64planmodifier.UseStateForUnknown(),
 						},
 					},
 				},
@@ -141,6 +136,13 @@ func (r *DevicesCellularSimsResource) Schema(_ context.Context, _ resource.Schem
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
 												},
+												Validators: []validator.String{
+													stringvalidator.OneOf(
+														"chap",
+														"none",
+														"pap",
+													),
+												},
 											},
 											"username": schema.StringAttribute{
 												MarkdownDescription: `APN username, if type is set.`,
@@ -178,6 +180,12 @@ func (r *DevicesCellularSimsResource) Schema(_ context.Context, _ resource.Schem
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"sim1",
+									"sim2",
+								),
+							},
 						},
 					},
 				},
@@ -206,7 +214,6 @@ func (r *DevicesCellularSimsResource) Create(ctx context.Context, req resource.C
 	}
 	//Has Paths
 	vvSerial := data.Serial.ValueString()
-	// serial
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Devices.GetDeviceCellularSims(vvSerial)
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
@@ -258,7 +265,7 @@ func (r *DevicesCellularSimsResource) Create(ctx context.Context, req resource.C
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseDevicesGetDeviceCellularSimsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -287,7 +294,6 @@ func (r *DevicesCellularSimsResource) Read(ctx context.Context, req resource.Rea
 	// Has Item2
 
 	vvSerial := data.Serial.ValueString()
-	// serial
 	responseGet, restyRespGet, err := r.client.Devices.GetDeviceCellularSims(vvSerial)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -311,7 +317,7 @@ func (r *DevicesCellularSimsResource) Read(ctx context.Context, req resource.Rea
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseDevicesGetDeviceCellularSimsItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -333,7 +339,6 @@ func (r *DevicesCellularSimsResource) Update(ctx context.Context, req resource.U
 
 	//Path Params
 	vvSerial := data.Serial.ValueString()
-	// serial
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Devices.UpdateDeviceCellularSims(vvSerial, dataRequest)
 	if err != nil || restyResp2 == nil {
@@ -357,7 +362,7 @@ func (r *DevicesCellularSimsResource) Update(ctx context.Context, req resource.U
 
 func (r *DevicesCellularSimsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting DevicesCellularSims", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -387,7 +392,8 @@ type ResponseDevicesGetDeviceCellularSimsSimsApnsAuthenticationRs struct {
 }
 
 type RequestDevicesUpdateDeviceCellularSimsSimFailoverRs struct {
-	Enabled types.Bool `tfsdk:"enabled"`
+	Enabled types.Bool  `tfsdk:"enabled"`
+	Timeout types.Int64 `tfsdk:"timeout"`
 }
 
 // FromBody
@@ -400,8 +406,15 @@ func (r *DevicesCellularSimsRs) toSdkApiRequestUpdate(ctx context.Context) *mera
 			}
 			return nil
 		}()
+		timeout := func() *int64 {
+			if !r.SimFailover.Timeout.IsUnknown() && !r.SimFailover.Timeout.IsNull() {
+				return r.SimFailover.Timeout.ValueInt64Pointer()
+			}
+			return nil
+		}()
 		requestDevicesUpdateDeviceCellularSimsSimFailover = &merakigosdk.RequestDevicesUpdateDeviceCellularSimsSimFailover{
 			Enabled: enabled,
+			Timeout: int64ToIntPointer(timeout),
 		}
 	}
 	var requestDevicesUpdateDeviceCellularSimsSims []merakigosdk.RequestDevicesUpdateDeviceCellularSimsSims
@@ -411,7 +424,7 @@ func (r *DevicesCellularSimsRs) toSdkApiRequestUpdate(ctx context.Context) *mera
 			if rItem1.Apns != nil {
 				for _, rItem2 := range *rItem1.Apns { //Apns// name: apns
 					var allowedIPTypes []string = nil
-
+					//Hoola aqui
 					rItem2.AllowedIPTypes.ElementsAs(ctx, &allowedIPTypes, false)
 					var requestDevicesUpdateDeviceCellularSimsSimsApnsAuthentication *merakigosdk.RequestDevicesUpdateDeviceCellularSimsSimsApnsAuthentication
 					if rItem2.Authentication != nil {

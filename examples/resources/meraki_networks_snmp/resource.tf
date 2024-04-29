@@ -1,8 +1,9 @@
 
 resource "meraki_networks_snmp" "example" {
 
-  access     = "users"
-  network_id = "string"
+  access           = "users"
+  community_string = "sample"
+  network_id       = "string"
   users = [{
 
     passphrase = "hunter2"

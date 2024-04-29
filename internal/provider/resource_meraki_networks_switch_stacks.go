@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -22,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -64,11 +48,11 @@ func (r *NetworksSwitchStacksResource) Schema(_ context.Context, _ resource.Sche
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: `Switch stacks id`,
+				MarkdownDescription: `ID of the Switch stack`,
 				Computed:            true,
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: `Switch stacks name`,
+				MarkdownDescription: `Name of the Switch stack`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -91,7 +75,6 @@ func (r *NetworksSwitchStacksResource) Schema(_ context.Context, _ resource.Sche
 			},
 			"switch_stack_id": schema.StringAttribute{
 				MarkdownDescription: `switchStackId path parameter. Switch stack ID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -121,7 +104,6 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvName := data.Name.ValueString()
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchStacks(vvNetworkID)
@@ -144,7 +126,7 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter SwitchStackID",
-					"Error",
+					err.Error(),
 				)
 				return
 			}
@@ -159,9 +141,9 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 		}
 	}
 	dataRequest := data.toSdkApiRequestCreate(ctx)
-	restyResp2, err := r.client.Switch.CreateNetworkSwitchStack(vvNetworkID, dataRequest)
+	response, restyResp2, err := r.client.Switch.CreateNetworkSwitchStack(vvNetworkID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchStack",
@@ -201,7 +183,7 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter SwitchStackID",
-				"Error",
+				err.Error(),
 			)
 			return
 		}
@@ -255,9 +237,7 @@ func (r *NetworksSwitchStacksResource) Read(ctx context.Context, req resource.Re
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvSwitchStackID := data.SwitchStackID.ValueString()
-	// switch_stack_id
 	responseGet, restyRespGet, err := r.client.Switch.GetNetworkSwitchStack(vvNetworkID, vvSwitchStackID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -281,7 +261,7 @@ func (r *NetworksSwitchStacksResource) Read(ctx context.Context, req resource.Re
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchStackItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned

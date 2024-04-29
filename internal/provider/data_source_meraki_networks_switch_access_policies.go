@@ -1,19 +1,3 @@
-// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
-// All rights reserved.
-//
-// Licensed under the Mozilla Public License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//	https://mozilla.org/MPL/2.0/
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +5,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v2/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -72,6 +56,24 @@ func (d *NetworksSwitchAccessPoliciesDataSource) Schema(_ context.Context, _ dat
 					"access_policy_type": schema.StringAttribute{
 						MarkdownDescription: `Access Type of the policy. Automatically 'Hybrid authentication' when hostMode is 'Multi-Domain'.`,
 						Computed:            true,
+					},
+					"counts": schema.SingleNestedAttribute{
+						MarkdownDescription: `Counts associated with the access policy`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"ports": schema.SingleNestedAttribute{
+								MarkdownDescription: `Counts associated with ports`,
+								Computed:            true,
+								Attributes: map[string]schema.Attribute{
+
+									"with_this_policy": schema.Int64Attribute{
+										MarkdownDescription: `Number of ports in the network with this policy. For template networks, this is the number of template ports (not child ports) with this policy.`,
+										Computed:            true,
+									},
+								},
+							},
+						},
 					},
 					"dot1x": schema.SingleNestedAttribute{
 						MarkdownDescription: `802.1x Settings`,
@@ -214,6 +216,24 @@ func (d *NetworksSwitchAccessPoliciesDataSource) Schema(_ context.Context, _ dat
 							MarkdownDescription: `Access Type of the policy. Automatically 'Hybrid authentication' when hostMode is 'Multi-Domain'.`,
 							Computed:            true,
 						},
+						"counts": schema.SingleNestedAttribute{
+							MarkdownDescription: `Counts associated with the access policy`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"ports": schema.SingleNestedAttribute{
+									MarkdownDescription: `Counts associated with ports`,
+									Computed:            true,
+									Attributes: map[string]schema.Attribute{
+
+										"with_this_policy": schema.Int64Attribute{
+											MarkdownDescription: `Number of ports in the network with this policy. For template networks, this is the number of template ports (not child ports) with this policy.`,
+											Computed:            true,
+										},
+									},
+								},
+							},
+						},
 						"dot1x": schema.SingleNestedAttribute{
 							MarkdownDescription: `802.1x Settings`,
 							Computed:            true,
@@ -305,7 +325,7 @@ func (d *NetworksSwitchAccessPoliciesDataSource) Schema(_ context.Context, _ dat
 							Computed:            true,
 						},
 						"radius_group_attribute": schema.StringAttribute{
-							MarkdownDescription: `Acceptable values are *""* for None, or *"11"* for Group Policies ACL`,
+							MarkdownDescription: `Acceptable values are *''* for None, or *'11'* for Group Policies ACL`,
 							Computed:            true,
 						},
 						"radius_servers": schema.SetNestedAttribute{
@@ -425,6 +445,7 @@ type NetworksSwitchAccessPolicies struct {
 
 type ResponseItemSwitchGetNetworkSwitchAccessPolicies struct {
 	AccessPolicyType               types.String                                                               `tfsdk:"access_policy_type"`
+	Counts                         *ResponseItemSwitchGetNetworkSwitchAccessPoliciesCounts                    `tfsdk:"counts"`
 	Dot1X                          *ResponseItemSwitchGetNetworkSwitchAccessPoliciesDot1X                     `tfsdk:"dot1x"`
 	GuestPortBouncing              types.Bool                                                                 `tfsdk:"guest_port_bouncing"`
 	GuestVLANID                    types.Int64                                                                `tfsdk:"guest_vlan_id"`
@@ -441,6 +462,14 @@ type ResponseItemSwitchGetNetworkSwitchAccessPolicies struct {
 	URLRedirectWalledGardenEnabled types.Bool                                                                 `tfsdk:"url_redirect_walled_garden_enabled"`
 	URLRedirectWalledGardenRanges  types.List                                                                 `tfsdk:"url_redirect_walled_garden_ranges"`
 	VoiceVLANClients               types.Bool                                                                 `tfsdk:"voice_vlan_clients"`
+}
+
+type ResponseItemSwitchGetNetworkSwitchAccessPoliciesCounts struct {
+	Ports *ResponseItemSwitchGetNetworkSwitchAccessPoliciesCountsPorts `tfsdk:"ports"`
+}
+
+type ResponseItemSwitchGetNetworkSwitchAccessPoliciesCountsPorts struct {
+	WithThisPolicy types.Int64 `tfsdk:"with_this_policy"`
 }
 
 type ResponseItemSwitchGetNetworkSwitchAccessPoliciesDot1X struct {
@@ -471,6 +500,7 @@ type ResponseItemSwitchGetNetworkSwitchAccessPoliciesRadiusServers struct {
 
 type ResponseSwitchGetNetworkSwitchAccessPolicy struct {
 	AccessPolicyType               types.String                                                         `tfsdk:"access_policy_type"`
+	Counts                         *ResponseSwitchGetNetworkSwitchAccessPolicyCounts                    `tfsdk:"counts"`
 	Dot1X                          *ResponseSwitchGetNetworkSwitchAccessPolicyDot1X                     `tfsdk:"dot1x"`
 	GuestPortBouncing              types.Bool                                                           `tfsdk:"guest_port_bouncing"`
 	GuestVLANID                    types.Int64                                                          `tfsdk:"guest_vlan_id"`
@@ -487,6 +517,14 @@ type ResponseSwitchGetNetworkSwitchAccessPolicy struct {
 	URLRedirectWalledGardenEnabled types.Bool                                                           `tfsdk:"url_redirect_walled_garden_enabled"`
 	URLRedirectWalledGardenRanges  types.List                                                           `tfsdk:"url_redirect_walled_garden_ranges"`
 	VoiceVLANClients               types.Bool                                                           `tfsdk:"voice_vlan_clients"`
+}
+
+type ResponseSwitchGetNetworkSwitchAccessPolicyCounts struct {
+	Ports *ResponseSwitchGetNetworkSwitchAccessPolicyCountsPorts `tfsdk:"ports"`
+}
+
+type ResponseSwitchGetNetworkSwitchAccessPolicyCountsPorts struct {
+	WithThisPolicy types.Int64 `tfsdk:"with_this_policy"`
 }
 
 type ResponseSwitchGetNetworkSwitchAccessPolicyDot1X struct {
@@ -521,6 +559,26 @@ func ResponseSwitchGetNetworkSwitchAccessPoliciesItemsToBody(state NetworksSwitc
 	for _, item := range *response {
 		itemState := ResponseItemSwitchGetNetworkSwitchAccessPolicies{
 			AccessPolicyType: types.StringValue(item.AccessPolicyType),
+			Counts: func() *ResponseItemSwitchGetNetworkSwitchAccessPoliciesCounts {
+				if item.Counts != nil {
+					return &ResponseItemSwitchGetNetworkSwitchAccessPoliciesCounts{
+						Ports: func() *ResponseItemSwitchGetNetworkSwitchAccessPoliciesCountsPorts {
+							if item.Counts.Ports != nil {
+								return &ResponseItemSwitchGetNetworkSwitchAccessPoliciesCountsPorts{
+									WithThisPolicy: func() types.Int64 {
+										if item.Counts.Ports.WithThisPolicy != nil {
+											return types.Int64Value(int64(*item.Counts.Ports.WithThisPolicy))
+										}
+										return types.Int64{}
+									}(),
+								}
+							}
+							return &ResponseItemSwitchGetNetworkSwitchAccessPoliciesCountsPorts{}
+						}(),
+					}
+				}
+				return &ResponseItemSwitchGetNetworkSwitchAccessPoliciesCounts{}
+			}(),
 			Dot1X: func() *ResponseItemSwitchGetNetworkSwitchAccessPoliciesDot1X {
 				if item.Dot1X != nil {
 					return &ResponseItemSwitchGetNetworkSwitchAccessPoliciesDot1X{
@@ -671,6 +729,26 @@ func ResponseSwitchGetNetworkSwitchAccessPoliciesItemsToBody(state NetworksSwitc
 func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBody(state NetworksSwitchAccessPolicies, response *merakigosdk.ResponseSwitchGetNetworkSwitchAccessPolicy) NetworksSwitchAccessPolicies {
 	itemState := ResponseSwitchGetNetworkSwitchAccessPolicy{
 		AccessPolicyType: types.StringValue(response.AccessPolicyType),
+		Counts: func() *ResponseSwitchGetNetworkSwitchAccessPolicyCounts {
+			if response.Counts != nil {
+				return &ResponseSwitchGetNetworkSwitchAccessPolicyCounts{
+					Ports: func() *ResponseSwitchGetNetworkSwitchAccessPolicyCountsPorts {
+						if response.Counts.Ports != nil {
+							return &ResponseSwitchGetNetworkSwitchAccessPolicyCountsPorts{
+								WithThisPolicy: func() types.Int64 {
+									if response.Counts.Ports.WithThisPolicy != nil {
+										return types.Int64Value(int64(*response.Counts.Ports.WithThisPolicy))
+									}
+									return types.Int64{}
+								}(),
+							}
+						}
+						return &ResponseSwitchGetNetworkSwitchAccessPolicyCountsPorts{}
+					}(),
+				}
+			}
+			return &ResponseSwitchGetNetworkSwitchAccessPolicyCounts{}
+		}(),
 		Dot1X: func() *ResponseSwitchGetNetworkSwitchAccessPolicyDot1X {
 			if response.Dot1X != nil {
 				return &ResponseSwitchGetNetworkSwitchAccessPolicyDot1X{

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"reflect"
-	tfsdkr "terraform-provider-meraki/internal/provider/reflects"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -17,6 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+
+	tfsdkr "github.com/cisco-open/terraform-provider-meraki/internal/provider/reflects"
 )
 
 var simpleTypes = []string{

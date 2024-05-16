@@ -22,7 +22,7 @@ import (
 	"flag"
 	"log"
 
-	"terraform-provider-meraki/internal/provider"
+	"github.com/cisco-open/terraform-provider-meraki/internal/provider"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 )

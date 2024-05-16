@@ -1,4 +1,4 @@
-module terraform-provider-meraki
+module github.com/cisco-open/terraform-provider-meraki
 
 go 1.21.5
 

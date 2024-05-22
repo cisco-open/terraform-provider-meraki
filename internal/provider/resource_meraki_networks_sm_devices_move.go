@@ -56,7 +56,7 @@ func (r *NetworksSmDevicesMoveResource) Schema(_ context.Context, _ resource.Sch
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"ids": schema.ListAttribute{
+					"ids": schema.SetAttribute{
 						MarkdownDescription: `The Meraki Ids of the set of devices.`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -70,7 +70,7 @@ func (r *NetworksSmDevicesMoveResource) Schema(_ context.Context, _ resource.Sch
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"ids": schema.ListAttribute{
+					"ids": schema.SetAttribute{
 						MarkdownDescription: `The ids of the devices to be moved.`,
 						Optional:            true,
 						Computed:            true,
@@ -84,19 +84,19 @@ func (r *NetworksSmDevicesMoveResource) Schema(_ context.Context, _ resource.Sch
 							stringplanmodifier.RequiresReplace(),
 						},
 					},
-					"scope": schema.ListAttribute{
+					"scope": schema.SetAttribute{
 						MarkdownDescription: `The scope (one of all, none, withAny, withAll, withoutAny, or withoutAll) and a set of tags of the devices to be moved.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"serials": schema.ListAttribute{
+					"serials": schema.SetAttribute{
 						MarkdownDescription: `The serials of the devices to be moved.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"wifi_macs": schema.ListAttribute{
+					"wifi_macs": schema.SetAttribute{
 						MarkdownDescription: `The wifiMacs of the devices to be moved.`,
 						Optional:            true,
 						Computed:            true,

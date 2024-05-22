@@ -289,6 +289,36 @@ func (r *NetworksAlertsSettingsResource) Schema(_ context.Context, _ resource.Sc
 					},
 				},
 			},
+			"muting": schema.SingleNestedAttribute{
+				MarkdownDescription: `muting`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
+				Attributes: map[string]schema.Attribute{
+
+					"by_port_schedules": schema.SingleNestedAttribute{
+						MarkdownDescription: `by_port_schedules`,
+						Computed:            true,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseStateForUnknown(),
+						},
+						Attributes: map[string]schema.Attribute{
+							"enabled": schema.BoolAttribute{
+								MarkdownDescription: `enabled`,
+								Computed:            true,
+								Optional:            true,
+								PlanModifiers: []planmodifier.Bool{
+									boolplanmodifier.UseStateForUnknown(),
+								},
+								Default: booldefault.StaticBool(false),
+							},
+						},
+					},
+				},
+			},
 			"network_id": schema.StringAttribute{
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
@@ -722,7 +752,7 @@ func ResponseNetworksGetNetworkAlertsSettingsItemToBodyRs(state NetworksAlertsSe
 		}(),
 	}
 
-	// itemState.DefaultDestinations.SNMP = state.DefaultDestinations.SNMP
+	itemState.DefaultDestinations.SNMP = state.DefaultDestinations.SNMP
 
 	itemState.Alerts = state.Alerts
 	if is_read {

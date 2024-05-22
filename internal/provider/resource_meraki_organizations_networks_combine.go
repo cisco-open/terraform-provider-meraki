@@ -126,7 +126,7 @@ func (r *OrganizationsNetworksCombineResource) Schema(_ context.Context, _ resou
 							stringplanmodifier.RequiresReplace(),
 						},
 					},
-					"network_ids": schema.ListAttribute{
+					"network_ids": schema.SetAttribute{
 						MarkdownDescription: `A list of the network IDs that will be combined. If an ID of a combined network is included in this list, the other networks in the list will be grouped into that network`,
 						Optional:            true,
 						Computed:            true,

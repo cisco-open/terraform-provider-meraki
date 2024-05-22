@@ -78,7 +78,7 @@ func (r *NetworksSmDevicesUninstallAppsResource) Schema(_ context.Context, _ res
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"app_ids": schema.ListAttribute{
+					"app_ids": schema.SetAttribute{
 						MarkdownDescription: `ids of applications to be uninstalled`,
 						Optional:            true,
 						Computed:            true,

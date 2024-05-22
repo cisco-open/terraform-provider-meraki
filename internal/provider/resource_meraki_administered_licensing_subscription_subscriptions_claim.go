@@ -147,7 +147,7 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsClaimResource) Schema(_ c
 						MarkdownDescription: `Subscription name`,
 						Computed:            true,
 					},
-					"product_types": schema.ListAttribute{
+					"product_types": schema.SetAttribute{
 						MarkdownDescription: `Products the subscription has entitlements for`,
 						Computed:            true,
 						ElementType:         types.StringType,

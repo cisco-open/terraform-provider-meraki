@@ -73,7 +73,7 @@ func (r *NetworksSmDevicesRebootResource) Schema(_ context.Context, _ resource.S
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"ids": schema.ListAttribute{
+					"ids": schema.SetAttribute{
 						MarkdownDescription: `The Meraki Ids of the set of endpoints.`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -83,13 +83,13 @@ func (r *NetworksSmDevicesRebootResource) Schema(_ context.Context, _ resource.S
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"ids": schema.ListAttribute{
+					"ids": schema.SetAttribute{
 						MarkdownDescription: `The ids of the endpoints to be rebooted.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"kext_paths": schema.ListAttribute{
+					"kext_paths": schema.SetAttribute{
 						MarkdownDescription: `The KextPaths of the endpoints to be rebooted. Available for macOS 11+`,
 						Optional:            true,
 						Computed:            true,
@@ -119,19 +119,19 @@ func (r *NetworksSmDevicesRebootResource) Schema(_ context.Context, _ resource.S
 							boolplanmodifier.RequiresReplace(),
 						},
 					},
-					"scope": schema.ListAttribute{
+					"scope": schema.SetAttribute{
 						MarkdownDescription: `The scope (one of all, none, withAny, withAll, withoutAny, or withoutAll) and a set of tags of the endpoints to be rebooted.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"serials": schema.ListAttribute{
+					"serials": schema.SetAttribute{
 						MarkdownDescription: `The serials of the endpoints to be rebooted.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"wifi_macs": schema.ListAttribute{
+					"wifi_macs": schema.SetAttribute{
 						MarkdownDescription: `The wifiMacs of the endpoints to be rebooted.`,
 						Optional:            true,
 						Computed:            true,

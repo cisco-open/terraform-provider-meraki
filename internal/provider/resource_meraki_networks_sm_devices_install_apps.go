@@ -79,7 +79,7 @@ func (r *NetworksSmDevicesInstallAppsResource) Schema(_ context.Context, _ resou
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"app_ids": schema.ListAttribute{
+					"app_ids": schema.SetAttribute{
 						MarkdownDescription: `ids of applications to be installed`,
 						Optional:            true,
 						Computed:            true,

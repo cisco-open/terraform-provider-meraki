@@ -76,7 +76,7 @@ func (r *NetworksWirelessEthernetPortsProfilesAssignResource) Schema(_ context.C
 						MarkdownDescription: `AP profile ID`,
 						Computed:            true,
 					},
-					"serials": schema.ListAttribute{
+					"serials": schema.SetAttribute{
 						MarkdownDescription: `List of updated AP serials`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -94,7 +94,7 @@ func (r *NetworksWirelessEthernetPortsProfilesAssignResource) Schema(_ context.C
 							stringplanmodifier.RequiresReplace(),
 						},
 					},
-					"serials": schema.ListAttribute{
+					"serials": schema.SetAttribute{
 						MarkdownDescription: `List of AP serials`,
 						Optional:            true,
 						Computed:            true,

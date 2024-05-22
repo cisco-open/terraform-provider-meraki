@@ -95,7 +95,7 @@ func (r *DevicesWirelessAlternateManagementInterfaceIPv6Resource) Schema(_ conte
 									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
-										"addresses": schema.ListAttribute{
+										"addresses": schema.SetAttribute{
 											MarkdownDescription: `Up to 2 nameserver addresses to use, ordered in priority from highest to lowest priority.`,
 											Computed:            true,
 											ElementType:         types.StringType,
@@ -155,7 +155,7 @@ func (r *DevicesWirelessAlternateManagementInterfaceIPv6Resource) Schema(_ conte
 									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
-										"addresses": schema.ListAttribute{
+										"addresses": schema.SetAttribute{
 											MarkdownDescription: `Up to 2 nameserver addresses to use, ordered in priority from highest to lowest priority.`,
 											Optional:            true,
 											Computed:            true,

@@ -72,7 +72,7 @@ func (r *NetworksSmDevicesShutdownResource) Schema(_ context.Context, _ resource
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"ids": schema.ListAttribute{
+					"ids": schema.SetAttribute{
 						MarkdownDescription: `The Meraki Ids of the set of endpoints.`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -82,25 +82,25 @@ func (r *NetworksSmDevicesShutdownResource) Schema(_ context.Context, _ resource
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"ids": schema.ListAttribute{
+					"ids": schema.SetAttribute{
 						MarkdownDescription: `The ids of the endpoints to be shutdown.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"scope": schema.ListAttribute{
+					"scope": schema.SetAttribute{
 						MarkdownDescription: `The scope (one of all, none, withAny, withAll, withoutAny, or withoutAll) and a set of tags of the endpoints to be shutdown.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"serials": schema.ListAttribute{
+					"serials": schema.SetAttribute{
 						MarkdownDescription: `The serials of the endpoints to be shutdown.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"wifi_macs": schema.ListAttribute{
+					"wifi_macs": schema.SetAttribute{
 						MarkdownDescription: `The wifiMacs of the endpoints to be shutdown.`,
 						Optional:            true,
 						Computed:            true,

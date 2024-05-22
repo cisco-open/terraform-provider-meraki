@@ -56,7 +56,7 @@ func (r *NetworksDevicesClaimResource) Schema(_ context.Context, _ resource.Sche
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"serials": schema.ListAttribute{
+					"serials": schema.SetAttribute{
 						MarkdownDescription: `The serials of the devices`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -66,7 +66,7 @@ func (r *NetworksDevicesClaimResource) Schema(_ context.Context, _ resource.Sche
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"serials": schema.ListAttribute{
+					"serials": schema.SetAttribute{
 						MarkdownDescription: `A list of serials of devices to claim`,
 						Optional:            true,
 						Computed:            true,

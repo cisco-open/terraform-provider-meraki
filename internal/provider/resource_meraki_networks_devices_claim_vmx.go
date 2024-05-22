@@ -125,7 +125,7 @@ func (r *NetworksDevicesClaimVmxResource) Schema(_ context.Context, _ resource.S
 						MarkdownDescription: `Serial number of the device`,
 						Computed:            true,
 					},
-					"tags": schema.ListAttribute{
+					"tags": schema.SetAttribute{
 						MarkdownDescription: `List of tags assigned to the device`,
 						Computed:            true,
 						ElementType:         types.StringType,

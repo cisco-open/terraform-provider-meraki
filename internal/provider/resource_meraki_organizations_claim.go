@@ -73,12 +73,12 @@ func (r *OrganizationsClaimResource) Schema(_ context.Context, _ resource.Schema
 							},
 						},
 					},
-					"orders": schema.ListAttribute{
+					"orders": schema.SetAttribute{
 						MarkdownDescription: `The numbers of the orders claimed`,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"serials": schema.ListAttribute{
+					"serials": schema.SetAttribute{
 						MarkdownDescription: `The serials of the devices claimed`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -114,13 +114,13 @@ func (r *OrganizationsClaimResource) Schema(_ context.Context, _ resource.Schema
 							},
 						},
 					},
-					"orders": schema.ListAttribute{
+					"orders": schema.SetAttribute{
 						MarkdownDescription: `The numbers of the orders that should be claimed`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"serials": schema.ListAttribute{
+					"serials": schema.SetAttribute{
 						MarkdownDescription: `The serials of the devices that should be claimed`,
 						Optional:            true,
 						Computed:            true,

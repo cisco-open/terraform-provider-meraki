@@ -7,21 +7,14 @@ terraform {
     }
   }
 }
+
 provider "meraki" {
   meraki_debug = "true"
 }
 
-resource "meraki_networks_syslog_servers" "example" {
-
-  network_id = "L_828099381482775375"
-  servers = [{
-
-    host  = "1.2.3.42"
-    port  = 443
-    roles = ["Wireless event log", "URLs"]
-  }]
-}
-
-output "meraki_networks_syslog_servers_example" {
-  value = meraki_networks_syslog_servers.example
+resource "meraki_organizations_adaptive_policy_groups" "repro" {
+  organization_id = "828099381482762270"
+  description     = "A repro"
+  name            = "pulumi testing 2"
+  sgt             = 1006
 }

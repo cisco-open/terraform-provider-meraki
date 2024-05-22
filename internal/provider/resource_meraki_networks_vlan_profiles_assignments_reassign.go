@@ -72,12 +72,12 @@ func (r *NetworksVLANProfilesAssignmentsReassignResource) Schema(_ context.Conte
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"serials": schema.ListAttribute{
+					"serials": schema.SetAttribute{
 						MarkdownDescription: `Array of Device Serials`,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"stack_ids": schema.ListAttribute{
+					"stack_ids": schema.SetAttribute{
 						MarkdownDescription: `Array of Switch Stack IDs`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -102,13 +102,13 @@ func (r *NetworksVLANProfilesAssignmentsReassignResource) Schema(_ context.Conte
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"serials": schema.ListAttribute{
+					"serials": schema.SetAttribute{
 						MarkdownDescription: `Array of Device Serials`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"stack_ids": schema.ListAttribute{
+					"stack_ids": schema.SetAttribute{
 						MarkdownDescription: `Array of Switch Stack IDs`,
 						Optional:            true,
 						Computed:            true,

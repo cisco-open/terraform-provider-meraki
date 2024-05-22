@@ -60,7 +60,7 @@ func (r *OrganizationsLicensesMoveResource) Schema(_ context.Context, _ resource
 						MarkdownDescription: `The ID of the organization to move the licenses to`,
 						Computed:            true,
 					},
-					"license_ids": schema.ListAttribute{
+					"license_ids": schema.SetAttribute{
 						MarkdownDescription: `A list of IDs of licenses to move to the new organization`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -78,7 +78,7 @@ func (r *OrganizationsLicensesMoveResource) Schema(_ context.Context, _ resource
 							stringplanmodifier.RequiresReplace(),
 						},
 					},
-					"license_ids": schema.ListAttribute{
+					"license_ids": schema.SetAttribute{
 						MarkdownDescription: `A list of IDs of licenses to move to the new organization`,
 						Optional:            true,
 						Computed:            true,

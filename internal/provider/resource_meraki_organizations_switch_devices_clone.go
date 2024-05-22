@@ -63,7 +63,7 @@ func (r *OrganizationsSwitchDevicesCloneResource) Schema(_ context.Context, _ re
 							stringplanmodifier.RequiresReplace(),
 						},
 					},
-					"target_serials": schema.ListAttribute{
+					"target_serials": schema.SetAttribute{
 						MarkdownDescription: `Array of serial numbers of one or more target switches (must be on a network not bound to a template)`,
 						Optional:            true,
 						Computed:            true,

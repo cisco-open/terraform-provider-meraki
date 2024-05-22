@@ -85,12 +85,12 @@ func (r *NetworksBindResource) Schema(_ context.Context, _ resource.SchemaReques
 						MarkdownDescription: `Organization ID`,
 						Computed:            true,
 					},
-					"product_types": schema.ListAttribute{
+					"product_types": schema.SetAttribute{
 						MarkdownDescription: `List of the product types that the network supports`,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"tags": schema.ListAttribute{
+					"tags": schema.SetAttribute{
 						MarkdownDescription: `Network tags`,
 						Computed:            true,
 						ElementType:         types.StringType,

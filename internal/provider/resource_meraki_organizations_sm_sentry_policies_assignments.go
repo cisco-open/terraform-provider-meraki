@@ -124,7 +124,7 @@ func (r *OrganizationsSmSentryPoliciesAssignmentsResource) Schema(_ context.Cont
 												MarkdownDescription: `The Id of the Systems Manager Network the Sentry Policy is assigned to`,
 												Computed:            true,
 											},
-											"tags": schema.ListAttribute{
+											"tags": schema.SetAttribute{
 												MarkdownDescription: `The tags of the Sentry Policy`,
 												Computed:            true,
 												ElementType:         types.StringType,
@@ -194,7 +194,7 @@ func (r *OrganizationsSmSentryPoliciesAssignmentsResource) Schema(_ context.Cont
 													stringplanmodifier.RequiresReplace(),
 												},
 											},
-											"tags": schema.ListAttribute{
+											"tags": schema.SetAttribute{
 												MarkdownDescription: `The tags for the Sentry Policy`,
 												Optional:            true,
 												Computed:            true,

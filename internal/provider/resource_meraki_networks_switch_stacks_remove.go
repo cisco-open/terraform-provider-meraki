@@ -71,7 +71,7 @@ func (r *NetworksSwitchStacksRemoveResource) Schema(_ context.Context, _ resourc
 						MarkdownDescription: `Name of the Switch stack`,
 						Computed:            true,
 					},
-					"serials": schema.ListAttribute{
+					"serials": schema.SetAttribute{
 						MarkdownDescription: `Serials of the switches in the switch stack`,
 						Computed:            true,
 						ElementType:         types.StringType,

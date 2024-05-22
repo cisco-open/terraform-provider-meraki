@@ -56,7 +56,7 @@ func (r *DevicesSwitchPortsCycleResource) Schema(_ context.Context, _ resource.S
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"ports": schema.ListAttribute{
+					"ports": schema.SetAttribute{
 						MarkdownDescription: `List of switch ports`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -66,7 +66,7 @@ func (r *DevicesSwitchPortsCycleResource) Schema(_ context.Context, _ resource.S
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"ports": schema.ListAttribute{
+					"ports": schema.SetAttribute{
 						MarkdownDescription: `List of switch ports`,
 						Optional:            true,
 						Computed:            true,

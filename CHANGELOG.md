@@ -1,3 +1,8 @@
+## 0.2.1-alpha (April 16, 2024)
+BUGFIXES:
+* ListAttribute replaced to SetAtrribute.
+* NetworksWirelessSSIDsResource attributte marked as `Computed` removed cause were only `Optional` params.
+
 ## 0.2.0-alpha (April 16, 2024)
 FEATURES:
 * Provider supports v1.44.1 of Meraki Dashboard API.

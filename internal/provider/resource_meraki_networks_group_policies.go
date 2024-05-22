@@ -4,6 +4,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
@@ -925,9 +926,9 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 	vvName := data.Name.ValueString()
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkGroupPolicies(vvNetworkID)
-	//Have Create
+	// Have Create
 	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
+		if restyResp1.StatusCode() != 404 && restyResp1.StatusCode() != 400 {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkGroupPolicies",
 				err.Error(),
@@ -937,6 +938,7 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 	}
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
+		log.Printf("[DEBUG] resp: %v", responseStruct)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 		if result != nil {
 			result2 := result.(map[string]interface{})
@@ -962,7 +964,7 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 	response, restyResp2, err := r.client.Networks.CreateNetworkGroupPolicy(vvNetworkID, dataRequest)
 
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkGroupPolicy",
 				err.Error(),

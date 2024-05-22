@@ -1,7 +1,7 @@
 
 resource "meraki_networks_wireless_ssids_firewall_l3_firewall_rules" "example" {
 
-  allow_lan_access = true
+  allow_lan_access = false
   network_id       = "string"
   number           = "string"
   rules = [{

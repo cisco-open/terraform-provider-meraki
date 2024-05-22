@@ -52,7 +52,6 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Schema(_ context.
 		Attributes: map[string]schema.Attribute{
 			"allow_lan_access": schema.BoolAttribute{
 				MarkdownDescription: `Allow wireless client access to local LAN (boolean value - true allows access and false denies access) (optional)`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -67,6 +66,74 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Schema(_ context.
 				Required:            true,
 			},
 			"rules": schema.SetNestedAttribute{
+				MarkdownDescription: `An ordered array of the firewall rules for this SSID (not including the local LAN access rule or the default rule).`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+
+						"comment": schema.StringAttribute{
+							MarkdownDescription: `Description of the rule (optional)`,
+							Computed:            true,
+							Optional:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"dest_cidr": schema.StringAttribute{
+							MarkdownDescription: `Comma-separated list of destination IP address(es) (in IP or CIDR notation), fully-qualified domain names (FQDN) or 'any'`,
+							Computed:            true,
+							Optional:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"dest_port": schema.StringAttribute{
+							MarkdownDescription: `Comma-separated list of destination port(s) (integer in the range 1-65535), or 'any'`,
+							Computed:            true,
+							Optional:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"policy": schema.StringAttribute{
+							MarkdownDescription: `'allow' or 'deny' traffic specified by this rule`,
+							Computed:            true,
+							Optional:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"allow",
+									"deny",
+								),
+							},
+						},
+						"protocol": schema.StringAttribute{
+							MarkdownDescription: `The type of protocol (must be 'tcp', 'udp', 'icmp', 'icmp6' or 'any')`,
+							Computed:            true,
+							Optional:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"any",
+									"icmp",
+									"icmp6",
+									"tcp",
+									"udp",
+								),
+							},
+						},
+					},
+				},
+			},
+			"rules_response": schema.SetNestedAttribute{
 				MarkdownDescription: `An ordered array of the firewall rules for this SSID (not including the local LAN access rule or the default rule).`,
 				Computed:            true,
 				Optional:            true,
@@ -329,6 +396,7 @@ type NetworksWirelessSSIDsFirewallL3FirewallRulesRs struct {
 	NetworkID      types.String                                                            `tfsdk:"network_id"`
 	Number         types.String                                                            `tfsdk:"number"`
 	Rules          *[]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs `tfsdk:"rules"`
+	RulesResponse  *[]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs `tfsdk:"rules_response"`
 	AllowLanAccess types.Bool                                                              `tfsdk:"allow_lan_access"`
 }
 
@@ -380,7 +448,7 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesRs) toSdkApiRequestUpdate(c
 // From gosdk to TF Structs Schema
 func ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRulesItemToBodyRs(state NetworksWirelessSSIDsFirewallL3FirewallRulesRs, response *merakigosdk.ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRules, is_read bool) NetworksWirelessSSIDsFirewallL3FirewallRulesRs {
 	itemState := NetworksWirelessSSIDsFirewallL3FirewallRulesRs{
-		Rules: func() *[]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs {
+		RulesResponse: func() *[]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs {
 			if response.Rules != nil {
 				result := make([]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs, len(*response.Rules))
 				for i, rules := range *response.Rules {
@@ -397,6 +465,9 @@ func ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRulesItemToBodyRs(s
 			return &[]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs{}
 		}(),
 	}
+
+	itemState.Rules = state.Rules
+	itemState.AllowLanAccess = state.AllowLanAccess
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksWirelessSSIDsFirewallL3FirewallRulesRs)
 	}

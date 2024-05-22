@@ -80,7 +80,7 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsBindResource) Schema(_ co
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"errors": schema.ListAttribute{
+					"errors": schema.SetAttribute{
 						MarkdownDescription: `Array of errors if failed`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -128,7 +128,7 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsBindResource) Schema(_ co
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"network_ids": schema.ListAttribute{
+					"network_ids": schema.SetAttribute{
 						MarkdownDescription: `List of network ids to bind to the subscription`,
 						Optional:            true,
 						Computed:            true,

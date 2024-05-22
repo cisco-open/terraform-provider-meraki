@@ -56,7 +56,7 @@ func (r *OrganizationsInventoryReleaseResource) Schema(_ context.Context, _ reso
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"serials": schema.ListAttribute{
+					"serials": schema.SetAttribute{
 						MarkdownDescription: `Serials of the devices that were released`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -66,7 +66,7 @@ func (r *OrganizationsInventoryReleaseResource) Schema(_ context.Context, _ reso
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"serials": schema.ListAttribute{
+					"serials": schema.SetAttribute{
 						MarkdownDescription: `Serials of the devices that should be released`,
 						Optional:            true,
 						Computed:            true,

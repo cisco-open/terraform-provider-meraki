@@ -230,7 +230,6 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"default_vlan_id": schema.Int64Attribute{
 				MarkdownDescription: `The default VLAN ID used for 'all other APs'. This param is only valid when the ipAssignmentMode is 'Bridge mode' or 'Layer 3 roaming'`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -2544,6 +2543,7 @@ func ResponseWirelessGetNetworkWirelessSSIDItemToBodyRs(state NetworksWirelessSS
 	}
 	// state.SplashGuestSponsorDomains = types.SetNull(types.StringType)
 	itemState.SplashGuestSponsorDomains = state.SplashGuestSponsorDomains
+
 	itemState.DefaultVLANID = state.DefaultVLANID
 	itemState.Psk = state.Psk
 	itemState.RadiusServers = state.RadiusServers

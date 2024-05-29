@@ -1063,7 +1063,7 @@ func (r *NetworksGroupPoliciesResource) Read(ctx context.Context, req resource.R
 	responseGet, restyRespGet, err := r.client.Networks.GetNetworkGroupPolicy(vvNetworkID, vvGroupPolicyID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
-			if restyRespGet.StatusCode() == 404 {
+			if restyRespGet.StatusCode() == 404 && restyRespGet.StatusCode() != 400 {
 				resp.Diagnostics.AddWarning(
 					"Resource not found",
 					"Deleting resource",

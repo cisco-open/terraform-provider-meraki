@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "0.2.0-alpha"
+      version = "0.2.2-alpha"
       source  = "hashicorp.com/edu/meraki"
       # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
@@ -29,7 +29,7 @@ resource "meraki_networks_appliance_vlans" "example" {
   # cidr         = "192.168.2.1/24"
   name   = "VLAN Terraform"
   subnet = "192.168.2.0/24"
-  # id = 1001
+  id = 1001
   depends_on = [meraki_networks_appliance_vlans_settings.example]
 }
 

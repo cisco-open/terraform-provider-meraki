@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"log"
 	"reflect"
-	tfsdkr "terraform-provider-meraki/internal/provider/reflects"
+
+	tfsdkr "github.com/cisco-open/terraform-provider-meraki/internal/provider/reflects"
 
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -749,13 +750,22 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 
 func changeStructUnknowns(a interface{}, b interface{}) interface{} {
 	valueA := reflect.ValueOf(a)
+	justA := valueA
 	valueB := reflect.ValueOf(b)
+	// if valueA.IsZero() {
+	// 	valueA = reflect.ValueOf(b)
+	// }
 	// log.Printf("Entre: ")
 	if valueA.Kind() == reflect.Ptr {
 		valueA = valueA.Elem()
 	}
 	if valueB.Kind() == reflect.Ptr {
 		valueB = valueB.Elem()
+	}
+
+	if justA.IsZero() {
+		log.Printf("Field A = B")
+		valueA = valueB
 	}
 
 	resultStruct := reflect.New(valueA.Type()).Elem()
@@ -791,23 +801,27 @@ func changeStructUnknowns(a interface{}, b interface{}) interface{} {
 			fieldValueA = valueA.Field(i)
 		}
 		if !fieldValueB.IsValid() {
+
 			fieldValueB = valueB.Field(i)
 		}
 
 		// Obtener el nombre del campo
 		fieldName := valueA.Type().Field(i).Name
 		log.Printf("Entre 2: fieldName %s", fieldName)
-
 		if fmt.Sprint(fieldValueA.Interface()) == "<unknown>" {
-			// log.Printf("Assigned %v to field %v\n", fieldValueB.Interface(), fieldName)
+			log.Printf("Assigned %v to field %v\n", fieldValueB.Interface(), fieldName)
 			resultStruct.Field(i).Set(fieldValueB)
 		} else {
 			if valueA.Field(i).Type() != reflect.TypeOf(types.String{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Bool{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Int64{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Float64{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Set{}) {
-				// log.Printf("Entre 3 %v to field %v\n", fieldValueB.Interface(), fieldName)
-				nestedResult := changeStructUnknowns(fieldValueA.Interface(), fieldValueB.Interface())
-				fieldValueBPtr := reflect.New(fieldValueB.Type())
-				fieldValueBPtr.Elem().Set(reflect.ValueOf(nestedResult))
-				resultStruct.Field(i).Set(fieldValueBPtr)
+				log.Printf("Entre 3 %v to field %v\n", fieldValueB.Interface(), fieldName)
+				if !fieldValueA.IsZero() || !fieldValueB.IsZero() {
+					nestedResult := changeStructUnknowns(fieldValueA.Interface(), fieldValueB.Interface())
+					fieldValueBPtr := reflect.New(fieldValueB.Type())
+					fieldValueBPtr.Elem().Set(reflect.ValueOf(nestedResult))
+					resultStruct.Field(i).Set(fieldValueBPtr)
+				} else {
+					log.Printf("Both null")
+				}
 			} else {
 				log.Printf("Assigned %v to field %v\n", fieldValueA.Interface(), fieldName)
 				resultStruct.Field(i).Set(fieldValueA)

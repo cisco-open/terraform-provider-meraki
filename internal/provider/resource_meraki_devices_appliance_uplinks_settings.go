@@ -7,6 +7,7 @@ import (
 	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -14,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -192,6 +194,7 @@ func (r *DevicesApplianceUplinksSettingsResource) Schema(_ context.Context, _ re
 														MarkdownDescription: `Up to 2 nameserver addresses to use, ordered in priority from highest to lowest priority.`,
 														Computed:            true,
 														Optional:            true,
+														Default:             setdefault.StaticValue(types.SetValueMust(types.StringType, make([]attr.Value, 0))),
 														PlanModifiers: []planmodifier.Set{
 															setplanmodifier.UseStateForUnknown(),
 														},
@@ -253,6 +256,7 @@ func (r *DevicesApplianceUplinksSettingsResource) Schema(_ context.Context, _ re
 													"addresses": schema.SetAttribute{
 														MarkdownDescription: `Up to 2 nameserver addresses to use, ordered in priority from highest to lowest priority.`,
 														Computed:            true,
+														Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
 														Optional:            true,
 														PlanModifiers: []planmodifier.Set{
 															setplanmodifier.UseStateForUnknown(),
@@ -285,8 +289,8 @@ func (r *DevicesApplianceUplinksSettingsResource) Schema(_ context.Context, _ re
 									},
 									"vlan_id": schema.Int64Attribute{
 										MarkdownDescription: `The ID of the VLAN to use for VLAN tagging.`,
-										Computed:            true,
-										Optional:            true,
+										// Computed:            true,
+										Optional: true,
 										PlanModifiers: []planmodifier.Int64{
 											int64planmodifier.UseStateForUnknown(),
 										},
@@ -427,6 +431,7 @@ func (r *DevicesApplianceUplinksSettingsResource) Schema(_ context.Context, _ re
 													"addresses": schema.SetAttribute{
 														MarkdownDescription: `Up to 2 nameserver addresses to use, ordered in priority from highest to lowest priority.`,
 														Computed:            true,
+														Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
 														Optional:            true,
 														PlanModifiers: []planmodifier.Set{
 															setplanmodifier.UseStateForUnknown(),
@@ -489,6 +494,7 @@ func (r *DevicesApplianceUplinksSettingsResource) Schema(_ context.Context, _ re
 													"addresses": schema.SetAttribute{
 														MarkdownDescription: `Up to 2 nameserver addresses to use, ordered in priority from highest to lowest priority.`,
 														Computed:            true,
+														Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
 														Optional:            true,
 														PlanModifiers: []planmodifier.Set{
 															setplanmodifier.UseStateForUnknown(),
@@ -521,8 +527,8 @@ func (r *DevicesApplianceUplinksSettingsResource) Schema(_ context.Context, _ re
 									},
 									"vlan_id": schema.Int64Attribute{
 										MarkdownDescription: `The ID of the VLAN to use for VLAN tagging.`,
-										Computed:            true,
-										Optional:            true,
+										// Computed:            true,
+										Optional: true,
 										PlanModifiers: []planmodifier.Int64{
 											int64planmodifier.UseStateForUnknown(),
 										},
@@ -881,6 +887,12 @@ func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Co
 							Addresses: addresses,
 						}
 					}
+					if r.Interfaces.Wan1.Svis.IPv4.Nameservers != nil {
+						if r.Interfaces.Wan1.Svis.IPv4.Nameservers.Addresses.IsNull() {
+							requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv4Nameservers = nil
+						}
+					}
+
 					requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv4 = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv4{
 						Address:        address,
 						AssignmentMode: assignmentMode,
@@ -900,6 +912,11 @@ func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Co
 						r.Interfaces.Wan1.Svis.IPv6.Nameservers.Addresses.ElementsAs(ctx, &addresses, false)
 						requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv6Nameservers = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv6Nameservers{
 							Addresses: addresses,
+						}
+					}
+					if r.Interfaces.Wan1.Svis.IPv6.Nameservers != nil {
+						if r.Interfaces.Wan1.Svis.IPv6.Nameservers.Addresses.IsNull() {
+							requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv6Nameservers = nil
 						}
 					}
 					requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv6 = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv6{
@@ -993,6 +1010,11 @@ func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Co
 							Addresses: addresses,
 						}
 					}
+					if r.Interfaces.Wan2.Svis.IPv4.Nameservers != nil {
+						if r.Interfaces.Wan2.Svis.IPv4.Nameservers.Addresses.IsNull() {
+							requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv4Nameservers = nil
+						}
+					}
 					requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv4 = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv4{
 						Address:        address,
 						AssignmentMode: assignmentMode,
@@ -1012,6 +1034,11 @@ func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Co
 						r.Interfaces.Wan2.Svis.IPv6.Nameservers.Addresses.ElementsAs(ctx, &addresses, false)
 						requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv6Nameservers = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv6Nameservers{
 							Addresses: addresses,
+						}
+					}
+					if r.Interfaces.Wan2.Svis.IPv6.Nameservers != nil {
+						if r.Interfaces.Wan2.Svis.IPv6.Nameservers.Addresses.IsNull() {
+							requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv6Nameservers = nil
 						}
 					}
 					requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv6 = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv6{
@@ -1120,7 +1147,9 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBodyRs(state Device
 																	Addresses: StringSliceToSet(response.Interfaces.Wan1.Svis.IPv4.Nameservers.Addresses),
 																}
 															}
-															return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1SvisIpv4NameserversRs{}
+															return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1SvisIpv4NameserversRs{
+																Addresses: types.SetNull(types.StringType),
+															}
 														}(),
 													}
 												}
@@ -1138,7 +1167,9 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBodyRs(state Device
 																	Addresses: StringSliceToSet(response.Interfaces.Wan1.Svis.IPv6.Nameservers.Addresses),
 																}
 															}
-															return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1SvisIpv6NameserversRs{}
+															return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1SvisIpv6NameserversRs{
+																Addresses: types.SetNull(types.StringType),
+															}
 														}(),
 													}
 												}
@@ -1222,7 +1253,9 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBodyRs(state Device
 																	Addresses: StringSliceToSet(response.Interfaces.Wan2.Svis.IPv4.Nameservers.Addresses),
 																}
 															}
-															return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2SvisIpv4NameserversRs{}
+															return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2SvisIpv4NameserversRs{
+																Addresses: types.SetNull(types.StringType),
+															}
 														}(),
 													}
 												}
@@ -1240,7 +1273,9 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBodyRs(state Device
 																	Addresses: StringSliceToSet(response.Interfaces.Wan2.Svis.IPv6.Nameservers.Addresses),
 																}
 															}
-															return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2SvisIpv6NameserversRs{}
+															return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2SvisIpv6NameserversRs{
+																Addresses: types.SetNull(types.StringType),
+															}
 														}(),
 													}
 												}

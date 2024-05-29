@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "0.2.0-alpha"
+      version = "0.2.2-alpha"
       source  = "hashicorp.com/edu/meraki"
       # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
@@ -14,7 +14,7 @@ provider "meraki" {
 
 resource "meraki_networks_wireless_ssids" "example" {
 
-  network_id      = "L_3695766444210915322"
+  network_id      = "L_828099381482771185"
   number          = 0
   name            = "tf-test-wifi2"
   auth_mode       = "psk"

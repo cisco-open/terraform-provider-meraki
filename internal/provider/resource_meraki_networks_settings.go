@@ -86,7 +86,6 @@ func (r *NetworksSettingsResource) Schema(_ context.Context, _ resource.SchemaRe
 							"password": schema.StringAttribute{
 								MarkdownDescription: `The password used for Local Status Page(s). Set this to null to clear the password.`,
 								Sensitive:           true,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -464,6 +463,14 @@ func ResponseNetworksGetNetworkSettingsItemToBodyRs(state NetworksSettingsRs, re
 									return types.Bool{}
 								}(),
 								Username: types.StringValue(response.LocalStatusPage.Authentication.Username),
+								Password: func() types.String {
+									if state.LocalStatusPage != nil {
+										if state.LocalStatusPage.Authentication != nil {
+											return state.LocalStatusPage.Authentication.Password
+										}
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return &ResponseNetworksGetNetworkSettingsLocalStatusPageAuthenticationRs{}
@@ -511,6 +518,7 @@ func ResponseNetworksGetNetworkSettingsItemToBodyRs(state NetworksSettingsRs, re
 			return &ResponseNetworksGetNetworkSettingsSecurePortRs{}
 		}(),
 	}
+
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksSettingsRs)
 	}

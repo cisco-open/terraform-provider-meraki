@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "0.2.0-alpha"
+      version = "0.2.2-alpha"
       source  = "hashicorp.com/edu/meraki"
     }
   }
@@ -32,22 +32,22 @@ resource "meraki_networks_group_policies" "group_policy_guest" {
   }
 }
 
-resource "meraki_networks_group_policies" "group_policy_pan" {
-  depends_on = [ meraki_networks_group_policies.group_policy_guest ]
-  name       = "PAN"
-  network_id = "L_828099381482771185"
-  vlan_tagging = {
-    settings = "custom"
-    vlan_id  = "15"
-  }
-}
+# resource "meraki_networks_group_policies" "group_policy_pan" {
+#   depends_on = [ meraki_networks_group_policies.group_policy_guest ]
+#   name       = "PAN"
+#   network_id = "L_828099381482771185"
+#   vlan_tagging = {
+#     settings = "custom"
+#     vlan_id  = "15"
+#   }
+# }
 
-resource "meraki_networks_group_policies" "group_policy_internal" {
-  depends_on = [ meraki_networks_group_policies.group_policy_pan ]
-  name       = "INTERNAL 2"
-  network_id = "L_828099381482771185"
-  vlan_tagging = {
-    settings = "custom"
-    vlan_id  = "5"
-  }
-}
+# resource "meraki_networks_group_policies" "group_policy_internal" {
+#   depends_on = [ meraki_networks_group_policies.group_policy_pan ]
+#   name       = "INTERNAL 2"
+#   network_id = "L_828099381482771185"
+#   vlan_tagging = {
+#     settings = "custom"
+#     vlan_id  = "5"
+#   }
+# }

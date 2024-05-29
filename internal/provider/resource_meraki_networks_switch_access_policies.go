@@ -17,6 +17,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -78,16 +79,25 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 			"counts": schema.SingleNestedAttribute{
 				MarkdownDescription: `Counts associated with the access policy`,
 				Computed:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 
 					"ports": schema.SingleNestedAttribute{
 						MarkdownDescription: `Counts associated with ports`,
 						Computed:            true,
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseStateForUnknown(),
+						},
 						Attributes: map[string]schema.Attribute{
 
 							"with_this_policy": schema.Int64Attribute{
 								MarkdownDescription: `Number of ports in the network with this policy. For template networks, this is the number of template ports (not child ports) with this policy.`,
 								Computed:            true,
+								PlanModifiers: []planmodifier.Int64{
+									int64planmodifier.UseStateForUnknown(),
+								},
 							},
 						},
 					},
@@ -128,7 +138,6 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 			},
 			"guest_vlan_id": schema.Int64Attribute{
 				MarkdownDescription: `ID for the guest VLAN allow unauthorized devices access to limited network resources`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -160,7 +169,6 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `Name of the access policy`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -206,7 +214,6 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 							},
 							"voice_vlan_id": schema.Int64Attribute{
 								MarkdownDescription: `VLAN that clients who use voice will be placed on when RADIUS authentication fails. Will be null if hostMode is Multi-Auth`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Int64{
 									int64planmodifier.UseStateForUnknown(),
@@ -224,7 +231,6 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 					},
 					"re_authentication_interval": schema.Int64Attribute{
 						MarkdownDescription: `Re-authentication period in seconds. Will be null if hostMode is Multi-Auth`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -242,8 +248,44 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 			},
 			"radius_accounting_servers": schema.SetNestedAttribute{
 				MarkdownDescription: `List of RADIUS accounting servers to require connecting devices to authenticate against before granting network access`,
+
+				Optional: true,
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+
+						"host": schema.StringAttribute{
+							MarkdownDescription: `Public IP address of the RADIUS accounting server`,
+
+							Optional: true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"port": schema.Int64Attribute{
+							MarkdownDescription: `UDP port that the RADIUS Accounting server listens on for access requests`,
+
+							Optional: true,
+							PlanModifiers: []planmodifier.Int64{
+								int64planmodifier.UseStateForUnknown(),
+							},
+						},
+						"secret": schema.StringAttribute{
+							MarkdownDescription: `RADIUS client shared secret`,
+							Optional:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+					},
+				},
+			},
+			"radius_accounting_servers_response": schema.SetNestedAttribute{
+				MarkdownDescription: `List of RADIUS accounting servers to require connecting devices to authenticate against before granting network access`,
 				Computed:            true,
-				Optional:            true,
+
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
@@ -253,7 +295,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 						"host": schema.StringAttribute{
 							MarkdownDescription: `Public IP address of the RADIUS accounting server`,
 							Computed:            true,
-							Optional:            true,
+
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -261,7 +303,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 						"port": schema.Int64Attribute{
 							MarkdownDescription: `UDP port that the RADIUS Accounting server listens on for access requests`,
 							Computed:            true,
-							Optional:            true,
+
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
 							},
@@ -269,7 +311,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 						"secret": schema.StringAttribute{
 							MarkdownDescription: `RADIUS client shared secret`,
 							Computed:            true,
-							Optional:            true,
+							Default:             stringdefault.StaticString(""),
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -295,8 +337,44 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 			},
 			"radius_servers": schema.SetNestedAttribute{
 				MarkdownDescription: `List of RADIUS servers to require connecting devices to authenticate against before granting network access`,
+
+				Optional: true,
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+
+						"host": schema.StringAttribute{
+							MarkdownDescription: `Public IP address of the RADIUS server`,
+
+							Optional: true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"port": schema.Int64Attribute{
+							MarkdownDescription: `UDP port that the RADIUS server listens on for access requests`,
+
+							Optional: true,
+							PlanModifiers: []planmodifier.Int64{
+								int64planmodifier.UseStateForUnknown(),
+							},
+						},
+						"secret": schema.StringAttribute{
+							MarkdownDescription: `RADIUS client shared secret`,
+							Optional:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+					},
+				},
+			},
+			"radius_servers_response": schema.SetNestedAttribute{
+				MarkdownDescription: `List of RADIUS servers to require connecting devices to authenticate against before granting network access`,
 				Computed:            true,
-				Optional:            true,
+
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
@@ -306,7 +384,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 						"host": schema.StringAttribute{
 							MarkdownDescription: `Public IP address of the RADIUS server`,
 							Computed:            true,
-							Optional:            true,
+
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -314,7 +392,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 						"port": schema.Int64Attribute{
 							MarkdownDescription: `UDP port that the RADIUS server listens on for access requests`,
 							Computed:            true,
-							Optional:            true,
+
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
 							},
@@ -322,7 +400,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 						"secret": schema.StringAttribute{
 							MarkdownDescription: `RADIUS client shared secret`,
 							Computed:            true,
-							Optional:            true,
+							Default:             stringdefault.StaticString(""),
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -348,7 +426,6 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 			},
 			"url_redirect_walled_garden_ranges": schema.SetAttribute{
 				MarkdownDescription: `IP address ranges, in CIDR notation, to restrict access for clients to a specific set of IP addresses or hostnames prior to authentication`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
@@ -634,26 +711,28 @@ func (r *NetworksSwitchAccessPoliciesResource) Delete(ctx context.Context, req r
 
 // TF Structs Schema
 type NetworksSwitchAccessPoliciesRs struct {
-	NetworkID                      types.String                                                           `tfsdk:"network_id"`
-	AccessPolicyNumber             types.String                                                           `tfsdk:"access_policy_number"`
-	AccessPolicyType               types.String                                                           `tfsdk:"access_policy_type"`
-	Counts                         *ResponseSwitchGetNetworkSwitchAccessPolicyCountsRs                    `tfsdk:"counts"`
-	Dot1X                          *ResponseSwitchGetNetworkSwitchAccessPolicyDot1XRs                     `tfsdk:"dot1x"`
-	GuestPortBouncing              types.Bool                                                             `tfsdk:"guest_port_bouncing"`
-	GuestVLANID                    types.Int64                                                            `tfsdk:"guest_vlan_id"`
-	HostMode                       types.String                                                           `tfsdk:"host_mode"`
-	IncreaseAccessSpeed            types.Bool                                                             `tfsdk:"increase_access_speed"`
-	Name                           types.String                                                           `tfsdk:"name"`
-	Radius                         *ResponseSwitchGetNetworkSwitchAccessPolicyRadiusRs                    `tfsdk:"radius"`
-	RadiusAccountingEnabled        types.Bool                                                             `tfsdk:"radius_accounting_enabled"`
-	RadiusAccountingServers        *[]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusAccountingServersRs `tfsdk:"radius_accounting_servers"`
-	RadiusCoaSupportEnabled        types.Bool                                                             `tfsdk:"radius_coa_support_enabled"`
-	RadiusGroupAttribute           types.String                                                           `tfsdk:"radius_group_attribute"`
-	RadiusServers                  *[]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusServersRs           `tfsdk:"radius_servers"`
-	RadiusTestingEnabled           types.Bool                                                             `tfsdk:"radius_testing_enabled"`
-	URLRedirectWalledGardenEnabled types.Bool                                                             `tfsdk:"url_redirect_walled_garden_enabled"`
-	URLRedirectWalledGardenRanges  types.Set                                                              `tfsdk:"url_redirect_walled_garden_ranges"`
-	VoiceVLANClients               types.Bool                                                             `tfsdk:"voice_vlan_clients"`
+	NetworkID                       types.String                                                           `tfsdk:"network_id"`
+	AccessPolicyNumber              types.String                                                           `tfsdk:"access_policy_number"`
+	AccessPolicyType                types.String                                                           `tfsdk:"access_policy_type"`
+	Counts                          *ResponseSwitchGetNetworkSwitchAccessPolicyCountsRs                    `tfsdk:"counts"`
+	Dot1X                           *ResponseSwitchGetNetworkSwitchAccessPolicyDot1XRs                     `tfsdk:"dot1x"`
+	GuestPortBouncing               types.Bool                                                             `tfsdk:"guest_port_bouncing"`
+	GuestVLANID                     types.Int64                                                            `tfsdk:"guest_vlan_id"`
+	HostMode                        types.String                                                           `tfsdk:"host_mode"`
+	IncreaseAccessSpeed             types.Bool                                                             `tfsdk:"increase_access_speed"`
+	Name                            types.String                                                           `tfsdk:"name"`
+	Radius                          *ResponseSwitchGetNetworkSwitchAccessPolicyRadiusRs                    `tfsdk:"radius"`
+	RadiusAccountingEnabled         types.Bool                                                             `tfsdk:"radius_accounting_enabled"`
+	RadiusAccountingServers         *[]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusAccountingServersRs `tfsdk:"radius_accounting_servers"`
+	RadiusAccountingServersResponse *[]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusAccountingServersRs `tfsdk:"radius_accounting_servers_response"`
+	RadiusCoaSupportEnabled         types.Bool                                                             `tfsdk:"radius_coa_support_enabled"`
+	RadiusGroupAttribute            types.String                                                           `tfsdk:"radius_group_attribute"`
+	RadiusServers                   *[]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusServersRs           `tfsdk:"radius_servers"`
+	RadiusServersResponse           *[]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusServersRs           `tfsdk:"radius_servers_response"`
+	RadiusTestingEnabled            types.Bool                                                             `tfsdk:"radius_testing_enabled"`
+	URLRedirectWalledGardenEnabled  types.Bool                                                             `tfsdk:"url_redirect_walled_garden_enabled"`
+	URLRedirectWalledGardenRanges   types.Set                                                              `tfsdk:"url_redirect_walled_garden_ranges"`
+	VoiceVLANClients                types.Bool                                                             `tfsdk:"voice_vlan_clients"`
 }
 
 type ResponseSwitchGetNetworkSwitchAccessPolicyCountsRs struct {
@@ -1089,7 +1168,8 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestUpdate(ctx context.Conte
 // From gosdk to TF Structs Schema
 func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBodyRs(state NetworksSwitchAccessPoliciesRs, response *merakigosdk.ResponseSwitchGetNetworkSwitchAccessPolicy, is_read bool) NetworksSwitchAccessPoliciesRs {
 	itemState := NetworksSwitchAccessPoliciesRs{
-		AccessPolicyType: types.StringValue(response.AccessPolicyType),
+		AccessPolicyNumber: types.StringValue(response.AccessPolicyNumber),
+		AccessPolicyType:   types.StringValue(response.AccessPolicyType),
 		Counts: func() *ResponseSwitchGetNetworkSwitchAccessPolicyCountsRs {
 			if response.Counts != nil {
 				return &ResponseSwitchGetNetworkSwitchAccessPolicyCountsRs{
@@ -1188,7 +1268,7 @@ func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBodyRs(state NetworksSwitch
 			}
 			return types.Bool{}
 		}(),
-		RadiusAccountingServers: func() *[]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusAccountingServersRs {
+		RadiusAccountingServersResponse: func() *[]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusAccountingServersRs {
 			if response.RadiusAccountingServers != nil {
 				result := make([]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusAccountingServersRs, len(*response.RadiusAccountingServers))
 				for i, radiusAccountingServers := range *response.RadiusAccountingServers {
@@ -1213,7 +1293,7 @@ func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBodyRs(state NetworksSwitch
 			return types.Bool{}
 		}(),
 		RadiusGroupAttribute: types.StringValue(response.RadiusGroupAttribute),
-		RadiusServers: func() *[]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusServersRs {
+		RadiusServersResponse: func() *[]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusServersRs {
 			if response.RadiusServers != nil {
 				result := make([]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusServersRs, len(*response.RadiusServers))
 				for i, radiusServers := range *response.RadiusServers {
@@ -1251,6 +1331,10 @@ func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBodyRs(state NetworksSwitch
 			return types.Bool{}
 		}(),
 	}
+
+	itemState.RadiusServers = state.RadiusServers
+	itemState.RadiusAccountingServers = state.RadiusAccountingServers
+	// itemState.Name = state.Name
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksSwitchAccessPoliciesRs)
 	}

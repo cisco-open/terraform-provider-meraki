@@ -7,13 +7,26 @@ terraform {
     }
   }
 }
+
 provider "meraki" {
   meraki_debug = "true"
 }
-data "meraki_organizations" "example" {
-  organization_id = "828099381482762270"
 
-}
-output "meraki_organizations_example" {
-  value = data.meraki_organizations.example.item
+resource "meraki_devices_appliance_uplinks_settings" "this" {
+
+  serial = "QBSA-TFWJ-U4L9"
+  interfaces = {
+    wan1 = {
+      enabled = true
+      svis = {
+        ipv4 = {
+          assignment_mode = "dynamic"
+        }
+      }
+      vlan_tagging = {
+        enabled = true
+        vlan_id = "10"
+      }
+    }
+  }
 }

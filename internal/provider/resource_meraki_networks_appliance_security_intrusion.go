@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -99,7 +100,7 @@ func (r *NetworksApplianceSecurityIntrusionResource) Schema(_ context.Context, _
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
 						},
-
+						Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
 						ElementType: types.StringType,
 					},
 					"included_cidr": schema.SetAttribute{
@@ -109,7 +110,7 @@ func (r *NetworksApplianceSecurityIntrusionResource) Schema(_ context.Context, _
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
 						},
-
+						Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
 						ElementType: types.StringType,
 					},
 					"use_default": schema.BoolAttribute{
@@ -347,6 +348,11 @@ func (r *NetworksApplianceSecurityIntrusionRs) toSdkApiRequestUpdate(ctx context
 			UseDefault:   useDefault,
 		}
 	}
+	if r.ProtectedNetworks != nil {
+		if r.ProtectedNetworks.ExcludedCidr.IsNull() && r.ProtectedNetworks.IncludedCidr.IsNull() {
+			requestApplianceUpdateNetworkApplianceSecurityIntrusionProtectedNetworks = nil
+		}
+	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceSecurityIntrusion{
 		IDsRulesets:       *iDsRulesets,
 		Mode:              *mode,
@@ -373,9 +379,13 @@ func ResponseApplianceGetNetworkApplianceSecurityIntrusionItemToBodyRs(state Net
 					}(),
 				}
 			}
-			return &ResponseApplianceGetNetworkApplianceSecurityIntrusionProtectedNetworksRs{}
+			return &ResponseApplianceGetNetworkApplianceSecurityIntrusionProtectedNetworksRs{
+				ExcludedCidr: types.SetNull(types.StringType),
+				IncludedCidr: types.SetNull(types.StringType),
+			}
 		}(),
 	}
+
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksApplianceSecurityIntrusionRs)
 	}

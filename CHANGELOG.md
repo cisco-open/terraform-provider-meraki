@@ -1,6 +1,17 @@
+## 0.2.2-alpha (May 29, 2024)
+BUGFIXES:
+* Manage `null` values for array into objects in `meraki_devices_appliance_uplinks_settings_resource`.
+* Manage `null` values for array into objects in `meraki_networks_appliance_security_intrusion_resource`.
+* Include exception to expects `400` code instead of `404` in `meraki_networks_group_policies_resource`.
+* Attribute `password` is now just am `Optional` parameter, not `Computed` in `meraki_networks_settings_resource`.
+* Avoid unexpected or non-existent changes in `meraki_networks_switch_access_policies_resource`.
+* Mapping ID post creation in `meraki_networks_switch_stacks_resource`.
+* Attribute `default_vlan_id` is now just am `Optional` parameter, not `Computed` in `meraki_networks_wireless_ssids_resource`.
+* Attribute `updatestrategy` included in `meraki_networks_wireless_settings_resource`.
+* Managing `null` interfaces, to avoid panics in `utils` at `changeUnknowns` function.
+
 ## 0.2.1-alpha (April 16, 2024)
 BUGFIXES:
-* ListAttribute replaced to SetAtrribute.
 * NetworksWirelessSSIDsResource attributte marked as `Computed` removed cause were only `Optional` params.
 
 ## 0.2.0-alpha (April 16, 2024)

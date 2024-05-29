@@ -363,6 +363,7 @@ func ResponseSwitchGetNetworkSwitchStackItemToBodyRs(state NetworksSwitchStacksR
 		Name:    types.StringValue(response.Name),
 		Serials: StringSliceToSet(response.Serials),
 	}
+	itemState.SwitchStackID = itemState.ID
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksSwitchStacksRs)
 	}

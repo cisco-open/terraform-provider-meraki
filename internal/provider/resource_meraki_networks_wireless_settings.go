@@ -341,7 +341,7 @@ type NetworksWirelessSettingsRs struct {
 	MeshingEnabled           types.Bool                                                    `tfsdk:"meshing_enabled"`
 	NamedVLANs               *ResponseWirelessGetNetworkWirelessSettingsNamedVlansRs       `tfsdk:"named_vlans"`
 	RegulatoryDomain         *ResponseWirelessGetNetworkWirelessSettingsRegulatoryDomainRs `tfsdk:"regulatory_domain"`
-	Upgradestrategy          types.String                                                  `tfsdk:"upgrade_strategy"`
+	Upgradestrategy          types.String                                                  `tfsdk:"upgradestrategy"`
 }
 
 type ResponseWirelessGetNetworkWirelessSettingsNamedVlansRs struct {

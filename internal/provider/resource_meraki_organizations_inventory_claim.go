@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -76,11 +77,13 @@ func (r *OrganizationsInventoryClaimResource) Schema(_ context.Context, _ resour
 					"orders": schema.SetAttribute{
 						MarkdownDescription: `The numbers of the orders claimed`,
 						Computed:            true,
+						Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
 						ElementType:         types.StringType,
 					},
 					"serials": schema.SetAttribute{
 						MarkdownDescription: `The serials of the devices claimed`,
 						Computed:            true,
+						Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
 						ElementType:         types.StringType,
 					},
 				},

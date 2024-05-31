@@ -75,6 +75,7 @@ func (r *NetworksSwitchStacksResource) Schema(_ context.Context, _ resource.Sche
 			},
 			"switch_stack_id": schema.StringAttribute{
 				MarkdownDescription: `switchStackId path parameter. Switch stack ID`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),

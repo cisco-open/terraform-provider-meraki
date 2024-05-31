@@ -1,3 +1,9 @@
+## 0.2.3-alpha (May 31, 2024)
+BUGFIXES:
+* Removing unnecessary attributes from `meraki_devices_appliance_vmx_authentication`.
+* Attribute `group_policy_id` turns to an only `Computed` parameter.
+* Attribute `switch_stack_id` is now a `Computed` attribute too, to avoid mismatches between state and response.
+
 ## 0.2.2-alpha (May 29, 2024)
 BUGFIXES:
 * Manage `null` values for array into objects in `meraki_devices_appliance_uplinks_settings_resource`.

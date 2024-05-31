@@ -566,7 +566,6 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 			"group_policy_id": schema.StringAttribute{
 				MarkdownDescription: `The ID of the group policy`,
 				Computed:            true,
-				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},

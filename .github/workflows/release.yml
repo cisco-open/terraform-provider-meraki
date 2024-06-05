@@ -37,7 +37,7 @@ jobs:
           gpg_private_key: ${{ secrets.TERRAFORM_GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.TERRAFORM_GPG_PASSPHRASE }}
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v5
+        uses: goreleaser/goreleaser-action@v6
         with:
           version: latest
           args: release --rm-dist

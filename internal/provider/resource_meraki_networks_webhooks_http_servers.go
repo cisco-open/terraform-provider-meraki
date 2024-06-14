@@ -50,6 +50,7 @@ func (r *NetworksWebhooksHTTPServersResource) Schema(_ context.Context, _ resour
 			"http_server_id": schema.StringAttribute{
 				MarkdownDescription: `httpServerId path parameter. Http server ID`,
 				Optional:            true,
+				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -57,6 +58,9 @@ func (r *NetworksWebhooksHTTPServersResource) Schema(_ context.Context, _ resour
 			"id": schema.StringAttribute{
 				MarkdownDescription: `A Base64 encoded ID.`,
 				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `A name for easy reference to the HTTP server`,
@@ -482,7 +486,8 @@ func ResponseNetworksGetNetworkWebhooksHTTPServerItemToBodyRs(state NetworksWebh
 			}
 			return &ResponseNetworksGetNetworkWebhooksHttpServerPayloadTemplateRs{}
 		}(),
-		URL: types.StringValue(response.URL),
+		URL:          types.StringValue(response.URL),
+		SharedSecret: state.SharedSecret,
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksWebhooksHTTPServersRs)

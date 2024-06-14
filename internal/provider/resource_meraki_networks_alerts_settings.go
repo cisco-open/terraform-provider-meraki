@@ -750,9 +750,11 @@ func ResponseNetworksGetNetworkAlertsSettingsItemToBodyRs(state NetworksAlertsSe
 			}
 			return &ResponseNetworksGetNetworkAlertsSettingsDefaultDestinationsRs{}
 		}(),
+		Muting: state.Muting,
 	}
-
-	itemState.DefaultDestinations.SNMP = state.DefaultDestinations.SNMP
+	if itemState.DefaultDestinations != nil && state.DefaultDestinations != nil {
+		itemState.DefaultDestinations.SNMP = state.DefaultDestinations.SNMP
+	}
 
 	itemState.Alerts = state.Alerts
 	if is_read {

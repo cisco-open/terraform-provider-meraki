@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -120,6 +121,7 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Schema(_ context.Context, _ 
 			"required_ip_mappings": schema.SetAttribute{
 				Computed:    true,
 				ElementType: types.StringType,
+				Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
 			},
 			"sgt": schema.Int64Attribute{
 				MarkdownDescription: `SGT value of the group`,

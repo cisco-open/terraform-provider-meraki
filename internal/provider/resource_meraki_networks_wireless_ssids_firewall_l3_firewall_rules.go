@@ -99,6 +99,14 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Schema(_ context.
 								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
+						"ip_ver": schema.StringAttribute{
+							MarkdownDescription: `Ip Ver`,
+							Computed:            true,
+							Optional:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
 						"policy": schema.StringAttribute{
 							MarkdownDescription: `'allow' or 'deny' traffic specified by this rule`,
 							Computed:            true,
@@ -161,6 +169,14 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Schema(_ context.
 						},
 						"dest_port": schema.StringAttribute{
 							MarkdownDescription: `Comma-separated list of destination port(s) (integer in the range 1-65535), or 'any'`,
+							Computed:            true,
+							Optional:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"ip_ver": schema.StringAttribute{
+							MarkdownDescription: `Ip Version`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
@@ -406,6 +422,7 @@ type ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs struct
 	DestPort types.String `tfsdk:"dest_port"`
 	Policy   types.String `tfsdk:"policy"`
 	Protocol types.String `tfsdk:"protocol"`
+	IpVer    types.String `tfsdk:"ip_ver"`
 }
 
 // FromBody
@@ -424,12 +441,14 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesRs) toSdkApiRequestUpdate(c
 			destPort := rItem1.DestPort.ValueString()
 			policy := rItem1.Policy.ValueString()
 			protocol := rItem1.Protocol.ValueString()
+			ipVer := rItem1.IpVer.ValueString()
 			requestWirelessUpdateNetworkWirelessSSIDFirewallL3FirewallRulesRules = append(requestWirelessUpdateNetworkWirelessSSIDFirewallL3FirewallRulesRules, merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDFirewallL3FirewallRulesRules{
 				Comment:  comment,
 				DestCidr: destCidr,
 				DestPort: destPort,
 				Policy:   policy,
 				Protocol: protocol,
+				IpVer:    ipVer,
 			})
 		}
 	}
@@ -458,6 +477,7 @@ func ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRulesItemToBodyRs(s
 						DestPort: types.StringValue(rules.DestPort),
 						Policy:   types.StringValue(rules.Policy),
 						Protocol: types.StringValue(rules.Protocol),
+						IpVer:    types.StringValue(rules.IpVer),
 					}
 				}
 				return &result

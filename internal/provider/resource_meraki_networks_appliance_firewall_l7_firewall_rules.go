@@ -55,7 +55,6 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Schema(_ context.Cont
 			},
 			"rules": schema.SetNestedAttribute{
 				MarkdownDescription: `An ordered array of the MX L7 firewall rules`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
@@ -65,7 +64,6 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Schema(_ context.Cont
 
 						"policy": schema.StringAttribute{
 							MarkdownDescription: `'Deny' traffic specified by this rule`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -78,7 +76,6 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Schema(_ context.Cont
 						},
 						"type": schema.StringAttribute{
 							MarkdownDescription: `Type of the L7 rule. One of: 'application', 'applicationCategory', 'host', 'port', 'ipRange'`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -95,7 +92,6 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Schema(_ context.Cont
 						},
 						"value": schema.StringAttribute{
 							MarkdownDescription: `The 'value' of what you want to block. Format of 'value' varies depending on type of the rule. The application categories and application ids can be retrieved from the the 'MX L7 application categories' endpoint. The countries follow the two-letter ISO 3166-1 alpha-2 format.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -103,8 +99,83 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Schema(_ context.Cont
 						},
 						"value_list": schema.SetAttribute{
 							MarkdownDescription: `The 'value_list' of what you want to block. Send a list in request`,
-							Computed:            true,
 							Optional:            true,
+							PlanModifiers: []planmodifier.Set{
+								setplanmodifier.UseStateForUnknown(),
+							},
+							ElementType: types.StringType,
+						},
+						"value_obj": schema.SingleNestedAttribute{
+							MarkdownDescription: `The 'value_obj' of what you want to block. Send a dict in request`,
+							Optional:            true,
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.UseStateForUnknown(),
+							},
+							Attributes: map[string]schema.Attribute{
+								"id": schema.StringAttribute{
+									Optional: true,
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.UseStateForUnknown(),
+									},
+								},
+								"name": schema.StringAttribute{
+									Optional: true,
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.UseStateForUnknown(),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"rules_response": schema.SetNestedAttribute{
+				MarkdownDescription: `An ordered array of the MX L7 firewall rules`,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+
+						"policy": schema.StringAttribute{
+							MarkdownDescription: `'Deny' traffic specified by this rule`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"deny",
+								),
+							},
+						},
+						"type": schema.StringAttribute{
+							MarkdownDescription: `Type of the L7 rule. One of: 'application', 'applicationCategory', 'host', 'port', 'ipRange'`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"application",
+									"applicationCategory",
+									"host",
+									"ipRange",
+									"port",
+								),
+							},
+						},
+						"value": schema.StringAttribute{
+							MarkdownDescription: `The 'value' of what you want to block. Format of 'value' varies depending on type of the rule. The application categories and application ids can be retrieved from the the 'MX L7 application categories' endpoint. The countries follow the two-letter ISO 3166-1 alpha-2 format.`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"value_list": schema.SetAttribute{
+							MarkdownDescription: `The 'value_list' of what you want to block. Send a list in request`,
+							Computed:            true,
 							PlanModifiers: []planmodifier.Set{
 								setplanmodifier.UseStateForUnknown(),
 							},
@@ -114,21 +185,18 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Schema(_ context.Cont
 						"value_obj": schema.SingleNestedAttribute{
 							MarkdownDescription: `The 'value_obj' of what you want to block. Send a dict in request`,
 							Computed:            true,
-							Optional:            true,
 							PlanModifiers: []planmodifier.Object{
 								objectplanmodifier.UseStateForUnknown(),
 							},
 							Attributes: map[string]schema.Attribute{
 								"id": schema.StringAttribute{
 									Computed: true,
-									Optional: true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
 									},
 								},
 								"name": schema.StringAttribute{
 									Computed: true,
-									Optional: true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
 									},
@@ -316,8 +384,9 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Delete(ctx context.Co
 
 // TF Structs Schema
 type NetworksApplianceFirewallL7FirewallRulesRs struct {
-	NetworkID types.String                                                          `tfsdk:"network_id"`
-	Rules     *[]ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesRs `tfsdk:"rules"`
+	NetworkID     types.String                                                          `tfsdk:"network_id"`
+	Rules         *[]ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesRs `tfsdk:"rules"`
+	RulesResponse *[]ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesRs `tfsdk:"rules_response"`
 }
 
 type ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesRs struct {
@@ -383,7 +452,7 @@ func (r *NetworksApplianceFirewallL7FirewallRulesRs) toSdkApiRequestUpdate(ctx c
 // From gosdk to TF Structs Schema
 func ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesItemToBodyRs(state NetworksApplianceFirewallL7FirewallRulesRs, response *merakigosdk.ResponseApplianceGetNetworkApplianceFirewallL7FirewallRules, is_read bool) NetworksApplianceFirewallL7FirewallRulesRs {
 	itemState := NetworksApplianceFirewallL7FirewallRulesRs{
-		Rules: func() *[]ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesRs {
+		RulesResponse: func() *[]ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesRs {
 			if response.Rules != nil {
 				result := make([]ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesRs, len(*response.Rules))
 				for i, rules := range *response.Rules {
@@ -417,6 +486,7 @@ func ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesItemToBodyRs(sta
 			}
 			return &[]ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesRs{}
 		}(),
+		Rules: state.Rules,
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksApplianceFirewallL7FirewallRulesRs)

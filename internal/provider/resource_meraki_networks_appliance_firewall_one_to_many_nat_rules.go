@@ -394,10 +394,9 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesRs) toSdkApiRequestUpdate(ctx
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallOneToManyNatRules{
 		Rules: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallOneToManyNatRulesRules {
-			if len(requestApplianceUpdateNetworkApplianceFirewallOneToManyNatRulesRules) > 0 {
-				return &requestApplianceUpdateNetworkApplianceFirewallOneToManyNatRulesRules
-			}
-			return nil
+
+			return &requestApplianceUpdateNetworkApplianceFirewallOneToManyNatRulesRules
+
 		}(),
 	}
 	return &out

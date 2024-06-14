@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -280,7 +281,6 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 
 					"adaptive": schema.BoolAttribute{
 						MarkdownDescription: `(Optional) Whether 802.11r is adaptive or not.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -288,7 +288,6 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 					},
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Whether 802.11r is enabled or not.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -306,7 +305,6 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Whether 802.11w is enabled or not.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -314,7 +312,6 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 					},
 					"required": schema.BoolAttribute{
 						MarkdownDescription: `(Optional) Whether 802.11w is required or not.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -337,12 +334,12 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
-				Validators: []validator.String{
-					stringvalidator.OneOf(
-						"wep",
-						"wpa",
-					),
-				},
+				// Validators: []validator.String{
+				// 	stringvalidator.OneOf(
+				// 		"wep",
+				// 		"wpa",
+				// 	),
+				// },
 			},
 			"enterprise_admin_access": schema.StringAttribute{
 				MarkdownDescription: `Whether or not an SSID is accessible by 'enterprise' administrators ('access disabled' or 'access enabled')`,
@@ -513,10 +510,13 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 					},
 				},
 			},
-			"local_auth": schema.BoolAttribute{
-				MarkdownDescription: `Extended local auth flag for Enterprise NAC`,
-				Computed:            true,
-			},
+			// "local_auth": schema.BoolAttribute{
+			// 	MarkdownDescription: `Extended local auth flag for Enterprise NAC`,
+			// 	Computed:            true,
+			// 	PlanModifiers: []planmodifier.Bool{
+			// 		boolplanmodifier.UseStateForUnknown(),
+			// 	},
+			// },
 			"local_radius": schema.SingleNestedAttribute{
 				MarkdownDescription: `The current setting for Local Authentication, a built-in RADIUS server on the access point. Only valid if authMode is '8021x-localradius'.`,
 				Optional:            true,
@@ -817,6 +817,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"radius_accounting_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Whether or not RADIUS accounting is enabled`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -831,7 +832,6 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"radius_accounting_servers": schema.SetNestedAttribute{
 				MarkdownDescription: `List of RADIUS accounting 802.1X servers to be used for authentication`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
@@ -841,7 +841,6 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 
 						"ca_certificate": schema.StringAttribute{
 							MarkdownDescription: `Certificate used for authorization for the RADSEC Server`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -849,19 +848,20 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 						},
 						"host": schema.StringAttribute{
 							MarkdownDescription: `IP address (or FQDN) to which the APs will send RADIUS accounting messages`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
-						"open_roaming_certificate_id": schema.Int64Attribute{
-							MarkdownDescription: `The ID of the Openroaming Certificate attached to radius server`,
-							Computed:            true,
-						},
 						"port": schema.Int64Attribute{
 							MarkdownDescription: `Port on the RADIUS server that is listening for accounting messages`,
-							Computed:            true,
+							Optional:            true,
+							PlanModifiers: []planmodifier.Int64{
+								int64planmodifier.UseStateForUnknown(),
+							},
+						},
+						"open_roaming_certificate_id": schema.Int64Attribute{
+							MarkdownDescription: `The ID of the Openroaming Certificate attached to radius server`,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -869,7 +869,6 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 						},
 						"radsec_enabled": schema.BoolAttribute{
 							MarkdownDescription: `Use RADSEC (TLS over TCP) to connect to this RADIUS accounting server. Requires radiusProxyEnabled.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Bool{
 								boolplanmodifier.UseStateForUnknown(),
@@ -877,8 +876,59 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 						},
 						"secret": schema.StringAttribute{
 							MarkdownDescription: `Shared key used to authenticate messages between the APs and RADIUS server`,
-							Computed:            true,
 							Optional:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+					},
+				},
+			},
+			"radius_accounting_servers_response": schema.SetNestedAttribute{
+				MarkdownDescription: `List of RADIUS accounting 802.1X servers to be used for authentication`,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+
+						"ca_certificate": schema.StringAttribute{
+							MarkdownDescription: `Certificate used for authorization for the RADSEC Server`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"host": schema.StringAttribute{
+							MarkdownDescription: `IP address (or FQDN) to which the APs will send RADIUS accounting messages`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"open_roaming_certificate_id": schema.Int64Attribute{
+							MarkdownDescription: `The ID of the Openroaming Certificate attached to radius server`,
+							Computed:            true,
+							Default:             int64default.StaticInt64(types.Int64Null().ValueInt64()),
+						},
+						"port": schema.Int64Attribute{
+							MarkdownDescription: `Port on the RADIUS server that is listening for accounting messages`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.Int64{
+								int64planmodifier.UseStateForUnknown(),
+							},
+						},
+						"radsec_enabled": schema.BoolAttribute{
+							MarkdownDescription: `Use RADSEC (TLS over TCP) to connect to this RADIUS accounting server. Requires radiusProxyEnabled.`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.Bool{
+								boolplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"secret": schema.StringAttribute{
+							MarkdownDescription: `Shared key used to authenticate messages between the APs and RADIUS server`,
+							Computed:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -923,10 +973,13 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"radius_enabled": schema.BoolAttribute{
-				MarkdownDescription: `Whether RADIUS authentication is enabled`,
-				Computed:            true,
-			},
+			// "radius_enabled": schema.BoolAttribute{
+			// 	MarkdownDescription: `Whether RADIUS authentication is enabled`,
+			// 	Computed:            true,
+			// 	PlanModifiers: []planmodifier.Bool{
+			// 		boolplanmodifier.UseStateForUnknown(),
+			// 	},
+			// },
 			"radius_failover_policy": schema.StringAttribute{
 				MarkdownDescription: `Policy which determines how authentication requests should be handled in the event that all of the configured RADIUS servers are unreachable`,
 				Computed:            true,
@@ -1087,6 +1140,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
 							},
+							Default: int64default.StaticInt64(types.Int64Null().ValueInt64()),
 						},
 						"port": schema.Int64Attribute{
 							MarkdownDescription: `UDP port the RADIUS server listens on for Access-requests`,
@@ -1181,11 +1235,17 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"splash_timeout": schema.StringAttribute{
 				MarkdownDescription: `Splash page timeout`,
-				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+				Computed: true,
 			},
 			"ssid_admin_accessible": schema.BoolAttribute{
 				MarkdownDescription: `SSID Administrator access status`,
-				Computed:            true,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+				Computed: true,
 			},
 			"use_vlan_tagging": schema.BoolAttribute{
 				MarkdownDescription: `Whether or not traffic should be directed to use specific VLANs. This param is only valid if the ipAssignmentMode is 'Bridge mode' or 'Layer 3 roaming'`,
@@ -1444,73 +1504,74 @@ func (r *NetworksWirelessSSIDsResource) Delete(ctx context.Context, req resource
 
 // TF Structs Schema
 type NetworksWirelessSSIDsRs struct {
-	NetworkID                        types.String                                                       `tfsdk:"network_id"`
-	Number                           types.Int64                                                        `tfsdk:"number"`
-	AdminSplashURL                   types.String                                                       `tfsdk:"admin_splash_url"`
-	AuthMode                         types.String                                                       `tfsdk:"auth_mode"`
-	AvailabilityTags                 types.Set                                                          `tfsdk:"availability_tags"`
-	AvailableOnAllAps                types.Bool                                                         `tfsdk:"available_on_all_aps"`
-	BandSelection                    types.String                                                       `tfsdk:"band_selection"`
-	Enabled                          types.Bool                                                         `tfsdk:"enabled"`
-	EncryptionMode                   types.String                                                       `tfsdk:"encryption_mode"`
-	IPAssignmentMode                 types.String                                                       `tfsdk:"ip_assignment_mode"`
-	LocalAuth                        types.Bool                                                         `tfsdk:"local_auth"`
-	MandatoryDhcpEnabled             types.Bool                                                         `tfsdk:"mandatory_dhcp_enabled"`
-	MinBitrate                       types.Int64                                                        `tfsdk:"min_bitrate"`
-	Name                             types.String                                                       `tfsdk:"name"`
-	PerClientBandwidthLimitDown      types.Int64                                                        `tfsdk:"per_client_bandwidth_limit_down"`
-	PerClientBandwidthLimitUp        types.Int64                                                        `tfsdk:"per_client_bandwidth_limit_up"`
-	PerSSIDBandwidthLimitDown        types.Int64                                                        `tfsdk:"per_ssid_bandwidth_limit_down"`
-	PerSSIDBandwidthLimitUp          types.Int64                                                        `tfsdk:"per_ssid_bandwidth_limit_up"`
-	RadiusAccountingEnabled          types.Bool                                                         `tfsdk:"radius_accounting_enabled"`
-	RadiusAccountingServers          *[]ResponseWirelessGetNetworkWirelessSsidRadiusAccountingServersRs `tfsdk:"radius_accounting_servers"`
-	RadiusAttributeForGroupPolicies  types.String                                                       `tfsdk:"radius_attribute_for_group_policies"`
-	RadiusEnabled                    types.Bool                                                         `tfsdk:"radius_enabled"`
-	RadiusFailoverPolicy             types.String                                                       `tfsdk:"radius_failover_policy"`
-	RadiusLoadBalancingPolicy        types.String                                                       `tfsdk:"radius_load_balancing_policy"`
-	RadiusServers                    *[]ResponseWirelessGetNetworkWirelessSsidRadiusServersRs           `tfsdk:"radius_servers"`
-	RadiusServersResponse            *[]ResponseWirelessGetNetworkWirelessSsidRadiusServersRs           `tfsdk:"radius_servers_response"`
-	SplashPage                       types.String                                                       `tfsdk:"splash_page"`
-	SplashTimeout                    types.String                                                       `tfsdk:"splash_timeout"`
-	SSIDAdminAccessible              types.Bool                                                         `tfsdk:"ssid_admin_accessible"`
-	Visible                          types.Bool                                                         `tfsdk:"visible"`
-	WalledGardenEnabled              types.Bool                                                         `tfsdk:"walled_garden_enabled"`
-	WalledGardenRanges               types.Set                                                          `tfsdk:"walled_garden_ranges"`
-	WpaEncryptionMode                types.String                                                       `tfsdk:"wpa_encryption_mode"`
-	ActiveDirectory                  *RequestWirelessUpdateNetworkWirelessSsidActiveDirectoryRs         `tfsdk:"active_directory"`
-	AdultContentFilteringEnabled     types.Bool                                                         `tfsdk:"adult_content_filtering_enabled"`
-	ApTagsAndVLANIDs                 *[]RequestWirelessUpdateNetworkWirelessSsidApTagsAndVlanIdsRs      `tfsdk:"ap_tags_and_vlan_ids"`
-	ConcentratorNetworkID            types.String                                                       `tfsdk:"concentrator_network_id"`
-	DefaultVLANID                    types.Int64                                                        `tfsdk:"default_vlan_id"`
-	DisassociateClientsOnVpnFailover types.Bool                                                         `tfsdk:"disassociate_clients_on_vpn_failover"`
-	DNSRewrite                       *RequestWirelessUpdateNetworkWirelessSsidDnsRewriteRs              `tfsdk:"dns_rewrite"`
-	Dot11R                           *RequestWirelessUpdateNetworkWirelessSsidDot11RRs                  `tfsdk:"dot11r"`
-	Dot11W                           *RequestWirelessUpdateNetworkWirelessSsidDot11WRs                  `tfsdk:"dot11w"`
-	EnterpriseAdminAccess            types.String                                                       `tfsdk:"enterprise_admin_access"`
-	Gre                              *RequestWirelessUpdateNetworkWirelessSsidGreRs                     `tfsdk:"gre"`
-	LanIsolationEnabled              types.Bool                                                         `tfsdk:"lan_isolation_enabled"`
-	Ldap                             *RequestWirelessUpdateNetworkWirelessSsidLdapRs                    `tfsdk:"ldap"`
-	LocalRadius                      *RequestWirelessUpdateNetworkWirelessSsidLocalRadiusRs             `tfsdk:"local_radius"`
-	NamedVLANs                       *RequestWirelessUpdateNetworkWirelessSsidNamedVlansRs              `tfsdk:"named_vlans"`
-	Oauth                            *RequestWirelessUpdateNetworkWirelessSsidOauthRs                   `tfsdk:"oauth"`
-	Psk                              types.String                                                       `tfsdk:"psk"`
-	RadiusAccountingInterimInterval  types.Int64                                                        `tfsdk:"radius_accounting_interim_interval"`
-	RadiusAuthenticationNasID        types.String                                                       `tfsdk:"radius_authentication_nas_id"`
-	RadiusCalledStationID            types.String                                                       `tfsdk:"radius_called_station_id"`
-	RadiusCoaEnabled                 types.Bool                                                         `tfsdk:"radius_coa_enabled"`
-	RadiusFallbackEnabled            types.Bool                                                         `tfsdk:"radius_fallback_enabled"`
-	RadiusGuestVLANEnabled           types.Bool                                                         `tfsdk:"radius_guest_vlan_enabled"`
-	RadiusGuestVLANID                types.Int64                                                        `tfsdk:"radius_guest_vlan_id"`
-	RadiusOverride                   types.Bool                                                         `tfsdk:"radius_override"`
-	RadiusProxyEnabled               types.Bool                                                         `tfsdk:"radius_proxy_enabled"`
-	RadiusServerAttemptsLimit        types.Int64                                                        `tfsdk:"radius_server_attempts_limit"`
-	RadiusServerTimeout              types.Int64                                                        `tfsdk:"radius_server_timeout"`
-	RadiusTestingEnabled             types.Bool                                                         `tfsdk:"radius_testing_enabled"`
-	SecondaryConcentratorNetworkID   types.String                                                       `tfsdk:"secondary_concentrator_network_id"`
-	SpeedBurst                       *RequestWirelessUpdateNetworkWirelessSsidSpeedBurstRs              `tfsdk:"speed_burst"`
-	SplashGuestSponsorDomains        types.Set                                                          `tfsdk:"splash_guest_sponsor_domains"`
-	UseVLANTagging                   types.Bool                                                         `tfsdk:"use_vlan_tagging"`
-	VLANID                           types.Int64                                                        `tfsdk:"vlan_id"`
+	NetworkID         types.String `tfsdk:"network_id"`
+	Number            types.Int64  `tfsdk:"number"`
+	AdminSplashURL    types.String `tfsdk:"admin_splash_url"`
+	AuthMode          types.String `tfsdk:"auth_mode"`
+	AvailabilityTags  types.Set    `tfsdk:"availability_tags"`
+	AvailableOnAllAps types.Bool   `tfsdk:"available_on_all_aps"`
+	BandSelection     types.String `tfsdk:"band_selection"`
+	Enabled           types.Bool   `tfsdk:"enabled"`
+	EncryptionMode    types.String `tfsdk:"encryption_mode"`
+	IPAssignmentMode  types.String `tfsdk:"ip_assignment_mode"`
+	// LocalAuth                       types.Bool                                                         `tfsdk:"local_auth"`
+	MandatoryDhcpEnabled            types.Bool                                                         `tfsdk:"mandatory_dhcp_enabled"`
+	MinBitrate                      types.Int64                                                        `tfsdk:"min_bitrate"`
+	Name                            types.String                                                       `tfsdk:"name"`
+	PerClientBandwidthLimitDown     types.Int64                                                        `tfsdk:"per_client_bandwidth_limit_down"`
+	PerClientBandwidthLimitUp       types.Int64                                                        `tfsdk:"per_client_bandwidth_limit_up"`
+	PerSSIDBandwidthLimitDown       types.Int64                                                        `tfsdk:"per_ssid_bandwidth_limit_down"`
+	PerSSIDBandwidthLimitUp         types.Int64                                                        `tfsdk:"per_ssid_bandwidth_limit_up"`
+	RadiusAccountingEnabled         types.Bool                                                         `tfsdk:"radius_accounting_enabled"`
+	RadiusAccountingServers         *[]ResponseWirelessGetNetworkWirelessSsidRadiusAccountingServersRs `tfsdk:"radius_accounting_servers"`
+	RadiusAccountingServersResponse *[]ResponseWirelessGetNetworkWirelessSsidRadiusAccountingServersRs `tfsdk:"radius_accounting_servers_response"`
+	RadiusAttributeForGroupPolicies types.String                                                       `tfsdk:"radius_attribute_for_group_policies"`
+	// RadiusEnabled                    types.Bool                                                         `tfsdk:"radius_enabled"`
+	RadiusFailoverPolicy             types.String                                                  `tfsdk:"radius_failover_policy"`
+	RadiusLoadBalancingPolicy        types.String                                                  `tfsdk:"radius_load_balancing_policy"`
+	RadiusServers                    *[]ResponseWirelessGetNetworkWirelessSsidRadiusServersRs      `tfsdk:"radius_servers"`
+	RadiusServersResponse            *[]ResponseWirelessGetNetworkWirelessSsidRadiusServersRs      `tfsdk:"radius_servers_response"`
+	SplashPage                       types.String                                                  `tfsdk:"splash_page"`
+	SplashTimeout                    types.String                                                  `tfsdk:"splash_timeout"`
+	SSIDAdminAccessible              types.Bool                                                    `tfsdk:"ssid_admin_accessible"`
+	Visible                          types.Bool                                                    `tfsdk:"visible"`
+	WalledGardenEnabled              types.Bool                                                    `tfsdk:"walled_garden_enabled"`
+	WalledGardenRanges               types.Set                                                     `tfsdk:"walled_garden_ranges"`
+	WpaEncryptionMode                types.String                                                  `tfsdk:"wpa_encryption_mode"`
+	ActiveDirectory                  *RequestWirelessUpdateNetworkWirelessSsidActiveDirectoryRs    `tfsdk:"active_directory"`
+	AdultContentFilteringEnabled     types.Bool                                                    `tfsdk:"adult_content_filtering_enabled"`
+	ApTagsAndVLANIDs                 *[]RequestWirelessUpdateNetworkWirelessSsidApTagsAndVlanIdsRs `tfsdk:"ap_tags_and_vlan_ids"`
+	ConcentratorNetworkID            types.String                                                  `tfsdk:"concentrator_network_id"`
+	DefaultVLANID                    types.Int64                                                   `tfsdk:"default_vlan_id"`
+	DisassociateClientsOnVpnFailover types.Bool                                                    `tfsdk:"disassociate_clients_on_vpn_failover"`
+	DNSRewrite                       *RequestWirelessUpdateNetworkWirelessSsidDnsRewriteRs         `tfsdk:"dns_rewrite"`
+	Dot11R                           *RequestWirelessUpdateNetworkWirelessSsidDot11RRs             `tfsdk:"dot11r"`
+	Dot11W                           *RequestWirelessUpdateNetworkWirelessSsidDot11WRs             `tfsdk:"dot11w"`
+	EnterpriseAdminAccess            types.String                                                  `tfsdk:"enterprise_admin_access"`
+	Gre                              *RequestWirelessUpdateNetworkWirelessSsidGreRs                `tfsdk:"gre"`
+	LanIsolationEnabled              types.Bool                                                    `tfsdk:"lan_isolation_enabled"`
+	Ldap                             *RequestWirelessUpdateNetworkWirelessSsidLdapRs               `tfsdk:"ldap"`
+	LocalRadius                      *RequestWirelessUpdateNetworkWirelessSsidLocalRadiusRs        `tfsdk:"local_radius"`
+	NamedVLANs                       *RequestWirelessUpdateNetworkWirelessSsidNamedVlansRs         `tfsdk:"named_vlans"`
+	Oauth                            *RequestWirelessUpdateNetworkWirelessSsidOauthRs              `tfsdk:"oauth"`
+	Psk                              types.String                                                  `tfsdk:"psk"`
+	RadiusAccountingInterimInterval  types.Int64                                                   `tfsdk:"radius_accounting_interim_interval"`
+	RadiusAuthenticationNasID        types.String                                                  `tfsdk:"radius_authentication_nas_id"`
+	RadiusCalledStationID            types.String                                                  `tfsdk:"radius_called_station_id"`
+	RadiusCoaEnabled                 types.Bool                                                    `tfsdk:"radius_coa_enabled"`
+	RadiusFallbackEnabled            types.Bool                                                    `tfsdk:"radius_fallback_enabled"`
+	RadiusGuestVLANEnabled           types.Bool                                                    `tfsdk:"radius_guest_vlan_enabled"`
+	RadiusGuestVLANID                types.Int64                                                   `tfsdk:"radius_guest_vlan_id"`
+	RadiusOverride                   types.Bool                                                    `tfsdk:"radius_override"`
+	RadiusProxyEnabled               types.Bool                                                    `tfsdk:"radius_proxy_enabled"`
+	RadiusServerAttemptsLimit        types.Int64                                                   `tfsdk:"radius_server_attempts_limit"`
+	RadiusServerTimeout              types.Int64                                                   `tfsdk:"radius_server_timeout"`
+	RadiusTestingEnabled             types.Bool                                                    `tfsdk:"radius_testing_enabled"`
+	SecondaryConcentratorNetworkID   types.String                                                  `tfsdk:"secondary_concentrator_network_id"`
+	SpeedBurst                       *RequestWirelessUpdateNetworkWirelessSsidSpeedBurstRs         `tfsdk:"speed_burst"`
+	SplashGuestSponsorDomains        types.Set                                                     `tfsdk:"splash_guest_sponsor_domains"`
+	UseVLANTagging                   types.Bool                                                    `tfsdk:"use_vlan_tagging"`
+	VLANID                           types.Int64                                                   `tfsdk:"vlan_id"`
 }
 
 type ResponseWirelessGetNetworkWirelessSsidRadiusAccountingServersRs struct {
@@ -2233,7 +2294,7 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 			requestWirelessUpdateNetworkWirelessSSIDRadiusServers = append(requestWirelessUpdateNetworkWirelessSSIDRadiusServers, merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDRadiusServers{
 				CaCertificate:            caCertificate,
 				Host:                     host,
-				OpenRoamingCertificateID: int64ToIntPointer3(openRoamingCertificateID),
+				OpenRoamingCertificateID: int64ToIntPointer(openRoamingCertificateID),
 				Port:                     int64ToIntPointer(port),
 				RadsecEnabled:            radsecEnabled,
 				Secret:                   secret,
@@ -2386,9 +2447,9 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 // From gosdk to TF Structs Schema
 func ResponseWirelessGetNetworkWirelessSSIDItemToBodyRs(state NetworksWirelessSSIDsRs, response *merakigosdk.ResponseWirelessGetNetworkWirelessSSID, is_read bool) NetworksWirelessSSIDsRs {
 	itemState := NetworksWirelessSSIDsRs{
-		AdminSplashURL:   types.StringValue(response.AdminSplashURL),
-		AuthMode:         types.StringValue(response.AuthMode),
-		AvailabilityTags: StringSliceToSet(response.AvailabilityTags),
+		AdminSplashURL: types.StringValue(response.AdminSplashURL),
+		AuthMode:       types.StringValue(response.AuthMode),
+		// AvailabilityTags: StringSliceToSet(response.AvailabilityTags),
 		AvailableOnAllAps: func() types.Bool {
 			if response.AvailableOnAllAps != nil {
 				return types.BoolValue(*response.AvailableOnAllAps)
@@ -2404,12 +2465,12 @@ func ResponseWirelessGetNetworkWirelessSSIDItemToBodyRs(state NetworksWirelessSS
 		}(),
 		EncryptionMode:   types.StringValue(response.EncryptionMode),
 		IPAssignmentMode: types.StringValue(response.IPAssignmentMode),
-		LocalAuth: func() types.Bool {
-			if response.LocalAuth != nil {
-				return types.BoolValue(*response.LocalAuth)
-			}
-			return types.Bool{}
-		}(),
+		// LocalAuth: func() types.Bool {
+		// 	if response.LocalAuth != nil {
+		// 		return types.BoolValue(*response.LocalAuth)
+		// 	}
+		// 	return types.BoolNull()
+		// }(),
 		MandatoryDhcpEnabled: func() types.Bool {
 			if response.MandatoryDhcpEnabled != nil {
 				return types.BoolValue(*response.MandatoryDhcpEnabled)
@@ -2459,7 +2520,7 @@ func ResponseWirelessGetNetworkWirelessSSIDItemToBodyRs(state NetworksWirelessSS
 			}
 			return types.Bool{}
 		}(),
-		RadiusAccountingServers: func() *[]ResponseWirelessGetNetworkWirelessSsidRadiusAccountingServersRs {
+		RadiusAccountingServersResponse: func() *[]ResponseWirelessGetNetworkWirelessSsidRadiusAccountingServersRs {
 			if response.RadiusAccountingServers != nil {
 				result := make([]ResponseWirelessGetNetworkWirelessSsidRadiusAccountingServersRs, len(*response.RadiusAccountingServers))
 				for i, radiusAccountingServers := range *response.RadiusAccountingServers {
@@ -2485,14 +2546,8 @@ func ResponseWirelessGetNetworkWirelessSSIDItemToBodyRs(state NetworksWirelessSS
 			return &[]ResponseWirelessGetNetworkWirelessSsidRadiusAccountingServersRs{}
 		}(),
 		RadiusAttributeForGroupPolicies: types.StringValue(response.RadiusAttributeForGroupPolicies),
-		RadiusEnabled: func() types.Bool {
-			if response.RadiusEnabled != nil {
-				return types.BoolValue(*response.RadiusEnabled)
-			}
-			return types.Bool{}
-		}(),
-		RadiusFailoverPolicy:      types.StringValue(response.RadiusFailoverPolicy),
-		RadiusLoadBalancingPolicy: types.StringValue(response.RadiusLoadBalancingPolicy),
+		RadiusFailoverPolicy:            types.StringValue(response.RadiusFailoverPolicy),
+		RadiusLoadBalancingPolicy:       types.StringValue(response.RadiusLoadBalancingPolicy),
 		RadiusServersResponse: func() *[]ResponseWirelessGetNetworkWirelessSsidRadiusServersRs {
 			if response.RadiusServers != nil {
 				result := make([]ResponseWirelessGetNetworkWirelessSsidRadiusServersRs, len(*response.RadiusServers))
@@ -2532,14 +2587,30 @@ func ResponseWirelessGetNetworkWirelessSSIDItemToBodyRs(state NetworksWirelessSS
 			}
 			return types.Bool{}
 		}(),
-		WalledGardenEnabled: func() types.Bool {
-			if response.WalledGardenEnabled != nil {
-				return types.BoolValue(*response.WalledGardenEnabled)
-			}
-			return types.Bool{}
-		}(),
-		WalledGardenRanges: StringSliceToSet(response.WalledGardenRanges),
-		WpaEncryptionMode:  types.StringValue(response.WpaEncryptionMode),
+		// WalledGardenEnabledResponse: func() types.Bool {
+		// 	if response.WalledGardenEnabled != nil {
+		// 		return types.BoolValue(*response.WalledGardenEnabled)
+		// 	}
+		// 	return types.Bool{}
+		// }(),
+		WalledGardenRanges:              StringSliceToSet(response.WalledGardenRanges),
+		WpaEncryptionMode:               types.StringValue(response.WpaEncryptionMode),
+		RadiusAccountingServers:         state.RadiusAccountingServers,
+		RadiusOverride:                  state.RadiusOverride,
+		RadiusAccountingInterimInterval: state.RadiusAccountingInterimInterval,
+		RadiusAuthenticationNasID:       state.RadiusAuthenticationNasID,
+		RadiusCalledStationID:           state.RadiusCalledStationID,
+		RadiusCoaEnabled:                state.RadiusCoaEnabled,
+		RadiusFallbackEnabled:           state.RadiusFallbackEnabled,
+		RadiusServerTimeout:             state.RadiusServerTimeout,
+		RadiusTestingEnabled:            state.RadiusTestingEnabled,
+		SpeedBurst:                      state.SpeedBurst,
+		UseVLANTagging:                  state.UseVLANTagging,
+		RadiusServerAttemptsLimit:       state.RadiusServerAttemptsLimit,
+		RadiusProxyEnabled:              state.RadiusProxyEnabled,
+		// RadiusEnabled:                   state.RadiusEnabled,
+		AvailabilityTags:    state.AvailabilityTags,
+		WalledGardenEnabled: state.WalledGardenEnabled,
 	}
 	// state.SplashGuestSponsorDomains = types.SetNull(types.StringType)
 	itemState.SplashGuestSponsorDomains = state.SplashGuestSponsorDomains
@@ -2549,6 +2620,8 @@ func ResponseWirelessGetNetworkWirelessSSIDItemToBodyRs(state NetworksWirelessSS
 	itemState.RadiusServers = state.RadiusServers
 	itemState.AdultContentFilteringEnabled = state.AdultContentFilteringEnabled
 	itemState.LanIsolationEnabled = state.LanIsolationEnabled
+	itemState.Dot11R = state.Dot11R
+	itemState.Dot11W = state.Dot11W
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksWirelessSSIDsRs)
 	}

@@ -52,7 +52,6 @@ func (r *NetworksApplianceFirewallInboundFirewallRulesResource) Schema(_ context
 			},
 			"rules": schema.SetNestedAttribute{
 				MarkdownDescription: `An ordered array of the firewall rules (not including the default rule)`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
@@ -62,7 +61,6 @@ func (r *NetworksApplianceFirewallInboundFirewallRulesResource) Schema(_ context
 
 						"comment": schema.StringAttribute{
 							MarkdownDescription: `Description of the rule (optional)`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -70,7 +68,6 @@ func (r *NetworksApplianceFirewallInboundFirewallRulesResource) Schema(_ context
 						},
 						"dest_cidr": schema.StringAttribute{
 							MarkdownDescription: `Comma-separated list of destination IP address(es) (in IP or CIDR notation), fully-qualified domain names (FQDN) or 'any'`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -78,7 +75,6 @@ func (r *NetworksApplianceFirewallInboundFirewallRulesResource) Schema(_ context
 						},
 						"dest_port": schema.StringAttribute{
 							MarkdownDescription: `Comma-separated list of destination port(s) (integer in the range 1-65535), or 'any'`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -86,7 +82,6 @@ func (r *NetworksApplianceFirewallInboundFirewallRulesResource) Schema(_ context
 						},
 						"policy": schema.StringAttribute{
 							MarkdownDescription: `'allow' or 'deny' traffic specified by this rule`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -94,7 +89,6 @@ func (r *NetworksApplianceFirewallInboundFirewallRulesResource) Schema(_ context
 						},
 						"protocol": schema.StringAttribute{
 							MarkdownDescription: `The type of protocol (must be 'tcp', 'udp', 'icmp', 'icmp6' or 'any')`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -102,7 +96,6 @@ func (r *NetworksApplianceFirewallInboundFirewallRulesResource) Schema(_ context
 						},
 						"src_cidr": schema.StringAttribute{
 							MarkdownDescription: `Comma-separated list of source IP address(es) (in IP or CIDR notation), or 'any' (note: FQDN not supported for source addresses)`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -110,7 +103,6 @@ func (r *NetworksApplianceFirewallInboundFirewallRulesResource) Schema(_ context
 						},
 						"src_port": schema.StringAttribute{
 							MarkdownDescription: `Comma-separated list of source port(s) (integer in the range 1-65535), or 'any'`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -118,8 +110,75 @@ func (r *NetworksApplianceFirewallInboundFirewallRulesResource) Schema(_ context
 						},
 						"syslog_enabled": schema.BoolAttribute{
 							MarkdownDescription: `Log this rule to syslog (true or false, boolean value) - only applicable if a syslog has been configured (optional)`,
-							Computed:            true,
 							Optional:            true,
+							PlanModifiers: []planmodifier.Bool{
+								boolplanmodifier.UseStateForUnknown(),
+							},
+						},
+					},
+				},
+			},
+			"rules_response": schema.SetNestedAttribute{
+				MarkdownDescription: `An ordered array of the firewall rules (not including the default rule)`,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+
+						"comment": schema.StringAttribute{
+							MarkdownDescription: `Description of the rule (optional)`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"dest_cidr": schema.StringAttribute{
+							MarkdownDescription: `Comma-separated list of destination IP address(es) (in IP or CIDR notation), fully-qualified domain names (FQDN) or 'any'`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"dest_port": schema.StringAttribute{
+							MarkdownDescription: `Comma-separated list of destination port(s) (integer in the range 1-65535), or 'any'`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"policy": schema.StringAttribute{
+							MarkdownDescription: `'allow' or 'deny' traffic specified by this rule`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"protocol": schema.StringAttribute{
+							MarkdownDescription: `The type of protocol (must be 'tcp', 'udp', 'icmp', 'icmp6' or 'any')`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"src_cidr": schema.StringAttribute{
+							MarkdownDescription: `Comma-separated list of source IP address(es) (in IP or CIDR notation), or 'any' (note: FQDN not supported for source addresses)`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"src_port": schema.StringAttribute{
+							MarkdownDescription: `Comma-separated list of source port(s) (integer in the range 1-65535), or 'any'`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"syslog_enabled": schema.BoolAttribute{
+							MarkdownDescription: `Log this rule to syslog (true or false, boolean value) - only applicable if a syslog has been configured (optional)`,
+							Computed:            true,
 							PlanModifiers: []planmodifier.Bool{
 								boolplanmodifier.UseStateForUnknown(),
 							},
@@ -315,6 +374,7 @@ func (r *NetworksApplianceFirewallInboundFirewallRulesResource) Delete(ctx conte
 type NetworksApplianceFirewallInboundFirewallRulesRs struct {
 	NetworkID         types.String                                                               `tfsdk:"network_id"`
 	Rules             *[]ResponseApplianceGetNetworkApplianceFirewallInboundFirewallRulesRulesRs `tfsdk:"rules"`
+	RulesResponse     *[]ResponseApplianceGetNetworkApplianceFirewallInboundFirewallRulesRulesRs `tfsdk:"rules_response"`
 	SyslogDefaultRule types.Bool                                                                 `tfsdk:"syslog_default_rule"`
 }
 
@@ -380,7 +440,7 @@ func (r *NetworksApplianceFirewallInboundFirewallRulesRs) toSdkApiRequestUpdate(
 // From gosdk to TF Structs Schema
 func ResponseApplianceGetNetworkApplianceFirewallInboundFirewallRulesItemToBodyRs(state NetworksApplianceFirewallInboundFirewallRulesRs, response *merakigosdk.ResponseApplianceGetNetworkApplianceFirewallInboundFirewallRules, is_read bool) NetworksApplianceFirewallInboundFirewallRulesRs {
 	itemState := NetworksApplianceFirewallInboundFirewallRulesRs{
-		Rules: func() *[]ResponseApplianceGetNetworkApplianceFirewallInboundFirewallRulesRulesRs {
+		RulesResponse: func() *[]ResponseApplianceGetNetworkApplianceFirewallInboundFirewallRulesRulesRs {
 			if response.Rules != nil {
 				result := make([]ResponseApplianceGetNetworkApplianceFirewallInboundFirewallRulesRulesRs, len(*response.Rules))
 				for i, rules := range *response.Rules {
@@ -410,6 +470,7 @@ func ResponseApplianceGetNetworkApplianceFirewallInboundFirewallRulesItemToBodyR
 			}
 			return types.Bool{}
 		}(),
+		Rules: state.Rules,
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksApplianceFirewallInboundFirewallRulesRs)

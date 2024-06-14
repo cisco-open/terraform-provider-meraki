@@ -55,7 +55,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 		Attributes: map[string]schema.Attribute{
 			"conditions": schema.SetNestedAttribute{
 				MarkdownDescription: `List of conditions that will cause the profile to send an alert.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
@@ -65,7 +64,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 
 						"direction": schema.StringAttribute{
 							MarkdownDescription: `If 'above', an alert will be sent when a sensor reads above the threshold. If 'below', an alert will be sent when a sensor reads below the threshold. Only applicable for temperature, humidity, realPower, apparentPower, powerFactor, voltage, current, and frequency thresholds.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -79,7 +77,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 						},
 						"duration": schema.Int64Attribute{
 							MarkdownDescription: `Length of time in seconds that the triggering state must persist before an alert is sent. Available options are 0 seconds, 1 minute, 2 minutes, 3 minutes, 4 minutes, 5 minutes, 10 minutes, 15 minutes, 30 minutes, 1 hour, 2 hours, 4 hours, and 8 hours. Default is 0.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -87,7 +84,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 						},
 						"metric": schema.StringAttribute{
 							MarkdownDescription: `The type of sensor metric that will be monitored for changes. Available metrics are apparentPower, co2, current, door, frequency, humidity, indoorAirQuality, noise, pm25, powerFactor, realPower, temperature, tvoc, upstreamPower, voltage, and water.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -95,7 +91,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 						},
 						"threshold": schema.SingleNestedAttribute{
 							MarkdownDescription: `Threshold for sensor readings that will cause an alert to be sent. This object should contain a single property key matching the condition's 'metric' value.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Object{
 								objectplanmodifier.UseStateForUnknown(),
@@ -104,7 +99,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 
 								"apparent_power": schema.SingleNestedAttribute{
 									MarkdownDescription: `Apparent power threshold. 'draw' must be provided.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Object{
 										objectplanmodifier.UseStateForUnknown(),
@@ -113,7 +107,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 
 										"draw": schema.Float64Attribute{
 											MarkdownDescription: `Alerting threshold in volt-amps. Must be between 0 and 3750.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.Float64{
 												float64planmodifier.UseStateForUnknown(),
@@ -123,7 +116,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 								},
 								"current": schema.SingleNestedAttribute{
 									MarkdownDescription: `Electrical current threshold. 'level' must be provided.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Object{
 										objectplanmodifier.UseStateForUnknown(),
@@ -132,7 +124,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 
 										"draw": schema.Float64Attribute{
 											MarkdownDescription: `Alerting threshold in amps. Must be between 0 and 15.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.Float64{
 												float64planmodifier.UseStateForUnknown(),
@@ -142,7 +133,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 								},
 								"door": schema.SingleNestedAttribute{
 									MarkdownDescription: `Door open threshold. 'open' must be provided and set to true.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Object{
 										objectplanmodifier.UseStateForUnknown(),
@@ -151,7 +141,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 
 										"open": schema.BoolAttribute{
 											MarkdownDescription: `Alerting threshold for a door open event. Must be set to true.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.Bool{
 												boolplanmodifier.UseStateForUnknown(),
@@ -161,7 +150,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 								},
 								"frequency": schema.SingleNestedAttribute{
 									MarkdownDescription: `Electrical frequency threshold. 'level' must be provided.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Object{
 										objectplanmodifier.UseStateForUnknown(),
@@ -170,7 +158,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 
 										"level": schema.Float64Attribute{
 											MarkdownDescription: `Alerting threshold in hertz. Must be between 0 and 60.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.Float64{
 												float64planmodifier.UseStateForUnknown(),
@@ -180,7 +167,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 								},
 								"humidity": schema.SingleNestedAttribute{
 									MarkdownDescription: `Humidity threshold. One of 'relativePercentage' or 'quality' must be provided.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Object{
 										objectplanmodifier.UseStateForUnknown(),
@@ -189,7 +175,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 
 										"quality": schema.StringAttribute{
 											MarkdownDescription: `Alerting threshold as a qualitative humidity level.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.String{
 												stringplanmodifier.UseStateForUnknown(),
@@ -205,7 +190,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 										},
 										"relative_percentage": schema.Int64Attribute{
 											MarkdownDescription: `Alerting threshold in %RH.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.Int64{
 												int64planmodifier.UseStateForUnknown(),
@@ -215,7 +199,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 								},
 								"indoor_air_quality": schema.SingleNestedAttribute{
 									MarkdownDescription: `Indoor air quality score threshold. One of 'score' or 'quality' must be provided.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Object{
 										objectplanmodifier.UseStateForUnknown(),
@@ -224,7 +207,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 
 										"quality": schema.StringAttribute{
 											MarkdownDescription: `Alerting threshold as a qualitative indoor air quality level.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.String{
 												stringplanmodifier.UseStateForUnknown(),
@@ -240,7 +222,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 										},
 										"score": schema.Int64Attribute{
 											MarkdownDescription: `Alerting threshold as indoor air quality score.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.Int64{
 												int64planmodifier.UseStateForUnknown(),
@@ -250,7 +231,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 								},
 								"noise": schema.SingleNestedAttribute{
 									MarkdownDescription: `Noise threshold. 'ambient' must be provided.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Object{
 										objectplanmodifier.UseStateForUnknown(),
@@ -259,7 +239,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 
 										"ambient": schema.SingleNestedAttribute{
 											MarkdownDescription: `Ambient noise threshold. One of 'level' or 'quality' must be provided.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.Object{
 												objectplanmodifier.UseStateForUnknown(),
@@ -268,7 +247,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 
 												"level": schema.Int64Attribute{
 													MarkdownDescription: `Alerting threshold as adjusted decibels.`,
-													Computed:            true,
 													Optional:            true,
 													PlanModifiers: []planmodifier.Int64{
 														int64planmodifier.UseStateForUnknown(),
@@ -276,7 +254,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 												},
 												"quality": schema.StringAttribute{
 													MarkdownDescription: `Alerting threshold as a qualitative ambient noise level.`,
-													Computed:            true,
 													Optional:            true,
 													PlanModifiers: []planmodifier.String{
 														stringplanmodifier.UseStateForUnknown(),
@@ -296,7 +273,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 								},
 								"pm25": schema.SingleNestedAttribute{
 									MarkdownDescription: `PM2.5 concentration threshold. One of 'concentration' or 'quality' must be provided.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Object{
 										objectplanmodifier.UseStateForUnknown(),
@@ -305,7 +281,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 
 										"concentration": schema.Int64Attribute{
 											MarkdownDescription: `Alerting threshold as PM2.5 parts per million.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.Int64{
 												int64planmodifier.UseStateForUnknown(),
@@ -313,7 +288,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 										},
 										"quality": schema.StringAttribute{
 											MarkdownDescription: `Alerting threshold as a qualitative PM2.5 level.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.String{
 												stringplanmodifier.UseStateForUnknown(),
@@ -331,7 +305,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 								},
 								"power_factor": schema.SingleNestedAttribute{
 									MarkdownDescription: `Power factor threshold. 'percentage' must be provided.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Object{
 										objectplanmodifier.UseStateForUnknown(),
@@ -340,7 +313,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 
 										"percentage": schema.Int64Attribute{
 											MarkdownDescription: `Alerting threshold as the ratio of active power to apparent power. Must be between 0 and 100.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.Int64{
 												int64planmodifier.UseStateForUnknown(),
@@ -350,7 +322,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 								},
 								"real_power": schema.SingleNestedAttribute{
 									MarkdownDescription: `Real power threshold. 'draw' must be provided.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Object{
 										objectplanmodifier.UseStateForUnknown(),
@@ -359,7 +330,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 
 										"draw": schema.Float64Attribute{
 											MarkdownDescription: `Alerting threshold in watts. Must be between 0 and 3750.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.Float64{
 												float64planmodifier.UseStateForUnknown(),
@@ -369,7 +339,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 								},
 								"temperature": schema.SingleNestedAttribute{
 									MarkdownDescription: `Temperature threshold. One of 'celsius', 'fahrenheit', or 'quality' must be provided.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Object{
 										objectplanmodifier.UseStateForUnknown(),
@@ -378,7 +347,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 
 										"celsius": schema.Float64Attribute{
 											MarkdownDescription: `Alerting threshold in degrees Celsius.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.Float64{
 												float64planmodifier.UseStateForUnknown(),
@@ -386,7 +354,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 										},
 										"fahrenheit": schema.Float64Attribute{
 											MarkdownDescription: `Alerting threshold in degrees Fahrenheit.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.Float64{
 												float64planmodifier.UseStateForUnknown(),
@@ -394,7 +361,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 										},
 										"quality": schema.StringAttribute{
 											MarkdownDescription: `Alerting threshold as a qualitative temperature level.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.String{
 												stringplanmodifier.UseStateForUnknown(),
@@ -412,7 +378,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 								},
 								"tvoc": schema.SingleNestedAttribute{
 									MarkdownDescription: `TVOC concentration threshold. One of 'concentration' or 'quality' must be provided.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Object{
 										objectplanmodifier.UseStateForUnknown(),
@@ -421,7 +386,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 
 										"concentration": schema.Int64Attribute{
 											MarkdownDescription: `Alerting threshold as TVOC micrograms per cubic meter.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.Int64{
 												int64planmodifier.UseStateForUnknown(),
@@ -429,7 +393,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 										},
 										"quality": schema.StringAttribute{
 											MarkdownDescription: `Alerting threshold as a qualitative TVOC level.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.String{
 												stringplanmodifier.UseStateForUnknown(),
@@ -447,7 +410,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 								},
 								"upstream_power": schema.SingleNestedAttribute{
 									MarkdownDescription: `Upstream power threshold. 'outageDetected' must be provided and set to true.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Object{
 										objectplanmodifier.UseStateForUnknown(),
@@ -456,7 +418,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 
 										"outage_detected": schema.BoolAttribute{
 											MarkdownDescription: `Alerting threshold for an upstream power event. Must be set to true.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.Bool{
 												boolplanmodifier.UseStateForUnknown(),
@@ -466,7 +427,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 								},
 								"voltage": schema.SingleNestedAttribute{
 									MarkdownDescription: `Voltage threshold. 'level' must be provided.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Object{
 										objectplanmodifier.UseStateForUnknown(),
@@ -475,7 +435,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 
 										"level": schema.Float64Attribute{
 											MarkdownDescription: `Alerting threshold in volts. Must be between 0 and 250.`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.Float64{
 												float64planmodifier.UseStateForUnknown(),
@@ -485,7 +444,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 								},
 								"water": schema.SingleNestedAttribute{
 									MarkdownDescription: `Water detection threshold. 'present' must be provided and set to true.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Object{
 										objectplanmodifier.UseStateForUnknown(),
@@ -494,8 +452,418 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 
 										"present": schema.BoolAttribute{
 											MarkdownDescription: `Alerting threshold for a water detection event. Must be set to true.`,
-											Computed:            true,
 											Optional:            true,
+											PlanModifiers: []planmodifier.Bool{
+												boolplanmodifier.UseStateForUnknown(),
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"conditions_response": schema.SetNestedAttribute{
+				MarkdownDescription: `List of conditions that will cause the profile to send an alert.`,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+
+						"direction": schema.StringAttribute{
+							MarkdownDescription: `If 'above', an alert will be sent when a sensor reads above the threshold. If 'below', an alert will be sent when a sensor reads below the threshold. Only applicable for temperature, humidity, realPower, apparentPower, powerFactor, voltage, current, and frequency thresholds.`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"above",
+									"below",
+								),
+							},
+						},
+						"duration": schema.Int64Attribute{
+							MarkdownDescription: `Length of time in seconds that the triggering state must persist before an alert is sent. Available options are 0 seconds, 1 minute, 2 minutes, 3 minutes, 4 minutes, 5 minutes, 10 minutes, 15 minutes, 30 minutes, 1 hour, 2 hours, 4 hours, and 8 hours. Default is 0.`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.Int64{
+								int64planmodifier.UseStateForUnknown(),
+							},
+						},
+						"metric": schema.StringAttribute{
+							MarkdownDescription: `The type of sensor metric that will be monitored for changes. Available metrics are apparentPower, co2, current, door, frequency, humidity, indoorAirQuality, noise, pm25, powerFactor, realPower, temperature, tvoc, upstreamPower, voltage, and water.`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"threshold": schema.SingleNestedAttribute{
+							MarkdownDescription: `Threshold for sensor readings that will cause an alert to be sent. This object should contain a single property key matching the condition's 'metric' value.`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.UseStateForUnknown(),
+							},
+							Attributes: map[string]schema.Attribute{
+
+								"apparent_power": schema.SingleNestedAttribute{
+									MarkdownDescription: `Apparent power threshold. 'draw' must be provided.`,
+									Computed:            true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseStateForUnknown(),
+									},
+									Attributes: map[string]schema.Attribute{
+
+										"draw": schema.Float64Attribute{
+											MarkdownDescription: `Alerting threshold in volt-amps. Must be between 0 and 3750.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.Float64{
+												float64planmodifier.UseStateForUnknown(),
+											},
+										},
+									},
+								},
+								"current": schema.SingleNestedAttribute{
+									MarkdownDescription: `Electrical current threshold. 'level' must be provided.`,
+									Computed:            true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseStateForUnknown(),
+									},
+									Attributes: map[string]schema.Attribute{
+
+										"draw": schema.Float64Attribute{
+											MarkdownDescription: `Alerting threshold in amps. Must be between 0 and 15.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.Float64{
+												float64planmodifier.UseStateForUnknown(),
+											},
+										},
+									},
+								},
+								"door": schema.SingleNestedAttribute{
+									MarkdownDescription: `Door open threshold. 'open' must be provided and set to true.`,
+									Computed:            true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseStateForUnknown(),
+									},
+									Attributes: map[string]schema.Attribute{
+
+										"open": schema.BoolAttribute{
+											MarkdownDescription: `Alerting threshold for a door open event. Must be set to true.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.Bool{
+												boolplanmodifier.UseStateForUnknown(),
+											},
+										},
+									},
+								},
+								"frequency": schema.SingleNestedAttribute{
+									MarkdownDescription: `Electrical frequency threshold. 'level' must be provided.`,
+									Computed:            true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseStateForUnknown(),
+									},
+									Attributes: map[string]schema.Attribute{
+
+										"level": schema.Float64Attribute{
+											MarkdownDescription: `Alerting threshold in hertz. Must be between 0 and 60.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.Float64{
+												float64planmodifier.UseStateForUnknown(),
+											},
+										},
+									},
+								},
+								"humidity": schema.SingleNestedAttribute{
+									MarkdownDescription: `Humidity threshold. One of 'relativePercentage' or 'quality' must be provided.`,
+									Computed:            true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseStateForUnknown(),
+									},
+									Attributes: map[string]schema.Attribute{
+
+										"quality": schema.StringAttribute{
+											MarkdownDescription: `Alerting threshold as a qualitative humidity level.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.UseStateForUnknown(),
+											},
+											Validators: []validator.String{
+												stringvalidator.OneOf(
+													"fair",
+													"good",
+													"inadequate",
+													"poor",
+												),
+											},
+										},
+										"relative_percentage": schema.Int64Attribute{
+											MarkdownDescription: `Alerting threshold in %RH.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.Int64{
+												int64planmodifier.UseStateForUnknown(),
+											},
+										},
+									},
+								},
+								"indoor_air_quality": schema.SingleNestedAttribute{
+									MarkdownDescription: `Indoor air quality score threshold. One of 'score' or 'quality' must be provided.`,
+									Computed:            true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseStateForUnknown(),
+									},
+									Attributes: map[string]schema.Attribute{
+
+										"quality": schema.StringAttribute{
+											MarkdownDescription: `Alerting threshold as a qualitative indoor air quality level.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.UseStateForUnknown(),
+											},
+											Validators: []validator.String{
+												stringvalidator.OneOf(
+													"fair",
+													"good",
+													"inadequate",
+													"poor",
+												),
+											},
+										},
+										"score": schema.Int64Attribute{
+											MarkdownDescription: `Alerting threshold as indoor air quality score.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.Int64{
+												int64planmodifier.UseStateForUnknown(),
+											},
+										},
+									},
+								},
+								"noise": schema.SingleNestedAttribute{
+									MarkdownDescription: `Noise threshold. 'ambient' must be provided.`,
+									Computed:            true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseStateForUnknown(),
+									},
+									Attributes: map[string]schema.Attribute{
+
+										"ambient": schema.SingleNestedAttribute{
+											MarkdownDescription: `Ambient noise threshold. One of 'level' or 'quality' must be provided.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.Object{
+												objectplanmodifier.UseStateForUnknown(),
+											},
+											Attributes: map[string]schema.Attribute{
+
+												"level": schema.Int64Attribute{
+													MarkdownDescription: `Alerting threshold as adjusted decibels.`,
+													Computed:            true,
+													PlanModifiers: []planmodifier.Int64{
+														int64planmodifier.UseStateForUnknown(),
+													},
+												},
+												"quality": schema.StringAttribute{
+													MarkdownDescription: `Alerting threshold as a qualitative ambient noise level.`,
+													Computed:            true,
+													PlanModifiers: []planmodifier.String{
+														stringplanmodifier.UseStateForUnknown(),
+													},
+													Validators: []validator.String{
+														stringvalidator.OneOf(
+															"fair",
+															"good",
+															"inadequate",
+															"poor",
+														),
+													},
+												},
+											},
+										},
+									},
+								},
+								"pm25": schema.SingleNestedAttribute{
+									MarkdownDescription: `PM2.5 concentration threshold. One of 'concentration' or 'quality' must be provided.`,
+									Computed:            true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseStateForUnknown(),
+									},
+									Attributes: map[string]schema.Attribute{
+
+										"concentration": schema.Int64Attribute{
+											MarkdownDescription: `Alerting threshold as PM2.5 parts per million.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.Int64{
+												int64planmodifier.UseStateForUnknown(),
+											},
+										},
+										"quality": schema.StringAttribute{
+											MarkdownDescription: `Alerting threshold as a qualitative PM2.5 level.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.UseStateForUnknown(),
+											},
+											Validators: []validator.String{
+												stringvalidator.OneOf(
+													"fair",
+													"good",
+													"inadequate",
+													"poor",
+												),
+											},
+										},
+									},
+								},
+								"power_factor": schema.SingleNestedAttribute{
+									MarkdownDescription: `Power factor threshold. 'percentage' must be provided.`,
+									Computed:            true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseStateForUnknown(),
+									},
+									Attributes: map[string]schema.Attribute{
+
+										"percentage": schema.Int64Attribute{
+											MarkdownDescription: `Alerting threshold as the ratio of active power to apparent power. Must be between 0 and 100.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.Int64{
+												int64planmodifier.UseStateForUnknown(),
+											},
+										},
+									},
+								},
+								"real_power": schema.SingleNestedAttribute{
+									MarkdownDescription: `Real power threshold. 'draw' must be provided.`,
+									Computed:            true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseStateForUnknown(),
+									},
+									Attributes: map[string]schema.Attribute{
+
+										"draw": schema.Float64Attribute{
+											MarkdownDescription: `Alerting threshold in watts. Must be between 0 and 3750.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.Float64{
+												float64planmodifier.UseStateForUnknown(),
+											},
+										},
+									},
+								},
+								"temperature": schema.SingleNestedAttribute{
+									MarkdownDescription: `Temperature threshold. One of 'celsius', 'fahrenheit', or 'quality' must be provided.`,
+									Computed:            true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseStateForUnknown(),
+									},
+									Attributes: map[string]schema.Attribute{
+
+										"celsius": schema.Float64Attribute{
+											MarkdownDescription: `Alerting threshold in degrees Celsius.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.Float64{
+												float64planmodifier.UseStateForUnknown(),
+											},
+										},
+										"fahrenheit": schema.Float64Attribute{
+											MarkdownDescription: `Alerting threshold in degrees Fahrenheit.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.Float64{
+												float64planmodifier.UseStateForUnknown(),
+											},
+										},
+										"quality": schema.StringAttribute{
+											MarkdownDescription: `Alerting threshold as a qualitative temperature level.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.UseStateForUnknown(),
+											},
+											Validators: []validator.String{
+												stringvalidator.OneOf(
+													"fair",
+													"good",
+													"inadequate",
+													"poor",
+												),
+											},
+										},
+									},
+								},
+								"tvoc": schema.SingleNestedAttribute{
+									MarkdownDescription: `TVOC concentration threshold. One of 'concentration' or 'quality' must be provided.`,
+									Computed:            true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseStateForUnknown(),
+									},
+									Attributes: map[string]schema.Attribute{
+
+										"concentration": schema.Int64Attribute{
+											MarkdownDescription: `Alerting threshold as TVOC micrograms per cubic meter.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.Int64{
+												int64planmodifier.UseStateForUnknown(),
+											},
+										},
+										"quality": schema.StringAttribute{
+											MarkdownDescription: `Alerting threshold as a qualitative TVOC level.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.UseStateForUnknown(),
+											},
+											Validators: []validator.String{
+												stringvalidator.OneOf(
+													"fair",
+													"good",
+													"inadequate",
+													"poor",
+												),
+											},
+										},
+									},
+								},
+								"upstream_power": schema.SingleNestedAttribute{
+									MarkdownDescription: `Upstream power threshold. 'outageDetected' must be provided and set to true.`,
+									Computed:            true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseStateForUnknown(),
+									},
+									Attributes: map[string]schema.Attribute{
+
+										"outage_detected": schema.BoolAttribute{
+											MarkdownDescription: `Alerting threshold for an upstream power event. Must be set to true.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.Bool{
+												boolplanmodifier.UseStateForUnknown(),
+											},
+										},
+									},
+								},
+								"voltage": schema.SingleNestedAttribute{
+									MarkdownDescription: `Voltage threshold. 'level' must be provided.`,
+									Computed:            true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseStateForUnknown(),
+									},
+									Attributes: map[string]schema.Attribute{
+
+										"level": schema.Float64Attribute{
+											MarkdownDescription: `Alerting threshold in volts. Must be between 0 and 250.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.Float64{
+												float64planmodifier.UseStateForUnknown(),
+											},
+										},
+									},
+								},
+								"water": schema.SingleNestedAttribute{
+									MarkdownDescription: `Water detection threshold. 'present' must be provided and set to true.`,
+									Computed:            true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseStateForUnknown(),
+									},
+									Attributes: map[string]schema.Attribute{
+
+										"present": schema.BoolAttribute{
+											MarkdownDescription: `Alerting threshold for a water detection event. Must be set to true.`,
+											Computed:            true,
 											PlanModifiers: []planmodifier.Bool{
 												boolplanmodifier.UseStateForUnknown(),
 											},
@@ -551,7 +919,6 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 					},
 					"http_server_ids": schema.SetAttribute{
 						MarkdownDescription: `A list of webhook endpoint IDs that will receive information about the alert.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
@@ -763,7 +1130,7 @@ func (r *NetworksSensorAlertsProfilesResource) Read(ctx context.Context, req res
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	vvID := data.ID.ValueString()
+	vvID := data.ProfileID.ValueString()
 	responseGet, restyRespGet, err := r.client.Sensor.GetNetworkSensorAlertsProfile(vvNetworkID, vvID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -820,7 +1187,7 @@ func (r *NetworksSensorAlertsProfilesResource) Update(ctx context.Context, req r
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	vvID := data.ID.ValueString()
+	vvID := data.ProfileID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Sensor.UpdateNetworkSensorAlertsProfile(vvNetworkID, vvID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
@@ -860,7 +1227,7 @@ func (r *NetworksSensorAlertsProfilesResource) Delete(ctx context.Context, req r
 	}
 
 	vvNetworkID := state.NetworkID.ValueString()
-	vvID := state.ID.ValueString()
+	vvID := state.ProfileID.ValueString()
 	_, err := r.client.Sensor.DeleteNetworkSensorAlertsProfile(vvNetworkID, vvID)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -874,14 +1241,15 @@ func (r *NetworksSensorAlertsProfilesResource) Delete(ctx context.Context, req r
 
 // TF Structs Schema
 type NetworksSensorAlertsProfilesRs struct {
-	NetworkID  types.String                                               `tfsdk:"network_id"`
-	ID         types.String                                               `tfsdk:"id"`
-	Conditions *[]ResponseSensorGetNetworkSensorAlertsProfileConditionsRs `tfsdk:"conditions"`
-	Name       types.String                                               `tfsdk:"name"`
-	ProfileID  types.String                                               `tfsdk:"profile_id"`
-	Recipients *ResponseSensorGetNetworkSensorAlertsProfileRecipientsRs   `tfsdk:"recipients"`
-	Schedule   *ResponseSensorGetNetworkSensorAlertsProfileScheduleRs     `tfsdk:"schedule"`
-	Serials    types.Set                                                  `tfsdk:"serials"`
+	NetworkID          types.String                                               `tfsdk:"network_id"`
+	ID                 types.String                                               `tfsdk:"id"`
+	Conditions         *[]ResponseSensorGetNetworkSensorAlertsProfileConditionsRs `tfsdk:"conditions"`
+	ConditionsResponse *[]ResponseSensorGetNetworkSensorAlertsProfileConditionsRs `tfsdk:"conditions_response"`
+	Name               types.String                                               `tfsdk:"name"`
+	ProfileID          types.String                                               `tfsdk:"profile_id"`
+	Recipients         *ResponseSensorGetNetworkSensorAlertsProfileRecipientsRs   `tfsdk:"recipients"`
+	Schedule           *ResponseSensorGetNetworkSensorAlertsProfileScheduleRs     `tfsdk:"schedule"`
+	Serials            types.Set                                                  `tfsdk:"serials"`
 }
 
 type ResponseSensorGetNetworkSensorAlertsProfileConditionsRs struct {
@@ -1123,13 +1491,23 @@ func (r *NetworksSensorAlertsProfilesRs) toSdkApiRequestCreate(ctx context.Conte
 				}
 				var requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdTemperature *merakigosdk.RequestSensorCreateNetworkSensorAlertsProfileConditionsThresholdTemperature
 				if rItem1.Threshold.Temperature != nil {
-					celsius := rItem1.Threshold.Temperature.Celsius.ValueFloat64Pointer()
-					fahrenheit := rItem1.Threshold.Temperature.Fahrenheit.ValueFloat64Pointer()
+					// celsius := rItem1.Threshold.Temperature.Celsius.ValueFloat64Pointer()
+					// fahrenheit := rItem1.Threshold.Temperature.Fahrenheit.ValueFloat64Pointer()
 					quality := rItem1.Threshold.Temperature.Quality.ValueString()
 					requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdTemperature = &merakigosdk.RequestSensorCreateNetworkSensorAlertsProfileConditionsThresholdTemperature{
-						Celsius:    celsius,
-						Fahrenheit: fahrenheit,
-						Quality:    quality,
+						Celsius: func() *float64 {
+							if !rItem1.Threshold.Temperature.Celsius.IsUnknown() && !rItem1.Threshold.Temperature.Celsius.IsNull() {
+								return rItem1.Threshold.Temperature.Celsius.ValueFloat64Pointer()
+							}
+							return nil
+						}(),
+						Fahrenheit: func() *float64 {
+							if !rItem1.Threshold.Temperature.Fahrenheit.IsUnknown() && !rItem1.Threshold.Temperature.Fahrenheit.IsNull() {
+								return rItem1.Threshold.Temperature.Fahrenheit.ValueFloat64Pointer()
+							}
+							return nil
+						}(),
+						Quality: quality,
 					}
 				}
 				var requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdTvoc *merakigosdk.RequestSensorCreateNetworkSensorAlertsProfileConditionsThresholdTvoc
@@ -1380,13 +1758,23 @@ func (r *NetworksSensorAlertsProfilesRs) toSdkApiRequestUpdate(ctx context.Conte
 				}
 				var requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdTemperature *merakigosdk.RequestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdTemperature
 				if rItem1.Threshold.Temperature != nil {
-					celsius := rItem1.Threshold.Temperature.Celsius.ValueFloat64Pointer()
-					fahrenheit := rItem1.Threshold.Temperature.Fahrenheit.ValueFloat64Pointer()
+					// celsius := rItem1.Threshold.Temperature.Celsius.ValueFloat64Pointer()
+					// fahrenheit := rItem1.Threshold.Temperature.Fahrenheit.ValueFloat64Pointer()
 					quality := rItem1.Threshold.Temperature.Quality.ValueString()
 					requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdTemperature = &merakigosdk.RequestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdTemperature{
-						Celsius:    celsius,
-						Fahrenheit: fahrenheit,
-						Quality:    quality,
+						Celsius: func() *float64 {
+							if !rItem1.Threshold.Temperature.Celsius.IsUnknown() && !rItem1.Threshold.Temperature.Celsius.IsNull() {
+								return rItem1.Threshold.Temperature.Celsius.ValueFloat64Pointer()
+							}
+							return nil
+						}(),
+						Fahrenheit: func() *float64 {
+							if !rItem1.Threshold.Temperature.Fahrenheit.IsUnknown() && !rItem1.Threshold.Temperature.Fahrenheit.IsNull() {
+								return rItem1.Threshold.Temperature.Fahrenheit.ValueFloat64Pointer()
+							}
+							return nil
+						}(),
+						Quality: quality,
 					}
 				}
 				var requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdTvoc *merakigosdk.RequestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdTvoc
@@ -1510,7 +1898,7 @@ func (r *NetworksSensorAlertsProfilesRs) toSdkApiRequestUpdate(ctx context.Conte
 // From gosdk to TF Structs Schema
 func ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(state NetworksSensorAlertsProfilesRs, response *merakigosdk.ResponseSensorGetNetworkSensorAlertsProfile, is_read bool) NetworksSensorAlertsProfilesRs {
 	itemState := NetworksSensorAlertsProfilesRs{
-		Conditions: func() *[]ResponseSensorGetNetworkSensorAlertsProfileConditionsRs {
+		ConditionsResponse: func() *[]ResponseSensorGetNetworkSensorAlertsProfileConditionsRs {
 			if response.Conditions != nil {
 				result := make([]ResponseSensorGetNetworkSensorAlertsProfileConditionsRs, len(*response.Conditions))
 				for i, conditions := range *response.Conditions {
@@ -1771,7 +2159,8 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(state NetworksSenso
 			}
 			return &ResponseSensorGetNetworkSensorAlertsProfileScheduleRs{}
 		}(),
-		Serials: StringSliceToSet(response.Serials),
+		Serials:    StringSliceToSet(response.Serials),
+		Conditions: state.Conditions,
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksSensorAlertsProfilesRs)

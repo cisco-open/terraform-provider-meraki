@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "0.2.3-alpha"
+      version = "0.2.4-alpha"
       source  = "hashicorp.com/edu/meraki"
       # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
@@ -23,16 +23,6 @@ resource "meraki_networks_appliance_firewall_l7_firewall_rules" "my_mx" {
       name = "Sports"
       id   = "meraki:layer7/category/5"
     }
-    },
-    {
-      policy     = "deny"
-      type       = "blockedCountries"
-      value_list = ["IT", "IL", "US"]
-    },
-    {
-      policy = "deny"
-      type   = "ipRange"
-      value  = "10.11.12.00/24"
     }
   ]
 }

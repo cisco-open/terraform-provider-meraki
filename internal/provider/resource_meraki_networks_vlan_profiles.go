@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
@@ -71,6 +72,9 @@ func (r *NetworksVLANProfilesResource) Schema(_ context.Context, _ resource.Sche
 			"is_default": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating the default VLAN Profile for any device that does not have a profile explicitly assigned`,
 				Computed:            true,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `Name of the profile, string length must be from 1 to 255 characters`,
@@ -448,10 +452,9 @@ func (r *NetworksVLANProfilesRs) toSdkApiRequestUpdate(ctx context.Context) *mer
 	out := merakigosdk.RequestNetworksUpdateNetworkVLANProfile{
 		Name: *name,
 		VLANGroups: func() *[]merakigosdk.RequestNetworksUpdateNetworkVLANProfileVLANGroups {
-			if len(requestNetworksUpdateNetworkVLANProfileVLANGroups) > 0 {
-				return &requestNetworksUpdateNetworkVLANProfileVLANGroups
-			}
-			return nil
+
+			return &requestNetworksUpdateNetworkVLANProfileVLANGroups
+
 		}(),
 		VLANNames: func() *[]merakigosdk.RequestNetworksUpdateNetworkVLANProfileVLANNames {
 			if len(requestNetworksUpdateNetworkVLANProfileVLANNames) > 0 {

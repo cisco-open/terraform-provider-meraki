@@ -339,10 +339,9 @@ func (r *NetworksApplianceFirewallPortForwardingRulesRs) toSdkApiRequestUpdate(c
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallPortForwardingRules{
 		Rules: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallPortForwardingRulesRules {
-			if len(requestApplianceUpdateNetworkApplianceFirewallPortForwardingRulesRules) > 0 {
-				return &requestApplianceUpdateNetworkApplianceFirewallPortForwardingRulesRules
-			}
-			return nil
+
+			return &requestApplianceUpdateNetworkApplianceFirewallPortForwardingRulesRules
+
 		}(),
 	}
 	return &out

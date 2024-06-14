@@ -1,3 +1,16 @@
+## 0.2.4-alpha (June 13, 2024)
+BUGFIXES:
+* Resource meraki_networks_sensor_alerts_profiles error with operation CreateNetworkSensorAlertsProfile #31.
+* resource meraki_networks_vlan_profiles causes error when attempting to create #73.
+* resource meraki_networks_webhooks_http_servers marked as tainted and results in an error after creating #72.
+* resource meraki_networks_alerts_settings causes a panic on create when muting is set #71.
+* resource meraki_networks_alerts_settings causes a panic when attempting to import #70.
+* resource meraki_networks_wireless_ssids this_ssid - 8021x-radius auth tfprotov6 plug crashing on apply #64.
+* resource meraki_networks_appliance_firewall_one_to_many_nat_rules this - failure on apply with empty ruleset to ensure no rules applied. #63
+* resource meraki_networks_appliance_firewall_inbound_firewall_rules this - Error out due to default rule not meshing with configured rule block. #62
+* Resource meraki_networks_sensor_alerts_profiles error with operation CreateNetworkSensorAlertsProfile #31.
+* meraki_networks_wireless_ssids_firewall_l3_firewall_rules rule attribute #28.
+
 ## 0.2.3-alpha (May 31, 2024)
 BUGFIXES:
 * Removing unnecessary attributes from `meraki_devices_appliance_vmx_authentication`.

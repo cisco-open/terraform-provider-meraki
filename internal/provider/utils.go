@@ -547,20 +547,27 @@ func merge(ctx context.Context, req resource.UpdateRequest, resp *resource.Updat
 
 func dereferencePtr(v reflect.Value) reflect.Value {
 	if v.Kind() == reflect.Ptr {
+		log.Printf("Dereference")
 		return v.Elem()
 	}
+	log.Printf("Dereference NO")
 	return v
 }
 
 func replaceUnknownFields(data interface{}) interface{} {
 	val := reflect.ValueOf(data)
-
+	// log.Printf("Name: %v", val.Type().Name())
+	// log.Printf("val: %v", val.Interface())
+	// log.Printf("val: %v", val.Interface())
+	// log.Printf("val: %v", val.IsValid())
+	// log.Printf("val: %v", val.IsValid())
+	// log.Printf("val: %v", val.Kind())
 	if val.Kind() != reflect.Ptr || val.IsNil() {
 		fmt.Println("Esperaba un puntero no nulo.")
 		return nil
 	}
 
-	val = val.Elem()
+	val = dereferencePtr(val)
 
 	if val.Kind() != reflect.Slice {
 		fmt.Println("Esperaba un slice.")
@@ -657,6 +664,7 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 		// log.Printf("ValueB: %v", valueB.Field(i).Interface())
 		// log.Printf("ValueA: %v", valueA.Field(i).IsValid())
 		// log.Printf("ValueB: %v", valueB.Field(i).IsValid())
+		// log.Printf("ValueB: %v", valueB.Field(i).Kind())
 
 		// log.Printf("fieldA: %v", fieldA.IsValid())
 		// log.Printf("fieldB: %v", fieldB.IsValid())
@@ -666,7 +674,7 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 
 		// Check if both fields are valid before proceeding
 		if fieldA.IsValid() && fieldB.IsValid() {
-			if fieldA.Kind() == reflect.Slice && fieldB.Kind() == reflect.Slice {
+			if fieldA.Kind() == reflect.Slice && fieldB.Kind() == reflect.Slice && valueA.Field(i).Kind() == reflect.Slice && valueB.Field(i).Kind() == reflect.Slice {
 				log.Printf("IF Slice:")
 				// Si ambos campos son slices, mezclarlos recursivamente
 				if field := replaceUnknownFields(valueA.Field(i)); field != nil {
@@ -683,7 +691,9 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 			} else {
 				if fmt.Sprint(fieldA.Interface()) == "<unknown>" || fmt.Sprint(fieldA.Interface()) == "<nil>" || fmt.Sprint(fieldA.Interface()) == "<null>" {
 					log.Printf("IF unkown:")
-					resultStruct.Field(i).Set(valueB.Field(i))
+					if fmt.Sprint(fieldB.Interface()) != "<unknown>" {
+						resultStruct.Field(i).Set(valueB.Field(i))
+					}
 				} else {
 					if valueA.Field(i).Type() != reflect.TypeOf(types.String{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Bool{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Int64{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Float64{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Set{}) {
 						// log.Printf("IF Struct:")
@@ -695,7 +705,7 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 						mergedValues := changeStructUnknowns(fieldA.Interface(), fieldB.Interface())
 						// log.Printf(" Sali 2")
 						// log.Printf(" ssss %v", PrintKeyValue(mergedValues))
-						fieldValueBPtr := reflect.New(fieldB.Type())
+						fieldValueBPtr := reflect.New(fieldA.Type())
 						fieldValueBPtr.Elem().Set(reflect.ValueOf(mergedValues))
 						resultStruct.Field(i).Set(fieldValueBPtr)
 					} else {
@@ -757,9 +767,11 @@ func changeStructUnknowns(a interface{}, b interface{}) interface{} {
 	// }
 	// log.Printf("Entre: ")
 	if valueA.Kind() == reflect.Ptr {
+		log.Printf("valueA.Kind() == reflect.Ptr")
 		valueA = valueA.Elem()
 	}
 	if valueB.Kind() == reflect.Ptr {
+		log.Printf("valueB.Kind() == reflect.Ptr")
 		valueB = valueB.Elem()
 	}
 
@@ -793,8 +805,18 @@ func changeStructUnknowns(a interface{}, b interface{}) interface{} {
 		// log.Printf("Entre 2: ")
 		fieldValueA := valueA.Field(i)
 		// log.Printf("Entre 2: fieldValueA %s", fieldValueA.Interface())
-		fieldValueB := valueB.Field(i)
-		// log.Printf("Entre 2: fieldValueB %s", fieldValueB.Interface())
+		// log.Printf("Entre 2: fieldValueA %s", fieldValueA.Kind())
+		// log.Printf("Entre 2: fieldValueB %v", valueB.IsValid())
+		// log.Printf("Entre 2: fieldValueB %v", valueB.Field(i).Kind())
+
+		var fieldValueB reflect.Value
+
+		if valueB.IsValid() {
+			fieldValueB = valueB.Field(i)
+		} else {
+			fieldValueB = valueA.Field(i)
+		}
+
 		fieldValueA = dereferencePtr(fieldValueA)
 		fieldValueB = dereferencePtr(fieldValueB)
 		if !fieldValueA.IsValid() {
@@ -809,8 +831,13 @@ func changeStructUnknowns(a interface{}, b interface{}) interface{} {
 		fieldName := valueA.Type().Field(i).Name
 		log.Printf("Entre 2: fieldName %s", fieldName)
 		if fmt.Sprint(fieldValueA.Interface()) == "<unknown>" {
-			log.Printf("Assigned %v to field %v\n", fieldValueB.Interface(), fieldName)
-			resultStruct.Field(i).Set(fieldValueB)
+			if fmt.Sprint(fieldValueB.Interface()) != "<unknown>" {
+				log.Printf("fieldValueB %t", fmt.Sprint(fieldValueB.Interface()) == "<unknown>")
+				log.Printf("Assigned %v to field %v\n", fieldValueB.Interface(), fieldName)
+				resultStruct.Field(i).Set(fieldValueB)
+			} else {
+				log.Printf("Not Assigned")
+			}
 		} else {
 			if valueA.Field(i).Type() != reflect.TypeOf(types.String{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Bool{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Int64{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Float64{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Set{}) {
 				log.Printf("Entre 3 %v to field %v\n", fieldValueB.Interface(), fieldName)
@@ -823,7 +850,7 @@ func changeStructUnknowns(a interface{}, b interface{}) interface{} {
 					log.Printf("Both null")
 				}
 			} else {
-				log.Printf("Assigned %v to field %v\n", fieldValueA.Interface(), fieldName)
+				log.Printf("2. Assigned %v to field %v\n", fieldValueA.Interface(), fieldName)
 				resultStruct.Field(i).Set(fieldValueA)
 			}
 		}

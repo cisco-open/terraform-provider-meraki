@@ -193,63 +193,64 @@ func (r *NetworksVLANProfilesResource) Create(ctx context.Context, req resource.
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	vvIname := data.Iname.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkVLANProfile(vvNetworkID, vvIname)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksVLANProfiles only have update context, not create.",
-			err.Error(),
-		)
-		return
+	vvName := data.Iname.ValueString()
+	//Items
+	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkVLANProfile(vvNetworkID, vvName)
+	//Have Create
+	if err != nil || restyResp1 == nil {
+		if restyResp1.StatusCode() != 404 {
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkVLANProfiles",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksVLANProfiles only have update context, not create.",
-			err.Error(),
-		)
+	if responseVerifyItem != nil {
+
+		data = ResponseNetworksGetNetworkVLANProfileItemToBodyRs(data, responseVerifyItem, false)
+		// Path params update assigned
+		resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 		return
+
 	}
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	response, restyResp2, err := r.client.Networks.UpdateNetworkVLANProfile(vvNetworkID, vvIname, dataRequest)
+	dataRequest := data.toSdkApiRequestCreate(ctx)
+	response, restyResp2, err := r.client.Networks.CreateNetworkVLANProfile(vvNetworkID, dataRequest)
 
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
-				"Failure when executing UpdateNetworkVLANProfile",
+				"Failure when executing CreateNetworkVLANProfile",
 				err.Error(),
 			)
 			return
 		}
 		resp.Diagnostics.AddError(
-			"Failure when executing UpdateNetworkVLANProfile",
+			"Failure when executing CreateNetworkVLANProfile",
 			err.Error(),
 		)
 		return
 	}
-	//Item
-	responseGet, restyResp1, err := r.client.Networks.GetNetworkVLANProfile(vvNetworkID, vvIname)
-	// Has item and not has items
+	//Items
+	responseGet, restyResp1, err := r.client.Networks.GetNetworkVLANProfile(vvNetworkID, vvName)
+	// Has item and has items
+
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkVLANProfile",
+				"Failure when executing GetNetworkVLANProfiles",
 				err.Error(),
 			)
 			return
 		}
 		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkVLANProfile",
+			"Failure when executing GetNetworkVLANProfiles",
 			err.Error(),
 		)
 		return
 	}
-	//entro aqui 2
 	data = ResponseNetworksGetNetworkVLANProfileItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *NetworksVLANProfilesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -459,6 +460,63 @@ func (r *NetworksVLANProfilesRs) toSdkApiRequestUpdate(ctx context.Context) *mer
 		VLANNames: func() *[]merakigosdk.RequestNetworksUpdateNetworkVLANProfileVLANNames {
 			if len(requestNetworksUpdateNetworkVLANProfileVLANNames) > 0 {
 				return &requestNetworksUpdateNetworkVLANProfileVLANNames
+			}
+			return nil
+		}(),
+	}
+	return &out
+}
+func (r *NetworksVLANProfilesRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestNetworksCreateNetworkVLANProfile {
+	emptyString := ""
+	iname := new(string)
+	if !r.Iname.IsUnknown() && !r.Iname.IsNull() {
+		*iname = r.Iname.ValueString()
+	} else {
+		iname = &emptyString
+	}
+	name := new(string)
+	if !r.Name.IsUnknown() && !r.Name.IsNull() {
+		*name = r.Name.ValueString()
+	} else {
+		name = &emptyString
+	}
+	var requestNetworksCreateNetworkVLANProfileVLANGroups []merakigosdk.RequestNetworksCreateNetworkVLANProfileVLANGroups
+	if r.VLANGroups != nil {
+		for _, rItem1 := range *r.VLANGroups {
+			name := rItem1.Name.ValueString()
+			vLANIDs := rItem1.VLANIDs.ValueString()
+			requestNetworksCreateNetworkVLANProfileVLANGroups = append(requestNetworksCreateNetworkVLANProfileVLANGroups, merakigosdk.RequestNetworksCreateNetworkVLANProfileVLANGroups{
+				Name:    name,
+				VLANIDs: vLANIDs,
+			})
+		}
+	}
+	var requestNetworksCreateNetworkVLANProfileVLANNames []merakigosdk.RequestNetworksCreateNetworkVLANProfileVLANNames
+	if r.VLANNames != nil {
+		for _, rItem1 := range *r.VLANNames {
+			var requestNetworksCreateNetworkVLANProfileVLANNamesAdaptivePolicyGroup *merakigosdk.RequestNetworksCreateNetworkVLANProfileVLANNamesAdaptivePolicyGroup
+			if rItem1.AdaptivePolicyGroup != nil {
+				iD := rItem1.AdaptivePolicyGroup.ID.ValueString()
+				requestNetworksCreateNetworkVLANProfileVLANNamesAdaptivePolicyGroup = &merakigosdk.RequestNetworksCreateNetworkVLANProfileVLANNamesAdaptivePolicyGroup{
+					ID: iD,
+				}
+			}
+			name := rItem1.Name.ValueString()
+			vLANID := rItem1.VLANID.ValueString()
+			requestNetworksCreateNetworkVLANProfileVLANNames = append(requestNetworksCreateNetworkVLANProfileVLANNames, merakigosdk.RequestNetworksCreateNetworkVLANProfileVLANNames{
+				AdaptivePolicyGroup: requestNetworksCreateNetworkVLANProfileVLANNamesAdaptivePolicyGroup,
+				Name:                name,
+				VLANID:              vLANID,
+			})
+		}
+	}
+	out := merakigosdk.RequestNetworksCreateNetworkVLANProfile{
+		Iname:      *iname,
+		Name:       *name,
+		VLANGroups: &requestNetworksCreateNetworkVLANProfileVLANGroups,
+		VLANNames: func() *[]merakigosdk.RequestNetworksCreateNetworkVLANProfileVLANNames {
+			if len(requestNetworksCreateNetworkVLANProfileVLANNames) > 0 {
+				return &requestNetworksCreateNetworkVLANProfileVLANNames
 			}
 			return nil
 		}(),

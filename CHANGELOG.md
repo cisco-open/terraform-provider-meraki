@@ -1,3 +1,12 @@
+## 0.2.5-alpha (June 28, 2024)
+BUGFIXES:
+* resource meraki_networks_appliance_firewall_l3_firewall_rules this_rule - rules issues for empty ruleset and syslog_default_rule #76.
+* resource meraki_networks_appliance_firewall_l7_firewall_rules this_rule - fails to apply with empty ruleset #79.
+* error when attempting to import vlan into resource meraki_networks_appliance_vlans this_vlan #81.
+* resource meraki_organizations_appliance_vpn_third_party_vpnpeers fails to create #80.
+* error on meraki_networks_appliance_content_filtering │ Path: blocked_url_categories_rs #82.
+* resource meraki_networks_vlan_profiles causes error when attempting to create #73.
+
 ## 0.2.4-alpha (June 13, 2024)
 BUGFIXES:
 * Resource meraki_networks_sensor_alerts_profiles error with operation CreateNetworkSensorAlertsProfile #31.

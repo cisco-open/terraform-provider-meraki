@@ -8,10 +8,13 @@ terraform {
   }
 }
 
-resource "meraki_networks_devices_remove" "example" {
-
-  network_id = "L_828099381482771185"
-  parameters = {
-    serial = "QBSA-D8CD-5LR6"
-  }
+provider "meraki" {
+  meraki_debug = "true"
 }
+
+resource "meraki_networks_appliance_firewall_l3_firewall_rules" "this" {
+  network_id = "L_828099381482771185"
+  rules = []
+  syslog_default_rule = true
+}
+

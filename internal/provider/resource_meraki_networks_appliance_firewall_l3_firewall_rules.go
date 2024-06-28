@@ -446,8 +446,10 @@ func (r *NetworksApplianceFirewallL3FirewallRulesRs) toSdkApiRequestUpdate(ctx c
 		Rules: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules {
 			if len(requestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules) > 0 {
 				return &requestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules
+			} else {
+				rules := make([]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules, 0)
+				return &rules
 			}
-			return nil
 		}(),
 		SyslogDefaultRule: syslogDefaultRule,
 	}
@@ -481,6 +483,7 @@ func ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesItemToBodyRs(sta
 			}
 			return &[]ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesRulesRs{}
 		}(),
+		SyslogDefaultRule: state.SyslogDefaultRule,
 	}
 	itemState.Rules = state.Rules
 	if is_read {

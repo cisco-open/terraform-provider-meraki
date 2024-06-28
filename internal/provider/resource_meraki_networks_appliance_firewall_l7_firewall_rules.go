@@ -442,8 +442,10 @@ func (r *NetworksApplianceFirewallL7FirewallRulesRs) toSdkApiRequestUpdate(ctx c
 		Rules: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRules {
 			if len(requestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRules) > 0 {
 				return &requestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRules
+			} else {
+				rules := make([]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRules, 0)
+				return &rules
 			}
-			return nil
 		}(),
 	}
 	return &out

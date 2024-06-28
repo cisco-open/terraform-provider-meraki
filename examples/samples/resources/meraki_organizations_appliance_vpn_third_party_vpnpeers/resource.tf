@@ -1,8 +1,22 @@
+terraform {
+  required_providers {
+    meraki = {
+      version = "0.2.5-alpha"
+      source  = "hashicorp.com/edu/meraki"
+      # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
+    }
+  }
+}
+
+provider "meraki" {
+  meraki_debug = "true"
+}
 
 resource "meraki_organizations_appliance_vpn_third_party_vpnpeers" "example" {
 
-  organization_id = "string"
-  peers = [{
+  organization_id = "828099381482762270"
+  peers = [
+    {
 
     ike_version = "2"
     ipsec_policies = {
@@ -25,7 +39,8 @@ resource "meraki_organizations_appliance_vpn_third_party_vpnpeers" "example" {
     public_ip             = "123.123.123.1"
     remote_id             = "miles@meraki.com"
     secret                = "Sample Password"
-  },{
+  },
+    {
 
     ike_version = "2"
     ipsec_policies = {
@@ -42,13 +57,13 @@ resource "meraki_organizations_appliance_vpn_third_party_vpnpeers" "example" {
     }
     ipsec_policies_preset = "default"
     local_id              = "myMXId@meraki.com"
-    name                  = "Peer Name 2 2"
+    name                  = "Peer Name 2"
     network_tags          = ["none"]
     private_subnets       = ["192.168.1.0/24", "192.168.128.0/24"]
     public_ip             = "123.123.123.1"
     remote_id             = "miles@meraki.com"
     secret                = "Sample Password"
-  },
+  }
   ]
 }
 

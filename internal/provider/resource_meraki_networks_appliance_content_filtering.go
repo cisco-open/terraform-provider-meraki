@@ -57,7 +57,7 @@ func (r *NetworksApplianceContentFilteringResource) Schema(_ context.Context, _ 
 
 				ElementType: types.StringType,
 			},
-			"blocked_url_categories": schema.SetNestedAttribute{
+			"blocked_url_categories_response": schema.SetNestedAttribute{
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
@@ -80,9 +80,8 @@ func (r *NetworksApplianceContentFilteringResource) Schema(_ context.Context, _ 
 					},
 				},
 			},
-			"blocked_url_categories_rs": schema.SetAttribute{
+			"blocked_url_categories": schema.SetAttribute{
 				MarkdownDescription: `A list of URL categories to block`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
@@ -109,7 +108,6 @@ func (r *NetworksApplianceContentFilteringResource) Schema(_ context.Context, _ 
 			},
 			"url_category_list_size": schema.StringAttribute{
 				MarkdownDescription: `URL category list size which is either 'topSites' or 'fullList'`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -301,8 +299,8 @@ func (r *NetworksApplianceContentFilteringResource) Delete(ctx context.Context, 
 type NetworksApplianceContentFilteringRs struct {
 	NetworkID              types.String                                                                  `tfsdk:"network_id"`
 	AllowedURLPatterns     types.Set                                                                     `tfsdk:"allowed_url_patterns"`
-	BlockedURLCategories   *[]ResponseApplianceGetNetworkApplianceContentFilteringBlockedUrlCategoriesRs `tfsdk:"blocked_url_categories"`
-	BlockedURLCategoriesRs types.Set                                                                     `tfsdk:"blocked_url_categories_rs"`
+	BlockedURLCategories   *[]ResponseApplianceGetNetworkApplianceContentFilteringBlockedUrlCategoriesRs `tfsdk:"blocked_url_categories_response"`
+	BlockedURLCategoriesRs types.Set                                                                     `tfsdk:"blocked_url_categories"`
 	BlockedURLPatterns     types.Set                                                                     `tfsdk:"blocked_url_patterns"`
 	URLCategoryListSize    types.String                                                                  `tfsdk:"url_category_list_size"`
 }
@@ -353,8 +351,10 @@ func ResponseApplianceGetNetworkApplianceContentFilteringItemToBodyRs(state Netw
 			}
 			return &[]ResponseApplianceGetNetworkApplianceContentFilteringBlockedUrlCategoriesRs{}
 		}(),
-		BlockedURLPatterns:  StringSliceToSet(response.BlockedURLPatterns),
-		URLCategoryListSize: types.StringValue(response.URLCategoryListSize),
+		BlockedURLPatterns: StringSliceToSet(response.BlockedURLPatterns),
+		// URLCategoryListSize:    types.StringValue(response.URLCategoryListSize),
+		BlockedURLCategoriesRs: state.BlockedURLCategoriesRs,
+		URLCategoryListSize:    state.URLCategoryListSize,
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksApplianceContentFilteringRs)

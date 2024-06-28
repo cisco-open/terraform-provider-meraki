@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -55,7 +56,6 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 			},
 			"peers": schema.SetNestedAttribute{
 				MarkdownDescription: `The list of VPN peers`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
@@ -65,7 +65,6 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 
 						"ike_version": schema.StringAttribute{
 							MarkdownDescription: `[optional] The IKE version to be used for the IPsec VPN peer configuration. Defaults to '1' when omitted.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -79,7 +78,6 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 						},
 						"ipsec_policies": schema.SingleNestedAttribute{
 							MarkdownDescription: `Custom IPSec policies for the VPN peer. If not included and a preset has not been chosen, the default preset for IPSec policies will be used.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Object{
 								objectplanmodifier.UseStateForUnknown(),
@@ -88,27 +86,20 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 
 								"child_auth_algo": schema.SetAttribute{
 									MarkdownDescription: `This is the authentication algorithms to be used in Phase 2. The value should be an array with one of the following algorithms: 'sha256', 'sha1', 'md5'`,
-									Computed:            true,
 									Optional:            true,
-									PlanModifiers: []planmodifier.Set{
-										setplanmodifier.UseStateForUnknown(),
-									},
-
-									ElementType: types.StringType,
+									Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
+									ElementType:         types.StringType,
+									Computed:            true,
 								},
 								"child_cipher_algo": schema.SetAttribute{
 									MarkdownDescription: `This is the cipher algorithms to be used in Phase 2. The value should be an array with one or more of the following algorithms: 'aes256', 'aes192', 'aes128', 'tripledes', 'des', 'null'`,
-									Computed:            true,
 									Optional:            true,
-									PlanModifiers: []planmodifier.Set{
-										setplanmodifier.UseStateForUnknown(),
-									},
-
-									ElementType: types.StringType,
+									Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
+									ElementType:         types.StringType,
+									Computed:            true,
 								},
 								"child_lifetime": schema.Int64Attribute{
 									MarkdownDescription: `The lifetime of the Phase 2 SA in seconds.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Int64{
 										int64planmodifier.UseStateForUnknown(),
@@ -116,47 +107,34 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 								},
 								"child_pfs_group": schema.SetAttribute{
 									MarkdownDescription: `This is the Diffie-Hellman group to be used for Perfect Forward Secrecy in Phase 2. The value should be an array with one of the following values: 'disabled','group14', 'group5', 'group2', 'group1'`,
-									Computed:            true,
 									Optional:            true,
-									PlanModifiers: []planmodifier.Set{
-										setplanmodifier.UseStateForUnknown(),
-									},
-
-									ElementType: types.StringType,
+									Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
+									ElementType:         types.StringType,
+									Computed:            true,
 								},
 								"ike_auth_algo": schema.SetAttribute{
 									MarkdownDescription: `This is the authentication algorithm to be used in Phase 1. The value should be an array with one of the following algorithms: 'sha256', 'sha1', 'md5'`,
-									Computed:            true,
 									Optional:            true,
-									PlanModifiers: []planmodifier.Set{
-										setplanmodifier.UseStateForUnknown(),
-									},
-
-									ElementType: types.StringType,
+									Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
+									ElementType:         types.StringType,
+									Computed:            true,
 								},
 								"ike_cipher_algo": schema.SetAttribute{
 									MarkdownDescription: `This is the cipher algorithm to be used in Phase 1. The value should be an array with one of the following algorithms: 'aes256', 'aes192', 'aes128', 'tripledes', 'des'`,
-									Computed:            true,
 									Optional:            true,
-									PlanModifiers: []planmodifier.Set{
-										setplanmodifier.UseStateForUnknown(),
-									},
-
-									ElementType: types.StringType,
+									Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
+									ElementType:         types.StringType,
+									Computed:            true,
 								},
 								"ike_diffie_hellman_group": schema.SetAttribute{
 									MarkdownDescription: `This is the Diffie-Hellman group to be used in Phase 1. The value should be an array with one of the following algorithms: 'group14', 'group5', 'group2', 'group1'`,
-									Computed:            true,
 									Optional:            true,
-									PlanModifiers: []planmodifier.Set{
-										setplanmodifier.UseStateForUnknown(),
-									},
-
-									ElementType: types.StringType,
+									Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
+									ElementType:         types.StringType,
+									Computed:            true,
 								},
 								"ike_lifetime": schema.Int64Attribute{
 									MarkdownDescription: `The lifetime of the Phase 1 SA in seconds.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Int64{
 										int64planmodifier.UseStateForUnknown(),
@@ -164,19 +142,15 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 								},
 								"ike_prf_algo": schema.SetAttribute{
 									MarkdownDescription: `[optional] This is the pseudo-random function to be used in IKE_SA. The value should be an array with one of the following algorithms: 'prfsha256', 'prfsha1', 'prfmd5', 'default'. The 'default' option can be used to default to the Authentication algorithm.`,
-									Computed:            true,
 									Optional:            true,
-									PlanModifiers: []planmodifier.Set{
-										setplanmodifier.UseStateForUnknown(),
-									},
-
-									ElementType: types.StringType,
+									Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
+									ElementType:         types.StringType,
+									Computed:            true,
 								},
 							},
 						},
 						"ipsec_policies_preset": schema.StringAttribute{
 							MarkdownDescription: `One of the following available presets: 'default', 'aws', 'azure'. If this is provided, the 'ipsecPolicies' parameter is ignored.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -184,7 +158,6 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 						},
 						"local_id": schema.StringAttribute{
 							MarkdownDescription: `[optional] The local ID is used to identify the MX to the peer. This will apply to all MXs this peer applies to.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -192,7 +165,6 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 						},
 						"name": schema.StringAttribute{
 							MarkdownDescription: `The name of the VPN peer`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -200,7 +172,6 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 						},
 						"network_tags": schema.SetAttribute{
 							MarkdownDescription: `A list of network tags that will connect with this peer. Use ['all'] for all networks. Use ['none'] for no networks. If not included, the default is ['all'].`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Set{
 								setplanmodifier.UseStateForUnknown(),
@@ -210,7 +181,6 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 						},
 						"private_subnets": schema.SetAttribute{
 							MarkdownDescription: `The list of the private subnets of the VPN peer`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Set{
 								setplanmodifier.UseStateForUnknown(),
@@ -220,7 +190,6 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 						},
 						"public_ip": schema.StringAttribute{
 							MarkdownDescription: `[optional] The public IP of the VPN peer`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -228,7 +197,6 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 						},
 						"remote_id": schema.StringAttribute{
 							MarkdownDescription: `[optional] The remote ID is used to identify the connecting VPN peer. This can either be a valid IPv4 Address, FQDN or User FQDN.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -236,8 +204,165 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 						},
 						"secret": schema.StringAttribute{
 							MarkdownDescription: `The shared secret with the VPN peer`,
-							Computed:            true,
 							Optional:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+					},
+				},
+			},
+			"peers_response": schema.SetNestedAttribute{
+				MarkdownDescription: `The list of VPN peers`,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+
+						"ike_version": schema.StringAttribute{
+							MarkdownDescription: `[optional] The IKE version to be used for the IPsec VPN peer configuration. Defaults to '1' when omitted.`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"1",
+									"2",
+								),
+							},
+						},
+						"ipsec_policies": schema.SingleNestedAttribute{
+							MarkdownDescription: `Custom IPSec policies for the VPN peer. If not included and a preset has not been chosen, the default preset for IPSec policies will be used.`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.UseStateForUnknown(),
+							},
+							Attributes: map[string]schema.Attribute{
+
+								"child_auth_algo": schema.SetAttribute{
+									MarkdownDescription: `This is the authentication algorithms to be used in Phase 2. The value should be an array with one of the following algorithms: 'sha256', 'sha1', 'md5'`,
+									Computed:            true,
+									Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
+
+									ElementType: types.StringType,
+								},
+								"child_cipher_algo": schema.SetAttribute{
+									MarkdownDescription: `This is the cipher algorithms to be used in Phase 2. The value should be an array with one or more of the following algorithms: 'aes256', 'aes192', 'aes128', 'tripledes', 'des', 'null'`,
+									Computed:            true,
+									Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
+
+									ElementType: types.StringType,
+								},
+								"child_lifetime": schema.Int64Attribute{
+									MarkdownDescription: `The lifetime of the Phase 2 SA in seconds.`,
+									Computed:            true,
+									PlanModifiers: []planmodifier.Int64{
+										int64planmodifier.UseStateForUnknown(),
+									},
+								},
+								"child_pfs_group": schema.SetAttribute{
+									MarkdownDescription: `This is the Diffie-Hellman group to be used for Perfect Forward Secrecy in Phase 2. The value should be an array with one of the following values: 'disabled','group14', 'group5', 'group2', 'group1'`,
+									Computed:            true,
+									Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
+
+									ElementType: types.StringType,
+								},
+								"ike_auth_algo": schema.SetAttribute{
+									MarkdownDescription: `This is the authentication algorithm to be used in Phase 1. The value should be an array with one of the following algorithms: 'sha256', 'sha1', 'md5'`,
+									Computed:            true,
+									Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
+
+									ElementType: types.StringType,
+								},
+								"ike_cipher_algo": schema.SetAttribute{
+									MarkdownDescription: `This is the cipher algorithm to be used in Phase 1. The value should be an array with one of the following algorithms: 'aes256', 'aes192', 'aes128', 'tripledes', 'des'`,
+									Computed:            true,
+									Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
+
+									ElementType: types.StringType,
+								},
+								"ike_diffie_hellman_group": schema.SetAttribute{
+									MarkdownDescription: `This is the Diffie-Hellman group to be used in Phase 1. The value should be an array with one of the following algorithms: 'group14', 'group5', 'group2', 'group1'`,
+									Computed:            true,
+									Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
+
+									ElementType: types.StringType,
+								},
+								"ike_lifetime": schema.Int64Attribute{
+									MarkdownDescription: `The lifetime of the Phase 1 SA in seconds.`,
+									Computed:            true,
+									PlanModifiers: []planmodifier.Int64{
+										int64planmodifier.UseStateForUnknown(),
+									},
+								},
+								"ike_prf_algo": schema.SetAttribute{
+									MarkdownDescription: `[optional] This is the pseudo-random function to be used in IKE_SA. The value should be an array with one of the following algorithms: 'prfsha256', 'prfsha1', 'prfmd5', 'default'. The 'default' option can be used to default to the Authentication algorithm.`,
+									Computed:            true,
+									Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
+
+									ElementType: types.StringType,
+								},
+							},
+						},
+						"ipsec_policies_preset": schema.StringAttribute{
+							MarkdownDescription: `One of the following available presets: 'default', 'aws', 'azure'. If this is provided, the 'ipsecPolicies' parameter is ignored.`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"local_id": schema.StringAttribute{
+							MarkdownDescription: `[optional] The local ID is used to identify the MX to the peer. This will apply to all MXs this peer applies to.`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"name": schema.StringAttribute{
+							MarkdownDescription: `The name of the VPN peer`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"network_tags": schema.SetAttribute{
+							MarkdownDescription: `A list of network tags that will connect with this peer. Use ['all'] for all networks. Use ['none'] for no networks. If not included, the default is ['all'].`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.Set{
+								setplanmodifier.UseStateForUnknown(),
+							},
+
+							ElementType: types.StringType,
+						},
+						"private_subnets": schema.SetAttribute{
+							MarkdownDescription: `The list of the private subnets of the VPN peer`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.Set{
+								setplanmodifier.UseStateForUnknown(),
+							},
+
+							ElementType: types.StringType,
+						},
+						"public_ip": schema.StringAttribute{
+							MarkdownDescription: `[optional] The public IP of the VPN peer`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"remote_id": schema.StringAttribute{
+							MarkdownDescription: `[optional] The remote ID is used to identify the connecting VPN peer. This can either be a valid IPv4 Address, FQDN or User FQDN.`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"secret": schema.StringAttribute{
+							MarkdownDescription: `The shared secret with the VPN peer`,
+							Computed:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -286,8 +411,8 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Create(ctx context
 		)
 		return
 	}
-	// dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Appliance.UpdateOrganizationApplianceVpnThirdPartyVpnpeers(vvOrganizationID)
+	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	restyResp2, err := r.client.Appliance.UpdateOrganizationApplianceVpnThirdPartyVpnpeers(vvOrganizationID, dataRequest)
 
 	if err != nil || restyResp2 == nil {
 		if restyResp1 != nil {
@@ -394,8 +519,8 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Update(ctx context
 
 	//Path Params
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Appliance.UpdateOrganizationApplianceVpnThirdPartyVpnpeers(vvOrganizationID)
+	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	restyResp2, err := r.client.Appliance.UpdateOrganizationApplianceVpnThirdPartyVpnpeers(vvOrganizationID, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
@@ -425,6 +550,7 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Delete(ctx context
 type OrganizationsApplianceVpnThirdPartyVpnpeersRs struct {
 	OrganizationID types.String                                                             `tfsdk:"organization_id"`
 	Peers          *[]ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersPeersRs `tfsdk:"peers"`
+	PeersResponse  *[]ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersPeersRs `tfsdk:"peers_response"`
 }
 
 type ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersPeersRs struct {
@@ -461,10 +587,8 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersRs) toSdkApiRequestUpdate(ct
 			var requestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeersPeersIPsecPolicies *merakigosdk.RequestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeersPeersIPsecPolicies
 			if rItem1.IPsecPolicies != nil {
 				var childAuthAlgo []string = nil
-				//Hoola aqui
 				rItem1.IPsecPolicies.ChildAuthAlgo.ElementsAs(ctx, &childAuthAlgo, false)
 				var childCipherAlgo []string = nil
-				//Hoola aqui
 				rItem1.IPsecPolicies.ChildCipherAlgo.ElementsAs(ctx, &childCipherAlgo, false)
 				childLifetime := func() *int64 {
 					if !rItem1.IPsecPolicies.ChildLifetime.IsUnknown() && !rItem1.IPsecPolicies.ChildLifetime.IsNull() {
@@ -473,16 +597,12 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersRs) toSdkApiRequestUpdate(ct
 					return nil
 				}()
 				var childPfsGroup []string = nil
-				//Hoola aqui
 				rItem1.IPsecPolicies.ChildPfsGroup.ElementsAs(ctx, &childPfsGroup, false)
 				var ikeAuthAlgo []string = nil
-				//Hoola aqui
 				rItem1.IPsecPolicies.IkeAuthAlgo.ElementsAs(ctx, &ikeAuthAlgo, false)
 				var ikeCipherAlgo []string = nil
-				//Hoola aqui
 				rItem1.IPsecPolicies.IkeCipherAlgo.ElementsAs(ctx, &ikeCipherAlgo, false)
 				var ikeDiffieHellmanGroup []string = nil
-				//Hoola aqui
 				rItem1.IPsecPolicies.IkeDiffieHellmanGroup.ElementsAs(ctx, &ikeDiffieHellmanGroup, false)
 				ikeLifetime := func() *int64 {
 					if !rItem1.IPsecPolicies.IkeLifetime.IsUnknown() && !rItem1.IPsecPolicies.IkeLifetime.IsNull() {
@@ -491,7 +611,6 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersRs) toSdkApiRequestUpdate(ct
 					return nil
 				}()
 				var ikePrfAlgo []string = nil
-				//Hoola aqui
 				rItem1.IPsecPolicies.IkePrfAlgo.ElementsAs(ctx, &ikePrfAlgo, false)
 				requestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeersPeersIPsecPolicies = &merakigosdk.RequestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeersPeersIPsecPolicies{
 					ChildAuthAlgo:         childAuthAlgo,
@@ -509,10 +628,8 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersRs) toSdkApiRequestUpdate(ct
 			localID := rItem1.LocalID.ValueString()
 			name := rItem1.Name.ValueString()
 			var networkTags []string = nil
-			//Hoola aqui
 			rItem1.NetworkTags.ElementsAs(ctx, &networkTags, false)
 			var privateSubnets []string = nil
-			//Hoola aqui
 			rItem1.PrivateSubnets.ElementsAs(ctx, &privateSubnets, false)
 			publicIP := rItem1.PublicIP.ValueString()
 			remoteID := rItem1.RemoteID.ValueString()
@@ -545,7 +662,7 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersRs) toSdkApiRequestUpdate(ct
 // From gosdk to TF Structs Schema
 func ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersItemToBodyRs(state OrganizationsApplianceVpnThirdPartyVpnpeersRs, response *merakigosdk.ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeers, is_read bool) OrganizationsApplianceVpnThirdPartyVpnpeersRs {
 	itemState := OrganizationsApplianceVpnThirdPartyVpnpeersRs{
-		Peers: func() *[]ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersPeersRs {
+		PeersResponse: func() *[]ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersPeersRs {
 			if response.Peers != nil {
 				result := make([]ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersPeersRs, len(*response.Peers))
 				for i, peers := range *response.Peers {
@@ -575,7 +692,7 @@ func ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersItemToBodyRs(
 									IkePrfAlgo: StringSliceToSet(peers.IPsecPolicies.IkePrfAlgo),
 								}
 							}
-							return &ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersPeersIpsecPoliciesRs{}
+							return nil
 						}(),
 						IPsecPoliciesPreset: types.StringValue(peers.IPsecPoliciesPreset),
 						LocalID:             types.StringValue(peers.LocalID),
@@ -591,6 +708,7 @@ func ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersItemToBodyRs(
 			}
 			return &[]ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersPeersRs{}
 		}(),
+		Peers: state.Peers,
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsApplianceVpnThirdPartyVpnpeersRs)

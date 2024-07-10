@@ -194,13 +194,15 @@ func (r *OrganizationsResource) Create(ctx context.Context, req resource.CreateR
 	//Items
 	responseVerifyItem, restyResp1, err := getAllItemsOrganizations(*r.client)
 	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizations",
-				err.Error(),
-			)
-			return
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetOrganizations",
+					err.Error(),
+				)
+				return
+			}
 		}
 	}
 	if responseVerifyItem != nil {

@@ -128,13 +128,15 @@ func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersResource) Crea
 	//Items
 	responseVerifyItem, restyResp1, err := getAllItemsNetworksSwitchDhcpServerPolicyArpInspectionTrustedServers(*r.client, vvNetworkID)
 	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServers",
-				err.Error(),
-			)
-			return
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServers",
+					err.Error(),
+				)
+				return
+			}
 		}
 	}
 	//TODO HAS ONLY ITEMS

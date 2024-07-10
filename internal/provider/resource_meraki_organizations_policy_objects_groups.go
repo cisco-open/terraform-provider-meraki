@@ -131,13 +131,15 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Create(ctx context.Context, r
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationPolicyObjects(vvOrganizationID, nil)
 	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizationPolicyObjectsGroups",
-				err.Error(),
-			)
-			return
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetOrganizationPolicyObjectsGroups",
+					err.Error(),
+				)
+				return
+			}
 		}
 	}
 	if responseVerifyItem != nil {

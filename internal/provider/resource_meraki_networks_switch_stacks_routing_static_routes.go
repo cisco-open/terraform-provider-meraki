@@ -134,13 +134,15 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Create(ctx context.Con
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchStackRoutingStaticRoutes(vvNetworkID, vvSwitchStackID)
 	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkSwitchStackRoutingStaticRoutes",
-				err.Error(),
-			)
-			return
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetNetworkSwitchStackRoutingStaticRoutes",
+					err.Error(),
+				)
+				return
+			}
 		}
 	}
 	if responseVerifyItem != nil {

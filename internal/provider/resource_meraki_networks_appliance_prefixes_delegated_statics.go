@@ -151,13 +151,15 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Create(ctx context.C
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkAppliancePrefixesDelegatedStatics(vvNetworkID)
 	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkAppliancePrefixesDelegatedStatics",
-				err.Error(),
-			)
-			return
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetNetworkAppliancePrefixesDelegatedStatics",
+					err.Error(),
+				)
+				return
+			}
 		}
 	}
 	if responseVerifyItem != nil {

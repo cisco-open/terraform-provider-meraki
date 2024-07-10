@@ -112,13 +112,15 @@ func (r *NetworksSmTargetGroupsResource) Create(ctx context.Context, req resourc
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Sm.GetNetworkSmTargetGroups(vvNetworkID, nil)
 	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkSmTargetGroups",
-				err.Error(),
-			)
-			return
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetNetworkSmTargetGroups",
+					err.Error(),
+				)
+				return
+			}
 		}
 	}
 	if responseVerifyItem != nil {

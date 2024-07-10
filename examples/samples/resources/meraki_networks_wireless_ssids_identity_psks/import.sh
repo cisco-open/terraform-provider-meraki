@@ -1,0 +1,1 @@
+terraform import meraki_networks_wireless_ssids_identity_psks.example "identity_psk_id,network_id,number"

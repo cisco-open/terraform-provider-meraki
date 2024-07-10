@@ -110,15 +110,17 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Create(ctx context
 	// name
 	responseVerifyItem, restyResp1, err := r.client.Camera.GetOrganizationCameraCustomAnalyticsArtifacts(vvOrganizationID)
 	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1 == nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing Get",
-				err.Error(),
-			)
-			return
-		}
-		if restyResp1.StatusCode() != 404 {
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1 == nil {
+				resp.Diagnostics.AddError(
+					"Failure when executing Get",
+					err.Error(),
+				)
+				return
+			}
+			if restyResp1.StatusCode() != 404 {
+			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationCameraCustomAnalyticsArtifacts",
 				err.Error(),

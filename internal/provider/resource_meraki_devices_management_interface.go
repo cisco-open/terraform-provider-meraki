@@ -254,15 +254,17 @@ func (r *DevicesManagementInterfaceResource) Create(ctx context.Context, req res
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Devices.GetDeviceManagementInterface(vvSerial)
 	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1 == nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing Get",
-				err.Error(),
-			)
-			return
-		}
-		if restyResp1.StatusCode() != 404 {
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1 == nil {
+				resp.Diagnostics.AddError(
+					"Failure when executing Get",
+					err.Error(),
+				)
+				return
+			}
+			if restyResp1.StatusCode() != 404 {
+			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceManagementInterface",
 				err.Error(),

@@ -109,13 +109,15 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchStacks(vvNetworkID)
 	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkSwitchStacks",
-				err.Error(),
-			)
-			return
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetNetworkSwitchStacks",
+					err.Error(),
+				)
+				return
+			}
 		}
 	}
 	if responseVerifyItem != nil {

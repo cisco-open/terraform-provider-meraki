@@ -244,13 +244,15 @@ func (r *OrganizationsCameraRolesResource) Create(ctx context.Context, req resou
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Camera.GetOrganizationCameraRoles(vvOrganizationID)
 	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizationCameraRoles",
-				err.Error(),
-			)
-			return
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetOrganizationCameraRoles",
+					err.Error(),
+				)
+				return
+			}
 		}
 	}
 	if responseVerifyItem != nil {

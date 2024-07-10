@@ -59,6 +59,10 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"default_gateway_response": schema.StringAttribute{
+				MarkdownDescription: `IPv4 default gateway`,
+				Computed:            true,
+			},
 			"interface_id": schema.StringAttribute{
 				MarkdownDescription: `The id`,
 				Computed:            true,
@@ -497,18 +501,19 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Delete(ctx context.Conte
 
 // TF Structs Schema
 type NetworksSwitchStacksRoutingInterfacesRs struct {
-	NetworkID        types.String                                                       `tfsdk:"network_id"`
-	SwitchStackID    types.String                                                       `tfsdk:"switch_stack_id"`
-	InterfaceID      types.String                                                       `tfsdk:"interface_id"`
-	DefaultGateway   types.String                                                       `tfsdk:"default_gateway"`
-	InterfaceIP      types.String                                                       `tfsdk:"interface_ip"`
-	IPv6             *ResponseSwitchGetNetworkSwitchStackRoutingInterfaceIpv6Rs         `tfsdk:"ipv6"`
-	MulticastRouting types.String                                                       `tfsdk:"multicast_routing"`
-	Name             types.String                                                       `tfsdk:"name"`
-	OspfSettings     *ResponseSwitchGetNetworkSwitchStackRoutingInterfaceOspfSettingsRs `tfsdk:"ospf_settings"`
-	OspfV3           *ResponseSwitchGetNetworkSwitchStackRoutingInterfaceOspfV3Rs       `tfsdk:"ospf_v3"`
-	Subnet           types.String                                                       `tfsdk:"subnet"`
-	VLANID           types.Int64                                                        `tfsdk:"vlan_id"`
+	NetworkID              types.String                                                       `tfsdk:"network_id"`
+	SwitchStackID          types.String                                                       `tfsdk:"switch_stack_id"`
+	InterfaceID            types.String                                                       `tfsdk:"interface_id"`
+	DefaultGateway         types.String                                                       `tfsdk:"default_gateway"`
+	DefaultGatewayResponse types.String                                                       `tfsdk:"default_gateway_response"`
+	InterfaceIP            types.String                                                       `tfsdk:"interface_ip"`
+	IPv6                   *ResponseSwitchGetNetworkSwitchStackRoutingInterfaceIpv6Rs         `tfsdk:"ipv6"`
+	MulticastRouting       types.String                                                       `tfsdk:"multicast_routing"`
+	Name                   types.String                                                       `tfsdk:"name"`
+	OspfSettings           *ResponseSwitchGetNetworkSwitchStackRoutingInterfaceOspfSettingsRs `tfsdk:"ospf_settings"`
+	OspfV3                 *ResponseSwitchGetNetworkSwitchStackRoutingInterfaceOspfV3Rs       `tfsdk:"ospf_v3"`
+	Subnet                 types.String                                                       `tfsdk:"subnet"`
+	VLANID                 types.Int64                                                        `tfsdk:"vlan_id"`
 }
 
 type ResponseSwitchGetNetworkSwitchStackRoutingInterfaceIpv6Rs struct {
@@ -539,6 +544,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesRs) toSdkApiRequestCreate(ctx cont
 	} else {
 		defaultGateway = &emptyString
 	}
+
 	interfaceIP := new(string)
 	if !r.InterfaceIP.IsUnknown() && !r.InterfaceIP.IsNull() {
 		*interfaceIP = r.InterfaceIP.ValueString()
@@ -623,6 +629,9 @@ func (r *NetworksSwitchStacksRoutingInterfacesRs) toSdkApiRequestUpdate(ctx cont
 	} else {
 		defaultGateway = &emptyString
 	}
+	if !r.DefaultGatewayResponse.IsNull() && !r.DefaultGatewayResponse.Equal(types.StringValue("")) {
+		defaultGateway = &emptyString
+	}
 	interfaceIP := new(string)
 	if !r.InterfaceIP.IsUnknown() && !r.InterfaceIP.IsNull() {
 		*interfaceIP = r.InterfaceIP.ValueString()
@@ -703,9 +712,10 @@ func (r *NetworksSwitchStacksRoutingInterfacesRs) toSdkApiRequestUpdate(ctx cont
 // From gosdk to TF Structs Schema
 func ResponseSwitchGetNetworkSwitchStackRoutingInterfaceItemToBodyRs(state NetworksSwitchStacksRoutingInterfacesRs, response *merakigosdk.ResponseSwitchGetNetworkSwitchStackRoutingInterface, is_read bool) NetworksSwitchStacksRoutingInterfacesRs {
 	itemState := NetworksSwitchStacksRoutingInterfacesRs{
-		DefaultGateway: types.StringValue(response.DefaultGateway),
-		InterfaceID:    types.StringValue(response.InterfaceID),
-		InterfaceIP:    types.StringValue(response.InterfaceIP),
+		DefaultGateway:         types.StringValue(response.DefaultGateway),
+		DefaultGatewayResponse: types.StringValue(response.DefaultGateway),
+		InterfaceID:            types.StringValue(response.InterfaceID),
+		InterfaceIP:            types.StringValue(response.InterfaceIP),
 		IPv6: func() *ResponseSwitchGetNetworkSwitchStackRoutingInterfaceIpv6Rs {
 			if response.IPv6 != nil {
 				return &ResponseSwitchGetNetworkSwitchStackRoutingInterfaceIpv6Rs{

@@ -446,6 +446,7 @@ func ResponseSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServersIt
 			}
 			return types.Int64{}
 		}(),
+		NetworkID: state.NetworkID,
 	}
 	state = itemState
 	return state

@@ -12,17 +12,14 @@ provider "meraki" {
   meraki_debug = "true"
 }
 
-resource "meraki_networks_vlan_profiles" "vlan_profiles" {
-   network_id = "L_828099381482771185"
-   iname = "Default 2"
-   name = "Default Profile 2"
-   vlan_names = [ {
-      name = "default_2",
-      vlan_id = "1"
-   }, {
-    name = "test_2",
-    vlan_id = "2"
-   }]
-   vlan_groups = []
+
+resource "meraki_networks_switch_stacks" "example" {
+
+  name       = "A cool stack"
+  network_id = "N_828099381482850157"
+  serials    = ["QBSB-AX45-LY9A", "QBSB-BNH2-KDXJ"]
 }
 
+output "meraki_networks_switch_stacks_example" {
+  value = meraki_networks_switch_stacks.example
+}

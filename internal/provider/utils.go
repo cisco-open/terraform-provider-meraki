@@ -843,19 +843,38 @@ func changeStructUnknowns(a interface{}, b interface{}) interface{} {
 				log.Printf("Entre 3 %v to field %v\n", fieldValueB.Interface(), fieldName)
 				if !fieldValueA.IsZero() || !fieldValueB.IsZero() {
 					nestedResult := changeStructUnknowns(fieldValueA.Interface(), fieldValueB.Interface())
-					fieldValueBPtr := reflect.New(fieldValueB.Type())
-					fieldValueBPtr.Elem().Set(reflect.ValueOf(nestedResult))
-					resultStruct.Field(i).Set(fieldValueBPtr)
+
+					log.Printf("A pointer: %t", fieldValueA.Kind() != reflect.Ptr)
+					log.Printf("B pointer: %t", fieldValueB.Kind() != reflect.Ptr)
+					if fieldValueB.Kind() != reflect.Ptr {
+						log.Printf("Entre 3 %v to field %v\n", fieldValueB.Interface(), fieldName)
+						fieldValueBPtr := reflect.New(fieldValueB.Type())
+						fieldValueBPtr.Elem().Set(reflect.ValueOf(nestedResult))
+						resultStruct.Field(i).Set(fieldValueBPtr)
+					} else {
+						if fieldValueA.Kind() != reflect.Ptr {
+							log.Printf("Entre 3 %v to field %v\n", fieldValueB.Interface(), fieldName)
+							fieldValueAPtr := reflect.New(fieldValueA.Type())
+							fieldValueAPtr.Elem().Set(reflect.ValueOf(nestedResult))
+							resultStruct.Field(i).Set(fieldValueAPtr)
+						}
+					}
 				} else {
 					log.Printf("Both null")
 				}
 			} else {
 				log.Printf("2. Assigned %v to field %v\n", fieldValueA.Interface(), fieldName)
+
 				resultStruct.Field(i).Set(fieldValueA)
 			}
 		}
 	}
 	log.Printf("Sali: ")
+	// if resultStruct.Kind() != reflect.Ptr {
+	// 	log.Print("Diferente de puntero: ", resultStruct.Kind())
+	// 	resultStruct = reflect.ValueOf(resultStruct)
+	// 	log.Print("Ahora puntero: ", resultStruct.Kind())
+	// }
 	return resultStruct.Interface()
 }
 

@@ -3,6 +3,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"log"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
@@ -921,6 +922,7 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionRs) toSdkApiRequestUpdate
 					})
 				}
 			}
+			log.Print("Hola revisar aqui %t", requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesPerformanceClass == nil)
 			requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferences = append(requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferences, merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferences{
 				FailOverCriterion: failOverCriterion,
 				PerformanceClass:  requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesPerformanceClass,
@@ -1028,6 +1030,9 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 			if response.ActiveActiveAutoVpnEnabled != nil {
 				return types.BoolValue(*response.ActiveActiveAutoVpnEnabled)
 			}
+			if !state.ActiveActiveAutoVpnEnabled.IsNull() {
+				return state.ActiveActiveAutoVpnEnabled
+			}
 			return types.Bool{}
 		}(),
 		DefaultUplink: types.StringValue(response.DefaultUplink),
@@ -1045,11 +1050,11 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 								}(),
 							}
 						}
-						return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionFailoverAndFailbackImmediateRs{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionFailoverAndFailbackRs{}
+			return nil
 		}(),
 		LoadBalancingEnabled: func() types.Bool {
 			if response.LoadBalancingEnabled != nil {
@@ -1071,7 +1076,7 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 									Type:                        types.StringValue(vpnTrafficUplinkPreferences.PerformanceClass.Type),
 								}
 							}
-							return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesPerformanceClassRs{}
+							return nil
 						}(),
 						PreferredUplink: types.StringValue(vpnTrafficUplinkPreferences.PreferredUplink),
 						TrafficFilters: func() *[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersRs {
@@ -1104,7 +1109,7 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 																}(),
 															}
 														}
-														return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueDestinationRs{}
+														return nil
 													}(),
 													ID:       types.StringValue(trafficFilters.Value.ID),
 													Protocol: types.StringValue(trafficFilters.Value.Protocol),
@@ -1128,11 +1133,11 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 																}(),
 															}
 														}
-														return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueSourceRs{}
+														return nil
 													}(),
 												}
 											}
-											return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueRs{}
+											return nil
 										}(),
 									}
 								}
@@ -1168,7 +1173,7 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 																Port: types.StringValue(trafficFilters.Value.Destination.Port),
 															}
 														}
-														return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestinationRs{}
+														return nil
 													}(),
 													Protocol: types.StringValue(trafficFilters.Value.Protocol),
 													Source: func() *ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueSourceRs {
@@ -1190,11 +1195,11 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 																}(),
 															}
 														}
-														return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueSourceRs{}
+														return nil
 													}(),
 												}
 											}
-											return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueRs{}
+											return nil
 										}(),
 									}
 								}

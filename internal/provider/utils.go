@@ -885,7 +885,10 @@ func mergeInterfacesOnlyPath(a, b interface{}) interface{} {
 		if !fieldB.IsValid() {
 			fieldB = valueB.Field(i)
 		}
-
+		log.Printf("fieldname %v", valueA.Type().Field(i).Name)
+		log.Printf("fieldA %v", fieldA)
+		log.Printf("fieldB %v", fieldB)
+		log.Printf("fieldB %v", fieldB)
 		if reflect.TypeOf(fieldB).Kind() == reflect.Slice {
 			// Obtener la longitud del slice usando reflexión
 			length := reflect.ValueOf(fieldB).Elem().Len()
@@ -897,11 +900,7 @@ func mergeInterfacesOnlyPath(a, b interface{}) interface{} {
 		}
 
 		log.Printf("Antes")
-		log.Printf("fieldname %v", valueA.Type().Field(i).Name)
-		log.Printf("fieldA %v", fieldA)
-		log.Printf("fieldB %v", fieldB)
 
-		log.Printf("Despues ZERO")
 		for _, path := range pathParams {
 			// if valueB.Type().Field(i).Name == "OrganizationID" {
 			// 	log.Printf("fieldB.IsZero() %v", fieldB.IsZero())
@@ -919,9 +918,12 @@ func mergeInterfacesOnlyPath(a, b interface{}) interface{} {
 					// log.Printf("Despues FOR fieldB.Type().Value() 22%v", fieldB.IsZero())
 					if valueB.FieldByName("ID").IsValid() {
 						if !valueB.FieldByName("ID").IsZero() {
+
 							resultStruct.Field(i).Set(valueB.FieldByName("ID"))
 						}
+
 					}
+
 				}
 			}
 

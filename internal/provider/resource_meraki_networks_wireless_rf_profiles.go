@@ -9,6 +9,7 @@ import (
 	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -17,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -188,14 +190,13 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
 						},
-
+						Default:     setdefault.StaticValue(types.SetValueMust(types.Int64Type, make([]attr.Value, 0))),
 						ElementType: types.Int64Type,
 					},
 				},
 			},
 			"flex_radios": schema.SingleNestedAttribute{
 				MarkdownDescription: `Flex radio settings.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -204,7 +205,6 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 
 					"by_model": schema.SetNestedAttribute{
 						MarkdownDescription: `Flex radios by model.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
@@ -214,7 +214,6 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 
 								"bands": schema.SetAttribute{
 									MarkdownDescription: `Band to use for each flex radio. For example, ['6'] will set the AP's first flex radio to 6 GHz`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Set{
 										setplanmodifier.UseStateForUnknown(),
@@ -224,7 +223,6 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 								},
 								"model": schema.StringAttribute{
 									MarkdownDescription: `Model of the AP`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -1328,6 +1326,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 			},
 			"rf_profile_id": schema.StringAttribute{
 				MarkdownDescription: `rfProfileId path parameter. Rf profile ID`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -1389,7 +1388,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
 						},
-
+						Default:     setdefault.StaticValue(types.SetValueMust(types.Int64Type, make([]attr.Value, 0))),
 						ElementType: types.Int64Type,
 					},
 				},
@@ -1469,7 +1468,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
 						},
-
+						Default:     setdefault.StaticValue(types.SetValueMust(types.Int64Type, make([]attr.Value, 0))),
 						ElementType: types.Int64Type,
 					},
 				},
@@ -1503,13 +1502,15 @@ func (r *NetworksWirelessRfProfilesResource) Create(ctx context.Context, req res
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessRfProfiles(vvNetworkID, nil)
 	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkWirelessRfProfiles",
-				err.Error(),
-			)
-			return
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetNetworkWirelessRfProfiles",
+					err.Error(),
+				)
+				return
+			}
 		}
 	}
 	if responseVerifyItem != nil {
@@ -3271,6 +3272,7 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestUpdate(ctx context.Context
 // From gosdk to TF Structs Schema
 func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirelessRfProfilesRs, response *merakigosdk.ResponseWirelessGetNetworkWirelessRfProfile, is_read bool) NetworksWirelessRfProfilesRs {
 	itemState := NetworksWirelessRfProfilesRs{
+		FlexRadios: state.FlexRadios,
 		ApBandSettings: func() *ResponseWirelessGetNetworkWirelessRfProfileApBandSettingsRs {
 			if response.ApBandSettings != nil {
 				return &ResponseWirelessGetNetworkWirelessRfProfileApBandSettingsRs{
@@ -3331,7 +3333,10 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 					ValidAutoChannels: StringSliceToSetInt(response.FiveGhzSettings.ValidAutoChannels),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessRfProfileFiveGhzSettingsRs{}
+			if state.FiveGhzSettings != nil {
+				return state.FiveGhzSettings
+			}
+			return nil
 		}(),
 		ID:             types.StringValue(response.ID),
 		MinBitrateType: types.StringValue(response.MinBitrateType),
@@ -3810,7 +3815,10 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 					ValidAutoChannels: StringSliceToSetInt(response.SixGhzSettings.ValidAutoChannels),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessRfProfileSixGhzSettingsRs{}
+			if state.SixGhzSettings != nil {
+				return state.SixGhzSettings
+			}
+			return nil
 		}(),
 		Transmission: func() *ResponseWirelessGetNetworkWirelessRfProfileTransmissionRs {
 			if response.Transmission != nil {
@@ -3858,11 +3866,15 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 						}
 						return types.Int64{}
 					}(),
-					ValidAutoChannels: StringSliceToSetInt(response.SixGhzSettings.ValidAutoChannels),
+					ValidAutoChannels: StringSliceToSetInt(response.TwoFourGhzSettings.ValidAutoChannels),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessRfProfileTwoFourGhzSettingsRs{}
+			if state.TwoFourGhzSettings != nil {
+				return state.TwoFourGhzSettings
+			}
+			return nil
 		}(),
+		RfProfileID: types.StringValue(response.ID),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksWirelessRfProfilesRs)

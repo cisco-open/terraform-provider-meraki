@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"sync"
 
 	tfsdkr "github.com/cisco-open/terraform-provider-meraki/internal/provider/reflects"
 
@@ -150,58 +151,77 @@ func elementsToStrings(ctx context.Context, elements types.List) []string {
 	return strings
 }
 
-// getDictResult function translates the Python function to Go.
+// getDictResult busca y devuelve un diccionario específico dentro de una estructura de datos flexible.
 func getDictResult(result interface{}, key string, value interface{}, cmpFn cmpFunc) interface{} {
-	// Check if the result is a list.
+	// Mutex local para sincronizar el acceso al mapa
+	var mu sync.Mutex
+
+	// Mapa para almacenar el resultado
+	resultMap := make(map[string]interface{})
+
+	// Función para verificar si un valor es un mapa[string]interface{}
+	isMapStringInterface := func(v interface{}) (map[string]interface{}, bool) {
+		if m, ok := v.(map[string]interface{}); ok {
+			return m, true
+		}
+		return nil, false
+	}
+
+	// Función interna para procesar un elemento
+	processItem := func(item interface{}) {
+		if itemMap, ok := isMapStringInterface(item); ok {
+			// Verificar si la clave y el valor coinciden con los proporcionados.
+			if val, ok := itemMap[key]; ok && cmpFn(val, value) {
+				// Bloquear el acceso al mapa antes de realizar la asignación
+				mu.Lock()
+				defer mu.Unlock()
+				resultMap = itemMap
+			}
+		}
+	}
+
+	// Verificar si el resultado es un slice.
 	if reflect.TypeOf(result).Kind() == reflect.Slice {
 		resultSlice := reflect.ValueOf(result)
-
-		// If the list has a single element.
+		if resultSlice.Len() == 0 {
+			return nil
+		}
+		// Si el slice tiene un solo elemento.
 		if resultSlice.Len() == 1 {
-			// Check if that element is a dictionary.
-			if reflect.TypeOf(resultSlice.Index(0).Interface()).Kind() == reflect.Map {
-				resultMap := resultSlice.Index(0).Interface().(map[string]interface{})
-				// Check if the key and value match the provided ones.
-				if val, ok := resultMap[key]; ok && !cmpFn(val, value) {
+			if itemMap, ok := isMapStringInterface(resultSlice.Index(0).Interface()); ok {
+				// Verificar si la clave y el valor coinciden con los proporcionados.
+				if val, ok := itemMap[key]; ok && !cmpFn(val, value) {
 					return nil
 				}
-				return resultMap
+				return itemMap
 			}
 			return nil
 		}
 
-		// Iterate over the elements of the list.
+		// Iterar sobre los elementos del slice.
 		for i := 0; i < resultSlice.Len(); i++ {
-			item := resultSlice.Index(i)
-			// Check if the item is a dictionary.
-			if reflect.TypeOf(item.Interface()).Kind() == reflect.Map {
-				itemMap := item.Interface().(map[string]interface{})
-				// Check if the key and value match the provided ones.
-				if val, ok := itemMap[key]; !ok || cmpFn(val, value) {
-					return itemMap
-				}
-			}
+			processItem(resultSlice.Index(i).Interface())
 		}
-		return nil
+		return resultMap
 	}
 
-	// If the result is not a list.
-	if reflect.TypeOf(result).Kind() != reflect.Map {
-		return nil
+	// Si el resultado no es un slice.
+	if itemMap, ok := isMapStringInterface(result); ok {
+		// Verificar si la clave y el valor coinciden con los proporcionados.
+		if val, ok := itemMap[key]; ok && !cmpFn(val, value) {
+			return nil
+		}
+		return itemMap
 	}
 
-	// Check if the result is a dictionary.
-	resultMap := result.(map[string]interface{})
-	// Check if the key and value match the provided ones.
-	if val, ok := resultMap[key]; ok && !cmpFn(val, value) {
-		return nil
-	}
-
-	return resultMap
+	// Si el resultado no es ni un slice ni un mapa.
+	return nil
 }
-
 func structToMap(data interface{}) []map[string]interface{} {
-	// Verificar si data es un puntero si es así obtener el valor
+	// Mutex local para sincronizar el acceso al resultado
+	var mu sync.Mutex
+
+	// Verificar si data es un puntero, si es así obtener el valor
 	if reflect.ValueOf(data).Kind() == reflect.Ptr {
 		data = reflect.ValueOf(data).Elem().Interface()
 	}
@@ -222,7 +242,6 @@ func structToMap(data interface{}) []map[string]interface{} {
 	if elementType.Kind() != reflect.Struct {
 		log.Printf("[DEBUG] El tipo dentro de la slice no es una estructura.")
 		fmt.Println("El tipo dentro de la slice no es una estructura.")
-		log.Printf("[DEBUG] El tipo dentro de la slice no es una estructura.")
 		// return nil
 	}
 
@@ -230,35 +249,70 @@ func structToMap(data interface{}) []map[string]interface{} {
 	result := make([]map[string]interface{}, val.Len())
 	for i := 0; i < val.Len(); i++ {
 		element := val.Index(i)
-		elementMap := make(map[string]interface{})
-		for j := 0; j < element.NumField(); j++ {
-			fieldName := elementType.Field(j).Name
-			fieldValue := element.Field(j).Interface()
-			elementMap[fieldName] = fieldValue
+
+		// Función interna para convertir una estructura a un mapa
+		structToMapFunc := func(elem reflect.Value) map[string]interface{} {
+			elemMap := make(map[string]interface{})
+			for j := 0; j < elem.NumField(); j++ {
+				fieldName := elementType.Field(j).Name
+				fieldValue := elem.Field(j).Interface()
+				elemMap[fieldName] = fieldValue
+			}
+			return elemMap
 		}
-		result[i] = elementMap
+
+		// Bloquear el acceso al resultado antes de asignar
+		mu.Lock()
+		result[i] = structToMapFunc(element)
+		mu.Unlock()
 	}
+
 	return result
 }
 
+// mapToStruct asigna valores desde un mapa a una estructura (target)
 func mapToStruct(data map[string]interface{}, target interface{}) error {
+	// Mutex local para sincronizar el acceso a la estructura de destino
+	var mu sync.Mutex
+
+	// Verificar si target es un puntero a una estructura
 	targetType := reflect.TypeOf(target)
 	if targetType.Kind() != reflect.Ptr || targetType.Elem().Kind() != reflect.Struct {
-		return fmt.Errorf("The target is not a pointer to an struct")
+		return fmt.Errorf("El objetivo no es un puntero a una estructura")
 	}
 	targetValue := reflect.ValueOf(target).Elem()
+
+	// Iterar sobre los campos de la estructura de destino
 	for i := 0; i < targetType.Elem().NumField(); i++ {
 		field := targetType.Elem().Field(i)
 		fieldName := field.Name
+
+		// Obtener el valor del mapa para el nombre del campo
 		value, ok := data[fieldName]
 		if !ok {
-			continue
+			continue // Si no existe en el mapa, continuar con el siguiente campo
 		}
-		fieldValue := reflect.ValueOf(value)
-		if fieldValue.Type().ConvertibleTo(field.Type) {
-			targetValue.FieldByName(fieldName).Set(fieldValue.Convert(field.Type))
-		} else {
-			return fmt.Errorf("The valur type %s is not on struct", fieldName)
+
+		// Función interna para asignar el valor al campo de la estructura
+		assignValue := func(field reflect.Value, value interface{}) error {
+			// Bloquear el acceso al campo antes de la asignación
+			mu.Lock()
+			defer mu.Unlock()
+
+			fieldValue := reflect.ValueOf(value)
+
+			// Verificar si el tipo de valor es convertible al tipo del campo
+			if fieldValue.Type().ConvertibleTo(field.Type()) {
+				field.Set(fieldValue.Convert(field.Type()))
+			} else {
+				return fmt.Errorf("el tipo de valor para el campo %s no es convertible al tipo del campo", fieldName)
+			}
+			return nil
+		}
+
+		// Llamar a la función interna para asignar el valor al campo
+		if err := assignValue(targetValue.FieldByName(fieldName), value); err != nil {
+			return err
 		}
 	}
 

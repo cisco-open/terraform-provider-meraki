@@ -34,7 +34,7 @@ resource "meraki_networks_wireless_ssids" "my_splash_ssid" {
   network_id                    = each.value.id
   number                        = 12
   auth_mode                     = "open"
-  enabled                       = true
+  enabled                       = false
   name                          = "Wide open"
   ip_assignment_mode            = "Bridge mode"
   default_vlan_id               = "300"

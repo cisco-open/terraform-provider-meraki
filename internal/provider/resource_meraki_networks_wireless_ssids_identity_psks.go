@@ -157,7 +157,7 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter IDentityPskID",
-					err.Error(),
+					"Failed",
 				)
 				return
 			}

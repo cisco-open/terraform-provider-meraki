@@ -18,7 +18,7 @@ terraform {
 
 resource "meraki_devices" "example" {
 
-  name = "new name 5"
+  name = "new name 6"
   # floor_plan_id = "string"
   # lat = 1.0
   # lng = 1.0

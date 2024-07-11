@@ -3,7 +3,6 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
-	"log"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
@@ -922,7 +921,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionRs) toSdkApiRequestUpdate
 					})
 				}
 			}
-			log.Print("Hola revisar aqui %t", requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesPerformanceClass == nil)
 			requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferences = append(requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferences, merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferences{
 				FailOverCriterion: failOverCriterion,
 				PerformanceClass:  requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesPerformanceClass,

@@ -161,8 +161,10 @@ type ResponseApplianceGetNetworkApplianceTrafficShapingRulesRules struct {
 }
 
 type ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesDefinitions struct {
-	Type  types.String `tfsdk:"type"`
-	Value types.String `tfsdk:"value"`
+	Type      types.String                                                              `tfsdk:"type"`
+	Value     types.String                                                              `tfsdk:"value"`
+	ValueList types.Set                                                                 `tfsdk:"value_list"`
+	ValueObj  *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj `tfsdk:"value_obj"`
 }
 
 type ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesPerClientBandwidthLimits struct {
@@ -194,8 +196,28 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingRulesItemToBody(state Net
 								result := make([]ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesDefinitions, len(*rules.Definitions))
 								for i, definitions := range *rules.Definitions {
 									result[i] = ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesDefinitions{
-										Type:  types.StringValue(definitions.Type),
-										Value: types.StringValue(definitions.Value),
+										Type: types.StringValue(definitions.Type),
+										Value: func() types.String {
+											if definitions.Value == nil {
+												return types.StringNull()
+											}
+											return types.StringValue(*definitions.Value)
+										}(),
+										ValueList: func() types.Set {
+											if definitions.ValueList == nil {
+												return types.SetNull(types.StringType)
+											}
+											return StringSliceToSet(*definitions.ValueList)
+										}(),
+										ValueObj: func() *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj {
+											if definitions.ValueObj == nil {
+												return nil
+											}
+											return &ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj{
+												ID:   types.StringValue(definitions.ValueObj.ID),
+												Name: types.StringValue(definitions.ValueObj.Name),
+											}
+										}(),
 									}
 								}
 								return &result

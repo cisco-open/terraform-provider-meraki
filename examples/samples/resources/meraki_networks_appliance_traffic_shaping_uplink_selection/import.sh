@@ -1,0 +1,1 @@
+terraform import meraki_networks_appliance_traffic_shaping_uplink_selection.example "network_id"

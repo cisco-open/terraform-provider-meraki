@@ -128,9 +128,11 @@ type ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRules struct {
 }
 
 type ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRules struct {
-	Policy types.String `tfsdk:"policy"`
-	Type   types.String `tfsdk:"type"`
-	Value  types.String `tfsdk:"value"`
+	Policy    types.String                                                              `tfsdk:"policy"`
+	Type      types.String                                                              `tfsdk:"type"`
+	Value     types.String                                                              `tfsdk:"value"`
+	ValueList types.Set                                                                 `tfsdk:"value_list"`
+	ValueObj  *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj `tfsdk:"value_obj"`
 }
 
 // ToBody
@@ -143,7 +145,27 @@ func ResponseWirelessGetNetworkWirelessSSIDFirewallL7FirewallRulesItemToBody(sta
 					result[i] = ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRules{
 						Policy: types.StringValue(rules.Policy),
 						Type:   types.StringValue(rules.Type),
-						Value:  types.StringValue(rules.Value),
+						Value: func() types.String {
+							if rules.Value == nil {
+								return types.StringNull()
+							}
+							return types.StringValue(*rules.Value)
+						}(),
+						ValueList: func() types.Set {
+							if rules.ValueList == nil {
+								return types.SetNull(types.StringType)
+							}
+							return StringSliceToSet(*rules.ValueList)
+						}(),
+						ValueObj: func() *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj {
+							if rules.ValueObj == nil {
+								return nil
+							}
+							return &ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj{
+								ID:   types.StringValue(rules.ValueObj.ID),
+								Name: types.StringValue(rules.ValueObj.Name),
+							}
+						}(),
 					}
 				}
 				return &result

@@ -259,13 +259,15 @@ func (r *DevicesLiveToolsCableResource) Create(ctx context.Context, req resource
 
 		responseVerifyItem, restyResp1, err := r.client.Devices.GetDeviceLiveToolsCableTest(vvSerial, vvID)
 		//Have Create
-		if err != nil || restyResp1 == nil {
-			if restyResp1.StatusCode() != 404 {
-				resp.Diagnostics.AddError(
-					"Failure when executing GetDeviceLiveToolsCableTest",
-					err.Error(),
-				)
-				return
+		if err != nil {
+			if restyResp1 != nil {
+				if restyResp1.StatusCode() != 404 {
+					resp.Diagnostics.AddError(
+						"Failure when executing GetDeviceLiveToolsCableTest",
+						err.Error(),
+					)
+					return
+				}
 			}
 		}
 		if responseVerifyItem != nil {

@@ -218,15 +218,18 @@ func (r *DevicesLiveToolsArpTableResource) Create(ctx context.Context, req resou
 	if vvArpTableID != "" {
 		responseVerifyItem, restyResp1, err := r.client.Devices.GetDeviceLiveToolsArpTable(vvSerial, vvArpTableID)
 		//Have Create
-		if err != nil || restyResp1 == nil {
-			if restyResp1.StatusCode() != 404 {
-				resp.Diagnostics.AddError(
-					"Failure when executing GetDeviceLiveToolsArpTable",
-					err.Error(),
-				)
-				return
+		if err != nil {
+			if restyResp1 != nil {
+				if restyResp1.StatusCode() != 404 {
+					resp.Diagnostics.AddError(
+						"Failure when executing GetDeviceLiveToolsArpTable",
+						err.Error(),
+					)
+					return
+				}
 			}
 		}
+
 		if responseVerifyItem != nil {
 			data := ResponseDevicesGetDeviceLiveToolsArpTableItemToBodyRs(data, responseVerifyItem, false)
 			//Path params in update assigned

@@ -166,13 +166,15 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 	//Items
 	responseVerifyItem, restyResp1, err := getAllItemsNetworks(*r.client, vvOrganizationID)
 	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizationNetworks",
-				err.Error(),
-			)
-			return
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetOrganizationNetworks",
+					err.Error(),
+				)
+				return
+			}
 		}
 	}
 	if responseVerifyItem != nil {

@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -103,6 +104,35 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Schema(_ context.
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"value_list": schema.SetAttribute{
+							MarkdownDescription: `The 'value_list' of what you want to block. Send a list in request`,
+							Optional:            true,
+							PlanModifiers: []planmodifier.Set{
+								setplanmodifier.UseStateForUnknown(),
+							},
+							ElementType: types.StringType,
+						},
+						"value_obj": schema.SingleNestedAttribute{
+							MarkdownDescription: `The 'value_obj' of what you want to block. Send a dict in request`,
+							Optional:            true,
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.UseStateForUnknown(),
+							},
+							Attributes: map[string]schema.Attribute{
+								"id": schema.StringAttribute{
+									Optional: true,
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.UseStateForUnknown(),
+									},
+								},
+								"name": schema.StringAttribute{
+									Optional: true,
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.UseStateForUnknown(),
+									},
+								},
 							},
 						},
 					},
@@ -306,9 +336,11 @@ type NetworksWirelessSSIDsFirewallL7FirewallRulesRs struct {
 }
 
 type ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesRs struct {
-	Policy types.String `tfsdk:"policy"`
-	Type   types.String `tfsdk:"type"`
-	Value  types.String `tfsdk:"value"`
+	Policy    types.String                                                              `tfsdk:"policy"`
+	Type      types.String                                                              `tfsdk:"type"`
+	Value     types.String                                                              `tfsdk:"value"`
+	ValueList types.Set                                                                 `tfsdk:"value_list"`
+	ValueObj  *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj `tfsdk:"value_obj"`
 }
 
 // FromBody
@@ -316,13 +348,34 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesRs) toSdkApiRequestUpdate(c
 	var requestWirelessUpdateNetworkWirelessSSIDFirewallL7FirewallRulesRules []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDFirewallL7FirewallRulesRules
 	if r.Rules != nil {
 		for _, rItem1 := range *r.Rules {
+			var valueR interface{}
 			policy := rItem1.Policy.ValueString()
 			typeR := rItem1.Type.ValueString()
 			value := rItem1.Value.ValueString()
+			var valueList []string
+			rItem1.ValueList.ElementsAs(ctx, &valueList, false)
+			var requestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRulesValue *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDFirewallL7FirewallRulesRulesValue
+			if rItem1.ValueObj != nil {
+				name := rItem1.ValueObj.Name.ValueString()
+				id := rItem1.ValueObj.ID.ValueString()
+				requestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRulesValue = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDFirewallL7FirewallRulesRulesValue{
+					ID:   id,
+					Name: name,
+				}
+			}
+			if !rItem1.Value.IsNull() && !rItem1.Value.IsUnknown() && rItem1.Type.ValueString() != "blockedCountries" && rItem1.Type.ValueString() != "applicationCategory" {
+				valueR = value
+			} else {
+				if !rItem1.ValueList.IsNull() && !rItem1.ValueList.IsUnknown() && rItem1.Type.ValueString() == "blockedCountries" {
+					valueR = valueList
+				} else {
+					valueR = requestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRulesValue
+				}
+			}
 			requestWirelessUpdateNetworkWirelessSSIDFirewallL7FirewallRulesRules = append(requestWirelessUpdateNetworkWirelessSSIDFirewallL7FirewallRulesRules, merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDFirewallL7FirewallRulesRules{
 				Policy: policy,
 				Type:   typeR,
-				Value:  value,
+				Value:  valueR,
 			})
 		}
 	}
@@ -347,7 +400,27 @@ func ResponseWirelessGetNetworkWirelessSSIDFirewallL7FirewallRulesItemToBodyRs(s
 					result[i] = ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesRs{
 						Policy: types.StringValue(rules.Policy),
 						Type:   types.StringValue(rules.Type),
-						Value:  types.StringValue(rules.Value),
+						Value: func() types.String {
+							if rules.Value == nil {
+								return types.StringNull()
+							}
+							return types.StringValue(*rules.Value)
+						}(),
+						ValueList: func() types.Set {
+							if rules.ValueList == nil {
+								return types.SetNull(types.StringType)
+							}
+							return StringSliceToSet(*rules.ValueList)
+						}(),
+						ValueObj: func() *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj {
+							if rules.ValueObj == nil {
+								return nil
+							}
+							return &ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj{
+								ID:   types.StringValue(rules.ValueObj.ID),
+								Name: types.StringValue(rules.ValueObj.Name),
+							}
+						}(),
 					}
 				}
 				return &result

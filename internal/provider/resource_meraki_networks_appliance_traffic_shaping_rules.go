@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -118,6 +119,40 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Schema(_ context.Context,
 										Optional: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
+										},
+									},
+									"value_list": schema.SetAttribute{
+										MarkdownDescription: `The 'value_list' of what you want to block. Send a list in request`,
+										Computed:            true,
+										Optional:            true,
+										PlanModifiers: []planmodifier.Set{
+											setplanmodifier.UseStateForUnknown(),
+										},
+										ElementType: types.StringType,
+										Default:     setdefault.StaticValue(types.SetNull(basetypes.StringType{})),
+									},
+									"value_obj": schema.SingleNestedAttribute{
+										MarkdownDescription: `The 'value_obj' of what you want to block. Send a dict in request`,
+										Computed:            true,
+										Optional:            true,
+										PlanModifiers: []planmodifier.Object{
+											objectplanmodifier.UseStateForUnknown(),
+										},
+										Attributes: map[string]schema.Attribute{
+											"id": schema.StringAttribute{
+												Computed: true,
+												Optional: true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.UseStateForUnknown(),
+												},
+											},
+											"name": schema.StringAttribute{
+												Computed: true,
+												Optional: true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.UseStateForUnknown(),
+												},
+											},
 										},
 									},
 								},
@@ -384,8 +419,10 @@ type ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesRs struct {
 }
 
 type ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesDefinitionsRs struct {
-	Type  types.String `tfsdk:"type"`
-	Value types.String `tfsdk:"value"`
+	Type      types.String                                                              `tfsdk:"type"`
+	Value     types.String                                                              `tfsdk:"value"`
+	ValueList types.Set                                                                 `tfsdk:"value_list"`
+	ValueObj  *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj `tfsdk:"value_obj"`
 }
 
 type ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesPerClientBandwidthLimitsRs struct {
@@ -412,11 +449,32 @@ func (r *NetworksApplianceTrafficShapingRulesRs) toSdkApiRequestUpdate(ctx conte
 			var requestApplianceUpdateNetworkApplianceTrafficShapingRulesRulesDefinitions []merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingRulesRulesDefinitions
 			if rItem1.Definitions != nil {
 				for _, rItem2 := range *rItem1.Definitions { //Definitions// name: definitions
+					var valueR interface{}
 					typeR := rItem2.Type.ValueString()
 					value := rItem2.Value.ValueString()
+					var valueList []string
+					rItem2.ValueList.ElementsAs(ctx, &valueList, false)
+					var requestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRulesValue *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDFirewallL7FirewallRulesRulesValue
+					if rItem2.ValueObj != nil {
+						name := rItem2.ValueObj.Name.ValueString()
+						id := rItem2.ValueObj.ID.ValueString()
+						requestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRulesValue = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDFirewallL7FirewallRulesRulesValue{
+							ID:   id,
+							Name: name,
+						}
+					}
+					if !rItem2.Value.IsNull() && !rItem2.Value.IsUnknown() && rItem2.Type.ValueString() != "blockedCountries" && rItem2.Type.ValueString() != "applicationCategory" {
+						valueR = value
+					} else {
+						if !rItem2.ValueList.IsNull() && !rItem2.ValueList.IsUnknown() && rItem2.Type.ValueString() == "blockedCountries" {
+							valueR = valueList
+						} else {
+							valueR = requestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRulesValue
+						}
+					}
 					requestApplianceUpdateNetworkApplianceTrafficShapingRulesRulesDefinitions = append(requestApplianceUpdateNetworkApplianceTrafficShapingRulesRulesDefinitions, merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingRulesRulesDefinitions{
 						Type:  typeR,
-						Value: value,
+						Value: valueR,
 					})
 				}
 			}
@@ -498,8 +556,28 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingRulesItemToBodyRs(state N
 								result := make([]ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesDefinitionsRs, len(*rules.Definitions))
 								for i, definitions := range *rules.Definitions {
 									result[i] = ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesDefinitionsRs{
-										Type:  types.StringValue(definitions.Type),
-										Value: types.StringValue(definitions.Value),
+										Type: types.StringValue(definitions.Type),
+										Value: func() types.String {
+											if definitions.Value == nil {
+												return types.StringNull()
+											}
+											return types.StringValue(*definitions.Value)
+										}(),
+										ValueList: func() types.Set {
+											if definitions.ValueList == nil {
+												return types.SetNull(types.StringType)
+											}
+											return StringSliceToSet(*definitions.ValueList)
+										}(),
+										ValueObj: func() *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj {
+											if definitions.ValueObj == nil {
+												return nil
+											}
+											return &ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj{
+												ID:   types.StringValue(definitions.ValueObj.ID),
+												Name: types.StringValue(definitions.ValueObj.Name),
+											}
+										}(),
 									}
 								}
 								return &result

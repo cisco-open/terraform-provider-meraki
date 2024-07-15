@@ -134,13 +134,15 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Create(ctx context.Con
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchStackRoutingStaticRoutes(vvNetworkID, vvSwitchStackID)
 	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkSwitchStackRoutingStaticRoutes",
-				err.Error(),
-			)
-			return
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetNetworkSwitchStackRoutingStaticRoutes",
+					err.Error(),
+				)
+				return
+			}
 		}
 	}
 	if responseVerifyItem != nil {
@@ -433,12 +435,12 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesRs) toSdkApiRequestCreate(ctx co
 }
 func (r *NetworksSwitchStacksRoutingStaticRoutesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestSwitchUpdateNetworkSwitchStackRoutingStaticRoute {
 	emptyString := ""
-	advertiseViaOspfEnabled := new(bool)
-	if !r.AdvertiseViaOspfEnabled.IsUnknown() && !r.AdvertiseViaOspfEnabled.IsNull() {
-		*advertiseViaOspfEnabled = r.AdvertiseViaOspfEnabled.ValueBool()
-	} else {
-		advertiseViaOspfEnabled = nil
-	}
+	// advertiseViaOspfEnabled := new(bool)
+	// if !r.AdvertiseViaOspfEnabled.IsUnknown() && !r.AdvertiseViaOspfEnabled.IsNull() {
+	// 	*advertiseViaOspfEnabled = r.AdvertiseViaOspfEnabled.ValueBool()
+	// } else {
+	// 	advertiseViaOspfEnabled = nil
+	// }
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
 		*name = r.Name.ValueString()
@@ -451,12 +453,12 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesRs) toSdkApiRequestUpdate(ctx co
 	} else {
 		nextHopIP = &emptyString
 	}
-	preferOverOspfRoutesEnabled := new(bool)
-	if !r.PreferOverOspfRoutesEnabled.IsUnknown() && !r.PreferOverOspfRoutesEnabled.IsNull() {
-		*preferOverOspfRoutesEnabled = r.PreferOverOspfRoutesEnabled.ValueBool()
-	} else {
-		preferOverOspfRoutesEnabled = nil
-	}
+	// preferOverOspfRoutesEnabled := new(bool)
+	// if !r.PreferOverOspfRoutesEnabled.IsUnknown() && !r.PreferOverOspfRoutesEnabled.IsNull() {
+	// 	*preferOverOspfRoutesEnabled = r.PreferOverOspfRoutesEnabled.ValueBool()
+	// } else {
+	// 	preferOverOspfRoutesEnabled = nil
+	// }
 	subnet := new(string)
 	if !r.Subnet.IsUnknown() && !r.Subnet.IsNull() {
 		*subnet = r.Subnet.ValueString()
@@ -464,11 +466,11 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesRs) toSdkApiRequestUpdate(ctx co
 		subnet = &emptyString
 	}
 	out := merakigosdk.RequestSwitchUpdateNetworkSwitchStackRoutingStaticRoute{
-		AdvertiseViaOspfEnabled:     advertiseViaOspfEnabled,
-		Name:                        *name,
-		NextHopIP:                   *nextHopIP,
-		PreferOverOspfRoutesEnabled: preferOverOspfRoutesEnabled,
-		Subnet:                      *subnet,
+		// AdvertiseViaOspfEnabled:     advertiseViaOspfEnabled,
+		Name:      *name,
+		NextHopIP: *nextHopIP,
+		// PreferOverOspfRoutesEnabled: preferOverOspfRoutesEnabled,
+		Subnet: *subnet,
 	}
 	return &out
 }

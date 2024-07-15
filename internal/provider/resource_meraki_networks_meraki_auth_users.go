@@ -201,13 +201,15 @@ func (r *NetworksMerakiAuthUsersResource) Create(ctx context.Context, req resour
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkMerakiAuthUsers(vvNetworkID)
 	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkMerakiAuthUsers",
-				err.Error(),
-			)
-			return
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetNetworkMerakiAuthUsers",
+					err.Error(),
+				)
+				return
+			}
 		}
 	}
 	if responseVerifyItem != nil {

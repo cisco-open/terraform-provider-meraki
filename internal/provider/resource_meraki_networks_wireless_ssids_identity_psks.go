@@ -72,6 +72,7 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Schema(_ context.Context, _ 
 			},
 			"identity_psk_id": schema.StringAttribute{
 				MarkdownDescription: `identityPskId path parameter. Identity psk ID`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -136,13 +137,15 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDIDentityPsks(vvNetworkID, vvNumber)
 	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkWirelessSSIDIDentityPsks",
-				err.Error(),
-			)
-			return
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetNetworkWirelessSSIDIDentityPsks",
+					err.Error(),
+				)
+				return
+			}
 		}
 	}
 	if responseVerifyItem != nil {
@@ -154,7 +157,7 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter IDentityPskID",
-					err.Error(),
+					"Failed",
 				)
 				return
 			}

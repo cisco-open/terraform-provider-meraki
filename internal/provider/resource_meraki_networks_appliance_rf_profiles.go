@@ -325,13 +325,15 @@ func (r *NetworksApplianceRfProfilesResource) Create(ctx context.Context, req re
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceRfProfiles(vvNetworkID)
 	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceRfProfiles",
-				err.Error(),
-			)
-			return
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetNetworkApplianceRfProfiles",
+					err.Error(),
+				)
+				return
+			}
 		}
 	}
 

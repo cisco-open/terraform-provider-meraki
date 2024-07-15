@@ -129,13 +129,15 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Create(ctx context.Context, r
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Switch.GetDeviceSwitchRoutingStaticRoutes(vvSerial)
 	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetDeviceSwitchRoutingStaticRoutes",
-				err.Error(),
-			)
-			return
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetDeviceSwitchRoutingStaticRoutes",
+					err.Error(),
+				)
+				return
+			}
 		}
 	}
 	if responseVerifyItem != nil {

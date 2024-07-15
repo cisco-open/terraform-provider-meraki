@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "0.2.5-alpha"
+      version = "0.2.6-alpha"
       source  = "hashicorp.com/edu/meraki"
       # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
@@ -34,7 +34,7 @@ resource "meraki_networks_wireless_ssids" "my_splash_ssid" {
   network_id                    = each.value.id
   number                        = 12
   auth_mode                     = "open"
-  enabled                       = true
+  enabled                       = false
   name                          = "Wide open"
   ip_assignment_mode            = "Bridge mode"
   default_vlan_id               = "300"

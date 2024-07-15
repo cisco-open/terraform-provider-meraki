@@ -215,6 +215,10 @@ func (r *NetworksApplianceVLANsResource) Schema(_ context.Context, _ resource.Sc
 			"interface_id": schema.StringAttribute{
 				MarkdownDescription: `The interface ID of the VLAN`,
 				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+					SuppressDiffString(),
+				},
 			},
 			"ipv6": schema.SingleNestedAttribute{
 				MarkdownDescription: `IPv6 configuration on the VLAN`,
@@ -445,13 +449,15 @@ func (r *NetworksApplianceVLANsResource) Create(ctx context.Context, req resourc
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceVLAN(vvNetworkID, vvID)
 	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceVLANs",
-				restyResp1.String(),
-			)
-			return
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetNetworkApplianceVLANs",
+					restyResp1.String(),
+				)
+				return
+			}
 		}
 	}
 
@@ -474,6 +480,22 @@ func (r *NetworksApplianceVLANsResource) Create(ctx context.Context, req resourc
 		}
 		resp.Diagnostics.AddError(
 			"Failure when executing CreateNetworkApplianceVLAN",
+			err.Error(),
+		)
+		return
+	}
+	dataRequestUp := data.toSdkApiRequestUpdate(ctx)
+	responseU, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceVLAN(vvNetworkID, strconv.Itoa(*response.ID), dataRequestUp)
+	if err != nil || restyResp2 == nil || responseU == nil {
+		if restyResp2 != nil {
+			resp.Diagnostics.AddError(
+				"Failure when executing CreateNetworkApplianceVLAN 2",
+				restyResp2.String(),
+			)
+			return
+		}
+		resp.Diagnostics.AddError(
+			"Failure when executing CreateNetworkApplianceVLAN 2",
 			err.Error(),
 		)
 		return
@@ -1049,10 +1071,16 @@ func ResponseApplianceGetNetworkApplianceVLANItemToBodyRs(state NetworksApplianc
 			if response.DhcpBootOptionsEnabled != nil {
 				return types.BoolValue(*response.DhcpBootOptionsEnabled)
 			}
-			return types.BoolNull()
+			return state.DhcpBootOptionsEnabled
 		}(),
-		DhcpHandling:  types.StringValue(response.DhcpHandling),
-		DhcpLeaseTime: types.StringValue(response.DhcpLeaseTime),
+		DhcpHandling: types.StringValue(response.DhcpHandling),
+		DhcpLeaseTime: func() types.String {
+			if response.DhcpLeaseTime != "" {
+				return types.StringValue(response.DhcpLeaseTime)
+			}
+			return state.DhcpLeaseTime
+
+		}(),
 		DhcpOptions: func() *[]ResponseApplianceGetNetworkApplianceVlanDhcpOptionsRs {
 			if response.DhcpOptions != nil {
 				result := make([]ResponseApplianceGetNetworkApplianceVlanDhcpOptionsRs, len(*response.DhcpOptions))

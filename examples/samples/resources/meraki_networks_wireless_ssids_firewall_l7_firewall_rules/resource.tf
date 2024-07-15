@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "0.2.5-alpha"
+      version = "0.2.6-alpha"
       source  = "hashicorp.com/edu/meraki"
       # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
@@ -22,6 +22,15 @@ resource "meraki_networks_wireless_ssids_firewall_l7_firewall_rules" "example" {
     policy = "deny"
     type   = "host"
     value  = "google.com"
+  },
+  {
+
+    policy = "deny"
+    type   = "applicationCategory"
+    value_obj  = {
+      id = "meraki:layer7/category/8"
+      name = "Peer-to-peer (P2P)"
+    }
   }]
 }
 

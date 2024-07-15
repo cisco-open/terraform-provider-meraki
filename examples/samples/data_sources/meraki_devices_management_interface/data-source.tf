@@ -7,14 +7,16 @@ terraform {
     }
   }
 }
-
 provider "meraki" {
   meraki_debug = "true"
 }
 
 
-resource "meraki_networks_switch_stacks" "this_ms_stack" {
-  network_id = "L_828099381482775374"
-  name       = "750-comm-meraki-lab-sw-stack"
-  serials    = ["QBSB-AX45-LY9A", "QBSB-BNH2-KDXJ"]
+data "meraki_devices_management_interface" "example" {
+
+  serial = "QBSB-BNH2-KDXJ"
+}
+
+output "meraki_devices_management_interface_example" {
+  value = data.meraki_devices_management_interface.example.item
 }

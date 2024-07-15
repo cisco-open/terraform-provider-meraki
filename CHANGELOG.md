@@ -1,3 +1,20 @@
+## 0.2.6-alpha (July 15, 2024)
+BUGFIXES:
+* Issue #88 fixed.
+* Issue #89 fixed.
+* Issue #92 fixed.
+* Issue #93 fixed.
+* Issue #94 fixed.
+* Issue #96 fixed.
+* Issue #97 fixed.
+* Issue #98 fixed.
+* Issue #99 fixed.
+* Issue #100 fixed.
+* Issue #101 fixed.
+* Issue #107 fixed.
+* Issue #108 fixed.
+* Issue #109 fixed.
+
 ## 0.2.5-alpha (June 28, 2024)
 BUGFIXES:
 * resource meraki_networks_appliance_firewall_l3_firewall_rules this_rule - rules issues for empty ruleset and syslog_default_rule #76.

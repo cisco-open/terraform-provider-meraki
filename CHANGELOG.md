@@ -1,3 +1,7 @@
+## 0.2.7-alpha (July 16, 2024)
+* meraki_devices_management_interface error on import state #109.
+* Encountering panic in latest version when attempting to create meraki_networks (Resource) #111. Solved in utils file.
+
 ## 0.2.6-alpha (July 15, 2024)
 BUGFIXES:
 * Issue #88 fixed.

@@ -4,6 +4,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/url"
 	"strings"
 
@@ -179,7 +180,9 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 	}
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
+		log.Print("responseStruct: ", responseStruct)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
+		log.Print("Result: ", result)
 		if result != nil {
 			result2 := result.(map[string]interface{})
 			vvNetworkID, ok := result2["ID"].(string)
@@ -520,29 +523,30 @@ func getAllItemsNetworks(client merakigosdk.Client, organizationId string) (mera
 		PerPage: 1000,
 	})
 	count := 0
-	all_response = append(all_response, *response...)
-	for len(*response) >= 1000 {
-		count += 1
-		fmt.Println(count)
-		links := strings.Split(r2.Header().Get("Link"), ",")
-		var link string
-		if count > 1 {
-			link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[2], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
-		} else {
-			link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[1], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
-		}
-		myUrl, _ := url.Parse(link)
-		params, _ := url.ParseQuery(myUrl.RawQuery)
-		if params["endingBefore"] != nil {
-			response, r2, er = client.Organizations.GetOrganizationNetworks(organizationId, &merakigosdk.GetOrganizationNetworksQueryParams{
-				PerPage:      1000,
-				EndingBefore: params["endingBefore"][0],
-			})
-			all_response = append(all_response, *response...)
-		} else {
-			break
+	if response != nil {
+		all_response = append(all_response, *response...)
+		for len(*response) >= 1000 {
+			count += 1
+			fmt.Println(count)
+			links := strings.Split(r2.Header().Get("Link"), ",")
+			var link string
+			if count > 1 {
+				link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[2], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
+			} else {
+				link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[1], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
+			}
+			myUrl, _ := url.Parse(link)
+			params, _ := url.ParseQuery(myUrl.RawQuery)
+			if params["endingBefore"] != nil {
+				response, r2, er = client.Organizations.GetOrganizationNetworks(organizationId, &merakigosdk.GetOrganizationNetworksQueryParams{
+					PerPage:      1000,
+					EndingBefore: params["endingBefore"][0],
+				})
+				all_response = append(all_response, *response...)
+			} else {
+				break
+			}
 		}
 	}
-
 	return all_response, r2, er
 }

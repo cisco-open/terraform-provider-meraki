@@ -528,7 +528,7 @@ func ResponseDevicesGetDeviceManagementInterfaceItemToBodyRs(state DevicesManage
 					DdnsHostnameWan2:   types.StringValue(response.DdnsHostnames.DdnsHostnameWan2),
 				}
 			}
-			return &ResponseDevicesGetDeviceManagementInterfaceDdnsHostnamesRs{}
+			return nil
 		}(),
 		Wan1: func() *ResponseDevicesGetDeviceManagementInterfaceWan1Rs {
 			if response.Wan1 != nil {
@@ -552,7 +552,7 @@ func ResponseDevicesGetDeviceManagementInterfaceItemToBodyRs(state DevicesManage
 					WanEnabled: types.StringValue(response.Wan1.WanEnabled),
 				}
 			}
-			return &ResponseDevicesGetDeviceManagementInterfaceWan1Rs{}
+			return nil
 		}(),
 		Wan2: func() *ResponseDevicesGetDeviceManagementInterfaceWan2Rs {
 			if response.Wan2 != nil {
@@ -576,7 +576,7 @@ func ResponseDevicesGetDeviceManagementInterfaceItemToBodyRs(state DevicesManage
 					WanEnabled: types.StringValue(response.Wan2.WanEnabled),
 				}
 			}
-			return &ResponseDevicesGetDeviceManagementInterfaceWan2Rs{}
+			return nil
 		}(),
 	}
 	if is_read {

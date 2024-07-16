@@ -171,8 +171,10 @@ func getDictResult(result interface{}, key string, value interface{}, cmpFn cmpF
 	processItem := func(item interface{}) {
 		if itemMap, ok := isMapStringInterface(item); ok {
 			// Verificar si la clave y el valor coinciden con los proporcionados.
+			log.Print(" Verificar si la clave y el valor coinciden con los proporcionados.")
 			if val, ok := itemMap[key]; ok && cmpFn(val, value) {
 				// Bloquear el acceso al mapa antes de realizar la asignación
+				log.Print(" Bloquear el acceso al mapa antes de realizar la asignación")
 				mu.Lock()
 				defer mu.Unlock()
 				resultMap = itemMap
@@ -181,14 +183,19 @@ func getDictResult(result interface{}, key string, value interface{}, cmpFn cmpF
 	}
 
 	// Verificar si el resultado es un slice.
+	log.Print("Verificar si el resultado es un slice.")
 	if reflect.TypeOf(result).Kind() == reflect.Slice {
 		resultSlice := reflect.ValueOf(result)
+		log.Print("Verificar si el resultado es un slice. 2")
 		if resultSlice.Len() == 0 {
 			return nil
 		}
+		log.Print("Si el slice tiene un solo elemento.")
 		// Si el slice tiene un solo elemento.
 		if resultSlice.Len() == 1 {
 			if itemMap, ok := isMapStringInterface(resultSlice.Index(0).Interface()); ok {
+
+				log.Print(" Verificar si la clave y el valor coinciden con los proporcionados.")
 				// Verificar si la clave y el valor coinciden con los proporcionados.
 				if val, ok := itemMap[key]; ok && !cmpFn(val, value) {
 					return nil
@@ -199,8 +206,13 @@ func getDictResult(result interface{}, key string, value interface{}, cmpFn cmpF
 		}
 
 		// Iterar sobre los elementos del slice.
+		log.Print("Iterar sobre los elementos del slice.")
+
 		for i := 0; i < resultSlice.Len(); i++ {
 			processItem(resultSlice.Index(i).Interface())
+		}
+		if len(reflect.ValueOf(resultMap).MapKeys()) == 0 {
+			return nil
 		}
 		return resultMap
 	}

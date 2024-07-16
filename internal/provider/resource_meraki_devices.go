@@ -505,27 +505,30 @@ func getAllItemsDevices(client merakigosdk.Client, organizationId string) (merak
 		PerPage: 1000,
 	})
 	count := 0
-	all_response = append(all_response, *response...)
-	for len(*response) >= 1000 {
-		count += 1
-		fmt.Println(count)
-		links := strings.Split(r2.Header().Get("Link"), ",")
-		var link string
-		if count > 1 {
-			link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[2], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
-		} else {
-			link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[1], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
-		}
-		myUrl, _ := url.Parse(link)
-		params, _ := url.ParseQuery(myUrl.RawQuery)
-		if params["endingBefore"] != nil {
-			response, r2, er = client.Organizations.GetOrganizationDevices(organizationId, &merakigosdk.GetOrganizationDevicesQueryParams{
-				PerPage:      1000,
-				EndingBefore: params["endingBefore"][0],
-			})
-			all_response = append(all_response, *response...)
-		} else {
-			break
+	if response != nil {
+		all_response = append(all_response, *response...)
+
+		for len(*response) >= 1000 {
+			count += 1
+			fmt.Println(count)
+			links := strings.Split(r2.Header().Get("Link"), ",")
+			var link string
+			if count > 1 {
+				link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[2], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
+			} else {
+				link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[1], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
+			}
+			myUrl, _ := url.Parse(link)
+			params, _ := url.ParseQuery(myUrl.RawQuery)
+			if params["endingBefore"] != nil {
+				response, r2, er = client.Organizations.GetOrganizationDevices(organizationId, &merakigosdk.GetOrganizationDevicesQueryParams{
+					PerPage:      1000,
+					EndingBefore: params["endingBefore"][0],
+				})
+				all_response = append(all_response, *response...)
+			} else {
+				break
+			}
 		}
 	}
 

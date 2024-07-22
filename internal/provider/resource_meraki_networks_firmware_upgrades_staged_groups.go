@@ -204,7 +204,7 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Create(ctx context.Contex
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter GroupID",
-					err.Error(),
+					"Fail Parsing GroupID",
 				)
 				return
 			}

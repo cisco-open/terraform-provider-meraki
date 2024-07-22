@@ -171,7 +171,7 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Create(ctx context.C
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter StaticDelegatedPrefixID",
-					err.Error(),
+					"Fail Parsing StaticDelegatedPrefixID",
 				)
 				return
 			}

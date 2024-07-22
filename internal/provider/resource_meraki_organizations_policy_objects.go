@@ -194,7 +194,7 @@ func (r *OrganizationsPolicyObjectsResource) Create(ctx context.Context, req res
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter PolicyObjectID",
-					err.Error(),
+					"Fail Parsing PolicyObjectID",
 				)
 				return
 			}

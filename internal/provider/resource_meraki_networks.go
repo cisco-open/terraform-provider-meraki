@@ -189,7 +189,7 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter NetworkID",
-					err.Error(),
+					"Fail Parsing NetworkID",
 				)
 				return
 			}

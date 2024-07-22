@@ -677,7 +677,7 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Create(ctx context.Cont
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter QualityRetentionProfileID",
-					err.Error(),
+					"Fail Parsing QualityRetentionProfileID",
 				)
 				return
 			}

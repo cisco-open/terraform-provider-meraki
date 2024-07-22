@@ -137,7 +137,7 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Create(ctx context
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter ArtifactID",
-					err.Error(),
+					"Fail Parsing ArtifactID",
 				)
 				return
 			}

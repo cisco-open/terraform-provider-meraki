@@ -192,7 +192,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Create(ctx context.Context, r
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter PayloadTemplateID",
-					err.Error(),
+					"Fail Parsing PayloadTemplateID",
 				)
 				return
 			}

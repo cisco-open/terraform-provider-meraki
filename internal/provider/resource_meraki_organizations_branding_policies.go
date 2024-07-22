@@ -486,7 +486,7 @@ func (r *OrganizationsBrandingPoliciesResource) Create(ctx context.Context, req 
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter BrandingPolicyID",
-					err.Error(),
+					"Fail Parsing BrandingPolicyID",
 				)
 				return
 			}

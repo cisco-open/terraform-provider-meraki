@@ -425,7 +425,13 @@ func ResponseSwitchGetNetworkSwitchStpItemToBodyRs(state NetworksSwitchStpRs, re
 				result := make([]ResponseSwitchGetNetworkSwitchStpStpBridgePriorityRs, len(*response.StpBridgePriority))
 				var localStacks basetypes.SetValue
 				var localSwitchProfiles basetypes.SetValue
-				b := *state.StpBridgePriority
+				var b []ResponseSwitchGetNetworkSwitchStpStpBridgePriorityRs
+				if state.StpBridgePriority != nil {
+					b = *state.StpBridgePriority
+				} else {
+					b = make([]ResponseSwitchGetNetworkSwitchStpStpBridgePriorityRs, 0)
+				}
+
 				for i, stpBridgePriority := range *response.StpBridgePriority {
 					if len(b) > i {
 						localStacks = b[i].Stacks
@@ -448,7 +454,7 @@ func ResponseSwitchGetNetworkSwitchStpItemToBodyRs(state NetworksSwitchStpRs, re
 				}
 				return &result
 			}
-			return &[]ResponseSwitchGetNetworkSwitchStpStpBridgePriorityRs{}
+			return nil
 		}(),
 	}
 

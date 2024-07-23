@@ -180,7 +180,7 @@ type ResponseSwitchGetNetworkSwitchRoutingOspf struct {
 }
 
 type ResponseSwitchGetNetworkSwitchRoutingOspfAreas struct {
-	AreaID   types.String `tfsdk:"area_id"`
+	AreaID   types.Int64  `tfsdk:"area_id"`
 	AreaName types.String `tfsdk:"area_name"`
 	AreaType types.String `tfsdk:"area_type"`
 }
@@ -198,7 +198,7 @@ type ResponseSwitchGetNetworkSwitchRoutingOspfV3 struct {
 }
 
 type ResponseSwitchGetNetworkSwitchRoutingOspfV3Areas struct {
-	AreaID   types.String `tfsdk:"area_id"`
+	AreaID   types.Int64  `tfsdk:"area_id"`
 	AreaName types.String `tfsdk:"area_name"`
 	AreaType types.String `tfsdk:"area_type"`
 }
@@ -211,7 +211,7 @@ func ResponseSwitchGetNetworkSwitchRoutingOspfItemToBody(state NetworksSwitchRou
 				result := make([]ResponseSwitchGetNetworkSwitchRoutingOspfAreas, len(*response.Areas))
 				for i, areas := range *response.Areas {
 					result[i] = ResponseSwitchGetNetworkSwitchRoutingOspfAreas{
-						AreaID:   types.StringValue(areas.AreaID),
+						AreaID:   types.Int64Value(int64(*areas.AreaID)),
 						AreaName: types.StringValue(areas.AreaName),
 						AreaType: types.StringValue(areas.AreaType),
 					}
@@ -256,7 +256,7 @@ func ResponseSwitchGetNetworkSwitchRoutingOspfItemToBody(state NetworksSwitchRou
 					Passphrase: types.StringValue(response.Md5AuthenticationKey.Passphrase),
 				}
 			}
-			return &ResponseSwitchGetNetworkSwitchRoutingOspfMd5AuthenticationKey{}
+			return nil
 		}(),
 		V3: func() *ResponseSwitchGetNetworkSwitchRoutingOspfV3 {
 			if response.V3 != nil {
@@ -266,7 +266,7 @@ func ResponseSwitchGetNetworkSwitchRoutingOspfItemToBody(state NetworksSwitchRou
 							result := make([]ResponseSwitchGetNetworkSwitchRoutingOspfV3Areas, len(*response.V3.Areas))
 							for i, areas := range *response.V3.Areas {
 								result[i] = ResponseSwitchGetNetworkSwitchRoutingOspfV3Areas{
-									AreaID:   types.StringValue(areas.AreaID),
+									AreaID:   types.Int64Value(int64(*areas.AreaID)),
 									AreaName: types.StringValue(areas.AreaName),
 									AreaType: types.StringValue(areas.AreaType),
 								}
@@ -295,7 +295,7 @@ func ResponseSwitchGetNetworkSwitchRoutingOspfItemToBody(state NetworksSwitchRou
 					}(),
 				}
 			}
-			return &ResponseSwitchGetNetworkSwitchRoutingOspfV3{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

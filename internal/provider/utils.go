@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"strconv"
 	"sync"
 
 	tfsdkr "github.com/cisco-open/terraform-provider-meraki/internal/provider/reflects"
@@ -330,6 +331,16 @@ func mapToStruct(data map[string]interface{}, target interface{}) error {
 
 	return nil
 }
+
+func int64ToString(i *int64) string {
+	// log.Printf("INT: %v", i)
+	if i == nil {
+		return ""
+	}
+	a := strconv.Itoa(int(*i))
+	return a
+}
+
 func int64ToIntPointer(i *int64) *int {
 	// log.Printf("INT: %v", i)
 	if i == nil {

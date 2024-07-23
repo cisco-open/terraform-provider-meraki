@@ -30,7 +30,7 @@ terraform {
   required_providers {
     meraki = {
       source = "cisco-open/meraki"
-      version = "0.2.8-alpha"
+      version = "0.2.9-alpha"
     }
   }
 }
@@ -68,7 +68,7 @@ terraform {
   required_providers {
     meraki = {
       source = "hashicorp.com/edu/meraki"
-      version = "0.2.8-alpha"
+      version = "0.2.9-alpha"
     }
   }
 }

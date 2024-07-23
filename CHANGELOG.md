@@ -1,4 +1,4 @@
-## 0.2.8-alpha (July 23, 2024)
+## 0.2.9-alpha (July 23, 2024)
 BUGFIXES:
 * meraki_networks_switch_stp - plugin crash when reading #114.
 * Failure when executing GetNetworkSwitchRoutingOspf #115.

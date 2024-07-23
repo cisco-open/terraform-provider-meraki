@@ -60,12 +60,12 @@ func (r *NetworksSwitchRoutingOspfResource) Schema(_ context.Context, _ resource
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
-						"area_id": schema.StringAttribute{
+						"area_id": schema.Int64Attribute{
 							MarkdownDescription: `OSPF area ID`,
 							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.Int64{
+								int64planmodifier.UseStateForUnknown(),
 							},
 						},
 						"area_name": schema.StringAttribute{
@@ -176,12 +176,12 @@ func (r *NetworksSwitchRoutingOspfResource) Schema(_ context.Context, _ resource
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
-								"area_id": schema.StringAttribute{
+								"area_id": schema.Int64Attribute{
 									MarkdownDescription: `OSPF area ID`,
 									Computed:            true,
 									Optional:            true,
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.UseStateForUnknown(),
+									PlanModifiers: []planmodifier.Int64{
+										int64planmodifier.UseStateForUnknown(),
 									},
 								},
 								"area_name": schema.StringAttribute{
@@ -425,7 +425,7 @@ type NetworksSwitchRoutingOspfRs struct {
 }
 
 type ResponseSwitchGetNetworkSwitchRoutingOspfAreasRs struct {
-	AreaID   types.String `tfsdk:"area_id"`
+	AreaID   types.Int64  `tfsdk:"area_id"`
 	AreaName types.String `tfsdk:"area_name"`
 	AreaType types.String `tfsdk:"area_type"`
 }
@@ -443,7 +443,7 @@ type ResponseSwitchGetNetworkSwitchRoutingOspfV3Rs struct {
 }
 
 type ResponseSwitchGetNetworkSwitchRoutingOspfV3AreasRs struct {
-	AreaID   types.String `tfsdk:"area_id"`
+	AreaID   types.Int64  `tfsdk:"area_id"`
 	AreaName types.String `tfsdk:"area_name"`
 	AreaType types.String `tfsdk:"area_type"`
 }
@@ -453,11 +453,11 @@ func (r *NetworksSwitchRoutingOspfRs) toSdkApiRequestUpdate(ctx context.Context)
 	var requestSwitchUpdateNetworkSwitchRoutingOspfAreas []merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspfAreas
 	if r.Areas != nil {
 		for _, rItem1 := range *r.Areas {
-			areaID := rItem1.AreaID.ValueString()
+			areaID := rItem1.AreaID.ValueInt64()
 			areaName := rItem1.AreaName.ValueString()
 			areaType := rItem1.AreaType.ValueString()
 			requestSwitchUpdateNetworkSwitchRoutingOspfAreas = append(requestSwitchUpdateNetworkSwitchRoutingOspfAreas, merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspfAreas{
-				AreaID:   areaID,
+				AreaID:   int64ToString(&areaID),
 				AreaName: areaName,
 				AreaType: areaType,
 			})
@@ -506,11 +506,11 @@ func (r *NetworksSwitchRoutingOspfRs) toSdkApiRequestUpdate(ctx context.Context)
 		var requestSwitchUpdateNetworkSwitchRoutingOspfV3Areas []merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspfV3Areas
 		if r.V3.Areas != nil {
 			for _, rItem1 := range *r.V3.Areas { //V3.Areas// name: areas
-				areaID := rItem1.AreaID.ValueString()
+				areaID := rItem1.AreaID.ValueInt64()
 				areaName := rItem1.AreaName.ValueString()
 				areaType := rItem1.AreaType.ValueString()
 				requestSwitchUpdateNetworkSwitchRoutingOspfV3Areas = append(requestSwitchUpdateNetworkSwitchRoutingOspfV3Areas, merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspfV3Areas{
-					AreaID:   areaID,
+					AreaID:   int64ToString(&areaID),
 					AreaName: areaName,
 					AreaType: areaType,
 				})
@@ -571,14 +571,14 @@ func ResponseSwitchGetNetworkSwitchRoutingOspfItemToBodyRs(state NetworksSwitchR
 				result := make([]ResponseSwitchGetNetworkSwitchRoutingOspfAreasRs, len(*response.Areas))
 				for i, areas := range *response.Areas {
 					result[i] = ResponseSwitchGetNetworkSwitchRoutingOspfAreasRs{
-						AreaID:   types.StringValue(areas.AreaID),
+						AreaID:   types.Int64Value(int64(*areas.AreaID)),
 						AreaName: types.StringValue(areas.AreaName),
 						AreaType: types.StringValue(areas.AreaType),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseSwitchGetNetworkSwitchRoutingOspfAreasRs{}
+			return nil
 		}(),
 		DeadTimerInSeconds: func() types.Int64 {
 			if response.DeadTimerInSeconds != nil {
@@ -626,14 +626,14 @@ func ResponseSwitchGetNetworkSwitchRoutingOspfItemToBodyRs(state NetworksSwitchR
 							result := make([]ResponseSwitchGetNetworkSwitchRoutingOspfV3AreasRs, len(*response.V3.Areas))
 							for i, areas := range *response.V3.Areas {
 								result[i] = ResponseSwitchGetNetworkSwitchRoutingOspfV3AreasRs{
-									AreaID:   types.StringValue(areas.AreaID),
+									AreaID:   types.Int64Value(int64(*areas.AreaID)),
 									AreaName: types.StringValue(areas.AreaName),
 									AreaType: types.StringValue(areas.AreaType),
 								}
 							}
 							return &result
 						}
-						return &[]ResponseSwitchGetNetworkSwitchRoutingOspfV3AreasRs{}
+						return nil
 					}(),
 					DeadTimerInSeconds: func() types.Int64 {
 						if response.V3.DeadTimerInSeconds != nil {

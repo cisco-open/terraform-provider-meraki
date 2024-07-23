@@ -230,7 +230,7 @@ func (r *OrganizationsSamlRolesResource) Create(ctx context.Context, req resourc
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter SamlRoleID",
-					err.Error(),
+					"Fail Parsing SamlRoleID",
 				)
 				return
 			}

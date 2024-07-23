@@ -184,7 +184,7 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Create(ctx context.Context, 
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter ID",
-					err.Error(),
+					"Fail Parsing ID",
 				)
 				return
 			}

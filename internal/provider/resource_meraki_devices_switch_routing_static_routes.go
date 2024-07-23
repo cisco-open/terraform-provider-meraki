@@ -149,7 +149,7 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Create(ctx context.Context, r
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter StaticRouteID",
-					err.Error(),
+					"Fail Parsing StaticRouteID",
 				)
 				return
 			}

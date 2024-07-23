@@ -274,7 +274,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Create(ctx context.Conte
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter InterfaceID",
-					err.Error(),
+					"Fail Parsing InterfaceID",
 				)
 				return
 			}

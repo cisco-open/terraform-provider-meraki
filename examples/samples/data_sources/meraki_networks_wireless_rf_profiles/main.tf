@@ -7,19 +7,16 @@ terraform {
     }
   }
 }
-
 provider "meraki" {
   meraki_debug = "true"
 }
 
-resource "meraki_networks_webhooks_http_servers" "webhook_http_server" {
-  name = "Pulumi Test Webhook"
-  url = "https://example.com/test"
-  network_id = "L_828099381482775375"
-  shared_secret = "redactedSecret"
-  payload_template = {
-    name = "Meraki (included)"
-    payload_template_id = "wpt_00001"
-  }
+
+data "meraki_networks_wireless_rf_profiles" "example" {
+network_id = "L_828099381482775342"
+rf_profile_id = "outdoor"
 }
 
+output "meraki_networks_wireless_rf_profiles_example" {
+value = data.meraki_networks_wireless_rf_profiles.example.item
+}

@@ -1021,10 +1021,11 @@ func (r *NetworksSensorAlertsProfilesResource) Create(ctx context.Context, req r
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter ID",
-					err.Error(),
+					"Fail Parsing ID",
 				)
 				return
 			}
+
 			r.client.Sensor.UpdateNetworkSensorAlertsProfile(vvNetworkID, vvID, data.toSdkApiRequestUpdate(ctx))
 			responseVerifyItem2, _, _ := r.client.Sensor.GetNetworkSensorAlertsProfile(vvNetworkID, vvID)
 			if responseVerifyItem2 != nil {
@@ -1074,7 +1075,7 @@ func (r *NetworksSensorAlertsProfilesResource) Create(ctx context.Context, req r
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
 		result2 := result.(map[string]interface{})
-		vvID, ok := result2["Name"].(string)
+		vvID, ok := result2["ProfileID"].(string)
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter ID",
@@ -1082,6 +1083,7 @@ func (r *NetworksSensorAlertsProfilesResource) Create(ctx context.Context, req r
 			)
 			return
 		}
+		// time.Sleep(5 * time.Second)
 		responseVerifyItem2, restyRespGet, err := r.client.Sensor.GetNetworkSensorAlertsProfile(vvNetworkID, vvID)
 		if responseVerifyItem2 != nil && err == nil {
 			data = ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(data, responseVerifyItem2, false)

@@ -947,7 +947,7 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter GroupPolicyID",
-					err.Error(),
+					"Fail Parsing GroupPolicyID",
 				)
 				return
 			}

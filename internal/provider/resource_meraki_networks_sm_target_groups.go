@@ -132,7 +132,7 @@ func (r *NetworksSmTargetGroupsResource) Create(ctx context.Context, req resourc
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter TargetGroupID",
-					err.Error(),
+					"Fail Parsing TargetGroupID",
 				)
 				return
 			}

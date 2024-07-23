@@ -1522,7 +1522,7 @@ func (r *NetworksWirelessRfProfilesResource) Create(ctx context.Context, req res
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter RfProfileID",
-					err.Error(),
+					"Fail Parsing RfProfileID",
 				)
 				return
 			}

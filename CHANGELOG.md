@@ -1,4 +1,14 @@
-## 0.2.7-alpha (July 16, 2024)
+## 0.2.9-alpha (July 23, 2024)
+BUGFIXES:
+* meraki_networks_switch_stp - plugin crash when reading #114.
+* Failure when executing GetNetworkSwitchRoutingOspf #115.
+* meraki_networks_vlan_profiles silently fails when attempting to create a resource on the default profile #94.
+* Resource meraki_networks_sensor_alerts_profiles error with operation CreateNetworkSensorAlertsProfile #91.
+* Resource meraki_networks_wireless_rf_profiles error when trying to create new profile.
+#88.
+
+## 0.2.8-alpha (July 16, 2024)
+BUGFIXES:
 * meraki_devices_management_interface error on import state #109.
 * Encountering panic in latest version when attempting to create meraki_networks (Resource) #111. Solved in utils file.
 

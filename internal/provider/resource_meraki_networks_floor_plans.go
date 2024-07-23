@@ -368,7 +368,7 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter FloorPlanID",
-					err.Error(),
+					"Fail Parsing FloorPlanID",
 				)
 				return
 			}

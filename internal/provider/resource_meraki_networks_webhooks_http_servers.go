@@ -170,7 +170,7 @@ func (r *NetworksWebhooksHTTPServersResource) Create(ctx context.Context, req re
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter HTTPServerID",
-					err.Error(),
+					"Fail Parsing HTTPServerID",
 				)
 				return
 			}

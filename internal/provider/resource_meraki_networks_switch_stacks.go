@@ -129,7 +129,7 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter SwitchStackID",
-					err.Error(),
+					"Fail Parsing SwitchStackID",
 				)
 				return
 			}

@@ -199,7 +199,7 @@ func (r *NetworksVLANProfilesResource) Create(ctx context.Context, req resource.
 	//Have Create
 	if err != nil {
 		if restyResp1 != nil {
-			if restyResp1.StatusCode() != 404 {
+			if restyResp1.StatusCode() != 404 && restyResp1.StatusCode() != 400 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkVLANProfiles",
 					err.Error(),

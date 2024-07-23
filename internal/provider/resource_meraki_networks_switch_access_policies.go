@@ -491,7 +491,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Create(ctx context.Context, req r
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter AccessPolicyNumber",
-					err.Error(),
+					"Fail Parsing AccessPolicyNumber",
 				)
 				return
 			}

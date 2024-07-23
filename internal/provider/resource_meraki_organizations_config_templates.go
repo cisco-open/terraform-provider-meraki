@@ -142,7 +142,7 @@ func (r *OrganizationsConfigTemplatesResource) Create(ctx context.Context, req r
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter ConfigTemplateID",
-					err.Error(),
+					"Fail Parsing ConfigTemplateID",
 				)
 				return
 			}

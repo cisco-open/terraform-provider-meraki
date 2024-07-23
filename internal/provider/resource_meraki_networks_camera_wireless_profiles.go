@@ -201,7 +201,7 @@ func (r *NetworksCameraWirelessProfilesResource) Create(ctx context.Context, req
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter WirelessProfileID",
-					err.Error(),
+					"Fail Parsing WirelessProfileID",
 				)
 				return
 			}

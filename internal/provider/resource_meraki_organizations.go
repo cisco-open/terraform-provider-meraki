@@ -214,7 +214,7 @@ func (r *OrganizationsResource) Create(ctx context.Context, req resource.CreateR
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter OrganizationID",
-					err.Error(),
+					"Fail Parsing OrganizationID",
 				)
 				return
 			}

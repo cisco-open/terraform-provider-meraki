@@ -221,7 +221,7 @@ func (r *NetworksMerakiAuthUsersResource) Create(ctx context.Context, req resour
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter MerakiAuthUserID",
-					err.Error(),
+					"Fail Parsing MerakiAuthUserID",
 				)
 				return
 			}

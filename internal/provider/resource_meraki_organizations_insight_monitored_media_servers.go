@@ -136,7 +136,7 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Create(ctx context.C
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter MonitoredMediaServerID",
-					err.Error(),
+					"Fail Parsing MonitoredMediaServerID",
 				)
 				return
 			}

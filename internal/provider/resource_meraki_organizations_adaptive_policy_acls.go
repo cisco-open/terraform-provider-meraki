@@ -209,7 +209,7 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Create(ctx context.Context, re
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter ACLID",
-					err.Error(),
+					"Fail Parsing ACLID",
 				)
 				return
 			}

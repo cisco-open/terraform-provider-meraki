@@ -7,7 +7,7 @@ BUGFIXES:
 * Resource meraki_networks_wireless_rf_profiles error when trying to create new profile.
 #88.
 
-## 0.2.7-alpha (July 16, 2024)
+## 0.2.8-alpha (July 16, 2024)
 BUGFIXES:
 * meraki_devices_management_interface error on import state #109.
 * Encountering panic in latest version when attempting to create meraki_networks (Resource) #111. Solved in utils file.

@@ -2,7 +2,7 @@ terraform {
   required_providers {
     meraki = {
       source  = "hashicorp.com/edu/meraki"
-      version = "0.2.7-alpha"
+      version = "0.2.8-alpha"
     }
   }
 

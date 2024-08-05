@@ -642,13 +642,13 @@ func (r *NetworksSwitchStacksRoutingInterfacesRs) toSdkApiRequestUpdate(ctx cont
 	if r.IPv6 != nil {
 		address := r.IPv6.Address.ValueString()
 		assignmentMode := r.IPv6.AssignmentMode.ValueString()
-		gateway := r.IPv6.Gateway.ValueString()
+		// gateway := r.IPv6.Gateway.ValueString()
 		prefix := r.IPv6.Prefix.ValueString()
 		requestSwitchUpdateNetworkSwitchStackRoutingInterfaceIPv6 = &merakigosdk.RequestSwitchUpdateNetworkSwitchStackRoutingInterfaceIPv6{
 			Address:        address,
 			AssignmentMode: assignmentMode,
-			Gateway:        gateway,
-			Prefix:         prefix,
+			// Gateway:        gateway,
+			Prefix: prefix,
 		}
 	}
 	multicastRouting := new(string)

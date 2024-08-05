@@ -153,7 +153,7 @@ func (d *OrganizationsDevicesDataSource) Schema(_ context.Context, _ datasource.
 							MarkdownDescription: `Firmware version of the device`,
 							Computed:            true,
 						},
-						"imei": schema.StringAttribute{
+						"imei": schema.Float64Attribute{
 							MarkdownDescription: `IMEI of the device, if applicable`,
 							Computed:            true,
 						},
@@ -290,7 +290,7 @@ type ResponseItemOrganizationsGetOrganizationDevices struct {
 	Address     types.String                                              `tfsdk:"address"`
 	Details     *[]ResponseItemOrganizationsGetOrganizationDevicesDetails `tfsdk:"details"`
 	Firmware    types.String                                              `tfsdk:"firmware"`
-	Imei        types.String                                              `tfsdk:"imei"`
+	Imei        types.Float64                                             `tfsdk:"imei"`
 	LanIP       types.String                                              `tfsdk:"lan_ip"`
 	Lat         types.Float64                                             `tfsdk:"lat"`
 	Lng         types.Float64                                             `tfsdk:"lng"`
@@ -329,8 +329,13 @@ func ResponseOrganizationsGetOrganizationDevicesItemsToBody(state OrganizationsD
 				return &[]ResponseItemOrganizationsGetOrganizationDevicesDetails{}
 			}(),
 			Firmware: types.StringValue(item.Firmware),
-			Imei:     types.StringValue(item.Imei),
-			LanIP:    types.StringValue(item.LanIP),
+			Imei: func() types.Float64 {
+				if item.Imei != nil {
+					return types.Float64Value(float64(*item.Imei))
+				}
+				return types.Float64{}
+			}(),
+			LanIP: types.StringValue(item.LanIP),
 			Lat: func() types.Float64 {
 				if item.Lat != nil {
 					return types.Float64Value(float64(*item.Lat))

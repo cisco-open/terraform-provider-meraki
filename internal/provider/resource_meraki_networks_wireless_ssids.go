@@ -1455,9 +1455,16 @@ func (r *NetworksWirelessSSIDsResource) ImportState(ctx context.Context, req res
 		)
 		return
 	}
-
+	number, err := strconv.Atoi(idParts[1])
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Unexpected Import Type",
+			fmt.Sprintf("Expected import type integer: %q", req.ID),
+		)
+		return
+	}
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("number"), idParts[1])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("number"), number)...)
 }
 
 func (r *NetworksWirelessSSIDsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {

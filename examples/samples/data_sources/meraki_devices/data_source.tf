@@ -7,9 +7,9 @@ terraform {
     }
   }
 }
-provider "meraki" {
-  meraki_debug = "true"
-}
+# provider "meraki" {
+#   meraki_debug = "true"
+# }
 data "meraki_devices" "example" {
 
   #   organization_id = "828099381482762766"

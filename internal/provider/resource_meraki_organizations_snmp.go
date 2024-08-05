@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -51,6 +52,9 @@ func (r *OrganizationsSNMPResource) Schema(_ context.Context, _ resource.SchemaR
 			"hostname": schema.StringAttribute{
 				MarkdownDescription: `The hostname of the SNMP server.`,
 				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
@@ -69,10 +73,16 @@ func (r *OrganizationsSNMPResource) Schema(_ context.Context, _ resource.SchemaR
 			"port": schema.Int64Attribute{
 				MarkdownDescription: `The port of the SNMP server.`,
 				Computed:            true,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
 			},
 			"v2_community_string": schema.StringAttribute{
 				MarkdownDescription: `The community string for SNMP version 2c, if enabled.`,
 				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"v2c_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating whether SNMP version 2c is enabled for the organization.`,
@@ -137,6 +147,9 @@ func (r *OrganizationsSNMPResource) Schema(_ context.Context, _ resource.SchemaR
 			"v3_user": schema.StringAttribute{
 				MarkdownDescription: `The user for SNMP version 3, if enabled.`,
 				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 		},
 	}
@@ -410,6 +423,8 @@ func ResponseOrganizationsGetOrganizationSNMPItemToBodyRs(state OrganizationsSNM
 		}(),
 		V3PrivMode: types.StringValue(response.V3PrivMode),
 		V3User:     types.StringValue(response.V3User),
+		V3AuthPass: state.V3AuthPass,
+		V3PrivPass: state.V3PrivPass,
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsSNMPRs)

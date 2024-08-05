@@ -1,0 +1,1 @@
+terraform import meraki_organizations_early_access_features_opt_ins.example "opt_in_id,organization_id"

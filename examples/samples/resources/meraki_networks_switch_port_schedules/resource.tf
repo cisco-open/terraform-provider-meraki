@@ -1,15 +1,28 @@
+terraform {
+  required_providers {
+    meraki = {
+      version = "0.2.9-alpha"
+      source  = "hashicorp.com/edu/meraki"
+      # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
+    }
+  }
+}
+
+provider "meraki" {
+  meraki_debug = "true"
+}
 
 resource "meraki_networks_switch_port_schedules" "example" {
 
   name       = "Weekdays schedule"
-  network_id = "string"
+  network_id = "L_828099381482771185"
   port_schedule = {
 
     friday = {
 
       active = true
       from   = "09:00"
-      to     = "17:00"
+      to     = "24:00"
     }
     monday = {
 
@@ -44,7 +57,7 @@ resource "meraki_networks_switch_port_schedules" "example" {
     wednesday = {
 
       active = true
-      from   = "9:00"
+      from   = "09:00"
       to     = "17:00"
     }
   }

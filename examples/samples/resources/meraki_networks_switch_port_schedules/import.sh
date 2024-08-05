@@ -1,0 +1,1 @@
+terraform import meraki_networks_switch_port_schedules.example "network_id"

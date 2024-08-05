@@ -143,9 +143,9 @@ func (p *MerakiProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	if !data.MerakiDashboardApiKey.IsNull() && !data.MerakiDashboardApiKey.IsUnknown() {
 		merakiDashboardApiKey = data.MerakiDashboardApiKey.ValueString()
 	}
-	if !data.Debug.IsNull() && !data.Debug.IsUnknown() {
-		debug = data.Debug.ValueString()
-	}
+	// if !data.Debug.IsNull() && !data.Debug.IsUnknown() {
+	// 	debug = data.Debug.ValueString()
+	// }
 
 	// if !data.SSLVerify.IsNull() {
 	// 	sslVerify = data.SSLVerify.ValueString()

@@ -19,7 +19,7 @@ resource "meraki_devices_appliance_radio_settings" "example" {
   five_ghz_settings = {
 
     channel       = 149
-    channel_width = 20
+    channel_width = "20"
     target_power  = 15
   }
   rf_profile_id = "1234"
@@ -55,7 +55,7 @@ output "meraki_devices_appliance_radio_settings_example" {
 Optional:
 
 - `channel` (Number) Manual channel for 5 GHz
-- `channel_width` (Number) Manual channel width for 5 GHz
+- `channel_width` (String) Manual channel width for 5 GHz
 - `target_power` (Number) Manual target power for 5 GHz
 
 

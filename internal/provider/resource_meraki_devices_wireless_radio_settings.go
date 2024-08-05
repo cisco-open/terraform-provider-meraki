@@ -63,12 +63,12 @@ func (r *DevicesWirelessRadioSettingsResource) Schema(_ context.Context, _ resou
 							int64planmodifier.UseStateForUnknown(),
 						},
 					},
-					"channel_width": schema.Int64Attribute{
+					"channel_width": schema.StringAttribute{
 						MarkdownDescription: `Sets a manual channel for 5 GHz. Can be '0', '20', '40', '80' or '160' or null for using auto channel width.`,
 						Computed:            true,
 						Optional:            true,
-						PlanModifiers: []planmodifier.Int64{
-							int64planmodifier.UseStateForUnknown(),
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
 						},
 					},
 					"target_power": schema.Int64Attribute{
@@ -305,9 +305,9 @@ type DevicesWirelessRadioSettingsRs struct {
 }
 
 type ResponseWirelessGetDeviceWirelessRadioSettingsFiveGhzSettingsRs struct {
-	Channel      types.Int64 `tfsdk:"channel"`
-	ChannelWidth types.Int64 `tfsdk:"channel_width"`
-	TargetPower  types.Int64 `tfsdk:"target_power"`
+	Channel      types.Int64  `tfsdk:"channel"`
+	ChannelWidth types.String `tfsdk:"channel_width"`
+	TargetPower  types.Int64  `tfsdk:"target_power"`
 }
 
 type ResponseWirelessGetDeviceWirelessRadioSettingsTwoFourGhzSettingsRs struct {
@@ -326,12 +326,7 @@ func (r *DevicesWirelessRadioSettingsRs) toSdkApiRequestUpdate(ctx context.Conte
 			}
 			return nil
 		}()
-		channelWidth := func() *int64 {
-			if !r.FiveGhzSettings.ChannelWidth.IsUnknown() && !r.FiveGhzSettings.ChannelWidth.IsNull() {
-				return r.FiveGhzSettings.ChannelWidth.ValueInt64Pointer()
-			}
-			return nil
-		}()
+		channelWidth := r.FiveGhzSettings.ChannelWidth.ValueString()
 		targetPower := func() *int64 {
 			if !r.FiveGhzSettings.TargetPower.IsUnknown() && !r.FiveGhzSettings.TargetPower.IsNull() {
 				return r.FiveGhzSettings.TargetPower.ValueInt64Pointer()
@@ -340,7 +335,7 @@ func (r *DevicesWirelessRadioSettingsRs) toSdkApiRequestUpdate(ctx context.Conte
 		}()
 		requestWirelessUpdateDeviceWirelessRadioSettingsFiveGhzSettings = &merakigosdk.RequestWirelessUpdateDeviceWirelessRadioSettingsFiveGhzSettings{
 			Channel:      int64ToIntPointer(channel),
-			ChannelWidth: int64ToIntPointer(channelWidth),
+			ChannelWidth: channelWidth,
 			TargetPower:  int64ToIntPointer(targetPower),
 		}
 	}
@@ -389,12 +384,7 @@ func ResponseWirelessGetDeviceWirelessRadioSettingsItemToBodyRs(state DevicesWir
 						}
 						return types.Int64{}
 					}(),
-					ChannelWidth: func() types.Int64 {
-						if response.FiveGhzSettings.ChannelWidth != nil {
-							return types.Int64Value(int64(*response.FiveGhzSettings.ChannelWidth))
-						}
-						return types.Int64{}
-					}(),
+					ChannelWidth: types.StringValue(response.FiveGhzSettings.ChannelWidth),
 					TargetPower: func() types.Int64 {
 						if response.FiveGhzSettings.TargetPower != nil {
 							return types.Int64Value(int64(*response.FiveGhzSettings.TargetPower))

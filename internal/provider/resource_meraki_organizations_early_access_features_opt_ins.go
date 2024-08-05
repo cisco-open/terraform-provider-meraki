@@ -65,6 +65,16 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Schema(_ context.Contex
 
 				ElementType: types.StringType,
 			},
+			"limit_scope_to_networks_rs": schema.SetAttribute{
+				MarkdownDescription: `Networks assigned to the Early Access Feature`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+
+				ElementType: types.StringType,
+			},
 			"opt_in_id": schema.StringAttribute{
 				MarkdownDescription: `optInId path parameter. Opt in ID`,
 				Optional:            true,
@@ -322,8 +332,8 @@ type OrganizationsEarlyAccessFeaturesOptInsRs struct {
 	OptInID                types.String                                                                          `tfsdk:"opt_in_id"`
 	CreatedAt              types.String                                                                          `tfsdk:"created_at"`
 	ID                     types.String                                                                          `tfsdk:"id"`
-	LimitScopeToNetworks   *[]ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInLimitScopeToNetworksRs `tfsdk:"limit_scope_to_networks"`
-	LimitScopeToNetworksRs types.Set                                                                             `tfsdk:"limit_scope_to_networks_rs"`
+	LimitScopeToNetworks   *[]ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInLimitScopeToNetworksRs `tfsdk:"limit_scope_to_networks_rs"`
+	LimitScopeToNetworksRs types.Set                                                                             `tfsdk:"limit_scope_to_networks"`
 	ShortName              types.String                                                                          `tfsdk:"short_name"`
 }
 
@@ -374,9 +384,11 @@ func ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInItemToBodyRs(st
 				}
 				return &result
 			}
-			return &[]ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInLimitScopeToNetworksRs{}
+			return nil
 		}(),
-		ShortName: types.StringValue(response.ShortName),
+		ShortName:              types.StringValue(response.ShortName),
+		OrganizationID:         state.OrganizationID,
+		LimitScopeToNetworksRs: state.LimitScopeToNetworksRs,
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsEarlyAccessFeaturesOptInsRs)

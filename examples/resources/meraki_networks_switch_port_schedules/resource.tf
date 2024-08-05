@@ -8,37 +8,37 @@ resource "meraki_networks_switch_port_schedules" "example" {
     friday = {
 
       active = true
-      from   = "9:00"
+      from   = "09:00"
       to     = "17:00"
     }
     monday = {
 
       active = true
-      from   = "9:00"
+      from   = "09:00"
       to     = "17:00"
     }
     saturday = {
 
       active = false
-      from   = "0:00"
+      from   = "00:00"
       to     = "24:00"
     }
     sunday = {
 
       active = false
-      from   = "0:00"
+      from   = "00:00"
       to     = "24:00"
     }
     thursday = {
 
       active = true
-      from   = "9:00"
+      from   = "09:00"
       to     = "17:00"
     }
     tuesday = {
 
       active = true
-      from   = "9:00"
+      from   = "09:00"
       to     = "17:00"
     }
     wednesday = {

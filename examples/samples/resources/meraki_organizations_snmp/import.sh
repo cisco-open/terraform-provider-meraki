@@ -1,0 +1,1 @@
+terraform import meraki_organizations_snmp.example "organization_id"

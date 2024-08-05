@@ -3,9 +3,11 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"regexp"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -13,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -48,6 +51,9 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name for your port schedule. Required`,
@@ -97,6 +103,9 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.RegexMatches(regexp.MustCompile(`^(24:00|([01]\d|2[0-3]):[0-5]\d)$`), "The time, from '00:00' to '24:00' with format xx:xx"),
+								},
 							},
 							"to": schema.StringAttribute{
 								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
@@ -104,6 +113,9 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.RegexMatches(regexp.MustCompile(`^(24:00|([01]\d|2[0-3]):[0-5]\d)$`), "The time, from '00:00' to '24:00' with format xx:xx"),
 								},
 							},
 						},
@@ -132,6 +144,9 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.RegexMatches(regexp.MustCompile(`^(24:00|([01]\d|2[0-3]):[0-5]\d)$`), "The time, from '00:00' to '24:00' with format xx:xx"),
+								},
 							},
 							"to": schema.StringAttribute{
 								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
@@ -139,6 +154,9 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.RegexMatches(regexp.MustCompile(`^(24:00|([01]\d|2[0-3]):[0-5]\d)$`), "The time, from '00:00' to '24:00' with format xx:xx"),
 								},
 							},
 						},
@@ -167,6 +185,9 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.RegexMatches(regexp.MustCompile(`^(24:00|([01]\d|2[0-3]):[0-5]\d)$`), "The time, from '00:00' to '24:00' with format xx:xx"),
+								},
 							},
 							"to": schema.StringAttribute{
 								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
@@ -174,6 +195,9 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.RegexMatches(regexp.MustCompile(`^(24:00|([01]\d|2[0-3]):[0-5]\d)$`), "The time, from '00:00' to '24:00' with format xx:xx"),
 								},
 							},
 						},
@@ -202,6 +226,9 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.RegexMatches(regexp.MustCompile(`^(24:00|([01]\d|2[0-3]):[0-5]\d)$`), "The time, from '00:00' to '24:00' with format xx:xx"),
+								},
 							},
 							"to": schema.StringAttribute{
 								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
@@ -209,6 +236,9 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.RegexMatches(regexp.MustCompile(`^(24:00|([01]\d|2[0-3]):[0-5]\d)$`), "The time, from '00:00' to '24:00' with format xx:xx"),
 								},
 							},
 						},
@@ -237,6 +267,9 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.RegexMatches(regexp.MustCompile(`^(24:00|([01]\d|2[0-3]):[0-5]\d)$`), "The time, from '00:00' to '24:00' with format xx:xx"),
+								},
 							},
 							"to": schema.StringAttribute{
 								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
@@ -244,6 +277,9 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.RegexMatches(regexp.MustCompile(`^(24:00|([01]\d|2[0-3]):[0-5]\d)$`), "The time, from '00:00' to '24:00' with format xx:xx"),
 								},
 							},
 						},
@@ -272,6 +308,9 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.RegexMatches(regexp.MustCompile(`^(24:00|([01]\d|2[0-3]):[0-5]\d)$`), "The time, from '00:00' to '24:00' with format xx:xx"),
+								},
 							},
 							"to": schema.StringAttribute{
 								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
@@ -279,6 +318,9 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.RegexMatches(regexp.MustCompile(`^(24:00|([01]\d|2[0-3]):[0-5]\d)$`), "The time, from '00:00' to '24:00' with format xx:xx"),
 								},
 							},
 						},
@@ -307,6 +349,9 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
+								Validators: []validator.String{
+									stringvalidator.RegexMatches(regexp.MustCompile(`^(24:00|([01]\d|2[0-3]):[0-5]\d)$`), "The time, from '00:00' to '24:00' with format xx:xx"),
+								},
 							},
 							"to": schema.StringAttribute{
 								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
@@ -314,6 +359,9 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.RegexMatches(regexp.MustCompile(`^(24:00|([01]\d|2[0-3]):[0-5]\d)$`), "The time, from '00:00' to '24:00' with format xx:xx"),
 								},
 							},
 						},
@@ -382,6 +430,7 @@ func (r *NetworksSwitchPortSchedulesResource) Create(ctx context.Context, req re
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	var responseVerifyItem2 merakigosdk.ResponseItemSwitchGetNetworkSwitchPortSchedules
 	if result != nil {
+
 		err := mapToStruct(result.(map[string]interface{}), &responseVerifyItem2)
 		if err != nil {
 			resp.Diagnostics.AddError(
@@ -390,9 +439,33 @@ func (r *NetworksSwitchPortSchedulesResource) Create(ctx context.Context, req re
 			)
 			return
 		}
-		data = ResponseSwitchGetNetworkSwitchPortSchedulesItemToBodyRs(data, &responseVerifyItem2, false)
-		diags := resp.State.Set(ctx, &data)
-		resp.Diagnostics.Append(diags...)
+		r.client.Switch.UpdateNetworkSwitchPortSchedule(vvNetworkID, responseVerifyItem2.ID, data.toSdkApiRequestUpdate(ctx))
+		responseVerifyItem3, _, err := r.client.Switch.GetNetworkSwitchPortSchedules(vvNetworkID)
+		if err != nil {
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkSwitchPortSchedules in resource",
+				err.Error(),
+			)
+			return
+		}
+		data.NetworkID = types.StringValue(responseVerifyItem2.NetworkID)
+		responseStruct2 := structToMap(responseVerifyItem3)
+		result2 := getDictResult(responseStruct2, "Name", vvName, simpleCmp)
+		var responseVerifyItem4 merakigosdk.ResponseItemSwitchGetNetworkSwitchPortSchedules
+		if result2 != nil {
+			err := mapToStruct(result.(map[string]interface{}), &responseVerifyItem4)
+			if err != nil {
+				resp.Diagnostics.AddError(
+					"Failure when executing mapToStruct in resource",
+					err.Error(),
+				)
+				return
+			}
+			data = ResponseSwitchGetNetworkSwitchPortSchedulesItemToBodyRs(data, &responseVerifyItem4, false)
+			diags := resp.State.Set(ctx, &data)
+			resp.Diagnostics.Append(diags...)
+			return
+		}
 		return
 	}
 	dataRequest := data.toSdkApiRequestCreate(ctx)
@@ -1048,6 +1121,7 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemToBodyRs(state NetworksSwitc
 			}
 			return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleRs{}
 		}(),
+		NetworkID: state.NetworkID,
 	}
 	state = itemState
 	return state

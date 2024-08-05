@@ -56,7 +56,7 @@ func (d *DevicesWirelessRadioSettingsDataSource) Schema(_ context.Context, _ dat
 							"channel": schema.Int64Attribute{
 								Computed: true,
 							},
-							"channel_width": schema.Int64Attribute{
+							"channel_width": schema.StringAttribute{
 								Computed: true,
 							},
 							"target_power": schema.Int64Attribute{
@@ -137,9 +137,9 @@ type ResponseWirelessGetDeviceWirelessRadioSettings struct {
 }
 
 type ResponseWirelessGetDeviceWirelessRadioSettingsFiveGhzSettings struct {
-	Channel      types.Int64 `tfsdk:"channel"`
-	ChannelWidth types.Int64 `tfsdk:"channel_width"`
-	TargetPower  types.Int64 `tfsdk:"target_power"`
+	Channel      types.Int64  `tfsdk:"channel"`
+	ChannelWidth types.String `tfsdk:"channel_width"`
+	TargetPower  types.Int64  `tfsdk:"target_power"`
 }
 
 type ResponseWirelessGetDeviceWirelessRadioSettingsTwoFourGhzSettings struct {
@@ -159,12 +159,7 @@ func ResponseWirelessGetDeviceWirelessRadioSettingsItemToBody(state DevicesWirel
 						}
 						return types.Int64{}
 					}(),
-					ChannelWidth: func() types.Int64 {
-						if response.FiveGhzSettings.ChannelWidth != nil {
-							return types.Int64Value(int64(*response.FiveGhzSettings.ChannelWidth))
-						}
-						return types.Int64{}
-					}(),
+					ChannelWidth: types.StringValue(response.FiveGhzSettings.ChannelWidth),
 					TargetPower: func() types.Int64 {
 						if response.FiveGhzSettings.TargetPower != nil {
 							return types.Int64Value(int64(*response.FiveGhzSettings.TargetPower))

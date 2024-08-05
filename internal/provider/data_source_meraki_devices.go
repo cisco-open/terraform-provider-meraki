@@ -233,7 +233,7 @@ func (d *DevicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 							MarkdownDescription: `Firmware version of the device`,
 							Computed:            true,
 						},
-						"imei": schema.StringAttribute{
+						"imei": schema.Float64Attribute{
 							MarkdownDescription: `IMEI of the device, if applicable`,
 							Computed:            true,
 						},
@@ -440,8 +440,13 @@ func ResponseDevicesGetOrganizationDevicesItemsToBody(state Devices, response *m
 				return &[]ResponseItemOrganizationsGetOrganizationDevicesDetails{}
 			}(),
 			Firmware: types.StringValue(item.Firmware),
-			Imei:     types.StringValue(item.Imei),
-			LanIP:    types.StringValue(item.LanIP),
+			Imei: func() types.Float64 {
+				if item.Imei != nil {
+					return types.Float64Value(float64(*item.Imei))
+				}
+				return types.Float64{}
+			}(),
+			LanIP: types.StringValue(item.LanIP),
 			Lat: func() types.Float64 {
 				if item.Lat != nil {
 					return types.Float64Value(float64(*item.Lat))

@@ -1,3 +1,20 @@
+## 0.2.10-alpha (August 05, 2024)
+BUGFIXES:
+* Issue #117 Fixed.
+* Issue #118 Fixed.
+* Issue #120 Fixed.
+* Issue #121 Fixed.
+* Issue #122 Fixed.
+* Issue #123 Fixed.
+* Issue #124 Fixed.
+* Issue #125 Fixed.
+* Issue #126 Fixed.
+* Issue #127 Fixed.
+* Issue #128 Fixed.
+* Issue #129 Fixed.
+* Issue #130 Fixed.
+* Issue #131 Fixed.
+
 ## 0.2.9-alpha (July 23, 2024)
 BUGFIXES:
 * meraki_networks_switch_stp - plugin crash when reading #114.

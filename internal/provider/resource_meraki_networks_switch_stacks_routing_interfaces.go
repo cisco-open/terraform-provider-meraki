@@ -725,7 +725,7 @@ func ResponseSwitchGetNetworkSwitchStackRoutingInterfaceItemToBodyRs(state Netwo
 					Prefix:         types.StringValue(response.IPv6.Prefix),
 				}
 			}
-			return &ResponseSwitchGetNetworkSwitchStackRoutingInterfaceIpv6Rs{}
+			return nil
 		}(),
 		MulticastRouting: types.StringValue(response.MulticastRouting),
 		Name:             types.StringValue(response.Name),
@@ -747,7 +747,7 @@ func ResponseSwitchGetNetworkSwitchStackRoutingInterfaceItemToBodyRs(state Netwo
 					}(),
 				}
 			}
-			return &ResponseSwitchGetNetworkSwitchStackRoutingInterfaceOspfSettingsRs{}
+			return nil
 		}(),
 		OspfV3: func() *ResponseSwitchGetNetworkSwitchStackRoutingInterfaceOspfV3Rs {
 			if response.OspfV3 != nil {
@@ -767,7 +767,7 @@ func ResponseSwitchGetNetworkSwitchStackRoutingInterfaceItemToBodyRs(state Netwo
 					}(),
 				}
 			}
-			return &ResponseSwitchGetNetworkSwitchStackRoutingInterfaceOspfV3Rs{}
+			return nil
 		}(),
 		Subnet: types.StringValue(response.Subnet),
 		VLANID: func() types.Int64 {

@@ -21,8 +21,15 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 Please provide an screenshot of the successful API call with cuRL, Postman, etc.
 
+**Debug**
+Please provide provider debug. This will help us get a clearer picture of the problem you are having, therefore the solution will be more effective.
+To enable debug:
+```zsh
+export MERAKI_DEBUG=true
+export TF_LOG=DEBUG
+```
+
 **Environment (please complete the following information):**
-* Meraki Dashboard version: 
 * Terraform version:
 * Meraki provider version:
 * OS Version: 

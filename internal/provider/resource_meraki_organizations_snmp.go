@@ -400,7 +400,7 @@ func (r *OrganizationsSNMPRs) toSdkApiRequestUpdate(ctx context.Context) *meraki
 func ResponseOrganizationsGetOrganizationSNMPItemToBodyRs(state OrganizationsSNMPRs, response *merakigosdk.ResponseOrganizationsGetOrganizationSNMP, is_read bool) OrganizationsSNMPRs {
 	itemState := OrganizationsSNMPRs{
 		Hostname: types.StringValue(response.Hostname),
-		PeerIPs:  StringSliceToSet(response.PeerIPs),
+		PeerIPs:  state.PeerIPs,
 		Port: func() types.Int64 {
 			if response.Port != nil {
 				return types.Int64Value(int64(*response.Port))

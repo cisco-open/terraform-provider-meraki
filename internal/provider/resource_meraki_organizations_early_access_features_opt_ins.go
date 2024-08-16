@@ -78,6 +78,7 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Schema(_ context.Contex
 			"opt_in_id": schema.StringAttribute{
 				MarkdownDescription: `optInId path parameter. Opt in ID`,
 				Optional:            true,
+				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},

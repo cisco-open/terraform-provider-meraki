@@ -59,7 +59,7 @@ func (d *NetworksDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
-				Optional:            true,
+				Required:            true,
 			},
 			"per_page": schema.Int64Attribute{
 				MarkdownDescription: `perPage query parameter. The number of entries per page returned. Acceptable range is 3 100000. Default is 1000.`,

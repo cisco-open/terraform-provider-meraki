@@ -11,12 +11,12 @@ provider "meraki" {
   meraki_debug = "true"
 }
 
-resource meraki_networks "example" {
-  name = "My Test Network"
+resource "meraki_networks" "example" {
+  name            = "My Test Network"
   organization_id = "828099381482762270"
-  notes = "This is a test network created by my team"
-  product_types = ["appliance", "switch", "wireless", "cellularGateway"]
-  time_zone = "America/Los_Angeles"
+  notes           = "This is a test network created by my team"
+  product_types   = ["appliance", "switch", "wireless", "cellularGateway"]
+  time_zone       = "America/Los_Angeles"
 }
 output "meraki_networks_example" {
   value = resource.meraki_networks.example

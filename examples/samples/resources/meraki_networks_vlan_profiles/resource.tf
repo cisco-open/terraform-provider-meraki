@@ -13,16 +13,16 @@ provider "meraki" {
 }
 
 resource "meraki_networks_vlan_profiles" "vlan_profiles" {
-   network_id = "L_828099381482771185"
-   iname = "Default"
-   name = "Default Profile"
-   vlan_names = [ {
-      name = "default",
-      vlan_id = "1"
-   }, {
-    name = "test",
+  network_id = "L_828099381482771185"
+  iname      = "Default"
+  name       = "Default Profile"
+  vlan_names = [{
+    name    = "default",
+    vlan_id = "1"
+    }, {
+    name    = "test",
     vlan_id = "2"
-   }]
-   vlan_groups = []
+  }]
+  vlan_groups = []
 }
 

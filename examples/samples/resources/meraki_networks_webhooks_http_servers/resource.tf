@@ -13,12 +13,12 @@ provider "meraki" {
 }
 
 resource "meraki_networks_webhooks_http_servers" "webhook_http_server" {
-  name = "Pulumi Test Webhook"
-  url = "https://example.com/test"
-  network_id = "L_828099381482775375"
+  name          = "Pulumi Test Webhook"
+  url           = "https://example.com/test"
+  network_id    = "L_828099381482775375"
   shared_secret = "redactedSecret"
   payload_template = {
-    name = "Meraki (included)"
+    name                = "Meraki (included)"
     payload_template_id = "wpt_00001"
   }
 }

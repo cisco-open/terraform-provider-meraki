@@ -35,7 +35,7 @@ resource "meraki_networks_switch_routing_ospf" "example" {
   network_id = "L_828099381482775374"
   v3 = {
 
-    areas = []
+    areas                  = []
     dead_timer_in_seconds  = 40
     enabled                = true
     hello_timer_in_seconds = 10

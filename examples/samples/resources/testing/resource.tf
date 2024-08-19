@@ -23,7 +23,7 @@ resource "meraki_networks_group_policies" "group_policy_byod" {
 }
 
 resource "meraki_networks_group_policies" "group_policy_guest" {
-  depends_on = [ meraki_networks_group_policies.group_policy_byod ]
+  depends_on = [meraki_networks_group_policies.group_policy_byod]
   name       = "GUEST"
   network_id = "L_828099381482771185"
   vlan_tagging = {

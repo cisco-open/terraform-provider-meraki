@@ -79,10 +79,20 @@ Optional:
     a hostname (e.g. "somesite.com"), a port (e.g. 8080), or an IP range ("192.1.0.0",
     "192.1.0.0/16", or "10.1.0.0/16:80"). 'localNet' also supports CIDR notation, excluding
     custom ports.
-     If "type" is 'application' or 'applicationCategory', then "value" must be an object
+- `value_list` (Set of String) The 'value_list' of what you want to block. Send a list in request
+- `value_obj` (Attributes) The 'value_obj' of what you want to block. Send a dict in request.  If "type" is 'application' or 'applicationCategory', then "value" must be an object
     with the structure { "id": "meraki:layer7/..." }, where "id" is the application category or
     application ID (for a list of IDs for your network, use the trafficShaping/applicationCategories
-    endpoint).
+    endpoint). (see [below for nested schema](#nestedatt--rules--definitions--value_obj))
+
+<a id="nestedatt--rules--definitions--value_obj"></a>
+### Nested Schema for `rules.definitions.value_obj`
+
+Optional:
+
+- `id` (String)
+- `name` (String)
+
 
 
 <a id="nestedatt--rules--per_client_bandwidth_limits"></a>

@@ -30,7 +30,7 @@ resource "meraki_networks_firmware_upgrades" "example" {
       }
       participate_in_next_beta_release = false
     }
-    
+
     # sensor = {
 
     #   next_upgrade = {

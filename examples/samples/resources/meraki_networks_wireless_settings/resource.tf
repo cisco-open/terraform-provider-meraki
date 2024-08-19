@@ -22,6 +22,6 @@ resource "meraki_networks_wireless_settings" "example" {
   location_analytics_enabled = false
   meshing_enabled            = true
   network_id                 = var.my_network_id
-  upgradestrategy           = "minimizeUpgradeTime"
+  upgradestrategy            = "minimizeUpgradeTime"
 }
 

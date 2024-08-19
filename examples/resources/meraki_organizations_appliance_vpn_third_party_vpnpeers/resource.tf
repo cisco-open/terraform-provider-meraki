@@ -25,7 +25,7 @@ resource "meraki_organizations_appliance_vpn_third_party_vpnpeers" "example" {
     public_ip             = "123.123.123.1"
     remote_id             = "miles@meraki.com"
     secret                = "Sample Password"
-  },{
+    }, {
 
     ike_version = "2"
     ipsec_policies = {
@@ -48,7 +48,7 @@ resource "meraki_organizations_appliance_vpn_third_party_vpnpeers" "example" {
     public_ip             = "123.123.123.1"
     remote_id             = "miles@meraki.com"
     secret                = "Sample Password"
-  },
+    },
   ]
 }
 

@@ -19,7 +19,7 @@ resource "meraki_networks_alerts_settings" "example" {
     enabled = true
   }]
   default_destinations = {
-    all_admins      = true
+    all_admins = true
     # emails          = []
     http_server_ids = ["aHR0cHM6Ly93ZWJob29rLnNpdGU="]
     snmp            = false

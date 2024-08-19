@@ -13,12 +13,12 @@ provider "meraki" {
 }
 
 resource "meraki_networks_wireless_ssids" "this_ssid" {
-  network_id              = "L_828099381482771185"
-  number                  = 0
-  name                    = "SSID Test Terraform"
-  enabled                 = true
-  splash_page             = "None"
-  auth_mode               = "8021x-radius"
+  network_id  = "L_828099381482771185"
+  number      = 0
+  name        = "SSID Test Terraform"
+  enabled     = true
+  splash_page = "None"
+  auth_mode   = "8021x-radius"
   dot11w = {
     enabled  = false
     required = false

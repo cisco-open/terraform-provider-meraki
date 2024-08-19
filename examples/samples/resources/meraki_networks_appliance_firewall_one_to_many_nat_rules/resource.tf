@@ -15,6 +15,6 @@ provider "meraki" {
 resource "meraki_networks_appliance_firewall_one_to_many_nat_rules" "this" {
   network_id = "L_828099381482771185"
   rules = [
-    
+
   ]
 }

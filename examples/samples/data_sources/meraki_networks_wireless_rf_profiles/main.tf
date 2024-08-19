@@ -13,10 +13,10 @@ provider "meraki" {
 
 
 data "meraki_networks_wireless_rf_profiles" "example" {
-network_id = "L_828099381482775342"
-rf_profile_id = "outdoor"
+  network_id    = "L_828099381482775342"
+  rf_profile_id = "outdoor"
 }
 
 output "meraki_networks_wireless_rf_profiles_example" {
-value = data.meraki_networks_wireless_rf_profiles.example.item
+  value = data.meraki_networks_wireless_rf_profiles.example.item
 }

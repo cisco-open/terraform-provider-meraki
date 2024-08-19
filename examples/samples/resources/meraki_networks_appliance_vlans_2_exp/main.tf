@@ -16,7 +16,7 @@ provider "meraki" {
 resource "meraki_networks_appliance_vlans" "this_vlan_1" {
   network_id                = "L_828099381482775374"
   name                      = "MGMT"
-  id                        = "1" 
+  id                        = "1"
   appliance_ip              = "10.76.237.17"
   subnet                    = "10.76.237.16/28"
   dhcp_handling             = "Run a DHCP server"

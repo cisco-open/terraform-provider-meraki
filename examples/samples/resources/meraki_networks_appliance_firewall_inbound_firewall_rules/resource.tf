@@ -13,8 +13,8 @@ provider "meraki" {
 }
 
 resource "meraki_networks_appliance_firewall_inbound_firewall_rules" "this" {
-  network_id          = "L_828099381482775375"
-  rules               = [
+  network_id = "L_828099381482775375"
+  rules = [
     {
       comment        = "Allow TCP traffic to subnet with HTTP servers."
       dest_cidr      = "2001:db8::/64"

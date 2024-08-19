@@ -28,7 +28,7 @@ resource "meraki_devices_management_interface" "sample_firewall_interface" {
   }
 
   wan2 = {
-    using_static_ip    = false
-    wan_enabled        = "enabled"
+    using_static_ip = false
+    wan_enabled     = "enabled"
   }
 }

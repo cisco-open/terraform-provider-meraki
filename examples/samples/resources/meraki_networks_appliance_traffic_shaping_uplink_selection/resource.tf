@@ -9,8 +9,8 @@ terraform {
   required_version = ">= 1.2.0"
 }
 
-provider meraki {
-    meraki_debug = "true"
+provider "meraki" {
+  meraki_debug = "true"
 }
 
 
@@ -19,7 +19,7 @@ provider meraki {
 #   organization_id = "828099381482762270"
 
 # }
-  
+
 resource "meraki_networks_appliance_traffic_shaping_uplink_selection" "this" {
   network_id                     = "L_828099381482775486"
   default_uplink                 = "wan1"

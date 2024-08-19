@@ -26,17 +26,17 @@ data "meraki_networks" "my_networks" {
 #
 resource "meraki_networks_wireless_ssids" "my_splash_ssid" {
   for_each = {
-    for idx, network in data.meraki_networks.my_networks.items : idx => network 
+    for idx, network in data.meraki_networks.my_networks.items : idx => network
     if contains(network.product_types, "wireless")
   }
 
-  provider                      = meraki
-  network_id                    = each.value.id
-  number                        = 12
-  auth_mode                     = "open"
-  enabled                       = false
-  name                          = "Wide open"
-  ip_assignment_mode            = "Bridge mode"
-  default_vlan_id               = "300"
-  splash_page                   = "Click-through splash page"
+  provider           = meraki
+  network_id         = each.value.id
+  number             = 12
+  auth_mode          = "open"
+  enabled            = false
+  name               = "Wide open"
+  ip_assignment_mode = "Bridge mode"
+  default_vlan_id    = "300"
+  splash_page        = "Click-through splash page"
 } 

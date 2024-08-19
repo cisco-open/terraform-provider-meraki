@@ -27,9 +27,9 @@ resource "meraki_networks_appliance_vlans" "example" {
   network_id   = "L_828099381482771185"
   appliance_ip = "192.168.2.2"
   # cidr         = "192.168.2.1/24"
-  name   = "VLAN Terraform"
-  subnet = "192.168.2.0/24"
-  id = 1001
+  name       = "VLAN Terraform"
+  subnet     = "192.168.2.0/24"
+  id         = 1001
   depends_on = [meraki_networks_appliance_vlans_settings.example]
 }
 

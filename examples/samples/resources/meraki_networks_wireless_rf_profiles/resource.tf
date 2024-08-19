@@ -14,7 +14,7 @@ provider "meraki" {
 
 
 resource "meraki_networks_wireless_rf_profiles" "example" {
-  
+
   ap_band_settings = {
 
     band_operation_mode   = "dual"

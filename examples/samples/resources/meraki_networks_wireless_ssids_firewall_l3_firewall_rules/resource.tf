@@ -16,7 +16,7 @@ resource "meraki_networks_wireless_ssids_firewall_l3_firewall_rules" "test" {
   network_id       = "L_828099381482771185"
   number           = 0
   allow_lan_access = false
-  rules            = [
+  rules = [
     {
       dest_cidr = "any"
       comment   = "Allow the Accessable VLAN"
@@ -30,7 +30,7 @@ resource "meraki_networks_wireless_ssids_firewall_l3_firewall_rules" "test" {
       policy    = "allow"
       protocol  = "any"
       dest_port = "any"
-      ip_ver = "ipv6"
+      ip_ver    = "ipv6"
     },
   ]
 }

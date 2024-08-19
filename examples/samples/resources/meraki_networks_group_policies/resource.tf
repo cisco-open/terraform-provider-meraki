@@ -8,7 +8,8 @@ terraform {
   }
 }
 provider "meraki" {
-  meraki_debug = "true"
+  meraki_debug    = "true"
+  meraki_base_url = "http://localhost:3000"
 }
 
 
@@ -33,23 +34,23 @@ resource "meraki_networks_group_policies" "example" {
     }]
     settings = "custom"
   }
-  content_filtering = {
+  # content_filtering = {
 
-    allowed_url_patterns = {
+  #   allowed_url_patterns = {
 
-      settings = "network default"
-    }
-    blocked_url_categories = {
+  #     settings = "network default"
+  #   }
+  #   blocked_url_categories = {
 
-      # categories = ["meraki:contentFiltering/category/1", "meraki:contentFiltering/category/7"]
-      settings   = "override"
-    }
-    blocked_url_patterns = {
+  #     # categories = ["meraki:contentFiltering/category/1", "meraki:contentFiltering/category/7"]
+  #     settings   = "override"
+  #   }
+  #   blocked_url_patterns = {
 
-      patterns = ["http://www.example.com", "http://www.betting.com"]
-      settings = "append"
-    }
-  }
+  #     patterns = ["http://www.example.com", "http://www.betting.com"]
+  #     settings = "append"
+  #   }
+  # }
   firewall_and_traffic_shaping = {
 
     l3_firewall_rules = [{
@@ -75,7 +76,7 @@ resource "meraki_networks_group_policies" "example" {
         value = "google.com"
       }]
       # dscp_tag_value = 1
-      pcp_tag_value  = 1
+      pcp_tag_value = 1
       per_client_bandwidth_limits = {
 
         bandwidth_limits = {
@@ -88,7 +89,7 @@ resource "meraki_networks_group_policies" "example" {
       priority = "normal"
     }]
   }
-  name       = "No video streaming"
+  name       = "IOT"
   network_id = "L_828099381482775375"
   scheduling = {
 
@@ -142,8 +143,4 @@ resource "meraki_networks_group_policies" "example" {
     settings = "custom"
     vlan_id  = "1"
   }
-}
-
-output "meraki_networks_group_policies_example" {
-  value = meraki_networks_group_policies.example
 }

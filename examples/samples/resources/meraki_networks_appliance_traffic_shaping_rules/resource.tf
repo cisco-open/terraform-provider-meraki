@@ -24,14 +24,14 @@ resource "meraki_networks_appliance_traffic_shaping_rules" "example" {
 
       type  = "host"
       value = "google.com"
-    },
-    {
-      type  = "applicationCategory"
-      value_obj  = {
-      id = "meraki:layer7/category/8"
-      name = "Peer-to-peer (P2P)"
-    },
-    
+      },
+      {
+        type = "applicationCategory"
+        value_obj = {
+          id   = "meraki:layer7/category/8"
+          name = "Peer-to-peer (P2P)"
+        },
+
     }]
     # dscp_tag_value = 1
     per_client_bandwidth_limits = {

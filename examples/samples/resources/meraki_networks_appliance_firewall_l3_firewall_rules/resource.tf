@@ -13,8 +13,8 @@ provider "meraki" {
 }
 
 resource "meraki_networks_appliance_firewall_l3_firewall_rules" "this" {
-  network_id = "L_828099381482771185"
-  rules = []
+  network_id          = "L_828099381482771185"
+  rules               = []
   syslog_default_rule = true
 }
 

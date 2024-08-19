@@ -17,7 +17,7 @@ resource "meraki_organizations_early_access_features_opt_ins" "example" {
   limit_scope_to_networks = ["N_12345"]
   organization_id         = "828099381482762270"
   short_name              = "has_mx_no_nat_early_access"
-  opt_in_id = "828099381482925915"
+  opt_in_id               = "828099381482925915"
 }
 
 output "meraki_organizations_early_access_features_opt_ins_example" {

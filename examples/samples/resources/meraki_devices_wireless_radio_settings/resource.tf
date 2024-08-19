@@ -8,7 +8,7 @@ resource "meraki_devices_wireless_radio_settings" "example" {
     target_power  = 15
   }
   # rf_profile_id = "1234"
-  serial        = "Q2FV-DJ6J-4QHD"
+  serial = "Q2FV-DJ6J-4QHD"
   two_four_ghz_settings = {
 
     channel      = 11

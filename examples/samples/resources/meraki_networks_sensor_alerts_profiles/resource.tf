@@ -16,7 +16,7 @@ resource "meraki_networks_sensor_alerts_profiles" "this" {
 
   conditions = [
     {
-      metric = "temperature"
+      metric   = "temperature"
       duration = 60
       threshold = {
         temperature = {
@@ -25,7 +25,7 @@ resource "meraki_networks_sensor_alerts_profiles" "this" {
       },
     },
     {
-      metric = "humidity"
+      metric   = "humidity"
       duration = 60
       threshold = {
         humidity = {

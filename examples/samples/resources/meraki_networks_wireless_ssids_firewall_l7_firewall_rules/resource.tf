@@ -22,15 +22,15 @@ resource "meraki_networks_wireless_ssids_firewall_l7_firewall_rules" "example" {
     policy = "deny"
     type   = "host"
     value  = "google.com"
-  },
-  {
+    },
+    {
 
-    policy = "deny"
-    type   = "applicationCategory"
-    value_obj  = {
-      id = "meraki:layer7/category/8"
-      name = "Peer-to-peer (P2P)"
-    }
+      policy = "deny"
+      type   = "applicationCategory"
+      value_obj = {
+        id   = "meraki:layer7/category/8"
+        name = "Peer-to-peer (P2P)"
+      }
   }]
 }
 

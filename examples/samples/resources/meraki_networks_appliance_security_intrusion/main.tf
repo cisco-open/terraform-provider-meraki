@@ -9,8 +9,8 @@ terraform {
   required_version = ">= 1.2.0"
 }
 
-provider meraki {
-    meraki_debug = "true"
+provider "meraki" {
+  meraki_debug = "true"
 }
 
 data "meraki_organizations" "example" {}

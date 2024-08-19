@@ -14,9 +14,9 @@ provider "meraki" {
 
 
 resource "meraki_networks_wireless_ssids_identity_psks" "example" {
-# lifecycle {
-#   # ignore_changes = [ expires_at ]
-# }
+  # lifecycle {
+  #   # ignore_changes = [ expires_at ]
+  # }
   expires_at      = "2018-02-11T00:00:00.090209Z"
   group_policy_id = "100"
   name            = "Sample Identity PSK"

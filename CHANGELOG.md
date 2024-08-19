@@ -1,3 +1,10 @@
+## 0.2.11-alpha (August 19, 2024)
+BUGFIXES:
+* problematic field is ipv6: {} in the body.
+* peer_ips field detecting unexpected changes #123.
+* provider produced inconsistent result after apply, meraki_organizations_early_access_features_opt_ins.
+* meraki_networks_appliance_traffic_shaping_rules input variable issue #134. Doc updated.
+
 ## 0.2.10-alpha (August 05, 2024)
 BUGFIXES:
 * Issue #117 Fixed.

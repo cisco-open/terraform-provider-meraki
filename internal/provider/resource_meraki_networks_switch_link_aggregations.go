@@ -347,7 +347,7 @@ func (r *NetworksSwitchLinkAggregationsResource) Delete(ctx context.Context, req
 	}
 
 	vvNetworkID := state.NetworkID.ValueString()
-	vvLinkAggregationID := state.LinkAggregationID.ValueString()
+	vvLinkAggregationID := state.ID.ValueString()
 	_, err := r.client.Switch.DeleteNetworkSwitchLinkAggregation(vvNetworkID, vvLinkAggregationID)
 	if err != nil {
 		resp.Diagnostics.AddError(

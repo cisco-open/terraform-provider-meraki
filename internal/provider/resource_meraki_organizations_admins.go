@@ -3,7 +3,9 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"fmt"
 	"log"
+	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
@@ -393,14 +395,25 @@ func (r *OrganizationsAdminsResource) Read(ctx context.Context, req resource.Rea
 	} else {
 		resp.Diagnostics.AddError(
 			"Failure when executing GetOrganizationAdmins Result",
-			err.Error(),
+			"Not found",
 		)
 		return
 	}
 }
 
 func (r *OrganizationsAdminsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), req.ID)...)
+	idParts := strings.Split(req.ID, ",")
+
+	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
+		resp.Diagnostics.AddError(
+			"Unexpected Import Identifier",
+			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+		)
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), idParts[0])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), idParts[1])...)
 }
 
 func (r *OrganizationsAdminsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -648,7 +661,7 @@ func ResponseOrganizationsGetOrganizationAdminsItemToBodyRs(state OrganizationsA
 				}
 				return &result
 			}
-			return &[]ResponseItemOrganizationsGetOrganizationAdminsNetworksRs{}
+			return nil
 		}(),
 		OrgAccess: types.StringValue(response.OrgAccess),
 		Tags: func() *[]ResponseItemOrganizationsGetOrganizationAdminsTagsRs {
@@ -662,7 +675,7 @@ func ResponseOrganizationsGetOrganizationAdminsItemToBodyRs(state OrganizationsA
 				}
 				return &result
 			}
-			return &[]ResponseItemOrganizationsGetOrganizationAdminsTagsRs{}
+			return nil
 		}(),
 		TwoFactorAuthEnabled: func() types.Bool {
 			if response.TwoFactorAuthEnabled != nil {

@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -52,11 +52,11 @@ func (r *NetworksApplianceFirewallL3FirewallRulesResource) Schema(_ context.Cont
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"rules": schema.SetNestedAttribute{
+			"rules": schema.ListNestedAttribute{
 				MarkdownDescription: `An ordered array of the firewall rules (not including the default rule)`,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -135,11 +135,11 @@ func (r *NetworksApplianceFirewallL3FirewallRulesResource) Schema(_ context.Cont
 					},
 				},
 			},
-			"rules_response": schema.SetNestedAttribute{
+			"rules_response": schema.ListNestedAttribute{
 				MarkdownDescription: `An ordered array of the firewall rules (not including the default rule)`,
 				Computed:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -389,10 +389,10 @@ func (r *NetworksApplianceFirewallL3FirewallRulesResource) Delete(ctx context.Co
 
 // TF Structs Schema
 type NetworksApplianceFirewallL3FirewallRulesRs struct {
-	NetworkID         types.String                                                          `tfsdk:"network_id"`
-	Rules             *[]ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesRulesRs `tfsdk:"rules"`
-	RulesResponse     *[]ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesRulesRs `tfsdk:"rules_response"`
-	SyslogDefaultRule types.Bool                                                            `tfsdk:"syslog_default_rule"`
+	NetworkID         types.String                                                         `tfsdk:"network_id"`
+	Rules             []ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesRulesRs `tfsdk:"rules"`
+	RulesResponse     []ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesRulesRs `tfsdk:"rules_response"`
+	SyslogDefaultRule types.Bool                                                           `tfsdk:"syslog_default_rule"`
 }
 
 type ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesRulesRs struct {
@@ -409,8 +409,9 @@ type ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesRulesRs struct {
 // FromBody
 func (r *NetworksApplianceFirewallL3FirewallRulesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL3FirewallRules {
 	var requestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules []merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules
-	if r.Rules != nil {
-		for _, rItem1 := range *r.Rules {
+	if len(r.Rules) > 0 {
+		requestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules = make([]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules, len(r.Rules))
+		for i, rItem1 := range r.Rules {
 			comment := rItem1.Comment.ValueString()
 			destCidr := rItem1.DestCidr.ValueString()
 			destPort := rItem1.DestPort.ValueString()
@@ -424,7 +425,7 @@ func (r *NetworksApplianceFirewallL3FirewallRulesRs) toSdkApiRequestUpdate(ctx c
 				}
 				return nil
 			}()
-			requestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules = append(requestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules, merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules{
+			requestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules[i] = merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules{
 				Comment:       comment,
 				DestCidr:      destCidr,
 				DestPort:      destPort,
@@ -433,7 +434,7 @@ func (r *NetworksApplianceFirewallL3FirewallRulesRs) toSdkApiRequestUpdate(ctx c
 				SrcCidr:       srcCidr,
 				SrcPort:       srcPort,
 				SyslogEnabled: syslogEnabled,
-			})
+			}
 		}
 	}
 	syslogDefaultRule := new(bool)
@@ -459,7 +460,7 @@ func (r *NetworksApplianceFirewallL3FirewallRulesRs) toSdkApiRequestUpdate(ctx c
 // From gosdk to TF Structs Schema
 func ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesItemToBodyRs(state NetworksApplianceFirewallL3FirewallRulesRs, response *merakigosdk.ResponseApplianceGetNetworkApplianceFirewallL3FirewallRules, is_read bool) NetworksApplianceFirewallL3FirewallRulesRs {
 	itemState := NetworksApplianceFirewallL3FirewallRulesRs{
-		RulesResponse: func() *[]ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesRulesRs {
+		RulesResponse: func() []ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesRulesRs {
 			if response.Rules != nil {
 				result := make([]ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesRulesRs, len(*response.Rules))
 				for i, rules := range *response.Rules {
@@ -479,9 +480,9 @@ func ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesItemToBodyRs(sta
 						}(),
 					}
 				}
-				return &result
+				return result
 			}
-			return &[]ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesRulesRs{}
+			return []ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesRulesRs{}
 		}(),
 		SyslogDefaultRule: state.SyslogDefaultRule,
 	}

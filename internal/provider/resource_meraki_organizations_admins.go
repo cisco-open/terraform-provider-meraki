@@ -326,8 +326,8 @@ func (r *OrganizationsAdminsResource) Create(ctx context.Context, req resource.C
 		return
 	} else {
 		resp.Diagnostics.AddError(
-			"Failure when executing GetOrganizationAdmins Result",
-			err.Error(),
+			"Failure when executing GetNetworkSwitchLinkAggregations Result",
+			"Not Found",
 		)
 		return
 	}

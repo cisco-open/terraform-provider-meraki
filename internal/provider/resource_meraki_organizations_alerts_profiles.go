@@ -318,8 +318,8 @@ func (r *OrganizationsAlertsProfilesResource) Create(ctx context.Context, req re
 		return
 	} else {
 		resp.Diagnostics.AddError(
-			"Failure when executing GetOrganizationAlertsProfiles Result",
-			err.Error(),
+			"Failure when executing GetNetworkSwitchLinkAggregations Result",
+			"Not Found",
 		)
 		return
 	}
@@ -385,8 +385,8 @@ func (r *OrganizationsAlertsProfilesResource) Read(ctx context.Context, req reso
 		return
 	} else {
 		resp.Diagnostics.AddError(
-			"Failure when executing GetOrganizationAlertsProfiles Result",
-			err.Error(),
+			"Failure when executing GetNetworkSwitchLinkAggregations Result",
+			"Not Found",
 		)
 		return
 	}

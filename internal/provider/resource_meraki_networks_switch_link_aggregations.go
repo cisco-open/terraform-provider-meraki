@@ -205,7 +205,7 @@ func (r *NetworksSwitchLinkAggregationsResource) Create(ctx context.Context, req
 	} else {
 		resp.Diagnostics.AddError(
 			"Failure when executing GetNetworkSwitchLinkAggregations Result",
-			err.Error(),
+			"Not Found",
 		)
 		return
 	}
@@ -273,7 +273,7 @@ func (r *NetworksSwitchLinkAggregationsResource) Read(ctx context.Context, req r
 	} else {
 		resp.Diagnostics.AddError(
 			"Failure when executing GetNetworkSwitchLinkAggregations Result",
-			err.Error(),
+			"Not Found",
 		)
 		return
 	}

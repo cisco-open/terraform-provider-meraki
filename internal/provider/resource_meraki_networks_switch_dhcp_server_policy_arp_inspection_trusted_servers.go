@@ -211,8 +211,8 @@ func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersResource) Crea
 		return
 	} else {
 		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServers Result",
-			err.Error(),
+			"Failure when executing GetNetworkSwitchLinkAggregations Result",
+			"Not Found",
 		)
 		return
 	}
@@ -279,8 +279,8 @@ func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersResource) Read
 		return
 	} else {
 		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServers Result",
-			err.Error(),
+			"Failure when executing GetNetworkSwitchLinkAggregations Result",
+			"Not Found",
 		)
 		return
 	}

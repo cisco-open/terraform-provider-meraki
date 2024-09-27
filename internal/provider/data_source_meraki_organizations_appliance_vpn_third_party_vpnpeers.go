@@ -255,7 +255,7 @@ func ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersItemToBody(st
 									IkePrfAlgo: StringSliceToList(peers.IPsecPolicies.IkePrfAlgo),
 								}
 							}
-							return &ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersPeersIpsecPolicies{}
+							return nil
 						}(),
 						IPsecPoliciesPreset: types.StringValue(peers.IPsecPoliciesPreset),
 						LocalID:             types.StringValue(peers.LocalID),
@@ -269,7 +269,7 @@ func ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersItemToBody(st
 				}
 				return &result
 			}
-			return &[]ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersPeers{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

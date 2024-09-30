@@ -1823,7 +1823,7 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 			}
 		}
 		var requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingL7FirewallRules []merakigosdk.RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingL7FirewallRules
-		if *r.FirewallAndTrafficShaping.L7FirewallRules != nil {
+		if r.FirewallAndTrafficShaping.L7FirewallRules != nil {
 			for _, rItem1 := range *r.FirewallAndTrafficShaping.L7FirewallRules {
 				policy := rItem1.Policy.ValueString()
 				typeR := rItem1.Type.ValueString()

@@ -152,15 +152,15 @@ func elementsToStrings(ctx context.Context, elements types.List) []string {
 	return strings
 }
 
-// getDictResult busca y devuelve un diccionario específico dentro de una estructura de datos flexible.
+// getDictResult looks up and returns a specific dictionary within a flexible data structure.
 func getDictResult(result interface{}, key string, value interface{}, cmpFn cmpFunc) interface{} {
-	// Mutex local para sincronizar el acceso al mapa
+	// Local mutex to synchronize map access
 	var mu sync.Mutex
 
-	// Mapa para almacenar el resultado
+	// Map to store the result
 	resultMap := make(map[string]interface{})
 
-	// Función para verificar si un valor es un mapa[string]interface{}
+	// Function to check if a value is a map[string]interface{}
 	isMapStringInterface := func(v interface{}) (map[string]interface{}, bool) {
 		if m, ok := v.(map[string]interface{}); ok {
 			return m, true
@@ -168,14 +168,14 @@ func getDictResult(result interface{}, key string, value interface{}, cmpFn cmpF
 		return nil, false
 	}
 
-	// Función interna para procesar un elemento
+	// Internal function to process an element
 	processItem := func(item interface{}) {
 		if itemMap, ok := isMapStringInterface(item); ok {
-			// Verificar si la clave y el valor coinciden con los proporcionados.
-			log.Print(" Verificar si la clave y el valor coinciden con los proporcionados.")
+			// Check if the key and value match those provided.
+			log.Print(" Check if the key and value match those provided.")
 			if val, ok := itemMap[key]; ok && cmpFn(val, value) {
-				// Bloquear el acceso al mapa antes de realizar la asignación
-				log.Print(" Bloquear el acceso al mapa antes de realizar la asignación")
+				// Block map access before mapping
+				log.Print(" Block map access before mapping")
 				mu.Lock()
 				defer mu.Unlock()
 				resultMap = itemMap
@@ -183,21 +183,21 @@ func getDictResult(result interface{}, key string, value interface{}, cmpFn cmpF
 		}
 	}
 
-	// Verificar si el resultado es un slice.
-	log.Print("Verificar si el resultado es un slice.")
+	// Check if the result is a slice.
+	log.Print("Check if the result is a slice.")
 	if reflect.TypeOf(result).Kind() == reflect.Slice {
 		resultSlice := reflect.ValueOf(result)
-		log.Print("Verificar si el resultado es un slice. 2")
+		log.Print("Check if the result is a slice. 2")
 		if resultSlice.Len() == 0 {
 			return nil
 		}
-		log.Print("Si el slice tiene un solo elemento.")
-		// Si el slice tiene un solo elemento.
+		log.Print("If the slice has only one element.")
+		// If the slice has only one element.
 		if resultSlice.Len() == 1 {
 			if itemMap, ok := isMapStringInterface(resultSlice.Index(0).Interface()); ok {
 
-				log.Print(" Verificar si la clave y el valor coinciden con los proporcionados.")
-				// Verificar si la clave y el valor coinciden con los proporcionados.
+				log.Print(" Check if the key and value match those provided.")
+				// Check if the key and value match those provided.
 				if val, ok := itemMap[key]; ok && !cmpFn(val, value) {
 					return nil
 				}
@@ -206,8 +206,8 @@ func getDictResult(result interface{}, key string, value interface{}, cmpFn cmpF
 			return nil
 		}
 
-		// Iterar sobre los elementos del slice.
-		log.Print("Iterar sobre los elementos del slice.")
+		// Iterate over the elements of the slice.
+		log.Print("Iterate over the elements of the slice.")
 
 		for i := 0; i < resultSlice.Len(); i++ {
 			processItem(resultSlice.Index(i).Interface())
@@ -218,52 +218,52 @@ func getDictResult(result interface{}, key string, value interface{}, cmpFn cmpF
 		return resultMap
 	}
 
-	// Si el resultado no es un slice.
+	// If the result is not a slice.
 	if itemMap, ok := isMapStringInterface(result); ok {
-		// Verificar si la clave y el valor coinciden con los proporcionados.
+		// Check if the key and value match those provided.
 		if val, ok := itemMap[key]; ok && !cmpFn(val, value) {
 			return nil
 		}
 		return itemMap
 	}
 
-	// Si el resultado no es ni un slice ni un mapa.
+	// If the result is neither a slice nor a map.
 	return nil
 }
 func structToMap(data interface{}) []map[string]interface{} {
-	// Mutex local para sincronizar el acceso al resultado
+	// Local mutex to synchronize access to the result
 	var mu sync.Mutex
 
-	// Verificar si data es un puntero, si es así obtener el valor
+	// Check if data is a pointer, if so get the value
 	if reflect.ValueOf(data).Kind() == reflect.Ptr {
 		data = reflect.ValueOf(data).Elem().Interface()
 	}
 
-	// Verificar si se pasa una slice
+	// Check if a slice is passed
 	val := reflect.ValueOf(data)
 	if val.Kind() != reflect.Slice {
-		log.Printf("[DEBUG] El valor proporcionado no es una slice.")
-		fmt.Println("El valor proporcionado no es una slice.")
+		log.Printf("[DEBUG] the value is not a slice.")
+		fmt.Println("the value is not a slice.")
 		// return nil
 	}
 
-	// Obtener el tipo de la estructura dentro de la slice
+	// Get the type of the structure inside the slice
 	elementType := val.Type().Elem()
 	if elementType.Kind() == reflect.Ptr {
 		elementType = elementType.Elem()
 	}
 	if elementType.Kind() != reflect.Struct {
-		log.Printf("[DEBUG] El tipo dentro de la slice no es una estructura.")
-		fmt.Println("El tipo dentro de la slice no es una estructura.")
+		log.Printf("[DEBUG] the type inside the slice is not a structure.")
+		fmt.Println("the type inside the slice is not a structure.")
 		// return nil
 	}
 
-	// Convertir cada elemento de la slice a un mapa
+	// Convert each element of the slice to a map
 	result := make([]map[string]interface{}, val.Len())
 	for i := 0; i < val.Len(); i++ {
 		element := val.Index(i)
 
-		// Función interna para convertir una estructura a un mapa
+		// Internal function to convert a structure to a map
 		structToMapFunc := func(elem reflect.Value) map[string]interface{} {
 			elemMap := make(map[string]interface{})
 			for j := 0; j < elem.NumField(); j++ {
@@ -274,7 +274,7 @@ func structToMap(data interface{}) []map[string]interface{} {
 			return elemMap
 		}
 
-		// Bloquear el acceso al resultado antes de asignar
+		// Block access to the result before assigning
 		mu.Lock()
 		result[i] = structToMapFunc(element)
 		mu.Unlock()
@@ -283,42 +283,42 @@ func structToMap(data interface{}) []map[string]interface{} {
 	return result
 }
 
-// mapToStruct asigna valores desde un mapa a una estructura (target)
+// mapToStruct assigns values ​​from a map to a structure (target)
 func mapToStruct(data map[string]interface{}, target interface{}) error {
-	// Mutex local para sincronizar el acceso a la estructura de destino
+	// Local mutex to synchronize access to the target structure
 	var mu sync.Mutex
 
-	// Verificar si target es un puntero a una estructura
+	// Check if target is a pointer to a structure
 	targetType := reflect.TypeOf(target)
 	if targetType.Kind() != reflect.Ptr || targetType.Elem().Kind() != reflect.Struct {
-		return fmt.Errorf("El objetivo no es un puntero a una estructura")
+		return fmt.Errorf("the target is not a pointer to a structure")
 	}
 	targetValue := reflect.ValueOf(target).Elem()
 
-	// Iterar sobre los campos de la estructura de destino
+	// Iterate over the fields of the target structure
 	for i := 0; i < targetType.Elem().NumField(); i++ {
 		field := targetType.Elem().Field(i)
 		fieldName := field.Name
 
-		// Obtener el valor del mapa para el nombre del campo
+		// Get map value for field name
 		value, ok := data[fieldName]
 		if !ok {
-			continue // Si no existe en el mapa, continuar con el siguiente campo
+			continue // If it does not exist on the map, continue with the next field
 		}
 
-		// Función interna para asignar el valor al campo de la estructura
+		// Internal function to assign the value to the structure field
 		assignValue := func(field reflect.Value, value interface{}) error {
-			// Bloquear el acceso al campo antes de la asignación
+			// Block field access before assignment
 			mu.Lock()
 			defer mu.Unlock()
 
 			fieldValue := reflect.ValueOf(value)
 
-			// Verificar si el tipo de valor es convertible al tipo del campo
+			// Check if the value type is convertible to the field type
 			if fieldValue.Type().ConvertibleTo(field.Type()) {
 				field.Set(fieldValue.Convert(field.Type()))
 			} else {
-				return fmt.Errorf("el tipo de valor para el campo %s no es convertible al tipo del campo", fieldName)
+				return fmt.Errorf("the value type for field %s is not convertible to the field type", fieldName)
 			}
 			return nil
 		}
@@ -640,14 +640,14 @@ func replaceUnknownFields(data interface{}) interface{} {
 	// log.Printf("val: %v", val.IsValid())
 	// log.Printf("val: %v", val.Kind())
 	if val.Kind() != reflect.Ptr || val.IsNil() {
-		fmt.Println("Esperaba un puntero no nulo.")
+		fmt.Println("expecting a non-null pointer.")
 		return nil
 	}
 
 	val = dereferencePtr(val)
 
 	if val.Kind() != reflect.Slice {
-		fmt.Println("Esperaba un slice.")
+		fmt.Println("expecting a slice.")
 		return nil
 	}
 
@@ -655,7 +655,7 @@ func replaceUnknownFields(data interface{}) interface{} {
 		elem := val.Index(i)
 
 		if elem.Kind() != reflect.Struct {
-			fmt.Println("Esperaba una estructura en el slice.")
+			fmt.Println("expecting some structure in the slice.")
 			return nil
 		}
 
@@ -683,7 +683,7 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 	valueA := reflect.ValueOf(a)
 	valueB := reflect.ValueOf(b)
 
-	// Desreferenciar punteros si es necesario
+	// Dereference pointers if necessary
 	valueA = dereferencePtr(valueA)
 	valueB = dereferencePtr(valueB)
 
@@ -693,21 +693,21 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 	if !valueB.IsValid() {
 		valueB = reflect.ValueOf(b)
 	}
-	// Verificar si ambos valores son slices
+	// Check if both values ​​are slices
 	if valueA.Kind() == reflect.Slice && valueB.Kind() == reflect.Slice {
 		lenA := valueA.Len()
 		lenB := valueB.Len()
 
-		// Verificar si los slices tienen la misma longitud
+		// Check if slices have the same length
 		if lenA != lenB {
-			// Si no tienen la misma longitud, devolvemos el slice más grande
+			// If they are not the same length, we return the largest slice
 			if lenB > lenA {
 				return b
 			}
 			return a
 		}
 
-		// Mezclar los elementos de los slices
+		// Mix the elements of the slices
 		resultSlice := reflect.MakeSlice(valueA.Type(), lenA, lenA)
 		for i := 0; i < lenA; i++ {
 			resultSlice.Index(i).Set(reflect.ValueOf(mergeInterfaces(valueA.Index(i).Interface(), valueB.Index(i).Interface(), false)))
@@ -716,11 +716,11 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 	}
 
 	if valueA.Kind() != reflect.Struct || valueB.Kind() != reflect.Struct {
-		// Si no son slices ni structs, simplemente devolvemos el segundo valor
+		// If they are not slices or structs, we simply return the second value
 		return b
 	}
 
-	// Mezclar los campos de los structs
+	// Mixing fields of structs
 	numFields := valueA.NumField()
 	resultStruct := reflect.New(valueA.Type()).Elem()
 
@@ -753,7 +753,7 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 		if fieldA.IsValid() && fieldB.IsValid() {
 			if fieldA.Kind() == reflect.Slice && fieldB.Kind() == reflect.Slice && valueA.Field(i).Kind() == reflect.Slice && valueB.Field(i).Kind() == reflect.Slice {
 				log.Printf("IF Slice:")
-				// Si ambos campos son slices, mezclarlos recursivamente
+				// If both fields are slices, merge them recursively
 				if field := replaceUnknownFields(valueA.Field(i)); field != nil {
 					log.Printf("IF Slice Replace:")
 					resultStruct.Field(i).Set(reflect.ValueOf(field))
@@ -762,7 +762,7 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 					resultStruct.Field(i).Set(valueB.Field(i))
 				}
 			} else if reflect.DeepEqual(fieldA.Interface(), reflect.Zero(fieldA.Type()).Interface()) && !reflect.DeepEqual(fieldB.Interface(), reflect.Zero(fieldB.Type()).Interface()) {
-				// Si el campo de a es nulo y el campo de b no lo es, utilizamos el campo de b
+				// If field a is null and field b is not, we use field b
 				log.Printf("IF DeepEqual:")
 				resultStruct.Field(i).Set(valueB.Field(i))
 			} else {
@@ -780,8 +780,8 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 						// log.Printf("[DEBUG] NameA: %v", valueA.Type().Field(i).Name)
 						// log.Printf("[DEBUG] NameB: %v", valueB.Type().Field(i).Name)
 						mergedValues := changeStructUnknowns(fieldA.Interface(), fieldB.Interface())
-						// log.Printf(" Sali 2")
-						// log.Printf(" ssss %v", PrintKeyValue(mergedValues))
+						// log.Printf(" End 2")
+						// log.Printf(" Print Key Value %v", PrintKeyValue(mergedValues))
 						fieldValueBPtr := reflect.New(fieldA.Type())
 						fieldValueBPtr.Elem().Set(reflect.ValueOf(mergedValues))
 						resultStruct.Field(i).Set(fieldValueBPtr)
@@ -801,20 +801,20 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 			fieldA := valueA.Field(i)
 			fieldB := valueB.Field(i)
 			// resultStruct.Field(i).Set(valueB.Field(i))
-			// log.Printf("Antes")
+			// log.Printf("Before")
 
-			// log.Printf("Despues ZERO")
+			// log.Printf("After ZERO")
 			for _, path := range pathParams {
-				// log.Printf("Despues FOR path  %v", path)
-				// log.Printf("Despues FOR valueB.Type().Field(i).Name  %v", valueB.Type().Field(i).Name)
+				// log.Printf("After FOR path  %v", path)
+				// log.Printf("After FOR valueB.Type().Field(i).Name  %v", valueB.Type().Field(i).Name)
 				if valueB.Type().Field(i).Name == path && fieldB.IsZero() && !fieldA.IsZero() && fmt.Sprint(fieldA.Interface()) != "<unknown>" {
 					resultStruct.Field(i).Set(fieldA)
 				} else {
 					// resultStruct.Field(i).Set(fieldB)
 					if valueB.Type().Field(i).Name == path && valueB.Type().Field(i).Name != "ID" && fieldB.IsZero() {
-						// log.Printf("Despues FOR fieldB.Type().Name() %v", valueB.Type().Field(i).Name)
-						// log.Printf("Despues FOR fieldB.Type().Value() %v", fieldB.Interface())
-						// log.Printf("Despues FOR fieldB.Type().Value() 22%v", fieldB.IsZero())
+						// log.Printf("After FOR fieldB.Type().Name() %v", valueB.Type().Field(i).Name)
+						// log.Printf("After FOR fieldB.Type().Value() %v", fieldB.Interface())
+						// log.Printf("After FOR fieldB.Type().Value() 22%v", fieldB.IsZero())
 						if valueB.FieldByName("ID").IsValid() {
 							if !valueB.FieldByName("ID").IsZero() {
 								resultStruct.Field(i).Set(valueB.FieldByName("ID"))
@@ -862,16 +862,16 @@ func changeStructUnknowns(a interface{}, b interface{}) interface{} {
 		lenA := valueA.Len()
 		lenB := valueB.Len()
 
-		// Verificar si los slices tienen la misma longitud
+		// Check if slices have the same length
 		if lenA != lenB {
-			// Si no tienen la misma longitud, devolvemos el slice más grande
+			// If they are not the same length, we return the largest slice
 			if lenB > lenA {
 				return b
 			}
 			return a
 		}
 
-		// Mezclar los elementos de los slices
+		// Mix the elements of the slices
 		resultSlice := reflect.MakeSlice(valueA.Type(), lenA, lenA)
 		for i := 0; i < lenA; i++ {
 			resultSlice.Index(i).Set(reflect.ValueOf(changeStructUnknowns(valueA.Index(i).Interface(), valueB.Index(i).Interface())))
@@ -879,12 +879,12 @@ func changeStructUnknowns(a interface{}, b interface{}) interface{} {
 		return resultSlice.Interface()
 	}
 	for i := 0; i < valueA.NumField(); i++ {
-		// log.Printf("Entre 2: ")
+		// log.Printf("In 2: ")
 		fieldValueA := valueA.Field(i)
-		// log.Printf("Entre 2: fieldValueA %s", fieldValueA.Interface())
-		// log.Printf("Entre 2: fieldValueA %s", fieldValueA.Kind())
-		// log.Printf("Entre 2: fieldValueB %v", valueB.IsValid())
-		// log.Printf("Entre 2: fieldValueB %v", valueB.Field(i).Kind())
+		// log.Printf("In 2: fieldValueA %s", fieldValueA.Interface())
+		// log.Printf("In 2: fieldValueA %s", fieldValueA.Kind())
+		// log.Printf("In 2: fieldValueB %v", valueB.IsValid())
+		// log.Printf("In 2: fieldValueB %v", valueB.Field(i).Kind())
 
 		var fieldValueB reflect.Value
 
@@ -904,9 +904,9 @@ func changeStructUnknowns(a interface{}, b interface{}) interface{} {
 			fieldValueB = valueB.Field(i)
 		}
 
-		// Obtener el nombre del campo
+		// Get the field name
 		fieldName := valueA.Type().Field(i).Name
-		log.Printf("Entre 2: fieldName %s", fieldName)
+		log.Printf("In 2: fieldName %s", fieldName)
 		if fmt.Sprint(fieldValueA.Interface()) == "<unknown>" {
 			if fmt.Sprint(fieldValueB.Interface()) != "<unknown>" {
 				log.Printf("fieldValueB %t", fmt.Sprint(fieldValueB.Interface()) == "<unknown>")
@@ -917,20 +917,20 @@ func changeStructUnknowns(a interface{}, b interface{}) interface{} {
 			}
 		} else {
 			if valueA.Field(i).Type() != reflect.TypeOf(types.String{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Bool{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Int64{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Float64{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Set{}) {
-				log.Printf("Entre 3 %v to field %v\n", fieldValueB.Interface(), fieldName)
+				log.Printf("In 3 %v to field %v\n", fieldValueB.Interface(), fieldName)
 				if !fieldValueA.IsZero() || !fieldValueB.IsZero() {
 					nestedResult := changeStructUnknowns(fieldValueA.Interface(), fieldValueB.Interface())
 
 					log.Printf("A pointer: %t", fieldValueA.Kind() != reflect.Ptr)
 					log.Printf("B pointer: %t", fieldValueB.Kind() != reflect.Ptr)
 					if fieldValueB.Kind() != reflect.Ptr {
-						log.Printf("Entre 3 %v to field %v\n", fieldValueB.Interface(), fieldName)
+						log.Printf("In 3 %v to field %v\n", fieldValueB.Interface(), fieldName)
 						fieldValueBPtr := reflect.New(fieldValueB.Type())
 						fieldValueBPtr.Elem().Set(reflect.ValueOf(nestedResult))
 						resultStruct.Field(i).Set(fieldValueBPtr)
 					} else {
 						if fieldValueA.Kind() != reflect.Ptr {
-							log.Printf("Entre 3 %v to field %v\n", fieldValueB.Interface(), fieldName)
+							log.Printf("In 3 %v to field %v\n", fieldValueB.Interface(), fieldName)
 							fieldValueAPtr := reflect.New(fieldValueA.Type())
 							fieldValueAPtr.Elem().Set(reflect.ValueOf(nestedResult))
 							resultStruct.Field(i).Set(fieldValueAPtr)
@@ -946,11 +946,10 @@ func changeStructUnknowns(a interface{}, b interface{}) interface{} {
 			}
 		}
 	}
-	log.Printf("Sali: ")
 	// if resultStruct.Kind() != reflect.Ptr {
-	// 	log.Print("Diferente de puntero: ", resultStruct.Kind())
+	// 	log.Print("Not a pointer: ", resultStruct.Kind())
 	// 	resultStruct = reflect.ValueOf(resultStruct)
-	// 	log.Print("Ahora puntero: ", resultStruct.Kind())
+	// 	log.Print("Pointer: ", resultStruct.Kind())
 	// }
 	return resultStruct.Interface()
 }
@@ -986,7 +985,7 @@ func mergeInterfacesOnlyPath(a, b interface{}) interface{} {
 		log.Printf("fieldB %v", fieldB)
 		log.Printf("fieldB %v", fieldB)
 		if reflect.TypeOf(fieldB).Kind() == reflect.Slice {
-			// Obtener la longitud del slice usando reflexión
+			// Get the length of the slice using reflect
 			length := reflect.ValueOf(fieldB).Elem().Len()
 			if length > 0 {
 				resultStruct.Field(i).Set(valueA.Field(i))
@@ -995,7 +994,7 @@ func mergeInterfacesOnlyPath(a, b interface{}) interface{} {
 			resultStruct.Field(i).Set(valueB.Field(i))
 		}
 
-		log.Printf("Antes")
+		log.Printf("Before")
 
 		for _, path := range pathParams {
 			// if valueB.Type().Field(i).Name == "OrganizationID" {
@@ -1008,10 +1007,10 @@ func mergeInterfacesOnlyPath(a, b interface{}) interface{} {
 				resultStruct.Field(i).Set(fieldA)
 			} else {
 				if valueB.Type().Field(i).Name == path && valueB.Type().Field(i).Name != "ID" && fieldB.IsZero() {
-					// log.Printf("Despues FOR path  %v", path)
-					// log.Printf("Despues FOR fieldB.Type().Name() %v", valueB.Type().Field(i).Name)
-					// log.Printf("Despues FOR fieldB.Type().Value() %v", fieldB.Interface())
-					// log.Printf("Despues FOR fieldB.Type().Value() 22%v", fieldB.IsZero())
+					// log.Printf("After FOR path  %v", path)
+					// log.Printf("After FOR fieldB.Type().Name() %v", valueB.Type().Field(i).Name)
+					// log.Printf("After FOR fieldB.Type().Value() %v", fieldB.Interface())
+					// log.Printf("After FOR fieldB.Type().Value() 22%v", fieldB.IsZero())
 					if valueB.FieldByName("ID").IsValid() {
 						if !valueB.FieldByName("ID").IsZero() {
 
@@ -1033,27 +1032,27 @@ func mergeInterfacesOnlyPath(a, b interface{}) interface{} {
 func PrintKeyValue(v interface{}) string {
 	val := reflect.ValueOf(v)
 
-	// Si v es un puntero, desreferenciarlo
+	// If v is a pointer, dereference it
 	if val.Kind() == reflect.Ptr {
 		val = val.Elem()
 	}
 
-	// Asegurarse de que v es una estructura
+	// Make sure v is a structure
 	if val.Kind() != reflect.Struct {
-		return "PrintKeyValue: v no es una estructura"
+		return "PrintKeyValue: v is not a struct"
 	}
 	var buffer bytes.Buffer
 
-	// Iterar sobre los campos de la estructura
+	// Iterate over the fields of the structure
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Field(i)
 		fieldName := val.Type().Field(i).Name
 
-		// Imprimir el nombre del campo y su valor
+		// Print the field name and its value
 		buffer.WriteString(fmt.Sprintf("%s value is %v, ", fieldName, field.Interface()))
 	}
 
-	// Eliminar la última coma y espacio
+	// Remove the last comma and space
 	if buffer.Len() > 0 {
 		buffer.Truncate(buffer.Len() - 2)
 	}

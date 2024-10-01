@@ -1797,12 +1797,12 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 	} else {
 		availableOnAllAps = nil
 	}
-	bandSelection := new(string)
-	if !r.BandSelection.IsUnknown() && !r.BandSelection.IsNull() {
-		*bandSelection = r.BandSelection.ValueString()
-	} else {
-		bandSelection = &emptyString
-	}
+	// bandSelection := new(string)
+	// if !r.BandSelection.IsUnknown() && !r.BandSelection.IsNull() {
+	// 	*bandSelection = r.BandSelection.ValueString()
+	// } else {
+	// 	bandSelection = &emptyString
+	// }
 	concentratorNetworkID := new(string)
 	if !r.ConcentratorNetworkID.IsUnknown() && !r.ConcentratorNetworkID.IsNull() {
 		*concentratorNetworkID = r.ConcentratorNetworkID.ValueString()
@@ -2046,12 +2046,12 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 	} else {
 		mandatoryDhcpEnabled = nil
 	}
-	minBitrate := new(float64)
-	if !r.MinBitrate.IsUnknown() && !r.MinBitrate.IsNull() {
-		*minBitrate = float64(r.MinBitrate.ValueInt64())
-	} else {
-		minBitrate = nil
-	}
+	// minBitrate := new(float64)
+	// if !r.MinBitrate.IsUnknown() && !r.MinBitrate.IsNull() {
+	// 	*minBitrate = float64(r.MinBitrate.ValueInt64())
+	// } else {
+	// 	minBitrate = nil
+	// }
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
 		*name = r.Name.ValueString()
@@ -2381,10 +2381,10 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 			}
 			return nil
 		}(),
-		AuthMode:                         *authMode,
-		AvailabilityTags:                 availabilityTags,
-		AvailableOnAllAps:                availableOnAllAps,
-		BandSelection:                    *bandSelection,
+		AuthMode:          *authMode,
+		AvailabilityTags:  availabilityTags,
+		AvailableOnAllAps: availableOnAllAps,
+		// BandSelection:                    *bandSelection,
 		ConcentratorNetworkID:            *concentratorNetworkID,
 		DefaultVLANID:                    int64ToIntPointer(defaultVLANID),
 		DisassociateClientsOnVpnFailover: disassociateClientsOnVpnFailover,
@@ -2400,17 +2400,17 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 		Ldap:                             requestWirelessUpdateNetworkWirelessSSIDLdap,
 		LocalRadius:                      requestWirelessUpdateNetworkWirelessSSIDLocalRadius,
 		MandatoryDhcpEnabled:             mandatoryDhcpEnabled,
-		MinBitrate:                       minBitrate,
-		Name:                             *name,
-		NamedVLANs:                       requestWirelessUpdateNetworkWirelessSSIDNamedVLANs,
-		Oauth:                            requestWirelessUpdateNetworkWirelessSSIDOauth,
-		PerClientBandwidthLimitDown:      int64ToIntPointer(perClientBandwidthLimitDown),
-		PerClientBandwidthLimitUp:        int64ToIntPointer(perClientBandwidthLimitUp),
-		PerSSIDBandwidthLimitDown:        int64ToIntPointer(perSSIDBandwidthLimitDown),
-		PerSSIDBandwidthLimitUp:          int64ToIntPointer(perSSIDBandwidthLimitUp),
-		Psk:                              *psk,
-		RadiusAccountingEnabled:          radiusAccountingEnabled,
-		RadiusAccountingInterimInterval:  int64ToIntPointer(radiusAccountingInterimInterval),
+		// MinBitrate:                       minBitrate,
+		Name:                            *name,
+		NamedVLANs:                      requestWirelessUpdateNetworkWirelessSSIDNamedVLANs,
+		Oauth:                           requestWirelessUpdateNetworkWirelessSSIDOauth,
+		PerClientBandwidthLimitDown:     int64ToIntPointer(perClientBandwidthLimitDown),
+		PerClientBandwidthLimitUp:       int64ToIntPointer(perClientBandwidthLimitUp),
+		PerSSIDBandwidthLimitDown:       int64ToIntPointer(perSSIDBandwidthLimitDown),
+		PerSSIDBandwidthLimitUp:         int64ToIntPointer(perSSIDBandwidthLimitUp),
+		Psk:                             *psk,
+		RadiusAccountingEnabled:         radiusAccountingEnabled,
+		RadiusAccountingInterimInterval: int64ToIntPointer(radiusAccountingInterimInterval),
 		RadiusAccountingServers: func() *[]merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDRadiusAccountingServers {
 			if len(requestWirelessUpdateNetworkWirelessSSIDRadiusAccountingServers) > 0 {
 				return &requestWirelessUpdateNetworkWirelessSSIDRadiusAccountingServers

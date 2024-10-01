@@ -205,7 +205,7 @@ func (r *NetworksSwitchLinkAggregationsResource) Create(ctx context.Context, req
 	} else {
 		resp.Diagnostics.AddError(
 			"Failure when executing GetNetworkSwitchLinkAggregations Result",
-			err.Error(),
+			"Not Found",
 		)
 		return
 	}
@@ -271,10 +271,11 @@ func (r *NetworksSwitchLinkAggregationsResource) Read(ctx context.Context, req r
 		resp.Diagnostics.Append(diags...)
 		return
 	} else {
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkSwitchLinkAggregations Result",
-			err.Error(),
+		resp.Diagnostics.AddWarning(
+			"Resource not found",
+			"Deleting resource",
 		)
+		resp.State.RemoveResource(ctx)
 		return
 	}
 }
@@ -347,7 +348,7 @@ func (r *NetworksSwitchLinkAggregationsResource) Delete(ctx context.Context, req
 	}
 
 	vvNetworkID := state.NetworkID.ValueString()
-	vvLinkAggregationID := state.LinkAggregationID.ValueString()
+	vvLinkAggregationID := state.ID.ValueString()
 	_, err := r.client.Switch.DeleteNetworkSwitchLinkAggregation(vvNetworkID, vvLinkAggregationID)
 	if err != nil {
 		resp.Diagnostics.AddError(

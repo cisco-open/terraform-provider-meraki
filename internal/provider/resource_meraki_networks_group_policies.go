@@ -1823,16 +1823,17 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 			}
 		}
 		var requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingL7FirewallRules []merakigosdk.RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingL7FirewallRules
-
-		for _, rItem1 := range *r.FirewallAndTrafficShaping.L7FirewallRules {
-			policy := rItem1.Policy.ValueString()
-			typeR := rItem1.Type.ValueString()
-			value := rItem1.Value.ValueString()
-			requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingL7FirewallRules = append(requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingL7FirewallRules, merakigosdk.RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingL7FirewallRules{
-				Policy: policy,
-				Type:   typeR,
-				Value:  value,
-			})
+		if r.FirewallAndTrafficShaping.L7FirewallRules != nil {
+			for _, rItem1 := range *r.FirewallAndTrafficShaping.L7FirewallRules {
+				policy := rItem1.Policy.ValueString()
+				typeR := rItem1.Type.ValueString()
+				value := rItem1.Value.ValueString()
+				requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingL7FirewallRules = append(requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingL7FirewallRules, merakigosdk.RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingL7FirewallRules{
+					Policy: policy,
+					Type:   typeR,
+					Value:  value,
+				})
+			}
 		}
 
 		settings := r.FirewallAndTrafficShaping.Settings.ValueString()

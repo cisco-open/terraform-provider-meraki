@@ -457,8 +457,39 @@ func (r *NetworksApplianceSSIDsResource) Update(ctx context.Context, req resourc
 }
 
 func (r *NetworksApplianceSSIDsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting NetworksApplianceSSIDs", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Warning deleting NetworksApplianceSSIDs", "This will restore default config except for VLAN ID")
+
+	var data NetworksApplianceSSIDsRs
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	networkID := data.NetworkID.ValueString()
+	number := int(data.Number.ValueInt64())
+
+	/* Meraki API doesn't provide a delete method so update to default config as much as possible.
+	   DefaultVLANID will not be set as this depends on what VLANs are configured on the appliance.
+
+	   AuthMode: "open"
+	   Enabled: false
+	   Name: "Unconfigured SSID " + number
+	*/
+	disableRequest := &merakigosdk.RequestApplianceUpdateNetworkApplianceSSID{
+		AuthMode: "open",
+		Enabled:  func() *bool { b := false; return &b }(),
+		Name:     "Unconfigured SSID " + strconv.Itoa(number),
+	}
+
+	_, _, err := r.client.Appliance.UpdateNetworkApplianceSSID(networkID, strconv.Itoa(number), disableRequest)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error disabling NetworksApplianceSSIDs",
+			"Couldn't disable the SSID: "+err.Error(),
+		)
+		return
+	}
+
 	resp.State.RemoveResource(ctx)
 }
 

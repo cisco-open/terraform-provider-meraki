@@ -1,3 +1,17 @@
+## 0.2.12-alpha (October 01, 2024)
+BUGFIXES:
+* Updating logs to only english.
+* meraki_networks_wireless_ssids fix in request, ignore empty fields.
+* meraki_networks_group_policies fix in request, ignore empty fields.
+* meraki_organizations_snmp fixing only read fields.
+* meraki_networks_appliance_traffic_shaping_rules input variable issue #134. Doc updated.
+* meraki_networks_switch_dhcp_server_policy_arp_inspection_trusted_servers read method fixed.
+* meraki_networks_group_policies Fail in toSdkFunction.
+* meraki_networks_switch_link_aggregations, ID not mapped in delete method.
+* meraki_networks_switch_link_aggregations, Incorrect error handling.
+* meraki_organizations_admins fixing import.
+* meraki_organizations_appliance_vpn_third_party_vpnpeers, fixig array converion fail.
+
 ## 0.2.11-alpha (August 19, 2024)
 BUGFIXES:
 * problematic field is ipv6: {} in the body.

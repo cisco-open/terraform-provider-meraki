@@ -5,7 +5,7 @@ terraform {
       source  = "hashicorp.com/edu/meraki"
     }
   }
-}
+ }
 
 
 provider "meraki" {

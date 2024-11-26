@@ -58,9 +58,15 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Schema(_ context.Context, _ r
 			},
 			"created_at": schema.StringAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"id": schema.StringAttribute{
 				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `A name for the group of network addresses, unique within the organization (alphanumeric, space, dash, or underscore characters only)`,
@@ -71,7 +77,10 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Schema(_ context.Context, _ r
 				},
 			},
 			"network_ids": schema.SetAttribute{
-				Computed:    true,
+				Computed: true,
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
 				ElementType: types.StringType,
 			},
 			"object_ids": schema.SetAttribute{
@@ -129,7 +138,7 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Create(ctx context.Context, r
 	// organization_id
 	vvName := data.Name.ValueString()
 	//Items
-	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationPolicyObjects(vvOrganizationID, nil)
+	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationPolicyObjectsGroups(vvOrganizationID, nil)
 	//Have Create
 	if err != nil {
 		if restyResp1 != nil {
@@ -183,7 +192,7 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Create(ctx context.Context, r
 		return
 	}
 	//Items
-	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationPolicyObjects(vvOrganizationID, nil)
+	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationPolicyObjectsGroups(vvOrganizationID, nil)
 	// Has item and has items
 
 	if err != nil || responseGet == nil {
@@ -207,8 +216,7 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Create(ctx context.Context, r
 		vvPolicyObjectGroupID, ok := result2["ID"].(string)
 		if !ok {
 			resp.Diagnostics.AddError(
-				"Failure when parsing path parameter PolicyObjectGroupID",
-				err.Error(),
+				"Failure when parsing path parameter PolicyObjectGroupID", "Error",
 			)
 			return
 		}
@@ -402,8 +410,9 @@ func (r *OrganizationsPolicyObjectsGroupsRs) toSdkApiRequestCreate(ctx context.C
 	} else {
 		name = &emptyString
 	}
-	var objectIDs *[]int = nil
+	var objectIDs *[]string = nil
 	r.ObjectIDs.ElementsAs(ctx, &objectIDs, false)
+
 	out := merakigosdk.RequestOrganizationsCreateOrganizationPolicyObjectsGroup{
 		Category:  *category,
 		Name:      *name,
@@ -436,7 +445,7 @@ func ResponseOrganizationsGetOrganizationPolicyObjectsGroupItemToBodyRs(state Or
 		ID:         types.StringValue(response.ID),
 		Name:       types.StringValue(response.Name),
 		NetworkIDs: StringSliceToSet(response.NetworkIDs),
-		ObjectIDs:  StringSliceToSetInt(response.ObjectIDs),
+		ObjectIDs:  StringSliceToSet(*response.ObjectIDs),
 		UpdatedAt:  types.StringValue(response.UpdatedAt),
 	}
 	if is_read {

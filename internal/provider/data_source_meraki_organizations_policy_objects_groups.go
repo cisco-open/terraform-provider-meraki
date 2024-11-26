@@ -194,7 +194,7 @@ func ResponseOrganizationsGetOrganizationPolicyObjectsGroupItemToBody(state Orga
 		ID:         types.StringValue(response.ID),
 		Name:       types.StringValue(response.Name),
 		NetworkIDs: StringSliceToSet(response.NetworkIDs),
-		ObjectIDs:  StringSliceToSetInt(response.ObjectIDs),
+		ObjectIDs:  StringSliceToSet(*response.ObjectIDs),
 		UpdatedAt:  types.StringValue(response.UpdatedAt),
 	}
 	state.Item = &itemState

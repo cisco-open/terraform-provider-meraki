@@ -5,11 +5,11 @@ terraform {
       source  = "hashicorp.com/edu/meraki"
     }
   }
- }
+}
 
 
 provider "meraki" {
-  meraki_debug = "true"
+  meraki_debug    = "true"
   meraki_base_url = "http://localhost:3001"
 }
 

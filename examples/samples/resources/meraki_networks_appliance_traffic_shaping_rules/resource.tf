@@ -17,7 +17,7 @@ provider "meraki" {
 resource "meraki_networks_appliance_traffic_shaping_rules" "example" {
   default_rules_enabled = true
   network_id            = "L_828099381482775486"
-  
+
   rules = [{
     definitions = [
       {
@@ -40,7 +40,7 @@ resource "meraki_networks_appliance_traffic_shaping_rules" "example" {
       settings = "custom"
     }
     priority = "high"
-  }, {
+    }, {
     definitions = [
       {
         type  = "host"

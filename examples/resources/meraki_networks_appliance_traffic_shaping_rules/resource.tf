@@ -9,13 +9,13 @@ resource "meraki_networks_appliance_traffic_shaping_rules" "example" {
 
       type  = "host"
       value = "google.com" #if type is ('host', 'port', 'ipRange' or 'localNet')
-    },
-    {
-      type  = "host"
-      value_obj ={
-        id= "string"
-        name= "string"
-      }# if type is ('application' or 'applicationCategory')
+      },
+      {
+        type = "host"
+        value_obj = {
+          id   = "string"
+          name = "string"
+        } # if type is ('application' or 'applicationCategory')
     }]
     dscp_tag_value = 1
     per_client_bandwidth_limits = {

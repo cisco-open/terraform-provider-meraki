@@ -1,0 +1,1 @@
+terraform import meraki_networks_appliance_static_routes.example "network_id,static_route_id"

@@ -19,7 +19,7 @@ resource "meraki_networks_wireless_ssids_firewall_l3_firewall_rules" "test-Terra
       dest_port = "any"
       policy    = "allow"
       protocol  = "any"
-      ip_ver = "ipv4"
+      ip_ver    = "ipv4"
     },
     {
       # comment = ""
@@ -27,7 +27,7 @@ resource "meraki_networks_wireless_ssids_firewall_l3_firewall_rules" "test-Terra
       dest_port = "any"
       policy    = "deny"
       protocol  = "any"
-      ip_ver = "ipv4"
+      ip_ver    = "ipv4"
     },
     {
       # comment = ""
@@ -35,7 +35,7 @@ resource "meraki_networks_wireless_ssids_firewall_l3_firewall_rules" "test-Terra
       dest_port = "any"
       policy    = "deny"
       protocol  = "any"
-      ip_ver = "ipv4"
+      ip_ver    = "ipv4"
     },
     {
       # comment = ""
@@ -43,7 +43,7 @@ resource "meraki_networks_wireless_ssids_firewall_l3_firewall_rules" "test-Terra
       dest_port = "any"
       policy    = "deny"
       protocol  = "any"
-      ip_ver = "ipv4"
+      ip_ver    = "ipv4"
     }
   ]
 }

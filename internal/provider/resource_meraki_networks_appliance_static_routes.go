@@ -19,9 +19,12 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
@@ -366,6 +369,20 @@ func (r *NetworksApplianceStaticRoutesResource) Read(ctx context.Context, req re
 	resp.Diagnostics.Append(diags...)
 }
 
+func (r *NetworksApplianceStaticRoutesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	idParts := strings.Split(req.ID, ",")
+	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
+		resp.Diagnostics.AddError(
+			"Unexpected Import Identifier",
+			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+		)
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("static_route_id"), idParts[1])...)
+}
+
 func (r *NetworksApplianceStaticRoutesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data NetworksApplianceStaticRoutesRs
 	merge(ctx, req, resp, &data)
@@ -581,11 +598,11 @@ func ResponseApplianceGetNetworkApplianceStaticRouteItemToBodyRs(state NetworksA
 								Name: types.StringValue(response.FixedIPAssignments.Status223344556677.Name),
 							}
 						}
-						return &ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignments223344556677Rs{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignmentsRs{}
+			return nil
 		}(),
 		GatewayIP: types.StringValue(response.GatewayIP),
 		GatewayVLANID: func() types.Int64 {
@@ -615,7 +632,7 @@ func ResponseApplianceGetNetworkApplianceStaticRouteItemToBodyRs(state NetworksA
 				}
 				return &result
 			}
-			return &[]ResponseApplianceGetNetworkApplianceStaticRouteReservedIpRangesRs{}
+			return nil
 		}(),
 		Subnet: types.StringValue(response.Subnet),
 	}

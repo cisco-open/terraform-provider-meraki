@@ -428,7 +428,7 @@ func (r *OrganizationsPolicyObjectsGroupsRs) toSdkApiRequestUpdate(ctx context.C
 	} else {
 		name = &emptyString
 	}
-	var objectIDs *[]int = nil
+	var objectIDs *[]string = nil
 	r.ObjectIDs.ElementsAs(ctx, &objectIDs, false)
 	out := merakigosdk.RequestOrganizationsUpdateOrganizationPolicyObjectsGroup{
 		Name:      *name,

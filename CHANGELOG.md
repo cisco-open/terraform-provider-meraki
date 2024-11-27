@@ -1,3 +1,13 @@
+## 0.2.13-alpha (November 27, 2024)
+BUGFIXES:
+* meraki_debug no longer works #179 [fixed].
+* appliance_traffic_shaping_rules does not store order #173, Changing to list to preserve the order.
+* Terraform registry documentation updates #180.
+* meraki_organizations_policy_objects_groups broken, both the data and resource #178, documentation issue, changing types to umarshal struct.
+FEATURES:
+* **New Resource** `resource_meraki_networks_appliance_static_routes`
+* **New Data Source** `data_source_meraki_networks_appliance_static_routes`
+
 ## 0.2.12-alpha (October 01, 2024)
 BUGFIXES:
 * Updating logs to only english.

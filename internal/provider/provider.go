@@ -117,16 +117,16 @@ func (p *MerakiProvider) Configure(ctx context.Context, req provider.ConfigureRe
 		)
 		return
 	}
-	if data.Debug.IsUnknown() || data.Debug.IsNull() {
-		// resp.Diagnostics.AddAttributeError(
-		// 	path.Root("debug"),
-		// 	"Unknown Meraki API debug",
-		// 	"The provider cannot create the Meraki API client as there is an unknown configuration value for the Meraki API Debug. "+
-		// 		"Either target apply the source of the value first, set the value statically in the configuration, or use the MERAKI_DEBUG environment variable.",
-		// )
-		// return
-		data.Debug = types.StringValue("false")
-	}
+	// if data.Debug.IsUnknown() || data.Debug.IsNull() {
+	// 	// resp.Diagnostics.AddAttributeError(
+	// 	// 	path.Root("debug"),
+	// 	// 	"Unknown Meraki API debug",
+	// 	// 	"The provider cannot create the Meraki API client as there is an unknown configuration value for the Meraki API Debug. "+
+	// 	// 		"Either target apply the source of the value first, set the value statically in the configuration, or use the MERAKI_DEBUG environment variable.",
+	// 	// )
+	// 	// return
+	// 	data.Debug = types.StringValue("false")
+	// }
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -143,9 +143,9 @@ func (p *MerakiProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	if !data.MerakiDashboardApiKey.IsNull() && !data.MerakiDashboardApiKey.IsUnknown() {
 		merakiDashboardApiKey = data.MerakiDashboardApiKey.ValueString()
 	}
-	// if !data.Debug.IsNull() && !data.Debug.IsUnknown() {
-	// 	debug = data.Debug.ValueString()
-	// }
+	if !data.Debug.IsNull() && !data.Debug.IsUnknown() {
+		debug = data.Debug.ValueString()
+	}
 
 	// if !data.SSLVerify.IsNull() {
 	// 	sslVerify = data.SSLVerify.ValueString()
@@ -181,6 +181,7 @@ func New(version string) func() provider.Provider {
 
 func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		NewNetworksApplianceStaticRoutesResource,
 		NewOrganizationsResource,
 		NewOrganizationsAdminsResource,
 		NewDevicesResource,
@@ -392,6 +393,7 @@ func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resour
 
 func (p *MerakiProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		NewNetworksApplianceStaticRoutesDataSource,
 		NewOrganizationsDataSource,
 		NewOrganizationsAdminsDataSource,
 		NewAdministeredIDentitiesMeDataSource,

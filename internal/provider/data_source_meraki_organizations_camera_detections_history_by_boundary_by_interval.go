@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -154,6 +155,8 @@ func (d *OrganizationsCameraDetectionsHistoryByBoundaryByIntervalDataSource) Rea
 		queryParams1.PerPage = int(organizationsCameraDetectionsHistoryByBoundaryByInterval.PerPage.ValueInt64())
 		queryParams1.BoundaryTypes = elementsToStrings(ctx, organizationsCameraDetectionsHistoryByBoundaryByInterval.BoundaryTypes)
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Camera.GetOrganizationCameraDetectionsHistoryByBoundaryByInterval(vvOrganizationID, &queryParams1)
 
 		if err != nil || response1 == nil {
@@ -228,7 +231,7 @@ func ResponseCameraGetOrganizationCameraDetectionsHistoryByBoundaryByIntervalIte
 						StartTime: types.StringValue(item.Results.StartTime),
 					}
 				}
-				return &ResponseItemCameraGetOrganizationCameraDetectionsHistoryByBoundaryByIntervalResults{}
+				return nil
 			}(),
 			Type: types.StringValue(item.Type),
 		}

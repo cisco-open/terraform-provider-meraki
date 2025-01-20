@@ -17,77 +17,77 @@ resource "meraki_networks_clients_provision" "example" {
     }
     policies_by_ssid = {
 
-      status_0 = {
+      0 = {
 
         device_policy   = "Group policy"
         group_policy_id = "101"
       }
-      status_1 = {
+      1 = {
 
         device_policy   = "Group policy"
         group_policy_id = "101"
       }
-      status_10 = {
+      10 = {
 
         device_policy   = "Group policy"
         group_policy_id = "101"
       }
-      status_11 = {
+      11 = {
 
         device_policy   = "Group policy"
         group_policy_id = "101"
       }
-      status_12 = {
+      12 = {
 
         device_policy   = "Group policy"
         group_policy_id = "101"
       }
-      status_13 = {
+      13 = {
 
         device_policy   = "Group policy"
         group_policy_id = "101"
       }
-      status_14 = {
+      14 = {
 
         device_policy   = "Group policy"
         group_policy_id = "101"
       }
-      status_2 = {
+      2 = {
 
         device_policy   = "Group policy"
         group_policy_id = "101"
       }
-      status_3 = {
+      3 = {
 
         device_policy   = "Group policy"
         group_policy_id = "101"
       }
-      status_4 = {
+      4 = {
 
         device_policy   = "Group policy"
         group_policy_id = "101"
       }
-      status_5 = {
+      5 = {
 
         device_policy   = "Group policy"
         group_policy_id = "101"
       }
-      status_6 = {
+      6 = {
 
         device_policy   = "Group policy"
         group_policy_id = "101"
       }
-      status_7 = {
+      7 = {
 
         device_policy   = "Group policy"
         group_policy_id = "101"
       }
-      status_8 = {
+      8 = {
 
         device_policy   = "Group policy"
         group_policy_id = "101"
       }
-      status_9 = {
+      9 = {
 
         device_policy   = "Group policy"
         group_policy_id = "101"

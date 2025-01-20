@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -59,7 +60,7 @@ func (d *AdministeredLicensingSubscriptionSubscriptionsComplianceStatusesDataSou
 		Attributes: map[string]schema.Attribute{
 			"organization_ids": schema.ListAttribute{
 				MarkdownDescription: `organizationIds query parameter. Organizations to get subscription compliance information for`,
-				Optional:            true,
+				Required:            true,
 				ElementType:         types.StringType,
 			},
 			"subscription_ids": schema.ListAttribute{
@@ -161,7 +162,10 @@ func (d *AdministeredLicensingSubscriptionSubscriptionsComplianceStatusesDataSou
 		queryParams1 := merakigosdk.GetAdministeredLicensingSubscriptionSubscriptionsComplianceStatusesQueryParams{}
 
 		queryParams1.OrganizationIDs = elementsToStrings(ctx, administeredLicensingSubscriptionSubscriptionsComplianceStatuses.OrganizationIDs)
+
 		queryParams1.SubscriptionIDs = elementsToStrings(ctx, administeredLicensingSubscriptionSubscriptionsComplianceStatuses.SubscriptionIDs)
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Licensing.GetAdministeredLicensingSubscriptionSubscriptionsComplianceStatuses(&queryParams1)
 
@@ -236,7 +240,7 @@ func ResponseLicensingGetAdministeredLicensingSubscriptionSubscriptionsComplianc
 						Status: types.StringValue(item.Subscription.Status),
 					}
 				}
-				return &ResponseItemLicensingGetAdministeredLicensingSubscriptionSubscriptionsComplianceStatusesSubscription{}
+				return nil
 			}(),
 			Violations: func() *ResponseItemLicensingGetAdministeredLicensingSubscriptionSubscriptionsComplianceStatusesViolations {
 				if item.Violations != nil {
@@ -266,22 +270,22 @@ func ResponseLicensingGetAdministeredLicensingSubscriptionSubscriptionsComplianc
 															}
 															return &result
 														}
-														return &[]ResponseItemLicensingGetAdministeredLicensingSubscriptionSubscriptionsComplianceStatusesViolationsByProductClassMissingEntitlements{}
+														return nil
 													}(),
 												}
 											}
-											return &ResponseItemLicensingGetAdministeredLicensingSubscriptionSubscriptionsComplianceStatusesViolationsByProductClassMissing{}
+											return nil
 										}(),
 										ProductClass: types.StringValue(byProductClass.ProductClass),
 									}
 								}
 								return &result
 							}
-							return &[]ResponseItemLicensingGetAdministeredLicensingSubscriptionSubscriptionsComplianceStatusesViolationsByProductClass{}
+							return nil
 						}(),
 					}
 				}
-				return &ResponseItemLicensingGetAdministeredLicensingSubscriptionSubscriptionsComplianceStatusesViolations{}
+				return nil
 			}(),
 		}
 		items = append(items, itemState)

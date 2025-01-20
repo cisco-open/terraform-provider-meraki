@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -165,8 +165,9 @@ func (r *DevicesLiveToolsWakeOnLanResource) Schema(_ context.Context, _ resource
 				Required:            true,
 			},
 			"status": schema.StringAttribute{
-				MarkdownDescription: `Status of the Wake-on-LAN request`,
-				Computed:            true,
+				MarkdownDescription: `Status of the Wake-on-LAN request
+                                  Allowed values: [complete,failed,new,ready,running,scheduled]`,
+				Computed: true,
 			},
 			"url": schema.StringAttribute{
 				MarkdownDescription: `GET this url to check the status of your ping request`,
@@ -466,7 +467,7 @@ func ResponseDevicesGetDeviceLiveToolsWakeOnLanItemToBodyRs(state DevicesLiveToo
 					}(),
 				}
 			}
-			return &ResponseDevicesGetDeviceLiveToolsWakeOnLanRequestRs{}
+			return nil
 		}(),
 		Status:      types.StringValue(response.Status),
 		URL:         types.StringValue(response.URL),

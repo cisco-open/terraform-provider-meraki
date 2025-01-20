@@ -1,10 +1,26 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -56,6 +72,7 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 			},
 			"peers": schema.SetNestedAttribute{
 				MarkdownDescription: `The list of VPN peers`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
@@ -64,8 +81,9 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 					Attributes: map[string]schema.Attribute{
 
 						"ike_version": schema.StringAttribute{
-							MarkdownDescription: `[optional] The IKE version to be used for the IPsec VPN peer configuration. Defaults to '1' when omitted.`,
-							Optional:            true,
+							MarkdownDescription: `[optional] The IKE version to be used for the IPsec VPN peer configuration. Defaults to '1' when omitted.
+                                        Allowed values: [1,2]`,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -150,7 +168,8 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 							},
 						},
 						"ipsec_policies_preset": schema.StringAttribute{
-							MarkdownDescription: `One of the following available presets: 'default', 'aws', 'azure'. If this is provided, the 'ipsecPolicies' parameter is ignored.`,
+							MarkdownDescription: `One of the following available presets: 'default', 'aws', 'azure', 'umbrella', 'zscaler'. If this is provided, the 'ipsecPolicies' parameter is ignored.`,
+							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -158,6 +177,7 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 						},
 						"local_id": schema.StringAttribute{
 							MarkdownDescription: `[optional] The local ID is used to identify the MX to the peer. This will apply to all MXs this peer applies to.`,
+							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -187,6 +207,14 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 							},
 
 							ElementType: types.StringType,
+						},
+						"public_hostname": schema.StringAttribute{
+							MarkdownDescription: `[optional] The public hostname of the VPN peer`,
+							Computed:            true,
+							Optional:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
 						},
 						"public_ip": schema.StringAttribute{
 							MarkdownDescription: `[optional] The public IP of the VPN peer`,
@@ -222,8 +250,10 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 					Attributes: map[string]schema.Attribute{
 
 						"ike_version": schema.StringAttribute{
-							MarkdownDescription: `[optional] The IKE version to be used for the IPsec VPN peer configuration. Defaults to '1' when omitted.`,
-							Computed:            true,
+							MarkdownDescription: `[optional] The IKE version to be used for the IPsec VPN peer configuration. Defaults to '1' when omitted.
+                                        Allowed values: [1,2]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -308,7 +338,7 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 							},
 						},
 						"ipsec_policies_preset": schema.StringAttribute{
-							MarkdownDescription: `One of the following available presets: 'default', 'aws', 'azure'. If this is provided, the 'ipsecPolicies' parameter is ignored.`,
+							MarkdownDescription: `One of the following available presets: 'default', 'aws', 'azure', 'umbrella', 'zscaler'. If this is provided, the 'ipsecPolicies' parameter is ignored.`,
 							Computed:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -345,6 +375,13 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Schema(_ context.C
 							},
 
 							ElementType: types.StringType,
+						},
+						"public_hostname": schema.StringAttribute{
+							MarkdownDescription: `[optional] The public hostname of the VPN peer`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
 						},
 						"public_ip": schema.StringAttribute{
 							MarkdownDescription: `[optional] The public IP of the VPN peer`,
@@ -564,6 +601,7 @@ type ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersPeersRs struc
 	PublicIP            types.String                                                                        `tfsdk:"public_ip"`
 	RemoteID            types.String                                                                        `tfsdk:"remote_id"`
 	Secret              types.String                                                                        `tfsdk:"secret"`
+	PublicHostname      types.String                                                                        `tfsdk:"public_hostname"`
 }
 
 type ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersPeersIpsecPoliciesRs struct {
@@ -587,8 +625,10 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersRs) toSdkApiRequestUpdate(ct
 			var requestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeersPeersIPsecPolicies *merakigosdk.RequestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeersPeersIPsecPolicies
 			if rItem1.IPsecPolicies != nil {
 				var childAuthAlgo []string = nil
+				//Hoola aqui
 				rItem1.IPsecPolicies.ChildAuthAlgo.ElementsAs(ctx, &childAuthAlgo, false)
 				var childCipherAlgo []string = nil
+				//Hoola aqui
 				rItem1.IPsecPolicies.ChildCipherAlgo.ElementsAs(ctx, &childCipherAlgo, false)
 				childLifetime := func() *int64 {
 					if !rItem1.IPsecPolicies.ChildLifetime.IsUnknown() && !rItem1.IPsecPolicies.ChildLifetime.IsNull() {
@@ -597,12 +637,16 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersRs) toSdkApiRequestUpdate(ct
 					return nil
 				}()
 				var childPfsGroup []string = nil
+				//Hoola aqui
 				rItem1.IPsecPolicies.ChildPfsGroup.ElementsAs(ctx, &childPfsGroup, false)
 				var ikeAuthAlgo []string = nil
+				//Hoola aqui
 				rItem1.IPsecPolicies.IkeAuthAlgo.ElementsAs(ctx, &ikeAuthAlgo, false)
 				var ikeCipherAlgo []string = nil
+				//Hoola aqui
 				rItem1.IPsecPolicies.IkeCipherAlgo.ElementsAs(ctx, &ikeCipherAlgo, false)
 				var ikeDiffieHellmanGroup []string = nil
+				//Hoola aqui
 				rItem1.IPsecPolicies.IkeDiffieHellmanGroup.ElementsAs(ctx, &ikeDiffieHellmanGroup, false)
 				ikeLifetime := func() *int64 {
 					if !rItem1.IPsecPolicies.IkeLifetime.IsUnknown() && !rItem1.IPsecPolicies.IkeLifetime.IsNull() {
@@ -611,6 +655,7 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersRs) toSdkApiRequestUpdate(ct
 					return nil
 				}()
 				var ikePrfAlgo []string = nil
+				//Hoola aqui
 				rItem1.IPsecPolicies.IkePrfAlgo.ElementsAs(ctx, &ikePrfAlgo, false)
 				requestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeersPeersIPsecPolicies = &merakigosdk.RequestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeersPeersIPsecPolicies{
 					ChildAuthAlgo:         childAuthAlgo,
@@ -628,9 +673,12 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersRs) toSdkApiRequestUpdate(ct
 			localID := rItem1.LocalID.ValueString()
 			name := rItem1.Name.ValueString()
 			var networkTags []string = nil
+			//Hoola aqui
 			rItem1.NetworkTags.ElementsAs(ctx, &networkTags, false)
 			var privateSubnets []string = nil
+			//Hoola aqui
 			rItem1.PrivateSubnets.ElementsAs(ctx, &privateSubnets, false)
+			publicHostname := rItem1.PublicHostname.ValueString()
 			publicIP := rItem1.PublicIP.ValueString()
 			remoteID := rItem1.RemoteID.ValueString()
 			secret := rItem1.Secret.ValueString()
@@ -642,6 +690,7 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersRs) toSdkApiRequestUpdate(ct
 				Name:                name,
 				NetworkTags:         networkTags,
 				PrivateSubnets:      privateSubnets,
+				PublicHostname:      publicHostname,
 				PublicIP:            publicIP,
 				RemoteID:            remoteID,
 				Secret:              secret,
@@ -706,7 +755,7 @@ func ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersItemToBodyRs(
 				}
 				return &result
 			}
-			return &[]ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersPeersRs{}
+			return nil
 		}(),
 		Peers: state.Peers,
 	}

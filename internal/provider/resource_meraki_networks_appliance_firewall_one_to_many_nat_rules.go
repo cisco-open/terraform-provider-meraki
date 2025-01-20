@@ -1,10 +1,26 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -106,9 +122,10 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Schema(_ context.Co
 										},
 									},
 									"protocol": schema.StringAttribute{
-										MarkdownDescription: `'tcp' or 'udp'`,
-										Computed:            true,
-										Optional:            true,
+										MarkdownDescription: `'tcp' or 'udp'
+                                              Allowed values: [tcp,udp]`,
+										Computed: true,
+										Optional: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
 										},
@@ -139,9 +156,10 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Schema(_ context.Co
 							},
 						},
 						"uplink": schema.StringAttribute{
-							MarkdownDescription: `The physical WAN interface on which the traffic will arrive ('internet1' or, if available, 'internet2')`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `The physical WAN interface on which the traffic will arrive ('internet1' or, if available, 'internet2')
+                                        Allowed values: [internet1,internet2]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -359,9 +377,8 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesRs) toSdkApiRequestUpdate(ctx
 		for _, rItem1 := range *r.Rules {
 			var requestApplianceUpdateNetworkApplianceFirewallOneToManyNatRulesRulesPortRules []merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallOneToManyNatRulesRulesPortRules
 			if rItem1.PortRules != nil {
-				for _, rItem2 := range *rItem1.PortRules {
+				for _, rItem2 := range *rItem1.PortRules { //PortRules// name: portRules
 					var allowedIPs []string = nil
-
 					rItem2.AllowedIPs.ElementsAs(ctx, &allowedIPs, false)
 					localIP := rItem2.LocalIP.ValueString()
 					localPort := rItem2.LocalPort.ValueString()
@@ -394,9 +411,10 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesRs) toSdkApiRequestUpdate(ctx
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallOneToManyNatRules{
 		Rules: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallOneToManyNatRulesRules {
-
-			return &requestApplianceUpdateNetworkApplianceFirewallOneToManyNatRulesRules
-
+			if len(requestApplianceUpdateNetworkApplianceFirewallOneToManyNatRulesRules) > 0 || r.Rules != nil {
+				return &requestApplianceUpdateNetworkApplianceFirewallOneToManyNatRulesRules
+			}
+			return nil
 		}(),
 	}
 	return &out
@@ -425,7 +443,7 @@ func ResponseApplianceGetNetworkApplianceFirewallOneToManyNatRulesItemToBodyRs(s
 								}
 								return &result
 							}
-							return &[]ResponseApplianceGetNetworkApplianceFirewallOneToManyNatRulesRulesPortRulesRs{}
+							return nil
 						}(),
 						PublicIP: types.StringValue(rules.PublicIP),
 						Uplink:   types.StringValue(rules.Uplink),
@@ -433,7 +451,7 @@ func ResponseApplianceGetNetworkApplianceFirewallOneToManyNatRulesItemToBodyRs(s
 				}
 				return &result
 			}
-			return &[]ResponseApplianceGetNetworkApplianceFirewallOneToManyNatRulesRulesRs{}
+			return nil
 		}(),
 	}
 	if is_read {

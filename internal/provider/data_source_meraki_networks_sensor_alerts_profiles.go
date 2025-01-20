@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -68,7 +85,7 @@ func (d *NetworksSensorAlertsProfilesDataSource) Schema(_ context.Context, _ dat
 									Computed:            true,
 								},
 								"metric": schema.StringAttribute{
-									MarkdownDescription: `The type of sensor metric that will be monitored for changes. Available metrics are apparentPower, co2, current, door, frequency, humidity, indoorAirQuality, noise, pm25, powerFactor, realPower, temperature, tvoc, upstreamPower, voltage, and water.`,
+									MarkdownDescription: `The type of sensor metric that will be monitored for changes.`,
 									Computed:            true,
 								},
 								"threshold": schema.SingleNestedAttribute{
@@ -83,6 +100,21 @@ func (d *NetworksSensorAlertsProfilesDataSource) Schema(_ context.Context, _ dat
 
 												"draw": schema.Float64Attribute{
 													MarkdownDescription: `Alerting threshold in volt-amps. Must be between 0 and 3750.`,
+													Computed:            true,
+												},
+											},
+										},
+										"co2": schema.SingleNestedAttribute{
+											MarkdownDescription: `CO2 concentration threshold. One of 'concentration' or 'quality' must be provided.`,
+											Computed:            true,
+											Attributes: map[string]schema.Attribute{
+
+												"concentration": schema.Int64Attribute{
+													MarkdownDescription: `Alerting threshold as CO2 parts per million.`,
+													Computed:            true,
+												},
+												"quality": schema.StringAttribute{
+													MarkdownDescription: `Alerting threshold as a qualitative CO2 level.`,
 													Computed:            true,
 												},
 											},
@@ -355,7 +387,7 @@ func (d *NetworksSensorAlertsProfilesDataSource) Schema(_ context.Context, _ dat
 										Computed:            true,
 									},
 									"metric": schema.StringAttribute{
-										MarkdownDescription: `The type of sensor metric that will be monitored for changes. Available metrics are apparentPower, co2, current, door, frequency, humidity, indoorAirQuality, noise, pm25, powerFactor, realPower, temperature, tvoc, upstreamPower, voltage, and water.`,
+										MarkdownDescription: `The type of sensor metric that will be monitored for changes.`,
 										Computed:            true,
 									},
 									"threshold": schema.SingleNestedAttribute{
@@ -370,6 +402,21 @@ func (d *NetworksSensorAlertsProfilesDataSource) Schema(_ context.Context, _ dat
 
 													"draw": schema.Float64Attribute{
 														MarkdownDescription: `Alerting threshold in volt-amps. Must be between 0 and 3750.`,
+														Computed:            true,
+													},
+												},
+											},
+											"co2": schema.SingleNestedAttribute{
+												MarkdownDescription: `CO2 concentration threshold. One of 'concentration' or 'quality' must be provided.`,
+												Computed:            true,
+												Attributes: map[string]schema.Attribute{
+
+													"concentration": schema.Int64Attribute{
+														MarkdownDescription: `Alerting threshold as CO2 parts per million.`,
+														Computed:            true,
+													},
+													"quality": schema.StringAttribute{
+														MarkdownDescription: `Alerting threshold as a qualitative CO2 level.`,
 														Computed:            true,
 													},
 												},
@@ -642,6 +689,8 @@ func (d *NetworksSensorAlertsProfilesDataSource) Read(ctx context.Context, req d
 		log.Printf("[DEBUG] Selected method: GetNetworkSensorAlertsProfiles")
 		vvNetworkID := networksSensorAlertsProfiles.NetworkID.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Sensor.GetNetworkSensorAlertsProfiles(vvNetworkID)
 
 		if err != nil || response1 == nil {
@@ -667,6 +716,8 @@ func (d *NetworksSensorAlertsProfilesDataSource) Read(ctx context.Context, req d
 		log.Printf("[DEBUG] Selected method: GetNetworkSensorAlertsProfile")
 		vvNetworkID := networksSensorAlertsProfiles.NetworkID.ValueString()
 		vvID := networksSensorAlertsProfiles.ID.ValueString()
+
+		// has_unknown_response: None
 
 		response2, restyResp2, err := d.client.Sensor.GetNetworkSensorAlertsProfile(vvNetworkID, vvID)
 
@@ -717,6 +768,7 @@ type ResponseItemSensorGetNetworkSensorAlertsProfilesConditions struct {
 
 type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThreshold struct {
 	ApparentPower    *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdApparentPower    `tfsdk:"apparent_power"`
+	Co2              *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdCo2              `tfsdk:"co2"`
 	Current          *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdCurrent          `tfsdk:"current"`
 	Door             *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdDoor             `tfsdk:"door"`
 	Frequency        *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdFrequency        `tfsdk:"frequency"`
@@ -735,6 +787,11 @@ type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThreshold struct 
 
 type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdApparentPower struct {
 	Draw types.Float64 `tfsdk:"draw"`
+}
+
+type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdCo2 struct {
+	Concentration types.Int64  `tfsdk:"concentration"`
+	Quality       types.String `tfsdk:"quality"`
 }
 
 type ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdCurrent struct {
@@ -833,6 +890,7 @@ type ResponseSensorGetNetworkSensorAlertsProfileConditions struct {
 
 type ResponseSensorGetNetworkSensorAlertsProfileConditionsThreshold struct {
 	ApparentPower    *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdApparentPower    `tfsdk:"apparent_power"`
+	Co2              *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCo2              `tfsdk:"co2"`
 	Current          *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCurrent          `tfsdk:"current"`
 	Door             *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdDoor             `tfsdk:"door"`
 	Frequency        *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdFrequency        `tfsdk:"frequency"`
@@ -851,6 +909,11 @@ type ResponseSensorGetNetworkSensorAlertsProfileConditionsThreshold struct {
 
 type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdApparentPower struct {
 	Draw types.Float64 `tfsdk:"draw"`
+}
+
+type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCo2 struct {
+	Concentration types.Int64  `tfsdk:"concentration"`
+	Quality       types.String `tfsdk:"quality"`
 }
 
 type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCurrent struct {
@@ -963,7 +1026,21 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 													}(),
 												}
 											}
-											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdApparentPower{}
+											return nil
+										}(),
+										Co2: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdCo2 {
+											if conditions.Threshold.Co2 != nil {
+												return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdCo2{
+													Concentration: func() types.Int64 {
+														if conditions.Threshold.Co2.Concentration != nil {
+															return types.Int64Value(int64(*conditions.Threshold.Co2.Concentration))
+														}
+														return types.Int64{}
+													}(),
+													Quality: types.StringValue(conditions.Threshold.Co2.Quality),
+												}
+											}
+											return nil
 										}(),
 										Current: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdCurrent {
 											if conditions.Threshold.Current != nil {
@@ -976,7 +1053,7 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 													}(),
 												}
 											}
-											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdCurrent{}
+											return nil
 										}(),
 										Door: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdDoor {
 											if conditions.Threshold.Door != nil {
@@ -989,7 +1066,7 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 													}(),
 												}
 											}
-											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdDoor{}
+											return nil
 										}(),
 										Frequency: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdFrequency {
 											if conditions.Threshold.Frequency != nil {
@@ -1002,7 +1079,7 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 													}(),
 												}
 											}
-											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdFrequency{}
+											return nil
 										}(),
 										Humidity: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdHumidity {
 											if conditions.Threshold.Humidity != nil {
@@ -1016,7 +1093,7 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 													}(),
 												}
 											}
-											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdHumidity{}
+											return nil
 										}(),
 										IndoorAirQuality: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdIndoorAirQuality {
 											if conditions.Threshold.IndoorAirQuality != nil {
@@ -1030,7 +1107,7 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 													}(),
 												}
 											}
-											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdIndoorAirQuality{}
+											return nil
 										}(),
 										Noise: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdNoise {
 											if conditions.Threshold.Noise != nil {
@@ -1047,11 +1124,11 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 																Quality: types.StringValue(conditions.Threshold.Noise.Ambient.Quality),
 															}
 														}
-														return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdNoiseAmbient{}
+														return nil
 													}(),
 												}
 											}
-											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdNoise{}
+											return nil
 										}(),
 										Pm25: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdPm25 {
 											if conditions.Threshold.Pm25 != nil {
@@ -1065,7 +1142,7 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 													Quality: types.StringValue(conditions.Threshold.Pm25.Quality),
 												}
 											}
-											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdPm25{}
+											return nil
 										}(),
 										PowerFactor: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdPowerFactor {
 											if conditions.Threshold.PowerFactor != nil {
@@ -1078,7 +1155,7 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 													}(),
 												}
 											}
-											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdPowerFactor{}
+											return nil
 										}(),
 										RealPower: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdRealPower {
 											if conditions.Threshold.RealPower != nil {
@@ -1091,7 +1168,7 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 													}(),
 												}
 											}
-											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdRealPower{}
+											return nil
 										}(),
 										Temperature: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdTemperature {
 											if conditions.Threshold.Temperature != nil {
@@ -1111,7 +1188,7 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 													Quality: types.StringValue(conditions.Threshold.Temperature.Quality),
 												}
 											}
-											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdTemperature{}
+											return nil
 										}(),
 										Tvoc: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdTvoc {
 											if conditions.Threshold.Tvoc != nil {
@@ -1125,7 +1202,7 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 													Quality: types.StringValue(conditions.Threshold.Tvoc.Quality),
 												}
 											}
-											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdTvoc{}
+											return nil
 										}(),
 										UpstreamPower: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdUpstreamPower {
 											if conditions.Threshold.UpstreamPower != nil {
@@ -1138,7 +1215,7 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 													}(),
 												}
 											}
-											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdUpstreamPower{}
+											return nil
 										}(),
 										Voltage: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdVoltage {
 											if conditions.Threshold.Voltage != nil {
@@ -1151,7 +1228,7 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 													}(),
 												}
 											}
-											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdVoltage{}
+											return nil
 										}(),
 										Water: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdWater {
 											if conditions.Threshold.Water != nil {
@@ -1164,17 +1241,17 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 													}(),
 												}
 											}
-											return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdWater{}
+											return nil
 										}(),
 									}
 								}
-								return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThreshold{}
+								return nil
 							}(),
 						}
 					}
 					return &result
 				}
-				return &[]ResponseItemSensorGetNetworkSensorAlertsProfilesConditions{}
+				return nil
 			}(),
 			Name:      types.StringValue(item.Name),
 			ProfileID: types.StringValue(item.ProfileID),
@@ -1186,7 +1263,7 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 						SmsNumbers:    StringSliceToList(item.Recipients.SmsNumbers),
 					}
 				}
-				return &ResponseItemSensorGetNetworkSensorAlertsProfilesRecipients{}
+				return nil
 			}(),
 			Schedule: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesSchedule {
 				if item.Schedule != nil {
@@ -1195,7 +1272,7 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 						Name: types.StringValue(item.Schedule.Name),
 					}
 				}
-				return &ResponseItemSensorGetNetworkSensorAlertsProfilesSchedule{}
+				return nil
 			}(),
 			Serials: StringSliceToList(item.Serials),
 		}
@@ -1234,7 +1311,21 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdApparentPower{}
+										return nil
+									}(),
+									Co2: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCo2 {
+										if conditions.Threshold.Co2 != nil {
+											return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCo2{
+												Concentration: func() types.Int64 {
+													if conditions.Threshold.Co2.Concentration != nil {
+														return types.Int64Value(int64(*conditions.Threshold.Co2.Concentration))
+													}
+													return types.Int64{}
+												}(),
+												Quality: types.StringValue(conditions.Threshold.Co2.Quality),
+											}
+										}
+										return nil
 									}(),
 									Current: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCurrent {
 										if conditions.Threshold.Current != nil {
@@ -1247,7 +1338,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCurrent{}
+										return nil
 									}(),
 									Door: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdDoor {
 										if conditions.Threshold.Door != nil {
@@ -1260,7 +1351,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdDoor{}
+										return nil
 									}(),
 									Frequency: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdFrequency {
 										if conditions.Threshold.Frequency != nil {
@@ -1273,7 +1364,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdFrequency{}
+										return nil
 									}(),
 									Humidity: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdHumidity {
 										if conditions.Threshold.Humidity != nil {
@@ -1287,7 +1378,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdHumidity{}
+										return nil
 									}(),
 									IndoorAirQuality: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdIndoorAirQuality {
 										if conditions.Threshold.IndoorAirQuality != nil {
@@ -1301,7 +1392,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdIndoorAirQuality{}
+										return nil
 									}(),
 									Noise: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdNoise {
 										if conditions.Threshold.Noise != nil {
@@ -1318,11 +1409,11 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 															Quality: types.StringValue(conditions.Threshold.Noise.Ambient.Quality),
 														}
 													}
-													return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdNoiseAmbient{}
+													return nil
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdNoise{}
+										return nil
 									}(),
 									Pm25: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdPm25 {
 										if conditions.Threshold.Pm25 != nil {
@@ -1336,7 +1427,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 												Quality: types.StringValue(conditions.Threshold.Pm25.Quality),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdPm25{}
+										return nil
 									}(),
 									PowerFactor: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdPowerFactor {
 										if conditions.Threshold.PowerFactor != nil {
@@ -1349,7 +1440,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdPowerFactor{}
+										return nil
 									}(),
 									RealPower: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdRealPower {
 										if conditions.Threshold.RealPower != nil {
@@ -1362,7 +1453,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdRealPower{}
+										return nil
 									}(),
 									Temperature: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdTemperature {
 										if conditions.Threshold.Temperature != nil {
@@ -1382,7 +1473,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 												Quality: types.StringValue(conditions.Threshold.Temperature.Quality),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdTemperature{}
+										return nil
 									}(),
 									Tvoc: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdTvoc {
 										if conditions.Threshold.Tvoc != nil {
@@ -1396,7 +1487,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 												Quality: types.StringValue(conditions.Threshold.Tvoc.Quality),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdTvoc{}
+										return nil
 									}(),
 									UpstreamPower: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdUpstreamPower {
 										if conditions.Threshold.UpstreamPower != nil {
@@ -1409,7 +1500,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdUpstreamPower{}
+										return nil
 									}(),
 									Voltage: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdVoltage {
 										if conditions.Threshold.Voltage != nil {
@@ -1422,7 +1513,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdVoltage{}
+										return nil
 									}(),
 									Water: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdWater {
 										if conditions.Threshold.Water != nil {
@@ -1435,17 +1526,17 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdWater{}
+										return nil
 									}(),
 								}
 							}
-							return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThreshold{}
+							return nil
 						}(),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseSensorGetNetworkSensorAlertsProfileConditions{}
+			return nil
 		}(),
 		Name:      types.StringValue(response.Name),
 		ProfileID: types.StringValue(response.ProfileID),
@@ -1457,7 +1548,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 					SmsNumbers:    StringSliceToList(response.Recipients.SmsNumbers),
 				}
 			}
-			return &ResponseSensorGetNetworkSensorAlertsProfileRecipients{}
+			return nil
 		}(),
 		Schedule: func() *ResponseSensorGetNetworkSensorAlertsProfileSchedule {
 			if response.Schedule != nil {
@@ -1466,7 +1557,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 					Name: types.StringValue(response.Schedule.Name),
 				}
 			}
-			return &ResponseSensorGetNetworkSensorAlertsProfileSchedule{}
+			return nil
 		}(),
 		Serials: StringSliceToList(response.Serials),
 	}

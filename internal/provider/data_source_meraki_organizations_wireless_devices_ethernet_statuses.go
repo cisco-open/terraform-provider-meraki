@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -91,11 +92,11 @@ func (d *OrganizationsWirelessDevicesEthernetStatusesDataSource) Schema(_ contex
 							Attributes: map[string]schema.Attribute{
 
 								"enabled": schema.BoolAttribute{
-									MarkdownDescription: `Link Aggregation enabled flag`,
+									MarkdownDescription: `Link Aggregation enabled flag will return null on Catalyst devices`,
 									Computed:            true,
 								},
 								"speed": schema.Int64Attribute{
-									MarkdownDescription: `Link Aggregation speed`,
+									MarkdownDescription: `Link Aggregation speed will return null on Catalyst devices`,
 									Computed:            true,
 								},
 							},
@@ -127,11 +128,11 @@ func (d *OrganizationsWirelessDevicesEthernetStatusesDataSource) Schema(_ contex
 										Attributes: map[string]schema.Attribute{
 
 											"duplex": schema.StringAttribute{
-												MarkdownDescription: `The duplex mode of the port. Can be 'full' or 'half'`,
+												MarkdownDescription: `The duplex mode of the port. Can be 'full' or 'half' will return null on Catalyst devices`,
 												Computed:            true,
 											},
 											"speed": schema.Int64Attribute{
-												MarkdownDescription: `The speed of the port`,
+												MarkdownDescription: `Show the speed of the port. The port speed will return null on Catalyst devices`,
 												Computed:            true,
 											},
 										},
@@ -215,6 +216,8 @@ func (d *OrganizationsWirelessDevicesEthernetStatusesDataSource) Read(ctx contex
 		queryParams1.StartingAfter = organizationsWirelessDevicesEthernetStatuses.StartingAfter.ValueString()
 		queryParams1.EndingBefore = organizationsWirelessDevicesEthernetStatuses.EndingBefore.ValueString()
 		queryParams1.NetworkIDs = elementsToStrings(ctx, organizationsWirelessDevicesEthernetStatuses.NetworkIDs)
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Wireless.GetOrganizationWirelessDevicesEthernetStatuses(vvOrganizationID, &queryParams1)
 
@@ -318,7 +321,7 @@ func ResponseWirelessGetOrganizationWirelessDevicesEthernetStatusesItemsToBody(s
 						}(),
 					}
 				}
-				return &ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesAggregation{}
+				return nil
 			}(),
 			Name: types.StringValue(item.Name),
 			Network: func() *ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesNetwork {
@@ -327,7 +330,7 @@ func ResponseWirelessGetOrganizationWirelessDevicesEthernetStatusesItemsToBody(s
 						ID: types.StringValue(item.Network.ID),
 					}
 				}
-				return &ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesNetwork{}
+				return nil
 			}(),
 			Ports: func() *[]ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesPorts {
 				if item.Ports != nil {
@@ -346,7 +349,7 @@ func ResponseWirelessGetOrganizationWirelessDevicesEthernetStatusesItemsToBody(s
 										}(),
 									}
 								}
-								return &ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesPortsLinkNegotiation{}
+								return nil
 							}(),
 							Name: types.StringValue(ports.Name),
 							Poe: func() *ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesPortsPoe {
@@ -355,13 +358,13 @@ func ResponseWirelessGetOrganizationWirelessDevicesEthernetStatusesItemsToBody(s
 										Standard: types.StringValue(ports.Poe.Standard),
 									}
 								}
-								return &ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesPortsPoe{}
+								return nil
 							}(),
 						}
 					}
 					return &result
 				}
-				return &[]ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesPorts{}
+				return nil
 			}(),
 			Power: func() *ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesPower {
 				if item.Power != nil {
@@ -377,7 +380,7 @@ func ResponseWirelessGetOrganizationWirelessDevicesEthernetStatusesItemsToBody(s
 									}(),
 								}
 							}
-							return &ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesPowerAc{}
+							return nil
 						}(),
 						Mode: types.StringValue(item.Power.Mode),
 						Poe: func() *ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesPowerPoe {
@@ -391,11 +394,11 @@ func ResponseWirelessGetOrganizationWirelessDevicesEthernetStatusesItemsToBody(s
 									}(),
 								}
 							}
-							return &ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesPowerPoe{}
+							return nil
 						}(),
 					}
 				}
-				return &ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesPower{}
+				return nil
 			}(),
 			Serial: types.StringValue(item.Serial),
 		}

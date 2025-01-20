@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -87,8 +87,9 @@ func (r *NetworksApplianceTrafficShapingVpnExclusionsResource) Schema(_ context.
 									Computed:            true,
 								},
 								"protocol": schema.StringAttribute{
-									MarkdownDescription: `Protocol.`,
-									Computed:            true,
+									MarkdownDescription: `Protocol.
+                                                Allowed values: [any,dns,icmp,tcp,udp]`,
+									Computed: true,
 								},
 							},
 						},
@@ -104,8 +105,9 @@ func (r *NetworksApplianceTrafficShapingVpnExclusionsResource) Schema(_ context.
 									Computed:            true,
 								},
 								"name": schema.StringAttribute{
-									MarkdownDescription: `Application's name.`,
-									Computed:            true,
+									MarkdownDescription: `Application's name.
+                                                Allowed values: [AWS,Box,Office 365 Sharepoint,Office 365 Suite,Oracle,SAP,Salesforce,Skype & Teams,Slack,Webex,Webex Calling,Webex Meetings,Zoom]`,
+									Computed: true,
 								},
 							},
 						},
@@ -147,9 +149,10 @@ func (r *NetworksApplianceTrafficShapingVpnExclusionsResource) Schema(_ context.
 									},
 								},
 								"protocol": schema.StringAttribute{
-									MarkdownDescription: `Protocol.`,
-									Optional:            true,
-									Computed:            true,
+									MarkdownDescription: `Protocol.
+                                              Allowed values: [any,dns,icmp,tcp,udp]`,
+									Optional: true,
+									Computed: true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.RequiresReplace(),
 									},
@@ -173,9 +176,10 @@ func (r *NetworksApplianceTrafficShapingVpnExclusionsResource) Schema(_ context.
 									},
 								},
 								"name": schema.StringAttribute{
-									MarkdownDescription: `Application's name.`,
-									Optional:            true,
-									Computed:            true,
+									MarkdownDescription: `Application's name.
+                                              Allowed values: [AWS,Box,Office 365 Sharepoint,Office 365 Suite,Oracle,SAP,Salesforce,Skype & Teams,Slack,Webex,Webex Calling,Webex Meetings,Zoom]`,
+									Optional: true,
+									Computed: true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.RequiresReplace(),
 									},
@@ -233,15 +237,15 @@ func (r *NetworksApplianceTrafficShapingVpnExclusionsResource) Create(ctx contex
 }
 
 func (r *NetworksApplianceTrafficShapingVpnExclusionsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *NetworksApplianceTrafficShapingVpnExclusionsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *NetworksApplianceTrafficShapingVpnExclusionsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -345,7 +349,7 @@ func ResponseApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsItemToBod
 				}
 				return &result
 			}
-			return &[]ResponseApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsCustom{}
+			return nil
 		}(),
 		MajorApplications: func() *[]ResponseApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsMajorApplications {
 			if response.MajorApplications != nil {
@@ -358,7 +362,7 @@ func ResponseApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsItemToBod
 				}
 				return &result
 			}
-			return &[]ResponseApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsMajorApplications{}
+			return nil
 		}(),
 		NetworkID:   types.StringValue(response.NetworkID),
 		NetworkName: types.StringValue(response.NetworkName),

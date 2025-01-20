@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -29,19 +30,19 @@ import (
 )
 
 var (
-	_ datasource.DataSource              = &DevicesLiveToolsCableTestDataSource{}
-	_ datasource.DataSourceWithConfigure = &DevicesLiveToolsCableTestDataSource{}
+	_ datasource.DataSource              = &DevicesLiveToolsCableDataSource{}
+	_ datasource.DataSourceWithConfigure = &DevicesLiveToolsCableDataSource{}
 )
 
-func NewDevicesLiveToolsCableTestDataSource() datasource.DataSource {
-	return &DevicesLiveToolsCableTestDataSource{}
+func NewDevicesLiveToolsCableDataSource() datasource.DataSource {
+	return &DevicesLiveToolsCableDataSource{}
 }
 
-type DevicesLiveToolsCableTestDataSource struct {
+type DevicesLiveToolsCableDataSource struct {
 	client *merakigosdk.Client
 }
 
-func (d *DevicesLiveToolsCableTestDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *DevicesLiveToolsCableDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -50,11 +51,11 @@ func (d *DevicesLiveToolsCableTestDataSource) Configure(ctx context.Context, req
 }
 
 // Metadata returns the data source type name.
-func (d *DevicesLiveToolsCableTestDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_devices_live_tools_cable_test"
+func (d *DevicesLiveToolsCableDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_devices_live_tools_cable"
 }
 
-func (d *DevicesLiveToolsCableTestDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (d *DevicesLiveToolsCableDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
@@ -153,9 +154,9 @@ func (d *DevicesLiveToolsCableTestDataSource) Schema(_ context.Context, _ dataso
 	}
 }
 
-func (d *DevicesLiveToolsCableTestDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var devicesLiveToolsCableTest DevicesLiveToolsCableTest
-	diags := req.Config.Get(ctx, &devicesLiveToolsCableTest)
+func (d *DevicesLiveToolsCableDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var devicesLiveToolsCable DevicesLiveToolsCable
+	diags := req.Config.Get(ctx, &devicesLiveToolsCable)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -163,8 +164,10 @@ func (d *DevicesLiveToolsCableTestDataSource) Read(ctx context.Context, req data
 	selectedMethod := 1
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetDeviceLiveToolsCableTest")
-		vvSerial := devicesLiveToolsCableTest.Serial.ValueString()
-		vvID := devicesLiveToolsCableTest.ID.ValueString()
+		vvSerial := devicesLiveToolsCable.Serial.ValueString()
+		vvID := devicesLiveToolsCable.ID.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Devices.GetDeviceLiveToolsCableTest(vvSerial, vvID)
 
@@ -179,8 +182,8 @@ func (d *DevicesLiveToolsCableTestDataSource) Read(ctx context.Context, req data
 			return
 		}
 
-		devicesLiveToolsCableTest = ResponseDevicesGetDeviceLiveToolsCableTestItemToBody(devicesLiveToolsCableTest, response1)
-		diags = resp.State.Set(ctx, &devicesLiveToolsCableTest)
+		devicesLiveToolsCable = ResponseDevicesGetDeviceLiveToolsCableTestItemToBody(devicesLiveToolsCable, response1)
+		diags = resp.State.Set(ctx, &devicesLiveToolsCable)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
@@ -190,7 +193,7 @@ func (d *DevicesLiveToolsCableTestDataSource) Read(ctx context.Context, req data
 }
 
 // structs
-type DevicesLiveToolsCableTest struct {
+type DevicesLiveToolsCable struct {
 	Serial types.String                                `tfsdk:"serial"`
 	ID     types.String                                `tfsdk:"id"`
 	Item   *ResponseDevicesGetDeviceLiveToolsCableTest `tfsdk:"item"`
@@ -225,7 +228,7 @@ type ResponseDevicesGetDeviceLiveToolsCableTestResultsPairs struct {
 }
 
 // ToBody
-func ResponseDevicesGetDeviceLiveToolsCableTestItemToBody(state DevicesLiveToolsCableTest, response *merakigosdk.ResponseDevicesGetDeviceLiveToolsCableTest) DevicesLiveToolsCableTest {
+func ResponseDevicesGetDeviceLiveToolsCableTestItemToBody(state DevicesLiveToolsCable, response *merakigosdk.ResponseDevicesGetDeviceLiveToolsCableTest) DevicesLiveToolsCable {
 	itemState := ResponseDevicesGetDeviceLiveToolsCableTest{
 		CableTestID: types.StringValue(response.CableTestID),
 		Error:       types.StringValue(response.Error),
@@ -236,7 +239,7 @@ func ResponseDevicesGetDeviceLiveToolsCableTestItemToBody(state DevicesLiveTools
 					Serial: types.StringValue(response.Request.Serial),
 				}
 			}
-			return &ResponseDevicesGetDeviceLiveToolsCableTestRequest{}
+			return nil
 		}(),
 		Results: func() *[]ResponseDevicesGetDeviceLiveToolsCableTestResults {
 			if response.Results != nil {
@@ -266,7 +269,7 @@ func ResponseDevicesGetDeviceLiveToolsCableTestItemToBody(state DevicesLiveTools
 								}
 								return &result
 							}
-							return &[]ResponseDevicesGetDeviceLiveToolsCableTestResultsPairs{}
+							return nil
 						}(),
 						Port: types.StringValue(results.Port),
 						SpeedMbps: func() types.Int64 {
@@ -280,7 +283,7 @@ func ResponseDevicesGetDeviceLiveToolsCableTestItemToBody(state DevicesLiveTools
 				}
 				return &result
 			}
-			return &[]ResponseDevicesGetDeviceLiveToolsCableTestResults{}
+			return nil
 		}(),
 		Status: types.StringValue(response.Status),
 		URL:    types.StringValue(response.URL),

@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -123,9 +139,10 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 				},
 			},
 			"controller_disconnection_behavior": schema.StringAttribute{
-				MarkdownDescription: `How login attempts should be handled when the controller is unreachable.`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `How login attempts should be handled when the controller is unreachable.
+                                  Allowed values: [default,open,restricted]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -186,8 +203,9 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 				Attributes: map[string]schema.Attribute{
 
 					"authorization_type": schema.StringAttribute{
-						MarkdownDescription: `How created user accounts should be authorized.`,
-						Computed:            true,
+						MarkdownDescription: `How created user accounts should be authorized.
+                                        Allowed values: [admin,auto,self_email]`,
+						Computed: true,
 					},
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Whether or not to allow users to create their own account on the network.`,
@@ -215,9 +233,10 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 						ElementType: types.StringType,
 					},
 					"strength": schema.StringAttribute{
-						MarkdownDescription: `The strength of the enforcement of selected system types.`,
-						Computed:            true,
-						Optional:            true,
+						MarkdownDescription: `The strength of the enforcement of selected system types.
+                                        Allowed values: [click-through,focused,strict]`,
+						Computed: true,
+						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
@@ -285,9 +304,10 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 								},
 							},
 							"format": schema.StringAttribute{
-								MarkdownDescription: `The format of the encoded contents. Supported formats are 'png', 'gif', and jpg'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `The format of the encoded contents. Supported formats are 'png', 'gif', and jpg'.
+                                              Allowed values: [gif,jpg,png]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -346,9 +366,10 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 								},
 							},
 							"format": schema.StringAttribute{
-								MarkdownDescription: `The format of the encoded contents. Supported formats are 'png', 'gif', and jpg'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `The format of the encoded contents. Supported formats are 'png', 'gif', and jpg'.
+                                              Allowed values: [gif,jpg,png]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -411,9 +432,10 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 								},
 							},
 							"format": schema.StringAttribute{
-								MarkdownDescription: `The format of the encoded contents. Supported formats are 'png', 'gif', and jpg'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `The format of the encoded contents. Supported formats are 'png', 'gif', and jpg'.
+                                              Allowed values: [gif,jpg,png]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -438,9 +460,10 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 				},
 			},
 			"splash_timeout": schema.Int64Attribute{
-				MarkdownDescription: `Splash timeout in minutes.`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `Splash timeout in minutes.
+                                  Allowed values: [30,60,120,240,480,720,1080,1440,2880,5760,7200,10080,20160,43200,86400,129600]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
@@ -1010,7 +1033,7 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(state Netw
 								}(),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsBillingFreeAccessRs{}
+						return nil
 					}(),
 					PrepaidAccessFastLoginEnabled: func() types.Bool {
 						if response.Billing.PrepaidAccessFastLoginEnabled != nil {
@@ -1021,7 +1044,7 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(state Netw
 					ReplyToEmailAddress: types.StringValue(response.Billing.ReplyToEmailAddress),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsBillingRs{}
+			return nil
 		}(),
 		BlockAllTrafficBeforeSignOn: func() types.Bool {
 			if response.BlockAllTrafficBeforeSignOn != nil {
@@ -1047,7 +1070,7 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(state Netw
 					}(),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsGuestSponsorshipRs{}
+			return nil
 		}(),
 		RedirectURL: types.StringValue(response.RedirectURL),
 		SelfRegistration: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSelfRegistrationRs {
@@ -1062,7 +1085,7 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(state Netw
 					}(),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSelfRegistrationRs{}
+			return nil
 		}(),
 		SentryEnrollment: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSentryEnrollmentRs {
 			if response.SentryEnrollment != nil {
@@ -1075,11 +1098,11 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(state Netw
 								ID: types.StringValue(response.SentryEnrollment.SystemsManagerNetwork.ID),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSentryEnrollmentSystemsManagerNetworkRs{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSentryEnrollmentRs{}
+			return nil
 		}(),
 		SplashImage: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashImageRs {
 			if response.SplashImage != nil {
@@ -1088,7 +1111,7 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(state Netw
 					Md5:       types.StringValue(response.SplashImage.Md5),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashImageRs{}
+			return nil
 		}(),
 		SplashLogo: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashLogoRs {
 			if response.SplashLogo != nil {
@@ -1097,7 +1120,7 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(state Netw
 					Md5:       types.StringValue(response.SplashLogo.Md5),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashLogoRs{}
+			return nil
 		}(),
 		SplashPage: types.StringValue(response.SplashPage),
 		SplashPrepaidFront: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashPrepaidFrontRs {
@@ -1107,7 +1130,7 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(state Netw
 					Md5:       types.StringValue(response.SplashPrepaidFront.Md5),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashPrepaidFrontRs{}
+			return nil
 		}(),
 		SplashTimeout: func() types.Int64 {
 			if response.SplashTimeout != nil {

@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -171,6 +188,17 @@ func (d *DevicesSwitchPortsStatusesDataSource) Schema(_ context.Context, _ datas
 								},
 							},
 						},
+						"poe": schema.SingleNestedAttribute{
+							MarkdownDescription: `PoE status of the port.`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"is_allocated": schema.BoolAttribute{
+									MarkdownDescription: `Whether the port is drawing power`,
+									Computed:            true,
+								},
+							},
+						},
 						"port_id": schema.StringAttribute{
 							MarkdownDescription: `The string identifier of this port on the switch. This is commonly just the port number but may contain additional identifying information such as the slot and module-type if the port is located on a port module.`,
 							Computed:            true,
@@ -202,7 +230,7 @@ func (d *DevicesSwitchPortsStatusesDataSource) Schema(_ context.Context, _ datas
 											Computed:            true,
 										},
 										"type": schema.StringAttribute{
-											MarkdownDescription: `The type of the  ('trunk' or 'access').`,
+											MarkdownDescription: `The type of the  ('trunk', 'access' or 'stack').`,
 											Computed:            true,
 										},
 										"vlan": schema.Int64Attribute{
@@ -307,6 +335,8 @@ func (d *DevicesSwitchPortsStatusesDataSource) Read(ctx context.Context, req dat
 		queryParams1.T0 = devicesSwitchPortsStatuses.T0.ValueString()
 		queryParams1.Timespan = devicesSwitchPortsStatuses.Timespan.ValueFloat64()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Switch.GetDeviceSwitchPortsStatuses(vvSerial, &queryParams1)
 
 		if err != nil || response1 == nil {
@@ -346,6 +376,7 @@ type ResponseItemSwitchGetDeviceSwitchPortsStatuses struct {
 	Errors         types.List                                                   `tfsdk:"errors"`
 	IsUplink       types.Bool                                                   `tfsdk:"is_uplink"`
 	Lldp           *ResponseItemSwitchGetDeviceSwitchPortsStatusesLldp          `tfsdk:"lldp"`
+	Poe            *ResponseItemSwitchGetDeviceSwitchPortsStatusesPoe           `tfsdk:"poe"`
 	PortID         types.String                                                 `tfsdk:"port_id"`
 	PowerUsageInWh types.Float64                                                `tfsdk:"power_usage_in_wh"`
 	SecurePort     *ResponseItemSwitchGetDeviceSwitchPortsStatusesSecurePort    `tfsdk:"secure_port"`
@@ -380,6 +411,10 @@ type ResponseItemSwitchGetDeviceSwitchPortsStatusesLldp struct {
 	SystemCapabilities types.String `tfsdk:"system_capabilities"`
 	SystemDescription  types.String `tfsdk:"system_description"`
 	SystemName         types.String `tfsdk:"system_name"`
+}
+
+type ResponseItemSwitchGetDeviceSwitchPortsStatusesPoe struct {
+	IsAllocated types.Bool `tfsdk:"is_allocated"`
 }
 
 type ResponseItemSwitchGetDeviceSwitchPortsStatusesSecurePort struct {
@@ -437,7 +472,7 @@ func ResponseSwitchGetDeviceSwitchPortsStatusesItemsToBody(state DevicesSwitchPo
 						VtpManagementDomain: types.StringValue(item.Cdp.VtpManagementDomain),
 					}
 				}
-				return &ResponseItemSwitchGetDeviceSwitchPortsStatusesCdp{}
+				return nil
 			}(),
 			ClientCount: func() types.Int64 {
 				if item.ClientCount != nil {
@@ -483,7 +518,20 @@ func ResponseSwitchGetDeviceSwitchPortsStatusesItemsToBody(state DevicesSwitchPo
 						SystemName:         types.StringValue(item.Lldp.SystemName),
 					}
 				}
-				return &ResponseItemSwitchGetDeviceSwitchPortsStatusesLldp{}
+				return nil
+			}(),
+			Poe: func() *ResponseItemSwitchGetDeviceSwitchPortsStatusesPoe {
+				if item.Poe != nil {
+					return &ResponseItemSwitchGetDeviceSwitchPortsStatusesPoe{
+						IsAllocated: func() types.Bool {
+							if item.Poe.IsAllocated != nil {
+								return types.BoolValue(*item.Poe.IsAllocated)
+							}
+							return types.Bool{}
+						}(),
+					}
+				}
+				return nil
 			}(),
 			PortID: types.StringValue(item.PortID),
 			PowerUsageInWh: func() types.Float64 {
@@ -521,7 +569,7 @@ func ResponseSwitchGetDeviceSwitchPortsStatusesItemsToBody(state DevicesSwitchPo
 									}(),
 								}
 							}
-							return &ResponseItemSwitchGetDeviceSwitchPortsStatusesSecurePortConfigOverrides{}
+							return nil
 						}(),
 						Enabled: func() types.Bool {
 							if item.SecurePort.Enabled != nil {
@@ -531,7 +579,7 @@ func ResponseSwitchGetDeviceSwitchPortsStatusesItemsToBody(state DevicesSwitchPo
 						}(),
 					}
 				}
-				return &ResponseItemSwitchGetDeviceSwitchPortsStatusesSecurePort{}
+				return nil
 			}(),
 			SpanningTree: func() *ResponseItemSwitchGetDeviceSwitchPortsStatusesSpanningTree {
 				if item.SpanningTree != nil {
@@ -539,7 +587,7 @@ func ResponseSwitchGetDeviceSwitchPortsStatusesItemsToBody(state DevicesSwitchPo
 						Statuses: StringSliceToList(item.SpanningTree.Statuses),
 					}
 				}
-				return &ResponseItemSwitchGetDeviceSwitchPortsStatusesSpanningTree{}
+				return nil
 			}(),
 			Speed:  types.StringValue(item.Speed),
 			Status: types.StringValue(item.Status),
@@ -566,7 +614,7 @@ func ResponseSwitchGetDeviceSwitchPortsStatusesItemsToBody(state DevicesSwitchPo
 						}(),
 					}
 				}
-				return &ResponseItemSwitchGetDeviceSwitchPortsStatusesTrafficInKbps{}
+				return nil
 			}(),
 			UsageInKb: func() *ResponseItemSwitchGetDeviceSwitchPortsStatusesUsageInKb {
 				if item.UsageInKb != nil {
@@ -591,7 +639,7 @@ func ResponseSwitchGetDeviceSwitchPortsStatusesItemsToBody(state DevicesSwitchPo
 						}(),
 					}
 				}
-				return &ResponseItemSwitchGetDeviceSwitchPortsStatusesUsageInKb{}
+				return nil
 			}(),
 			Warnings: StringSliceToList(item.Warnings),
 		}

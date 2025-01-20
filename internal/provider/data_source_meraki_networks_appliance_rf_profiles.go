@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -201,6 +202,8 @@ func (d *NetworksApplianceRfProfilesDataSource) Read(ctx context.Context, req da
 		log.Printf("[DEBUG] Selected method: GetNetworkApplianceRfProfiles")
 		vvNetworkID := networksApplianceRfProfiles.NetworkID.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Appliance.GetNetworkApplianceRfProfiles(vvNetworkID)
 
 		if err != nil || response1 == nil {
@@ -219,6 +222,8 @@ func (d *NetworksApplianceRfProfilesDataSource) Read(ctx context.Context, req da
 		log.Printf("[DEBUG] Selected method: GetNetworkApplianceRfProfile")
 		vvNetworkID := networksApplianceRfProfiles.NetworkID.ValueString()
 		vvRfProfileID := networksApplianceRfProfiles.RfProfileID.ValueString()
+
+		// has_unknown_response: None
 
 		response2, restyResp2, err := d.client.Appliance.GetNetworkApplianceRfProfile(vvNetworkID, vvRfProfileID)
 
@@ -265,10 +270,10 @@ type ResponseApplianceGetNetworkApplianceRfProfileFiveGhzSettings struct {
 }
 
 type ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings struct {
-	Status1 *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings1 `tfsdk:"1"`
-	Status2 *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings2 `tfsdk:"2"`
-	Status3 *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings3 `tfsdk:"3"`
-	Status4 *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings4 `tfsdk:"4"`
+	Status1 *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings1 `tfsdk:"status_1"`
+	Status2 *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings2 `tfsdk:"status_2"`
+	Status3 *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings3 `tfsdk:"status_3"`
+	Status4 *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings4 `tfsdk:"status_4"`
 }
 
 type ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings1 struct {
@@ -316,7 +321,7 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBody(state NetworksAppli
 					}(),
 				}
 			}
-			return &ResponseApplianceGetNetworkApplianceRfProfileFiveGhzSettings{}
+			return nil
 		}(),
 		ID:        types.StringValue(response.ID),
 		Name:      types.StringValue(response.Name),
@@ -336,7 +341,7 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBody(state NetworksAppli
 								}(),
 							}
 						}
-						return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings1{}
+						return nil
 					}(),
 					Status2: func() *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings2 {
 						if response.PerSSIDSettings.Status2 != nil {
@@ -350,7 +355,7 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBody(state NetworksAppli
 								}(),
 							}
 						}
-						return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings2{}
+						return nil
 					}(),
 					Status3: func() *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings3 {
 						if response.PerSSIDSettings.Status3 != nil {
@@ -364,7 +369,7 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBody(state NetworksAppli
 								}(),
 							}
 						}
-						return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings3{}
+						return nil
 					}(),
 					Status4: func() *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings4 {
 						if response.PerSSIDSettings.Status4 != nil {
@@ -378,11 +383,11 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBody(state NetworksAppli
 								}(),
 							}
 						}
-						return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings4{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings{}
+			return nil
 		}(),
 		TwoFourGhzSettings: func() *ResponseApplianceGetNetworkApplianceRfProfileTwoFourGhzSettings {
 			if response.TwoFourGhzSettings != nil {
@@ -401,7 +406,7 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBody(state NetworksAppli
 					}(),
 				}
 			}
-			return &ResponseApplianceGetNetworkApplianceRfProfileTwoFourGhzSettings{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

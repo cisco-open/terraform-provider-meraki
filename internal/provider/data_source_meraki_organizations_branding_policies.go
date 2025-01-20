@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -402,6 +419,8 @@ func (d *OrganizationsBrandingPoliciesDataSource) Read(ctx context.Context, req 
 		log.Printf("[DEBUG] Selected method: GetOrganizationBrandingPolicies")
 		vvOrganizationID := organizationsBrandingPolicies.OrganizationID.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Organizations.GetOrganizationBrandingPolicies(vvOrganizationID)
 
 		if err != nil || response1 == nil {
@@ -427,6 +446,8 @@ func (d *OrganizationsBrandingPoliciesDataSource) Read(ctx context.Context, req 
 		log.Printf("[DEBUG] Selected method: GetOrganizationBrandingPolicy")
 		vvOrganizationID := organizationsBrandingPolicies.OrganizationID.ValueString()
 		vvBrandingPolicyID := organizationsBrandingPolicies.BrandingPolicyID.ValueString()
+
+		// has_unknown_response: None
 
 		response2, restyResp2, err := d.client.Organizations.GetOrganizationBrandingPolicy(vvOrganizationID, vvBrandingPolicyID)
 
@@ -561,7 +582,7 @@ func ResponseOrganizationsGetOrganizationBrandingPoliciesItemsToBody(state Organ
 						Values:    StringSliceToList(item.AdminSettings.Values),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationBrandingPoliciesAdminSettings{}
+				return nil
 			}(),
 			CustomLogo: func() *ResponseItemOrganizationsGetOrganizationBrandingPoliciesCustomLogo {
 				if item.CustomLogo != nil {
@@ -582,15 +603,15 @@ func ResponseOrganizationsGetOrganizationBrandingPoliciesItemsToBody(state Organ
 												URL:       types.StringValue(item.CustomLogo.Image.Preview.URL),
 											}
 										}
-										return &ResponseItemOrganizationsGetOrganizationBrandingPoliciesCustomLogoImagePreview{}
+										return nil
 									}(),
 								}
 							}
-							return &ResponseItemOrganizationsGetOrganizationBrandingPoliciesCustomLogoImage{}
+							return nil
 						}(),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationBrandingPoliciesCustomLogo{}
+				return nil
 			}(),
 			Enabled: func() types.Bool {
 				if item.Enabled != nil {
@@ -618,7 +639,7 @@ func ResponseOrganizationsGetOrganizationBrandingPoliciesItemsToBody(state Organ
 						UniversalSearchKnowledgeBaseSearch: types.StringValue(item.HelpSettings.UniversalSearchKnowledgeBaseSearch),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationBrandingPoliciesHelpSettings{}
+				return nil
 			}(),
 			Name: types.StringValue(item.Name),
 		}
@@ -637,7 +658,7 @@ func ResponseOrganizationsGetOrganizationBrandingPolicyItemToBody(state Organiza
 					Values:    StringSliceToList(response.AdminSettings.Values),
 				}
 			}
-			return &ResponseOrganizationsGetOrganizationBrandingPolicyAdminSettings{}
+			return nil
 		}(),
 		CustomLogo: func() *ResponseOrganizationsGetOrganizationBrandingPolicyCustomLogo {
 			if response.CustomLogo != nil {
@@ -658,15 +679,15 @@ func ResponseOrganizationsGetOrganizationBrandingPolicyItemToBody(state Organiza
 											URL:       types.StringValue(response.CustomLogo.Image.Preview.URL),
 										}
 									}
-									return &ResponseOrganizationsGetOrganizationBrandingPolicyCustomLogoImagePreview{}
+									return nil
 								}(),
 							}
 						}
-						return &ResponseOrganizationsGetOrganizationBrandingPolicyCustomLogoImage{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseOrganizationsGetOrganizationBrandingPolicyCustomLogo{}
+			return nil
 		}(),
 		Enabled: func() types.Bool {
 			if response.Enabled != nil {
@@ -694,7 +715,7 @@ func ResponseOrganizationsGetOrganizationBrandingPolicyItemToBody(state Organiza
 					UniversalSearchKnowledgeBaseSearch: types.StringValue(response.HelpSettings.UniversalSearchKnowledgeBaseSearch),
 				}
 			}
-			return &ResponseOrganizationsGetOrganizationBrandingPolicyHelpSettings{}
+			return nil
 		}(),
 		Name: types.StringValue(response.Name),
 	}

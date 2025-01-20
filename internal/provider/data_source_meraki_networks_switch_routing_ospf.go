@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -50,75 +67,94 @@ func (d *NetworksSwitchRoutingOspfDataSource) Schema(_ context.Context, _ dataso
 				Attributes: map[string]schema.Attribute{
 
 					"areas": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `OSPF areas`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"area_id": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `OSPF area ID`,
+									Computed:            true,
 								},
 								"area_name": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Name of the OSPF area`,
+									Computed:            true,
 								},
 								"area_type": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Area types in OSPF. Must be one of: ["normal", "stub", "nssa"]`,
+									Computed:            true,
 								},
 							},
 						},
 					},
 					"dead_timer_in_seconds": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `Time interval to determine when the peer will be declared inactive/dead. Value must be between 1 and 65535`,
+						Computed:            true,
 					},
 					"enabled": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Boolean value to enable or disable OSPF routing. OSPF routing is disabled by default.`,
+						Computed:            true,
 					},
 					"hello_timer_in_seconds": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `Time interval in seconds at which hello packet will be sent to OSPF neighbors to maintain connectivity. Value must be between 1 and 255. Default is 10 seconds.`,
+						Computed:            true,
 					},
 					"md5_authentication_enabled": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Boolean value to enable or disable MD5 authentication. MD5 authentication is disabled by default.`,
+						Computed:            true,
 					},
 					"md5_authentication_key": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `MD5 authentication credentials. This param is only relevant if md5AuthenticationEnabled is true`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"id": schema.Int64Attribute{
-								Computed: true,
+								MarkdownDescription: `MD5 authentication key index. Key index must be between 1 to 255`,
+								Computed:            true,
 							},
 							"passphrase": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `MD5 authentication passphrase`,
+								Computed:            true,
 							},
 						},
 					},
 					"v3": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `OSPF v3 configuration`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"areas": schema.SetNestedAttribute{
-								Computed: true,
+								MarkdownDescription: `OSPF v3 areas`,
+								Computed:            true,
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
 
 										"area_id": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `OSPF area ID`,
+											Computed:            true,
 										},
 										"area_name": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `Name of the OSPF area`,
+											Computed:            true,
 										},
 										"area_type": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `Area types in OSPF. Must be one of: ["normal", "stub", "nssa"]`,
+											Computed:            true,
 										},
 									},
 								},
 							},
 							"dead_timer_in_seconds": schema.Int64Attribute{
-								Computed: true,
+								MarkdownDescription: `Time interval to determine when the peer will be declared inactive/dead. Value must be between 1 and 65535`,
+								Computed:            true,
 							},
 							"enabled": schema.BoolAttribute{
-								Computed: true,
+								MarkdownDescription: `Boolean value to enable or disable V3 OSPF routing. OSPF V3 routing is disabled by default.`,
+								Computed:            true,
 							},
 							"hello_timer_in_seconds": schema.Int64Attribute{
-								Computed: true,
+								MarkdownDescription: `Time interval in seconds at which hello packet will be sent to OSPF neighbors to maintain connectivity. Value must be between 1 and 255. Default is 10 seconds.`,
+								Computed:            true,
 							},
 						},
 					},
@@ -139,6 +175,8 @@ func (d *NetworksSwitchRoutingOspfDataSource) Read(ctx context.Context, req data
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetNetworkSwitchRoutingOspf")
 		vvNetworkID := networksSwitchRoutingOspf.NetworkID.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Switch.GetNetworkSwitchRoutingOspf(vvNetworkID)
 
@@ -211,14 +249,19 @@ func ResponseSwitchGetNetworkSwitchRoutingOspfItemToBody(state NetworksSwitchRou
 				result := make([]ResponseSwitchGetNetworkSwitchRoutingOspfAreas, len(*response.Areas))
 				for i, areas := range *response.Areas {
 					result[i] = ResponseSwitchGetNetworkSwitchRoutingOspfAreas{
-						AreaID:   types.Int64Value(int64(*areas.AreaID)),
+						AreaID: func() types.Int64 {
+							if areas.AreaID != nil {
+								return types.Int64Value(int64(*areas.AreaID))
+							}
+							return types.Int64{}
+						}(),
 						AreaName: types.StringValue(areas.AreaName),
 						AreaType: types.StringValue(areas.AreaType),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseSwitchGetNetworkSwitchRoutingOspfAreas{}
+			return nil
 		}(),
 		DeadTimerInSeconds: func() types.Int64 {
 			if response.DeadTimerInSeconds != nil {
@@ -266,14 +309,19 @@ func ResponseSwitchGetNetworkSwitchRoutingOspfItemToBody(state NetworksSwitchRou
 							result := make([]ResponseSwitchGetNetworkSwitchRoutingOspfV3Areas, len(*response.V3.Areas))
 							for i, areas := range *response.V3.Areas {
 								result[i] = ResponseSwitchGetNetworkSwitchRoutingOspfV3Areas{
-									AreaID:   types.Int64Value(int64(*areas.AreaID)),
+									AreaID: func() types.Int64 {
+										if areas.AreaID != nil {
+											return types.Int64Value(int64(*areas.AreaID))
+										}
+										return types.Int64{}
+									}(),
 									AreaName: types.StringValue(areas.AreaName),
 									AreaType: types.StringValue(areas.AreaType),
 								}
 							}
 							return &result
 						}
-						return &[]ResponseSwitchGetNetworkSwitchRoutingOspfV3Areas{}
+						return nil
 					}(),
 					DeadTimerInSeconds: func() types.Int64 {
 						if response.V3.DeadTimerInSeconds != nil {

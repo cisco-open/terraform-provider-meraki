@@ -24,7 +24,7 @@ resource "meraki_devices_management_interface" "sample_firewall_interface" {
     static_subnet_mask = "255.255.255.0"
     static_dns         = ["8.8.8.8", "8.8.4.4"]
     vlan               = null
-    wan_enabled        = "enabled"
+    wan_enabled        = "disabled"
   }
 
   wan2 = {

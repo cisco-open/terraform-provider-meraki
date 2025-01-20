@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -59,7 +76,7 @@ func (d *OrganizationsDevicesAvailabilitiesDataSource) Schema(_ context.Context,
 				Optional:            true,
 			},
 			"product_types": schema.ListAttribute{
-				MarkdownDescription: `productTypes query parameter. Optional parameter to filter device availabilities by device product types. This filter uses multiple exact matches.`,
+				MarkdownDescription: `productTypes query parameter. Optional parameter to filter device availabilities by device product types. This filter uses multiple exact matches. Valid types are wireless, appliance, switch, camera, cellularGateway, sensor, wirelessController, and campusGateway`,
 				Optional:            true,
 				ElementType:         types.StringType,
 			},
@@ -71,6 +88,11 @@ func (d *OrganizationsDevicesAvailabilitiesDataSource) Schema(_ context.Context,
 			"starting_after": schema.StringAttribute{
 				MarkdownDescription: `startingAfter query parameter. A token used by the server to indicate the start of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.`,
 				Optional:            true,
+			},
+			"statuses": schema.ListAttribute{
+				MarkdownDescription: `statuses query parameter. Optional parameter to filter device availabilities by device status. This filter uses multiple exact matches.`,
+				Optional:            true,
+				ElementType:         types.StringType,
 			},
 			"tags": schema.ListAttribute{
 				MarkdownDescription: `tags query parameter. An optional parameter to filter devices by tags. The filtering is case-sensitive. If tags are included, 'tagsFilterType' should also be included (see below). This filter uses multiple exact matches.`,
@@ -152,6 +174,9 @@ func (d *OrganizationsDevicesAvailabilitiesDataSource) Read(ctx context.Context,
 		queryParams1.Serials = elementsToStrings(ctx, organizationsDevicesAvailabilities.Serials)
 		queryParams1.Tags = elementsToStrings(ctx, organizationsDevicesAvailabilities.Tags)
 		queryParams1.TagsFilterType = organizationsDevicesAvailabilities.TagsFilterType.ValueString()
+		queryParams1.Statuses = elementsToStrings(ctx, organizationsDevicesAvailabilities.Statuses)
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Organizations.GetOrganizationDevicesAvailabilities(vvOrganizationID, &queryParams1)
 
@@ -187,6 +212,7 @@ type OrganizationsDevicesAvailabilities struct {
 	Serials        types.List                                                       `tfsdk:"serials"`
 	Tags           types.List                                                       `tfsdk:"tags"`
 	TagsFilterType types.String                                                     `tfsdk:"tags_filter_type"`
+	Statuses       types.List                                                       `tfsdk:"statuses"`
 	Items          *[]ResponseItemOrganizationsGetOrganizationDevicesAvailabilities `tfsdk:"items"`
 }
 
@@ -217,7 +243,7 @@ func ResponseOrganizationsGetOrganizationDevicesAvailabilitiesItemsToBody(state 
 						ID: types.StringValue(item.Network.ID),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationDevicesAvailabilitiesNetwork{}
+				return nil
 			}(),
 			ProductType: types.StringValue(item.ProductType),
 			Serial:      types.StringValue(item.Serial),

@@ -8,8 +8,11 @@ data "meraki_networks_events" "example" {
   device_name          = "string"
   device_serial        = "string"
   ending_before        = "string"
+  event_details        = "string"
+  event_severity       = "string"
   excluded_event_types = ["string"]
   included_event_types = ["string"]
+  is_catalyst          = false
   network_id           = "string"
   per_page             = 1
   product_type         = "string"

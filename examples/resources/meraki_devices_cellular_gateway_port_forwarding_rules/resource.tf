@@ -4,6 +4,7 @@ resource "meraki_devices_cellular_gateway_port_forwarding_rules" "example" {
   rules = [{
 
     access      = "any"
+    allowed_ips = ["10.10.10.10", "10.10.10.11"]
     lan_ip      = "172.31.128.5"
     local_port  = "4"
     name        = "test"

@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -59,11 +76,16 @@ func (d *NetworksDataSource) Schema(_ context.Context, _ datasource.SchemaReques
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
-				Required:            true,
+				Optional:            true,
 			},
 			"per_page": schema.Int64Attribute{
 				MarkdownDescription: `perPage query parameter. The number of entries per page returned. Acceptable range is 3 100000. Default is 1000.`,
 				Optional:            true,
+			},
+			"product_types": schema.ListAttribute{
+				MarkdownDescription: `productTypes query parameter. An optional parameter to filter networks by product type. Results will have at least one of the included product types.`,
+				Optional:            true,
+				ElementType:         types.StringType,
 			},
 			"starting_after": schema.StringAttribute{
 				MarkdownDescription: `startingAfter query parameter. A token used by the server to indicate the start of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.`,
@@ -191,13 +213,15 @@ func (d *NetworksDataSource) Read(ctx context.Context, req datasource.ReadReques
 
 	method1 := []bool{!networks.NetworkID.IsNull()}
 	log.Printf("[DEBUG] Selecting method. Method 1 %v", method1)
-	method2 := []bool{!networks.OrganizationID.IsNull(), !networks.ConfigTemplateID.IsNull(), !networks.IsBoundToConfigTemplate.IsNull(), !networks.Tags.IsNull(), !networks.TagsFilterType.IsNull(), !networks.PerPage.IsNull(), !networks.StartingAfter.IsNull(), !networks.EndingBefore.IsNull()}
+	method2 := []bool{!networks.OrganizationID.IsNull(), !networks.ConfigTemplateID.IsNull(), !networks.IsBoundToConfigTemplate.IsNull(), !networks.Tags.IsNull(), !networks.TagsFilterType.IsNull(), !networks.ProductTypes.IsNull(), !networks.PerPage.IsNull(), !networks.StartingAfter.IsNull(), !networks.EndingBefore.IsNull()}
 	log.Printf("[DEBUG] Selecting method. Method 2 %v", method2)
 
 	selectedMethod := pickMethod([][]bool{method1, method2})
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetNetwork")
 		vvNetworkID := networks.NetworkID.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Networks.GetNetwork(vvNetworkID)
 
@@ -229,9 +253,12 @@ func (d *NetworksDataSource) Read(ctx context.Context, req datasource.ReadReques
 		queryParams2.IsBoundToConfigTemplate = networks.IsBoundToConfigTemplate.ValueBool()
 		queryParams2.Tags = elementsToStrings(ctx, networks.Tags)
 		queryParams2.TagsFilterType = networks.TagsFilterType.ValueString()
+		queryParams2.ProductTypes = elementsToStrings(ctx, networks.ProductTypes)
 		queryParams2.PerPage = int(networks.PerPage.ValueInt64())
 		queryParams2.StartingAfter = networks.StartingAfter.ValueString()
 		queryParams2.EndingBefore = networks.EndingBefore.ValueString()
+
+		// has_unknown_response: None
 
 		response2, restyResp2, err := d.client.Organizations.GetOrganizationNetworks(vvOrganizationID, &queryParams2)
 
@@ -264,6 +291,7 @@ type Networks struct {
 	IsBoundToConfigTemplate types.Bool                                          `tfsdk:"is_bound_to_config_template"`
 	Tags                    types.List                                          `tfsdk:"tags"`
 	TagsFilterType          types.String                                        `tfsdk:"tags_filter_type"`
+	ProductTypes            types.List                                          `tfsdk:"product_types"`
 	PerPage                 types.Int64                                         `tfsdk:"per_page"`
 	StartingAfter           types.String                                        `tfsdk:"starting_after"`
 	EndingBefore            types.String                                        `tfsdk:"ending_before"`

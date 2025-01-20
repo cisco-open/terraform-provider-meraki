@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -50,30 +67,38 @@ func (d *NetworksCellularGatewaySubnetPoolDataSource) Schema(_ context.Context, 
 				Attributes: map[string]schema.Attribute{
 
 					"cidr": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `CIDR of the pool of subnets. Each MG in this network will automatically pick a subnet from this pool.`,
+						Computed:            true,
 					},
 					"deployment_mode": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Deployment mode for the cellular gateways in the network. (Passthrough/Routed)`,
+						Computed:            true,
 					},
 					"mask": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `Mask used for the subnet of all MGs in  this network.`,
+						Computed:            true,
 					},
 					"subnets": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `List of subnets of all MGs in this network.`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"appliance_ip": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Appliance IP of the MG device.`,
+									Computed:            true,
 								},
 								"name": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Name of the MG.`,
+									Computed:            true,
 								},
 								"serial": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Serial Number of the MG.`,
+									Computed:            true,
 								},
 								"subnet": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Subnet of MG device.`,
+									Computed:            true,
 								},
 							},
 						},
@@ -95,6 +120,8 @@ func (d *NetworksCellularGatewaySubnetPoolDataSource) Read(ctx context.Context, 
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetNetworkCellularGatewaySubnetPool")
 		vvNetworkID := networksCellularGatewaySubnetPool.NetworkID.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.CellularGateway.GetNetworkCellularGatewaySubnetPool(vvNetworkID)
 
@@ -163,7 +190,7 @@ func ResponseCellularGatewayGetNetworkCellularGatewaySubnetPoolItemToBody(state 
 				}
 				return &result
 			}
-			return &[]ResponseCellularGatewayGetNetworkCellularGatewaySubnetPoolSubnets{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

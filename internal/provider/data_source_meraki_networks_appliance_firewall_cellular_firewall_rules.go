@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -99,6 +116,8 @@ func (d *NetworksApplianceFirewallCellularFirewallRulesDataSource) Read(ctx cont
 		log.Printf("[DEBUG] Selected method: GetNetworkApplianceFirewallCellularFirewallRules")
 		vvNetworkID := networksApplianceFirewallCellularFirewallRules.NetworkID.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Appliance.GetNetworkApplianceFirewallCellularFirewallRules(vvNetworkID)
 
 		if err != nil || response1 == nil {
@@ -168,7 +187,7 @@ func ResponseApplianceGetNetworkApplianceFirewallCellularFirewallRulesItemToBody
 				}
 				return &result
 			}
-			return &[]ResponseApplianceGetNetworkApplianceFirewallCellularFirewallRulesRules{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

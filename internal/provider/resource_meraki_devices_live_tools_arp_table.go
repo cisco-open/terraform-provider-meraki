@@ -16,14 +16,13 @@
 // SPDX-License-Identifier: MPL-2.0
 package provider
 
-// Falta import
 // RESOURCE NORMAL
 import (
 	"context"
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -182,8 +181,9 @@ func (r *DevicesLiveToolsArpTableResource) Schema(_ context.Context, _ resource.
 				Required:            true,
 			},
 			"status": schema.StringAttribute{
-				MarkdownDescription: `Status of the ARP table request.`,
-				Computed:            true,
+				MarkdownDescription: `Status of the ARP table request.
+                                  Allowed values: [complete,failed,new,ready,running,scheduled]`,
+				Computed: true,
 			},
 			"url": schema.StringAttribute{
 				MarkdownDescription: `GET this url to check the status of your ARP table request.`,
@@ -462,7 +462,7 @@ func ResponseDevicesGetDeviceLiveToolsArpTableItemToBodyRs(state DevicesLiveTool
 				}
 				return &result
 			}
-			return &[]ResponseDevicesGetDeviceLiveToolsArpTableEntriesRs{}
+			return nil
 		}(),
 		Error: types.StringValue(response.Error),
 		Request: func() *ResponseDevicesGetDeviceLiveToolsArpTableRequestRs {
@@ -471,7 +471,7 @@ func ResponseDevicesGetDeviceLiveToolsArpTableItemToBodyRs(state DevicesLiveTool
 					Serial: types.StringValue(response.Request.Serial),
 				}
 			}
-			return &ResponseDevicesGetDeviceLiveToolsArpTableRequestRs{}
+			return nil
 		}(),
 		Status: types.StringValue(response.Status),
 		URL:    types.StringValue(response.URL),

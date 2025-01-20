@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -50,7 +66,7 @@ func (r *NetworksSwitchQosRulesOrderResource) Schema(_ context.Context, _ resour
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"dscp": schema.Int64Attribute{
-				MarkdownDescription: `DSCP tag. Set this to -1 to trust incoming DSCP. Default value is 0`,
+				MarkdownDescription: `DSCP tag for the incoming packet. Set this to -1 to trust incoming DSCP. Default value is 0`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
@@ -74,16 +90,18 @@ func (r *NetworksSwitchQosRulesOrderResource) Schema(_ context.Context, _ resour
 				},
 			},
 			"id": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `Qos Rule id`,
+				Computed:            true,
 			},
 			"network_id": schema.StringAttribute{
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
 			"protocol": schema.StringAttribute{
-				MarkdownDescription: `The protocol of the incoming packet. Can be one of "ANY", "TCP" or "UDP". Default value is "ANY"`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The protocol of the incoming packet. Can be one of "ANY", "TCP" or "UDP". Default value is "ANY"
+                                  Allowed values: [ANY,TCP,UDP]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -307,7 +325,7 @@ func (r *NetworksSwitchQosRulesOrderResource) Update(ctx context.Context, req re
 	vvQosRuleID := data.QosRuleID.ValueString()
 	// qos_rules_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Switch.UpdateNetworkSwitchQosRule(vvNetworkID, vvQosRuleID, dataRequest)
+	_, restyResp2, err := r.client.Switch.UpdateNetworkSwitchQosRule(vvNetworkID, vvQosRuleID, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(

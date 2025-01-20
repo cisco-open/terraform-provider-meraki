@@ -5,11 +5,11 @@ resource "meraki_networks_clients_splash_authorization_status" "example" {
   network_id = "string"
   ssids = {
 
-    status_0 = {
+    0 = {
 
       is_authorized = true
     }
-    status_2 = {
+    2 = {
 
       is_authorized = false
     }

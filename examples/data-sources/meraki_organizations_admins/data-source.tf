@@ -1,6 +1,7 @@
 
 data "meraki_organizations_admins" "example" {
 
+  network_ids     = ["string"]
   organization_id = "string"
 }
 

@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -7,7 +23,7 @@ import (
 	"net/url"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -59,7 +75,7 @@ func (r *OrganizationsPolicyObjectsResource) Schema(_ context.Context, _ resourc
 				},
 			},
 			"cidr": schema.StringAttribute{
-				MarkdownDescription: `CIDR Value of a policy object (e.g. 10.11.12.1/24")`,
+				MarkdownDescription: `CIDR Value of a policy object`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -67,7 +83,8 @@ func (r *OrganizationsPolicyObjectsResource) Schema(_ context.Context, _ resourc
 				},
 			},
 			"created_at": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `Time Stamp of policy object creation.`,
+				Computed:            true,
 			},
 			"fqdn": schema.StringAttribute{
 				MarkdownDescription: `Fully qualified domain name of policy object (e.g. "example.com")`,
@@ -78,7 +95,7 @@ func (r *OrganizationsPolicyObjectsResource) Schema(_ context.Context, _ resourc
 				},
 			},
 			"group_ids": schema.SetAttribute{
-				MarkdownDescription: `The IDs of policy object groups the policy object belongs to`,
+				MarkdownDescription: `The IDs of policy object groups the policy object belongs to.`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
@@ -88,7 +105,8 @@ func (r *OrganizationsPolicyObjectsResource) Schema(_ context.Context, _ resourc
 				ElementType: types.StringType,
 			},
 			"id": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `Policy object ID`,
+				Computed:            true,
 			},
 			"ip": schema.StringAttribute{
 				MarkdownDescription: `IP Address of a policy object (e.g. "1.2.3.4")`,
@@ -107,7 +125,7 @@ func (r *OrganizationsPolicyObjectsResource) Schema(_ context.Context, _ resourc
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: `Name of a policy object, unique within the organization (alphanumeric, space, dash, or underscore characters only)`,
+				MarkdownDescription: `Name of policy object (alphanumeric, space, dash, or underscore characters only).`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -115,8 +133,9 @@ func (r *OrganizationsPolicyObjectsResource) Schema(_ context.Context, _ resourc
 				},
 			},
 			"network_ids": schema.SetAttribute{
-				Computed:    true,
-				ElementType: types.StringType,
+				MarkdownDescription: `The IDs of the networks that use the policy object.`,
+				Computed:            true,
+				ElementType:         types.StringType,
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
@@ -140,13 +159,13 @@ func (r *OrganizationsPolicyObjectsResource) Schema(_ context.Context, _ resourc
 				},
 			},
 			"updated_at": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `Time Stamp of policy object updation.`,
+				Computed:            true,
 			},
 		},
 	}
 }
 
-//path params to set ['policyObjectId']
 //path params to assign NOT EDITABLE ['category', 'type']
 
 func (r *OrganizationsPolicyObjectsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -251,7 +270,7 @@ func (r *OrganizationsPolicyObjectsResource) Create(ctx context.Context, req res
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter PolicyObjectID",
-				err.Error(),
+				"Error",
 			)
 			return
 		}

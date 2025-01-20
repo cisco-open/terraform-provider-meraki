@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -368,6 +385,8 @@ func (d *OrganizationsSensorReadingsHistoryDataSource) Read(ctx context.Context,
 		queryParams1.Serials = elementsToStrings(ctx, organizationsSensorReadingsHistory.Serials)
 		queryParams1.Metrics = elementsToStrings(ctx, organizationsSensorReadingsHistory.Metrics)
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Sensor.GetOrganizationSensorReadingsHistory(vvOrganizationID, &queryParams1)
 
 		if err != nil || response1 == nil {
@@ -534,7 +553,7 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 						}(),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryApparentPower{}
+				return nil
 			}(),
 			Battery: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryBattery {
 				if item.Battery != nil {
@@ -547,7 +566,7 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 						}(),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryBattery{}
+				return nil
 			}(),
 			Button: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryButton {
 				if item.Button != nil {
@@ -555,7 +574,7 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 						PressType: types.StringValue(item.Button.PressType),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryButton{}
+				return nil
 			}(),
 			Co2: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryCo2 {
 				if item.Co2 != nil {
@@ -568,7 +587,7 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 						}(),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryCo2{}
+				return nil
 			}(),
 			Current: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryCurrent {
 				if item.Current != nil {
@@ -581,7 +600,7 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 						}(),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryCurrent{}
+				return nil
 			}(),
 			Door: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryDoor {
 				if item.Door != nil {
@@ -594,7 +613,7 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 						}(),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryDoor{}
+				return nil
 			}(),
 			DownstreamPower: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryDownstreamPower {
 				if item.DownstreamPower != nil {
@@ -607,7 +626,7 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 						}(),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryDownstreamPower{}
+				return nil
 			}(),
 			Frequency: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryFrequency {
 				if item.Frequency != nil {
@@ -620,7 +639,7 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 						}(),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryFrequency{}
+				return nil
 			}(),
 			Humidity: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryHumidity {
 				if item.Humidity != nil {
@@ -633,7 +652,7 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 						}(),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryHumidity{}
+				return nil
 			}(),
 			IndoorAirQuality: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryIndoorAirQuality {
 				if item.IndoorAirQuality != nil {
@@ -646,7 +665,7 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 						}(),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryIndoorAirQuality{}
+				return nil
 			}(),
 			Metric: types.StringValue(item.Metric),
 			Network: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryNetwork {
@@ -656,7 +675,7 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 						Name: types.StringValue(item.Network.Name),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryNetwork{}
+				return nil
 			}(),
 			Noise: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryNoise {
 				if item.Noise != nil {
@@ -672,11 +691,11 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 									}(),
 								}
 							}
-							return &ResponseItemSensorGetOrganizationSensorReadingsHistoryNoiseAmbient{}
+							return nil
 						}(),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryNoise{}
+				return nil
 			}(),
 			Pm25: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryPm25 {
 				if item.Pm25 != nil {
@@ -689,7 +708,7 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 						}(),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryPm25{}
+				return nil
 			}(),
 			PowerFactor: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryPowerFactor {
 				if item.PowerFactor != nil {
@@ -702,7 +721,7 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 						}(),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryPowerFactor{}
+				return nil
 			}(),
 			RealPower: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryRealPower {
 				if item.RealPower != nil {
@@ -715,7 +734,7 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 						}(),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryRealPower{}
+				return nil
 			}(),
 			RemoteLockoutSwitch: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryRemoteLockoutSwitch {
 				if item.RemoteLockoutSwitch != nil {
@@ -728,7 +747,7 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 						}(),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryRemoteLockoutSwitch{}
+				return nil
 			}(),
 			Serial: types.StringValue(item.Serial),
 			Temperature: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryTemperature {
@@ -748,7 +767,7 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 						}(),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryTemperature{}
+				return nil
 			}(),
 			Ts: types.StringValue(item.Ts),
 			Tvoc: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryTvoc {
@@ -762,7 +781,7 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 						}(),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryTvoc{}
+				return nil
 			}(),
 			Voltage: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryVoltage {
 				if item.Voltage != nil {
@@ -775,7 +794,7 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 						}(),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryVoltage{}
+				return nil
 			}(),
 			Water: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryWater {
 				if item.Water != nil {
@@ -788,7 +807,7 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 						}(),
 					}
 				}
-				return &ResponseItemSensorGetOrganizationSensorReadingsHistoryWater{}
+				return nil
 			}(),
 		}
 		items = append(items, itemState)

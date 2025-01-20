@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -54,43 +71,54 @@ func (d *OrganizationsAdaptivePolicyGroupsDataSource) Schema(_ context.Context, 
 				Attributes: map[string]schema.Attribute{
 
 					"created_at": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Created at timestamp for the adaptive policy group`,
+						Computed:            true,
 					},
 					"description": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The description for the adaptive policy group`,
+						Computed:            true,
 					},
 					"group_id": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The ID of the adaptive policy group`,
+						Computed:            true,
 					},
 					"is_default_group": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Whether the adaptive policy group is the default group`,
+						Computed:            true,
 					},
 					"name": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The name of the adaptive policy group`,
+						Computed:            true,
 					},
 					"policy_objects": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `The policy objects for the adaptive policy group`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"id": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The ID of the policy object`,
+									Computed:            true,
 								},
 								"name": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The name of the policy object`,
+									Computed:            true,
 								},
 							},
 						},
 					},
 					"required_ip_mappings": schema.ListAttribute{
-						Computed:    true,
-						ElementType: types.StringType,
+						MarkdownDescription: `List of required IP mappings for the adaptive policy group`,
+						Computed:            true,
+						ElementType:         types.StringType,
 					},
 					"sgt": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `The security group tag for the adaptive policy group`,
+						Computed:            true,
 					},
 					"updated_at": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Updated at timestamp for the adaptive policy group`,
+						Computed:            true,
 					},
 				},
 			},
@@ -102,43 +130,54 @@ func (d *OrganizationsAdaptivePolicyGroupsDataSource) Schema(_ context.Context, 
 					Attributes: map[string]schema.Attribute{
 
 						"created_at": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Created at timestamp for the adaptive policy group`,
+							Computed:            true,
 						},
 						"description": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The description for the adaptive policy group`,
+							Computed:            true,
 						},
 						"group_id": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The ID of the adaptive policy group`,
+							Computed:            true,
 						},
 						"is_default_group": schema.BoolAttribute{
-							Computed: true,
+							MarkdownDescription: `Whether the adaptive policy group is the default group`,
+							Computed:            true,
 						},
 						"name": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The name of the adaptive policy group`,
+							Computed:            true,
 						},
 						"policy_objects": schema.SetNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `The policy objects for the adaptive policy group`,
+							Computed:            true,
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 
 									"id": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The ID of the policy object`,
+										Computed:            true,
 									},
 									"name": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The name of the policy object`,
+										Computed:            true,
 									},
 								},
 							},
 						},
 						"required_ip_mappings": schema.ListAttribute{
-							Computed:    true,
-							ElementType: types.StringType,
+							MarkdownDescription: `List of required IP mappings for the adaptive policy group`,
+							Computed:            true,
+							ElementType:         types.StringType,
 						},
 						"sgt": schema.Int64Attribute{
-							Computed: true,
+							MarkdownDescription: `The security group tag for the adaptive policy group`,
+							Computed:            true,
 						},
 						"updated_at": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Updated at timestamp for the adaptive policy group`,
+							Computed:            true,
 						},
 					},
 				},
@@ -163,6 +202,8 @@ func (d *OrganizationsAdaptivePolicyGroupsDataSource) Read(ctx context.Context, 
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetOrganizationAdaptivePolicyGroups")
 		vvOrganizationID := organizationsAdaptivePolicyGroups.OrganizationID.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Organizations.GetOrganizationAdaptivePolicyGroups(vvOrganizationID)
 
@@ -189,6 +230,8 @@ func (d *OrganizationsAdaptivePolicyGroupsDataSource) Read(ctx context.Context, 
 		log.Printf("[DEBUG] Selected method: GetOrganizationAdaptivePolicyGroup")
 		vvOrganizationID := organizationsAdaptivePolicyGroups.OrganizationID.ValueString()
 		vvID := organizationsAdaptivePolicyGroups.ID.ValueString()
+
+		// has_unknown_response: None
 
 		response2, restyResp2, err := d.client.Organizations.GetOrganizationAdaptivePolicyGroup(vvOrganizationID, vvID)
 
@@ -281,7 +324,7 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyGroupsItemsToBody(state O
 					}
 					return &result
 				}
-				return &[]ResponseItemOrganizationsGetOrganizationAdaptivePolicyGroupsPolicyObjects{}
+				return nil
 			}(),
 			RequiredIPMappings: StringSliceToList(item.RequiredIPMappings),
 			Sgt: func() types.Int64 {
@@ -321,7 +364,7 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyGroupItemToBody(state Org
 				}
 				return &result
 			}
-			return &[]ResponseOrganizationsGetOrganizationAdaptivePolicyGroupPolicyObjects{}
+			return nil
 		}(),
 		RequiredIPMappings: StringSliceToList(response.RequiredIPMappings),
 		Sgt: func() types.Int64 {

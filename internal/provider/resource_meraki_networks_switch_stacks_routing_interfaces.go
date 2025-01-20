@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -123,9 +139,10 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 				},
 			},
 			"multicast_routing": schema.StringAttribute{
-				MarkdownDescription: `Multicast routing status`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `Multicast routing status
+                                  Allowed values: [IGMP snooping querier,disabled,enabled]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -214,6 +231,14 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 			"switch_stack_id": schema.StringAttribute{
 				MarkdownDescription: `switchStackId path parameter. Switch stack ID`,
 				Required:            true,
+			},
+			"uplink_v4": schema.BoolAttribute{
+				MarkdownDescription: `Whether this is the switch's IPv4 uplink`,
+				Computed:            true,
+			},
+			"uplink_v6": schema.BoolAttribute{
+				MarkdownDescription: `Whether this is the switch's IPv6 uplink`,
+				Computed:            true,
 			},
 			"vlan_id": schema.Int64Attribute{
 				MarkdownDescription: `VLAN id`,
@@ -331,7 +356,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Create(ctx context.Conte
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter InterfaceID",
-				err.Error(),
+				"Error",
 			)
 			return
 		}
@@ -513,6 +538,8 @@ type NetworksSwitchStacksRoutingInterfacesRs struct {
 	OspfSettings           *ResponseSwitchGetNetworkSwitchStackRoutingInterfaceOspfSettingsRs `tfsdk:"ospf_settings"`
 	OspfV3                 *ResponseSwitchGetNetworkSwitchStackRoutingInterfaceOspfV3Rs       `tfsdk:"ospf_v3"`
 	Subnet                 types.String                                                       `tfsdk:"subnet"`
+	UplinkV4               types.Bool                                                         `tfsdk:"uplink_v4"`
+	UplinkV6               types.Bool                                                         `tfsdk:"uplink_v6"`
 	VLANID                 types.Int64                                                        `tfsdk:"vlan_id"`
 }
 
@@ -544,7 +571,6 @@ func (r *NetworksSwitchStacksRoutingInterfacesRs) toSdkApiRequestCreate(ctx cont
 	} else {
 		defaultGateway = &emptyString
 	}
-
 	interfaceIP := new(string)
 	if !r.InterfaceIP.IsUnknown() && !r.InterfaceIP.IsNull() {
 		*interfaceIP = r.InterfaceIP.ValueString()
@@ -770,6 +796,18 @@ func ResponseSwitchGetNetworkSwitchStackRoutingInterfaceItemToBodyRs(state Netwo
 			return nil
 		}(),
 		Subnet: types.StringValue(response.Subnet),
+		UplinkV4: func() types.Bool {
+			if response.UplinkV4 != nil {
+				return types.BoolValue(*response.UplinkV4)
+			}
+			return types.Bool{}
+		}(),
+		UplinkV6: func() types.Bool {
+			if response.UplinkV6 != nil {
+				return types.BoolValue(*response.UplinkV6)
+			}
+			return types.Bool{}
+		}(),
 		VLANID: func() types.Int64 {
 			if response.VLANID != nil {
 				return types.Int64Value(int64(*response.VLANID))

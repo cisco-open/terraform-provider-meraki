@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -168,6 +185,8 @@ func (d *NetworksWirelessSSIDsHotspot20DataSource) Read(ctx context.Context, req
 		vvNetworkID := networksWirelessSSIDsHotspot20.NetworkID.ValueString()
 		vvNumber := networksWirelessSSIDsHotspot20.Number.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Wireless.GetNetworkWirelessSSIDHotspot20(vvNetworkID, vvNumber)
 
 		if err != nil || response1 == nil {
@@ -262,7 +281,7 @@ func ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBody(state NetworksWir
 				}
 				return &result
 			}
-			return &[]ResponseWirelessGetNetworkWirelessSsidHotspot20MccMncs{}
+			return nil
 		}(),
 		NaiRealms: func() *[]ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealms {
 			if response.NaiRealms != nil {
@@ -284,21 +303,21 @@ func ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBody(state NetworksWir
 													TunneledEapMethodCredentials: StringSliceToList(methods.AuthenticationTypes.TunneledEapMethodCredentials),
 												}
 											}
-											return &ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealmsMethodsAuthenticationTypes{}
+											return nil
 										}(),
 										ID: types.StringValue(methods.ID),
 									}
 								}
 								return &result
 							}
-							return &[]ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealmsMethods{}
+							return nil
 						}(),
 						Name: types.StringValue(naiRealms.Name),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealms{}
+			return nil
 		}(),
 		NetworkAccessType: types.StringValue(response.NetworkAccessType),
 		Operator: func() *ResponseWirelessGetNetworkWirelessSsidHotspot20Operator {
@@ -307,7 +326,7 @@ func ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBody(state NetworksWir
 					Name: types.StringValue(response.Operator.Name),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSsidHotspot20Operator{}
+			return nil
 		}(),
 		RoamConsortOis: StringSliceToList(response.RoamConsortOis),
 		Venue: func() *ResponseWirelessGetNetworkWirelessSsidHotspot20Venue {
@@ -317,7 +336,7 @@ func ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBody(state NetworksWir
 					Type: types.StringValue(response.Venue.Type),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSsidHotspot20Venue{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -54,7 +71,7 @@ func (d *NetworksSwitchQosRulesOrderDataSource) Schema(_ context.Context, _ data
 				Attributes: map[string]schema.Attribute{
 
 					"dscp": schema.Int64Attribute{
-						MarkdownDescription: `DSCP tag. Set this to -1 to trust incoming DSCP. Default value is 0`,
+						MarkdownDescription: `DSCP tag for the incoming packet. Set this to -1 to trust incoming DSCP. Default value is 0`,
 						Computed:            true,
 					},
 					"dst_port": schema.Int64Attribute{
@@ -95,28 +112,36 @@ func (d *NetworksSwitchQosRulesOrderDataSource) Schema(_ context.Context, _ data
 					Attributes: map[string]schema.Attribute{
 
 						"dscp": schema.Int64Attribute{
-							Computed: true,
+							MarkdownDescription: `DSCP tag for the incoming packet. Set this to -1 to trust incoming DSCP. Default value is 0`,
+							Computed:            true,
 						},
 						"dst_port": schema.Int64Attribute{
-							Computed: true,
+							MarkdownDescription: `The destination port of the incoming packet. Applicable only if protocol is TCP or UDP.`,
+							Computed:            true,
 						},
 						"dst_port_range": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The destination port range of the incoming packet. Applicable only if protocol is set to TCP or UDP. Example: 70-80`,
+							Computed:            true,
 						},
 						"id": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Qos Rule id`,
+							Computed:            true,
 						},
 						"protocol": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The protocol of the incoming packet. Can be one of "ANY", "TCP" or "UDP". Default value is "ANY"`,
+							Computed:            true,
 						},
 						"src_port": schema.Int64Attribute{
-							Computed: true,
+							MarkdownDescription: `The source port of the incoming packet. Applicable only if protocol is TCP or UDP.`,
+							Computed:            true,
 						},
 						"src_port_range": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The source port range of the incoming packet. Applicable only if protocol is set to TCP or UDP. Example: 70-80`,
+							Computed:            true,
 						},
 						"vlan": schema.Int64Attribute{
-							Computed: true,
+							MarkdownDescription: `The VLAN of the incoming packet. A null value will match any VLAN.`,
+							Computed:            true,
 						},
 					},
 				},
@@ -141,6 +166,8 @@ func (d *NetworksSwitchQosRulesOrderDataSource) Read(ctx context.Context, req da
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetNetworkSwitchQosRules")
 		vvNetworkID := networksSwitchQosRulesOrder.NetworkID.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Switch.GetNetworkSwitchQosRules(vvNetworkID)
 
@@ -167,6 +194,8 @@ func (d *NetworksSwitchQosRulesOrderDataSource) Read(ctx context.Context, req da
 		log.Printf("[DEBUG] Selected method: GetNetworkSwitchQosRule")
 		vvNetworkID := networksSwitchQosRulesOrder.NetworkID.ValueString()
 		vvQosRuleID := networksSwitchQosRulesOrder.QosRuleID.ValueString()
+
+		// has_unknown_response: None
 
 		response2, restyResp2, err := d.client.Switch.GetNetworkSwitchQosRule(vvNetworkID, vvQosRuleID)
 

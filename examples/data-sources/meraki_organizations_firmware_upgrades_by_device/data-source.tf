@@ -1,6 +1,7 @@
 
 data "meraki_organizations_firmware_upgrades_by_device" "example" {
 
+  current_upgrades_only      = false
   ending_before              = "string"
   firmware_upgrade_batch_ids = ["string"]
   macs                       = ["string"]

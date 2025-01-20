@@ -20,7 +20,7 @@ resource "meraki_devices_appliance_uplinks_settings" "this" {
       enabled = true
       svis = {
         ipv4 = {
-          assignment_mode = "dynamic"
+          assignment_mode = "static"
         }
       }
       vlan_tagging = {

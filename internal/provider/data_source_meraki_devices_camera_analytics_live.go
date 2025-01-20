@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -50,18 +67,22 @@ func (d *DevicesCameraAnalyticsLiveDataSource) Schema(_ context.Context, _ datas
 				Attributes: map[string]schema.Attribute{
 
 					"ts": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The current time`,
+						Computed:            true,
 					},
 					"zones": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `The zones state`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
-							"status_0": schema.SingleNestedAttribute{
-								Computed: true,
+							"zone_id": schema.SingleNestedAttribute{
+								MarkdownDescription: `The zone state, dynamic`,
+								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 
 									"person": schema.Int64Attribute{
-										Computed: true,
+										MarkdownDescription: `The count per type, dynamic`,
+										Computed:            true,
 									},
 								},
 							},
@@ -84,6 +105,8 @@ func (d *DevicesCameraAnalyticsLiveDataSource) Read(ctx context.Context, req dat
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetDeviceCameraAnalyticsLive")
 		vvSerial := devicesCameraAnalyticsLive.Serial.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Camera.GetDeviceCameraAnalyticsLive(vvSerial)
 
@@ -120,10 +143,10 @@ type ResponseCameraGetDeviceCameraAnalyticsLive struct {
 }
 
 type ResponseCameraGetDeviceCameraAnalyticsLiveZones struct {
-	Status0 *ResponseCameraGetDeviceCameraAnalyticsLiveZones0 `tfsdk:"status_0"`
+	ZoneID *ResponseCameraGetDeviceCameraAnalyticsLiveZonesZoneId `tfsdk:"zone_id"`
 }
 
-type ResponseCameraGetDeviceCameraAnalyticsLiveZones0 struct {
+type ResponseCameraGetDeviceCameraAnalyticsLiveZonesZoneId struct {
 	Person types.Int64 `tfsdk:"person"`
 }
 
@@ -134,22 +157,22 @@ func ResponseCameraGetDeviceCameraAnalyticsLiveItemToBody(state DevicesCameraAna
 		Zones: func() *ResponseCameraGetDeviceCameraAnalyticsLiveZones {
 			if response.Zones != nil {
 				return &ResponseCameraGetDeviceCameraAnalyticsLiveZones{
-					Status0: func() *ResponseCameraGetDeviceCameraAnalyticsLiveZones0 {
-						if response.Zones.Status0 != nil {
-							return &ResponseCameraGetDeviceCameraAnalyticsLiveZones0{
+					ZoneID: func() *ResponseCameraGetDeviceCameraAnalyticsLiveZonesZoneId {
+						if response.Zones.ZoneID != nil {
+							return &ResponseCameraGetDeviceCameraAnalyticsLiveZonesZoneId{
 								Person: func() types.Int64 {
-									if response.Zones.Status0.Person != nil {
-										return types.Int64Value(int64(*response.Zones.Status0.Person))
+									if response.Zones.ZoneID.Person != nil {
+										return types.Int64Value(int64(*response.Zones.ZoneID.Person))
 									}
 									return types.Int64{}
 								}(),
 							}
 						}
-						return &ResponseCameraGetDeviceCameraAnalyticsLiveZones0{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseCameraGetDeviceCameraAnalyticsLiveZones{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -252,6 +269,8 @@ func (d *NetworksWirelessSSIDsSplashSettingsDataSource) Read(ctx context.Context
 		vvNetworkID := networksWirelessSSIDsSplashSettings.NetworkID.ValueString()
 		vvNumber := networksWirelessSSIDsSplashSettings.Number.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Wireless.GetNetworkWirelessSSIDSplashSettings(vvNetworkID, vvNumber)
 
 		if err != nil || response1 == nil {
@@ -379,7 +398,7 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBody(state Networ
 								}(),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsBillingFreeAccess{}
+						return nil
 					}(),
 					PrepaidAccessFastLoginEnabled: func() types.Bool {
 						if response.Billing.PrepaidAccessFastLoginEnabled != nil {
@@ -390,7 +409,7 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBody(state Networ
 					ReplyToEmailAddress: types.StringValue(response.Billing.ReplyToEmailAddress),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsBilling{}
+			return nil
 		}(),
 		BlockAllTrafficBeforeSignOn: func() types.Bool {
 			if response.BlockAllTrafficBeforeSignOn != nil {
@@ -416,7 +435,7 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBody(state Networ
 					}(),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsGuestSponsorship{}
+			return nil
 		}(),
 		RedirectURL: types.StringValue(response.RedirectURL),
 		SelfRegistration: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSelfRegistration {
@@ -431,7 +450,7 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBody(state Networ
 					}(),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSelfRegistration{}
+			return nil
 		}(),
 		SentryEnrollment: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSentryEnrollment {
 			if response.SentryEnrollment != nil {
@@ -444,11 +463,11 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBody(state Networ
 								ID: types.StringValue(response.SentryEnrollment.SystemsManagerNetwork.ID),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSentryEnrollmentSystemsManagerNetwork{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSentryEnrollment{}
+			return nil
 		}(),
 		SplashImage: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashImage {
 			if response.SplashImage != nil {
@@ -457,7 +476,7 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBody(state Networ
 					Md5:       types.StringValue(response.SplashImage.Md5),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashImage{}
+			return nil
 		}(),
 		SplashLogo: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashLogo {
 			if response.SplashLogo != nil {
@@ -466,7 +485,7 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBody(state Networ
 					Md5:       types.StringValue(response.SplashLogo.Md5),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashLogo{}
+			return nil
 		}(),
 		SplashPage: types.StringValue(response.SplashPage),
 		SplashPrepaidFront: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashPrepaidFront {
@@ -476,7 +495,7 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBody(state Networ
 					Md5:       types.StringValue(response.SplashPrepaidFront.Md5),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashPrepaidFront{}
+			return nil
 		}(),
 		SplashTimeout: func() types.Int64 {
 			if response.SplashTimeout != nil {

@@ -12,6 +12,11 @@ resource "meraki_networks_sensor_alerts_profiles" "example" {
 
         draw = 17.2
       }
+      co2 = {
+
+        concentration = 400
+        quality       = "poor"
+      }
       current = {
 
         draw = 0.14

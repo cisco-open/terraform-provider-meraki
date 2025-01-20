@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE ACTION
@@ -5,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -121,9 +137,10 @@ func (r *NetworksClientsProvisionResource) Schema(_ context.Context, _ resource.
 						},
 					},
 					"device_policy": schema.StringAttribute{
-						MarkdownDescription: `The policy to apply to the specified client. Can be 'Group policy', 'Allowed', 'Blocked', 'Per connection' or 'Normal'. Required.`,
-						Optional:            true,
-						Computed:            true,
+						MarkdownDescription: `The policy to apply to the specified client. Can be 'Group policy', 'Allowed', 'Blocked', 'Per connection' or 'Normal'. Required.
+                                        Allowed values: [Allowed,Blocked,Group policy,Normal,Per connection]`,
+						Optional: true,
+						Computed: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.RequiresReplace(),
 						},
@@ -143,9 +160,10 @@ func (r *NetworksClientsProvisionResource) Schema(_ context.Context, _ resource.
 						Attributes: map[string]schema.Attribute{
 
 							"device_policy": schema.StringAttribute{
-								MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked' or 'Normal'. Required.`,
-								Optional:            true,
-								Computed:            true,
+								MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked' or 'Normal'. Required.
+                                              Allowed values: [Allowed,Blocked,Normal]`,
+								Optional: true,
+								Computed: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.RequiresReplace(),
 								},
@@ -165,9 +183,10 @@ func (r *NetworksClientsProvisionResource) Schema(_ context.Context, _ resource.
 								Attributes: map[string]schema.Attribute{
 
 									"device_policy": schema.StringAttribute{
-										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.`,
-										Optional:            true,
-										Computed:            true,
+										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.
+                                                    Allowed values: [Allowed,Blocked,Group policy,Normal]`,
+										Optional: true,
+										Computed: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.RequiresReplace(),
 										},
@@ -189,9 +208,10 @@ func (r *NetworksClientsProvisionResource) Schema(_ context.Context, _ resource.
 								Attributes: map[string]schema.Attribute{
 
 									"device_policy": schema.StringAttribute{
-										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.`,
-										Optional:            true,
-										Computed:            true,
+										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.
+                                                    Allowed values: [Allowed,Blocked,Group policy,Normal]`,
+										Optional: true,
+										Computed: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.RequiresReplace(),
 										},
@@ -213,9 +233,10 @@ func (r *NetworksClientsProvisionResource) Schema(_ context.Context, _ resource.
 								Attributes: map[string]schema.Attribute{
 
 									"device_policy": schema.StringAttribute{
-										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.`,
-										Optional:            true,
-										Computed:            true,
+										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.
+                                                    Allowed values: [Allowed,Blocked,Group policy,Normal]`,
+										Optional: true,
+										Computed: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.RequiresReplace(),
 										},
@@ -237,9 +258,10 @@ func (r *NetworksClientsProvisionResource) Schema(_ context.Context, _ resource.
 								Attributes: map[string]schema.Attribute{
 
 									"device_policy": schema.StringAttribute{
-										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.`,
-										Optional:            true,
-										Computed:            true,
+										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.
+                                                    Allowed values: [Allowed,Blocked,Group policy,Normal]`,
+										Optional: true,
+										Computed: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.RequiresReplace(),
 										},
@@ -261,9 +283,10 @@ func (r *NetworksClientsProvisionResource) Schema(_ context.Context, _ resource.
 								Attributes: map[string]schema.Attribute{
 
 									"device_policy": schema.StringAttribute{
-										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.`,
-										Optional:            true,
-										Computed:            true,
+										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.
+                                                    Allowed values: [Allowed,Blocked,Group policy,Normal]`,
+										Optional: true,
+										Computed: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.RequiresReplace(),
 										},
@@ -285,9 +308,10 @@ func (r *NetworksClientsProvisionResource) Schema(_ context.Context, _ resource.
 								Attributes: map[string]schema.Attribute{
 
 									"device_policy": schema.StringAttribute{
-										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.`,
-										Optional:            true,
-										Computed:            true,
+										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.
+                                                    Allowed values: [Allowed,Blocked,Group policy,Normal]`,
+										Optional: true,
+										Computed: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.RequiresReplace(),
 										},
@@ -309,9 +333,10 @@ func (r *NetworksClientsProvisionResource) Schema(_ context.Context, _ resource.
 								Attributes: map[string]schema.Attribute{
 
 									"device_policy": schema.StringAttribute{
-										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.`,
-										Optional:            true,
-										Computed:            true,
+										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.
+                                                    Allowed values: [Allowed,Blocked,Group policy,Normal]`,
+										Optional: true,
+										Computed: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.RequiresReplace(),
 										},
@@ -333,9 +358,10 @@ func (r *NetworksClientsProvisionResource) Schema(_ context.Context, _ resource.
 								Attributes: map[string]schema.Attribute{
 
 									"device_policy": schema.StringAttribute{
-										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.`,
-										Optional:            true,
-										Computed:            true,
+										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.
+                                                    Allowed values: [Allowed,Blocked,Group policy,Normal]`,
+										Optional: true,
+										Computed: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.RequiresReplace(),
 										},
@@ -357,9 +383,10 @@ func (r *NetworksClientsProvisionResource) Schema(_ context.Context, _ resource.
 								Attributes: map[string]schema.Attribute{
 
 									"device_policy": schema.StringAttribute{
-										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.`,
-										Optional:            true,
-										Computed:            true,
+										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.
+                                                    Allowed values: [Allowed,Blocked,Group policy,Normal]`,
+										Optional: true,
+										Computed: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.RequiresReplace(),
 										},
@@ -381,9 +408,10 @@ func (r *NetworksClientsProvisionResource) Schema(_ context.Context, _ resource.
 								Attributes: map[string]schema.Attribute{
 
 									"device_policy": schema.StringAttribute{
-										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.`,
-										Optional:            true,
-										Computed:            true,
+										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.
+                                                    Allowed values: [Allowed,Blocked,Group policy,Normal]`,
+										Optional: true,
+										Computed: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.RequiresReplace(),
 										},
@@ -405,9 +433,10 @@ func (r *NetworksClientsProvisionResource) Schema(_ context.Context, _ resource.
 								Attributes: map[string]schema.Attribute{
 
 									"device_policy": schema.StringAttribute{
-										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.`,
-										Optional:            true,
-										Computed:            true,
+										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.
+                                                    Allowed values: [Allowed,Blocked,Group policy,Normal]`,
+										Optional: true,
+										Computed: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.RequiresReplace(),
 										},
@@ -429,9 +458,10 @@ func (r *NetworksClientsProvisionResource) Schema(_ context.Context, _ resource.
 								Attributes: map[string]schema.Attribute{
 
 									"device_policy": schema.StringAttribute{
-										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.`,
-										Optional:            true,
-										Computed:            true,
+										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.
+                                                    Allowed values: [Allowed,Blocked,Group policy,Normal]`,
+										Optional: true,
+										Computed: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.RequiresReplace(),
 										},
@@ -453,9 +483,10 @@ func (r *NetworksClientsProvisionResource) Schema(_ context.Context, _ resource.
 								Attributes: map[string]schema.Attribute{
 
 									"device_policy": schema.StringAttribute{
-										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.`,
-										Optional:            true,
-										Computed:            true,
+										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.
+                                                    Allowed values: [Allowed,Blocked,Group policy,Normal]`,
+										Optional: true,
+										Computed: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.RequiresReplace(),
 										},
@@ -477,9 +508,10 @@ func (r *NetworksClientsProvisionResource) Schema(_ context.Context, _ resource.
 								Attributes: map[string]schema.Attribute{
 
 									"device_policy": schema.StringAttribute{
-										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.`,
-										Optional:            true,
-										Computed:            true,
+										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.
+                                                    Allowed values: [Allowed,Blocked,Group policy,Normal]`,
+										Optional: true,
+										Computed: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.RequiresReplace(),
 										},
@@ -501,9 +533,10 @@ func (r *NetworksClientsProvisionResource) Schema(_ context.Context, _ resource.
 								Attributes: map[string]schema.Attribute{
 
 									"device_policy": schema.StringAttribute{
-										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.`,
-										Optional:            true,
-										Computed:            true,
+										MarkdownDescription: `The policy to apply to the specified client. Can be 'Allowed', 'Blocked', 'Normal' or 'Group policy'. Required.
+                                                    Allowed values: [Allowed,Blocked,Group policy,Normal]`,
+										Optional: true,
+										Computed: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.RequiresReplace(),
 										},
@@ -570,15 +603,15 @@ func (r *NetworksClientsProvisionResource) Create(ctx context.Context, req resou
 }
 
 func (r *NetworksClientsProvisionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *NetworksClientsProvisionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *NetworksClientsProvisionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -932,7 +965,7 @@ func ResponseNetworksProvisionNetworkClientsItemToBody(state NetworksClientsProv
 				}
 				return &result
 			}
-			return &[]ResponseNetworksProvisionNetworkClientsClients{}
+			return nil
 		}(),
 		DevicePolicy:  types.StringValue(response.DevicePolicy),
 		GroupPolicyID: types.StringValue(response.GroupPolicyID),

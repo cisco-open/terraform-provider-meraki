@@ -145,6 +145,22 @@ func StringSliceToSetInt(items *[]int) basetypes.SetValue {
 	return types.SetValueMust(types.Int64Type, eles)
 }
 
+func StringSliceToListInt(items *[]int) basetypes.ListValue {
+	var eles []attr.Value
+	if items == nil {
+		return types.ListNull(types.Int64Type)
+	}
+
+	if len(*items) == 0 {
+		return types.ListNull(types.Int64Type)
+	}
+	for _, item := range *items {
+		eles = append(eles, basetypes.NewInt64Value(int64(item)))
+	}
+
+	return types.ListValueMust(types.Int64Type, eles)
+}
+
 func elementsToStrings(ctx context.Context, elements types.List) []string {
 	var strings []string
 	elements.ElementsAs(ctx, &strings, false)

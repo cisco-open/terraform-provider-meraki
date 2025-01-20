@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -161,6 +162,8 @@ func (d *OrganizationsApplianceTrafficShapingVpnExclusionsByNetworkDataSource) R
 		queryParams1.EndingBefore = organizationsApplianceTrafficShapingVpnExclusionsByNetwork.EndingBefore.ValueString()
 		queryParams1.NetworkIDs = elementsToStrings(ctx, organizationsApplianceTrafficShapingVpnExclusionsByNetwork.NetworkIDs)
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Appliance.GetOrganizationApplianceTrafficShapingVpnExclusionsByNetwork(vvOrganizationID, &queryParams1)
 
 		if err != nil || response1 == nil {
@@ -236,7 +239,7 @@ func ResponseApplianceGetOrganizationApplianceTrafficShapingVpnExclusionsByNetwo
 								}
 								return &result
 							}
-							return &[]ResponseApplianceGetOrganizationApplianceTrafficShapingVpnExclusionsByNetworkItemsCustom{}
+							return nil
 						}(),
 						MajorApplications: func() *[]ResponseApplianceGetOrganizationApplianceTrafficShapingVpnExclusionsByNetworkItemsMajorApplications {
 							if items.MajorApplications != nil {
@@ -249,7 +252,7 @@ func ResponseApplianceGetOrganizationApplianceTrafficShapingVpnExclusionsByNetwo
 								}
 								return &result
 							}
-							return &[]ResponseApplianceGetOrganizationApplianceTrafficShapingVpnExclusionsByNetworkItemsMajorApplications{}
+							return nil
 						}(),
 						NetworkID:   types.StringValue(items.NetworkID),
 						NetworkName: types.StringValue(items.NetworkName),
@@ -257,7 +260,7 @@ func ResponseApplianceGetOrganizationApplianceTrafficShapingVpnExclusionsByNetwo
 				}
 				return &result
 			}
-			return &[]ResponseApplianceGetOrganizationApplianceTrafficShapingVpnExclusionsByNetworkItems{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

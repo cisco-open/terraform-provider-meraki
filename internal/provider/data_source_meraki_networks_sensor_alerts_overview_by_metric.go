@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -42,7 +59,7 @@ func (d *NetworksSensorAlertsOverviewByMetricDataSource) Schema(_ context.Contex
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"interval": schema.Int64Attribute{
-				MarkdownDescription: `interval query parameter. The time interval in seconds for returned data. The valid intervals are: 86400, 604800. The default is 604800.`,
+				MarkdownDescription: `interval query parameter. The time interval in seconds for returned data. The valid intervals are: 900, 3600, 86400, 604800, 2592000. The default is 604800. Interval is calculated if time params are provided.`,
 				Optional:            true,
 			},
 			"network_id": schema.StringAttribute{
@@ -50,15 +67,15 @@ func (d *NetworksSensorAlertsOverviewByMetricDataSource) Schema(_ context.Contex
 				Required:            true,
 			},
 			"t0": schema.StringAttribute{
-				MarkdownDescription: `t0 query parameter. The beginning of the timespan for the data. The maximum lookback period is 365 days from today.`,
+				MarkdownDescription: `t0 query parameter. The beginning of the timespan for the data. The maximum lookback period is 731 days from today.`,
 				Optional:            true,
 			},
 			"t1": schema.StringAttribute{
-				MarkdownDescription: `t1 query parameter. The end of the timespan for the data. t1 can be a maximum of 31 days after t0.`,
+				MarkdownDescription: `t1 query parameter. The end of the timespan for the data. t1 can be a maximum of 366 days after t0.`,
 				Optional:            true,
 			},
 			"timespan": schema.Float64Attribute{
-				MarkdownDescription: `timespan query parameter. The timespan for which the information will be fetched. If specifying timespan, do not specify parameters t0 and t1. The value must be in seconds and be less than or equal to 31 days. The default is 7 days.`,
+				MarkdownDescription: `timespan query parameter. The timespan for which the information will be fetched. If specifying timespan, do not specify parameters t0 and t1. The value must be in seconds and be less than or equal to 366 days. The default is 7 days. If interval is provided, the timespan will be autocalculated.`,
 				Optional:            true,
 			},
 
@@ -178,6 +195,8 @@ func (d *NetworksSensorAlertsOverviewByMetricDataSource) Read(ctx context.Contex
 		queryParams1.T1 = networksSensorAlertsOverviewByMetric.T1.ValueString()
 		queryParams1.Timespan = networksSensorAlertsOverviewByMetric.Timespan.ValueFloat64()
 		queryParams1.Interval = int(networksSensorAlertsOverviewByMetric.Interval.ValueInt64())
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Sensor.GetNetworkSensorAlertsOverviewByMetric(vvNetworkID, &queryParams1)
 
@@ -302,7 +321,7 @@ func ResponseSensorGetNetworkSensorAlertsOverviewByMetricItemsToBody(state Netwo
 									}(),
 								}
 							}
-							return &ResponseItemSensorGetNetworkSensorAlertsOverviewByMetricCountsNoise{}
+							return nil
 						}(),
 						Pm25: func() types.Int64 {
 							if item.Counts.Pm25 != nil {
@@ -354,7 +373,7 @@ func ResponseSensorGetNetworkSensorAlertsOverviewByMetricItemsToBody(state Netwo
 						}(),
 					}
 				}
-				return &ResponseItemSensorGetNetworkSensorAlertsOverviewByMetricCounts{}
+				return nil
 			}(),
 			EndTs:   types.StringValue(item.EndTs),
 			StartTs: types.StringValue(item.StartTs),

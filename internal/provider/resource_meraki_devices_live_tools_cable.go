@@ -16,14 +16,13 @@
 // SPDX-License-Identifier: MPL-2.0
 package provider
 
-// Falta import
 // RESOURCE NORMAL
 import (
 	"context"
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -146,7 +145,7 @@ func (r *DevicesLiveToolsCableResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"ports": schema.SetAttribute{
-				MarkdownDescription: `A list of ports for which to perform the cable test.`,
+				MarkdownDescription: `A list of ports for which to perform the cable test.  For Catalyst switches, IOS interface names are also supported, such as "GigabitEthernet1/0/8", "Gi1/0/8", or even "1/0/8".`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
@@ -188,16 +187,18 @@ func (r *DevicesLiveToolsCableResource) Schema(_ context.Context, _ resource.Sch
 								Attributes: map[string]schema.Attribute{
 
 									"index": schema.Int64Attribute{
-										MarkdownDescription: `The index of the twisted pair tested.`,
-										Computed:            true,
+										MarkdownDescription: `The index of the twisted pair tested.
+                                              Allowed values: [0,1,2,3]`,
+										Computed: true,
 									},
 									"length_meters": schema.Int64Attribute{
 										MarkdownDescription: `The detected length of the twisted pair.`,
 										Computed:            true,
 									},
 									"status": schema.StringAttribute{
-										MarkdownDescription: `The test result of the twisted pair tested.`,
-										Computed:            true,
+										MarkdownDescription: `The test result of the twisted pair tested.
+                                              Allowed values: [abnormal,couplex,fail,forced,in-progress,invalid,not-supported,ok,open,open or short,short,short or abnormal,short or couplex,unknown]`,
+										Computed: true,
 									},
 								},
 							},
@@ -211,8 +212,9 @@ func (r *DevicesLiveToolsCableResource) Schema(_ context.Context, _ resource.Sch
 							Computed:            true,
 						},
 						"status": schema.StringAttribute{
-							MarkdownDescription: `The current status of the port. If the cable test is still being performed on the port, "in-progress" is used. If an error occurred during the cable test, "error" is used and the error property will be populated.`,
-							Computed:            true,
+							MarkdownDescription: `The current status of the port. If the cable test is still being performed on the port, "in-progress" is used. If an error occurred during the cable test, "error" is used and the error property will be populated.
+                                        Allowed values: [down,error,in-progress,up]`,
+							Computed: true,
 						},
 					},
 				},
@@ -222,8 +224,9 @@ func (r *DevicesLiveToolsCableResource) Schema(_ context.Context, _ resource.Sch
 				Required:            true,
 			},
 			"status": schema.StringAttribute{
-				MarkdownDescription: `Status of the cable test request.`,
-				Computed:            true,
+				MarkdownDescription: `Status of the cable test request.
+                                  Allowed values: [complete,failed,new,ready,running,scheduled]`,
+				Computed: true,
 			},
 			"url": schema.StringAttribute{
 				MarkdownDescription: `GET this url to check the status of your cable test request.`,
@@ -235,7 +238,7 @@ func (r *DevicesLiveToolsCableResource) Schema(_ context.Context, _ resource.Sch
 
 func (r *DevicesLiveToolsCableResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var data DevicesLiveToolsCableTestRs
+	var data DevicesLiveToolsCableRs
 
 	var item types.Object
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &item)...)
@@ -319,7 +322,7 @@ func (r *DevicesLiveToolsCableResource) Create(ctx context.Context, req resource
 }
 
 func (r *DevicesLiveToolsCableResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data DevicesLiveToolsCableTestRs
+	var data DevicesLiveToolsCableRs
 
 	var item types.Object
 
@@ -387,7 +390,7 @@ func (r *DevicesLiveToolsCableResource) ImportState(ctx context.Context, req res
 }
 
 func (r *DevicesLiveToolsCableResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data DevicesLiveToolsCableTestRs
+	var data DevicesLiveToolsCableRs
 	merge(ctx, req, resp, &data)
 
 	if resp.Diagnostics.HasError() {
@@ -397,20 +400,20 @@ func (r *DevicesLiveToolsCableResource) Update(ctx context.Context, req resource
 	//Update
 	// No update
 	resp.Diagnostics.AddError(
-		"Update operation not supported in DevicesLiveToolsCableTest",
-		"Update operation not supported in DevicesLiveToolsCableTest",
+		"Update operation not supported in DevicesLiveToolsCable",
+		"Update operation not supported in DevicesLiveToolsCable",
 	)
 	return
 }
 
 func (r *DevicesLiveToolsCableResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting DevicesLiveToolsCableTest", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting DevicesLiveToolsCable", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
 // TF Structs Schema
-type DevicesLiveToolsCableTestRs struct {
+type DevicesLiveToolsCableRs struct {
 	Serial      types.String                                            `tfsdk:"serial"`
 	ID          types.String                                            `tfsdk:"id"`
 	CableTestID types.String                                            `tfsdk:"cable_test_id"`
@@ -458,7 +461,7 @@ type RequestDevicesCreateDeviceLiveToolsCableTestCallbackPayloadTemplateRs struc
 }
 
 // FromBody
-func (r *DevicesLiveToolsCableTestRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestDevicesCreateDeviceLiveToolsCableTest {
+func (r *DevicesLiveToolsCableRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestDevicesCreateDeviceLiveToolsCableTest {
 	var requestDevicesCreateDeviceLiveToolsCableTestCallback *merakigosdk.RequestDevicesCreateDeviceLiveToolsCableTestCallback
 	if r.Callback != nil {
 		var requestDevicesCreateDeviceLiveToolsCableTestCallbackHTTPServer *merakigosdk.RequestDevicesCreateDeviceLiveToolsCableTestCallbackHTTPServer
@@ -494,8 +497,8 @@ func (r *DevicesLiveToolsCableTestRs) toSdkApiRequestCreate(ctx context.Context)
 }
 
 // From gosdk to TF Structs Schema
-func ResponseDevicesGetDeviceLiveToolsCableTestItemToBodyRs(state DevicesLiveToolsCableTestRs, response *merakigosdk.ResponseDevicesGetDeviceLiveToolsCableTest, is_read bool) DevicesLiveToolsCableTestRs {
-	itemState := DevicesLiveToolsCableTestRs{
+func ResponseDevicesGetDeviceLiveToolsCableTestItemToBodyRs(state DevicesLiveToolsCableRs, response *merakigosdk.ResponseDevicesGetDeviceLiveToolsCableTest, is_read bool) DevicesLiveToolsCableRs {
+	itemState := DevicesLiveToolsCableRs{
 		CableTestID: types.StringValue(response.CableTestID),
 		Error:       types.StringValue(response.Error),
 		Request: func() *ResponseDevicesGetDeviceLiveToolsCableTestRequestRs {
@@ -505,7 +508,7 @@ func ResponseDevicesGetDeviceLiveToolsCableTestItemToBodyRs(state DevicesLiveToo
 					Serial: types.StringValue(response.Request.Serial),
 				}
 			}
-			return &ResponseDevicesGetDeviceLiveToolsCableTestRequestRs{}
+			return nil
 		}(),
 		Results: func() *[]ResponseDevicesGetDeviceLiveToolsCableTestResultsRs {
 			if response.Results != nil {
@@ -535,7 +538,7 @@ func ResponseDevicesGetDeviceLiveToolsCableTestItemToBodyRs(state DevicesLiveToo
 								}
 								return &result
 							}
-							return &[]ResponseDevicesGetDeviceLiveToolsCableTestResultsPairsRs{}
+							return nil
 						}(),
 						Port: types.StringValue(results.Port),
 						SpeedMbps: func() types.Int64 {
@@ -549,13 +552,13 @@ func ResponseDevicesGetDeviceLiveToolsCableTestItemToBodyRs(state DevicesLiveToo
 				}
 				return &result
 			}
-			return &[]ResponseDevicesGetDeviceLiveToolsCableTestResultsRs{}
+			return nil
 		}(),
 		Status: types.StringValue(response.Status),
 		URL:    types.StringValue(response.URL),
 	}
 	if is_read {
-		return mergeInterfacesOnlyPath(state, itemState).(DevicesLiveToolsCableTestRs)
+		return mergeInterfacesOnlyPath(state, itemState).(DevicesLiveToolsCableRs)
 	}
-	return mergeInterfaces(state, itemState, true).(DevicesLiveToolsCableTestRs)
+	return mergeInterfaces(state, itemState, true).(DevicesLiveToolsCableRs)
 }

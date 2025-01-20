@@ -20,7 +20,7 @@ resource "meraki_networks_alerts_settings" "example" {
     alert_destinations = {
 
       all_admins = false
-      emails     = ["miles@meraki.com"]
+      emails     = ["miles2@meraki.com"]
     }
     filters = {
       timeout = 10

@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -182,9 +198,9 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Create(ctx context.Context, req
 		return
 	}
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDSchedules(vvNetworkID, vvNumber, dataRequest)
+	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDSchedules(vvNetworkID, vvNumber, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDSchedules",
@@ -303,8 +319,8 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Update(ctx context.Context, req
 	vvNetworkID := data.NetworkID.ValueString()
 	vvNumber := data.Number.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDSchedules(vvNetworkID, vvNumber, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDSchedules(vvNetworkID, vvNumber, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDSchedules",
@@ -331,11 +347,11 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Delete(ctx context.Context, req
 
 // TF Structs Schema
 type NetworksWirelessSSIDsSchedulesRs struct {
-	NetworkID       types.String                                                          `tfsdk:"network_id"`
-	Number          types.String                                                          `tfsdk:"number"`
-	Enabled         types.Bool                                                            `tfsdk:"enabled"`
-	Ranges          *[]ResponseWirelessGetNetworkWirelessSsidSchedulesRangesRs            `tfsdk:"ranges"`
-	RangesInSeconds *[]RequestWirelessUpdateNetworkWirelessSsidSchedulesRangesInSecondsRs `tfsdk:"ranges_in_seconds"`
+	NetworkID       types.String                                                        `tfsdk:"network_id"`
+	Number          types.String                                                        `tfsdk:"number"`
+	Enabled         types.Bool                                                          `tfsdk:"enabled"`
+	Ranges          *[]ResponseWirelessGetNetworkWirelessSsidSchedulesRangesRs          `tfsdk:"ranges"`
+	RangesInSeconds *[]ResponseWirelessGetNetworkWirelessSsidSchedulesRangesInSecondsRs `tfsdk:"ranges_in_seconds"`
 }
 
 type ResponseWirelessGetNetworkWirelessSsidSchedulesRangesRs struct {
@@ -345,7 +361,7 @@ type ResponseWirelessGetNetworkWirelessSsidSchedulesRangesRs struct {
 	StartTime types.String `tfsdk:"start_time"`
 }
 
-type RequestWirelessUpdateNetworkWirelessSsidSchedulesRangesInSecondsRs struct {
+type ResponseWirelessGetNetworkWirelessSsidSchedulesRangesInSecondsRs struct {
 	End   types.Int64 `tfsdk:"end"`
 	Start types.Int64 `tfsdk:"start"`
 }
@@ -434,7 +450,30 @@ func ResponseWirelessGetNetworkWirelessSSIDSchedulesItemToBodyRs(state NetworksW
 				}
 				return &result
 			}
-			return &[]ResponseWirelessGetNetworkWirelessSsidSchedulesRangesRs{}
+			return nil
+		}(),
+		RangesInSeconds: func() *[]ResponseWirelessGetNetworkWirelessSsidSchedulesRangesInSecondsRs {
+			if response.RangesInSeconds != nil {
+				result := make([]ResponseWirelessGetNetworkWirelessSsidSchedulesRangesInSecondsRs, len(*response.RangesInSeconds))
+				for i, rangesInSeconds := range *response.RangesInSeconds {
+					result[i] = ResponseWirelessGetNetworkWirelessSsidSchedulesRangesInSecondsRs{
+						End: func() types.Int64 {
+							if rangesInSeconds.End != nil {
+								return types.Int64Value(int64(*rangesInSeconds.End))
+							}
+							return types.Int64{}
+						}(),
+						Start: func() types.Int64 {
+							if rangesInSeconds.Start != nil {
+								return types.Int64Value(int64(*rangesInSeconds.Start))
+							}
+							return types.Int64{}
+						}(),
+					}
+				}
+				return &result
+			}
+			return nil
 		}(),
 	}
 	if is_read {

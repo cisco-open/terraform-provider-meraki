@@ -6,6 +6,7 @@ data "meraki_networks" "example" {
   is_bound_to_config_template = false
   organization_id             = "string"
   per_page                    = 1
+  product_types               = ["string"]
   starting_after              = "string"
   tags                        = ["string"]
   tags_filter_type            = "string"

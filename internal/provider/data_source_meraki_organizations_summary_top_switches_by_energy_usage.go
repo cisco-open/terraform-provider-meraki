@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -41,20 +58,40 @@ func (d *OrganizationsSummaryTopSwitchesByEnergyUsageDataSource) Metadata(_ cont
 func (d *OrganizationsSummaryTopSwitchesByEnergyUsageDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"device_tag": schema.StringAttribute{
+				MarkdownDescription: `deviceTag query parameter. Match result to an exact device tag`,
+				Optional:            true,
+			},
+			"network_tag": schema.StringAttribute{
+				MarkdownDescription: `networkTag query parameter. Match result to an exact network tag`,
+				Optional:            true,
+			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
 				Required:            true,
+			},
+			"quantity": schema.Int64Attribute{
+				MarkdownDescription: `quantity query parameter. Set number of desired results to return. Default is 10.`,
+				Optional:            true,
+			},
+			"ssid_name": schema.StringAttribute{
+				MarkdownDescription: `ssidName query parameter. Filter results by ssid name`,
+				Optional:            true,
 			},
 			"t0": schema.StringAttribute{
 				MarkdownDescription: `t0 query parameter. The beginning of the timespan for the data.`,
 				Optional:            true,
 			},
 			"t1": schema.StringAttribute{
-				MarkdownDescription: `t1 query parameter. The end of the timespan for the data. t1 can be a maximum of 31 days after t0.`,
+				MarkdownDescription: `t1 query parameter. The end of the timespan for the data. t1 can be a maximum of 186 days after t0.`,
 				Optional:            true,
 			},
 			"timespan": schema.Float64Attribute{
-				MarkdownDescription: `timespan query parameter. The timespan for which the information will be fetched. If specifying timespan, do not specify parameters t0 and t1. The value must be in seconds and be greater than or equal to 25 minutes and be less than or equal to 31 days. The default is 1 day.`,
+				MarkdownDescription: `timespan query parameter. The timespan for which the information will be fetched. If specifying timespan, do not specify parameters t0 and t1. The value must be in seconds and be greater than or equal to 25 minutes and be less than or equal to 186 days. The default is 1 day.`,
+				Optional:            true,
+			},
+			"usage_uplink": schema.StringAttribute{
+				MarkdownDescription: `usageUplink query parameter. Filter results by usage uplink`,
 				Optional:            true,
 			},
 
@@ -122,9 +159,16 @@ func (d *OrganizationsSummaryTopSwitchesByEnergyUsageDataSource) Read(ctx contex
 		vvOrganizationID := organizationsSummaryTopSwitchesByEnergyUsage.OrganizationID.ValueString()
 		queryParams1 := merakigosdk.GetOrganizationSummaryTopSwitchesByEnergyUsageQueryParams{}
 
+		queryParams1.NetworkTag = organizationsSummaryTopSwitchesByEnergyUsage.NetworkTag.ValueString()
+		queryParams1.DeviceTag = organizationsSummaryTopSwitchesByEnergyUsage.DeviceTag.ValueString()
+		queryParams1.Quantity = int(organizationsSummaryTopSwitchesByEnergyUsage.Quantity.ValueInt64())
+		queryParams1.SSIDName = organizationsSummaryTopSwitchesByEnergyUsage.SSIDName.ValueString()
+		queryParams1.UsageUplink = organizationsSummaryTopSwitchesByEnergyUsage.UsageUplink.ValueString()
 		queryParams1.T0 = organizationsSummaryTopSwitchesByEnergyUsage.T0.ValueString()
 		queryParams1.T1 = organizationsSummaryTopSwitchesByEnergyUsage.T1.ValueString()
 		queryParams1.Timespan = organizationsSummaryTopSwitchesByEnergyUsage.Timespan.ValueFloat64()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Organizations.GetOrganizationSummaryTopSwitchesByEnergyUsage(vvOrganizationID, &queryParams1)
 
@@ -152,6 +196,11 @@ func (d *OrganizationsSummaryTopSwitchesByEnergyUsageDataSource) Read(ctx contex
 // structs
 type OrganizationsSummaryTopSwitchesByEnergyUsage struct {
 	OrganizationID types.String                                                               `tfsdk:"organization_id"`
+	NetworkTag     types.String                                                               `tfsdk:"network_tag"`
+	DeviceTag      types.String                                                               `tfsdk:"device_tag"`
+	Quantity       types.Int64                                                                `tfsdk:"quantity"`
+	SSIDName       types.String                                                               `tfsdk:"ssid_name"`
+	UsageUplink    types.String                                                               `tfsdk:"usage_uplink"`
 	T0             types.String                                                               `tfsdk:"t0"`
 	T1             types.String                                                               `tfsdk:"t1"`
 	Timespan       types.Float64                                                              `tfsdk:"timespan"`
@@ -190,7 +239,7 @@ func ResponseOrganizationsGetOrganizationSummaryTopSwitchesByEnergyUsageItemsToB
 						Name: types.StringValue(item.Network.Name),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationSummaryTopSwitchesByEnergyUsageNetwork{}
+				return nil
 			}(),
 			Usage: func() *ResponseItemOrganizationsGetOrganizationSummaryTopSwitchesByEnergyUsageUsage {
 				if item.Usage != nil {
@@ -203,7 +252,7 @@ func ResponseOrganizationsGetOrganizationSummaryTopSwitchesByEnergyUsageItemsToB
 						}(),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationSummaryTopSwitchesByEnergyUsageUsage{}
+				return nil
 			}(),
 		}
 		items = append(items, itemState)

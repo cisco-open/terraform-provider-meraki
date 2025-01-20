@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -272,6 +289,8 @@ func (d *OrganizationsLicensesOverviewDataSource) Read(ctx context.Context, req 
 		log.Printf("[DEBUG] Selected method: GetOrganizationLicensesOverview")
 		vvOrganizationID := organizationsLicensesOverview.OrganizationID.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Organizations.GetOrganizationLicensesOverview(vvOrganizationID)
 
 		if err != nil || response1 == nil {
@@ -416,16 +435,16 @@ func ResponseOrganizationsGetOrganizationLicensesOverviewItemToBody(state Organi
 									}(),
 								}
 							}
-							return &ResponseOrganizationsGetOrganizationLicensesOverviewLicenseTypesCounts{}
+							return nil
 						}(),
 						LicenseType: types.StringValue(licenseTypes.LicenseType),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseOrganizationsGetOrganizationLicensesOverviewLicenseTypes{}
+			return nil
 		}(),
-		// LicensedDeviceCounts: types.StringValue(response.LicensedDeviceCounts),//TODO POSIBLE interface
+		// LicensedDeviceCounts: types.StringValue(response.LicensedDeviceCounts), //TODO POSIBLE interface
 		States: func() *ResponseOrganizationsGetOrganizationLicensesOverviewStates {
 			if response.States != nil {
 				return &ResponseOrganizationsGetOrganizationLicensesOverviewStates{
@@ -440,7 +459,7 @@ func ResponseOrganizationsGetOrganizationLicensesOverviewItemToBody(state Organi
 								}(),
 							}
 						}
-						return &ResponseOrganizationsGetOrganizationLicensesOverviewStatesActive{}
+						return nil
 					}(),
 					Expired: func() *ResponseOrganizationsGetOrganizationLicensesOverviewStatesExpired {
 						if response.States.Expired != nil {
@@ -453,7 +472,7 @@ func ResponseOrganizationsGetOrganizationLicensesOverviewItemToBody(state Organi
 								}(),
 							}
 						}
-						return &ResponseOrganizationsGetOrganizationLicensesOverviewStatesExpired{}
+						return nil
 					}(),
 					Expiring: func() *ResponseOrganizationsGetOrganizationLicensesOverviewStatesExpiring {
 						if response.States.Expiring != nil {
@@ -481,7 +500,7 @@ func ResponseOrganizationsGetOrganizationLicensesOverviewItemToBody(state Organi
 											}(),
 										}
 									}
-									return &ResponseOrganizationsGetOrganizationLicensesOverviewStatesExpiringCritical{}
+									return nil
 								}(),
 								Warning: func() *ResponseOrganizationsGetOrganizationLicensesOverviewStatesExpiringWarning {
 									if response.States.Expiring.Warning != nil {
@@ -500,11 +519,11 @@ func ResponseOrganizationsGetOrganizationLicensesOverviewItemToBody(state Organi
 											}(),
 										}
 									}
-									return &ResponseOrganizationsGetOrganizationLicensesOverviewStatesExpiringWarning{}
+									return nil
 								}(),
 							}
 						}
-						return &ResponseOrganizationsGetOrganizationLicensesOverviewStatesExpiring{}
+						return nil
 					}(),
 					RecentlyQueued: func() *ResponseOrganizationsGetOrganizationLicensesOverviewStatesRecentlyQueued {
 						if response.States.RecentlyQueued != nil {
@@ -517,7 +536,7 @@ func ResponseOrganizationsGetOrganizationLicensesOverviewItemToBody(state Organi
 								}(),
 							}
 						}
-						return &ResponseOrganizationsGetOrganizationLicensesOverviewStatesRecentlyQueued{}
+						return nil
 					}(),
 					Unused: func() *ResponseOrganizationsGetOrganizationLicensesOverviewStatesUnused {
 						if response.States.Unused != nil {
@@ -540,11 +559,11 @@ func ResponseOrganizationsGetOrganizationLicensesOverviewItemToBody(state Organi
 											}(),
 										}
 									}
-									return &ResponseOrganizationsGetOrganizationLicensesOverviewStatesUnusedSoonestActivation{}
+									return nil
 								}(),
 							}
 						}
-						return &ResponseOrganizationsGetOrganizationLicensesOverviewStatesUnused{}
+						return nil
 					}(),
 					UnusedActive: func() *ResponseOrganizationsGetOrganizationLicensesOverviewStatesUnusedActive {
 						if response.States.UnusedActive != nil {
@@ -567,15 +586,15 @@ func ResponseOrganizationsGetOrganizationLicensesOverviewItemToBody(state Organi
 											}(),
 										}
 									}
-									return &ResponseOrganizationsGetOrganizationLicensesOverviewStatesUnusedActiveOldestActivation{}
+									return nil
 								}(),
 							}
 						}
-						return &ResponseOrganizationsGetOrganizationLicensesOverviewStatesUnusedActive{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseOrganizationsGetOrganizationLicensesOverviewStates{}
+			return nil
 		}(),
 		Status: types.StringValue(response.Status),
 		SystemsManager: func() *ResponseOrganizationsGetOrganizationLicensesOverviewSystemsManager {
@@ -610,11 +629,11 @@ func ResponseOrganizationsGetOrganizationLicensesOverviewItemToBody(state Organi
 								}(),
 							}
 						}
-						return &ResponseOrganizationsGetOrganizationLicensesOverviewSystemsManagerCounts{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseOrganizationsGetOrganizationLicensesOverviewSystemsManager{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

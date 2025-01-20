@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -201,6 +202,8 @@ func (d *OrganizationsWirelessDevicesChannelUtilizationByDeviceDataSource) Read(
 		queryParams1.Timespan = organizationsWirelessDevicesChannelUtilizationByDevice.Timespan.ValueFloat64()
 		queryParams1.Interval = int(organizationsWirelessDevicesChannelUtilizationByDevice.Interval.ValueInt64())
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Wireless.GetOrganizationWirelessDevicesChannelUtilizationByDevice(vvOrganizationID, &queryParams1)
 
 		if err != nil || response1 == nil {
@@ -291,7 +294,7 @@ func ResponseWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceIte
 										}(),
 									}
 								}
-								return &ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceByBandNonWifi{}
+								return nil
 							}(),
 							Total: func() *ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceByBandTotal {
 								if byBand.Total != nil {
@@ -304,7 +307,7 @@ func ResponseWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceIte
 										}(),
 									}
 								}
-								return &ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceByBandTotal{}
+								return nil
 							}(),
 							Wifi: func() *ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceByBandWifi {
 								if byBand.Wifi != nil {
@@ -317,13 +320,13 @@ func ResponseWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceIte
 										}(),
 									}
 								}
-								return &ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceByBandWifi{}
+								return nil
 							}(),
 						}
 					}
 					return &result
 				}
-				return &[]ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceByBand{}
+				return nil
 			}(),
 			Mac: types.StringValue(item.Mac),
 			Network: func() *ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceNetwork {
@@ -332,7 +335,7 @@ func ResponseWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceIte
 						ID: types.StringValue(item.Network.ID),
 					}
 				}
-				return &ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceNetwork{}
+				return nil
 			}(),
 			Serial: types.StringValue(item.Serial),
 		}

@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE ACTION
@@ -5,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -53,6 +69,20 @@ func (r *DevicesCameraGenerateSnapshotResource) Schema(_ context.Context, _ reso
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
+			"item": schema.SingleNestedAttribute{
+				Computed: true,
+				Attributes: map[string]schema.Attribute{
+
+					"expiry": schema.StringAttribute{
+						MarkdownDescription: `Expiration details for snapshot image access`,
+						Computed:            true,
+					},
+					"url": schema.StringAttribute{
+						MarkdownDescription: `Url for the snapshot`,
+						Computed:            true,
+					},
+				},
+			},
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
@@ -98,9 +128,9 @@ func (r *DevicesCameraGenerateSnapshotResource) Create(ctx context.Context, req 
 	//Has Paths
 	vvSerial := data.Serial.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
-	restyResp1, err := r.client.Camera.GenerateDeviceCameraSnapshot(vvSerial, dataRequest)
+	response, restyResp1, err := r.client.Camera.GenerateDeviceCameraSnapshot(vvSerial, dataRequest)
 
-	if err != nil {
+	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GenerateDeviceCameraSnapshot",
@@ -115,30 +145,35 @@ func (r *DevicesCameraGenerateSnapshotResource) Create(ctx context.Context, req 
 		return
 	}
 	//Item
-	// //entro aqui 2
-	// data = ResponseCameraGenerateDeviceCameraSnapshot(data, response)
+	data = ResponseCameraGenerateDeviceCameraSnapshotItemToBody(data, response)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
 func (r *DevicesCameraGenerateSnapshotResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *DevicesCameraGenerateSnapshotResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *DevicesCameraGenerateSnapshotResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
 // TF Structs Schema
 type DevicesCameraGenerateSnapshot struct {
 	Serial     types.String                                 `tfsdk:"serial"`
+	Item       *ResponseCameraGenerateDeviceCameraSnapshot  `tfsdk:"item"`
 	Parameters *RequestCameraGenerateDeviceCameraSnapshotRs `tfsdk:"parameters"`
+}
+
+type ResponseCameraGenerateDeviceCameraSnapshot struct {
+	Expiry types.String `tfsdk:"expiry"`
+	URL    types.String `tfsdk:"url"`
 }
 
 type RequestCameraGenerateDeviceCameraSnapshotRs struct {
@@ -167,4 +202,14 @@ func (r *DevicesCameraGenerateSnapshot) toSdkApiRequestCreate(ctx context.Contex
 		Timestamp: *timestamp,
 	}
 	return &out
+}
+
+// ToBody
+func ResponseCameraGenerateDeviceCameraSnapshotItemToBody(state DevicesCameraGenerateSnapshot, response *merakigosdk.ResponseCameraGenerateDeviceCameraSnapshot) DevicesCameraGenerateSnapshot {
+	itemState := ResponseCameraGenerateDeviceCameraSnapshot{
+		Expiry: types.StringValue(response.Expiry),
+		URL:    types.StringValue(response.URL),
+	}
+	state.Item = &itemState
+	return state
 }

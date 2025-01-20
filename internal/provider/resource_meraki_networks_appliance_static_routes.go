@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -67,7 +67,7 @@ func (r *NetworksApplianceStaticRoutesResource) Schema(_ context.Context, _ reso
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"enabled": schema.BoolAttribute{
-				MarkdownDescription: `The enabled state of the static route`,
+				MarkdownDescription: `Whether the route is enabled or not`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
@@ -98,7 +98,7 @@ func (r *NetworksApplianceStaticRoutesResource) Schema(_ context.Context, _ reso
 				},
 			},
 			"gateway_ip": schema.StringAttribute{
-				MarkdownDescription: `The gateway IP (next hop) of the static route`,
+				MarkdownDescription: `Gateway IP address (next hop)`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -106,7 +106,7 @@ func (r *NetworksApplianceStaticRoutesResource) Schema(_ context.Context, _ reso
 				},
 			},
 			"gateway_vlan_id": schema.Int64Attribute{
-				MarkdownDescription: `The gateway IP (next hop) VLAN ID of the static route`,
+				MarkdownDescription: `Gateway VLAN ID`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
@@ -115,7 +115,7 @@ func (r *NetworksApplianceStaticRoutesResource) Schema(_ context.Context, _ reso
 				//            Differents_types: `   parameter: schema.TypeString, item: schema.TypeInt`,
 			},
 			"gateway_vlan_id_rs": schema.StringAttribute{
-				MarkdownDescription: `The gateway IP (next hop) VLAN ID of the static route`,
+				MarkdownDescription: `Gateway VLAN ID`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -124,13 +124,15 @@ func (r *NetworksApplianceStaticRoutesResource) Schema(_ context.Context, _ reso
 				//            Differents_types: `   parameter: schema.TypeString, item: schema.TypeInt`,
 			},
 			"id": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `Route ID`,
+				Computed:            true,
 			},
 			"ip_version": schema.Int64Attribute{
-				Computed: true,
+				MarkdownDescription: `IP protocol version`,
+				Computed:            true,
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: `The name of the new static route`,
+				MarkdownDescription: `Name of the route`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -138,11 +140,11 @@ func (r *NetworksApplianceStaticRoutesResource) Schema(_ context.Context, _ reso
 				},
 			},
 			"network_id": schema.StringAttribute{
-				MarkdownDescription: `networkId path parameter. Network ID`,
+				MarkdownDescription: `Network ID`,
 				Required:            true,
 			},
 			"reserved_ip_ranges": schema.SetNestedAttribute{
-				MarkdownDescription: `The DHCP reserved IP ranges on the static route`,
+				MarkdownDescription: `DHCP reserved IP ranges`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
@@ -152,7 +154,7 @@ func (r *NetworksApplianceStaticRoutesResource) Schema(_ context.Context, _ reso
 					Attributes: map[string]schema.Attribute{
 
 						"comment": schema.StringAttribute{
-							MarkdownDescription: `A text comment for the reserved range`,
+							MarkdownDescription: `Description of the range`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
@@ -160,7 +162,7 @@ func (r *NetworksApplianceStaticRoutesResource) Schema(_ context.Context, _ reso
 							},
 						},
 						"end": schema.StringAttribute{
-							MarkdownDescription: `The last IP in the reserved range`,
+							MarkdownDescription: `Last address in the reserved range`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
@@ -168,7 +170,7 @@ func (r *NetworksApplianceStaticRoutesResource) Schema(_ context.Context, _ reso
 							},
 						},
 						"start": schema.StringAttribute{
-							MarkdownDescription: `The first IP in the reserved range`,
+							MarkdownDescription: `First address in the reserved range`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
@@ -186,7 +188,7 @@ func (r *NetworksApplianceStaticRoutesResource) Schema(_ context.Context, _ reso
 				},
 			},
 			"subnet": schema.StringAttribute{
-				MarkdownDescription: `The subnet of the static route`,
+				MarkdownDescription: `Subnet of the route`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -249,9 +251,9 @@ func (r *NetworksApplianceStaticRoutesResource) Create(ctx context.Context, req 
 		}
 	}
 	dataRequest := data.toSdkApiRequestCreate(ctx)
-	restyResp2, err := r.client.Appliance.CreateNetworkApplianceStaticRoute(vvNetworkID, dataRequest)
+	response, restyResp2, err := r.client.Appliance.CreateNetworkApplianceStaticRoute(vvNetworkID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkApplianceStaticRoute",
@@ -397,8 +399,8 @@ func (r *NetworksApplianceStaticRoutesResource) Update(ctx context.Context, req 
 	vvNetworkID := data.NetworkID.ValueString()
 	vvStaticRouteID := data.StaticRouteID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceStaticRoute(vvNetworkID, vvStaticRouteID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceStaticRoute(vvNetworkID, vvStaticRouteID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceStaticRoute",
@@ -634,7 +636,8 @@ func ResponseApplianceGetNetworkApplianceStaticRouteItemToBodyRs(state NetworksA
 			}
 			return nil
 		}(),
-		Subnet: types.StringValue(response.Subnet),
+		Subnet:        types.StringValue(response.Subnet),
+		StaticRouteID: types.StringValue(response.ID),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksApplianceStaticRoutesRs)

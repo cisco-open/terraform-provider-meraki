@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -62,38 +79,49 @@ func (d *NetworksBluetoothClientsDataSource) Schema(_ context.Context, _ datasou
 				Attributes: map[string]schema.Attribute{
 
 					"device_name": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Bluetooth device name`,
+						Computed:            true,
 					},
 					"id": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `ID of the client`,
+						Computed:            true,
 					},
 					"in_sight_alert": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Device in sight alert`,
+						Computed:            true,
 					},
 					"last_seen": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `Epoch timestamp of the device's last appearance`,
+						Computed:            true,
 					},
 					"mac": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `MAC address of the client`,
+						Computed:            true,
 					},
 					"manufacturer": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Name of the manufacturer`,
+						Computed:            true,
 					},
 					"name": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Name of the client`,
+						Computed:            true,
 					},
 					"network_id": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Network ID`,
+						Computed:            true,
 					},
 					"out_of_sight_alert": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Device out of sight alert`,
+						Computed:            true,
 					},
 					"seen_by_device_mac": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Seen by device MAC`,
+						Computed:            true,
 					},
 					"tags": schema.ListAttribute{
-						Computed:    true,
-						ElementType: types.StringType,
+						MarkdownDescription: `A list of tags applied to the device`,
+						Computed:            true,
+						ElementType:         types.StringType,
 					},
 				},
 			},
@@ -117,6 +145,8 @@ func (d *NetworksBluetoothClientsDataSource) Read(ctx context.Context, req datas
 
 		queryParams1.IncludeConnectivityHistory = networksBluetoothClients.IncludeConnectivityHistory.ValueBool()
 		queryParams1.ConnectivityHistoryTimespan = int(networksBluetoothClients.ConnectivityHistoryTimespan.ValueInt64())
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Networks.GetNetworkBluetoothClient(vvNetworkID, vvBluetoothClientID, &queryParams1)
 

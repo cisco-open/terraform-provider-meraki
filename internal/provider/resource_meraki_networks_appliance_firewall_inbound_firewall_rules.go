@@ -1,11 +1,28 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -13,6 +30,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -86,16 +104,34 @@ func (r *NetworksApplianceFirewallInboundFirewallRulesResource) Schema(_ context
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"allow",
+									"deny",
+								),
+							},
 						},
 						"protocol": schema.StringAttribute{
-							MarkdownDescription: `The type of protocol (must be 'tcp', 'udp', 'icmp', 'icmp6' or 'any')`,
-							Optional:            true,
+							MarkdownDescription: `The type of protocol (must be 'tcp', 'udp', 'icmp', 'icmp6' or 'any')
+                                        Allowed values: [any,icmp,icmp6,tcp,udp]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
+							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"any",
+									"icmp",
+									"icmp6",
+									"tcp",
+									"udp",
+								),
 							},
 						},
 						"src_cidr": schema.StringAttribute{
 							MarkdownDescription: `Comma-separated list of source IP address(es) (in IP or CIDR notation), or 'any' (note: FQDN not supported for source addresses)`,
+							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -103,6 +139,7 @@ func (r *NetworksApplianceFirewallInboundFirewallRulesResource) Schema(_ context
 						},
 						"src_port": schema.StringAttribute{
 							MarkdownDescription: `Comma-separated list of source port(s) (integer in the range 1-65535), or 'any'`,
+							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -110,6 +147,7 @@ func (r *NetworksApplianceFirewallInboundFirewallRulesResource) Schema(_ context
 						},
 						"syslog_enabled": schema.BoolAttribute{
 							MarkdownDescription: `Log this rule to syslog (true or false, boolean value) - only applicable if a syslog has been configured (optional)`,
+							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Bool{
 								boolplanmodifier.UseStateForUnknown(),
@@ -427,7 +465,7 @@ func (r *NetworksApplianceFirewallInboundFirewallRulesRs) toSdkApiRequestUpdate(
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallInboundFirewallRules{
 		Rules: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallInboundFirewallRulesRules {
-			if len(requestApplianceUpdateNetworkApplianceFirewallInboundFirewallRulesRules) > 0 {
+			if len(requestApplianceUpdateNetworkApplianceFirewallInboundFirewallRulesRules) > 0 || r.Rules != nil {
 				return &requestApplianceUpdateNetworkApplianceFirewallInboundFirewallRulesRules
 			}
 			return nil
@@ -462,7 +500,7 @@ func ResponseApplianceGetNetworkApplianceFirewallInboundFirewallRulesItemToBodyR
 				}
 				return &result
 			}
-			return &[]ResponseApplianceGetNetworkApplianceFirewallInboundFirewallRulesRulesRs{}
+			return nil
 		}(),
 		SyslogDefaultRule: func() types.Bool {
 			if response.SyslogDefaultRule != nil {

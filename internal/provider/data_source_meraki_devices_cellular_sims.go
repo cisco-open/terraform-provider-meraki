@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -49,43 +66,77 @@ func (d *DevicesCellularSimsDataSource) Schema(_ context.Context, _ datasource.S
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
+					"sim_failover": schema.SingleNestedAttribute{
+						MarkdownDescription: `SIM Failover settings.`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"enabled": schema.BoolAttribute{
+								MarkdownDescription: `Failover to secondary SIM`,
+								Computed:            true,
+							},
+							"timeout": schema.Int64Attribute{
+								MarkdownDescription: `Failover timeout in seconds`,
+								Computed:            true,
+							},
+						},
+					},
+					"sim_ordering": schema.ListAttribute{
+						MarkdownDescription: `Specifies the ordering of all SIMs for an MG: primary, secondary, and not-in-use (when applicable). It's required for devices with 3 or more SIMs and can be used in place of 'isPrimary' for dual-SIM devices. To indicate eSIM, use 'sim3'. Sim failover will occur only between primary and secondary sim slots.`,
+						Computed:            true,
+						ElementType:         types.StringType,
+					},
 					"sims": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `List of SIMs. If a SIM was previously configured and not specified in this request, it will remain unchanged.`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"apns": schema.SetNestedAttribute{
-									Computed: true,
+									MarkdownDescription: `APN configurations. If empty, the default APN will be used.`,
+									Computed:            true,
 									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 
 											"allowed_ip_types": schema.ListAttribute{
-												Computed:    true,
-												ElementType: types.StringType,
+												MarkdownDescription: `IP versions to support (permitted values include 'ipv4', 'ipv6').`,
+												Computed:            true,
+												ElementType:         types.StringType,
 											},
 											"authentication": schema.SingleNestedAttribute{
-												Computed: true,
+												MarkdownDescription: `APN authentication configurations.`,
+												Computed:            true,
 												Attributes: map[string]schema.Attribute{
 
+													"password": schema.StringAttribute{
+														MarkdownDescription: `APN password, if type is set (if APN password is not supplied, the password is left unchanged).`,
+														Sensitive:           true,
+														Computed:            true,
+													},
 													"type": schema.StringAttribute{
-														Computed: true,
+														MarkdownDescription: `APN auth type.`,
+														Computed:            true,
 													},
 													"username": schema.StringAttribute{
-														Computed: true,
+														MarkdownDescription: `APN username, if type is set.`,
+														Computed:            true,
 													},
 												},
 											},
 											"name": schema.StringAttribute{
-												Computed: true,
+												MarkdownDescription: `APN name.`,
+												Computed:            true,
 											},
 										},
 									},
 								},
 								"is_primary": schema.BoolAttribute{
-									Computed: true,
+									MarkdownDescription: `If true, this SIM is activated on platform bootup. It must be true on single-SIM devices and is a required field for dual-SIM MGs unless it is being configured using 'simOrdering'.`,
+									Computed:            true,
 								},
 								"slot": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `SIM slot being configured. Must be 'sim1' on single-sim devices. Use 'sim3' for eSIM.`,
+									Computed:            true,
 								},
 							},
 						},
@@ -107,6 +158,8 @@ func (d *DevicesCellularSimsDataSource) Read(ctx context.Context, req datasource
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetDeviceCellularSims")
 		vvSerial := devicesCellularSims.Serial.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Devices.GetDeviceCellularSims(vvSerial)
 
@@ -138,7 +191,14 @@ type DevicesCellularSims struct {
 }
 
 type ResponseDevicesGetDeviceCellularSims struct {
-	Sims *[]ResponseDevicesGetDeviceCellularSimsSims `tfsdk:"sims"`
+	SimFailover *ResponseDevicesGetDeviceCellularSimsSimFailover `tfsdk:"sim_failover"`
+	SimOrdering types.List                                       `tfsdk:"sim_ordering"`
+	Sims        *[]ResponseDevicesGetDeviceCellularSimsSims      `tfsdk:"sims"`
+}
+
+type ResponseDevicesGetDeviceCellularSimsSimFailover struct {
+	Enabled types.Bool  `tfsdk:"enabled"`
+	Timeout types.Int64 `tfsdk:"timeout"`
 }
 
 type ResponseDevicesGetDeviceCellularSimsSims struct {
@@ -154,6 +214,7 @@ type ResponseDevicesGetDeviceCellularSimsSimsApns struct {
 }
 
 type ResponseDevicesGetDeviceCellularSimsSimsApnsAuthentication struct {
+	Password types.String `tfsdk:"password"`
 	Type     types.String `tfsdk:"type"`
 	Username types.String `tfsdk:"username"`
 }
@@ -161,6 +222,26 @@ type ResponseDevicesGetDeviceCellularSimsSimsApnsAuthentication struct {
 // ToBody
 func ResponseDevicesGetDeviceCellularSimsItemToBody(state DevicesCellularSims, response *merakigosdk.ResponseDevicesGetDeviceCellularSims) DevicesCellularSims {
 	itemState := ResponseDevicesGetDeviceCellularSims{
+		SimFailover: func() *ResponseDevicesGetDeviceCellularSimsSimFailover {
+			if response.SimFailover != nil {
+				return &ResponseDevicesGetDeviceCellularSimsSimFailover{
+					Enabled: func() types.Bool {
+						if response.SimFailover.Enabled != nil {
+							return types.BoolValue(*response.SimFailover.Enabled)
+						}
+						return types.Bool{}
+					}(),
+					Timeout: func() types.Int64 {
+						if response.SimFailover.Timeout != nil {
+							return types.Int64Value(int64(*response.SimFailover.Timeout))
+						}
+						return types.Int64{}
+					}(),
+				}
+			}
+			return nil
+		}(),
+		SimOrdering: StringSliceToList(response.SimOrdering),
 		Sims: func() *[]ResponseDevicesGetDeviceCellularSimsSims {
 			if response.Sims != nil {
 				result := make([]ResponseDevicesGetDeviceCellularSimsSims, len(*response.Sims))
@@ -175,18 +256,19 @@ func ResponseDevicesGetDeviceCellularSimsItemToBody(state DevicesCellularSims, r
 										Authentication: func() *ResponseDevicesGetDeviceCellularSimsSimsApnsAuthentication {
 											if apns.Authentication != nil {
 												return &ResponseDevicesGetDeviceCellularSimsSimsApnsAuthentication{
+													Password: types.StringValue(apns.Authentication.Password),
 													Type:     types.StringValue(apns.Authentication.Type),
 													Username: types.StringValue(apns.Authentication.Username),
 												}
 											}
-											return &ResponseDevicesGetDeviceCellularSimsSimsApnsAuthentication{}
+											return nil
 										}(),
 										Name: types.StringValue(apns.Name),
 									}
 								}
 								return &result
 							}
-							return &[]ResponseDevicesGetDeviceCellularSimsSimsApns{}
+							return nil
 						}(),
 						IsPrimary: func() types.Bool {
 							if sims.IsPrimary != nil {
@@ -199,7 +281,7 @@ func ResponseDevicesGetDeviceCellularSimsItemToBody(state DevicesCellularSims, r
 				}
 				return &result
 			}
-			return &[]ResponseDevicesGetDeviceCellularSimsSims{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -62,9 +78,10 @@ func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Schema(_ context.
 					Attributes: map[string]schema.Attribute{
 
 						"device_policy": schema.StringAttribute{
-							MarkdownDescription: `The device policy. Can be one of 'Allowed', 'Blocked' or 'Group policy'`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `The device policy. Can be one of 'Allowed', 'Blocked' or 'Group policy'
+                                        Allowed values: [Allowed,Blocked,Group policy]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -77,9 +94,10 @@ func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Schema(_ context.
 							},
 						},
 						"device_type": schema.StringAttribute{
-							MarkdownDescription: `The device type. Can be one of 'Android', 'BlackBerry', 'Chrome OS', 'iPad', 'iPhone', 'iPod', 'Mac OS X', 'Windows', 'Windows Phone', 'B&N Nook' or 'Other OS'`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `The device type. Can be one of 'Android', 'BlackBerry', 'Chrome OS', 'iPad', 'iPhone', 'iPod', 'Mac OS X', 'Windows', 'Windows Phone', 'B&N Nook' or 'Other OS'
+                                        Allowed values: [Android,B&N Nook,BlackBerry,Chrome OS,Mac OS X,Other OS,Windows,Windows Phone,iPad,iPhone,iPod]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -382,7 +400,7 @@ func ResponseWirelessGetNetworkWirelessSSIDDeviceTypeGroupPoliciesItemToBodyRs(s
 				}
 				return &result
 			}
-			return &[]ResponseWirelessGetNetworkWirelessSsidDeviceTypeGroupPoliciesDeviceTypePoliciesRs{}
+			return nil
 		}(),
 		Enabled: func() types.Bool {
 			if response.Enabled != nil {

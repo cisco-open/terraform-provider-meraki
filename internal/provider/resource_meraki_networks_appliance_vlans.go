@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -9,7 +25,7 @@ import (
 
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -95,9 +111,10 @@ func (r *NetworksApplianceVLANsResource) Schema(_ context.Context, _ resource.Sc
 				},
 			},
 			"dhcp_handling": schema.StringAttribute{
-				MarkdownDescription: `The appliance's handling of DHCP requests on this VLAN. One of: 'Run a DHCP server', 'Relay DHCP to another server' or 'Do not respond to DHCP requests'`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The appliance's handling of DHCP requests on this VLAN. One of: 'Run a DHCP server', 'Relay DHCP to another server' or 'Do not respond to DHCP requests'
+                                  Allowed values: [Do not respond to DHCP requests,Relay DHCP to another server,Run a DHCP server]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -110,9 +127,10 @@ func (r *NetworksApplianceVLANsResource) Schema(_ context.Context, _ resource.Sc
 				},
 			},
 			"dhcp_lease_time": schema.StringAttribute{
-				MarkdownDescription: `The term of DHCP leases if the appliance is running a DHCP server on this VLAN. One of: '30 minutes', '1 hour', '4 hours', '12 hours', '1 day' or '1 week'`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The term of DHCP leases if the appliance is running a DHCP server on this VLAN. One of: '30 minutes', '1 hour', '4 hours', '12 hours', '1 day' or '1 week'
+                                  Allowed values: [1 day,1 hour,1 week,12 hours,30 minutes,4 hours]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -146,9 +164,10 @@ func (r *NetworksApplianceVLANsResource) Schema(_ context.Context, _ resource.Sc
 							},
 						},
 						"type": schema.StringAttribute{
-							MarkdownDescription: `The type for the DHCP option. One of: 'text', 'ip', 'hex' or 'integer'`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `The type for the DHCP option. One of: 'text', 'ip', 'hex' or 'integer'
+                                        Allowed values: [hex,integer,ip,text]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -206,7 +225,8 @@ func (r *NetworksApplianceVLANsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: `The VLAN ID of the VLAN`,
-				Required:            true,
+				Computed:            true,
+				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 					SuppressDiffString(),
@@ -275,9 +295,10 @@ func (r *NetworksApplianceVLANsResource) Schema(_ context.Context, _ resource.Sc
 											ElementType: types.StringType,
 										},
 										"type": schema.StringAttribute{
-											MarkdownDescription: `Type of the origin`,
-											Computed:            true,
-											Optional:            true,
+											MarkdownDescription: `Type of the origin
+                                                    Allowed values: [independent,internet]`,
+											Computed: true,
+											Optional: true,
 											PlanModifiers: []planmodifier.String{
 												stringplanmodifier.UseStateForUnknown(),
 											},
@@ -396,9 +417,10 @@ func (r *NetworksApplianceVLANsResource) Schema(_ context.Context, _ resource.Sc
 				},
 			},
 			"template_vlan_type": schema.StringAttribute{
-				MarkdownDescription: `Type of subnetting of the VLAN. Applicable only for template network.`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `Type of subnetting of the VLAN. Applicable only for template network.
+                                  Allowed values: [same,unique]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -501,7 +523,7 @@ func (r *NetworksApplianceVLANsResource) Create(ctx context.Context, req resourc
 		return
 	}
 	//Items
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceVLAN(vvNetworkID, vvID)
+	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceVLAN(vvNetworkID, strconv.Itoa(*response.ID))
 	// Has item and has items
 
 	if err != nil || responseGet == nil {
@@ -581,7 +603,7 @@ func (r *NetworksApplianceVLANsResource) Read(ctx context.Context, req resource.
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceVLANItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -669,7 +691,8 @@ func (r *NetworksApplianceVLANsResource) Delete(ctx context.Context, req resourc
 
 // TF Structs Schema
 type NetworksApplianceVLANsRs struct {
-	NetworkID              types.String                                             `tfsdk:"network_id"`
+	NetworkID types.String `tfsdk:"network_id"`
+	// VLANID                 types.String                                                  `tfsdk:"vlan_id"`
 	ApplianceIP            types.String                                             `tfsdk:"appliance_ip"`
 	Cidr                   types.String                                             `tfsdk:"cidr"`
 	DhcpBootFilename       types.String                                             `tfsdk:"dhcp_boot_filename"`

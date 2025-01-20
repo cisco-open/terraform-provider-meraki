@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -5,7 +21,7 @@ import (
 	"context"
 	"regexp"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -1026,7 +1042,7 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemToBodyRs(state NetworksSwitc
 								To:   types.StringValue(response.PortSchedule.Friday.To),
 							}
 						}
-						return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleFridayRs{}
+						return nil
 					}(),
 					Monday: func() *ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleMondayRs {
 						if response.PortSchedule.Monday != nil {
@@ -1041,7 +1057,7 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemToBodyRs(state NetworksSwitc
 								To:   types.StringValue(response.PortSchedule.Monday.To),
 							}
 						}
-						return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleMondayRs{}
+						return nil
 					}(),
 					Saturday: func() *ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleSaturdayRs {
 						if response.PortSchedule.Saturday != nil {
@@ -1056,7 +1072,7 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemToBodyRs(state NetworksSwitc
 								To:   types.StringValue(response.PortSchedule.Saturday.To),
 							}
 						}
-						return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleSaturdayRs{}
+						return nil
 					}(),
 					Sunday: func() *ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleSundayRs {
 						if response.PortSchedule.Sunday != nil {
@@ -1071,7 +1087,7 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemToBodyRs(state NetworksSwitc
 								To:   types.StringValue(response.PortSchedule.Sunday.To),
 							}
 						}
-						return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleSundayRs{}
+						return nil
 					}(),
 					Thursday: func() *ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleThursdayRs {
 						if response.PortSchedule.Thursday != nil {
@@ -1086,7 +1102,7 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemToBodyRs(state NetworksSwitc
 								To:   types.StringValue(response.PortSchedule.Thursday.To),
 							}
 						}
-						return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleThursdayRs{}
+						return nil
 					}(),
 					Tuesday: func() *ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleTuesdayRs {
 						if response.PortSchedule.Tuesday != nil {
@@ -1101,7 +1117,7 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemToBodyRs(state NetworksSwitc
 								To:   types.StringValue(response.PortSchedule.Tuesday.To),
 							}
 						}
-						return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleTuesdayRs{}
+						return nil
 					}(),
 					Wednesday: func() *ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleWednesdayRs {
 						if response.PortSchedule.Wednesday != nil {
@@ -1116,11 +1132,11 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemToBodyRs(state NetworksSwitc
 								To:   types.StringValue(response.PortSchedule.Wednesday.To),
 							}
 						}
-						return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleWednesdayRs{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleRs{}
+			return nil
 		}(),
 		NetworkID: state.NetworkID,
 	}

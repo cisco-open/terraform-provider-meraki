@@ -1,10 +1,26 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -64,7 +80,7 @@ func (r *DevicesCellularSimsResource) Schema(_ context.Context, _ resource.Schem
 				Attributes: map[string]schema.Attribute{
 
 					"enabled": schema.BoolAttribute{
-						MarkdownDescription: `Failover to secondary SIM (optional)`,
+						MarkdownDescription: `Failover to secondary SIM`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
@@ -72,7 +88,7 @@ func (r *DevicesCellularSimsResource) Schema(_ context.Context, _ resource.Schem
 						},
 					},
 					"timeout": schema.Int64Attribute{
-						MarkdownDescription: `Failover timeout in seconds (optional)`,
+						MarkdownDescription: `Failover timeout in seconds`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
@@ -80,6 +96,16 @@ func (r *DevicesCellularSimsResource) Schema(_ context.Context, _ resource.Schem
 						},
 					},
 				},
+			},
+			"sim_ordering": schema.SetAttribute{
+				MarkdownDescription: `Specifies the ordering of all SIMs for an MG: primary, secondary, and not-in-use (when applicable). It's required for devices with 3 or more SIMs and can be used in place of 'isPrimary' for dual-SIM devices. To indicate eSIM, use 'sim3'. Sim failover will occur only between primary and secondary sim slots.`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+
+				ElementType: types.StringType,
 			},
 			"sims": schema.SetNestedAttribute{
 				MarkdownDescription: `List of SIMs. If a SIM was previously configured and not specified in this request, it will remain unchanged.`,
@@ -130,9 +156,10 @@ func (r *DevicesCellularSimsResource) Schema(_ context.Context, _ resource.Schem
 												},
 											},
 											"type": schema.StringAttribute{
-												MarkdownDescription: `APN auth type.`,
-												Computed:            true,
-												Optional:            true,
+												MarkdownDescription: `APN auth type.
+                                                    Allowed values: [chap,none,pap]`,
+												Computed: true,
+												Optional: true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
 												},
@@ -166,15 +193,23 @@ func (r *DevicesCellularSimsResource) Schema(_ context.Context, _ resource.Schem
 							},
 						},
 						"is_primary": schema.BoolAttribute{
-							MarkdownDescription: `If true, this SIM is used for boot. Must be true on single-sim devices.`,
+							MarkdownDescription: `If true, this SIM is activated on platform bootup. It must be true on single-SIM devices and is a required field for dual-SIM MGs unless it is being configured using 'simOrdering'.`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Bool{
 								boolplanmodifier.UseStateForUnknown(),
 							},
 						},
+						"sim_order": schema.Int64Attribute{
+							MarkdownDescription: `Priority of SIM slot being configured. Use a value between 1 and total number of SIMs available. The value must be unique for each SIM.`,
+							Computed:            true,
+							Optional:            true,
+							PlanModifiers: []planmodifier.Int64{
+								int64planmodifier.UseStateForUnknown(),
+							},
+						},
 						"slot": schema.StringAttribute{
-							MarkdownDescription: `SIM slot being configured. Must be 'sim1' on single-sim devices.`,
+							MarkdownDescription: `SIM slot being configured. Must be 'sim1' on single-sim devices. Use 'sim3' for eSIM.`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
@@ -232,9 +267,9 @@ func (r *DevicesCellularSimsResource) Create(ctx context.Context, req resource.C
 		return
 	}
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Devices.UpdateDeviceCellularSims(vvSerial, dataRequest)
+	response, restyResp2, err := r.client.Devices.UpdateDeviceCellularSims(vvSerial, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCellularSims",
@@ -340,8 +375,8 @@ func (r *DevicesCellularSimsResource) Update(ctx context.Context, req resource.U
 	//Path Params
 	vvSerial := data.Serial.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Devices.UpdateDeviceCellularSims(vvSerial, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Devices.UpdateDeviceCellularSims(vvSerial, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCellularSims",
@@ -368,15 +403,22 @@ func (r *DevicesCellularSimsResource) Delete(ctx context.Context, req resource.D
 
 // TF Structs Schema
 type DevicesCellularSimsRs struct {
-	Serial      types.String                                         `tfsdk:"serial"`
-	Sims        *[]ResponseDevicesGetDeviceCellularSimsSimsRs        `tfsdk:"sims"`
-	SimFailover *RequestDevicesUpdateDeviceCellularSimsSimFailoverRs `tfsdk:"sim_failover"`
+	Serial      types.String                                       `tfsdk:"serial"`
+	SimFailover *ResponseDevicesGetDeviceCellularSimsSimFailoverRs `tfsdk:"sim_failover"`
+	SimOrdering types.Set                                          `tfsdk:"sim_ordering"`
+	Sims        *[]ResponseDevicesGetDeviceCellularSimsSimsRs      `tfsdk:"sims"`
+}
+
+type ResponseDevicesGetDeviceCellularSimsSimFailoverRs struct {
+	Enabled types.Bool  `tfsdk:"enabled"`
+	Timeout types.Int64 `tfsdk:"timeout"`
 }
 
 type ResponseDevicesGetDeviceCellularSimsSimsRs struct {
 	Apns      *[]ResponseDevicesGetDeviceCellularSimsSimsApnsRs `tfsdk:"apns"`
 	IsPrimary types.Bool                                        `tfsdk:"is_primary"`
 	Slot      types.String                                      `tfsdk:"slot"`
+	SimOrder  types.Int64                                       `tfsdk:"sim_order"`
 }
 
 type ResponseDevicesGetDeviceCellularSimsSimsApnsRs struct {
@@ -386,14 +428,9 @@ type ResponseDevicesGetDeviceCellularSimsSimsApnsRs struct {
 }
 
 type ResponseDevicesGetDeviceCellularSimsSimsApnsAuthenticationRs struct {
+	Password types.String `tfsdk:"password"`
 	Type     types.String `tfsdk:"type"`
 	Username types.String `tfsdk:"username"`
-	Password types.String `tfsdk:"password"`
-}
-
-type RequestDevicesUpdateDeviceCellularSimsSimFailoverRs struct {
-	Enabled types.Bool  `tfsdk:"enabled"`
-	Timeout types.Int64 `tfsdk:"timeout"`
 }
 
 // FromBody
@@ -417,6 +454,8 @@ func (r *DevicesCellularSimsRs) toSdkApiRequestUpdate(ctx context.Context) *mera
 			Timeout: int64ToIntPointer(timeout),
 		}
 	}
+	var simOrdering []string = nil
+	r.SimOrdering.ElementsAs(ctx, &simOrdering, false)
 	var requestDevicesUpdateDeviceCellularSimsSims []merakigosdk.RequestDevicesUpdateDeviceCellularSimsSims
 	if r.Sims != nil {
 		for _, rItem1 := range *r.Sims {
@@ -451,6 +490,12 @@ func (r *DevicesCellularSimsRs) toSdkApiRequestUpdate(ctx context.Context) *mera
 				}
 				return nil
 			}()
+			simOrder := func() *int64 {
+				if !rItem1.SimOrder.IsUnknown() && !rItem1.SimOrder.IsNull() {
+					return rItem1.SimOrder.ValueInt64Pointer()
+				}
+				return nil
+			}()
 			slot := rItem1.Slot.ValueString()
 			requestDevicesUpdateDeviceCellularSimsSims = append(requestDevicesUpdateDeviceCellularSimsSims, merakigosdk.RequestDevicesUpdateDeviceCellularSimsSims{
 				Apns: func() *[]merakigosdk.RequestDevicesUpdateDeviceCellularSimsSimsApns {
@@ -460,12 +505,14 @@ func (r *DevicesCellularSimsRs) toSdkApiRequestUpdate(ctx context.Context) *mera
 					return nil
 				}(),
 				IsPrimary: isPrimary,
+				SimOrder:  int64ToIntPointer(simOrder),
 				Slot:      slot,
 			})
 		}
 	}
 	out := merakigosdk.RequestDevicesUpdateDeviceCellularSims{
 		SimFailover: requestDevicesUpdateDeviceCellularSimsSimFailover,
+		SimOrdering: simOrdering,
 		Sims: func() *[]merakigosdk.RequestDevicesUpdateDeviceCellularSimsSims {
 			if len(requestDevicesUpdateDeviceCellularSimsSims) > 0 {
 				return &requestDevicesUpdateDeviceCellularSimsSims
@@ -479,6 +526,26 @@ func (r *DevicesCellularSimsRs) toSdkApiRequestUpdate(ctx context.Context) *mera
 // From gosdk to TF Structs Schema
 func ResponseDevicesGetDeviceCellularSimsItemToBodyRs(state DevicesCellularSimsRs, response *merakigosdk.ResponseDevicesGetDeviceCellularSims, is_read bool) DevicesCellularSimsRs {
 	itemState := DevicesCellularSimsRs{
+		SimFailover: func() *ResponseDevicesGetDeviceCellularSimsSimFailoverRs {
+			if response.SimFailover != nil {
+				return &ResponseDevicesGetDeviceCellularSimsSimFailoverRs{
+					Enabled: func() types.Bool {
+						if response.SimFailover.Enabled != nil {
+							return types.BoolValue(*response.SimFailover.Enabled)
+						}
+						return types.Bool{}
+					}(),
+					Timeout: func() types.Int64 {
+						if response.SimFailover.Timeout != nil {
+							return types.Int64Value(int64(*response.SimFailover.Timeout))
+						}
+						return types.Int64{}
+					}(),
+				}
+			}
+			return nil
+		}(),
+		SimOrdering: StringSliceToSet(response.SimOrdering),
 		Sims: func() *[]ResponseDevicesGetDeviceCellularSimsSimsRs {
 			if response.Sims != nil {
 				result := make([]ResponseDevicesGetDeviceCellularSimsSimsRs, len(*response.Sims))
@@ -497,14 +564,14 @@ func ResponseDevicesGetDeviceCellularSimsItemToBodyRs(state DevicesCellularSimsR
 													Username: types.StringValue(apns.Authentication.Username),
 												}
 											}
-											return &ResponseDevicesGetDeviceCellularSimsSimsApnsAuthenticationRs{}
+											return nil
 										}(),
 										Name: types.StringValue(apns.Name),
 									}
 								}
 								return &result
 							}
-							return &[]ResponseDevicesGetDeviceCellularSimsSimsApnsRs{}
+							return nil
 						}(),
 						IsPrimary: func() types.Bool {
 							if sims.IsPrimary != nil {
@@ -517,7 +584,7 @@ func ResponseDevicesGetDeviceCellularSimsItemToBodyRs(state DevicesCellularSimsR
 				}
 				return &result
 			}
-			return &[]ResponseDevicesGetDeviceCellularSimsSimsRs{}
+			return nil
 		}(),
 	}
 	if is_read {

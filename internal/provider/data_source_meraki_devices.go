@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -491,8 +508,8 @@ func ResponseDevicesGetDeviceItemToBody(state Devices, response *merakigosdk.Res
 			return &[]ResponseDevicesGetDeviceDetails{}
 		}(),
 		Firmware: types.StringValue(response.Firmware),
-		Imei:     types.StringValue(response.Imei),
-		LanIP:    types.StringValue(response.LanIP),
+		// Imei:     types.StringValue(response.Imei),
+		LanIP: types.StringValue(response.LanIP),
 		Lat: func() types.Float64 {
 			if response.Lat != nil {
 				return types.Float64Value(float64(*response.Lat))
@@ -505,14 +522,14 @@ func ResponseDevicesGetDeviceItemToBody(state Devices, response *merakigosdk.Res
 			}
 			return types.Float64{}
 		}(),
-		Mac:         types.StringValue(response.Mac),
-		Model:       types.StringValue(response.Model),
-		Name:        types.StringValue(response.Name),
-		NetworkID:   types.StringValue(response.NetworkID),
-		Notes:       types.StringValue(response.Notes),
-		ProductType: types.StringValue(response.ProductType),
-		Serial:      types.StringValue(response.Serial),
-		Tags:        StringSliceToList(response.Tags),
+		Mac:       types.StringValue(response.Mac),
+		Model:     types.StringValue(response.Model),
+		Name:      types.StringValue(response.Name),
+		NetworkID: types.StringValue(response.NetworkID),
+		Notes:     types.StringValue(response.Notes),
+		// ProductType: types.StringValue(response.ProductType),
+		Serial: types.StringValue(response.Serial),
+		Tags:   StringSliceToList(response.Tags),
 	}
 	state.Item = &itemState
 	return state

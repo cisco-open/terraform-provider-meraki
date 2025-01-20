@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -53,18 +70,22 @@ func (d *NetworksSwitchLinkAggregationsDataSource) Schema(_ context.Context, _ d
 					Attributes: map[string]schema.Attribute{
 
 						"id": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The ID for the link aggregation.`,
+							Computed:            true,
 						},
 						"switch_ports": schema.SetNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `The ID for the link aggregation.`,
+							Computed:            true,
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 
 									"port_id": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The ID for the switch port.`,
+										Computed:            true,
 									},
 									"serial": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The serial number for the switch port.`,
+										Computed:            true,
 									},
 								},
 							},
@@ -87,6 +108,8 @@ func (d *NetworksSwitchLinkAggregationsDataSource) Read(ctx context.Context, req
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetNetworkSwitchLinkAggregations")
 		vvNetworkID := networksSwitchLinkAggregations.NetworkID.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Switch.GetNetworkSwitchLinkAggregations(vvNetworkID)
 
@@ -144,7 +167,7 @@ func ResponseSwitchGetNetworkSwitchLinkAggregationsItemsToBody(state NetworksSwi
 					}
 					return &result
 				}
-				return &[]ResponseItemSwitchGetNetworkSwitchLinkAggregationsSwitchPorts{}
+				return nil
 			}(),
 		}
 		items = append(items, itemState)

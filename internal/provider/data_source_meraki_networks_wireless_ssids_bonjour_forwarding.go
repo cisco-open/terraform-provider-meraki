@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -79,7 +96,7 @@ func (d *NetworksWirelessSSIDsBonjourForwardingDataSource) Schema(_ context.Cont
 									Computed:            true,
 								},
 								"services": schema.ListAttribute{
-									MarkdownDescription: `A list of Bonjour services. At least one service must be specified. Available services are 'All Services', 'AirPlay', 'AFP', 'BitTorrent', 'FTP', 'iChat', 'iTunes', 'Printers', 'Samba', 'Scanners' and 'SSH'`,
+									MarkdownDescription: `A list of Bonjour services. At least one service must be specified. Available services are 'All Services', 'AFP', 'AirPlay', 'Apple screen share', 'BitTorrent', 'Chromecast', 'FTP', 'iChat', 'iTunes', 'Printers', 'Samba', 'Scanners', 'Spotify' and 'SSH'`,
 									Computed:            true,
 									ElementType:         types.StringType,
 								},
@@ -108,6 +125,8 @@ func (d *NetworksWirelessSSIDsBonjourForwardingDataSource) Read(ctx context.Cont
 		log.Printf("[DEBUG] Selected method: GetNetworkWirelessSSIDBonjourForwarding")
 		vvNetworkID := networksWirelessSSIDsBonjourForwarding.NetworkID.ValueString()
 		vvNumber := networksWirelessSSIDsBonjourForwarding.Number.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Wireless.GetNetworkWirelessSSIDBonjourForwarding(vvNetworkID, vvNumber)
 
@@ -175,7 +194,7 @@ func ResponseWirelessGetNetworkWirelessSSIDBonjourForwardingItemToBody(state Net
 					}(),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSsidBonjourForwardingException{}
+			return nil
 		}(),
 		Rules: func() *[]ResponseWirelessGetNetworkWirelessSsidBonjourForwardingRules {
 			if response.Rules != nil {
@@ -189,7 +208,7 @@ func ResponseWirelessGetNetworkWirelessSSIDBonjourForwardingItemToBody(state Net
 				}
 				return &result
 			}
-			return &[]ResponseWirelessGetNetworkWirelessSsidBonjourForwardingRules{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

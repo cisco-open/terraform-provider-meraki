@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -150,6 +151,8 @@ func (d *NetworksWirelessEthernetPortsProfilesDataSource) Read(ctx context.Conte
 		vvNetworkID := networksWirelessEthernetPortsProfiles.NetworkID.ValueString()
 		vvProfileID := networksWirelessEthernetPortsProfiles.ProfileID.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Wireless.GetNetworkWirelessEthernetPortsProfile(vvNetworkID, vvProfileID)
 
 		if err != nil || response1 == nil {
@@ -241,7 +244,7 @@ func ResponseWirelessGetNetworkWirelessEthernetPortsProfileItemToBody(state Netw
 				}
 				return &result
 			}
-			return &[]ResponseWirelessGetNetworkWirelessEthernetPortsProfilePorts{}
+			return nil
 		}(),
 		ProfileID: types.StringValue(response.ProfileID),
 		UsbPorts: func() *[]ResponseWirelessGetNetworkWirelessEthernetPortsProfileUsbPorts {
@@ -266,7 +269,7 @@ func ResponseWirelessGetNetworkWirelessEthernetPortsProfileItemToBody(state Netw
 				}
 				return &result
 			}
-			return &[]ResponseWirelessGetNetworkWirelessEthernetPortsProfileUsbPorts{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

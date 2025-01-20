@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -86,11 +103,10 @@ func (d *OrganizationsPolicyObjectsGroupsDataSource) Schema(_ context.Context, _
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"object_ids": schema.SetAttribute{
+					"object_ids": schema.ListAttribute{
 						MarkdownDescription: `Policy objects associated with Network Object Group or Port Object Group`,
 						Computed:            true,
-						ElementType:         types.StringType, //TODO FINAL ELSE param_schema.Elem.Type para revisar
-						// {'Type': 'schema.TypeInt'}
+						ElementType:         types.Int64Type, //TODO FINAL ELSE param_schema.Elem.Type para revisar
 					},
 					"updated_at": schema.StringAttribute{
 						MarkdownDescription: `Time Stamp of policy object updation.`,
@@ -124,6 +140,8 @@ func (d *OrganizationsPolicyObjectsGroupsDataSource) Read(ctx context.Context, r
 		queryParams1.StartingAfter = organizationsPolicyObjectsGroups.StartingAfter.ValueString()
 		queryParams1.EndingBefore = organizationsPolicyObjectsGroups.EndingBefore.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Organizations.GetOrganizationPolicyObjectsGroups(vvOrganizationID, &queryParams1)
 
 		if err != nil || response1 == nil {
@@ -142,6 +160,8 @@ func (d *OrganizationsPolicyObjectsGroupsDataSource) Read(ctx context.Context, r
 		log.Printf("[DEBUG] Selected method: GetOrganizationPolicyObjectsGroup")
 		vvOrganizationID := organizationsPolicyObjectsGroups.OrganizationID.ValueString()
 		vvPolicyObjectGroupID := organizationsPolicyObjectsGroups.PolicyObjectGroupID.ValueString()
+
+		// has_unknown_response: None
 
 		response2, restyResp2, err := d.client.Organizations.GetOrganizationPolicyObjectsGroup(vvOrganizationID, vvPolicyObjectGroupID)
 
@@ -181,8 +201,8 @@ type ResponseOrganizationsGetOrganizationPolicyObjectsGroup struct {
 	CreatedAt  types.String `tfsdk:"created_at"`
 	ID         types.String `tfsdk:"id"`
 	Name       types.String `tfsdk:"name"`
-	NetworkIDs types.Set    `tfsdk:"network_ids"`
-	ObjectIDs  types.Set    `tfsdk:"object_ids"`
+	NetworkIDs types.List   `tfsdk:"network_ids"`
+	ObjectIDs  types.List   `tfsdk:"object_ids"`
 	UpdatedAt  types.String `tfsdk:"updated_at"`
 }
 
@@ -193,8 +213,8 @@ func ResponseOrganizationsGetOrganizationPolicyObjectsGroupItemToBody(state Orga
 		CreatedAt:  types.StringValue(response.CreatedAt),
 		ID:         types.StringValue(response.ID),
 		Name:       types.StringValue(response.Name),
-		NetworkIDs: StringSliceToSet(response.NetworkIDs),
-		ObjectIDs:  StringSliceToSet(*response.ObjectIDs),
+		NetworkIDs: StringSliceToList(response.NetworkIDs),
+		ObjectIDs:  StringSliceToListInt(response.ObjectIDs),
 		UpdatedAt:  types.StringValue(response.UpdatedAt),
 	}
 	state.Item = &itemState

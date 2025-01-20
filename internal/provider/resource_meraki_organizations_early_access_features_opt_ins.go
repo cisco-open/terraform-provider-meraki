@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,12 +22,13 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -55,25 +72,32 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Schema(_ context.Contex
 				MarkdownDescription: `ID of Early Access Feature`,
 				Computed:            true,
 			},
+			"limit_scope_to_networks_rs": schema.SetNestedAttribute{
+				MarkdownDescription: `Networks assigned to the Early Access Feature`,
+				Computed:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"id": schema.BoolAttribute{
+							MarkdownDescription: `id`,
+							Computed:            true,
+						},
+						"name": schema.BoolAttribute{
+							MarkdownDescription: `name`,
+							Computed:            true,
+						},
+					},
+				},
+			},
 			"limit_scope_to_networks": schema.SetAttribute{
 				MarkdownDescription: `Networks assigned to the Early Access Feature`,
-				Computed:            true,
 				Optional:            true,
+				Computed:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
-			},
-			"limit_scope_to_networks_rs": schema.SetAttribute{
-				MarkdownDescription: `Networks assigned to the Early Access Feature`,
-				Computed:            true,
-				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
-				},
-
-				ElementType: types.StringType,
+				Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
 			},
 			"opt_in_id": schema.StringAttribute{
 				MarkdownDescription: `optInId path parameter. Opt in ID`,
@@ -81,6 +105,36 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Schema(_ context.Contex
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"opt_out_eligibility": schema.SingleNestedAttribute{
+				MarkdownDescription: `Descriptions of the early access feature`,
+				Computed:            true,
+				Attributes: map[string]schema.Attribute{
+
+					"eligible": schema.BoolAttribute{
+						MarkdownDescription: `Condition flag to opt out from the feature`,
+						Computed:            true,
+					},
+					"help": schema.SingleNestedAttribute{
+						MarkdownDescription: `Additional help information`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"label": schema.StringAttribute{
+								MarkdownDescription: `Help link label`,
+								Computed:            true,
+							},
+							"url": schema.StringAttribute{
+								MarkdownDescription: `Help link url`,
+								Computed:            true,
+							},
+						},
+					},
+					"reason": schema.StringAttribute{
+						MarkdownDescription: `User friendly message regarding opt-out eligibility`,
+						Computed:            true,
+					},
 				},
 			},
 			"organization_id": schema.StringAttribute{
@@ -134,7 +188,7 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Create(ctx context.Cont
 				if restyRespGet.StatusCode() != 404 {
 
 					resp.Diagnostics.AddError(
-						"Failure when executing GetOrganizationEarlyAccessFeaturesOptIn",
+						"Failure when executing GetOrganizationEarlyAccessFeaturesOptIns",
 						err.Error(),
 					)
 					return
@@ -155,13 +209,13 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Create(ctx context.Cont
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
-				"Failure when executing ",
+				"Failure when executing CreateOrganizationEarlyAccessFeaturesOptIn",
 				err.Error(),
 			)
 			return
 		}
 		resp.Diagnostics.AddError(
-			"Failure when executing ",
+			"Failure when executing CreateOrganizationEarlyAccessFeaturesOptIn",
 			err.Error(),
 		)
 		return
@@ -228,13 +282,13 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Read(ctx context.Contex
 				return
 			}
 			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizationEarlyAccessFeaturesOptIn",
+				"Failure when executing GetOrganizationEarlyAccessFeaturesOptIns",
 				err.Error(),
 			)
 			return
 		}
 		resp.Diagnostics.AddError(
-			"Failure when executing GetOrganizationEarlyAccessFeaturesOptIn",
+			"Failure when executing GetOrganizationEarlyAccessFeaturesOptIns",
 			err.Error(),
 		)
 		return
@@ -273,12 +327,10 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Update(ctx context.Cont
 
 	//Path Params
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
 	vvOptInID := data.OptInID.ValueString()
-	// opt_in_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	_, restyResp2, err := r.client.Organizations.UpdateOrganizationEarlyAccessFeaturesOptIn(vvOrganizationID, vvOptInID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Organizations.UpdateOrganizationEarlyAccessFeaturesOptIn(vvOrganizationID, vvOptInID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationEarlyAccessFeaturesOptIn",
@@ -334,6 +386,7 @@ type OrganizationsEarlyAccessFeaturesOptInsRs struct {
 	CreatedAt              types.String                                                                          `tfsdk:"created_at"`
 	ID                     types.String                                                                          `tfsdk:"id"`
 	LimitScopeToNetworks   *[]ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInLimitScopeToNetworksRs `tfsdk:"limit_scope_to_networks_rs"`
+	OptOutEligibility      *ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInOptOutEligibilityRs      `tfsdk:"opt_out_eligibility"`
 	LimitScopeToNetworksRs types.Set                                                                             `tfsdk:"limit_scope_to_networks"`
 	ShortName              types.String                                                                          `tfsdk:"short_name"`
 }
@@ -341,6 +394,17 @@ type OrganizationsEarlyAccessFeaturesOptInsRs struct {
 type ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInLimitScopeToNetworksRs struct {
 	ID   types.String `tfsdk:"id"`
 	Name types.String `tfsdk:"name"`
+}
+
+type ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInOptOutEligibilityRs struct {
+	Eligible types.Bool                                                                           `tfsdk:"eligible"`
+	Help     *ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInOptOutEligibilityHelpRs `tfsdk:"help"`
+	Reason   types.String                                                                         `tfsdk:"reason"`
+}
+
+type ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInOptOutEligibilityHelpRs struct {
+	Label types.String `tfsdk:"label"`
+	URL   types.String `tfsdk:"url"`
 }
 
 // FromBody
@@ -384,6 +448,29 @@ func ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInItemToBodyRs(st
 					}
 				}
 				return &result
+			}
+			return nil
+		}(),
+		OptOutEligibility: func() *ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInOptOutEligibilityRs {
+			if response.OptOutEligibility != nil {
+				return &ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInOptOutEligibilityRs{
+					Eligible: func() types.Bool {
+						if response.OptOutEligibility.Eligible != nil {
+							return types.BoolValue(*response.OptOutEligibility.Eligible)
+						}
+						return types.Bool{}
+					}(),
+					Help: func() *ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInOptOutEligibilityHelpRs {
+						if response.OptOutEligibility.Help != nil {
+							return &ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInOptOutEligibilityHelpRs{
+								Label: types.StringValue(response.OptOutEligibility.Help.Label),
+								URL:   types.StringValue(response.OptOutEligibility.Help.URL),
+							}
+						}
+						return nil
+					}(),
+					Reason: types.StringValue(response.OptOutEligibility.Reason),
+				}
 			}
 			return nil
 		}(),

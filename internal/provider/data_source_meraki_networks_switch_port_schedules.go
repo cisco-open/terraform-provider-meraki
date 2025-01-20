@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -223,6 +240,8 @@ func (d *NetworksSwitchPortSchedulesDataSource) Read(ctx context.Context, req da
 		log.Printf("[DEBUG] Selected method: GetNetworkSwitchPortSchedules")
 		vvNetworkID := networksSwitchPortSchedules.NetworkID.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Switch.GetNetworkSwitchPortSchedules(vvNetworkID)
 
 		if err != nil || response1 == nil {
@@ -335,7 +354,7 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemsToBody(state NetworksSwitch
 									To:   types.StringValue(item.PortSchedule.Friday.To),
 								}
 							}
-							return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleFriday{}
+							return nil
 						}(),
 						Monday: func() *ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleMonday {
 							if item.PortSchedule.Monday != nil {
@@ -350,7 +369,7 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemsToBody(state NetworksSwitch
 									To:   types.StringValue(item.PortSchedule.Monday.To),
 								}
 							}
-							return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleMonday{}
+							return nil
 						}(),
 						Saturday: func() *ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleSaturday {
 							if item.PortSchedule.Saturday != nil {
@@ -365,7 +384,7 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemsToBody(state NetworksSwitch
 									To:   types.StringValue(item.PortSchedule.Saturday.To),
 								}
 							}
-							return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleSaturday{}
+							return nil
 						}(),
 						Sunday: func() *ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleSunday {
 							if item.PortSchedule.Sunday != nil {
@@ -380,7 +399,7 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemsToBody(state NetworksSwitch
 									To:   types.StringValue(item.PortSchedule.Sunday.To),
 								}
 							}
-							return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleSunday{}
+							return nil
 						}(),
 						Thursday: func() *ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleThursday {
 							if item.PortSchedule.Thursday != nil {
@@ -395,7 +414,7 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemsToBody(state NetworksSwitch
 									To:   types.StringValue(item.PortSchedule.Thursday.To),
 								}
 							}
-							return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleThursday{}
+							return nil
 						}(),
 						Tuesday: func() *ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleTuesday {
 							if item.PortSchedule.Tuesday != nil {
@@ -410,7 +429,7 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemsToBody(state NetworksSwitch
 									To:   types.StringValue(item.PortSchedule.Tuesday.To),
 								}
 							}
-							return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleTuesday{}
+							return nil
 						}(),
 						Wednesday: func() *ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleWednesday {
 							if item.PortSchedule.Wednesday != nil {
@@ -425,11 +444,11 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemsToBody(state NetworksSwitch
 									To:   types.StringValue(item.PortSchedule.Wednesday.To),
 								}
 							}
-							return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleWednesday{}
+							return nil
 						}(),
 					}
 				}
-				return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortSchedule{}
+				return nil
 			}(),
 		}
 		items = append(items, itemState)

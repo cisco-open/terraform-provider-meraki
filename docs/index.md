@@ -23,3 +23,4 @@ description: |-
 - `meraki_base_url` (String) Cisco Meraki base URL, FQDN or IP. If not set, it uses the MERAKI_BASE_URL environment variable defaults is (https://api.meraki.com/).
 - `meraki_debug` (String) Flag for Cisco Meraki to enable debugging. If not set, it uses the MERAKI_DEBUG environment variable defaults to `false`.
 - `meraki_requests_per_second` (Int) Setting requests per second, default is 10.
+- `meraki_user_agent`(String) Define an identifier or User-Agent for API requests to Meraki. Default is (Meraki).

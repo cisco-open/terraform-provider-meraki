@@ -19,7 +19,7 @@ resource "meraki_networks_appliance_firewall_inbound_firewall_rules" "this" {
       comment        = "Allow TCP traffic to subnet with HTTP servers."
       dest_cidr      = "2001:db8::/64"
       dest_port      = "443"
-      policy         = "allow"
+      policy         = "deny"
       protocol       = "tcp"
       src_cidr       = "Any"
       src_port       = "Any"

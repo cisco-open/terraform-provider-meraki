@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -184,15 +184,15 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsBindResource) Create(ctx 
 }
 
 func (r *AdministeredLicensingSubscriptionSubscriptionsBindResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *AdministeredLicensingSubscriptionSubscriptionsBindResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *AdministeredLicensingSubscriptionSubscriptionsBindResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -255,7 +255,7 @@ func ResponseLicensingBindAdministeredLicensingSubscriptionSubscriptionItemToBod
 				}
 				return &result
 			}
-			return &[]ResponseLicensingBindAdministeredLicensingSubscriptionSubscriptionInsufficientEntitlements{}
+			return nil
 		}(),
 		Networks: func() *[]ResponseLicensingBindAdministeredLicensingSubscriptionSubscriptionNetworks {
 			if response.Networks != nil {
@@ -268,7 +268,7 @@ func ResponseLicensingBindAdministeredLicensingSubscriptionSubscriptionItemToBod
 				}
 				return &result
 			}
-			return &[]ResponseLicensingBindAdministeredLicensingSubscriptionSubscriptionNetworks{}
+			return nil
 		}(),
 		SubscriptionID: types.StringValue(response.SubscriptionID),
 	}

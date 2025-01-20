@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -72,15 +89,6 @@ func (d *NetworksClientsSplashAuthorizationStatusDataSource) Schema(_ context.Co
 									},
 								},
 							},
-							"status_2": schema.SingleNestedAttribute{
-								Computed: true,
-								Attributes: map[string]schema.Attribute{
-
-									"is_authorized": schema.BoolAttribute{
-										Computed: true,
-									},
-								},
-							},
 						},
 					},
 				},
@@ -101,6 +109,8 @@ func (d *NetworksClientsSplashAuthorizationStatusDataSource) Read(ctx context.Co
 		log.Printf("[DEBUG] Selected method: GetNetworkClientSplashAuthorizationStatus")
 		vvNetworkID := networksClientsSplashAuthorizationStatus.NetworkID.ValueString()
 		vvClientID := networksClientsSplashAuthorizationStatus.ClientID.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Networks.GetNetworkClientSplashAuthorizationStatus(vvNetworkID, vvClientID)
 
@@ -138,17 +148,12 @@ type ResponseNetworksGetNetworkClientSplashAuthorizationStatus struct {
 
 type ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids struct {
 	Status0 *ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids0 `tfsdk:"status_0"`
-	Status2 *ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids2 `tfsdk:"status_2"`
 }
 
 type ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids0 struct {
 	AuthorizedAt types.String `tfsdk:"authorized_at"`
 	ExpiresAt    types.String `tfsdk:"expires_at"`
 	IsAuthorized types.Bool   `tfsdk:"is_authorized"`
-}
-
-type ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids2 struct {
-	IsAuthorized types.Bool `tfsdk:"is_authorized"`
 }
 
 // ToBody
@@ -170,24 +175,11 @@ func ResponseNetworksGetNetworkClientSplashAuthorizationStatusItemToBody(state N
 								}(),
 							}
 						}
-						return &ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids0{}
-					}(),
-					Status2: func() *ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids2 {
-						if response.SSIDs.Status2 != nil {
-							return &ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids2{
-								IsAuthorized: func() types.Bool {
-									if response.SSIDs.Status2.IsAuthorized != nil {
-										return types.BoolValue(*response.SSIDs.Status2.IsAuthorized)
-									}
-									return types.Bool{}
-								}(),
-							}
-						}
-						return &ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids2{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -50,19 +67,33 @@ func (d *NetworksSwitchStpDataSource) Schema(_ context.Context, _ datasource.Sch
 				Attributes: map[string]schema.Attribute{
 
 					"rstp_enabled": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `The spanning tree protocol status in network`,
+						Computed:            true,
 					},
 					"stp_bridge_priority": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `STP bridge priority for switches/stacks or switch templates. An empty array will clear the STP bridge priority settings.`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
+								"stacks": schema.ListAttribute{
+									MarkdownDescription: `List of stack IDs`,
+									Computed:            true,
+									ElementType:         types.StringType,
+								},
 								"stp_priority": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `STP priority for switch, stacks, or switch templates`,
+									Computed:            true,
+								},
+								"switch_profiles": schema.ListAttribute{
+									MarkdownDescription: `List of switch template IDs`,
+									Computed:            true,
+									ElementType:         types.StringType,
 								},
 								"switches": schema.ListAttribute{
-									Computed:    true,
-									ElementType: types.StringType,
+									MarkdownDescription: `List of switch serial numbers`,
+									Computed:            true,
+									ElementType:         types.StringType,
 								},
 							},
 						},
@@ -84,6 +115,8 @@ func (d *NetworksSwitchStpDataSource) Read(ctx context.Context, req datasource.R
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetNetworkSwitchStp")
 		vvNetworkID := networksSwitchStp.NetworkID.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Switch.GetNetworkSwitchStp(vvNetworkID)
 
@@ -120,8 +153,10 @@ type ResponseSwitchGetNetworkSwitchStp struct {
 }
 
 type ResponseSwitchGetNetworkSwitchStpStpBridgePriority struct {
-	StpPriority types.Int64 `tfsdk:"stp_priority"`
-	Switches    types.List  `tfsdk:"switches"`
+	Stacks         types.List  `tfsdk:"stacks"`
+	StpPriority    types.Int64 `tfsdk:"stp_priority"`
+	SwitchProfiles types.List  `tfsdk:"switch_profiles"`
+	Switches       types.List  `tfsdk:"switches"`
 }
 
 // ToBody
@@ -138,18 +173,20 @@ func ResponseSwitchGetNetworkSwitchStpItemToBody(state NetworksSwitchStp, respon
 				result := make([]ResponseSwitchGetNetworkSwitchStpStpBridgePriority, len(*response.StpBridgePriority))
 				for i, stpBridgePriority := range *response.StpBridgePriority {
 					result[i] = ResponseSwitchGetNetworkSwitchStpStpBridgePriority{
+						Stacks: StringSliceToList(stpBridgePriority.Stacks),
 						StpPriority: func() types.Int64 {
 							if stpBridgePriority.StpPriority != nil {
 								return types.Int64Value(int64(*stpBridgePriority.StpPriority))
 							}
 							return types.Int64{}
 						}(),
-						Switches: StringSliceToList(stpBridgePriority.Switches),
+						SwitchProfiles: StringSliceToList(stpBridgePriority.SwitchProfiles),
+						Switches:       StringSliceToList(stpBridgePriority.Switches),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseSwitchGetNetworkSwitchStpStpBridgePriority{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

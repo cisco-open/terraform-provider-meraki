@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -119,6 +136,8 @@ func (d *NetworksApplianceTrafficShapingRulesDataSource) Read(ctx context.Contex
 		log.Printf("[DEBUG] Selected method: GetNetworkApplianceTrafficShapingRules")
 		vvNetworkID := networksApplianceTrafficShapingRules.NetworkID.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Appliance.GetNetworkApplianceTrafficShapingRules(vvNetworkID)
 
 		if err != nil || response1 == nil {
@@ -165,6 +184,11 @@ type ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesDefinitions str
 	Value     types.String                                                              `tfsdk:"value"`
 	ValueList types.Set                                                                 `tfsdk:"value_list"`
 	ValueObj  *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj `tfsdk:"value_obj"`
+}
+
+type ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj struct {
+	ID   types.String `tfsdk:"id"`
+	Name types.String `tfsdk:"name"`
 }
 
 type ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesPerClientBandwidthLimits struct {
@@ -222,7 +246,7 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingRulesItemToBody(state Net
 								}
 								return &result
 							}
-							return &[]ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesDefinitions{}
+							return nil
 						}(),
 						DscpTagValue: func() types.Int64 {
 							if rules.DscpTagValue != nil {
@@ -250,19 +274,19 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingRulesItemToBody(state Net
 												}(),
 											}
 										}
-										return &ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesPerClientBandwidthLimitsBandwidthLimits{}
+										return nil
 									}(),
 									Settings: types.StringValue(rules.PerClientBandwidthLimits.Settings),
 								}
 							}
-							return &ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesPerClientBandwidthLimits{}
+							return nil
 						}(),
 						Priority: types.StringValue(rules.Priority),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseApplianceGetNetworkApplianceTrafficShapingRulesRules{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

@@ -18,12 +18,6 @@ resource "meraki_devices_switch_routing_interfaces" "example" {
     cost               = 1
     is_passive_enabled = true
   }
-  ospf_v3 = {
-
-    area               = "1"
-    cost               = 2
-    is_passive_enabled = true
-  }
   serial  = "string"
   subnet  = "192.168.1.0/24"
   vlan_id = 100

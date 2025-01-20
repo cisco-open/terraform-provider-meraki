@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -63,8 +79,9 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 					Attributes: map[string]schema.Attribute{
 
 						"direction": schema.StringAttribute{
-							MarkdownDescription: `If 'above', an alert will be sent when a sensor reads above the threshold. If 'below', an alert will be sent when a sensor reads below the threshold. Only applicable for temperature, humidity, realPower, apparentPower, powerFactor, voltage, current, and frequency thresholds.`,
-							Optional:            true,
+							MarkdownDescription: `If 'above', an alert will be sent when a sensor reads above the threshold. If 'below', an alert will be sent when a sensor reads below the threshold. Only applicable for temperature, humidity, realPower, apparentPower, powerFactor, voltage, current, and frequency thresholds.
+                                        Allowed values: [above,below]`,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -76,17 +93,39 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 							},
 						},
 						"duration": schema.Int64Attribute{
-							MarkdownDescription: `Length of time in seconds that the triggering state must persist before an alert is sent. Available options are 0 seconds, 1 minute, 2 minutes, 3 minutes, 4 minutes, 5 minutes, 10 minutes, 15 minutes, 30 minutes, 1 hour, 2 hours, 4 hours, and 8 hours. Default is 0.`,
-							Optional:            true,
+							MarkdownDescription: `Length of time in seconds that the triggering state must persist before an alert is sent. Available options are 0 seconds, 1 minute, 2 minutes, 3 minutes, 4 minutes, 5 minutes, 10 minutes, 15 minutes, 30 minutes, 1 hour, 2 hours, 4 hours, and 8 hours. Default is 0.
+                                        Allowed values: [0,60,120,180,240,300,600,900,1800,3600,7200,14400,28800]`,
+							Optional: true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
 							},
 						},
 						"metric": schema.StringAttribute{
-							MarkdownDescription: `The type of sensor metric that will be monitored for changes. Available metrics are apparentPower, co2, current, door, frequency, humidity, indoorAirQuality, noise, pm25, powerFactor, realPower, temperature, tvoc, upstreamPower, voltage, and water.`,
-							Optional:            true,
+							MarkdownDescription: `The type of sensor metric that will be monitored for changes.
+                                        Allowed values: [apparentPower,co2,current,door,frequency,humidity,indoorAirQuality,noise,pm25,powerFactor,realPower,temperature,tvoc,upstreamPower,voltage,water]`,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
+							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"apparentPower",
+									"co2",
+									"current",
+									"door",
+									"frequency",
+									"humidity",
+									"indoorAirQuality",
+									"noise",
+									"pm25",
+									"powerFactor",
+									"realPower",
+									"temperature",
+									"tvoc",
+									"upstreamPower",
+									"voltage",
+									"water",
+								),
 							},
 						},
 						"threshold": schema.SingleNestedAttribute{
@@ -110,6 +149,39 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 											Optional:            true,
 											PlanModifiers: []planmodifier.Float64{
 												float64planmodifier.UseStateForUnknown(),
+											},
+										},
+									},
+								},
+								"co2": schema.SingleNestedAttribute{
+									MarkdownDescription: `CO2 concentration threshold. One of 'concentration' or 'quality' must be provided.`,
+									Optional:            true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseStateForUnknown(),
+									},
+									Attributes: map[string]schema.Attribute{
+
+										"concentration": schema.Int64Attribute{
+											MarkdownDescription: `Alerting threshold as CO2 parts per million.`,
+											Optional:            true,
+											PlanModifiers: []planmodifier.Int64{
+												int64planmodifier.UseStateForUnknown(),
+											},
+										},
+										"quality": schema.StringAttribute{
+											MarkdownDescription: `Alerting threshold as a qualitative CO2 level.
+                                                    Allowed values: [fair,good,inadequate,poor]`,
+											Optional: true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.UseStateForUnknown(),
+											},
+											Validators: []validator.String{
+												stringvalidator.OneOf(
+													"fair",
+													"good",
+													"inadequate",
+													"poor",
+												),
 											},
 										},
 									},
@@ -174,8 +246,9 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 									Attributes: map[string]schema.Attribute{
 
 										"quality": schema.StringAttribute{
-											MarkdownDescription: `Alerting threshold as a qualitative humidity level.`,
-											Optional:            true,
+											MarkdownDescription: `Alerting threshold as a qualitative humidity level.
+                                                    Allowed values: [fair,good,inadequate,poor]`,
+											Optional: true,
 											PlanModifiers: []planmodifier.String{
 												stringplanmodifier.UseStateForUnknown(),
 											},
@@ -206,8 +279,9 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 									Attributes: map[string]schema.Attribute{
 
 										"quality": schema.StringAttribute{
-											MarkdownDescription: `Alerting threshold as a qualitative indoor air quality level.`,
-											Optional:            true,
+											MarkdownDescription: `Alerting threshold as a qualitative indoor air quality level.
+                                                    Allowed values: [fair,good,inadequate,poor]`,
+											Optional: true,
 											PlanModifiers: []planmodifier.String{
 												stringplanmodifier.UseStateForUnknown(),
 											},
@@ -253,8 +327,9 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 													},
 												},
 												"quality": schema.StringAttribute{
-													MarkdownDescription: `Alerting threshold as a qualitative ambient noise level.`,
-													Optional:            true,
+													MarkdownDescription: `Alerting threshold as a qualitative ambient noise level.
+                                                          Allowed values: [fair,good,inadequate,poor]`,
+													Optional: true,
 													PlanModifiers: []planmodifier.String{
 														stringplanmodifier.UseStateForUnknown(),
 													},
@@ -287,8 +362,9 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 											},
 										},
 										"quality": schema.StringAttribute{
-											MarkdownDescription: `Alerting threshold as a qualitative PM2.5 level.`,
-											Optional:            true,
+											MarkdownDescription: `Alerting threshold as a qualitative PM2.5 level.
+                                                    Allowed values: [fair,good,inadequate,poor]`,
+											Optional: true,
 											PlanModifiers: []planmodifier.String{
 												stringplanmodifier.UseStateForUnknown(),
 											},
@@ -360,8 +436,9 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 											},
 										},
 										"quality": schema.StringAttribute{
-											MarkdownDescription: `Alerting threshold as a qualitative temperature level.`,
-											Optional:            true,
+											MarkdownDescription: `Alerting threshold as a qualitative temperature level.
+                                                    Allowed values: [fair,good,inadequate,poor]`,
+											Optional: true,
 											PlanModifiers: []planmodifier.String{
 												stringplanmodifier.UseStateForUnknown(),
 											},
@@ -392,8 +469,9 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 											},
 										},
 										"quality": schema.StringAttribute{
-											MarkdownDescription: `Alerting threshold as a qualitative TVOC level.`,
-											Optional:            true,
+											MarkdownDescription: `Alerting threshold as a qualitative TVOC level.
+                                                    Allowed values: [fair,good,inadequate,poor]`,
+											Optional: true,
 											PlanModifiers: []planmodifier.String{
 												stringplanmodifier.UseStateForUnknown(),
 											},
@@ -507,7 +585,39 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 								objectplanmodifier.UseStateForUnknown(),
 							},
 							Attributes: map[string]schema.Attribute{
+								"co2": schema.SingleNestedAttribute{
+									MarkdownDescription: `CO2 concentration threshold. One of 'concentration' or 'quality' must be provided.`,
+									Computed:            true,
+									PlanModifiers: []planmodifier.Object{
+										objectplanmodifier.UseStateForUnknown(),
+									},
+									Attributes: map[string]schema.Attribute{
 
+										"concentration": schema.Int64Attribute{
+											MarkdownDescription: `Alerting threshold as CO2 parts per million.`,
+											Computed:            true,
+											PlanModifiers: []planmodifier.Int64{
+												int64planmodifier.UseStateForUnknown(),
+											},
+										},
+										"quality": schema.StringAttribute{
+											MarkdownDescription: `Alerting threshold as a qualitative CO2 level.
+                                                    Allowed values: [fair,good,inadequate,poor]`,
+											Computed: true,
+											PlanModifiers: []planmodifier.String{
+												stringplanmodifier.UseStateForUnknown(),
+											},
+											Validators: []validator.String{
+												stringvalidator.OneOf(
+													"fair",
+													"good",
+													"inadequate",
+													"poor",
+												),
+											},
+										},
+									},
+								},
 								"apparent_power": schema.SingleNestedAttribute{
 									MarkdownDescription: `Apparent power threshold. 'draw' must be provided.`,
 									Computed:            true,
@@ -919,6 +1029,7 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 					},
 					"http_server_ids": schema.SetAttribute{
 						MarkdownDescription: `A list of webhook endpoint IDs that will receive information about the alert.`,
+						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
@@ -1079,7 +1190,7 @@ func (r *NetworksSensorAlertsProfilesResource) Create(ctx context.Context, req r
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter ID",
-				err.Error(),
+				"Error",
 			)
 			return
 		}
@@ -1265,6 +1376,7 @@ type ResponseSensorGetNetworkSensorAlertsProfileConditionsRs struct {
 
 type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdRs struct {
 	ApparentPower    *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdApparentPowerRs    `tfsdk:"apparent_power"`
+	Co2              *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCo2Rs              `tfsdk:"co2"`
 	Current          *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCurrentRs          `tfsdk:"current"`
 	Door             *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdDoorRs             `tfsdk:"door"`
 	Frequency        *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdFrequencyRs        `tfsdk:"frequency"`
@@ -1283,6 +1395,11 @@ type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdRs struct {
 
 type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdApparentPowerRs struct {
 	Draw types.Float64 `tfsdk:"draw"`
+}
+
+type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCo2Rs struct {
+	Concentration types.Int64  `tfsdk:"concentration"`
+	Quality       types.String `tfsdk:"quality"`
 }
 
 type ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCurrentRs struct {
@@ -1381,14 +1498,38 @@ func (r *NetworksSensorAlertsProfilesRs) toSdkApiRequestCreate(ctx context.Conte
 			if rItem1.Threshold != nil {
 				var requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdApparentPower *merakigosdk.RequestSensorCreateNetworkSensorAlertsProfileConditionsThresholdApparentPower
 				if rItem1.Threshold.ApparentPower != nil {
-					draw := rItem1.Threshold.ApparentPower.Draw.ValueFloat64Pointer()
+					draw := func() *float64 {
+						if !rItem1.Threshold.ApparentPower.Draw.IsUnknown() && !rItem1.Threshold.ApparentPower.Draw.IsNull() {
+							return rItem1.Threshold.ApparentPower.Draw.ValueFloat64Pointer()
+						}
+						return nil
+					}()
 					requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdApparentPower = &merakigosdk.RequestSensorCreateNetworkSensorAlertsProfileConditionsThresholdApparentPower{
 						Draw: draw,
 					}
 				}
+				var requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdCo2 *merakigosdk.RequestSensorCreateNetworkSensorAlertsProfileConditionsThresholdCo2
+				if rItem1.Threshold.Co2 != nil {
+					concentration := func() *int64 {
+						if !rItem1.Threshold.Co2.Concentration.IsUnknown() && !rItem1.Threshold.Co2.Concentration.IsNull() {
+							return rItem1.Threshold.Co2.Concentration.ValueInt64Pointer()
+						}
+						return nil
+					}()
+					quality := rItem1.Threshold.Co2.Quality.ValueString()
+					requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdCo2 = &merakigosdk.RequestSensorCreateNetworkSensorAlertsProfileConditionsThresholdCo2{
+						Concentration: int64ToIntPointer(concentration),
+						Quality:       quality,
+					}
+				}
 				var requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdCurrent *merakigosdk.RequestSensorCreateNetworkSensorAlertsProfileConditionsThresholdCurrent
 				if rItem1.Threshold.Current != nil {
-					draw := rItem1.Threshold.Current.Draw.ValueFloat64Pointer()
+					draw := func() *float64 {
+						if !rItem1.Threshold.Current.Draw.IsUnknown() && !rItem1.Threshold.Current.Draw.IsNull() {
+							return rItem1.Threshold.Current.Draw.ValueFloat64Pointer()
+						}
+						return nil
+					}()
 					requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdCurrent = &merakigosdk.RequestSensorCreateNetworkSensorAlertsProfileConditionsThresholdCurrent{
 						Draw: draw,
 					}
@@ -1407,7 +1548,12 @@ func (r *NetworksSensorAlertsProfilesRs) toSdkApiRequestCreate(ctx context.Conte
 				}
 				var requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdFrequency *merakigosdk.RequestSensorCreateNetworkSensorAlertsProfileConditionsThresholdFrequency
 				if rItem1.Threshold.Frequency != nil {
-					level := rItem1.Threshold.Frequency.Level.ValueFloat64Pointer()
+					level := func() *float64 {
+						if !rItem1.Threshold.Frequency.Level.IsUnknown() && !rItem1.Threshold.Frequency.Level.IsNull() {
+							return rItem1.Threshold.Frequency.Level.ValueFloat64Pointer()
+						}
+						return nil
+					}()
 					requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdFrequency = &merakigosdk.RequestSensorCreateNetworkSensorAlertsProfileConditionsThresholdFrequency{
 						Level: level,
 					}
@@ -1488,30 +1634,35 @@ func (r *NetworksSensorAlertsProfilesRs) toSdkApiRequestCreate(ctx context.Conte
 				}
 				var requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdRealPower *merakigosdk.RequestSensorCreateNetworkSensorAlertsProfileConditionsThresholdRealPower
 				if rItem1.Threshold.RealPower != nil {
-					draw := rItem1.Threshold.RealPower.Draw.ValueFloat64Pointer()
+					draw := func() *float64 {
+						if !rItem1.Threshold.RealPower.Draw.IsUnknown() && !rItem1.Threshold.RealPower.Draw.IsNull() {
+							return rItem1.Threshold.RealPower.Draw.ValueFloat64Pointer()
+						}
+						return nil
+					}()
 					requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdRealPower = &merakigosdk.RequestSensorCreateNetworkSensorAlertsProfileConditionsThresholdRealPower{
 						Draw: draw,
 					}
 				}
 				var requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdTemperature *merakigosdk.RequestSensorCreateNetworkSensorAlertsProfileConditionsThresholdTemperature
 				if rItem1.Threshold.Temperature != nil {
-					// celsius := rItem1.Threshold.Temperature.Celsius.ValueFloat64Pointer()
-					// fahrenheit := rItem1.Threshold.Temperature.Fahrenheit.ValueFloat64Pointer()
+					celsius := func() *float64 {
+						if !rItem1.Threshold.Temperature.Celsius.IsUnknown() && !rItem1.Threshold.Temperature.Celsius.IsNull() {
+							return rItem1.Threshold.Temperature.Celsius.ValueFloat64Pointer()
+						}
+						return nil
+					}()
+					fahrenheit := func() *float64 {
+						if !rItem1.Threshold.Temperature.Fahrenheit.IsUnknown() && !rItem1.Threshold.Temperature.Fahrenheit.IsNull() {
+							return rItem1.Threshold.Temperature.Fahrenheit.ValueFloat64Pointer()
+						}
+						return nil
+					}()
 					quality := rItem1.Threshold.Temperature.Quality.ValueString()
 					requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdTemperature = &merakigosdk.RequestSensorCreateNetworkSensorAlertsProfileConditionsThresholdTemperature{
-						Celsius: func() *float64 {
-							if !rItem1.Threshold.Temperature.Celsius.IsUnknown() && !rItem1.Threshold.Temperature.Celsius.IsNull() {
-								return rItem1.Threshold.Temperature.Celsius.ValueFloat64Pointer()
-							}
-							return nil
-						}(),
-						Fahrenheit: func() *float64 {
-							if !rItem1.Threshold.Temperature.Fahrenheit.IsUnknown() && !rItem1.Threshold.Temperature.Fahrenheit.IsNull() {
-								return rItem1.Threshold.Temperature.Fahrenheit.ValueFloat64Pointer()
-							}
-							return nil
-						}(),
-						Quality: quality,
+						Celsius:    celsius,
+						Fahrenheit: fahrenheit,
+						Quality:    quality,
 					}
 				}
 				var requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdTvoc *merakigosdk.RequestSensorCreateNetworkSensorAlertsProfileConditionsThresholdTvoc
@@ -1561,6 +1712,7 @@ func (r *NetworksSensorAlertsProfilesRs) toSdkApiRequestCreate(ctx context.Conte
 				}
 				requestSensorCreateNetworkSensorAlertsProfileConditionsThreshold = &merakigosdk.RequestSensorCreateNetworkSensorAlertsProfileConditionsThreshold{
 					ApparentPower:    requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdApparentPower,
+					Co2:              requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdCo2,
 					Current:          requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdCurrent,
 					Door:             requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdDoor,
 					Frequency:        requestSensorCreateNetworkSensorAlertsProfileConditionsThresholdFrequency,
@@ -1648,14 +1800,38 @@ func (r *NetworksSensorAlertsProfilesRs) toSdkApiRequestUpdate(ctx context.Conte
 			if rItem1.Threshold != nil {
 				var requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdApparentPower *merakigosdk.RequestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdApparentPower
 				if rItem1.Threshold.ApparentPower != nil {
-					draw := rItem1.Threshold.ApparentPower.Draw.ValueFloat64Pointer()
+					draw := func() *float64 {
+						if !rItem1.Threshold.ApparentPower.Draw.IsUnknown() && !rItem1.Threshold.ApparentPower.Draw.IsNull() {
+							return rItem1.Threshold.ApparentPower.Draw.ValueFloat64Pointer()
+						}
+						return nil
+					}()
 					requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdApparentPower = &merakigosdk.RequestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdApparentPower{
 						Draw: draw,
 					}
 				}
+				var requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdCo2 *merakigosdk.RequestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdCo2
+				if rItem1.Threshold.Co2 != nil {
+					concentration := func() *int64 {
+						if !rItem1.Threshold.Co2.Concentration.IsUnknown() && !rItem1.Threshold.Co2.Concentration.IsNull() {
+							return rItem1.Threshold.Co2.Concentration.ValueInt64Pointer()
+						}
+						return nil
+					}()
+					quality := rItem1.Threshold.Co2.Quality.ValueString()
+					requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdCo2 = &merakigosdk.RequestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdCo2{
+						Concentration: int64ToIntPointer(concentration),
+						Quality:       quality,
+					}
+				}
 				var requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdCurrent *merakigosdk.RequestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdCurrent
 				if rItem1.Threshold.Current != nil {
-					draw := rItem1.Threshold.Current.Draw.ValueFloat64Pointer()
+					draw := func() *float64 {
+						if !rItem1.Threshold.Current.Draw.IsUnknown() && !rItem1.Threshold.Current.Draw.IsNull() {
+							return rItem1.Threshold.Current.Draw.ValueFloat64Pointer()
+						}
+						return nil
+					}()
 					requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdCurrent = &merakigosdk.RequestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdCurrent{
 						Draw: draw,
 					}
@@ -1674,7 +1850,12 @@ func (r *NetworksSensorAlertsProfilesRs) toSdkApiRequestUpdate(ctx context.Conte
 				}
 				var requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdFrequency *merakigosdk.RequestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdFrequency
 				if rItem1.Threshold.Frequency != nil {
-					level := rItem1.Threshold.Frequency.Level.ValueFloat64Pointer()
+					level := func() *float64 {
+						if !rItem1.Threshold.Frequency.Level.IsUnknown() && !rItem1.Threshold.Frequency.Level.IsNull() {
+							return rItem1.Threshold.Frequency.Level.ValueFloat64Pointer()
+						}
+						return nil
+					}()
 					requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdFrequency = &merakigosdk.RequestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdFrequency{
 						Level: level,
 					}
@@ -1755,30 +1936,35 @@ func (r *NetworksSensorAlertsProfilesRs) toSdkApiRequestUpdate(ctx context.Conte
 				}
 				var requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdRealPower *merakigosdk.RequestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdRealPower
 				if rItem1.Threshold.RealPower != nil {
-					draw := rItem1.Threshold.RealPower.Draw.ValueFloat64Pointer()
+					draw := func() *float64 {
+						if !rItem1.Threshold.RealPower.Draw.IsUnknown() && !rItem1.Threshold.RealPower.Draw.IsNull() {
+							return rItem1.Threshold.RealPower.Draw.ValueFloat64Pointer()
+						}
+						return nil
+					}()
 					requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdRealPower = &merakigosdk.RequestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdRealPower{
 						Draw: draw,
 					}
 				}
 				var requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdTemperature *merakigosdk.RequestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdTemperature
 				if rItem1.Threshold.Temperature != nil {
-					// celsius := rItem1.Threshold.Temperature.Celsius.ValueFloat64Pointer()
-					// fahrenheit := rItem1.Threshold.Temperature.Fahrenheit.ValueFloat64Pointer()
+					celsius := func() *float64 {
+						if !rItem1.Threshold.Temperature.Celsius.IsUnknown() && !rItem1.Threshold.Temperature.Celsius.IsNull() {
+							return rItem1.Threshold.Temperature.Celsius.ValueFloat64Pointer()
+						}
+						return nil
+					}()
+					fahrenheit := func() *float64 {
+						if !rItem1.Threshold.Temperature.Fahrenheit.IsUnknown() && !rItem1.Threshold.Temperature.Fahrenheit.IsNull() {
+							return rItem1.Threshold.Temperature.Fahrenheit.ValueFloat64Pointer()
+						}
+						return nil
+					}()
 					quality := rItem1.Threshold.Temperature.Quality.ValueString()
 					requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdTemperature = &merakigosdk.RequestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdTemperature{
-						Celsius: func() *float64 {
-							if !rItem1.Threshold.Temperature.Celsius.IsUnknown() && !rItem1.Threshold.Temperature.Celsius.IsNull() {
-								return rItem1.Threshold.Temperature.Celsius.ValueFloat64Pointer()
-							}
-							return nil
-						}(),
-						Fahrenheit: func() *float64 {
-							if !rItem1.Threshold.Temperature.Fahrenheit.IsUnknown() && !rItem1.Threshold.Temperature.Fahrenheit.IsNull() {
-								return rItem1.Threshold.Temperature.Fahrenheit.ValueFloat64Pointer()
-							}
-							return nil
-						}(),
-						Quality: quality,
+						Celsius:    celsius,
+						Fahrenheit: fahrenheit,
+						Quality:    quality,
 					}
 				}
 				var requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdTvoc *merakigosdk.RequestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdTvoc
@@ -1809,7 +1995,12 @@ func (r *NetworksSensorAlertsProfilesRs) toSdkApiRequestUpdate(ctx context.Conte
 				}
 				var requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdVoltage *merakigosdk.RequestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdVoltage
 				if rItem1.Threshold.Voltage != nil {
-					level := rItem1.Threshold.Voltage.Level.ValueFloat64Pointer()
+					level := func() *float64 {
+						if !rItem1.Threshold.Voltage.Level.IsUnknown() && !rItem1.Threshold.Voltage.Level.IsNull() {
+							return rItem1.Threshold.Voltage.Level.ValueFloat64Pointer()
+						}
+						return nil
+					}()
 					requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdVoltage = &merakigosdk.RequestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdVoltage{
 						Level: level,
 					}
@@ -1828,6 +2019,7 @@ func (r *NetworksSensorAlertsProfilesRs) toSdkApiRequestUpdate(ctx context.Conte
 				}
 				requestSensorUpdateNetworkSensorAlertsProfileConditionsThreshold = &merakigosdk.RequestSensorUpdateNetworkSensorAlertsProfileConditionsThreshold{
 					ApparentPower:    requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdApparentPower,
+					Co2:              requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdCo2,
 					Current:          requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdCurrent,
 					Door:             requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdDoor,
 					Frequency:        requestSensorUpdateNetworkSensorAlertsProfileConditionsThresholdFrequency,
@@ -1929,7 +2121,21 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(state NetworksSenso
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdApparentPowerRs{}
+										return nil
+									}(),
+									Co2: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCo2Rs {
+										if conditions.Threshold.Co2 != nil {
+											return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCo2Rs{
+												Concentration: func() types.Int64 {
+													if conditions.Threshold.Co2.Concentration != nil {
+														return types.Int64Value(int64(*conditions.Threshold.Co2.Concentration))
+													}
+													return types.Int64{}
+												}(),
+												Quality: types.StringValue(conditions.Threshold.Co2.Quality),
+											}
+										}
+										return nil
 									}(),
 									Current: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCurrentRs {
 										if conditions.Threshold.Current != nil {
@@ -1942,7 +2148,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(state NetworksSenso
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdCurrentRs{}
+										return nil
 									}(),
 									Door: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdDoorRs {
 										if conditions.Threshold.Door != nil {
@@ -1955,7 +2161,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(state NetworksSenso
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdDoorRs{}
+										return nil
 									}(),
 									Frequency: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdFrequencyRs {
 										if conditions.Threshold.Frequency != nil {
@@ -1968,7 +2174,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(state NetworksSenso
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdFrequencyRs{}
+										return nil
 									}(),
 									Humidity: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdHumidityRs {
 										if conditions.Threshold.Humidity != nil {
@@ -1982,7 +2188,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(state NetworksSenso
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdHumidityRs{}
+										return nil
 									}(),
 									IndoorAirQuality: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdIndoorAirQualityRs {
 										if conditions.Threshold.IndoorAirQuality != nil {
@@ -1996,7 +2202,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(state NetworksSenso
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdIndoorAirQualityRs{}
+										return nil
 									}(),
 									Noise: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdNoiseRs {
 										if conditions.Threshold.Noise != nil {
@@ -2013,11 +2219,11 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(state NetworksSenso
 															Quality: types.StringValue(conditions.Threshold.Noise.Ambient.Quality),
 														}
 													}
-													return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdNoiseAmbientRs{}
+													return nil
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdNoiseRs{}
+										return nil
 									}(),
 									Pm25: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdPm25Rs {
 										if conditions.Threshold.Pm25 != nil {
@@ -2031,7 +2237,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(state NetworksSenso
 												Quality: types.StringValue(conditions.Threshold.Pm25.Quality),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdPm25Rs{}
+										return nil
 									}(),
 									PowerFactor: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdPowerFactorRs {
 										if conditions.Threshold.PowerFactor != nil {
@@ -2044,7 +2250,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(state NetworksSenso
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdPowerFactorRs{}
+										return nil
 									}(),
 									RealPower: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdRealPowerRs {
 										if conditions.Threshold.RealPower != nil {
@@ -2057,7 +2263,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(state NetworksSenso
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdRealPowerRs{}
+										return nil
 									}(),
 									Temperature: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdTemperatureRs {
 										if conditions.Threshold.Temperature != nil {
@@ -2077,7 +2283,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(state NetworksSenso
 												Quality: types.StringValue(conditions.Threshold.Temperature.Quality),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdTemperatureRs{}
+										return nil
 									}(),
 									Tvoc: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdTvocRs {
 										if conditions.Threshold.Tvoc != nil {
@@ -2091,7 +2297,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(state NetworksSenso
 												Quality: types.StringValue(conditions.Threshold.Tvoc.Quality),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdTvocRs{}
+										return nil
 									}(),
 									UpstreamPower: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdUpstreamPowerRs {
 										if conditions.Threshold.UpstreamPower != nil {
@@ -2104,7 +2310,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(state NetworksSenso
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdUpstreamPowerRs{}
+										return nil
 									}(),
 									Voltage: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdVoltageRs {
 										if conditions.Threshold.Voltage != nil {
@@ -2117,7 +2323,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(state NetworksSenso
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdVoltageRs{}
+										return nil
 									}(),
 									Water: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdWaterRs {
 										if conditions.Threshold.Water != nil {
@@ -2130,17 +2336,17 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(state NetworksSenso
 												}(),
 											}
 										}
-										return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdWaterRs{}
+										return nil
 									}(),
 								}
 							}
-							return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdRs{}
+							return nil
 						}(),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseSensorGetNetworkSensorAlertsProfileConditionsRs{}
+			return nil
 		}(),
 		Name:      types.StringValue(response.Name),
 		ProfileID: types.StringValue(response.ProfileID),
@@ -2152,7 +2358,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(state NetworksSenso
 					SmsNumbers:    StringSliceToSet(response.Recipients.SmsNumbers),
 				}
 			}
-			return &ResponseSensorGetNetworkSensorAlertsProfileRecipientsRs{}
+			return nil
 		}(),
 		Schedule: func() *ResponseSensorGetNetworkSensorAlertsProfileScheduleRs {
 			if response.Schedule != nil {
@@ -2161,7 +2367,7 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBodyRs(state NetworksSenso
 					Name: types.StringValue(response.Schedule.Name),
 				}
 			}
-			return &ResponseSensorGetNetworkSensorAlertsProfileScheduleRs{}
+			return nil
 		}(),
 		Serials:    StringSliceToSet(response.Serials),
 		Conditions: state.Conditions,

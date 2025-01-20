@@ -15,5 +15,5 @@ provider "meraki" {
 resource "meraki_networks_appliance_firewall_port_forwarding_rules" "example" {
 
   network_id = "L_828099381482771185"
-  rules      = []
+  # rules      = []
 }

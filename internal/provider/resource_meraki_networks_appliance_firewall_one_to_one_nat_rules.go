@@ -1,10 +1,26 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -92,9 +108,10 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Schema(_ context.Con
 										ElementType: types.StringType,
 									},
 									"protocol": schema.StringAttribute{
-										MarkdownDescription: `Either of the following: 'tcp', 'udp', 'icmp-ping' or 'any'`,
-										Computed:            true,
-										Optional:            true,
+										MarkdownDescription: `Either of the following: 'tcp', 'udp', 'icmp-ping' or 'any'
+                                              Allowed values: [any,icmp-ping,tcp,udp]`,
+										Computed: true,
+										Optional: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
 										},
@@ -135,9 +152,10 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Schema(_ context.Con
 							},
 						},
 						"uplink": schema.StringAttribute{
-							MarkdownDescription: `The physical WAN interface on which the traffic will arrive ('internet1' or, if available, 'internet2')`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `The physical WAN interface on which the traffic will arrive ('internet1' or, if available, 'internet2')
+                                        Allowed values: [internet1,internet2]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -389,7 +407,10 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesRs) toSdkApiRequestUpdate(ctx 
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallOneToOneNatRules{
 		Rules: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallOneToOneNatRulesRules {
-			return &requestApplianceUpdateNetworkApplianceFirewallOneToOneNatRulesRules
+			if len(requestApplianceUpdateNetworkApplianceFirewallOneToOneNatRulesRules) > 0 || r.Rules != nil {
+				return &requestApplianceUpdateNetworkApplianceFirewallOneToOneNatRulesRules
+			}
+			return nil
 		}(),
 	}
 	return &out
@@ -415,7 +436,7 @@ func ResponseApplianceGetNetworkApplianceFirewallOneToOneNatRulesItemToBodyRs(st
 								}
 								return &result
 							}
-							return &[]ResponseApplianceGetNetworkApplianceFirewallOneToOneNatRulesRulesAllowedInboundRs{}
+							return nil
 						}(),
 						LanIP:    types.StringValue(rules.LanIP),
 						Name:     types.StringValue(rules.Name),
@@ -425,7 +446,7 @@ func ResponseApplianceGetNetworkApplianceFirewallOneToOneNatRulesItemToBodyRs(st
 				}
 				return &result
 			}
-			return &[]ResponseApplianceGetNetworkApplianceFirewallOneToOneNatRulesRulesRs{}
+			return nil
 		}(),
 	}
 	if is_read {

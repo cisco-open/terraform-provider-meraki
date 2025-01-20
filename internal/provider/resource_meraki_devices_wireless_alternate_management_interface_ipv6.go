@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -83,8 +83,9 @@ func (r *DevicesWirelessAlternateManagementInterfaceIPv6Resource) Schema(_ conte
 									Computed:            true,
 								},
 								"assignment_mode": schema.StringAttribute{
-									MarkdownDescription: `The type of address assignment. Either static or dynamic.`,
-									Computed:            true,
+									MarkdownDescription: `The type of address assignment. Either static or dynamic.
+                                                Allowed values: [dynamic,static]`,
+									Computed: true,
 								},
 								"gateway": schema.StringAttribute{
 									MarkdownDescription: `The gateway address configured for the alternate managment interface`,
@@ -107,8 +108,9 @@ func (r *DevicesWirelessAlternateManagementInterfaceIPv6Resource) Schema(_ conte
 									Computed:            true,
 								},
 								"protocol": schema.StringAttribute{
-									MarkdownDescription: `The IP protocol used for the address`,
-									Computed:            true,
+									MarkdownDescription: `The IP protocol used for the address
+                                                Allowed values: [ipv4,ipv6]`,
+									Computed: true,
 								},
 							},
 						},
@@ -134,9 +136,10 @@ func (r *DevicesWirelessAlternateManagementInterfaceIPv6Resource) Schema(_ conte
 									},
 								},
 								"assignment_mode": schema.StringAttribute{
-									MarkdownDescription: `The type of address assignment. Either static or dynamic.`,
-									Optional:            true,
-									Computed:            true,
+									MarkdownDescription: `The type of address assignment. Either static or dynamic.
+                                              Allowed values: [dynamic,static]`,
+									Optional: true,
+									Computed: true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.RequiresReplace(),
 									},
@@ -155,7 +158,7 @@ func (r *DevicesWirelessAlternateManagementInterfaceIPv6Resource) Schema(_ conte
 									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
-										"addresses": schema.SetAttribute{
+										"addresses": schema.ListAttribute{
 											MarkdownDescription: `Up to 2 nameserver addresses to use, ordered in priority from highest to lowest priority.`,
 											Optional:            true,
 											Computed:            true,
@@ -172,9 +175,10 @@ func (r *DevicesWirelessAlternateManagementInterfaceIPv6Resource) Schema(_ conte
 									},
 								},
 								"protocol": schema.StringAttribute{
-									MarkdownDescription: `The IP protocol used for the address`,
-									Optional:            true,
-									Computed:            true,
+									MarkdownDescription: `The IP protocol used for the address
+                                              Allowed values: [ipv4,ipv6]`,
+									Optional: true,
+									Computed: true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.RequiresReplace(),
 									},
@@ -232,15 +236,15 @@ func (r *DevicesWirelessAlternateManagementInterfaceIPv6Resource) Create(ctx con
 }
 
 func (r *DevicesWirelessAlternateManagementInterfaceIPv6Resource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *DevicesWirelessAlternateManagementInterfaceIPv6Resource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *DevicesWirelessAlternateManagementInterfaceIPv6Resource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -265,7 +269,7 @@ type ResponseWirelessUpdateDeviceWirelessAlternateManagementInterfaceIpv6Address
 }
 
 type ResponseWirelessUpdateDeviceWirelessAlternateManagementInterfaceIpv6AddressesNameservers struct {
-	Addresses types.Set `tfsdk:"addresses"`
+	Addresses types.List `tfsdk:"addresses"`
 }
 
 type RequestWirelessUpdateDeviceWirelessAlternateManagementInterfaceIpv6Rs struct {
@@ -340,10 +344,10 @@ func ResponseWirelessUpdateDeviceWirelessAlternateManagementInterfaceIPv6ItemToB
 						Nameservers: func() *ResponseWirelessUpdateDeviceWirelessAlternateManagementInterfaceIpv6AddressesNameservers {
 							if addresses.Nameservers != nil {
 								return &ResponseWirelessUpdateDeviceWirelessAlternateManagementInterfaceIpv6AddressesNameservers{
-									Addresses: StringSliceToSet(addresses.Nameservers.Addresses),
+									Addresses: StringSliceToList(addresses.Nameservers.Addresses),
 								}
 							}
-							return &ResponseWirelessUpdateDeviceWirelessAlternateManagementInterfaceIpv6AddressesNameservers{}
+							return nil
 						}(),
 						Prefix:   types.StringValue(addresses.Prefix),
 						Protocol: types.StringValue(addresses.Protocol),
@@ -351,7 +355,7 @@ func ResponseWirelessUpdateDeviceWirelessAlternateManagementInterfaceIPv6ItemToB
 				}
 				return &result
 			}
-			return &[]ResponseWirelessUpdateDeviceWirelessAlternateManagementInterfaceIpv6Addresses{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

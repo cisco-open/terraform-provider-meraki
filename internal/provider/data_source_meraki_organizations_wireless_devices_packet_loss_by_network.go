@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -196,6 +197,8 @@ func (d *OrganizationsWirelessDevicesPacketLossByNetworkDataSource) Read(ctx con
 		queryParams1.T1 = organizationsWirelessDevicesPacketLossByNetwork.T1.ValueString()
 		queryParams1.Timespan = organizationsWirelessDevicesPacketLossByNetwork.Timespan.ValueFloat64()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Wireless.GetOrganizationWirelessDevicesPacketLossByNetwork(vvOrganizationID, &queryParams1)
 
 		if err != nil || response1 == nil {
@@ -286,7 +289,7 @@ func ResponseWirelessGetOrganizationWirelessDevicesPacketLossByNetworkItemsToBod
 						}(),
 					}
 				}
-				return &ResponseItemWirelessGetOrganizationWirelessDevicesPacketLossByNetworkDownstream{}
+				return nil
 			}(),
 			Network: func() *ResponseItemWirelessGetOrganizationWirelessDevicesPacketLossByNetworkNetwork {
 				if item.Network != nil {
@@ -295,7 +298,7 @@ func ResponseWirelessGetOrganizationWirelessDevicesPacketLossByNetworkItemsToBod
 						Name: types.StringValue(item.Network.Name),
 					}
 				}
-				return &ResponseItemWirelessGetOrganizationWirelessDevicesPacketLossByNetworkNetwork{}
+				return nil
 			}(),
 			Upstream: func() *ResponseItemWirelessGetOrganizationWirelessDevicesPacketLossByNetworkUpstream {
 				if item.Upstream != nil {
@@ -320,7 +323,7 @@ func ResponseWirelessGetOrganizationWirelessDevicesPacketLossByNetworkItemsToBod
 						}(),
 					}
 				}
-				return &ResponseItemWirelessGetOrganizationWirelessDevicesPacketLossByNetworkUpstream{}
+				return nil
 			}(),
 		}
 		items = append(items, itemState)

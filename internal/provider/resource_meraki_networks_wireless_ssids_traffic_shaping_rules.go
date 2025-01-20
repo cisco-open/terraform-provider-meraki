@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -93,9 +109,10 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Schema(_ context.Cont
 								Attributes: map[string]schema.Attribute{
 
 									"type": schema.StringAttribute{
-										MarkdownDescription: `The type of definition. Can be one of 'application', 'applicationCategory', 'host', 'port', 'ipRange' or 'localNet'.`,
-										Computed:            true,
-										Optional:            true,
+										MarkdownDescription: `The type of definition. Can be one of 'application', 'applicationCategory', 'host', 'port', 'ipRange' or 'localNet'.
+                                              Allowed values: [application,applicationCategory,host,ipRange,localNet,port]`,
+										Computed: true,
+										Optional: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
 										},
@@ -511,7 +528,7 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesRs) toSdkApiRequestUpdate(ctx c
 	out := merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDTrafficShapingRules{
 		DefaultRulesEnabled: defaultRulesEnabled,
 		Rules: func() *[]merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRules {
-			if len(requestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRules) > 0 {
+			if len(requestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRules) > 0 || r.Rules != nil {
 				return &requestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRules
 			}
 			return nil
@@ -546,7 +563,7 @@ func ResponseWirelessGetNetworkWirelessSSIDTrafficShapingRulesItemToBodyRs(state
 								}
 								return &result
 							}
-							return &[]ResponseWirelessGetNetworkWirelessSsidTrafficShapingRulesRulesDefinitionsRs{}
+							return nil
 						}(),
 						DscpTagValue: func() types.Int64 {
 							if rules.DscpTagValue != nil {
@@ -580,18 +597,18 @@ func ResponseWirelessGetNetworkWirelessSSIDTrafficShapingRulesItemToBodyRs(state
 												}(),
 											}
 										}
-										return &ResponseWirelessGetNetworkWirelessSsidTrafficShapingRulesRulesPerClientBandwidthLimitsBandwidthLimitsRs{}
+										return nil
 									}(),
 									Settings: types.StringValue(rules.PerClientBandwidthLimits.Settings),
 								}
 							}
-							return &ResponseWirelessGetNetworkWirelessSsidTrafficShapingRulesRulesPerClientBandwidthLimitsRs{}
+							return nil
 						}(),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseWirelessGetNetworkWirelessSsidTrafficShapingRulesRulesRs{}
+			return nil
 		}(),
 		TrafficShapingEnabled: func() types.Bool {
 			if response.TrafficShapingEnabled != nil {

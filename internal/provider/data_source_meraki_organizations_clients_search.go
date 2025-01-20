@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -66,116 +83,155 @@ func (d *OrganizationsClientsSearchDataSource) Schema(_ context.Context, _ datas
 				Attributes: map[string]schema.Attribute{
 
 					"client_id": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The ID of the client`,
+						Computed:            true,
 					},
 					"mac": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The MAC address of the client`,
+						Computed:            true,
 					},
 					"manufacturer": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Manufacturer of the client`,
+						Computed:            true,
 					},
 					"records": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `The clients that appear on any networks within an organization`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
-								"cdp": schema.StringAttribute{
-									Computed: true,
+								"cdp": schema.SetNestedAttribute{
+									MarkdownDescription: `The Cisco discover protocol settings for the client`,
+									Computed:            true,
 								},
 								"client_vpn_connections": schema.SetNestedAttribute{
-									Computed: true,
+									MarkdownDescription: `VPN connections associated with the client`,
+									Computed:            true,
 									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
 
 											"connected_at": schema.Int64Attribute{
-												Computed: true,
+												MarkdownDescription: `The time the client last connected to the VPN`,
+												Computed:            true,
 											},
 											"disconnected_at": schema.Int64Attribute{
-												Computed: true,
+												MarkdownDescription: `The time the client last disconnected from the VPN`,
+												Computed:            true,
 											},
 											"remote_ip": schema.StringAttribute{
-												Computed: true,
+												MarkdownDescription: `The IP address of the VPN the client last connected to`,
+												Computed:            true,
 											},
 										},
 									},
 								},
 								"description": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Short description of the client`,
+									Computed:            true,
 								},
 								"first_seen": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `Timestamp client was first seen in the network`,
+									Computed:            true,
 								},
 								"ip": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The IP address of the client`,
+									Computed:            true,
 								},
 								"ip6": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The IPv6 address of the client`,
+									Computed:            true,
 								},
 								"last_seen": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `Timestamp client was last seen in the network`,
+									Computed:            true,
 								},
-								"lldp": schema.ListAttribute{
-									Computed:    true,
-									ElementType: types.StringType,
+								"lldp": schema.SetNestedAttribute{
+									MarkdownDescription: `The link layer discover protocol settings for the client`,
+									Computed:            true,
 								},
 								"network": schema.SingleNestedAttribute{
-									Computed: true,
+									MarkdownDescription: `The network upon which a client with the given MAC address was found`,
+									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
 										"enrollment_string": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The network enrollment string`,
+											Computed:            true,
 										},
 										"id": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The network identifier`,
+											Computed:            true,
 										},
 										"is_bound_to_config_template": schema.BoolAttribute{
-											Computed: true,
+											MarkdownDescription: `If the network is bound to a config template`,
+											Computed:            true,
 										},
 										"name": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The network name`,
+											Computed:            true,
 										},
 										"notes": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The notes for the network`,
+											Computed:            true,
 										},
 										"organization_id": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The organization identifier`,
+											Computed:            true,
 										},
 										"product_types": schema.ListAttribute{
 											Computed:    true,
 											ElementType: types.StringType,
 										},
 										"tags": schema.ListAttribute{
-											Computed:    true,
-											ElementType: types.StringType,
+											MarkdownDescription: `The network tags`,
+											Computed:            true,
+											ElementType:         types.StringType,
 										},
 										"time_zone": schema.StringAttribute{
-											Computed: true,
+											MarkdownDescription: `The network's timezone`,
+											Computed:            true,
+										},
+										"url": schema.StringAttribute{
+											MarkdownDescription: `The network URL`,
+											Computed:            true,
 										},
 									},
 								},
 								"os": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The operating system of the client`,
+									Computed:            true,
+								},
+								"recent_device_mac": schema.StringAttribute{
+									MarkdownDescription: `The MAC address of the node that the device was last connected to`,
+									Computed:            true,
 								},
 								"sm_installed": schema.BoolAttribute{
-									Computed: true,
+									MarkdownDescription: `Status of SM for the client`,
+									Computed:            true,
 								},
 								"ssid": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The name of the SSID that the client is connected to`,
+									Computed:            true,
 								},
 								"status": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The connection status of the client`,
+									Computed:            true,
 								},
 								"switchport": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The switch port the client is connected to`,
+									Computed:            true,
 								},
 								"user": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The username of the user of the client`,
+									Computed:            true,
 								},
 								"vlan": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The name of the VLAN that the client is connected to`,
+									Computed:            true,
 								},
 								"wireless_capabilities": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Wireless capabilities of the client`,
+									Computed:            true,
 								},
 							},
 						},
@@ -199,11 +255,12 @@ func (d *OrganizationsClientsSearchDataSource) Read(ctx context.Context, req dat
 		vvOrganizationID := organizationsClientsSearch.OrganizationID.ValueString()
 		queryParams1 := merakigosdk.GetOrganizationClientsSearchQueryParams{}
 
-		queryParams1.Mac = organizationsClientsSearch.Mac.ValueString()
-
 		queryParams1.PerPage = int(organizationsClientsSearch.PerPage.ValueInt64())
 		queryParams1.StartingAfter = organizationsClientsSearch.StartingAfter.ValueString()
 		queryParams1.EndingBefore = organizationsClientsSearch.EndingBefore.ValueString()
+		queryParams1.Mac = organizationsClientsSearch.Mac.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Organizations.GetOrganizationClientsSearch(vvOrganizationID, &queryParams1)
 
@@ -231,10 +288,10 @@ func (d *OrganizationsClientsSearchDataSource) Read(ctx context.Context, req dat
 // structs
 type OrganizationsClientsSearch struct {
 	OrganizationID types.String                                       `tfsdk:"organization_id"`
-	Mac            types.String                                       `tfsdk:"mac"`
 	PerPage        types.Int64                                        `tfsdk:"per_page"`
 	StartingAfter  types.String                                       `tfsdk:"starting_after"`
 	EndingBefore   types.String                                       `tfsdk:"ending_before"`
+	Mac            types.String                                       `tfsdk:"mac"`
 	Item           *ResponseOrganizationsGetOrganizationClientsSearch `tfsdk:"item"`
 }
 
@@ -246,16 +303,17 @@ type ResponseOrganizationsGetOrganizationClientsSearch struct {
 }
 
 type ResponseOrganizationsGetOrganizationClientsSearchRecords struct {
-	Cdp                  types.String                                                                    `tfsdk:"cdp"`
+	Cdp                  *[][]string                                                                     `tfsdk:"cdp"`
 	ClientVpnConnections *[]ResponseOrganizationsGetOrganizationClientsSearchRecordsClientVpnConnections `tfsdk:"client_vpn_connections"`
 	Description          types.String                                                                    `tfsdk:"description"`
 	FirstSeen            types.Int64                                                                     `tfsdk:"first_seen"`
 	IP                   types.String                                                                    `tfsdk:"ip"`
 	IP6                  types.String                                                                    `tfsdk:"ip6"`
 	LastSeen             types.Int64                                                                     `tfsdk:"last_seen"`
-	Lldp                 types.List                                                                      `tfsdk:"lldp"`
+	Lldp                 *[][]string                                                                     `tfsdk:"lldp"`
 	Network              *ResponseOrganizationsGetOrganizationClientsSearchRecordsNetwork                `tfsdk:"network"`
 	Os                   types.String                                                                    `tfsdk:"os"`
+	RecentDeviceMac      types.String                                                                    `tfsdk:"recent_device_mac"`
 	SmInstalled          types.Bool                                                                      `tfsdk:"sm_installed"`
 	SSID                 types.String                                                                    `tfsdk:"ssid"`
 	Status               types.String                                                                    `tfsdk:"status"`
@@ -281,6 +339,7 @@ type ResponseOrganizationsGetOrganizationClientsSearchRecordsNetwork struct {
 	ProductTypes            types.List   `tfsdk:"product_types"`
 	Tags                    types.List   `tfsdk:"tags"`
 	TimeZone                types.String `tfsdk:"time_zone"`
+	URL                     types.String `tfsdk:"url"`
 }
 
 // ToBody
@@ -294,7 +353,7 @@ func ResponseOrganizationsGetOrganizationClientsSearchItemToBody(state Organizat
 				result := make([]ResponseOrganizationsGetOrganizationClientsSearchRecords, len(*response.Records))
 				for i, records := range *response.Records {
 					result[i] = ResponseOrganizationsGetOrganizationClientsSearchRecords{
-						Cdp: types.StringValue(records.Cdp),
+						//TODO [][]
 						ClientVpnConnections: func() *[]ResponseOrganizationsGetOrganizationClientsSearchRecordsClientVpnConnections {
 							if records.ClientVpnConnections != nil {
 								result := make([]ResponseOrganizationsGetOrganizationClientsSearchRecordsClientVpnConnections, len(*records.ClientVpnConnections))
@@ -317,7 +376,7 @@ func ResponseOrganizationsGetOrganizationClientsSearchItemToBody(state Organizat
 								}
 								return &result
 							}
-							return &[]ResponseOrganizationsGetOrganizationClientsSearchRecordsClientVpnConnections{}
+							return nil
 						}(),
 						Description: types.StringValue(records.Description),
 						FirstSeen: func() types.Int64 {
@@ -334,7 +393,7 @@ func ResponseOrganizationsGetOrganizationClientsSearchItemToBody(state Organizat
 							}
 							return types.Int64{}
 						}(),
-						Lldp: StringSliceToList(records.Lldp),
+						//TODO [][]
 						Network: func() *ResponseOrganizationsGetOrganizationClientsSearchRecordsNetwork {
 							if records.Network != nil {
 								return &ResponseOrganizationsGetOrganizationClientsSearchRecordsNetwork{
@@ -352,11 +411,13 @@ func ResponseOrganizationsGetOrganizationClientsSearchItemToBody(state Organizat
 									ProductTypes:   StringSliceToList(records.Network.ProductTypes),
 									Tags:           StringSliceToList(records.Network.Tags),
 									TimeZone:       types.StringValue(records.Network.TimeZone),
+									URL:            types.StringValue(records.Network.URL),
 								}
 							}
-							return &ResponseOrganizationsGetOrganizationClientsSearchRecordsNetwork{}
+							return nil
 						}(),
-						Os: types.StringValue(records.Os),
+						Os:              types.StringValue(records.Os),
+						RecentDeviceMac: types.StringValue(records.RecentDeviceMac),
 						SmInstalled: func() types.Bool {
 							if records.SmInstalled != nil {
 								return types.BoolValue(*records.SmInstalled)
@@ -373,7 +434,7 @@ func ResponseOrganizationsGetOrganizationClientsSearchItemToBody(state Organizat
 				}
 				return &result
 			}
-			return &[]ResponseOrganizationsGetOrganizationClientsSearchRecords{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

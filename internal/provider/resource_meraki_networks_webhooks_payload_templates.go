@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -56,7 +72,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Schema(_ context.Context, _ r
 				},
 			},
 			"body_file": schema.StringAttribute{
-				MarkdownDescription: `A file containing liquid template used for the body of the webhook message. Either *body* or *bodyFile* must be specified.`,
+				MarkdownDescription: `A Base64 encoded file containing liquid template used for the body of the webhook message. Either *body* or *bodyFile* must be specified.`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -93,7 +109,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Schema(_ context.Context, _ r
 				},
 			},
 			"headers_file": schema.StringAttribute{
-				MarkdownDescription: `A file containing the liquid template used with the webhook headers.`,
+				MarkdownDescription: `A Base64 encoded file containing the liquid template used with the webhook headers.`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -249,7 +265,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Create(ctx context.Context, r
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter PayloadTemplateID",
-				err.Error(),
+				"Error",
 			)
 			return
 		}
@@ -557,7 +573,7 @@ func ResponseNetworksGetNetworkWebhooksPayloadTemplateItemToBodyRs(state Network
 				}
 				return &result
 			}
-			return &[]ResponseNetworksGetNetworkWebhooksPayloadTemplateHeadersRs{}
+			return nil
 		}(),
 		Name:              types.StringValue(response.Name),
 		PayloadTemplateID: types.StringValue(response.PayloadTemplateID),
@@ -575,11 +591,11 @@ func ResponseNetworksGetNetworkWebhooksPayloadTemplateItemToBodyRs(state Network
 								}(),
 							}
 						}
-						return &ResponseNetworksGetNetworkWebhooksPayloadTemplateSharingByNetworkRs{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseNetworksGetNetworkWebhooksPayloadTemplateSharingRs{}
+			return nil
 		}(),
 		Type: types.StringValue(response.Type),
 	}

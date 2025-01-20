@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -211,6 +212,8 @@ func (d *OrganizationsWirelessDevicesPacketLossByClientDataSource) Read(ctx cont
 		queryParams1.T1 = organizationsWirelessDevicesPacketLossByClient.T1.ValueString()
 		queryParams1.Timespan = organizationsWirelessDevicesPacketLossByClient.Timespan.ValueFloat64()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Wireless.GetOrganizationWirelessDevicesPacketLossByClient(vvOrganizationID, &queryParams1)
 
 		if err != nil || response1 == nil {
@@ -291,7 +294,7 @@ func ResponseWirelessGetOrganizationWirelessDevicesPacketLossByClientItemsToBody
 						Mac: types.StringValue(item.Client.Mac),
 					}
 				}
-				return &ResponseItemWirelessGetOrganizationWirelessDevicesPacketLossByClientClient{}
+				return nil
 			}(),
 			Downstream: func() *ResponseItemWirelessGetOrganizationWirelessDevicesPacketLossByClientDownstream {
 				if item.Downstream != nil {
@@ -316,7 +319,7 @@ func ResponseWirelessGetOrganizationWirelessDevicesPacketLossByClientItemsToBody
 						}(),
 					}
 				}
-				return &ResponseItemWirelessGetOrganizationWirelessDevicesPacketLossByClientDownstream{}
+				return nil
 			}(),
 			Network: func() *ResponseItemWirelessGetOrganizationWirelessDevicesPacketLossByClientNetwork {
 				if item.Network != nil {
@@ -325,7 +328,7 @@ func ResponseWirelessGetOrganizationWirelessDevicesPacketLossByClientItemsToBody
 						Name: types.StringValue(item.Network.Name),
 					}
 				}
-				return &ResponseItemWirelessGetOrganizationWirelessDevicesPacketLossByClientNetwork{}
+				return nil
 			}(),
 			Upstream: func() *ResponseItemWirelessGetOrganizationWirelessDevicesPacketLossByClientUpstream {
 				if item.Upstream != nil {
@@ -350,7 +353,7 @@ func ResponseWirelessGetOrganizationWirelessDevicesPacketLossByClientItemsToBody
 						}(),
 					}
 				}
-				return &ResponseItemWirelessGetOrganizationWirelessDevicesPacketLossByClientUpstream{}
+				return nil
 			}(),
 		}
 		items = append(items, itemState)

@@ -16,5 +16,5 @@ data "meraki_organizations_switch_ports_by_switch" "example" {
 }
 
 output "meraki_organizations_switch_ports_by_switch_example" {
-  value = data.meraki_organizations_switch_ports_by_switch.example.items
+  value = data.meraki_organizations_switch_ports_by_switch.example.item
 }

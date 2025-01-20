@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -316,6 +333,8 @@ func (d *DevicesApplianceUplinksSettingsDataSource) Read(ctx context.Context, re
 		log.Printf("[DEBUG] Selected method: GetDeviceApplianceUplinksSettings")
 		vvSerial := devicesApplianceUplinksSettings.Serial.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Appliance.GetDeviceApplianceUplinksSettings(vvSerial)
 
 		if err != nil || response1 == nil {
@@ -482,7 +501,7 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBody(state DevicesA
 														Username: types.StringValue(response.Interfaces.Wan1.Pppoe.Authentication.Username),
 													}
 												}
-												return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1PppoeAuthentication{}
+												return nil
 											}(),
 											Enabled: func() types.Bool {
 												if response.Interfaces.Wan1.Pppoe.Enabled != nil {
@@ -492,7 +511,7 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBody(state DevicesA
 											}(),
 										}
 									}
-									return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1Pppoe{}
+									return nil
 								}(),
 								Svis: func() *ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1Svis {
 									if response.Interfaces.Wan1.Svis != nil {
@@ -509,11 +528,11 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBody(state DevicesA
 																	Addresses: StringSliceToList(response.Interfaces.Wan1.Svis.IPv4.Nameservers.Addresses),
 																}
 															}
-															return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1SvisIpv4Nameservers{}
+															return nil
 														}(),
 													}
 												}
-												return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1SvisIpv4{}
+												return nil
 											}(),
 											IPv6: func() *ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1SvisIpv6 {
 												if response.Interfaces.Wan1.Svis.IPv6 != nil {
@@ -527,15 +546,15 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBody(state DevicesA
 																	Addresses: StringSliceToList(response.Interfaces.Wan1.Svis.IPv6.Nameservers.Addresses),
 																}
 															}
-															return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1SvisIpv6Nameservers{}
+															return nil
 														}(),
 													}
 												}
-												return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1SvisIpv6{}
+												return nil
 											}(),
 										}
 									}
-									return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1Svis{}
+									return nil
 								}(),
 								VLANTagging: func() *ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1VlanTagging {
 									if response.Interfaces.Wan1.VLANTagging != nil {
@@ -554,11 +573,11 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBody(state DevicesA
 											}(),
 										}
 									}
-									return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1VlanTagging{}
+									return nil
 								}(),
 							}
 						}
-						return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1{}
+						return nil
 					}(),
 					Wan2: func() *ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2 {
 						if response.Interfaces.Wan2 != nil {
@@ -584,7 +603,7 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBody(state DevicesA
 														Username: types.StringValue(response.Interfaces.Wan2.Pppoe.Authentication.Username),
 													}
 												}
-												return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2PppoeAuthentication{}
+												return nil
 											}(),
 											Enabled: func() types.Bool {
 												if response.Interfaces.Wan2.Pppoe.Enabled != nil {
@@ -594,7 +613,7 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBody(state DevicesA
 											}(),
 										}
 									}
-									return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2Pppoe{}
+									return nil
 								}(),
 								Svis: func() *ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2Svis {
 									if response.Interfaces.Wan2.Svis != nil {
@@ -611,11 +630,11 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBody(state DevicesA
 																	Addresses: StringSliceToList(response.Interfaces.Wan2.Svis.IPv4.Nameservers.Addresses),
 																}
 															}
-															return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2SvisIpv4Nameservers{}
+															return nil
 														}(),
 													}
 												}
-												return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2SvisIpv4{}
+												return nil
 											}(),
 											IPv6: func() *ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2SvisIpv6 {
 												if response.Interfaces.Wan2.Svis.IPv6 != nil {
@@ -629,15 +648,15 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBody(state DevicesA
 																	Addresses: StringSliceToList(response.Interfaces.Wan2.Svis.IPv6.Nameservers.Addresses),
 																}
 															}
-															return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2SvisIpv6Nameservers{}
+															return nil
 														}(),
 													}
 												}
-												return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2SvisIpv6{}
+												return nil
 											}(),
 										}
 									}
-									return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2Svis{}
+									return nil
 								}(),
 								VLANTagging: func() *ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2VlanTagging {
 									if response.Interfaces.Wan2.VLANTagging != nil {
@@ -656,15 +675,15 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBody(state DevicesA
 											}(),
 										}
 									}
-									return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2VlanTagging{}
+									return nil
 								}(),
 							}
 						}
-						return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfaces{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -172,6 +172,9 @@ func (r *NetworksVLANProfilesResource) Schema(_ context.Context, _ resource.Sche
 		},
 	}
 }
+
+//path params to set ['iname']
+//path params to assign NOT EDITABLE ['iname']
 
 func (r *NetworksVLANProfilesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
@@ -548,7 +551,7 @@ func ResponseNetworksGetNetworkVLANProfileItemToBodyRs(state NetworksVLANProfile
 				}
 				return &result
 			}
-			return &[]ResponseNetworksGetNetworkVlanProfileVlanGroupsRs{}
+			return nil
 		}(),
 		VLANNames: func() *[]ResponseNetworksGetNetworkVlanProfileVlanNamesRs {
 			if response.VLANNames != nil {
@@ -562,7 +565,7 @@ func ResponseNetworksGetNetworkVLANProfileItemToBodyRs(state NetworksVLANProfile
 									Name: types.StringValue(vLANNames.AdaptivePolicyGroup.Name),
 								}
 							}
-							return &ResponseNetworksGetNetworkVlanProfileVlanNamesAdaptivePolicyGroupRs{}
+							return nil
 						}(),
 						Name:   types.StringValue(vLANNames.Name),
 						VLANID: types.StringValue(vLANNames.VLANID),
@@ -570,7 +573,7 @@ func ResponseNetworksGetNetworkVLANProfileItemToBodyRs(state NetworksVLANProfile
 				}
 				return &result
 			}
-			return &[]ResponseNetworksGetNetworkVlanProfileVlanNamesRs{}
+			return nil
 		}(),
 	}
 	if is_read {

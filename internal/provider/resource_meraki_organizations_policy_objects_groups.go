@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -48,7 +64,7 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Schema(_ context.Context, _ r
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"category": schema.StringAttribute{
-				MarkdownDescription: `Category of a policy object group (one of: NetworkObjectGroup, GeoLocationGroup, PortObjectGroup, ApplicationGroup)`,
+				MarkdownDescription: `Type of object groups. (NetworkObjectGroup, GeoLocationGroup, PortObjectGroup, ApplicationGroup)`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -69,7 +85,7 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Schema(_ context.Context, _ r
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: `A name for the group of network addresses, unique within the organization (alphanumeric, space, dash, or underscore characters only)`,
+				MarkdownDescription: `Name of the Policy object group.`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -84,14 +100,14 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Schema(_ context.Context, _ r
 				ElementType: types.StringType,
 			},
 			"object_ids": schema.SetAttribute{
-				MarkdownDescription: `A list of Policy Object ID's that this NetworkObjectGroup should be associated to (note: these ID's will replace the existing associated Policy Objects)`,
+				MarkdownDescription: `Policy objects associated with Network Object Group or Port Object Group`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
 
-				ElementType: types.StringType,
+				ElementType: types.Int64Type,
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
@@ -106,13 +122,13 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Schema(_ context.Context, _ r
 				},
 			},
 			"updated_at": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `Time Stamp of policy object updation.`,
+				Computed:            true,
 			},
 		},
 	}
 }
 
-//path params to set ['policyObjectGroupId']
 //path params to assign NOT EDITABLE ['category']
 
 func (r *OrganizationsPolicyObjectsGroupsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -412,7 +428,6 @@ func (r *OrganizationsPolicyObjectsGroupsRs) toSdkApiRequestCreate(ctx context.C
 	}
 	var objectIDs *[]string = nil
 	r.ObjectIDs.ElementsAs(ctx, &objectIDs, false)
-
 	out := merakigosdk.RequestOrganizationsCreateOrganizationPolicyObjectsGroup{
 		Category:  *category,
 		Name:      *name,
@@ -445,7 +460,7 @@ func ResponseOrganizationsGetOrganizationPolicyObjectsGroupItemToBodyRs(state Or
 		ID:         types.StringValue(response.ID),
 		Name:       types.StringValue(response.Name),
 		NetworkIDs: StringSliceToSet(response.NetworkIDs),
-		ObjectIDs:  StringSliceToSet(*response.ObjectIDs),
+		ObjectIDs:  StringSliceToSetInt(response.ObjectIDs),
 		UpdatedAt:  types.StringValue(response.UpdatedAt),
 	}
 	if is_read {

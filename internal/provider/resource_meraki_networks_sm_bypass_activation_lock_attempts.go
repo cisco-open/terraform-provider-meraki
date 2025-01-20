@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -349,7 +349,7 @@ func ResponseSmGetNetworkSmBypassActivationLockAttemptItemToBodyRs(state Network
 								}(),
 							}
 						}
-						return &ResponseSmGetNetworkSmBypassActivationLockAttemptData2090938209Rs{}
+						return nil
 					}(),
 					Status38290139892: func() *ResponseSmGetNetworkSmBypassActivationLockAttemptData38290139892Rs {
 						if response.Data.Status38290139892 != nil {
@@ -362,11 +362,11 @@ func ResponseSmGetNetworkSmBypassActivationLockAttemptItemToBodyRs(state Network
 								}(),
 							}
 						}
-						return &ResponseSmGetNetworkSmBypassActivationLockAttemptData38290139892Rs{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseSmGetNetworkSmBypassActivationLockAttemptDataRs{}
+			return nil
 		}(),
 		ID:     types.StringValue(response.ID),
 		Status: types.StringValue(response.Status),

@@ -1,0 +1,1 @@
+terraform import meraki_organizations_splash_themes.example "organization_id"

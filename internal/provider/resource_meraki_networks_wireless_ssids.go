@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -8,7 +24,7 @@ import (
 	"strconv"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -166,14 +182,16 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"auth_mode": schema.StringAttribute{
-				MarkdownDescription: `The association control method for the SSID`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The association control method for the SSID
+                                  Allowed values: [8021x-entra,8021x-google,8021x-localradius,8021x-meraki,8021x-nac,8021x-radius,ipsk-with-nac,ipsk-with-radius,ipsk-without-radius,open,open-enhanced,open-with-nac,open-with-radius,psk]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 				Validators: []validator.String{
 					stringvalidator.OneOf(
+						"8021x-entra",
 						"8021x-google",
 						"8021x-localradius",
 						"8021x-meraki",
@@ -208,9 +226,10 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"band_selection": schema.StringAttribute{
-				MarkdownDescription: `The client-serving radio frequencies of this SSID in the default indoor RF profile`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The client-serving radio frequencies of this SSID in the default indoor RF profile
+                                  Allowed values: [5 GHz band only,Dual band operation,Dual band operation with Band Steering]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -328,9 +347,10 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"encryption_mode": schema.StringAttribute{
-				MarkdownDescription: `The psk encryption mode for the SSID`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The psk encryption mode for the SSID
+                                  Allowed values: [wep,wpa]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -342,8 +362,10 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				// },
 			},
 			"enterprise_admin_access": schema.StringAttribute{
-				MarkdownDescription: `Whether or not an SSID is accessible by 'enterprise' administrators ('access disabled' or 'access enabled')`,
-				Optional:            true,
+				MarkdownDescription: `Whether or not an SSID is accessible by 'enterprise' administrators ('access disabled' or 'access enabled')
+                                  Allowed values: [access disabled,access enabled]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -392,9 +414,10 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"ip_assignment_mode": schema.StringAttribute{
-				MarkdownDescription: `The client IP assignment mode`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The client IP assignment mode
+                                  Allowed values: [Bridge mode,Ethernet over GRE,Layer 3 roaming,Layer 3 roaming with a concentrator,NAT mode,VPN]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -937,9 +960,10 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"radius_attribute_for_group_policies": schema.StringAttribute{
-				MarkdownDescription: `RADIUS attribute used to look up group policies`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `RADIUS attribute used to look up group policies
+                                  Allowed values: [Airespace-ACL-Name,Aruba-User-Role,Filter-Id,Reply-Message]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -1016,9 +1040,10 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"radius_load_balancing_policy": schema.StringAttribute{
-				MarkdownDescription: `Policy which determines which RADIUS server will be contacted first in an authentication attempt, and the ordering of any necessary retry attempts`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `Policy which determines which RADIUS server will be contacted first in an authentication attempt, and the ordering of any necessary retry attempts
+                                  Allowed values: [Round robin,Strict priority order]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -1208,9 +1233,10 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				ElementType: types.StringType,
 			},
 			"splash_page": schema.StringAttribute{
-				MarkdownDescription: `The type of splash page for the SSID`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The type of splash page for the SSID
+                                  Allowed values: [Billing,Cisco ISE,Click-through splash page,Facebook Wi-Fi,Google Apps domain,Google OAuth,Microsoft Entra ID,None,Password-protected with Active Directory,Password-protected with LDAP,Password-protected with Meraki RADIUS,Password-protected with custom RADIUS,SMS authentication,Sponsored guest,Systems Manager Sentry]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -1222,6 +1248,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 						"Facebook Wi-Fi",
 						"Google Apps domain",
 						"Google OAuth",
+						"Microsoft Entra ID",
 						"None",
 						"Password-protected with Active Directory",
 						"Password-protected with LDAP",
@@ -1286,9 +1313,10 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 				ElementType: types.StringType,
 			},
 			"wpa_encryption_mode": schema.StringAttribute{
-				MarkdownDescription: `The types of WPA encryption`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The types of WPA encryption
+                                  Allowed values: [WPA1 and WPA2,WPA1 only,WPA2 only,WPA3 192-bit Security,WPA3 Transition Mode,WPA3 only]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -1521,7 +1549,7 @@ type NetworksWirelessSSIDsRs struct {
 	Enabled           types.Bool   `tfsdk:"enabled"`
 	EncryptionMode    types.String `tfsdk:"encryption_mode"`
 	IPAssignmentMode  types.String `tfsdk:"ip_assignment_mode"`
-	// LocalAuth                       types.Bool                                                         `tfsdk:"local_auth"`
+	// LocalAuth                        types.Bool                                                         `tfsdk:"local_auth"`
 	MandatoryDhcpEnabled            types.Bool                                                         `tfsdk:"mandatory_dhcp_enabled"`
 	MinBitrate                      types.Int64                                                        `tfsdk:"min_bitrate"`
 	Name                            types.String                                                       `tfsdk:"name"`
@@ -2550,11 +2578,17 @@ func ResponseWirelessGetNetworkWirelessSSIDItemToBodyRs(state NetworksWirelessSS
 				}
 				return &result
 			}
-			return &[]ResponseWirelessGetNetworkWirelessSsidRadiusAccountingServersRs{}
+			return nil
 		}(),
 		RadiusAttributeForGroupPolicies: types.StringValue(response.RadiusAttributeForGroupPolicies),
-		RadiusFailoverPolicy:            types.StringValue(response.RadiusFailoverPolicy),
-		RadiusLoadBalancingPolicy:       types.StringValue(response.RadiusLoadBalancingPolicy),
+		// RadiusEnabled: func() types.Bool {
+		// 	if response.RadiusEnabled != nil {
+		// 		return types.BoolValue(*response.RadiusEnabled)
+		// 	}
+		// 	return types.Bool{}
+		// }(),
+		RadiusFailoverPolicy:      types.StringValue(response.RadiusFailoverPolicy),
+		RadiusLoadBalancingPolicy: types.StringValue(response.RadiusLoadBalancingPolicy),
 		RadiusServersResponse: func() *[]ResponseWirelessGetNetworkWirelessSsidRadiusServersRs {
 			if response.RadiusServers != nil {
 				result := make([]ResponseWirelessGetNetworkWirelessSsidRadiusServersRs, len(*response.RadiusServers))
@@ -2578,7 +2612,7 @@ func ResponseWirelessGetNetworkWirelessSSIDItemToBodyRs(state NetworksWirelessSS
 				}
 				return &result
 			}
-			return &[]ResponseWirelessGetNetworkWirelessSsidRadiusServersRs{}
+			return nil
 		}(),
 		SplashPage:    types.StringValue(response.SplashPage),
 		SplashTimeout: types.StringValue(response.SplashTimeout),
@@ -2594,7 +2628,7 @@ func ResponseWirelessGetNetworkWirelessSSIDItemToBodyRs(state NetworksWirelessSS
 			}
 			return types.Bool{}
 		}(),
-		// WalledGardenEnabledResponse: func() types.Bool {
+		// WalledGardenEnabled: func() types.Bool {
 		// 	if response.WalledGardenEnabled != nil {
 		// 		return types.BoolValue(*response.WalledGardenEnabled)
 		// 	}
@@ -2619,7 +2653,6 @@ func ResponseWirelessGetNetworkWirelessSSIDItemToBodyRs(state NetworksWirelessSS
 		AvailabilityTags:    state.AvailabilityTags,
 		WalledGardenEnabled: state.WalledGardenEnabled,
 	}
-	// state.SplashGuestSponsorDomains = types.SetNull(types.StringType)
 	itemState.SplashGuestSponsorDomains = state.SplashGuestSponsorDomains
 
 	itemState.DefaultVLANID = state.DefaultVLANID

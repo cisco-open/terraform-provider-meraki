@@ -1,10 +1,26 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -77,9 +93,10 @@ func (r *NetworksSwitchRoutingOspfResource) Schema(_ context.Context, _ resource
 							},
 						},
 						"area_type": schema.StringAttribute{
-							MarkdownDescription: `Area types in OSPF. Must be one of: ["normal", "stub", "nssa"]`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `Area types in OSPF. Must be one of: ["normal", "stub", "nssa"]
+                                        Allowed values: [normal,nssa,stub]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -193,9 +210,10 @@ func (r *NetworksSwitchRoutingOspfResource) Schema(_ context.Context, _ resource
 									},
 								},
 								"area_type": schema.StringAttribute{
-									MarkdownDescription: `Area types in OSPF. Must be one of: ["normal", "stub", "nssa"]`,
-									Computed:            true,
-									Optional:            true,
+									MarkdownDescription: `Area types in OSPF. Must be one of: ["normal", "stub", "nssa"]
+                                              Allowed values: [normal,nssa,stub]`,
+									Computed: true,
+									Optional: true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
 									},
@@ -278,9 +296,9 @@ func (r *NetworksSwitchRoutingOspfResource) Create(ctx context.Context, req reso
 		return
 	}
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Switch.UpdateNetworkSwitchRoutingOspf(vvNetworkID, dataRequest)
+	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchRoutingOspf(vvNetworkID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchRoutingOspf",
@@ -386,8 +404,8 @@ func (r *NetworksSwitchRoutingOspfResource) Update(ctx context.Context, req reso
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Switch.UpdateNetworkSwitchRoutingOspf(vvNetworkID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchRoutingOspf(vvNetworkID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchRoutingOspf",
@@ -536,7 +554,7 @@ func (r *NetworksSwitchRoutingOspfRs) toSdkApiRequestUpdate(ctx context.Context)
 		}()
 		requestSwitchUpdateNetworkSwitchRoutingOspfV3 = &merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspfV3{
 			Areas: func() *[]merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspfV3Areas {
-				if len(requestSwitchUpdateNetworkSwitchRoutingOspfV3Areas) > 0 {
+				if len(requestSwitchUpdateNetworkSwitchRoutingOspfV3Areas) > 0 || r.V3.Areas != nil {
 					return &requestSwitchUpdateNetworkSwitchRoutingOspfV3Areas
 				}
 				return nil
@@ -548,7 +566,7 @@ func (r *NetworksSwitchRoutingOspfRs) toSdkApiRequestUpdate(ctx context.Context)
 	}
 	out := merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspf{
 		Areas: func() *[]merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspfAreas {
-			if len(requestSwitchUpdateNetworkSwitchRoutingOspfAreas) > 0 {
+			if len(requestSwitchUpdateNetworkSwitchRoutingOspfAreas) > 0 || r.Areas != nil {
 				return &requestSwitchUpdateNetworkSwitchRoutingOspfAreas
 			}
 			return nil
@@ -616,7 +634,7 @@ func ResponseSwitchGetNetworkSwitchRoutingOspfItemToBodyRs(state NetworksSwitchR
 					Passphrase: types.StringValue(response.Md5AuthenticationKey.Passphrase),
 				}
 			}
-			return &ResponseSwitchGetNetworkSwitchRoutingOspfMd5AuthenticationKeyRs{}
+			return nil
 		}(),
 		V3: func() *ResponseSwitchGetNetworkSwitchRoutingOspfV3Rs {
 			if response.V3 != nil {
@@ -655,7 +673,7 @@ func ResponseSwitchGetNetworkSwitchRoutingOspfItemToBodyRs(state NetworksSwitchR
 					}(),
 				}
 			}
-			return &ResponseSwitchGetNetworkSwitchRoutingOspfV3Rs{}
+			return nil
 		}(),
 	}
 	if is_read {

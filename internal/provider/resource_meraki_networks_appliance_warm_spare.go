@@ -1,10 +1,26 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -46,7 +62,7 @@ func (r *NetworksApplianceWarmSpareResource) Schema(_ context.Context, _ resourc
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"enabled": schema.BoolAttribute{
-				MarkdownDescription: `Enable warm spare`,
+				MarkdownDescription: `Is the warm spare enabled`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
@@ -58,7 +74,8 @@ func (r *NetworksApplianceWarmSpareResource) Schema(_ context.Context, _ resourc
 				Required:            true,
 			},
 			"primary_serial": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `Serial number of the primary appliance`,
+				Computed:            true,
 			},
 			"spare_serial": schema.StringAttribute{
 				MarkdownDescription: `Serial number of the warm spare appliance`,
@@ -93,26 +110,32 @@ func (r *NetworksApplianceWarmSpareResource) Schema(_ context.Context, _ resourc
 				},
 			},
 			"wan1": schema.SingleNestedAttribute{
-				Computed: true,
+				MarkdownDescription: `WAN 1 IP and subnet`,
+				Computed:            true,
 				Attributes: map[string]schema.Attribute{
 
 					"ip": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `IP address used for WAN 1`,
+						Computed:            true,
 					},
 					"subnet": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Subnet used for WAN 1`,
+						Computed:            true,
 					},
 				},
 			},
 			"wan2": schema.SingleNestedAttribute{
-				Computed: true,
+				MarkdownDescription: `WAN 2 IP and subnet`,
+				Computed:            true,
 				Attributes: map[string]schema.Attribute{
 
 					"ip": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `IP address used for WAN 2`,
+						Computed:            true,
 					},
 					"subnet": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Subnet used for WAN 2`,
+						Computed:            true,
 					},
 				},
 			},
@@ -158,9 +181,9 @@ func (r *NetworksApplianceWarmSpareResource) Create(ctx context.Context, req res
 		return
 	}
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceWarmSpare(vvNetworkID, dataRequest)
+	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceWarmSpare(vvNetworkID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceWarmSpare",
@@ -266,8 +289,8 @@ func (r *NetworksApplianceWarmSpareResource) Update(ctx context.Context, req res
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceWarmSpare(vvNetworkID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceWarmSpare(vvNetworkID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceWarmSpare",
@@ -377,7 +400,7 @@ func ResponseApplianceGetNetworkApplianceWarmSpareItemToBodyRs(state NetworksApp
 					Subnet: types.StringValue(response.Wan1.Subnet),
 				}
 			}
-			return &ResponseApplianceGetNetworkApplianceWarmSpareWan1Rs{}
+			return nil
 		}(),
 		Wan2: func() *ResponseApplianceGetNetworkApplianceWarmSpareWan2Rs {
 			if response.Wan2 != nil {
@@ -386,7 +409,7 @@ func ResponseApplianceGetNetworkApplianceWarmSpareItemToBodyRs(state NetworksApp
 					Subnet: types.StringValue(response.Wan2.Subnet),
 				}
 			}
-			return &ResponseApplianceGetNetworkApplianceWarmSpareWan2Rs{}
+			return nil
 		}(),
 	}
 	if is_read {

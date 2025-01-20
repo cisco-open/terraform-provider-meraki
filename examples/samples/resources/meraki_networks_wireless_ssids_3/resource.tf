@@ -32,14 +32,14 @@ resource "meraki_networks_wireless_ssids" "this_ssid" {
     host           = "192.168.10.2"
     port           = 1812
     radsec_enabled = false
-    secret         = "<-blanked->"
+    # secret         = "<-blanked->"
   }]
   radius_accounting_enabled = true
   radius_accounting_servers = [{
     host           = "192.168.10.3"
     port           = 1813
     radsec_enabled = false
-    secret         = "<-blanked->"
+    # secret         = "<-blanked->"
   }]
   radius_testing_enabled             = false
   radius_server_timeout              = 1

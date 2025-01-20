@@ -1,7 +1,7 @@
 
 resource "meraki_networks_vlan_profiles" "example" {
 
-  iname      = "string"
+  iname      = "Profile1"
   name       = "My VLAN profile name"
   network_id = "string"
   vlan_groups = [{

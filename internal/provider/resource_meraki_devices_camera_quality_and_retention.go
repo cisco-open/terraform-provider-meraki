@@ -1,12 +1,29 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
@@ -64,9 +81,10 @@ func (r *DevicesCameraQualityAndRetentionResource) Schema(_ context.Context, _ r
 				},
 			},
 			"motion_detector_version": schema.Int64Attribute{
-				MarkdownDescription: `The version of the motion detector that will be used by the camera. Only applies to Gen 2 cameras. Defaults to v2.`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The version of the motion detector that will be used by the camera. Only applies to Gen 2 cameras. Defaults to v2.
+                                  Allowed values: [1,2]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
@@ -80,9 +98,10 @@ func (r *DevicesCameraQualityAndRetentionResource) Schema(_ context.Context, _ r
 				},
 			},
 			"quality": schema.StringAttribute{
-				MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'High' or 'Enhanced'. Not all qualities are supported by every camera model.`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'High' or 'Enhanced'. Not all qualities are supported by every camera model.
+                                  Allowed values: [Enhanced,High,Standard]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -95,9 +114,10 @@ func (r *DevicesCameraQualityAndRetentionResource) Schema(_ context.Context, _ r
 				},
 			},
 			"resolution": schema.StringAttribute{
-				MarkdownDescription: `Resolution of the camera. Can be one of '1280x720', '1920x1080', '1080x1080', '2112x2112', '2880x2880', '2688x1512' or '3840x2160'.Not all resolutions are supported by every camera model.`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `Resolution of the camera. Can be one of '1280x720', '1920x1080', '1080x1080', '2112x2112', '2880x2880', '2688x1512' or '3840x2160'.Not all resolutions are supported by every camera model.
+                                  Allowed values: [1080x1080,1280x720,1920x1080,2112x2112,2688x1512,2880x2880,3840x2160]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -257,6 +277,9 @@ func (r *DevicesCameraQualityAndRetentionResource) Read(ctx context.Context, req
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
 	resp.Diagnostics.Append(diags...)
+}
+func (r *DevicesCameraQualityAndRetentionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("serial"), req.ID)...)
 }
 
 func (r *DevicesCameraQualityAndRetentionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {

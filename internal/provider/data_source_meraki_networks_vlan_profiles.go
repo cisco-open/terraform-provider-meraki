@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -59,11 +60,11 @@ func (d *NetworksVLANProfilesDataSource) Schema(_ context.Context, _ datasource.
 		Attributes: map[string]schema.Attribute{
 			"iname": schema.StringAttribute{
 				MarkdownDescription: `iname path parameter.`,
-				Required:            true,
+				Optional:            true,
 			},
 			"network_id": schema.StringAttribute{
 				MarkdownDescription: `networkId path parameter. Network ID`,
-				Required:            true,
+				Optional:            true,
 			},
 			"item": schema.SingleNestedAttribute{
 				Computed: true,
@@ -132,6 +133,77 @@ func (d *NetworksVLANProfilesDataSource) Schema(_ context.Context, _ datasource.
 					},
 				},
 			},
+
+			"items": schema.ListNestedAttribute{
+				MarkdownDescription: `Array of ResponseNetworksGetNetworkVlanProfiles`,
+				Computed:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+
+						"iname": schema.StringAttribute{
+							MarkdownDescription: `IName of the VLAN profile`,
+							Computed:            true,
+						},
+						"is_default": schema.BoolAttribute{
+							MarkdownDescription: `Boolean indicating the default VLAN Profile for any device that does not have a profile explicitly assigned`,
+							Computed:            true,
+						},
+						"name": schema.StringAttribute{
+							MarkdownDescription: `Name of the profile, string length must be from 1 to 255 characters`,
+							Computed:            true,
+						},
+						"vlan_groups": schema.SetNestedAttribute{
+							MarkdownDescription: `An array of named VLANs`,
+							Computed:            true,
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+
+									"name": schema.StringAttribute{
+										MarkdownDescription: `Name of the VLAN, string length must be from 1 to 32 characters`,
+										Computed:            true,
+									},
+									"vlan_ids": schema.StringAttribute{
+										MarkdownDescription: `Comma-separated VLAN IDs or ID ranges`,
+										Computed:            true,
+									},
+								},
+							},
+						},
+						"vlan_names": schema.SetNestedAttribute{
+							MarkdownDescription: `An array of named VLANs`,
+							Computed:            true,
+							NestedObject: schema.NestedAttributeObject{
+								Attributes: map[string]schema.Attribute{
+
+									"adaptive_policy_group": schema.SingleNestedAttribute{
+										MarkdownDescription: `Adaptive Policy Group assigned to Vlan ID`,
+										Computed:            true,
+										Attributes: map[string]schema.Attribute{
+
+											"id": schema.StringAttribute{
+												MarkdownDescription: `Adaptive Policy Group ID`,
+												Computed:            true,
+											},
+											"name": schema.StringAttribute{
+												MarkdownDescription: `Adaptive Policy Group name`,
+												Computed:            true,
+											},
+										},
+									},
+									"name": schema.StringAttribute{
+										MarkdownDescription: `Name of the VLAN, string length must be from 1 to 32 characters`,
+										Computed:            true,
+									},
+									"vlan_id": schema.StringAttribute{
+										MarkdownDescription: `VLAN ID`,
+										Computed:            true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -143,17 +215,51 @@ func (d *NetworksVLANProfilesDataSource) Read(ctx context.Context, req datasourc
 		return
 	}
 
-	selectedMethod := 1
-	if selectedMethod == 1 {
-		log.Printf("[DEBUG] Selected method: GetNetworkVLANProfile")
-		vvNetworkID := networksVLANProfiles.NetworkID.ValueString()
-		vvIname := networksVLANProfiles.Iname.ValueString()
+	method1 := []bool{!networksVLANProfiles.NetworkID.IsNull()}
+	log.Printf("[DEBUG] Selecting method. Method 1 %v", method1)
+	method2 := []bool{!networksVLANProfiles.NetworkID.IsNull(), !networksVLANProfiles.Iname.IsNull()}
+	log.Printf("[DEBUG] Selecting method. Method 2 %v", method2)
 
-		response1, restyResp1, err := d.client.Networks.GetNetworkVLANProfile(vvNetworkID, vvIname)
+	selectedMethod := pickMethod([][]bool{method1, method2})
+	if selectedMethod == 1 {
+		log.Printf("[DEBUG] Selected method: GetNetworkVLANProfiles")
+		vvNetworkID := networksVLANProfiles.NetworkID.ValueString()
+
+		// has_unknown_response: None
+
+		response1, restyResp1, err := d.client.Networks.GetNetworkVLANProfiles(vvNetworkID)
 
 		if err != nil || response1 == nil {
 			if restyResp1 != nil {
 				log.Printf("[DEBUG] Retrieved error response %s", restyResp1.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkVLANProfiles",
+				err.Error(),
+			)
+			return
+		}
+
+		networksVLANProfiles = ResponseNetworksGetNetworkVLANProfilesItemsToBody(networksVLANProfiles, response1)
+		diags = resp.State.Set(ctx, &networksVLANProfiles)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+	}
+	if selectedMethod == 2 {
+		log.Printf("[DEBUG] Selected method: GetNetworkVLANProfile")
+		vvNetworkID := networksVLANProfiles.NetworkID.ValueString()
+		vvIname := networksVLANProfiles.Iname.ValueString()
+
+		// has_unknown_response: None
+
+		response2, restyResp2, err := d.client.Networks.GetNetworkVLANProfile(vvNetworkID, vvIname)
+
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkVLANProfile",
@@ -162,7 +268,7 @@ func (d *NetworksVLANProfilesDataSource) Read(ctx context.Context, req datasourc
 			return
 		}
 
-		networksVLANProfiles = ResponseNetworksGetNetworkVLANProfileItemToBody(networksVLANProfiles, response1)
+		networksVLANProfiles = ResponseNetworksGetNetworkVLANProfileItemToBody(networksVLANProfiles, response2)
 		diags = resp.State.Set(ctx, &networksVLANProfiles)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
@@ -174,9 +280,34 @@ func (d *NetworksVLANProfilesDataSource) Read(ctx context.Context, req datasourc
 
 // structs
 type NetworksVLANProfiles struct {
-	NetworkID types.String                           `tfsdk:"network_id"`
-	Iname     types.String                           `tfsdk:"iname"`
-	Item      *ResponseNetworksGetNetworkVlanProfile `tfsdk:"item"`
+	NetworkID types.String                                  `tfsdk:"network_id"`
+	Iname     types.String                                  `tfsdk:"iname"`
+	Items     *[]ResponseItemNetworksGetNetworkVlanProfiles `tfsdk:"items"`
+	Item      *ResponseNetworksGetNetworkVlanProfile        `tfsdk:"item"`
+}
+
+type ResponseItemNetworksGetNetworkVlanProfiles struct {
+	Iname      types.String                                            `tfsdk:"iname"`
+	IsDefault  types.Bool                                              `tfsdk:"is_default"`
+	Name       types.String                                            `tfsdk:"name"`
+	VLANGroups *[]ResponseItemNetworksGetNetworkVlanProfilesVlanGroups `tfsdk:"vlan_groups"`
+	VLANNames  *[]ResponseItemNetworksGetNetworkVlanProfilesVlanNames  `tfsdk:"vlan_names"`
+}
+
+type ResponseItemNetworksGetNetworkVlanProfilesVlanGroups struct {
+	Name    types.String `tfsdk:"name"`
+	VLANIDs types.String `tfsdk:"vlan_ids"`
+}
+
+type ResponseItemNetworksGetNetworkVlanProfilesVlanNames struct {
+	AdaptivePolicyGroup *ResponseItemNetworksGetNetworkVlanProfilesVlanNamesAdaptivePolicyGroup `tfsdk:"adaptive_policy_group"`
+	Name                types.String                                                            `tfsdk:"name"`
+	VLANID              types.String                                                            `tfsdk:"vlan_id"`
+}
+
+type ResponseItemNetworksGetNetworkVlanProfilesVlanNamesAdaptivePolicyGroup struct {
+	ID   types.String `tfsdk:"id"`
+	Name types.String `tfsdk:"name"`
 }
 
 type ResponseNetworksGetNetworkVlanProfile struct {
@@ -204,6 +335,60 @@ type ResponseNetworksGetNetworkVlanProfileVlanNamesAdaptivePolicyGroup struct {
 }
 
 // ToBody
+func ResponseNetworksGetNetworkVLANProfilesItemsToBody(state NetworksVLANProfiles, response *merakigosdk.ResponseNetworksGetNetworkVLANProfiles) NetworksVLANProfiles {
+	var items []ResponseItemNetworksGetNetworkVlanProfiles
+	for _, item := range *response {
+		itemState := ResponseItemNetworksGetNetworkVlanProfiles{
+			Iname: types.StringValue(item.Iname),
+			IsDefault: func() types.Bool {
+				if item.IsDefault != nil {
+					return types.BoolValue(*item.IsDefault)
+				}
+				return types.Bool{}
+			}(),
+			Name: types.StringValue(item.Name),
+			VLANGroups: func() *[]ResponseItemNetworksGetNetworkVlanProfilesVlanGroups {
+				if item.VLANGroups != nil {
+					result := make([]ResponseItemNetworksGetNetworkVlanProfilesVlanGroups, len(*item.VLANGroups))
+					for i, vLANGroups := range *item.VLANGroups {
+						result[i] = ResponseItemNetworksGetNetworkVlanProfilesVlanGroups{
+							Name:    types.StringValue(vLANGroups.Name),
+							VLANIDs: types.StringValue(vLANGroups.VLANIDs),
+						}
+					}
+					return &result
+				}
+				return nil
+			}(),
+			VLANNames: func() *[]ResponseItemNetworksGetNetworkVlanProfilesVlanNames {
+				if item.VLANNames != nil {
+					result := make([]ResponseItemNetworksGetNetworkVlanProfilesVlanNames, len(*item.VLANNames))
+					for i, vLANNames := range *item.VLANNames {
+						result[i] = ResponseItemNetworksGetNetworkVlanProfilesVlanNames{
+							AdaptivePolicyGroup: func() *ResponseItemNetworksGetNetworkVlanProfilesVlanNamesAdaptivePolicyGroup {
+								if vLANNames.AdaptivePolicyGroup != nil {
+									return &ResponseItemNetworksGetNetworkVlanProfilesVlanNamesAdaptivePolicyGroup{
+										ID:   types.StringValue(vLANNames.AdaptivePolicyGroup.ID),
+										Name: types.StringValue(vLANNames.AdaptivePolicyGroup.Name),
+									}
+								}
+								return nil
+							}(),
+							Name:   types.StringValue(vLANNames.Name),
+							VLANID: types.StringValue(vLANNames.VLANID),
+						}
+					}
+					return &result
+				}
+				return nil
+			}(),
+		}
+		items = append(items, itemState)
+	}
+	state.Items = &items
+	return state
+}
+
 func ResponseNetworksGetNetworkVLANProfileItemToBody(state NetworksVLANProfiles, response *merakigosdk.ResponseNetworksGetNetworkVLANProfile) NetworksVLANProfiles {
 	itemState := ResponseNetworksGetNetworkVlanProfile{
 		Iname: types.StringValue(response.Iname),
@@ -225,7 +410,7 @@ func ResponseNetworksGetNetworkVLANProfileItemToBody(state NetworksVLANProfiles,
 				}
 				return &result
 			}
-			return &[]ResponseNetworksGetNetworkVlanProfileVlanGroups{}
+			return nil
 		}(),
 		VLANNames: func() *[]ResponseNetworksGetNetworkVlanProfileVlanNames {
 			if response.VLANNames != nil {
@@ -239,7 +424,7 @@ func ResponseNetworksGetNetworkVLANProfileItemToBody(state NetworksVLANProfiles,
 									Name: types.StringValue(vLANNames.AdaptivePolicyGroup.Name),
 								}
 							}
-							return &ResponseNetworksGetNetworkVlanProfileVlanNamesAdaptivePolicyGroup{}
+							return nil
 						}(),
 						Name:   types.StringValue(vLANNames.Name),
 						VLANID: types.StringValue(vLANNames.VLANID),
@@ -247,7 +432,7 @@ func ResponseNetworksGetNetworkVLANProfileItemToBody(state NetworksVLANProfiles,
 				}
 				return &result
 			}
-			return &[]ResponseNetworksGetNetworkVlanProfileVlanNames{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

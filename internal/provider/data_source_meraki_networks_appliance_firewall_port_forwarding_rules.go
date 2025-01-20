@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -50,31 +67,39 @@ func (d *NetworksApplianceFirewallPortForwardingRulesDataSource) Schema(_ contex
 				Attributes: map[string]schema.Attribute{
 
 					"rules": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `An array of port forwarding rules`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"allowed_ips": schema.ListAttribute{
-									Computed:    true,
-									ElementType: types.StringType,
+									MarkdownDescription: `An array of ranges of WAN IP addresses that are allowed to make inbound connections on the specified ports or port ranges (or any)`,
+									Computed:            true,
+									ElementType:         types.StringType,
 								},
 								"lan_ip": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `IP address of the device subject to port forwarding`,
+									Computed:            true,
 								},
 								"local_port": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The port or port range that receives forwarded traffic from the WAN`,
+									Computed:            true,
 								},
 								"name": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Name of the rule`,
+									Computed:            true,
 								},
 								"protocol": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Protocol the rule applies to`,
+									Computed:            true,
 								},
 								"public_port": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The port or port range forwarded to the host on the LAN`,
+									Computed:            true,
 								},
 								"uplink": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The physical WAN interface on which the traffic arrives; allowed values vary by appliance model and configuration`,
+									Computed:            true,
 								},
 							},
 						},
@@ -96,6 +121,8 @@ func (d *NetworksApplianceFirewallPortForwardingRulesDataSource) Read(ctx contex
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetNetworkApplianceFirewallPortForwardingRules")
 		vvNetworkID := networksApplianceFirewallPortForwardingRules.NetworkID.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Appliance.GetNetworkApplianceFirewallPortForwardingRules(vvNetworkID)
 
@@ -159,7 +186,7 @@ func ResponseApplianceGetNetworkApplianceFirewallPortForwardingRulesItemToBody(s
 				}
 				return &result
 			}
-			return &[]ResponseApplianceGetNetworkApplianceFirewallPortForwardingRulesRules{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

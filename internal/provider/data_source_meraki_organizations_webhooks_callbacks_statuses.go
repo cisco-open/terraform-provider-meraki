@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -149,6 +150,8 @@ func (d *OrganizationsWebhooksCallbacksStatusesDataSource) Read(ctx context.Cont
 		vvOrganizationID := organizationsWebhooksCallbacksStatuses.OrganizationID.ValueString()
 		vvCallbackID := organizationsWebhooksCallbacksStatuses.CallbackID.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Organizations.GetOrganizationWebhooksCallbacksStatus(vvOrganizationID, vvCallbackID)
 
 		if err != nil || response1 == nil {
@@ -216,7 +219,7 @@ func ResponseOrganizationsGetOrganizationWebhooksCallbacksStatusItemToBody(state
 					AdminID: types.StringValue(response.CreatedBy.AdminID),
 				}
 			}
-			return &ResponseOrganizationsGetOrganizationWebhooksCallbacksStatusCreatedBy{}
+			return nil
 		}(),
 		Errors: StringSliceToList(response.Errors),
 		Status: types.StringValue(response.Status),
@@ -229,7 +232,7 @@ func ResponseOrganizationsGetOrganizationWebhooksCallbacksStatusItemToBody(state
 								ID: types.StringValue(response.Webhook.HTTPServer.ID),
 							}
 						}
-						return &ResponseOrganizationsGetOrganizationWebhooksCallbacksStatusWebhookHttpServer{}
+						return nil
 					}(),
 					PayloadTemplate: func() *ResponseOrganizationsGetOrganizationWebhooksCallbacksStatusWebhookPayloadTemplate {
 						if response.Webhook.PayloadTemplate != nil {
@@ -237,13 +240,13 @@ func ResponseOrganizationsGetOrganizationWebhooksCallbacksStatusItemToBody(state
 								ID: types.StringValue(response.Webhook.PayloadTemplate.ID),
 							}
 						}
-						return &ResponseOrganizationsGetOrganizationWebhooksCallbacksStatusWebhookPayloadTemplate{}
+						return nil
 					}(),
 					SentAt: types.StringValue(response.Webhook.SentAt),
 					URL:    types.StringValue(response.Webhook.URL),
 				}
 			}
-			return &ResponseOrganizationsGetOrganizationWebhooksCallbacksStatusWebhook{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

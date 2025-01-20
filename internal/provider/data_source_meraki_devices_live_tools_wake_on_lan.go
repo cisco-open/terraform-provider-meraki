@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -123,6 +124,8 @@ func (d *DevicesLiveToolsWakeOnLanDataSource) Read(ctx context.Context, req data
 		vvSerial := devicesLiveToolsWakeOnLan.Serial.ValueString()
 		vvWakeOnLanID := devicesLiveToolsWakeOnLan.WakeOnLanID.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Devices.GetDeviceLiveToolsWakeOnLan(vvSerial, vvWakeOnLanID)
 
 		if err != nil || response1 == nil {
@@ -184,7 +187,7 @@ func ResponseDevicesGetDeviceLiveToolsWakeOnLanItemToBody(state DevicesLiveTools
 					}(),
 				}
 			}
-			return &ResponseDevicesGetDeviceLiveToolsWakeOnLanRequest{}
+			return nil
 		}(),
 		Status:      types.StringValue(response.Status),
 		URL:         types.StringValue(response.URL),

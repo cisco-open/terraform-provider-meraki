@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -156,7 +173,7 @@ func (d *OrganizationsUplinksStatusesDataSource) Schema(_ context.Context, _ dat
 										MarkdownDescription: `Primary DNS IP`,
 										Computed:            true,
 									},
-									"provider": schema.StringAttribute{
+									"provider_r": schema.StringAttribute{
 										MarkdownDescription: `Network Provider`,
 										Computed:            true,
 									},
@@ -221,6 +238,8 @@ func (d *OrganizationsUplinksStatusesDataSource) Read(ctx context.Context, req d
 		queryParams1.Serials = elementsToStrings(ctx, organizationsUplinksStatuses.Serials)
 		queryParams1.Iccids = elementsToStrings(ctx, organizationsUplinksStatuses.Iccids)
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Organizations.GetOrganizationUplinksStatuses(vvOrganizationID, &queryParams1)
 
 		if err != nil || response1 == nil {
@@ -281,7 +300,7 @@ type ResponseItemOrganizationsGetOrganizationUplinksStatusesUplinks struct {
 	IP             types.String                                                              `tfsdk:"ip"`
 	IPAssignedBy   types.String                                                              `tfsdk:"ip_assigned_by"`
 	PrimaryDNS     types.String                                                              `tfsdk:"primary_dns"`
-	Provider       types.String                                                              `tfsdk:"provider"`
+	Provider       types.String                                                              `tfsdk:"provider_r"`
 	PublicIP       types.String                                                              `tfsdk:"public_ip"`
 	SecondaryDNS   types.String                                                              `tfsdk:"secondary_dns"`
 	SignalStat     *ResponseItemOrganizationsGetOrganizationUplinksStatusesUplinksSignalStat `tfsdk:"signal_stat"`
@@ -311,7 +330,7 @@ func ResponseOrganizationsGetOrganizationUplinksStatusesItemsToBody(state Organi
 						Role: types.StringValue(item.HighAvailability.Role),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationUplinksStatusesHighAvailability{}
+				return nil
 			}(),
 			LastReportedAt: types.StringValue(item.LastReportedAt),
 			Model:          types.StringValue(item.Model),
@@ -342,7 +361,7 @@ func ResponseOrganizationsGetOrganizationUplinksStatusesItemsToBody(state Organi
 										Rsrq: types.StringValue(uplinks.SignalStat.Rsrq),
 									}
 								}
-								return &ResponseItemOrganizationsGetOrganizationUplinksStatusesUplinksSignalStat{}
+								return nil
 							}(),
 							SignalType: types.StringValue(uplinks.SignalType),
 							Status:     types.StringValue(uplinks.Status),
@@ -350,7 +369,7 @@ func ResponseOrganizationsGetOrganizationUplinksStatusesItemsToBody(state Organi
 					}
 					return &result
 				}
-				return &[]ResponseItemOrganizationsGetOrganizationUplinksStatusesUplinks{}
+				return nil
 			}(),
 		}
 		items = append(items, itemState)

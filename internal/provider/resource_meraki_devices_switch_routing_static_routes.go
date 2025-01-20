@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -55,6 +71,14 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Schema(_ context.Context, _ r
 					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"management_next_hop": schema.StringAttribute{
+				MarkdownDescription: `Optional fallback IP address for management traffic`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name or description of the layer 3 static route`,
 				Computed:            true,
@@ -64,7 +88,7 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Schema(_ context.Context, _ r
 				},
 			},
 			"next_hop_ip": schema.StringAttribute{
-				MarkdownDescription: ` The IP address of the router to which traffic for this destination network should be sent`,
+				MarkdownDescription: `The IP address of the router to which traffic for this destination network should be sent`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -86,10 +110,6 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Schema(_ context.Context, _ r
 			"static_route_id": schema.StringAttribute{
 				MarkdownDescription: `The identifier of a layer 3 static route`,
 				Computed:            true,
-				Optional:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"subnet": schema.StringAttribute{
 				MarkdownDescription: `The IP address of the subnetwork specified in CIDR notation (ex. 1.2.3.0/24)`,
@@ -129,15 +149,13 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Create(ctx context.Context, r
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Switch.GetDeviceSwitchRoutingStaticRoutes(vvSerial)
 	//Have Create
-	if err != nil {
-		if restyResp1 != nil {
-			if restyResp1.StatusCode() != 404 {
-				resp.Diagnostics.AddError(
-					"Failure when executing GetDeviceSwitchRoutingStaticRoutes",
-					err.Error(),
-				)
-				return
-			}
+	if err != nil || restyResp1 == nil {
+		if restyResp1.StatusCode() != 404 {
+			resp.Diagnostics.AddError(
+				"Failure when executing GetDeviceSwitchRoutingStaticRoutes",
+				err.Error(),
+			)
+			return
 		}
 	}
 	if responseVerifyItem != nil {
@@ -145,14 +163,7 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Create(ctx context.Context, r
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 		if result != nil {
 			result2 := result.(map[string]interface{})
-			vvStaticRouteID, ok := result2["StaticRouteID"].(string)
-			if !ok {
-				resp.Diagnostics.AddError(
-					"Failure when parsing path parameter StaticRouteID",
-					"Fail Parsing StaticRouteID",
-				)
-				return
-			}
+			vvStaticRouteID := result2["StaticRouteID"].(string)
 			r.client.Switch.UpdateDeviceSwitchRoutingStaticRoute(vvSerial, vvStaticRouteID, data.toSdkApiRequestUpdate(ctx))
 			responseVerifyItem2, _, _ := r.client.Switch.GetDeviceSwitchRoutingStaticRoute(vvSerial, vvStaticRouteID)
 			if responseVerifyItem2 != nil {
@@ -202,18 +213,11 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Create(ctx context.Context, r
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
 		result2 := result.(map[string]interface{})
-		vvStaticRouteID, ok := result2["StaticRouteID"].(string)
-		if !ok {
-			resp.Diagnostics.AddError(
-				"Failure when parsing path parameter StaticRouteID",
-				err.Error(),
-			)
-			return
-		}
+		vvStaticRouteID := result2["StaticRouteID"].(string)
 		responseVerifyItem2, restyRespGet, err := r.client.Switch.GetDeviceSwitchRoutingStaticRoute(vvSerial, vvStaticRouteID)
 		if responseVerifyItem2 != nil && err == nil {
-			data = ResponseSwitchGetDeviceSwitchRoutingStaticRouteItemToBodyRs(data, responseVerifyItem2, false)
-			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			data3 := ResponseSwitchGetDeviceSwitchRoutingStaticRouteItemToBodyRs(data, responseVerifyItem2, false)
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data3)...)
 			return
 		} else {
 			if restyRespGet != nil {
@@ -290,6 +294,7 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Read(ctx context.Context, req
 	//update path params assigned
 	resp.Diagnostics.Append(diags...)
 }
+
 func (r *DevicesSwitchRoutingStaticRoutesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
 
@@ -374,6 +379,7 @@ type DevicesSwitchRoutingStaticRoutesRs struct {
 	Serial                      types.String `tfsdk:"serial"`
 	StaticRouteID               types.String `tfsdk:"static_route_id"`
 	AdvertiseViaOspfEnabled     types.Bool   `tfsdk:"advertise_via_ospf_enabled"`
+	ManagementNextHop           types.String `tfsdk:"management_next_hop"`
 	Name                        types.String `tfsdk:"name"`
 	NextHopIP                   types.String `tfsdk:"next_hop_ip"`
 	PreferOverOspfRoutesEnabled types.Bool   `tfsdk:"prefer_over_ospf_routes_enabled"`
@@ -430,6 +436,12 @@ func (r *DevicesSwitchRoutingStaticRoutesRs) toSdkApiRequestUpdate(ctx context.C
 	} else {
 		advertiseViaOspfEnabled = nil
 	}
+	managementNextHop := new(string)
+	if !r.ManagementNextHop.IsUnknown() && !r.ManagementNextHop.IsNull() {
+		*managementNextHop = r.ManagementNextHop.ValueString()
+	} else {
+		managementNextHop = &emptyString
+	}
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
 		*name = r.Name.ValueString()
@@ -456,6 +468,7 @@ func (r *DevicesSwitchRoutingStaticRoutesRs) toSdkApiRequestUpdate(ctx context.C
 	}
 	out := merakigosdk.RequestSwitchUpdateDeviceSwitchRoutingStaticRoute{
 		AdvertiseViaOspfEnabled:     advertiseViaOspfEnabled,
+		ManagementNextHop:           *managementNextHop,
 		Name:                        *name,
 		NextHopIP:                   *nextHopIP,
 		PreferOverOspfRoutesEnabled: preferOverOspfRoutesEnabled,
@@ -473,8 +486,9 @@ func ResponseSwitchGetDeviceSwitchRoutingStaticRouteItemToBodyRs(state DevicesSw
 			}
 			return types.Bool{}
 		}(),
-		Name:      types.StringValue(response.Name),
-		NextHopIP: types.StringValue(response.NextHopIP),
+		ManagementNextHop: types.StringValue(response.ManagementNextHop),
+		Name:              types.StringValue(response.Name),
+		NextHopIP:         types.StringValue(response.NextHopIP),
 		PreferOverOspfRoutesEnabled: func() types.Bool {
 			if response.PreferOverOspfRoutesEnabled != nil {
 				return types.BoolValue(*response.PreferOverOspfRoutesEnabled)

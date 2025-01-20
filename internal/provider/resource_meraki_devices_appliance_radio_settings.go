@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -72,17 +72,19 @@ func (r *DevicesApplianceRadioSettingsResource) Schema(_ context.Context, _ reso
 				Attributes: map[string]schema.Attribute{
 
 					"channel": schema.Int64Attribute{
-						MarkdownDescription: `Manual channel for 5 GHz`,
-						Computed:            true,
-						Optional:            true,
+						MarkdownDescription: `Manual channel for 5 GHz
+                                        Allowed values: [36,40,44,48,52,56,60,64,100,104,108,112,116,120,124,128,132,136,140,144,149,153,157,161,165,169,173,177]`,
+						Computed: true,
+						Optional: true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
 						},
 					},
 					"channel_width": schema.Int64Attribute{
-						MarkdownDescription: `Manual channel width for 5 GHz`,
-						Computed:            true,
-						Optional:            true,
+						MarkdownDescription: `Manual channel width for 5 GHz
+                                        Allowed values: [0,20,40,80,160]`,
+						Computed: true,
+						Optional: true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
 						},
@@ -119,9 +121,10 @@ func (r *DevicesApplianceRadioSettingsResource) Schema(_ context.Context, _ reso
 				Attributes: map[string]schema.Attribute{
 
 					"channel": schema.Int64Attribute{
-						MarkdownDescription: `Manual channel for 2.4 GHz`,
-						Computed:            true,
-						Optional:            true,
+						MarkdownDescription: `Manual channel for 2.4 GHz
+                                        Allowed values: [1,2,3,4,5,6,7,8,9,10,11,12,13,14]`,
+						Computed: true,
+						Optional: true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
 						},
@@ -419,7 +422,7 @@ func ResponseApplianceGetDeviceApplianceRadioSettingsItemToBodyRs(state DevicesA
 					}(),
 				}
 			}
-			return &ResponseApplianceGetDeviceApplianceRadioSettingsFiveGhzSettingsRs{}
+			return nil
 		}(),
 		RfProfileID: types.StringValue(response.RfProfileID),
 		Serial:      types.StringValue(response.Serial),
@@ -440,7 +443,7 @@ func ResponseApplianceGetDeviceApplianceRadioSettingsItemToBodyRs(state DevicesA
 					}(),
 				}
 			}
-			return &ResponseApplianceGetDeviceApplianceRadioSettingsTwoFourGhzSettingsRs{}
+			return nil
 		}(),
 	}
 	if is_read {

@@ -11,6 +11,11 @@ resource "meraki_networks_wireless_ssids_schedules" "example" {
     start_day  = "Tuesday"
     start_time = "01:00"
   }]
+  ranges_in_seconds = [{
+
+    end   = 1
+    start = 604800
+  }]
 }
 
 output "meraki_networks_wireless_ssids_schedules_example" {

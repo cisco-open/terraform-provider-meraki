@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -65,9 +81,10 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 				Attributes: map[string]schema.Attribute{
 
 					"band_operation_mode": schema.StringAttribute{
-						MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'. Defaults to dual.`,
-						Computed:            true,
-						Optional:            true,
+						MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'. Defaults to dual.
+                                        Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+						Computed: true,
+						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
@@ -99,7 +116,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						Attributes: map[string]schema.Attribute{
 
 							"enabled": schema.SetAttribute{
-								MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"`,
+								MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"]`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Set{
@@ -113,9 +130,10 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 				},
 			},
 			"band_selection_type": schema.StringAttribute{
-				MarkdownDescription: `Band selection can be set to either 'ssid' or 'ap'. This param is required on creation.`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `Band selection can be set to either 'ssid' or 'ap'. This param is required on creation.
+                                  Allowed values: [ap,ssid]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -190,13 +208,14 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
 						},
-						Default:     setdefault.StaticValue(types.SetValueMust(types.Int64Type, make([]attr.Value, 0))),
+
 						ElementType: types.Int64Type,
 					},
 				},
 			},
 			"flex_radios": schema.SingleNestedAttribute{
 				MarkdownDescription: `Flex radio settings.`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -205,6 +224,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 
 					"by_model": schema.SetNestedAttribute{
 						MarkdownDescription: `Flex radios by model.`,
+						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Set{
 							setplanmodifier.UseStateForUnknown(),
@@ -214,6 +234,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 
 								"bands": schema.SetAttribute{
 									MarkdownDescription: `Band to use for each flex radio. For example, ['6'] will set the AP's first flex radio to 6 GHz`,
+									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Set{
 										setplanmodifier.UseStateForUnknown(),
@@ -223,6 +244,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 								},
 								"model": schema.StringAttribute{
 									MarkdownDescription: `Model of the AP`,
+									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -237,10 +259,27 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 				MarkdownDescription: `The name of the new profile. Must be unique.`,
 				Computed:            true,
 			},
-			"min_bitrate_type": schema.StringAttribute{
-				MarkdownDescription: `Minimum bitrate can be set to either 'band' or 'ssid'. Defaults to band.`,
+			"is_indoor_default": schema.BoolAttribute{
+				MarkdownDescription: `Set this profile as the default indoor rf profile. If the profile ID is one of 'indoor' or 'outdoor',   then a new profile will be created from the respective ID and set as the default`,
 				Computed:            true,
 				Optional:            true,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"is_outdoor_default": schema.BoolAttribute{
+				MarkdownDescription: `Set this profile as the default outdoor rf profile. If the profile ID is one of 'indoor' or 'outdoor',   then a new profile will be created from the respective ID and set as the default`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"min_bitrate_type": schema.StringAttribute{
+				MarkdownDescription: `Minimum bitrate can be set to either 'band' or 'ssid'. Defaults to band.
+                                  Allowed values: [band,ssid]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -282,9 +321,10 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						Attributes: map[string]schema.Attribute{
 
 							"band_operation_mode": schema.StringAttribute{
-								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
+                                              Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -316,7 +356,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 								Attributes: map[string]schema.Attribute{
 
 									"enabled": schema.SetAttribute{
-										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"`,
+										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"]`,
 										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Set{
@@ -352,9 +392,10 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						Attributes: map[string]schema.Attribute{
 
 							"band_operation_mode": schema.StringAttribute{
-								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
+                                              Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -386,7 +427,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 								Attributes: map[string]schema.Attribute{
 
 									"enabled": schema.SetAttribute{
-										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"`,
+										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"]`,
 										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Set{
@@ -422,9 +463,10 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						Attributes: map[string]schema.Attribute{
 
 							"band_operation_mode": schema.StringAttribute{
-								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
+                                              Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -456,7 +498,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 								Attributes: map[string]schema.Attribute{
 
 									"enabled": schema.SetAttribute{
-										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"`,
+										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"]`,
 										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Set{
@@ -492,9 +534,10 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						Attributes: map[string]schema.Attribute{
 
 							"band_operation_mode": schema.StringAttribute{
-								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
+                                              Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -526,7 +569,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 								Attributes: map[string]schema.Attribute{
 
 									"enabled": schema.SetAttribute{
-										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"`,
+										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"]`,
 										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Set{
@@ -562,9 +605,10 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						Attributes: map[string]schema.Attribute{
 
 							"band_operation_mode": schema.StringAttribute{
-								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
+                                              Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -596,7 +640,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 								Attributes: map[string]schema.Attribute{
 
 									"enabled": schema.SetAttribute{
-										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"`,
+										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"]`,
 										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Set{
@@ -632,9 +676,10 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						Attributes: map[string]schema.Attribute{
 
 							"band_operation_mode": schema.StringAttribute{
-								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
+                                              Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -666,7 +711,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 								Attributes: map[string]schema.Attribute{
 
 									"enabled": schema.SetAttribute{
-										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"`,
+										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"]`,
 										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Set{
@@ -702,9 +747,10 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						Attributes: map[string]schema.Attribute{
 
 							"band_operation_mode": schema.StringAttribute{
-								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
+                                              Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -736,7 +782,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 								Attributes: map[string]schema.Attribute{
 
 									"enabled": schema.SetAttribute{
-										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"`,
+										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"]`,
 										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Set{
@@ -772,9 +818,10 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						Attributes: map[string]schema.Attribute{
 
 							"band_operation_mode": schema.StringAttribute{
-								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
+                                              Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -806,7 +853,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 								Attributes: map[string]schema.Attribute{
 
 									"enabled": schema.SetAttribute{
-										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"`,
+										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"]`,
 										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Set{
@@ -842,9 +889,10 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						Attributes: map[string]schema.Attribute{
 
 							"band_operation_mode": schema.StringAttribute{
-								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
+                                              Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -876,7 +924,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 								Attributes: map[string]schema.Attribute{
 
 									"enabled": schema.SetAttribute{
-										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"`,
+										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"]`,
 										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Set{
@@ -912,9 +960,10 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						Attributes: map[string]schema.Attribute{
 
 							"band_operation_mode": schema.StringAttribute{
-								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
+                                              Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -946,7 +995,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 								Attributes: map[string]schema.Attribute{
 
 									"enabled": schema.SetAttribute{
-										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"`,
+										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"]`,
 										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Set{
@@ -982,9 +1031,10 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						Attributes: map[string]schema.Attribute{
 
 							"band_operation_mode": schema.StringAttribute{
-								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
+                                              Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -1016,7 +1066,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 								Attributes: map[string]schema.Attribute{
 
 									"enabled": schema.SetAttribute{
-										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"`,
+										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"]`,
 										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Set{
@@ -1052,9 +1102,10 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						Attributes: map[string]schema.Attribute{
 
 							"band_operation_mode": schema.StringAttribute{
-								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
+                                              Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -1086,7 +1137,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 								Attributes: map[string]schema.Attribute{
 
 									"enabled": schema.SetAttribute{
-										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"`,
+										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"]`,
 										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Set{
@@ -1122,9 +1173,10 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						Attributes: map[string]schema.Attribute{
 
 							"band_operation_mode": schema.StringAttribute{
-								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
+                                              Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -1156,7 +1208,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 								Attributes: map[string]schema.Attribute{
 
 									"enabled": schema.SetAttribute{
-										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"`,
+										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"]`,
 										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Set{
@@ -1192,9 +1244,10 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						Attributes: map[string]schema.Attribute{
 
 							"band_operation_mode": schema.StringAttribute{
-								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
+                                              Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -1226,7 +1279,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 								Attributes: map[string]schema.Attribute{
 
 									"enabled": schema.SetAttribute{
-										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"`,
+										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"]`,
 										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Set{
@@ -1262,9 +1315,10 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 						Attributes: map[string]schema.Attribute{
 
 							"band_operation_mode": schema.StringAttribute{
-								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `Choice between 'dual', '2.4ghz', '5ghz', '6ghz' or 'multi'.
+                                              Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -1296,7 +1350,7 @@ func (r *NetworksWirelessRfProfilesResource) Schema(_ context.Context, _ resourc
 								Attributes: map[string]schema.Attribute{
 
 									"enabled": schema.SetAttribute{
-										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"`,
+										MarkdownDescription: `List of enabled bands. Can include ["2.4", "5", "6", "disabled"]`,
 										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Set{
@@ -1579,7 +1633,7 @@ func (r *NetworksWirelessRfProfilesResource) Create(ctx context.Context, req res
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter RfProfileID",
-				err.Error(),
+				"Error",
 			)
 			return
 		}
@@ -1648,13 +1702,13 @@ func (r *NetworksWirelessRfProfilesResource) Read(ctx context.Context, req resou
 				return
 			}
 			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkWirelessRfProfile",
+				"Failure when executing GetNetworkWirelessRfProfiles",
 				err.Error(),
 			)
 			return
 		}
 		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkWirelessRfProfile",
+			"Failure when executing GetNetworkWirelessRfProfiles",
 			err.Error(),
 		)
 		return
@@ -1692,7 +1746,6 @@ func (r *NetworksWirelessRfProfilesResource) Update(ctx context.Context, req res
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvRfProfileID := data.RfProfileID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessRfProfile(vvNetworkID, vvRfProfileID, dataRequest)
@@ -1754,6 +1807,8 @@ type NetworksWirelessRfProfilesRs struct {
 	ClientBalancingEnabled types.Bool                                                       `tfsdk:"client_balancing_enabled"`
 	FiveGhzSettings        *ResponseWirelessGetNetworkWirelessRfProfileFiveGhzSettingsRs    `tfsdk:"five_ghz_settings"`
 	ID                     types.String                                                     `tfsdk:"id"`
+	IsIndoorDefault        types.Bool                                                       `tfsdk:"is_indoor_default"`
+	IsOutdoorDefault       types.Bool                                                       `tfsdk:"is_outdoor_default"`
 	MinBitrateType         types.String                                                     `tfsdk:"min_bitrate_type"`
 	Name                   types.String                                                     `tfsdk:"name"`
 	PerSSIDSettings        *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettingsRs    `tfsdk:"per_ssid_settings"`
@@ -2741,6 +2796,18 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestUpdate(ctx context.Context
 			}(),
 		}
 	}
+	isIndoorDefault := new(bool)
+	if !r.IsIndoorDefault.IsUnknown() && !r.IsIndoorDefault.IsNull() {
+		*isIndoorDefault = r.IsIndoorDefault.ValueBool()
+	} else {
+		isIndoorDefault = nil
+	}
+	isOutdoorDefault := new(bool)
+	if !r.IsOutdoorDefault.IsUnknown() && !r.IsOutdoorDefault.IsNull() {
+		*isOutdoorDefault = r.IsOutdoorDefault.ValueBool()
+	} else {
+		isOutdoorDefault = nil
+	}
 	minBitrateType := new(string)
 	if !r.MinBitrateType.IsUnknown() && !r.MinBitrateType.IsNull() {
 		*minBitrateType = r.MinBitrateType.ValueString()
@@ -3228,7 +3295,12 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestUpdate(ctx context.Context
 			}
 			return nil
 		}()
-		minBitrate := r.TwoFourGhzSettings.MinBitrate.ValueFloat64Pointer()
+		minBitrate := func() *float64 {
+			if !r.TwoFourGhzSettings.MinBitrate.IsUnknown() && !r.TwoFourGhzSettings.MinBitrate.IsNull() {
+				return r.TwoFourGhzSettings.MinBitrate.ValueFloat64Pointer()
+			}
+			return nil
+		}()
 		minPower := func() *int64 {
 			if !r.TwoFourGhzSettings.MinPower.IsUnknown() && !r.TwoFourGhzSettings.MinPower.IsNull() {
 				return r.TwoFourGhzSettings.MinPower.ValueInt64Pointer()
@@ -3259,6 +3331,8 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestUpdate(ctx context.Context
 		ClientBalancingEnabled: clientBalancingEnabled,
 		FiveGhzSettings:        requestWirelessUpdateNetworkWirelessRfProfileFiveGhzSettings,
 		FlexRadios:             requestWirelessUpdateNetworkWirelessRfProfileFlexRadios,
+		IsIndoorDefault:        isIndoorDefault,
+		IsOutdoorDefault:       isOutdoorDefault,
 		MinBitrateType:         *minBitrateType,
 		Name:                   *name,
 		PerSSIDSettings:        requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings,
@@ -3289,11 +3363,11 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 								Enabled: StringSliceToSet(response.ApBandSettings.Bands.Enabled),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessRfProfileApBandSettingsBandsRs{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessRfProfileApBandSettingsRs{}
+			return nil
 		}(),
 		BandSelectionType: types.StringValue(response.BandSelectionType),
 		ClientBalancingEnabled: func() types.Bool {
@@ -3338,7 +3412,19 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 			}
 			return nil
 		}(),
-		ID:             types.StringValue(response.ID),
+		ID: types.StringValue(response.ID),
+		IsIndoorDefault: func() types.Bool {
+			if response.IsIndoorDefault != nil {
+				return types.BoolValue(*response.IsIndoorDefault)
+			}
+			return types.Bool{}
+		}(),
+		IsOutdoorDefault: func() types.Bool {
+			if response.IsOutdoorDefault != nil {
+				return types.BoolValue(*response.IsOutdoorDefault)
+			}
+			return types.Bool{}
+		}(),
 		MinBitrateType: types.StringValue(response.MinBitrateType),
 		Name:           types.StringValue(response.Name),
 		NetworkID:      types.StringValue(response.NetworkID),
@@ -3361,7 +3447,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 											Enabled: StringSliceToSet(response.PerSSIDSettings.Status0.Bands.Enabled),
 										}
 									}
-									return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings0BandsRs{}
+									return nil
 								}(),
 								MinBitrate: func() types.Int64 {
 									if response.PerSSIDSettings.Status0.MinBitrate != nil {
@@ -3372,7 +3458,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 								Name: types.StringValue(response.PerSSIDSettings.Status0.Name),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings0Rs{}
+						return nil
 					}(),
 					Status1: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings1Rs {
 						if response.PerSSIDSettings.Status1 != nil {
@@ -3390,7 +3476,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 											Enabled: StringSliceToSet(response.PerSSIDSettings.Status1.Bands.Enabled),
 										}
 									}
-									return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings1BandsRs{}
+									return nil
 								}(),
 								MinBitrate: func() types.Int64 {
 									if response.PerSSIDSettings.Status1.MinBitrate != nil {
@@ -3401,7 +3487,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 								Name: types.StringValue(response.PerSSIDSettings.Status1.Name),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings1Rs{}
+						return nil
 					}(),
 					Status10: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings10Rs {
 						if response.PerSSIDSettings.Status10 != nil {
@@ -3419,7 +3505,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 											Enabled: StringSliceToSet(response.PerSSIDSettings.Status10.Bands.Enabled),
 										}
 									}
-									return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings10BandsRs{}
+									return nil
 								}(),
 								MinBitrate: func() types.Int64 {
 									if response.PerSSIDSettings.Status10.MinBitrate != nil {
@@ -3430,7 +3516,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 								Name: types.StringValue(response.PerSSIDSettings.Status10.Name),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings10Rs{}
+						return nil
 					}(),
 					Status11: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings11Rs {
 						if response.PerSSIDSettings.Status11 != nil {
@@ -3448,7 +3534,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 											Enabled: StringSliceToSet(response.PerSSIDSettings.Status11.Bands.Enabled),
 										}
 									}
-									return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings11BandsRs{}
+									return nil
 								}(),
 								MinBitrate: func() types.Int64 {
 									if response.PerSSIDSettings.Status11.MinBitrate != nil {
@@ -3459,7 +3545,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 								Name: types.StringValue(response.PerSSIDSettings.Status11.Name),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings11Rs{}
+						return nil
 					}(),
 					Status12: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings12Rs {
 						if response.PerSSIDSettings.Status12 != nil {
@@ -3477,7 +3563,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 											Enabled: StringSliceToSet(response.PerSSIDSettings.Status12.Bands.Enabled),
 										}
 									}
-									return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings12BandsRs{}
+									return nil
 								}(),
 								MinBitrate: func() types.Int64 {
 									if response.PerSSIDSettings.Status12.MinBitrate != nil {
@@ -3488,7 +3574,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 								Name: types.StringValue(response.PerSSIDSettings.Status12.Name),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings12Rs{}
+						return nil
 					}(),
 					Status13: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings13Rs {
 						if response.PerSSIDSettings.Status13 != nil {
@@ -3506,7 +3592,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 											Enabled: StringSliceToSet(response.PerSSIDSettings.Status13.Bands.Enabled),
 										}
 									}
-									return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings13BandsRs{}
+									return nil
 								}(),
 								MinBitrate: func() types.Int64 {
 									if response.PerSSIDSettings.Status13.MinBitrate != nil {
@@ -3517,7 +3603,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 								Name: types.StringValue(response.PerSSIDSettings.Status13.Name),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings13Rs{}
+						return nil
 					}(),
 					Status14: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings14Rs {
 						if response.PerSSIDSettings.Status14 != nil {
@@ -3535,7 +3621,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 											Enabled: StringSliceToSet(response.PerSSIDSettings.Status14.Bands.Enabled),
 										}
 									}
-									return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings14BandsRs{}
+									return nil
 								}(),
 								MinBitrate: func() types.Int64 {
 									if response.PerSSIDSettings.Status14.MinBitrate != nil {
@@ -3546,7 +3632,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 								Name: types.StringValue(response.PerSSIDSettings.Status14.Name),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings14Rs{}
+						return nil
 					}(),
 					Status2: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings2Rs {
 						if response.PerSSIDSettings.Status2 != nil {
@@ -3564,7 +3650,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 											Enabled: StringSliceToSet(response.PerSSIDSettings.Status2.Bands.Enabled),
 										}
 									}
-									return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings2BandsRs{}
+									return nil
 								}(),
 								MinBitrate: func() types.Int64 {
 									if response.PerSSIDSettings.Status2.MinBitrate != nil {
@@ -3575,7 +3661,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 								Name: types.StringValue(response.PerSSIDSettings.Status2.Name),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings2Rs{}
+						return nil
 					}(),
 					Status3: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings3Rs {
 						if response.PerSSIDSettings.Status3 != nil {
@@ -3593,7 +3679,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 											Enabled: StringSliceToSet(response.PerSSIDSettings.Status3.Bands.Enabled),
 										}
 									}
-									return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings3BandsRs{}
+									return nil
 								}(),
 								MinBitrate: func() types.Int64 {
 									if response.PerSSIDSettings.Status3.MinBitrate != nil {
@@ -3604,7 +3690,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 								Name: types.StringValue(response.PerSSIDSettings.Status3.Name),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings3Rs{}
+						return nil
 					}(),
 					Status4: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings4Rs {
 						if response.PerSSIDSettings.Status4 != nil {
@@ -3622,7 +3708,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 											Enabled: StringSliceToSet(response.PerSSIDSettings.Status4.Bands.Enabled),
 										}
 									}
-									return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings4BandsRs{}
+									return nil
 								}(),
 								MinBitrate: func() types.Int64 {
 									if response.PerSSIDSettings.Status4.MinBitrate != nil {
@@ -3633,7 +3719,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 								Name: types.StringValue(response.PerSSIDSettings.Status4.Name),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings4Rs{}
+						return nil
 					}(),
 					Status5: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings5Rs {
 						if response.PerSSIDSettings.Status5 != nil {
@@ -3651,7 +3737,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 											Enabled: StringSliceToSet(response.PerSSIDSettings.Status5.Bands.Enabled),
 										}
 									}
-									return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings5BandsRs{}
+									return nil
 								}(),
 								MinBitrate: func() types.Int64 {
 									if response.PerSSIDSettings.Status5.MinBitrate != nil {
@@ -3662,7 +3748,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 								Name: types.StringValue(response.PerSSIDSettings.Status5.Name),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings5Rs{}
+						return nil
 					}(),
 					Status6: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings6Rs {
 						if response.PerSSIDSettings.Status6 != nil {
@@ -3680,7 +3766,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 											Enabled: StringSliceToSet(response.PerSSIDSettings.Status6.Bands.Enabled),
 										}
 									}
-									return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings6BandsRs{}
+									return nil
 								}(),
 								MinBitrate: func() types.Int64 {
 									if response.PerSSIDSettings.Status6.MinBitrate != nil {
@@ -3691,7 +3777,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 								Name: types.StringValue(response.PerSSIDSettings.Status6.Name),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings6Rs{}
+						return nil
 					}(),
 					Status7: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings7Rs {
 						if response.PerSSIDSettings.Status7 != nil {
@@ -3709,7 +3795,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 											Enabled: StringSliceToSet(response.PerSSIDSettings.Status7.Bands.Enabled),
 										}
 									}
-									return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings7BandsRs{}
+									return nil
 								}(),
 								MinBitrate: func() types.Int64 {
 									if response.PerSSIDSettings.Status7.MinBitrate != nil {
@@ -3720,7 +3806,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 								Name: types.StringValue(response.PerSSIDSettings.Status7.Name),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings7Rs{}
+						return nil
 					}(),
 					Status8: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings8Rs {
 						if response.PerSSIDSettings.Status8 != nil {
@@ -3738,7 +3824,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 											Enabled: StringSliceToSet(response.PerSSIDSettings.Status8.Bands.Enabled),
 										}
 									}
-									return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings8BandsRs{}
+									return nil
 								}(),
 								MinBitrate: func() types.Int64 {
 									if response.PerSSIDSettings.Status8.MinBitrate != nil {
@@ -3749,7 +3835,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 								Name: types.StringValue(response.PerSSIDSettings.Status8.Name),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings8Rs{}
+						return nil
 					}(),
 					Status9: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings9Rs {
 						if response.PerSSIDSettings.Status9 != nil {
@@ -3767,7 +3853,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 											Enabled: StringSliceToSet(response.PerSSIDSettings.Status9.Bands.Enabled),
 										}
 									}
-									return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings9BandsRs{}
+									return nil
 								}(),
 								MinBitrate: func() types.Int64 {
 									if response.PerSSIDSettings.Status9.MinBitrate != nil {
@@ -3778,11 +3864,11 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 								Name: types.StringValue(response.PerSSIDSettings.Status9.Name),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings9Rs{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettingsRs{}
+			return nil
 		}(),
 		SixGhzSettings: func() *ResponseWirelessGetNetworkWirelessRfProfileSixGhzSettingsRs {
 			if response.SixGhzSettings != nil {
@@ -3831,7 +3917,7 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(state NetworksWirel
 					}(),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessRfProfileTransmissionRs{}
+			return nil
 		}(),
 		TwoFourGhzSettings: func() *ResponseWirelessGetNetworkWirelessRfProfileTwoFourGhzSettingsRs {
 			if response.TwoFourGhzSettings != nil {

@@ -1,10 +1,26 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -77,9 +93,10 @@ func (r *OrganizationsAlertsProfilesResource) Schema(_ context.Context, _ resour
 						},
 					},
 					"interface": schema.StringAttribute{
-						MarkdownDescription: `The uplink observed for the alert`,
-						Computed:            true,
-						Optional:            true,
+						MarkdownDescription: `The uplink observed for the alert
+                                        Allowed values: [cellular,wan1,wan2,wan3]`,
+						Computed: true,
+						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
@@ -159,7 +176,8 @@ func (r *OrganizationsAlertsProfilesResource) Schema(_ context.Context, _ resour
 				},
 			},
 			"id": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `The alert config ID`,
+				Computed:            true,
 			},
 			"network_tags": schema.SetAttribute{
 				MarkdownDescription: `Networks with these tags will be monitored for the alert`,
@@ -207,9 +225,10 @@ func (r *OrganizationsAlertsProfilesResource) Schema(_ context.Context, _ resour
 				},
 			},
 			"type": schema.StringAttribute{
-				MarkdownDescription: `The alert type`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The alert type
+                                  Allowed values: [appOutage,voipJitter,voipMos,voipPacketLoss,wanLatency,wanPacketLoss,wanStatus,wanUtilization]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -562,10 +581,10 @@ func (r *OrganizationsAlertsProfilesRs) toSdkApiRequestCreate(ctx context.Contex
 	var requestOrganizationsCreateOrganizationAlertsProfileRecipients *merakigosdk.RequestOrganizationsCreateOrganizationAlertsProfileRecipients
 	if r.Recipients != nil {
 		var emails []string = nil
-
+		//Hoola aqui
 		r.Recipients.Emails.ElementsAs(ctx, &emails, false)
 		var httpServerIDs []string = nil
-
+		//Hoola aqui
 		r.Recipients.HTTPServerIDs.ElementsAs(ctx, &httpServerIDs, false)
 		requestOrganizationsCreateOrganizationAlertsProfileRecipients = &merakigosdk.RequestOrganizationsCreateOrganizationAlertsProfileRecipients{
 			Emails:        emails,
@@ -662,10 +681,10 @@ func (r *OrganizationsAlertsProfilesRs) toSdkApiRequestUpdate(ctx context.Contex
 	var requestOrganizationsUpdateOrganizationAlertsProfileRecipients *merakigosdk.RequestOrganizationsUpdateOrganizationAlertsProfileRecipients
 	if r.Recipients != nil {
 		var emails []string = nil
-
+		//Hoola aqui
 		r.Recipients.Emails.ElementsAs(ctx, &emails, false)
 		var httpServerIDs []string = nil
-
+		//Hoola aqui
 		r.Recipients.HTTPServerIDs.ElementsAs(ctx, &httpServerIDs, false)
 		requestOrganizationsUpdateOrganizationAlertsProfileRecipients = &merakigosdk.RequestOrganizationsUpdateOrganizationAlertsProfileRecipients{
 			Emails:        emails,
@@ -716,7 +735,7 @@ func ResponseOrganizationsGetOrganizationAlertsProfilesItemToBodyRs(state Organi
 					}(),
 				}
 			}
-			return &ResponseItemOrganizationsGetOrganizationAlertsProfilesAlertConditionRs{}
+			return nil
 		}(),
 		Description: types.StringValue(response.Description),
 		Enabled: func() types.Bool {
@@ -734,7 +753,7 @@ func ResponseOrganizationsGetOrganizationAlertsProfilesItemToBodyRs(state Organi
 					HTTPServerIDs: StringSliceToSet(response.Recipients.HTTPServerIDs),
 				}
 			}
-			return &ResponseItemOrganizationsGetOrganizationAlertsProfilesRecipientsRs{}
+			return nil
 		}(),
 		Type: types.StringValue(response.Type),
 	}

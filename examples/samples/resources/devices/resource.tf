@@ -25,7 +25,7 @@ resource "meraki_devices" "example" {
   # mac = "string"
   # move_map_marker = "false"
   # name = "string"
-  notes  = "This is a test from terraform"
+  notes  = "This is a test from terraform 2"
   serial = "QBSA-TFWJ-U4L9"
   # switch_profile_id = "string"
   # tags = ["string"]

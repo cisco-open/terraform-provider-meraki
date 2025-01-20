@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -54,60 +71,75 @@ func (d *OrganizationsAdaptivePolicyPoliciesDataSource) Schema(_ context.Context
 				Attributes: map[string]schema.Attribute{
 
 					"acls": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `The access control lists for the adaptive policy`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"id": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The ID for the access control list`,
+									Computed:            true,
 								},
 								"name": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The name for the access control list`,
+									Computed:            true,
 								},
 							},
 						},
 					},
 					"adaptive_policy_id": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The ID for the adaptive policy`,
+						Computed:            true,
 					},
 					"created_at": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The created at timestamp for the adaptive policy`,
+						Computed:            true,
 					},
 					"destination_group": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `The destination group for the given adaptive policy`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"id": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `The ID for the destination group`,
+								Computed:            true,
 							},
 							"name": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `The name for the destination group`,
+								Computed:            true,
 							},
 							"sgt": schema.Int64Attribute{
-								Computed: true,
+								MarkdownDescription: `The security group tag for the destination group`,
+								Computed:            true,
 							},
 						},
 					},
 					"last_entry_rule": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The rule to apply if there is no matching ACL`,
+						Computed:            true,
 					},
 					"source_group": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `The source group for the given adaptive policy`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"id": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `The ID for the source group`,
+								Computed:            true,
 							},
 							"name": schema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: `The name for the source group`,
+								Computed:            true,
 							},
 							"sgt": schema.Int64Attribute{
-								Computed: true,
+								MarkdownDescription: `The security group tag for the source group`,
+								Computed:            true,
 							},
 						},
 					},
 					"updated_at": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `The updated at timestamp for the adaptive policy`,
+						Computed:            true,
 					},
 				},
 			},
@@ -119,60 +151,75 @@ func (d *OrganizationsAdaptivePolicyPoliciesDataSource) Schema(_ context.Context
 					Attributes: map[string]schema.Attribute{
 
 						"acls": schema.SetNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `The access control lists for the adaptive policy`,
+							Computed:            true,
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 
 									"id": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The ID for the access control list`,
+										Computed:            true,
 									},
 									"name": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `The name for the access control list`,
+										Computed:            true,
 									},
 								},
 							},
 						},
 						"adaptive_policy_id": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The ID for the adaptive policy`,
+							Computed:            true,
 						},
 						"created_at": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The created at timestamp for the adaptive policy`,
+							Computed:            true,
 						},
 						"destination_group": schema.SingleNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `The destination group for the given adaptive policy`,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
 								"id": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The ID for the destination group`,
+									Computed:            true,
 								},
 								"name": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The name for the destination group`,
+									Computed:            true,
 								},
 								"sgt": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `The security group tag for the destination group`,
+									Computed:            true,
 								},
 							},
 						},
 						"last_entry_rule": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The rule to apply if there is no matching ACL`,
+							Computed:            true,
 						},
 						"source_group": schema.SingleNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `The source group for the given adaptive policy`,
+							Computed:            true,
 							Attributes: map[string]schema.Attribute{
 
 								"id": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The ID for the source group`,
+									Computed:            true,
 								},
 								"name": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The name for the source group`,
+									Computed:            true,
 								},
 								"sgt": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `The security group tag for the source group`,
+									Computed:            true,
 								},
 							},
 						},
 						"updated_at": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `The updated at timestamp for the adaptive policy`,
+							Computed:            true,
 						},
 					},
 				},
@@ -197,6 +244,8 @@ func (d *OrganizationsAdaptivePolicyPoliciesDataSource) Read(ctx context.Context
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetOrganizationAdaptivePolicyPolicies")
 		vvOrganizationID := organizationsAdaptivePolicyPolicies.OrganizationID.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Organizations.GetOrganizationAdaptivePolicyPolicies(vvOrganizationID)
 
@@ -223,6 +272,8 @@ func (d *OrganizationsAdaptivePolicyPoliciesDataSource) Read(ctx context.Context
 		log.Printf("[DEBUG] Selected method: GetOrganizationAdaptivePolicyPolicy")
 		vvOrganizationID := organizationsAdaptivePolicyPolicies.OrganizationID.ValueString()
 		vvID := organizationsAdaptivePolicyPolicies.ID.ValueString()
+
+		// has_unknown_response: None
 
 		response2, restyResp2, err := d.client.Organizations.GetOrganizationAdaptivePolicyPolicy(vvOrganizationID, vvID)
 
@@ -325,7 +376,7 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyPoliciesItemsToBody(state
 					}
 					return &result
 				}
-				return &[]ResponseItemOrganizationsGetOrganizationAdaptivePolicyPoliciesAcls{}
+				return nil
 			}(),
 			AdaptivePolicyID: types.StringValue(item.AdaptivePolicyID),
 			CreatedAt:        types.StringValue(item.CreatedAt),
@@ -342,7 +393,7 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyPoliciesItemsToBody(state
 						}(),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationAdaptivePolicyPoliciesDestinationGroup{}
+				return nil
 			}(),
 			LastEntryRule: types.StringValue(item.LastEntryRule),
 			SourceGroup: func() *ResponseItemOrganizationsGetOrganizationAdaptivePolicyPoliciesSourceGroup {
@@ -358,7 +409,7 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyPoliciesItemsToBody(state
 						}(),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationAdaptivePolicyPoliciesSourceGroup{}
+				return nil
 			}(),
 			UpdatedAt: types.StringValue(item.UpdatedAt),
 		}
@@ -381,7 +432,7 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyItemToBody(state Or
 				}
 				return &result
 			}
-			return &[]ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyAcls{}
+			return nil
 		}(),
 		AdaptivePolicyID: types.StringValue(response.AdaptivePolicyID),
 		CreatedAt:        types.StringValue(response.CreatedAt),
@@ -398,7 +449,7 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyItemToBody(state Or
 					}(),
 				}
 			}
-			return &ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyDestinationGroup{}
+			return nil
 		}(),
 		LastEntryRule: types.StringValue(response.LastEntryRule),
 		SourceGroup: func() *ResponseOrganizationsGetOrganizationAdaptivePolicyPolicySourceGroup {
@@ -414,7 +465,7 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyItemToBody(state Or
 					}(),
 				}
 			}
-			return &ResponseOrganizationsGetOrganizationAdaptivePolicyPolicySourceGroup{}
+			return nil
 		}(),
 		UpdatedAt: types.StringValue(response.UpdatedAt),
 	}

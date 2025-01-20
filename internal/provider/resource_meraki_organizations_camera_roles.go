@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -665,7 +665,7 @@ func ResponseCameraGetOrganizationCameraRoleItemToBodyRs(state OrganizationsCame
 				}
 				return &result
 			}
-			return &[]ResponseCameraGetOrganizationCameraRoleAppliedOnDevicesRs{}
+			return nil
 		}(),
 		AppliedOnNetworks: func() *[]ResponseCameraGetOrganizationCameraRoleAppliedOnNetworksRs {
 			if response.AppliedOnNetworks != nil {
@@ -681,7 +681,7 @@ func ResponseCameraGetOrganizationCameraRoleItemToBodyRs(state OrganizationsCame
 				}
 				return &result
 			}
-			return &[]ResponseCameraGetOrganizationCameraRoleAppliedOnNetworksRs{}
+			return nil
 		}(),
 		AppliedOrgWide: func() *[]ResponseCameraGetOrganizationCameraRoleAppliedOrgWideRs {
 			if response.AppliedOrgWide != nil {
@@ -696,7 +696,7 @@ func ResponseCameraGetOrganizationCameraRoleItemToBodyRs(state OrganizationsCame
 				}
 				return &result
 			}
-			return &[]ResponseCameraGetOrganizationCameraRoleAppliedOrgWideRs{}
+			return nil
 		}(),
 		Name: types.StringValue(response.Name),
 	}

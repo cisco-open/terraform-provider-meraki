@@ -1,12 +1,28 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
 import (
 	"context"
-	"fmt"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -169,6 +185,8 @@ func (d *NetworksAlertsHistoryDataSource) Read(ctx context.Context, req datasour
 		queryParams1.StartingAfter = networksAlertsHistory.StartingAfter.ValueString()
 		queryParams1.EndingBefore = networksAlertsHistory.EndingBefore.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Networks.GetNetworkAlertsHistory(vvNetworkID, &queryParams1)
 
 		if err != nil || response1 == nil {
@@ -202,7 +220,7 @@ type NetworksAlertsHistory struct {
 }
 
 type ResponseItemNetworksGetNetworkAlertsHistory struct {
-	AlertData    types.String                                             `tfsdk:"alert_data"`
+	AlertData    *ResponseItemNetworksGetNetworkAlertsHistoryAlertData    `tfsdk:"alert_data"`
 	AlertType    types.String                                             `tfsdk:"alert_type"`
 	AlertTypeID  types.String                                             `tfsdk:"alert_type_id"`
 	Destinations *ResponseItemNetworksGetNetworkAlertsHistoryDestinations `tfsdk:"destinations"`
@@ -210,7 +228,7 @@ type ResponseItemNetworksGetNetworkAlertsHistory struct {
 	OccurredAt   types.String                                             `tfsdk:"occurred_at"`
 }
 
-// type ResponseItemNetworksGetNetworkAlertsHistoryAlertData interface{}
+type ResponseItemNetworksGetNetworkAlertsHistoryAlertData interface{}
 
 type ResponseItemNetworksGetNetworkAlertsHistoryDestinations struct {
 	Email   *ResponseItemNetworksGetNetworkAlertsHistoryDestinationsEmail   `tfsdk:"email"`
@@ -244,7 +262,7 @@ func ResponseNetworksGetNetworkAlertsHistoryItemsToBody(state NetworksAlertsHist
 	var items []ResponseItemNetworksGetNetworkAlertsHistory
 	for _, item := range *response {
 		itemState := ResponseItemNetworksGetNetworkAlertsHistory{
-			AlertData:   types.StringValue(fmt.Sprintf("%v", item.AlertData)), //TODO POSIBLE interface
+			// AlertData:   types.StringValue(item.AlertData), //TODO POSIBLE interface
 			AlertType:   types.StringValue(item.AlertType),
 			AlertTypeID: types.StringValue(item.AlertTypeID),
 			Destinations: func() *ResponseItemNetworksGetNetworkAlertsHistoryDestinations {
@@ -256,7 +274,7 @@ func ResponseNetworksGetNetworkAlertsHistoryItemsToBody(state NetworksAlertsHist
 									SentAt: types.StringValue(item.Destinations.Email.SentAt),
 								}
 							}
-							return &ResponseItemNetworksGetNetworkAlertsHistoryDestinationsEmail{}
+							return nil
 						}(),
 						Push: func() *ResponseItemNetworksGetNetworkAlertsHistoryDestinationsPush {
 							if item.Destinations.Push != nil {
@@ -264,7 +282,7 @@ func ResponseNetworksGetNetworkAlertsHistoryItemsToBody(state NetworksAlertsHist
 									SentAt: types.StringValue(item.Destinations.Push.SentAt),
 								}
 							}
-							return &ResponseItemNetworksGetNetworkAlertsHistoryDestinationsPush{}
+							return nil
 						}(),
 						Sms: func() *ResponseItemNetworksGetNetworkAlertsHistoryDestinationsSms {
 							if item.Destinations.Sms != nil {
@@ -272,7 +290,7 @@ func ResponseNetworksGetNetworkAlertsHistoryItemsToBody(state NetworksAlertsHist
 									SentAt: types.StringValue(item.Destinations.Sms.SentAt),
 								}
 							}
-							return &ResponseItemNetworksGetNetworkAlertsHistoryDestinationsSms{}
+							return nil
 						}(),
 						Webhook: func() *ResponseItemNetworksGetNetworkAlertsHistoryDestinationsWebhook {
 							if item.Destinations.Webhook != nil {
@@ -280,11 +298,11 @@ func ResponseNetworksGetNetworkAlertsHistoryItemsToBody(state NetworksAlertsHist
 									SentAt: types.StringValue(item.Destinations.Webhook.SentAt),
 								}
 							}
-							return &ResponseItemNetworksGetNetworkAlertsHistoryDestinationsWebhook{}
+							return nil
 						}(),
 					}
 				}
-				return &ResponseItemNetworksGetNetworkAlertsHistoryDestinations{}
+				return nil
 			}(),
 			Device: func() *ResponseItemNetworksGetNetworkAlertsHistoryDevice {
 				if item.Device != nil {
@@ -292,7 +310,7 @@ func ResponseNetworksGetNetworkAlertsHistoryItemsToBody(state NetworksAlertsHist
 						Serial: types.StringValue(item.Device.Serial),
 					}
 				}
-				return &ResponseItemNetworksGetNetworkAlertsHistoryDevice{}
+				return nil
 			}(),
 			OccurredAt: types.StringValue(item.OccurredAt),
 		}

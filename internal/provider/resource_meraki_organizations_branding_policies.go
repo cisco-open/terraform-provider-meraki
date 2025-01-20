@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -61,9 +77,10 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 				Attributes: map[string]schema.Attribute{
 
 					"applies_to": schema.StringAttribute{
-						MarkdownDescription: `Which kinds of admins this policy applies to. Can be one of 'All organization admins', 'All enterprise admins', 'All network admins', 'All admins of networks...', 'All admins of networks tagged...', 'Specific admins...', 'All admins' or 'All SAML admins'.`,
-						Computed:            true,
-						Optional:            true,
+						MarkdownDescription: `Which kinds of admins this policy applies to. Can be one of 'All organization admins', 'All enterprise admins', 'All network admins', 'All admins of networks...', 'All admins of networks tagged...', 'Specific admins...', 'All admins' or 'All SAML admins'.
+                                        Allowed values: [All SAML admins,All admins,All admins of networks tagged...,All admins of networks...,All enterprise admins,All network admins,All organization admins,Specific admins...]`,
+						Computed: true,
+						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
@@ -138,9 +155,10 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 								},
 							},
 							"format": schema.StringAttribute{
-								MarkdownDescription: `The format of the encoded contents.  Supported formats are 'png', 'gif', and jpg'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `The format of the encoded contents.  Supported formats are 'png', 'gif', and jpg'.
+                                              Allowed values: [gif,jpg,png]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -195,7 +213,8 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 					"api_docs_subtab": schema.StringAttribute{
 						MarkdownDescription: `      The 'Help -> API docs' subtab where a detailed description of the Dashboard API is listed. Can be one of
       'default or inherit', 'hide' or 'show'.
-`,
+
+                                        Allowed values: [default or inherit,hide,show]`,
 						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
@@ -212,7 +231,8 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 					"cases_subtab": schema.StringAttribute{
 						MarkdownDescription: `      The 'Help -> Cases' Dashboard subtab on which Cisco Meraki support cases for this organization can be managed. Can be one
       of 'default or inherit', 'hide' or 'show'.
-`,
+
+                                        Allowed values: [default or inherit,hide,show]`,
 						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
@@ -237,7 +257,8 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 					},
 					"community_subtab": schema.StringAttribute{
 						MarkdownDescription: `      The 'Help -> Community' subtab which provides a link to Meraki Community. Can be one of 'default or inherit', 'hide' or 'show'.
-`,
+
+                                        Allowed values: [default or inherit,hide,show]`,
 						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
@@ -254,7 +275,8 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 					"data_protection_requests_subtab": schema.StringAttribute{
 						MarkdownDescription: `      The 'Help -> Data protection requests' Dashboard subtab on which requests to delete, restrict, or export end-user data can
       be audited. Can be one of 'default or inherit', 'hide' or 'show'.
-`,
+
+                                        Allowed values: [default or inherit,hide,show]`,
 						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
@@ -271,7 +293,8 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 					"firewall_info_subtab": schema.StringAttribute{
 						MarkdownDescription: `      The 'Help -> Firewall info' subtab where necessary upstream firewall rules for communication to the Cisco Meraki cloud are
       listed. Can be one of 'default or inherit', 'hide' or 'show'.
-`,
+
+                                        Allowed values: [default or inherit,hide,show]`,
 						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
@@ -289,7 +312,8 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 						MarkdownDescription: `      The 'Help -> Get Help' subtab on which Cisco Meraki KB, Product Manuals, and Support/Case Information are displayed. Note
       that if this subtab is hidden, branding customizations for the KB on 'Get help', Cisco Meraki product documentation,
       and support contact info will not be visible. Can be one of 'default or inherit', 'hide' or 'show'.
-`,
+
+                                        Allowed values: [default or inherit,hide,show]`,
 						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
@@ -315,7 +339,8 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 					"hardware_replacements_subtab": schema.StringAttribute{
 						MarkdownDescription: `      The 'Help -> Replacement info' subtab where important information regarding device replacements is detailed. Can be one of
       'default or inherit', 'hide' or 'show'.
-`,
+
+                                        Allowed values: [default or inherit,hide,show]`,
 						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
@@ -332,7 +357,8 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 					"help_tab": schema.StringAttribute{
 						MarkdownDescription: `      The Help tab, under which all support information resides. If this tab is hidden, no other 'Help' branding
       customizations will be visible. Can be one of 'default or inherit', 'hide' or 'show'.
-`,
+
+                                        Allowed values: [default or inherit,hide,show]`,
 						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
@@ -349,7 +375,8 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 					"help_widget": schema.StringAttribute{
 						MarkdownDescription: `      The 'Help Widget' is a support widget which provides access to live chat, documentation links, Sales contact info,
       and other contact avenues to reach Meraki Support. Can be one of 'default or inherit', 'hide' or 'show'.
-`,
+
+                                        Allowed values: [default or inherit,hide,show]`,
 						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
@@ -365,7 +392,8 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 					},
 					"new_features_subtab": schema.StringAttribute{
 						MarkdownDescription: `      The 'Help -> New features' subtab where new Dashboard features are detailed. Can be one of 'default or inherit', 'hide' or 'show'.
-`,
+
+                                        Allowed values: [default or inherit,hide,show]`,
 						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
@@ -382,7 +410,8 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 					"sm_forums": schema.StringAttribute{
 						MarkdownDescription: `      The 'SM Forums' subtab which links to community-based support for Cisco Meraki Systems Manager. Only configurable for
       organizations that contain Systems Manager networks. Can be one of 'default or inherit', 'hide' or 'show'.
-`,
+
+                                        Allowed values: [default or inherit,hide,show]`,
 						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
@@ -408,7 +437,8 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 					"universal_search_knowledge_base_search": schema.StringAttribute{
 						MarkdownDescription: `      The universal search box always visible on Dashboard will, by default, present results from the Meraki KB. This configures
       whether these Meraki KB results should be returned. Can be one of 'default or inherit', 'hide' or 'show'.
-`,
+
+                                        Allowed values: [default or inherit,hide,show]`,
 						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
@@ -543,7 +573,7 @@ func (r *OrganizationsBrandingPoliciesResource) Create(ctx context.Context, req 
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter BrandingPolicyID",
-				err.Error(),
+				"Error",
 			)
 			return
 		}
@@ -950,7 +980,7 @@ func ResponseOrganizationsGetOrganizationBrandingPolicyItemToBodyRs(state Organi
 					Values:    StringSliceToSet(response.AdminSettings.Values),
 				}
 			}
-			return &ResponseOrganizationsGetOrganizationBrandingPolicyAdminSettingsRs{}
+			return nil
 		}(),
 		CustomLogo: func() *ResponseOrganizationsGetOrganizationBrandingPolicyCustomLogoRs {
 			if response.CustomLogo != nil {
@@ -971,15 +1001,15 @@ func ResponseOrganizationsGetOrganizationBrandingPolicyItemToBodyRs(state Organi
 											URL:       types.StringValue(response.CustomLogo.Image.Preview.URL),
 										}
 									}
-									return &ResponseOrganizationsGetOrganizationBrandingPolicyCustomLogoImagePreviewRs{}
+									return nil
 								}(),
 							}
 						}
-						return &ResponseOrganizationsGetOrganizationBrandingPolicyCustomLogoImageRs{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseOrganizationsGetOrganizationBrandingPolicyCustomLogoRs{}
+			return nil
 		}(),
 		Enabled: func() types.Bool {
 			if response.Enabled != nil {
@@ -1007,7 +1037,7 @@ func ResponseOrganizationsGetOrganizationBrandingPolicyItemToBodyRs(state Organi
 					UniversalSearchKnowledgeBaseSearch: types.StringValue(response.HelpSettings.UniversalSearchKnowledgeBaseSearch),
 				}
 			}
-			return &ResponseOrganizationsGetOrganizationBrandingPolicyHelpSettingsRs{}
+			return nil
 		}(),
 		Name: types.StringValue(response.Name),
 	}

@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -556,13 +572,13 @@ type NetworksClientsSplashAuthorizationStatusRs struct {
 
 type ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsidsRs struct {
 	Status0  *ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids0Rs    `tfsdk:"status_0"`
-	Status2  *ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids2Rs    `tfsdk:"status_2"`
 	Status1  *RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSsids1Rs  `tfsdk:"status_1"`
 	Status10 *RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSsids10Rs `tfsdk:"status_10"`
 	Status11 *RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSsids11Rs `tfsdk:"status_11"`
 	Status12 *RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSsids12Rs `tfsdk:"status_12"`
 	Status13 *RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSsids13Rs `tfsdk:"status_13"`
 	Status14 *RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSsids14Rs `tfsdk:"status_14"`
+	Status2  *RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSsids2Rs  `tfsdk:"status_2"`
 	Status3  *RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSsids3Rs  `tfsdk:"status_3"`
 	Status4  *RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSsids4Rs  `tfsdk:"status_4"`
 	Status5  *RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSsids5Rs  `tfsdk:"status_5"`
@@ -576,10 +592,6 @@ type ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids0Rs struct {
 	AuthorizedAt types.String `tfsdk:"authorized_at"`
 	ExpiresAt    types.String `tfsdk:"expires_at"`
 	IsAuthorized types.Bool   `tfsdk:"is_authorized"`
-}
-
-type ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids2Rs struct {
-	IsAuthorized types.Bool `tfsdk:"is_authorized"`
 }
 
 type RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSsids1Rs struct {
@@ -603,6 +615,10 @@ type RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSsids13Rs struct
 }
 
 type RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSsids14Rs struct {
+	IsAuthorized types.Bool `tfsdk:"is_authorized"`
+}
+
+type RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSsids2Rs struct {
 	IsAuthorized types.Bool `tfsdk:"is_authorized"`
 }
 
@@ -861,24 +877,11 @@ func ResponseNetworksGetNetworkClientSplashAuthorizationStatusItemToBodyRs(state
 								}(),
 							}
 						}
-						return &ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids0Rs{}
-					}(),
-					Status2: func() *ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids2Rs {
-						if response.SSIDs.Status2 != nil {
-							return &ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids2Rs{
-								IsAuthorized: func() types.Bool {
-									if response.SSIDs.Status2.IsAuthorized != nil {
-										return types.BoolValue(*response.SSIDs.Status2.IsAuthorized)
-									}
-									return types.Bool{}
-								}(),
-							}
-						}
-						return &ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids2Rs{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsidsRs{}
+			return nil
 		}(),
 	}
 	if is_read {

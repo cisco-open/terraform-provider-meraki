@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -82,6 +99,15 @@ func (d *NetworksCameraQualityRetentionProfilesDataSource) Schema(_ context.Cont
 					},
 					"schedule_id": schema.StringAttribute{
 						Computed: true,
+					},
+					"smart_retention": schema.SingleNestedAttribute{
+						Computed: true,
+						Attributes: map[string]schema.Attribute{
+
+							"enabled": schema.BoolAttribute{
+								Computed: true,
+							},
+						},
 					},
 					"video_settings": schema.SingleNestedAttribute{
 						Computed: true,
@@ -176,6 +202,15 @@ func (d *NetworksCameraQualityRetentionProfilesDataSource) Schema(_ context.Cont
 						"schedule_id": schema.StringAttribute{
 							Computed: true,
 						},
+						"smart_retention": schema.SingleNestedAttribute{
+							Computed: true,
+							Attributes: map[string]schema.Attribute{
+
+								"enabled": schema.BoolAttribute{
+									Computed: true,
+								},
+							},
+						},
 						"video_settings": schema.SingleNestedAttribute{
 							Computed: true,
 							Attributes: map[string]schema.Attribute{
@@ -254,6 +289,8 @@ func (d *NetworksCameraQualityRetentionProfilesDataSource) Read(ctx context.Cont
 		log.Printf("[DEBUG] Selected method: GetNetworkCameraQualityRetentionProfiles")
 		vvNetworkID := networksCameraQualityRetentionProfiles.NetworkID.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Camera.GetNetworkCameraQualityRetentionProfiles(vvNetworkID)
 
 		if err != nil || response1 == nil {
@@ -279,6 +316,8 @@ func (d *NetworksCameraQualityRetentionProfilesDataSource) Read(ctx context.Cont
 		log.Printf("[DEBUG] Selected method: GetNetworkCameraQualityRetentionProfile")
 		vvNetworkID := networksCameraQualityRetentionProfiles.NetworkID.ValueString()
 		vvQualityRetentionProfileID := networksCameraQualityRetentionProfiles.QualityRetentionProfileID.ValueString()
+
+		// has_unknown_response: None
 
 		response2, restyResp2, err := d.client.Camera.GetNetworkCameraQualityRetentionProfile(vvNetworkID, vvQualityRetentionProfileID)
 
@@ -312,17 +351,22 @@ type NetworksCameraQualityRetentionProfiles struct {
 }
 
 type ResponseItemCameraGetNetworkCameraQualityRetentionProfiles struct {
-	AudioRecordingEnabled          types.Bool                                                               `tfsdk:"audio_recording_enabled"`
-	CloudArchiveEnabled            types.Bool                                                               `tfsdk:"cloud_archive_enabled"`
-	ID                             types.String                                                             `tfsdk:"id"`
-	MaxRetentionDays               types.Int64                                                              `tfsdk:"max_retention_days"`
-	MotionBasedRetentionEnabled    types.Bool                                                               `tfsdk:"motion_based_retention_enabled"`
-	MotionDetectorVersion          types.Int64                                                              `tfsdk:"motion_detector_version"`
-	Name                           types.String                                                             `tfsdk:"name"`
-	NetworkID                      types.String                                                             `tfsdk:"network_id"`
-	RestrictedBandwidthModeEnabled types.Bool                                                               `tfsdk:"restricted_bandwidth_mode_enabled"`
-	ScheduleID                     types.String                                                             `tfsdk:"schedule_id"`
-	VideoSettings                  *ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettings `tfsdk:"video_settings"`
+	AudioRecordingEnabled          types.Bool                                                                `tfsdk:"audio_recording_enabled"`
+	CloudArchiveEnabled            types.Bool                                                                `tfsdk:"cloud_archive_enabled"`
+	ID                             types.String                                                              `tfsdk:"id"`
+	MaxRetentionDays               types.Int64                                                               `tfsdk:"max_retention_days"`
+	MotionBasedRetentionEnabled    types.Bool                                                                `tfsdk:"motion_based_retention_enabled"`
+	MotionDetectorVersion          types.Int64                                                               `tfsdk:"motion_detector_version"`
+	Name                           types.String                                                              `tfsdk:"name"`
+	NetworkID                      types.String                                                              `tfsdk:"network_id"`
+	RestrictedBandwidthModeEnabled types.Bool                                                                `tfsdk:"restricted_bandwidth_mode_enabled"`
+	ScheduleID                     types.String                                                              `tfsdk:"schedule_id"`
+	SmartRetention                 *ResponseItemCameraGetNetworkCameraQualityRetentionProfilesSmartRetention `tfsdk:"smart_retention"`
+	VideoSettings                  *ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettings  `tfsdk:"video_settings"`
+}
+
+type ResponseItemCameraGetNetworkCameraQualityRetentionProfilesSmartRetention struct {
+	Enabled types.Bool `tfsdk:"enabled"`
 }
 
 type ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettings struct {
@@ -353,24 +397,29 @@ type ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettingsMV32
 }
 
 type ResponseCameraGetNetworkCameraQualityRetentionProfile struct {
-	AudioRecordingEnabled          types.Bool                                                          `tfsdk:"audio_recording_enabled"`
-	CloudArchiveEnabled            types.Bool                                                          `tfsdk:"cloud_archive_enabled"`
-	ID                             types.String                                                        `tfsdk:"id"`
-	MaxRetentionDays               types.Int64                                                         `tfsdk:"max_retention_days"`
-	MotionBasedRetentionEnabled    types.Bool                                                          `tfsdk:"motion_based_retention_enabled"`
-	MotionDetectorVersion          types.Int64                                                         `tfsdk:"motion_detector_version"`
-	Name                           types.String                                                        `tfsdk:"name"`
-	NetworkID                      types.String                                                        `tfsdk:"network_id"`
-	RestrictedBandwidthModeEnabled types.Bool                                                          `tfsdk:"restricted_bandwidth_mode_enabled"`
-	ScheduleID                     types.String                                                        `tfsdk:"schedule_id"`
-	VideoSettings                  *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettings `tfsdk:"video_settings"`
+	AudioRecordingEnabled          types.Bool                                                           `tfsdk:"audio_recording_enabled"`
+	CloudArchiveEnabled            types.Bool                                                           `tfsdk:"cloud_archive_enabled"`
+	ID                             types.String                                                         `tfsdk:"id"`
+	MaxRetentionDays               types.Int64                                                          `tfsdk:"max_retention_days"`
+	MotionBasedRetentionEnabled    types.Bool                                                           `tfsdk:"motion_based_retention_enabled"`
+	MotionDetectorVersion          types.Int64                                                          `tfsdk:"motion_detector_version"`
+	Name                           types.String                                                         `tfsdk:"name"`
+	NetworkID                      types.String                                                         `tfsdk:"network_id"`
+	RestrictedBandwidthModeEnabled types.Bool                                                           `tfsdk:"restricted_bandwidth_mode_enabled"`
+	ScheduleID                     types.String                                                         `tfsdk:"schedule_id"`
+	SmartRetention                 *ResponseCameraGetNetworkCameraQualityRetentionProfileSmartRetention `tfsdk:"smart_retention"`
+	VideoSettings                  *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettings  `tfsdk:"video_settings"`
+}
+
+type ResponseCameraGetNetworkCameraQualityRetentionProfileSmartRetention struct {
+	Enabled types.Bool `tfsdk:"enabled"`
 }
 
 type ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettings struct {
-	MV12MV22MV72 *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV12MV22MV72 `tfsdk:"mv12/mv22/mv72"`
-	MV12WE       *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV12WE       `tfsdk:"mv12_we"`
-	MV21MV71     *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV21MV71     `tfsdk:"mv21/mv71"`
-	MV32         *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV32         `tfsdk:"mv32"`
+	MV12MV22MV72 *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV12MV22MV72 `tfsdk:"m_v12_m_v22_m_v72"`
+	MV12WE       *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV12WE       `tfsdk:"m_v12_we"`
+	MV21MV71     *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV21MV71     `tfsdk:"m_v21_m_v71"`
+	MV32         *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV32         `tfsdk:"m_v32"`
 }
 
 type ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV12MV22MV72 struct {
@@ -438,6 +487,19 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfilesItemsToBody(state Net
 				return types.Bool{}
 			}(),
 			ScheduleID: types.StringValue(item.ScheduleID),
+			SmartRetention: func() *ResponseItemCameraGetNetworkCameraQualityRetentionProfilesSmartRetention {
+				if item.SmartRetention != nil {
+					return &ResponseItemCameraGetNetworkCameraQualityRetentionProfilesSmartRetention{
+						Enabled: func() types.Bool {
+							if item.SmartRetention.Enabled != nil {
+								return types.BoolValue(*item.SmartRetention.Enabled)
+							}
+							return types.Bool{}
+						}(),
+					}
+				}
+				return nil
+			}(),
 			VideoSettings: func() *ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettings {
 				if item.VideoSettings != nil {
 					return &ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettings{
@@ -448,7 +510,7 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfilesItemsToBody(state Net
 									Resolution: types.StringValue(item.VideoSettings.MV12MV22MV72.Resolution),
 								}
 							}
-							return &ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettingsMV12MV22MV72{}
+							return nil
 						}(),
 						MV12WE: func() *ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettingsMV12WE {
 							if item.VideoSettings.MV12WE != nil {
@@ -457,7 +519,7 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfilesItemsToBody(state Net
 									Resolution: types.StringValue(item.VideoSettings.MV12WE.Resolution),
 								}
 							}
-							return &ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettingsMV12WE{}
+							return nil
 						}(),
 						MV21MV71: func() *ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettingsMV21MV71 {
 							if item.VideoSettings.MV21MV71 != nil {
@@ -466,7 +528,7 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfilesItemsToBody(state Net
 									Resolution: types.StringValue(item.VideoSettings.MV21MV71.Resolution),
 								}
 							}
-							return &ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettingsMV21MV71{}
+							return nil
 						}(),
 						MV32: func() *ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettingsMV32 {
 							if item.VideoSettings.MV32 != nil {
@@ -475,11 +537,11 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfilesItemsToBody(state Net
 									Resolution: types.StringValue(item.VideoSettings.MV32.Resolution),
 								}
 							}
-							return &ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettingsMV32{}
+							return nil
 						}(),
 					}
 				}
-				return &ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettings{}
+				return nil
 			}(),
 		}
 		items = append(items, itemState)
@@ -530,6 +592,19 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBody(state Netwo
 			return types.Bool{}
 		}(),
 		ScheduleID: types.StringValue(response.ScheduleID),
+		SmartRetention: func() *ResponseCameraGetNetworkCameraQualityRetentionProfileSmartRetention {
+			if response.SmartRetention != nil {
+				return &ResponseCameraGetNetworkCameraQualityRetentionProfileSmartRetention{
+					Enabled: func() types.Bool {
+						if response.SmartRetention.Enabled != nil {
+							return types.BoolValue(*response.SmartRetention.Enabled)
+						}
+						return types.Bool{}
+					}(),
+				}
+			}
+			return nil
+		}(),
 		VideoSettings: func() *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettings {
 			if response.VideoSettings != nil {
 				return &ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettings{
@@ -540,7 +615,7 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBody(state Netwo
 								Resolution: types.StringValue(response.VideoSettings.MV12MV22MV72.Resolution),
 							}
 						}
-						return &ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV12MV22MV72{}
+						return nil
 					}(),
 					MV12WE: func() *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV12WE {
 						if response.VideoSettings.MV12WE != nil {
@@ -549,7 +624,7 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBody(state Netwo
 								Resolution: types.StringValue(response.VideoSettings.MV12WE.Resolution),
 							}
 						}
-						return &ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV12WE{}
+						return nil
 					}(),
 					MV21MV71: func() *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV21MV71 {
 						if response.VideoSettings.MV21MV71 != nil {
@@ -558,7 +633,7 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBody(state Netwo
 								Resolution: types.StringValue(response.VideoSettings.MV21MV71.Resolution),
 							}
 						}
-						return &ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV21MV71{}
+						return nil
 					}(),
 					MV32: func() *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV32 {
 						if response.VideoSettings.MV32 != nil {
@@ -567,11 +642,11 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBody(state Netwo
 								Resolution: types.StringValue(response.VideoSettings.MV32.Resolution),
 							}
 						}
-						return &ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV32{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettings{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

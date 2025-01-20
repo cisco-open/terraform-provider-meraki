@@ -1,0 +1,1 @@
+terraform import meraki_devices_wireless_electronic_shelf_label.example "serial"

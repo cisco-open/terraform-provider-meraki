@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -50,6 +66,40 @@ func (r *NetworksSwitchStacksResource) Schema(_ context.Context, _ resource.Sche
 			"id": schema.StringAttribute{
 				MarkdownDescription: `ID of the Switch stack`,
 				Computed:            true,
+			},
+			"is_monitor_only": schema.BoolAttribute{
+				MarkdownDescription: `Tells if stack is Monitored Stack.`,
+				Computed:            true,
+			},
+			"members": schema.SetNestedAttribute{
+				MarkdownDescription: `Members of the Stack`,
+				Computed:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+
+						"mac": schema.StringAttribute{
+							MarkdownDescription: `MAC address of the device`,
+							Computed:            true,
+						},
+						"model": schema.StringAttribute{
+							MarkdownDescription: `Model of the device`,
+							Computed:            true,
+						},
+						"name": schema.StringAttribute{
+							MarkdownDescription: `Name of the device`,
+							Computed:            true,
+						},
+						"role": schema.StringAttribute{
+							MarkdownDescription: `Role of the device
+                                        Allowed values: [active,member,standby]`,
+							Computed: true,
+						},
+						"serial": schema.StringAttribute{
+							MarkdownDescription: `Serial number of the device`,
+							Computed:            true,
+						},
+					},
+				},
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `Name of the Switch stack`,
@@ -186,7 +236,7 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter SwitchStackID",
-				err.Error(),
+				"Error",
 			)
 			return
 		}
@@ -334,11 +384,21 @@ func (r *NetworksSwitchStacksResource) Delete(ctx context.Context, req resource.
 
 // TF Structs Schema
 type NetworksSwitchStacksRs struct {
-	NetworkID     types.String `tfsdk:"network_id"`
-	SwitchStackID types.String `tfsdk:"switch_stack_id"`
-	ID            types.String `tfsdk:"id"`
-	Name          types.String `tfsdk:"name"`
-	Serials       types.Set    `tfsdk:"serials"`
+	NetworkID     types.String                                    `tfsdk:"network_id"`
+	SwitchStackID types.String                                    `tfsdk:"switch_stack_id"`
+	ID            types.String                                    `tfsdk:"id"`
+	IsMonitorOnly types.Bool                                      `tfsdk:"is_monitor_only"`
+	Members       *[]ResponseSwitchGetNetworkSwitchStackMembersRs `tfsdk:"members"`
+	Name          types.String                                    `tfsdk:"name"`
+	Serials       types.Set                                       `tfsdk:"serials"`
+}
+
+type ResponseSwitchGetNetworkSwitchStackMembersRs struct {
+	Mac    types.String `tfsdk:"mac"`
+	Model  types.String `tfsdk:"model"`
+	Name   types.String `tfsdk:"name"`
+	Role   types.String `tfsdk:"role"`
+	Serial types.String `tfsdk:"serial"`
 }
 
 // FromBody
@@ -362,7 +422,29 @@ func (r *NetworksSwitchStacksRs) toSdkApiRequestCreate(ctx context.Context) *mer
 // From gosdk to TF Structs Schema
 func ResponseSwitchGetNetworkSwitchStackItemToBodyRs(state NetworksSwitchStacksRs, response *merakigosdk.ResponseSwitchGetNetworkSwitchStack, is_read bool) NetworksSwitchStacksRs {
 	itemState := NetworksSwitchStacksRs{
-		ID:      types.StringValue(response.ID),
+		ID: types.StringValue(response.ID),
+		IsMonitorOnly: func() types.Bool {
+			if response.IsMonitorOnly != nil {
+				return types.BoolValue(*response.IsMonitorOnly)
+			}
+			return types.Bool{}
+		}(),
+		Members: func() *[]ResponseSwitchGetNetworkSwitchStackMembersRs {
+			if response.Members != nil {
+				result := make([]ResponseSwitchGetNetworkSwitchStackMembersRs, len(*response.Members))
+				for i, members := range *response.Members {
+					result[i] = ResponseSwitchGetNetworkSwitchStackMembersRs{
+						Mac:    types.StringValue(members.Mac),
+						Model:  types.StringValue(members.Model),
+						Name:   types.StringValue(members.Name),
+						Role:   types.StringValue(members.Role),
+						Serial: types.StringValue(members.Serial),
+					}
+				}
+				return &result
+			}
+			return nil
+		}(),
 		Name:    types.StringValue(response.Name),
 		Serials: StringSliceToSet(response.Serials),
 	}

@@ -14,6 +14,11 @@ resource "meraki_networks_switch_access_policies" "example" {
   network_id            = "string"
   radius = {
 
+    cache = {
+
+      enabled = false
+      timeout = 24
+    }
     critical_auth = {
 
       data_vlan_id        = 100
@@ -26,17 +31,19 @@ resource "meraki_networks_switch_access_policies" "example" {
   radius_accounting_enabled = true
   radius_accounting_servers = [{
 
-    host   = "1.2.3.4"
-    port   = 22
-    secret = "secret"
+    host                          = "1.2.3.4"
+    organization_radius_server_id = "42"
+    port                          = 22
+    secret                        = "secret"
   }]
   radius_coa_support_enabled = false
   radius_group_attribute     = "11"
   radius_servers = [{
 
-    host   = "1.2.3.4"
-    port   = 22
-    secret = "secret"
+    host                          = "1.2.3.4"
+    organization_radius_server_id = "42"
+    port                          = 22
+    secret                        = "secret"
   }]
   radius_testing_enabled             = false
   url_redirect_walled_garden_enabled = true

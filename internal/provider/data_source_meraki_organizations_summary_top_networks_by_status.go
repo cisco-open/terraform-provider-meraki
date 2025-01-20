@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -57,8 +58,16 @@ func (d *OrganizationsSummaryTopNetworksByStatusDataSource) Metadata(_ context.C
 func (d *OrganizationsSummaryTopNetworksByStatusDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"device_tag": schema.StringAttribute{
+				MarkdownDescription: `deviceTag query parameter. Match result to an exact device tag`,
+				Optional:            true,
+			},
 			"ending_before": schema.StringAttribute{
 				MarkdownDescription: `endingBefore query parameter. A token used by the server to indicate the end of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.`,
+				Optional:            true,
+			},
+			"network_tag": schema.StringAttribute{
+				MarkdownDescription: `networkTag query parameter. Match result to an exact network tag`,
 				Optional:            true,
 			},
 			"organization_id": schema.StringAttribute{
@@ -69,8 +78,20 @@ func (d *OrganizationsSummaryTopNetworksByStatusDataSource) Schema(_ context.Con
 				MarkdownDescription: `perPage query parameter. The number of entries per page returned. Acceptable range is 3 5000.`,
 				Optional:            true,
 			},
+			"quantity": schema.Int64Attribute{
+				MarkdownDescription: `quantity query parameter. Set number of desired results to return. Default is 10.`,
+				Optional:            true,
+			},
+			"ssid_name": schema.StringAttribute{
+				MarkdownDescription: `ssidName query parameter. Filter results by ssid name`,
+				Optional:            true,
+			},
 			"starting_after": schema.StringAttribute{
 				MarkdownDescription: `startingAfter query parameter. A token used by the server to indicate the start of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.`,
+				Optional:            true,
+			},
+			"usage_uplink": schema.StringAttribute{
+				MarkdownDescription: `usageUplink query parameter. Filter results by usage uplink`,
 				Optional:            true,
 			},
 
@@ -226,9 +247,16 @@ func (d *OrganizationsSummaryTopNetworksByStatusDataSource) Read(ctx context.Con
 		vvOrganizationID := organizationsSummaryTopNetworksByStatus.OrganizationID.ValueString()
 		queryParams1 := merakigosdk.GetOrganizationSummaryTopNetworksByStatusQueryParams{}
 
+		queryParams1.NetworkTag = organizationsSummaryTopNetworksByStatus.NetworkTag.ValueString()
+		queryParams1.DeviceTag = organizationsSummaryTopNetworksByStatus.DeviceTag.ValueString()
+		queryParams1.Quantity = int(organizationsSummaryTopNetworksByStatus.Quantity.ValueInt64())
+		queryParams1.SSIDName = organizationsSummaryTopNetworksByStatus.SSIDName.ValueString()
+		queryParams1.UsageUplink = organizationsSummaryTopNetworksByStatus.UsageUplink.ValueString()
 		queryParams1.PerPage = int(organizationsSummaryTopNetworksByStatus.PerPage.ValueInt64())
 		queryParams1.StartingAfter = organizationsSummaryTopNetworksByStatus.StartingAfter.ValueString()
 		queryParams1.EndingBefore = organizationsSummaryTopNetworksByStatus.EndingBefore.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Organizations.GetOrganizationSummaryTopNetworksByStatus(vvOrganizationID, &queryParams1)
 
@@ -256,6 +284,11 @@ func (d *OrganizationsSummaryTopNetworksByStatusDataSource) Read(ctx context.Con
 // structs
 type OrganizationsSummaryTopNetworksByStatus struct {
 	OrganizationID types.String                                                          `tfsdk:"organization_id"`
+	NetworkTag     types.String                                                          `tfsdk:"network_tag"`
+	DeviceTag      types.String                                                          `tfsdk:"device_tag"`
+	Quantity       types.Int64                                                           `tfsdk:"quantity"`
+	SSIDName       types.String                                                          `tfsdk:"ssid_name"`
+	UsageUplink    types.String                                                          `tfsdk:"usage_uplink"`
 	PerPage        types.Int64                                                           `tfsdk:"per_page"`
 	StartingAfter  types.String                                                          `tfsdk:"starting_after"`
 	EndingBefore   types.String                                                          `tfsdk:"ending_before"`
@@ -332,7 +365,7 @@ func ResponseOrganizationsGetOrganizationSummaryTopNetworksByStatusItemsToBody(s
 									}(),
 								}
 							}
-							return &ResponseItemOrganizationsGetOrganizationSummaryTopNetworksByStatusClientsCounts{}
+							return nil
 						}(),
 						Usage: func() *ResponseItemOrganizationsGetOrganizationSummaryTopNetworksByStatusClientsUsage {
 							if item.Clients.Usage != nil {
@@ -351,11 +384,11 @@ func ResponseOrganizationsGetOrganizationSummaryTopNetworksByStatusItemsToBody(s
 									}(),
 								}
 							}
-							return &ResponseItemOrganizationsGetOrganizationSummaryTopNetworksByStatusClientsUsage{}
+							return nil
 						}(),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationSummaryTopNetworksByStatusClients{}
+				return nil
 			}(),
 			Devices: func() *ResponseItemOrganizationsGetOrganizationSummaryTopNetworksByStatusDevices {
 				if item.Devices != nil {
@@ -371,11 +404,11 @@ func ResponseOrganizationsGetOrganizationSummaryTopNetworksByStatusItemsToBody(s
 								}
 								return &result
 							}
-							return &[]ResponseItemOrganizationsGetOrganizationSummaryTopNetworksByStatusDevicesByProductType{}
+							return nil
 						}(),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationSummaryTopNetworksByStatusDevices{}
+				return nil
 			}(),
 			Name:         types.StringValue(item.Name),
 			NetworkID:    types.StringValue(item.NetworkID),
@@ -417,19 +450,19 @@ func ResponseOrganizationsGetOrganizationSummaryTopNetworksByStatusItemsToBody(s
 													}(),
 												}
 											}
-											return &ResponseItemOrganizationsGetOrganizationSummaryTopNetworksByStatusStatusesByProductTypeCounts{}
+											return nil
 										}(),
 										ProductType: types.StringValue(byProductType.ProductType),
 									}
 								}
 								return &result
 							}
-							return &[]ResponseItemOrganizationsGetOrganizationSummaryTopNetworksByStatusStatusesByProductType{}
+							return nil
 						}(),
 						Overall: types.StringValue(item.Statuses.Overall),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationSummaryTopNetworksByStatusStatuses{}
+				return nil
 			}(),
 			Tags: StringSliceToList(item.Tags),
 			URL:  types.StringValue(item.URL),

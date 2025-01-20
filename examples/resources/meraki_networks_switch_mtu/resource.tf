@@ -5,8 +5,9 @@ resource "meraki_networks_switch_mtu" "example" {
   network_id       = "string"
   overrides = [{
 
-    mtu_size = 1500
-    switches = ["Q234-ABCD-0001", "Q234-ABCD-0002", "Q234-ABCD-0003"]
+    mtu_size        = 1500
+    switch_profiles = ["1284392014819", "2983092129865"]
+    switches        = ["Q234-ABCD-0001", "Q234-ABCD-0002", "Q234-ABCD-0003"]
   }]
 }
 

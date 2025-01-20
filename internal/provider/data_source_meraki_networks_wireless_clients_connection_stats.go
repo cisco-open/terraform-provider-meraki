@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -82,28 +99,31 @@ func (d *NetworksWirelessClientsConnectionStatsDataSource) Schema(_ context.Cont
 				Attributes: map[string]schema.Attribute{
 
 					"connection_stats": schema.SingleNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `Connection stats`,
+						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"assoc": schema.Int64Attribute{
-								Computed: true,
+								MarkdownDescription: `Association count`,
+								Computed:            true,
 							},
 							"auth": schema.Int64Attribute{
-								Computed: true,
+								MarkdownDescription: `Authorization count`,
+								Computed:            true,
 							},
 							"dhcp": schema.Int64Attribute{
-								Computed: true,
-							},
-							"dns": schema.Int64Attribute{
-								Computed: true,
+								MarkdownDescription: `DHCP count`,
+								Computed:            true,
 							},
 							"success": schema.Int64Attribute{
-								Computed: true,
+								MarkdownDescription: `successful count`,
+								Computed:            true,
 							},
 						},
 					},
 					"mac": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `MAC address of the client`,
+						Computed:            true,
 					},
 				},
 			},
@@ -132,6 +152,8 @@ func (d *NetworksWirelessClientsConnectionStatsDataSource) Read(ctx context.Cont
 		queryParams1.SSID = int(networksWirelessClientsConnectionStats.SSID.ValueInt64())
 		queryParams1.VLAN = int(networksWirelessClientsConnectionStats.VLAN.ValueInt64())
 		queryParams1.ApTag = networksWirelessClientsConnectionStats.ApTag.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Wireless.GetNetworkWirelessClientConnectionStats(vvNetworkID, vvClientID, &queryParams1)
 
@@ -179,7 +201,6 @@ type ResponseWirelessGetNetworkWirelessClientConnectionStatsConnectionStats stru
 	Assoc   types.Int64 `tfsdk:"assoc"`
 	Auth    types.Int64 `tfsdk:"auth"`
 	Dhcp    types.Int64 `tfsdk:"dhcp"`
-	DNS     types.Int64 `tfsdk:"dns"`
 	Success types.Int64 `tfsdk:"success"`
 }
 
@@ -207,12 +228,6 @@ func ResponseWirelessGetNetworkWirelessClientConnectionStatsItemToBody(state Net
 						}
 						return types.Int64{}
 					}(),
-					DNS: func() types.Int64 {
-						if response.ConnectionStats.DNS != nil {
-							return types.Int64Value(int64(*response.ConnectionStats.DNS))
-						}
-						return types.Int64{}
-					}(),
 					Success: func() types.Int64 {
 						if response.ConnectionStats.Success != nil {
 							return types.Int64Value(int64(*response.ConnectionStats.Success))
@@ -221,7 +236,7 @@ func ResponseWirelessGetNetworkWirelessClientConnectionStatsItemToBody(state Net
 					}(),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessClientConnectionStatsConnectionStats{}
+			return nil
 		}(),
 		Mac: types.StringValue(response.Mac),
 	}

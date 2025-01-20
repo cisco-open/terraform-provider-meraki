@@ -1,10 +1,26 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -112,9 +128,10 @@ func (r *NetworksApplianceSingleLanResource) Schema(_ context.Context, _ resourc
 											ElementType: types.StringType,
 										},
 										"type": schema.StringAttribute{
-											MarkdownDescription: `Type of the origin`,
-											Computed:            true,
-											Optional:            true,
+											MarkdownDescription: `Type of the origin
+                                                    Allowed values: [independent,internet]`,
+											Computed: true,
+											Optional: true,
 											PlanModifiers: []planmodifier.String{
 												stringplanmodifier.UseStateForUnknown(),
 											},
@@ -203,7 +220,6 @@ func (r *NetworksApplianceSingleLanResource) Create(ctx context.Context, req res
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceSingleLan(vvNetworkID)
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
@@ -255,7 +271,7 @@ func (r *NetworksApplianceSingleLanResource) Create(ctx context.Context, req res
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceSingleLanItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
@@ -284,7 +300,6 @@ func (r *NetworksApplianceSingleLanResource) Read(ctx context.Context, req resou
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	responseGet, restyRespGet, err := r.client.Appliance.GetNetworkApplianceSingleLan(vvNetworkID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -308,7 +323,7 @@ func (r *NetworksApplianceSingleLanResource) Read(ctx context.Context, req resou
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceSingleLanItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -330,7 +345,6 @@ func (r *NetworksApplianceSingleLanResource) Update(ctx context.Context, req res
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceSingleLan(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
@@ -354,7 +368,7 @@ func (r *NetworksApplianceSingleLanResource) Update(ctx context.Context, req res
 
 func (r *NetworksApplianceSingleLanResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksApplianceSingleLan", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -511,7 +525,7 @@ func ResponseApplianceGetNetworkApplianceSingleLanItemToBodyRs(state NetworksApp
 												Type:       types.StringValue(prefixAssignments.Origin.Type),
 											}
 										}
-										return &ResponseApplianceGetNetworkApplianceSingleLanIpv6PrefixAssignmentsOriginRs{}
+										return nil
 									}(),
 									StaticApplianceIP6: types.StringValue(prefixAssignments.StaticApplianceIP6),
 									StaticPrefix:       types.StringValue(prefixAssignments.StaticPrefix),
@@ -519,11 +533,11 @@ func ResponseApplianceGetNetworkApplianceSingleLanItemToBodyRs(state NetworksApp
 							}
 							return &result
 						}
-						return &[]ResponseApplianceGetNetworkApplianceSingleLanIpv6PrefixAssignmentsRs{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseApplianceGetNetworkApplianceSingleLanIpv6Rs{}
+			return nil
 		}(),
 		MandatoryDhcp: func() *ResponseApplianceGetNetworkApplianceSingleLanMandatoryDhcpRs {
 			if response.MandatoryDhcp != nil {
@@ -536,7 +550,7 @@ func ResponseApplianceGetNetworkApplianceSingleLanItemToBodyRs(state NetworksApp
 					}(),
 				}
 			}
-			return &ResponseApplianceGetNetworkApplianceSingleLanMandatoryDhcpRs{}
+			return nil
 		}(),
 		Subnet: types.StringValue(response.Subnet),
 	}

@@ -1,3 +1,81 @@
+
+## 1.0.0-beta (January 20, 2025)
+BREAKING CHANGES:
+* Resource `resource_meraki_organizations_users.go` has been removed.
+FEATURES:
+* **New Data Source** `data_source_meraki_administered_identities_me_api_keys.go`
+* **New Data Source** `data_source_meraki_devices_wireless_electronic_shelf_label.go`
+* **New Data Source** `data_source_meraki_networks_wireless_electronic_shelf_label.go`
+* **New Data Source** `data_source_meraki_networks_wireless_electronic_shelf_label_configured_devices.go`
+* **New Data Source** `data_source_meraki_organizations_assurance_alerts.go`
+* **New Data Source** `data_source_meraki_organizations_assurance_alerts_overview.go`
+* **New Data Source** `data_source_meraki_organizations_assurance_alerts_overview_by_network.go`
+* **New Data Source** `data_source_meraki_organizations_assurance_alerts_overview_by_type.go`
+* **New Data Source** `data_source_meraki_organizations_assurance_alerts_overview_historical.go`
+* **New Data Source** `data_source_meraki_organizations_cellular_gateway_esims_inventory.go`
+* **New Data Source** `data_source_meraki_organizations_cellular_gateway_esims_service_providers.go`
+* **New Data Source** `data_source_meraki_organizations_cellular_gateway_esims_service_providers_accounts.go`
+* **New Data Source** `data_source_meraki_organizations_cellular_gateway_esims_service_providers_accounts_communication_plans.go`
+* **New Data Source** `data_source_meraki_organizations_cellular_gateway_esims_service_providers_accounts_rate_plans.go`
+* **New Data Source** `data_source_meraki_organizations_devices_overview_by_model.go`
+* **New Data Source** `data_source_meraki_organizations_floor_plans_auto_locate_devices.go`
+* **New Data Source** `data_source_meraki_organizations_floor_plans_auto_locate_statuses.go`
+* **New Data Source** `data_source_meraki_organizations_splash_themes.go`
+* **New Data Source** `data_source_meraki_organizations_summary_top_applications_by_usage.go`
+* **New Data Source** `data_source_meraki_organizations_summary_top_applications_categories_by_usage.go`
+* **New Data Source** `data_source_meraki_organizations_switch_ports_clients_overview_by_device.go`
+* **New Data Source** `data_source_meraki_organizations_switch_ports_overview.go`
+* **New Data Source** `data_source_meraki_organizations_switch_ports_statuses_by_switch.go`
+* **New Data Source** `data_source_meraki_organizations_switch_ports_topology_discovery_by_device.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_air_marshal_rules.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_air_marshal_settings_by_network.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_clients_overview_by_device.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_controller_availabilities_change_history.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_controller_clients_overview_history_by_device_by_interval.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_controller_connections.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_controller_devices_interfaces_l2_by_device.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_controller_devices_interfaces_l2_statuses_change_history_by_device.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_controller_devices_interfaces_l2_usage_history_by_interval.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_controller_devices_interfaces_l3_by_device.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_controller_devices_interfaces_l3_statuses_change_history_by_device.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_controller_devices_interfaces_l3_usage_history_by_interval.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_controller_devices_interfaces_packets_overview_by_device.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_controller_devices_interfaces_usage_history_by_interval.`go
+* **New Data Source** `data_source_meraki_organizations_wireless_controller_devices_redundancy_failover_history.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_controller_devices_redundancy_statuses.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_controller_devices_system_utilization_history_by_interval.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_controller_overview_by_device.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_devices_wireless_controllers_by_device.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_rf_profiles_assignments_by_device.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_ssids_statuses_by_device.go`
+* **New Resource** `resource_meraki_administered_identities_me_api_keys_generate.go`
+* **New Resource** `resource_meraki_administered_identities_me_api_keys_revoke.go`
+* **New Resource** `resource_meraki_devices_live_tools_leds_blink.go`
+* **New Resource** `resource_meraki_devices_wireless_electronic_shelf_label.go`
+* **New Resource** `resource_meraki_networks_appliance_sdwan_internet_policies.go`
+* **New Resource** `resource_meraki_networks_cancel.go`
+* **New Resource** `resource_meraki_networks_floor_plans_auto_locate_jobs_batch.go`
+* **New Resource** `resource_meraki_networks_floor_plans_devices_batch_update.go`
+* **New Resource** `resource_meraki_networks_publish.go`
+* **New Resource** `resource_meraki_networks_recalculate.go`
+* **New Resource** `resource_meraki_networks_wireless_air_marshal_rules.go`
+* **New Resource** `resource_meraki_networks_wireless_air_marshal_rules_delete.go`
+* **New Resource** `resource_meraki_networks_wireless_air_marshal_rules_update.go`
+* **New Resource** `resource_meraki_networks_wireless_air_marshal_settings.go`
+* **New Resource** `resource_meraki_networks_wireless_electronic_shelf_label.go`
+* **New Resource** `resource_meraki_organizations_assets.go`
+* **New Resource** `resource_meraki_organizations_assurance_alerts_dismiss.go`
+* **New Resource** `resource_meraki_organizations_assurance_alerts_restore.go`
+* **New Resource** `resource_meraki_organizations_cellular_gateway_esims_service_providers_accounts.go`
+* **New Resource** `resource_meraki_organizations_cellular_gateway_esims_swap.go`
+* **New Resource** `resource_meraki_organizations_devices_details_bulk_update.go`
+* **New Resource** `resource_meraki_organizations_licenses_renew_seats.go`
+* **New Resource** `resource_meraki_organizations_splash_themes.go`
+* **New Resource** `resource_meraki_organizations_wireless_radio_auto_rf_channels_recalculate.go`
+* **New Resource** `resource_meraki_organizations_licenses_renew_seats.go`
+IMPROVEMENTS:
+* Provider supports v1.53.0 of Meraki Dashboard API.
+
 ## 0.2.13-alpha (November 27, 2024)
 BUGFIXES:
 * meraki_debug no longer works #179 [fixed].

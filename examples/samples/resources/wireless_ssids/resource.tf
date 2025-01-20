@@ -16,7 +16,7 @@ resource "meraki_networks_wireless_ssids" "test" {
   network_id                      = "L_828099381482771185"
   number                          = 1
   enabled                         = true
-  name                            = "test 2"
+  name                            = "test"
   adult_content_filtering_enabled = false
   auth_mode                       = "psk"
   available_on_all_aps            = true

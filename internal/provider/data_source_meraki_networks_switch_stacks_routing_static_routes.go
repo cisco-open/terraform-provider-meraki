@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -61,12 +78,16 @@ func (d *NetworksSwitchStacksRoutingStaticRoutesDataSource) Schema(_ context.Con
 						MarkdownDescription: `Option to advertise static routes via OSPF`,
 						Computed:            true,
 					},
+					"management_next_hop": schema.StringAttribute{
+						MarkdownDescription: `Optional fallback IP address for management traffic`,
+						Computed:            true,
+					},
 					"name": schema.StringAttribute{
 						MarkdownDescription: `The name or description of the layer 3 static route`,
 						Computed:            true,
 					},
 					"next_hop_ip": schema.StringAttribute{
-						MarkdownDescription: ` The IP address of the router to which traffic for this destination network should be sent`,
+						MarkdownDescription: `The IP address of the router to which traffic for this destination network should be sent`,
 						Computed:            true,
 					},
 					"prefer_over_ospf_routes_enabled": schema.BoolAttribute{
@@ -94,12 +115,16 @@ func (d *NetworksSwitchStacksRoutingStaticRoutesDataSource) Schema(_ context.Con
 							MarkdownDescription: `Option to advertise static routes via OSPF`,
 							Computed:            true,
 						},
+						"management_next_hop": schema.StringAttribute{
+							MarkdownDescription: `Optional fallback IP address for management traffic`,
+							Computed:            true,
+						},
 						"name": schema.StringAttribute{
 							MarkdownDescription: `The name or description of the layer 3 static route`,
 							Computed:            true,
 						},
 						"next_hop_ip": schema.StringAttribute{
-							MarkdownDescription: ` The IP address of the router to which traffic for this destination network should be sent`,
+							MarkdownDescription: `The IP address of the router to which traffic for this destination network should be sent`,
 							Computed:            true,
 						},
 						"prefer_over_ospf_routes_enabled": schema.BoolAttribute{
@@ -139,6 +164,8 @@ func (d *NetworksSwitchStacksRoutingStaticRoutesDataSource) Read(ctx context.Con
 		vvNetworkID := networksSwitchStacksRoutingStaticRoutes.NetworkID.ValueString()
 		vvSwitchStackID := networksSwitchStacksRoutingStaticRoutes.SwitchStackID.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Switch.GetNetworkSwitchStackRoutingStaticRoutes(vvNetworkID, vvSwitchStackID)
 
 		if err != nil || response1 == nil {
@@ -165,6 +192,8 @@ func (d *NetworksSwitchStacksRoutingStaticRoutesDataSource) Read(ctx context.Con
 		vvNetworkID := networksSwitchStacksRoutingStaticRoutes.NetworkID.ValueString()
 		vvSwitchStackID := networksSwitchStacksRoutingStaticRoutes.SwitchStackID.ValueString()
 		vvStaticRouteID := networksSwitchStacksRoutingStaticRoutes.StaticRouteID.ValueString()
+
+		// has_unknown_response: None
 
 		response2, restyResp2, err := d.client.Switch.GetNetworkSwitchStackRoutingStaticRoute(vvNetworkID, vvSwitchStackID, vvStaticRouteID)
 
@@ -200,6 +229,7 @@ type NetworksSwitchStacksRoutingStaticRoutes struct {
 
 type ResponseItemSwitchGetNetworkSwitchStackRoutingStaticRoutes struct {
 	AdvertiseViaOspfEnabled     types.Bool   `tfsdk:"advertise_via_ospf_enabled"`
+	ManagementNextHop           types.String `tfsdk:"management_next_hop"`
 	Name                        types.String `tfsdk:"name"`
 	NextHopIP                   types.String `tfsdk:"next_hop_ip"`
 	PreferOverOspfRoutesEnabled types.Bool   `tfsdk:"prefer_over_ospf_routes_enabled"`
@@ -209,6 +239,7 @@ type ResponseItemSwitchGetNetworkSwitchStackRoutingStaticRoutes struct {
 
 type ResponseSwitchGetNetworkSwitchStackRoutingStaticRoute struct {
 	AdvertiseViaOspfEnabled     types.Bool   `tfsdk:"advertise_via_ospf_enabled"`
+	ManagementNextHop           types.String `tfsdk:"management_next_hop"`
 	Name                        types.String `tfsdk:"name"`
 	NextHopIP                   types.String `tfsdk:"next_hop_ip"`
 	PreferOverOspfRoutesEnabled types.Bool   `tfsdk:"prefer_over_ospf_routes_enabled"`
@@ -227,8 +258,9 @@ func ResponseSwitchGetNetworkSwitchStackRoutingStaticRoutesItemsToBody(state Net
 				}
 				return types.Bool{}
 			}(),
-			Name:      types.StringValue(item.Name),
-			NextHopIP: types.StringValue(item.NextHopIP),
+			ManagementNextHop: types.StringValue(item.ManagementNextHop),
+			Name:              types.StringValue(item.Name),
+			NextHopIP:         types.StringValue(item.NextHopIP),
 			PreferOverOspfRoutesEnabled: func() types.Bool {
 				if item.PreferOverOspfRoutesEnabled != nil {
 					return types.BoolValue(*item.PreferOverOspfRoutesEnabled)
@@ -252,8 +284,9 @@ func ResponseSwitchGetNetworkSwitchStackRoutingStaticRouteItemToBody(state Netwo
 			}
 			return types.Bool{}
 		}(),
-		Name:      types.StringValue(response.Name),
-		NextHopIP: types.StringValue(response.NextHopIP),
+		ManagementNextHop: types.StringValue(response.ManagementNextHop),
+		Name:              types.StringValue(response.Name),
+		NextHopIP:         types.StringValue(response.NextHopIP),
 		PreferOverOspfRoutesEnabled: func() types.Bool {
 			if response.PreferOverOspfRoutesEnabled != nil {
 				return types.BoolValue(*response.PreferOverOspfRoutesEnabled)

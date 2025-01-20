@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -7,7 +23,7 @@ import (
 	"log"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -51,8 +67,9 @@ func (r *OrganizationsAdminsResource) Schema(_ context.Context, _ resource.Schem
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"account_status": schema.StringAttribute{
-				MarkdownDescription: `Status of the admin's account`,
-				Computed:            true,
+				MarkdownDescription: `Status of the admin's account
+                                  Allowed values: [locked,ok,pending,unverified]`,
+				Computed: true,
 			},
 			"admin_id": schema.StringAttribute{
 				MarkdownDescription: `adminId path parameter. Admin ID`,
@@ -62,9 +79,10 @@ func (r *OrganizationsAdminsResource) Schema(_ context.Context, _ resource.Schem
 				},
 			},
 			"authentication_method": schema.StringAttribute{
-				MarkdownDescription: `Admin's authentication method`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `Admin's authentication method
+                                  Allowed values: [Cisco SecureX Sign-On,Email]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 					SuppressDiffString(),
@@ -135,9 +153,10 @@ func (r *OrganizationsAdminsResource) Schema(_ context.Context, _ resource.Schem
 				},
 			},
 			"org_access": schema.StringAttribute{
-				MarkdownDescription: `Admin's level of access to the organization`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `Admin's level of access to the organization
+                                  Allowed values: [enterprise,full,none,read-only]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -152,10 +171,7 @@ func (r *OrganizationsAdminsResource) Schema(_ context.Context, _ resource.Schem
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-				Required: true,
+				Required:            true,
 			},
 			"tags": schema.SetNestedAttribute{
 				MarkdownDescription: `Admin tag information`,
@@ -168,9 +184,10 @@ func (r *OrganizationsAdminsResource) Schema(_ context.Context, _ resource.Schem
 					Attributes: map[string]schema.Attribute{
 
 						"access": schema.StringAttribute{
-							MarkdownDescription: `Access level for the tag`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `Access level for the tag
+                                        Allowed values: [full,guest-ambassador,monitor-only,read-only]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -228,7 +245,7 @@ func (r *OrganizationsAdminsResource) Create(ctx context.Context, req resource.C
 	// organization_id
 	vvName := data.Email.ValueString()
 	//Items
-	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationAdmins(vvOrganizationID)
+	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationAdmins(vvOrganizationID, nil)
 	//Have Create
 	if err != nil {
 		if restyResp1 != nil {
@@ -292,7 +309,7 @@ func (r *OrganizationsAdminsResource) Create(ctx context.Context, req resource.C
 		return
 	}
 	//Items
-	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationAdmins(vvOrganizationID)
+	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationAdmins(vvOrganizationID, nil)
 	// Has only items
 
 	if err != nil || responseGet == nil {
@@ -359,7 +376,7 @@ func (r *OrganizationsAdminsResource) Read(ctx context.Context, req resource.Rea
 	vvName := data.ID.ValueString()
 	// name
 
-	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationAdmins(vvOrganizationID)
+	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationAdmins(vvOrganizationID, nil)
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {

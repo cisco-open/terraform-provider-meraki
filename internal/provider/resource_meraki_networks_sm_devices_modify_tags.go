@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE ACTION
@@ -5,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -154,7 +170,6 @@ func (r *NetworksSmDevicesModifyTagsResource) Create(ctx context.Context, req re
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Sm.ModifyNetworkSmDevicesTags(vvNetworkID, dataRequest)
 
@@ -173,7 +188,7 @@ func (r *NetworksSmDevicesModifyTagsResource) Create(ctx context.Context, req re
 		return
 	}
 	//Item
-
+	// //entro aqui 2
 	// data2 := ResponseSmModifyNetworkSmDevicesTags(data, response)
 
 	diags := resp.State.Set(ctx, &data)
@@ -189,6 +204,7 @@ func (r *NetworksSmDevicesModifyTagsResource) Update(ctx context.Context, req re
 }
 
 func (r *NetworksSmDevicesModifyTagsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 

@@ -75,6 +75,10 @@ resource "meraki_organizations_inventory_onboarding_cloud_monitoring_prepare" "e
         start_line_number = 16
       }
     }]
+    options = {
+
+      skip_commit = false
+    }
   }
 }
 

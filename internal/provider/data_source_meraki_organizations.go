@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -82,6 +99,17 @@ func (d *OrganizationsDataSource) Schema(_ context.Context, _ datasource.SchemaR
 								Computed:            true,
 								Attributes: map[string]schema.Attribute{
 
+									"host": schema.SingleNestedAttribute{
+										MarkdownDescription: `Where organization data is hosted`,
+										Computed:            true,
+										Attributes: map[string]schema.Attribute{
+
+											"name": schema.StringAttribute{
+												MarkdownDescription: `Name of location`,
+												Computed:            true,
+											},
+										},
+									},
 									"name": schema.StringAttribute{
 										MarkdownDescription: `Name of region`,
 										Computed:            true,
@@ -111,7 +139,7 @@ func (d *OrganizationsDataSource) Schema(_ context.Context, _ datasource.SchemaR
 						Attributes: map[string]schema.Attribute{
 
 							"details": schema.SetNestedAttribute{
-								MarkdownDescription: `Details related to organization management, possibly empty. Details may be named 'MSP ID', 'IP restriction mode for API', or 'IP restriction mode for dashboard', if the organization admin has configured any.`,
+								MarkdownDescription: `Details related to organization management, possibly empty. Details may be named 'MSP ID', 'customer number', 'IP restriction mode for API', or 'IP restriction mode for dashboard', if the organization admin has configured any.`,
 								Computed:            true,
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
@@ -167,6 +195,17 @@ func (d *OrganizationsDataSource) Schema(_ context.Context, _ datasource.SchemaR
 									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
+										"host": schema.SingleNestedAttribute{
+											MarkdownDescription: `Where organization data is hosted`,
+											Computed:            true,
+											Attributes: map[string]schema.Attribute{
+
+												"name": schema.StringAttribute{
+													MarkdownDescription: `Name of location`,
+													Computed:            true,
+												},
+											},
+										},
 										"name": schema.StringAttribute{
 											MarkdownDescription: `Name of region`,
 											Computed:            true,
@@ -196,7 +235,7 @@ func (d *OrganizationsDataSource) Schema(_ context.Context, _ datasource.SchemaR
 							Attributes: map[string]schema.Attribute{
 
 								"details": schema.SetNestedAttribute{
-									MarkdownDescription: `Details related to organization management, possibly empty. Details may be named 'MSP ID', 'IP restriction mode for API', or 'IP restriction mode for dashboard', if the organization admin has configured any.`,
+									MarkdownDescription: `Details related to organization management, possibly empty. Details may be named 'MSP ID', 'customer number', 'IP restriction mode for API', or 'IP restriction mode for dashboard', if the organization admin has configured any.`,
 									Computed:            true,
 									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
@@ -250,6 +289,8 @@ func (d *OrganizationsDataSource) Read(ctx context.Context, req datasource.ReadR
 		queryParams1.StartingAfter = organizations.StartingAfter.ValueString()
 		queryParams1.EndingBefore = organizations.EndingBefore.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Organizations.GetOrganizations(&queryParams1)
 
 		if err != nil || response1 == nil {
@@ -274,6 +315,8 @@ func (d *OrganizationsDataSource) Read(ctx context.Context, req datasource.ReadR
 	if selectedMethod == 2 {
 		log.Printf("[DEBUG] Selected method: GetOrganization")
 		vvOrganizationID := organizations.OrganizationID.ValueString()
+
+		// has_unknown_response: None
 
 		response2, restyResp2, err := d.client.Organizations.GetOrganization(vvOrganizationID)
 
@@ -327,6 +370,11 @@ type ResponseItemOrganizationsGetOrganizationsCloud struct {
 }
 
 type ResponseItemOrganizationsGetOrganizationsCloudRegion struct {
+	Host *ResponseItemOrganizationsGetOrganizationsCloudRegionHost `tfsdk:"host"`
+	Name types.String                                              `tfsdk:"name"`
+}
+
+type ResponseItemOrganizationsGetOrganizationsCloudRegionHost struct {
 	Name types.String `tfsdk:"name"`
 }
 
@@ -362,6 +410,11 @@ type ResponseOrganizationsGetOrganizationCloud struct {
 }
 
 type ResponseOrganizationsGetOrganizationCloudRegion struct {
+	Host *ResponseOrganizationsGetOrganizationCloudRegionHost `tfsdk:"host"`
+	Name types.String                                         `tfsdk:"name"`
+}
+
+type ResponseOrganizationsGetOrganizationCloudRegionHost struct {
 	Name types.String `tfsdk:"name"`
 }
 
@@ -394,7 +447,7 @@ func ResponseOrganizationsGetOrganizationsItemsToBody(state Organizations, respo
 						}(),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationsApi{}
+				return nil
 			}(),
 			Cloud: func() *ResponseItemOrganizationsGetOrganizationsCloud {
 				if item.Cloud != nil {
@@ -402,14 +455,22 @@ func ResponseOrganizationsGetOrganizationsItemsToBody(state Organizations, respo
 						Region: func() *ResponseItemOrganizationsGetOrganizationsCloudRegion {
 							if item.Cloud.Region != nil {
 								return &ResponseItemOrganizationsGetOrganizationsCloudRegion{
+									Host: func() *ResponseItemOrganizationsGetOrganizationsCloudRegionHost {
+										if item.Cloud.Region.Host != nil {
+											return &ResponseItemOrganizationsGetOrganizationsCloudRegionHost{
+												Name: types.StringValue(item.Cloud.Region.Host.Name),
+											}
+										}
+										return nil
+									}(),
 									Name: types.StringValue(item.Cloud.Region.Name),
 								}
 							}
-							return &ResponseItemOrganizationsGetOrganizationsCloudRegion{}
+							return nil
 						}(),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationsCloud{}
+				return nil
 			}(),
 			ID: types.StringValue(item.ID),
 			Licensing: func() *ResponseItemOrganizationsGetOrganizationsLicensing {
@@ -418,7 +479,7 @@ func ResponseOrganizationsGetOrganizationsItemsToBody(state Organizations, respo
 						Model: types.StringValue(item.Licensing.Model),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationsLicensing{}
+				return nil
 			}(),
 			Management: func() *ResponseItemOrganizationsGetOrganizationsManagement {
 				if item.Management != nil {
@@ -434,11 +495,11 @@ func ResponseOrganizationsGetOrganizationsItemsToBody(state Organizations, respo
 								}
 								return &result
 							}
-							return &[]ResponseItemOrganizationsGetOrganizationsManagementDetails{}
+							return nil
 						}(),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationsManagement{}
+				return nil
 			}(),
 			Name: types.StringValue(item.Name),
 			URL:  types.StringValue(item.URL),
@@ -462,7 +523,7 @@ func ResponseOrganizationsGetOrganizationItemToBody(state Organizations, respons
 					}(),
 				}
 			}
-			return &ResponseOrganizationsGetOrganizationApi{}
+			return nil
 		}(),
 		Cloud: func() *ResponseOrganizationsGetOrganizationCloud {
 			if response.Cloud != nil {
@@ -470,14 +531,22 @@ func ResponseOrganizationsGetOrganizationItemToBody(state Organizations, respons
 					Region: func() *ResponseOrganizationsGetOrganizationCloudRegion {
 						if response.Cloud.Region != nil {
 							return &ResponseOrganizationsGetOrganizationCloudRegion{
+								Host: func() *ResponseOrganizationsGetOrganizationCloudRegionHost {
+									if response.Cloud.Region.Host != nil {
+										return &ResponseOrganizationsGetOrganizationCloudRegionHost{
+											Name: types.StringValue(response.Cloud.Region.Host.Name),
+										}
+									}
+									return nil
+								}(),
 								Name: types.StringValue(response.Cloud.Region.Name),
 							}
 						}
-						return &ResponseOrganizationsGetOrganizationCloudRegion{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseOrganizationsGetOrganizationCloud{}
+			return nil
 		}(),
 		ID: types.StringValue(response.ID),
 		Licensing: func() *ResponseOrganizationsGetOrganizationLicensing {
@@ -486,7 +555,7 @@ func ResponseOrganizationsGetOrganizationItemToBody(state Organizations, respons
 					Model: types.StringValue(response.Licensing.Model),
 				}
 			}
-			return &ResponseOrganizationsGetOrganizationLicensing{}
+			return nil
 		}(),
 		Management: func() *ResponseOrganizationsGetOrganizationManagement {
 			if response.Management != nil {
@@ -502,11 +571,11 @@ func ResponseOrganizationsGetOrganizationItemToBody(state Organizations, respons
 							}
 							return &result
 						}
-						return &[]ResponseOrganizationsGetOrganizationManagementDetails{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseOrganizationsGetOrganizationManagement{}
+			return nil
 		}(),
 		Name: types.StringValue(response.Name),
 		URL:  types.StringValue(response.URL),

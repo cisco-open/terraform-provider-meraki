@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -41,6 +58,10 @@ func (d *OrganizationsFirmwareUpgradesByDeviceDataSource) Metadata(_ context.Con
 func (d *OrganizationsFirmwareUpgradesByDeviceDataSource) Schema(_ context.Context, _ datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
+			"current_upgrades_only": schema.BoolAttribute{
+				MarkdownDescription: `currentUpgradesOnly query parameter. Optional parameter to filter to only current or pending upgrade statuses`,
+				Optional:            true,
+			},
 			"ending_before": schema.StringAttribute{
 				MarkdownDescription: `endingBefore query parameter. A token used by the server to indicate the end of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.`,
 				Optional:            true,
@@ -216,6 +237,9 @@ func (d *OrganizationsFirmwareUpgradesByDeviceDataSource) Read(ctx context.Conte
 		queryParams1.Macs = elementsToStrings(ctx, organizationsFirmwareUpgradesByDevice.Macs)
 		queryParams1.FirmwareUpgradeBatchIDs = elementsToStrings(ctx, organizationsFirmwareUpgradesByDevice.FirmwareUpgradeBatchIDs)
 		queryParams1.Upgradestatuses = elementsToStrings(ctx, organizationsFirmwareUpgradesByDevice.Upgradestatuses)
+		queryParams1.CurrentUpgradesOnly = organizationsFirmwareUpgradesByDevice.CurrentUpgradesOnly.ValueBool()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Organizations.GetOrganizationFirmwareUpgradesByDevice(vvOrganizationID, &queryParams1)
 
@@ -251,6 +275,7 @@ type OrganizationsFirmwareUpgradesByDevice struct {
 	Macs                    types.List                                                          `tfsdk:"macs"`
 	FirmwareUpgradeBatchIDs types.List                                                          `tfsdk:"firmware_upgrade_batch_ids"`
 	Upgradestatuses         types.List                                                          `tfsdk:"upgradestatuses"`
+	CurrentUpgradesOnly     types.Bool                                                          `tfsdk:"current_upgrades_only"`
 	Items                   *[]ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDevice `tfsdk:"items"`
 }
 
@@ -313,7 +338,7 @@ func ResponseOrganizationsGetOrganizationFirmwareUpgradesByDeviceItemsToBody(sta
 									ShortName:   types.StringValue(item.Upgrade.FromVersion.ShortName),
 								}
 							}
-							return &ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDeviceUpgradeFromVersion{}
+							return nil
 						}(),
 						ID: types.StringValue(item.Upgrade.ID),
 						Staged: func() *ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDeviceUpgradestaged {
@@ -325,11 +350,11 @@ func ResponseOrganizationsGetOrganizationFirmwareUpgradesByDeviceItemsToBody(sta
 												ID: types.StringValue(item.Upgrade.Staged.Group.ID),
 											}
 										}
-										return &ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDeviceUpgradestagedGroup{}
+										return nil
 									}(),
 								}
 							}
-							return &ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDeviceUpgradestaged{}
+							return nil
 						}(),
 						Status: types.StringValue(item.Upgrade.Status),
 						Time:   types.StringValue(item.Upgrade.Time),
@@ -342,12 +367,12 @@ func ResponseOrganizationsGetOrganizationFirmwareUpgradesByDeviceItemsToBody(sta
 									ShortName:   types.StringValue(item.Upgrade.ToVersion.ShortName),
 								}
 							}
-							return &ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDeviceUpgradeToVersion{}
+							return nil
 						}(),
 						UpgradeBatchID: types.StringValue(item.Upgrade.UpgradeBatchID),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDeviceUpgrade{}
+				return nil
 			}(),
 		}
 		items = append(items, itemState)

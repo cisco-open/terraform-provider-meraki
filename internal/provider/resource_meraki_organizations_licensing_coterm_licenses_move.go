@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE ACTION
@@ -5,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -122,8 +138,9 @@ func (r *OrganizationsLicensingCotermLicensesMoveResource) Schema(_ context.Cont
 									Computed:            true,
 								},
 								"mode": schema.StringAttribute{
-									MarkdownDescription: `The operation mode of the license when it was claimed`,
-									Computed:            true,
+									MarkdownDescription: `The operation mode of the license when it was claimed
+                                                Allowed values: [addDevices,renew]`,
+									Computed: true,
 								},
 								"organization_id": schema.StringAttribute{
 									MarkdownDescription: `The ID of the organization that the license is claimed in`,
@@ -201,8 +218,9 @@ func (r *OrganizationsLicensingCotermLicensesMoveResource) Schema(_ context.Cont
 									Computed:            true,
 								},
 								"mode": schema.StringAttribute{
-									MarkdownDescription: `The operation mode of the license when it was claimed`,
-									Computed:            true,
+									MarkdownDescription: `The operation mode of the license when it was claimed
+                                                Allowed values: [addDevices,renew]`,
+									Computed: true,
 								},
 								"organization_id": schema.StringAttribute{
 									MarkdownDescription: `The ID of the organization that the license is claimed in`,
@@ -227,9 +245,10 @@ func (r *OrganizationsLicensingCotermLicensesMoveResource) Schema(_ context.Cont
 						Attributes: map[string]schema.Attribute{
 
 							"mode": schema.StringAttribute{
-								MarkdownDescription: `The claim mode of the moved license`,
-								Optional:            true,
-								Computed:            true,
+								MarkdownDescription: `The claim mode of the moved license
+                                              Allowed values: [addDevices,renew]`,
+								Optional: true,
+								Computed: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.RequiresReplace(),
 								},
@@ -338,15 +357,15 @@ func (r *OrganizationsLicensingCotermLicensesMoveResource) Create(ctx context.Co
 }
 
 func (r *OrganizationsLicensingCotermLicensesMoveResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *OrganizationsLicensingCotermLicensesMoveResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *OrganizationsLicensingCotermLicensesMoveResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -436,7 +455,7 @@ func (r *OrganizationsLicensingCotermLicensesMove) toSdkApiRequestCreate(ctx con
 	var requestLicensingMoveOrganizationLicensingCotermLicensesDestination *merakigosdk.RequestLicensingMoveOrganizationLicensingCotermLicensesDestination
 	if re.Destination != nil {
 		mode := re.Destination.Mode.ValueString()
-		organizationID := re.Destination.OrganizationID.ValueString()
+		organizationID := r.OrganizationID.ValueString()
 		requestLicensingMoveOrganizationLicensingCotermLicensesDestination = &merakigosdk.RequestLicensingMoveOrganizationLicensingCotermLicensesDestination{
 			Mode:           mode,
 			OrganizationID: organizationID,
@@ -510,7 +529,7 @@ func ResponseLicensingMoveOrganizationLicensingCotermLicensesItemToBody(state Or
 								}
 								return &result
 							}
-							return &[]ResponseLicensingMoveOrganizationLicensingCotermLicensesMovedLicensesCounts{}
+							return nil
 						}(),
 						Duration: func() types.Int64 {
 							if movedLicenses.Duration != nil {
@@ -529,7 +548,7 @@ func ResponseLicensingMoveOrganizationLicensingCotermLicensesItemToBody(state Or
 								}
 								return &result
 							}
-							return &[]ResponseLicensingMoveOrganizationLicensingCotermLicensesMovedLicensesEditions{}
+							return nil
 						}(),
 						Expired: func() types.Bool {
 							if movedLicenses.Expired != nil {
@@ -552,7 +571,7 @@ func ResponseLicensingMoveOrganizationLicensingCotermLicensesItemToBody(state Or
 				}
 				return &result
 			}
-			return &[]ResponseLicensingMoveOrganizationLicensingCotermLicensesMovedLicenses{}
+			return nil
 		}(),
 		RemainderLicenses: func() *[]ResponseLicensingMoveOrganizationLicensingCotermLicensesRemainderLicenses {
 			if response.RemainderLicenses != nil {
@@ -576,7 +595,7 @@ func ResponseLicensingMoveOrganizationLicensingCotermLicensesItemToBody(state Or
 								}
 								return &result
 							}
-							return &[]ResponseLicensingMoveOrganizationLicensingCotermLicensesRemainderLicensesCounts{}
+							return nil
 						}(),
 						Duration: func() types.Int64 {
 							if remainderLicenses.Duration != nil {
@@ -595,7 +614,7 @@ func ResponseLicensingMoveOrganizationLicensingCotermLicensesItemToBody(state Or
 								}
 								return &result
 							}
-							return &[]ResponseLicensingMoveOrganizationLicensingCotermLicensesRemainderLicensesEditions{}
+							return nil
 						}(),
 						Expired: func() types.Bool {
 							if remainderLicenses.Expired != nil {
@@ -618,7 +637,7 @@ func ResponseLicensingMoveOrganizationLicensingCotermLicensesItemToBody(state Or
 				}
 				return &result
 			}
-			return &[]ResponseLicensingMoveOrganizationLicensingCotermLicensesRemainderLicenses{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

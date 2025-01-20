@@ -1,12 +1,12 @@
 
 resource "meraki_networks_netflow" "example" {
 
-  collector_ip      = "1.2.3.4"
-  collector_port    = 443
-  eta_dst_port      = 443
-  eta_enabled       = true
+  collector_ip      = "string"
+  collector_port    = 1
+  eta_dst_port      = 1
+  eta_enabled       = false
   network_id        = "string"
-  reporting_enabled = true
+  reporting_enabled = false
 }
 
 output "meraki_networks_netflow_example" {

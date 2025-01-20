@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -50,10 +66,12 @@ func (r *NetworksCameraWirelessProfilesResource) Schema(_ context.Context, _ res
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"applied_device_count": schema.Int64Attribute{
-				Computed: true,
+				MarkdownDescription: `The count of the applied devices.`,
+				Computed:            true,
 			},
 			"id": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `The ID of the camera wireless profile.`,
+				Computed:            true,
 			},
 			"identity": schema.SingleNestedAttribute{
 				MarkdownDescription: `The identity of the wireless profile. Required for creating wireless profiles in 8021x-radius auth mode.`,
@@ -84,7 +102,7 @@ func (r *NetworksCameraWirelessProfilesResource) Schema(_ context.Context, _ res
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: `The name of the camera wireless profile. This parameter is required.`,
+				MarkdownDescription: `The name of the camera wireless profile.`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -105,9 +123,10 @@ func (r *NetworksCameraWirelessProfilesResource) Schema(_ context.Context, _ res
 				Attributes: map[string]schema.Attribute{
 
 					"auth_mode": schema.StringAttribute{
-						MarkdownDescription: `The auth mode of the SSID. It can be set to ('psk', '8021x-radius').`,
-						Computed:            true,
-						Optional:            true,
+						MarkdownDescription: `The auth mode of the SSID. It can be set to ('psk', '8021x-radius').
+                                        Allowed values: [8021x-radius,psk]`,
+						Computed: true,
+						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
@@ -119,7 +138,7 @@ func (r *NetworksCameraWirelessProfilesResource) Schema(_ context.Context, _ res
 						},
 					},
 					"encryption_mode": schema.StringAttribute{
-						MarkdownDescription: `The encryption mode of the SSID. It can be set to ('wpa', 'wpa-eap'). With 'wpa' mode, the authMode should be 'psk' and with 'wpa-eap' the authMode should be '8021x-radius'`,
+						MarkdownDescription: `The encryption mode of the SSID.`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
@@ -135,7 +154,7 @@ func (r *NetworksCameraWirelessProfilesResource) Schema(_ context.Context, _ res
 						},
 					},
 					"psk": schema.StringAttribute{
-						MarkdownDescription: `The pre-shared key of the SSID.`,
+						MarkdownDescription: `The pre-shared key of the SSID, if mode is PSK`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
@@ -216,9 +235,9 @@ func (r *NetworksCameraWirelessProfilesResource) Create(ctx context.Context, req
 		}
 	}
 	dataRequest := data.toSdkApiRequestCreate(ctx)
-	restyResp2, err := r.client.Camera.CreateNetworkCameraWirelessProfile(vvNetworkID, dataRequest)
+	response, restyResp2, err := r.client.Camera.CreateNetworkCameraWirelessProfile(vvNetworkID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkCameraWirelessProfile",
@@ -258,7 +277,7 @@ func (r *NetworksCameraWirelessProfilesResource) Create(ctx context.Context, req
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter WirelessProfileID",
-				err.Error(),
+				"Error",
 			)
 			return
 		}
@@ -371,8 +390,8 @@ func (r *NetworksCameraWirelessProfilesResource) Update(ctx context.Context, req
 	vvNetworkID := data.NetworkID.ValueString()
 	vvWirelessProfileID := data.WirelessProfileID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Camera.UpdateNetworkCameraWirelessProfile(vvNetworkID, vvWirelessProfileID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Camera.UpdateNetworkCameraWirelessProfile(vvNetworkID, vvWirelessProfileID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCameraWirelessProfile",
@@ -537,7 +556,7 @@ func ResponseCameraGetNetworkCameraWirelessProfileItemToBodyRs(state NetworksCam
 					Username: types.StringValue(response.IDentity.Username),
 				}
 			}
-			return &ResponseCameraGetNetworkCameraWirelessProfileIdentityRs{}
+			return nil
 		}(),
 		Name: types.StringValue(response.Name),
 		SSID: func() *ResponseCameraGetNetworkCameraWirelessProfileSsidRs {
@@ -546,9 +565,10 @@ func ResponseCameraGetNetworkCameraWirelessProfileItemToBodyRs(state NetworksCam
 					AuthMode:       types.StringValue(response.SSID.AuthMode),
 					EncryptionMode: types.StringValue(response.SSID.EncryptionMode),
 					Name:           types.StringValue(response.SSID.Name),
+					Psk:            types.StringValue(response.SSID.Psk),
 				}
 			}
-			return &ResponseCameraGetNetworkCameraWirelessProfileSsidRs{}
+			return nil
 		}(),
 	}
 	if is_read {

@@ -5,20 +5,26 @@ package provider
 
 import (
 	"context"
+	"fmt"
+	"log"
 	"os"
+	"regexp"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 const (
-	CUSTOM_USER_AGENT = "MerakiTerraform/1.47.0 Cisco"
+	CUSTOM_USER_AGENT  = "MerakiTerraform/0.2.13-alpha Cisco"
+	DEFAULT_USER_AGENT = "Meraki"
 )
 
 // terraform-provider-meraki
@@ -39,6 +45,7 @@ type MerakiProviderModel struct {
 	MerakiDashboardApiKey types.String `tfsdk:"meraki_dashboard_api_key"`
 	Debug                 types.String `tfsdk:"meraki_debug"`
 	RequestPerSecond      types.Int64  `tfsdk:"meraki_requests_per_second"`
+	UserAgent             types.String `tfsdk:"meraki_user_agent"`
 }
 
 type MerakiProviderData struct {
@@ -69,6 +76,16 @@ func (p *MerakiProvider) Schema(ctx context.Context, req provider.SchemaRequest,
 			"meraki_requests_per_second": schema.Int64Attribute{
 				Optional:            true,
 				MarkdownDescription: "Flag requests per second allowed for client. Default is (10)",
+			},
+			"meraki_user_agent": schema.StringAttribute{
+				Optional:            true,
+				MarkdownDescription: " Define an identifier or User-Agent for API requests to Meraki. Default is (Meraki)",
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^\S*$`),
+						"must not contain white spaces",
+					),
+				},
 			},
 		},
 	}
@@ -136,7 +153,7 @@ func (p *MerakiProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	baseURL := os.Getenv("MERAKI_BASE_URL")
 	merakiDashboardApiKey := os.Getenv("MERAKI_DASHBOARD_API_KEY")
 	debug := os.Getenv("MERAKI_DEBUG")
-
+	userAgent := CUSTOM_USER_AGENT
 	if !data.BaseURL.IsNull() && !data.BaseURL.IsUnknown() {
 		baseURL = data.BaseURL.ValueString()
 	}
@@ -147,13 +164,19 @@ func (p *MerakiProvider) Configure(ctx context.Context, req provider.ConfigureRe
 		debug = data.Debug.ValueString()
 	}
 
+	if !data.UserAgent.IsNull() && !data.UserAgent.IsUnknown() {
+		userAgent = fmt.Sprintf("%s %s", CUSTOM_USER_AGENT, data.UserAgent.ValueString())
+	} else {
+		userAgent = fmt.Sprintf("%s %s", CUSTOM_USER_AGENT, DEFAULT_USER_AGENT)
+	}
+	log.Printf("[DEBUG] Meraki userAgent: %s", userAgent)
 	// if !data.SSLVerify.IsNull() {
 	// 	sslVerify = data.SSLVerify.ValueString()
 	// }
 
 	// Create a new Meraki client using the configuration values
 	client, err := merakigosdk.NewClientWithOptionsAndRequests(baseURL,
-		merakiDashboardApiKey, debug, CUSTOM_USER_AGENT, requestPerSecond,
+		merakiDashboardApiKey, debug, userAgent, requestPerSecond,
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -178,10 +201,8 @@ func New(version string) func() provider.Provider {
 		}
 	}
 }
-
 func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewNetworksApplianceStaticRoutesResource,
 		NewOrganizationsResource,
 		NewOrganizationsAdminsResource,
 		NewDevicesResource,
@@ -194,8 +215,6 @@ func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewDevicesCellularSimsResource,
 		NewDevicesCellularGatewayLanResource,
 		NewDevicesCellularGatewayPortForwardingRulesResource,
-		NewDevicesLiveToolsPingResource,
-		NewDevicesLiveToolsPingDeviceResource,
 		NewDevicesManagementInterfaceResource,
 		NewDevicesSensorRelationshipsResource,
 		NewDevicesSwitchPortsResource,
@@ -209,6 +228,7 @@ func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewNetworksAlertsSettingsResource,
 		NewNetworksApplianceConnectivityMonitoringDestinationsResource,
 		NewNetworksApplianceContentFilteringResource,
+		NewNetworksApplianceStaticRoutesResource,
 		NewNetworksApplianceFirewallCellularFirewallRulesResource,
 		NewNetworksApplianceFirewallFirewalledServicesResource,
 		NewNetworksApplianceFirewallInboundFirewallRulesResource,
@@ -313,7 +333,6 @@ func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewOrganizationsConfigTemplatesSwitchProfilesPortsResource,
 		NewOrganizationsEarlyAccessFeaturesOptInsResource,
 		NewOrganizationsInsightMonitoredMediaServersResource,
-		NewOrganizationsInventoryOnboardingCloudMonitoringImportsResource,
 		NewOrganizationsLicensesResource,
 		NewOrganizationsLoginSecurityResource,
 		NewOrganizationsPolicyObjectsGroupsResource,
@@ -324,15 +343,22 @@ func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewOrganizationsSNMPResource,
 		NewDevicesApplianceRadioSettingsResource,
 		NewDevicesLiveToolsArpTableResource,
+		NewDevicesLiveToolsCableResource,
 		NewDevicesLiveToolsWakeOnLanResource,
 		NewNetworksApplianceRfProfilesResource,
 		NewNetworksVLANProfilesResource,
 		NewNetworksWirelessEthernetPortsProfilesResource,
 		NewOrganizationsCameraRolesResource,
 		NewOrganizationsSmAdminsRolesResource,
+		NewDevicesWirelessElectronicShelfLabelResource,
+		NewNetworksWirelessElectronicShelfLabelResource,
+		NewOrganizationsCellularGatewayEsimsServiceProvidersAccountsResource,
+		NewOrganizationsSplashThemesResource,
 		NewDevicesApplianceVmxAuthenticationTokenResource,
 		NewDevicesBlinkLedsResource,
 		NewDevicesCameraGenerateSnapshotResource,
+		NewDevicesLiveToolsPingResource,
+		NewDevicesLiveToolsPingDeviceResource,
 		NewDevicesSwitchPortsCycleResource,
 		NewNetworksApplianceTrafficShapingCustomPerformanceClassesResource,
 		NewNetworksApplianceWarmSpareSwapResource,
@@ -363,6 +389,7 @@ func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewOrganizationsCloneResource,
 		NewOrganizationsInventoryClaimResource,
 		NewOrganizationsInventoryOnboardingCloudMonitoringExportEventsResource,
+		NewOrganizationsInventoryOnboardingCloudMonitoringImportsResource,
 		NewOrganizationsInventoryOnboardingCloudMonitoringPrepareResource,
 		NewOrganizationsInventoryReleaseResource,
 		NewOrganizationsLicensesAssignSeatsResource,
@@ -372,7 +399,6 @@ func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewOrganizationsLicensingCotermLicensesMoveResource,
 		NewOrganizationsNetworksCombineResource,
 		NewOrganizationsSwitchDevicesCloneResource,
-		NewOrganizationsUsersResource,
 		NewAdministeredLicensingSubscriptionSubscriptionsClaimResource,
 		NewAdministeredLicensingSubscriptionSubscriptionsClaimKeyValidateResource,
 		NewAdministeredLicensingSubscriptionSubscriptionsBindResource,
@@ -386,14 +412,30 @@ func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewNetworksWirelessEthernetPortsProfilesAssignResource,
 		NewNetworksWirelessEthernetPortsProfilesSetDefaultResource,
 		NewOrganizationsSmSentryPoliciesAssignmentsResource,
-		NewDevicesLiveToolsCableResource,
-		NewDevicesLiveToolsThroughputTestResource,
+		NewAdministeredIDentitiesMeAPIKeysGenerateResource,
+		NewAdministeredIDentitiesMeAPIKeysRevokeResource,
+		NewDevicesLiveToolsLedsBlinkResource,
+		NewNetworksApplianceSdwanInternetPoliciesResource,
+		NewNetworksFloorPlansAutoLocateJobsBatchResource,
+		NewNetworksCancelResource,
+		NewNetworksPublishResource,
+		NewNetworksRecalculateResource,
+		NewNetworksFloorPlansDevicesBatchUpdateResource,
+		NewNetworksWirelessAirMarshalRulesResource,
+		NewNetworksWirelessAirMarshalRulesUpdateResource,
+		NewNetworksWirelessAirMarshalRulesDeleteResource,
+		NewNetworksWirelessAirMarshalSettingsResource,
+		NewOrganizationsAssuranceAlertsDismissResource,
+		NewOrganizationsAssuranceAlertsRestoreResource,
+		NewOrganizationsCellularGatewayEsimsSwapResource,
+		NewOrganizationsDevicesDetailsBulkUpdateResource,
+		NewOrganizationsAssetsResource,
+		NewOrganizationsWirelessRadioAutoRfChannelsRecalculateResource,
 	}
 }
 
 func (p *MerakiProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		NewNetworksApplianceStaticRoutesDataSource,
 		NewOrganizationsDataSource,
 		NewOrganizationsAdminsDataSource,
 		NewAdministeredIDentitiesMeDataSource,
@@ -410,8 +452,8 @@ func (p *MerakiProvider) DataSources(ctx context.Context) []func() datasource.Da
 		NewDevicesCellularSimsDataSource,
 		NewDevicesCellularGatewayLanDataSource,
 		NewDevicesCellularGatewayPortForwardingRulesDataSource,
-		NewDevicesLiveToolsPingDataSource,
-		NewDevicesLiveToolsPingDeviceDataSource,
+		NewDevicesLiveToolsPingInfoDataSource,
+		NewDevicesLiveToolsPingDeviceInfoDataSource,
 		NewDevicesLldpCdpDataSource,
 		NewDevicesManagementInterfaceDataSource,
 		NewDevicesSensorRelationshipsDataSource,
@@ -431,6 +473,7 @@ func (p *MerakiProvider) DataSources(ctx context.Context) []func() datasource.Da
 		NewNetworksAlertsSettingsDataSource,
 		NewNetworksApplianceConnectivityMonitoringDestinationsDataSource,
 		NewNetworksApplianceContentFilteringDataSource,
+		NewNetworksApplianceStaticRoutesDataSource,
 		NewNetworksApplianceContentFilteringCategoriesDataSource,
 		NewNetworksApplianceFirewallCellularFirewallRulesDataSource,
 		NewNetworksApplianceFirewallFirewalledServicesDataSource,
@@ -610,7 +653,7 @@ func (p *MerakiProvider) DataSources(ctx context.Context) []func() datasource.Da
 		NewOrganizationsInsightApplicationsDataSource,
 		NewOrganizationsInsightMonitoredMediaServersDataSource,
 		NewOrganizationsInventoryDevicesDataSource,
-		NewOrganizationsInventoryOnboardingCloudMonitoringImportsDataSource,
+		NewOrganizationsInventoryOnboardingCloudMonitoringImportsInfoDataSource,
 		NewOrganizationsInventoryOnboardingCloudMonitoringNetworksDataSource,
 		NewOrganizationsLicensesDataSource,
 		NewOrganizationsLicensesOverviewDataSource,
@@ -643,8 +686,7 @@ func (p *MerakiProvider) DataSources(ctx context.Context) []func() datasource.Da
 		NewAdministeredLicensingSubscriptionSubscriptionsComplianceStatusesDataSource,
 		NewDevicesApplianceRadioSettingsDataSource,
 		NewDevicesLiveToolsArpTableDataSource,
-		NewDevicesLiveToolsCableTestDataSource,
-		NewDevicesLiveToolsThroughputTestDataSource,
+		NewDevicesLiveToolsCableDataSource,
 		NewDevicesLiveToolsWakeOnLanDataSource,
 		NewNetworksApplianceRfProfilesDataSource,
 		NewNetworksVLANProfilesDataSource,
@@ -659,7 +701,6 @@ func (p *MerakiProvider) DataSources(ctx context.Context) []func() datasource.Da
 		NewOrganizationsCameraPermissionsDataSource,
 		NewOrganizationsCameraRolesDataSource,
 		NewOrganizationsDevicesAvailabilitiesChangeHistoryDataSource,
-		NewOrganizationsDevicesBootsHistoryDataSource,
 		NewOrganizationsSmAdminsRolesDataSource,
 		NewOrganizationsSmSentryPoliciesAssignmentsByNetworkDataSource,
 		NewOrganizationsSummaryTopNetworksByStatusDataSource,
@@ -671,5 +712,50 @@ func (p *MerakiProvider) DataSources(ctx context.Context) []func() datasource.Da
 		NewOrganizationsWirelessDevicesPacketLossByClientDataSource,
 		NewOrganizationsWirelessDevicesPacketLossByDeviceDataSource,
 		NewOrganizationsWirelessDevicesPacketLossByNetworkDataSource,
+		NewAdministeredIDentitiesMeAPIKeysDataSource,
+		NewDevicesWirelessElectronicShelfLabelDataSource,
+		NewNetworksWirelessElectronicShelfLabelDataSource,
+		NewNetworksWirelessElectronicShelfLabelConfiguredDevicesDataSource,
+		NewOrganizationsAssuranceAlertsDataSource,
+		NewOrganizationsAssuranceAlertsOverviewDataSource,
+		NewOrganizationsAssuranceAlertsOverviewByNetworkDataSource,
+		NewOrganizationsAssuranceAlertsOverviewByTypeDataSource,
+		NewOrganizationsAssuranceAlertsOverviewHistoricalDataSource,
+		NewOrganizationsCellularGatewayEsimsInventoryDataSource,
+		NewOrganizationsCellularGatewayEsimsServiceProvidersDataSource,
+		NewOrganizationsCellularGatewayEsimsServiceProvidersAccountsDataSource,
+		NewOrganizationsCellularGatewayEsimsServiceProvidersAccountsCommunicationPlansDataSource,
+		NewOrganizationsCellularGatewayEsimsServiceProvidersAccountsRatePlansDataSource,
+		NewOrganizationsDevicesOverviewByModelDataSource,
+		NewOrganizationsFloorPlansAutoLocateDevicesDataSource,
+		NewOrganizationsFloorPlansAutoLocateStatusesDataSource,
+		NewOrganizationsSplashThemesDataSource,
+		NewOrganizationsSummaryTopApplicationsByUsageDataSource,
+		NewOrganizationsSummaryTopApplicationsCategoriesByUsageDataSource,
+		NewOrganizationsSwitchPortsClientsOverviewByDeviceDataSource,
+		NewOrganizationsSwitchPortsOverviewDataSource,
+		NewOrganizationsSwitchPortsStatusesBySwitchDataSource,
+		NewOrganizationsSwitchPortsTopologyDiscoveryByDeviceDataSource,
+		NewOrganizationsWirelessAirMarshalRulesDataSource,
+		NewOrganizationsWirelessAirMarshalSettingsByNetworkDataSource,
+		NewOrganizationsWirelessClientsOverviewByDeviceDataSource,
+		NewOrganizationsWirelessDevicesWirelessControllersByDeviceDataSource,
+		NewOrganizationsWirelessRfProfilesAssignmentsByDeviceDataSource,
+		NewOrganizationsWirelessSSIDsStatusesByDeviceDataSource,
+		NewOrganizationsWirelessControllerAvailabilitiesChangeHistoryDataSource,
+		NewOrganizationsWirelessControllerClientsOverviewHistoryByDeviceByIntervalDataSource,
+		NewOrganizationsWirelessControllerConnectionsDataSource,
+		NewOrganizationsWirelessControllerDevicesInterfacesL2ByDeviceDataSource,
+		NewOrganizationsWirelessControllerDevicesInterfacesL2StatusesChangeHistoryByDeviceDataSource,
+		NewOrganizationsWirelessControllerDevicesInterfacesL2UsageHistoryByIntervalDataSource,
+		NewOrganizationsWirelessControllerDevicesInterfacesL3ByDeviceDataSource,
+		NewOrganizationsWirelessControllerDevicesInterfacesL3StatusesChangeHistoryByDeviceDataSource,
+		NewOrganizationsWirelessControllerDevicesInterfacesL3UsageHistoryByIntervalDataSource,
+		NewOrganizationsWirelessControllerDevicesInterfacesPacketsOverviewByDeviceDataSource,
+		NewOrganizationsWirelessControllerDevicesInterfacesUsageHistoryByIntervalDataSource,
+		NewOrganizationsWirelessControllerDevicesRedundancyFailoverHistoryDataSource,
+		NewOrganizationsWirelessControllerDevicesRedundancyStatusesDataSource,
+		NewOrganizationsWirelessControllerDevicesSystemUtilizationHistoryByIntervalDataSource,
+		NewOrganizationsWirelessControllerOverviewByDeviceDataSource,
 	}
 }

@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -119,9 +135,10 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 				},
 			},
 			"multicast_routing": schema.StringAttribute{
-				MarkdownDescription: `Multicast routing status`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `Multicast routing status
+                                  Allowed values: [IGMP snooping querier,disabled,enabled]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -222,6 +239,14 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+			},
+			"uplink_v4": schema.BoolAttribute{
+				MarkdownDescription: `Whether this is the switch's IPv4 uplink`,
+				Computed:            true,
+			},
+			"uplink_v6": schema.BoolAttribute{
+				MarkdownDescription: `Whether this is the switch's IPv6 uplink`,
+				Computed:            true,
 			},
 			"vlan_id": schema.Int64Attribute{
 				MarkdownDescription: `VLAN id`,
@@ -338,7 +363,7 @@ func (r *DevicesSwitchRoutingInterfacesResource) Create(ctx context.Context, req
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter InterfaceID",
-				err.Error(),
+				"Error",
 			)
 			return
 		}
@@ -513,6 +538,8 @@ type DevicesSwitchRoutingInterfacesRs struct {
 	OspfSettings     *ResponseSwitchGetDeviceSwitchRoutingInterfaceOspfSettingsRs `tfsdk:"ospf_settings"`
 	OspfV3           *ResponseSwitchGetDeviceSwitchRoutingInterfaceOspfV3Rs       `tfsdk:"ospf_v3"`
 	Subnet           types.String                                                 `tfsdk:"subnet"`
+	UplinkV4         types.Bool                                                   `tfsdk:"uplink_v4"`
+	UplinkV6         types.Bool                                                   `tfsdk:"uplink_v6"`
 	VLANID           types.Int64                                                  `tfsdk:"vlan_id"`
 }
 
@@ -596,27 +623,6 @@ func (r *DevicesSwitchRoutingInterfacesRs) toSdkApiRequestCreate(ctx context.Con
 			IsPassiveEnabled: isPassiveEnabled,
 		}
 	}
-	var requestSwitchCreateDeviceSwitchRoutingInterfaceOspfV3 *merakigosdk.RequestSwitchCreateDeviceSwitchRoutingInterfaceOspfV3
-	if r.OspfV3 != nil {
-		area := r.OspfV3.Area.ValueString()
-		cost := func() *int64 {
-			if !r.OspfV3.Cost.IsUnknown() && !r.OspfV3.Cost.IsNull() {
-				return r.OspfV3.Cost.ValueInt64Pointer()
-			}
-			return nil
-		}()
-		isPassiveEnabled := func() *bool {
-			if !r.OspfV3.IsPassiveEnabled.IsUnknown() && !r.OspfV3.IsPassiveEnabled.IsNull() {
-				return r.OspfV3.IsPassiveEnabled.ValueBoolPointer()
-			}
-			return nil
-		}()
-		requestSwitchCreateDeviceSwitchRoutingInterfaceOspfV3 = &merakigosdk.RequestSwitchCreateDeviceSwitchRoutingInterfaceOspfV3{
-			Area:             area,
-			Cost:             int64ToIntPointer(cost),
-			IsPassiveEnabled: isPassiveEnabled,
-		}
-	}
 	subnet := new(string)
 	if !r.Subnet.IsUnknown() && !r.Subnet.IsNull() {
 		*subnet = r.Subnet.ValueString()
@@ -636,7 +642,6 @@ func (r *DevicesSwitchRoutingInterfacesRs) toSdkApiRequestCreate(ctx context.Con
 		MulticastRouting: *multicastRouting,
 		Name:             *name,
 		OspfSettings:     requestSwitchCreateDeviceSwitchRoutingInterfaceOspfSettings,
-		OspfV3:           requestSwitchCreateDeviceSwitchRoutingInterfaceOspfV3,
 		Subnet:           *subnet,
 		VLANID:           int64ToIntPointer(vLANID),
 	}
@@ -702,27 +707,6 @@ func (r *DevicesSwitchRoutingInterfacesRs) toSdkApiRequestUpdate(ctx context.Con
 			IsPassiveEnabled: isPassiveEnabled,
 		}
 	}
-	var requestSwitchUpdateDeviceSwitchRoutingInterfaceOspfV3 *merakigosdk.RequestSwitchUpdateDeviceSwitchRoutingInterfaceOspfV3
-	if r.OspfV3 != nil {
-		area := r.OspfV3.Area.ValueString()
-		cost := func() *int64 {
-			if !r.OspfV3.Cost.IsUnknown() && !r.OspfV3.Cost.IsNull() {
-				return r.OspfV3.Cost.ValueInt64Pointer()
-			}
-			return nil
-		}()
-		isPassiveEnabled := func() *bool {
-			if !r.OspfV3.IsPassiveEnabled.IsUnknown() && !r.OspfV3.IsPassiveEnabled.IsNull() {
-				return r.OspfV3.IsPassiveEnabled.ValueBoolPointer()
-			}
-			return nil
-		}()
-		requestSwitchUpdateDeviceSwitchRoutingInterfaceOspfV3 = &merakigosdk.RequestSwitchUpdateDeviceSwitchRoutingInterfaceOspfV3{
-			Area:             area,
-			Cost:             int64ToIntPointer(cost),
-			IsPassiveEnabled: isPassiveEnabled,
-		}
-	}
 	subnet := new(string)
 	if !r.Subnet.IsUnknown() && !r.Subnet.IsNull() {
 		*subnet = r.Subnet.ValueString()
@@ -735,6 +719,7 @@ func (r *DevicesSwitchRoutingInterfacesRs) toSdkApiRequestUpdate(ctx context.Con
 	} else {
 		vLANID = nil
 	}
+
 	out := merakigosdk.RequestSwitchUpdateDeviceSwitchRoutingInterface{
 		DefaultGateway:   *defaultGateway,
 		InterfaceIP:      *interfaceIP,
@@ -742,7 +727,6 @@ func (r *DevicesSwitchRoutingInterfacesRs) toSdkApiRequestUpdate(ctx context.Con
 		MulticastRouting: *multicastRouting,
 		Name:             *name,
 		OspfSettings:     requestSwitchUpdateDeviceSwitchRoutingInterfaceOspfSettings,
-		OspfV3:           requestSwitchUpdateDeviceSwitchRoutingInterfaceOspfV3,
 		Subnet:           *subnet,
 		VLANID:           int64ToIntPointer(vLANID),
 	}
@@ -764,7 +748,7 @@ func ResponseSwitchGetDeviceSwitchRoutingInterfaceItemToBodyRs(state DevicesSwit
 					Prefix:         types.StringValue(response.IPv6.Prefix),
 				}
 			}
-			return &ResponseSwitchGetDeviceSwitchRoutingInterfaceIpv6Rs{}
+			return nil
 		}(),
 		MulticastRouting: types.StringValue(response.MulticastRouting),
 		Name:             types.StringValue(response.Name),
@@ -786,7 +770,7 @@ func ResponseSwitchGetDeviceSwitchRoutingInterfaceItemToBodyRs(state DevicesSwit
 					}(),
 				}
 			}
-			return &ResponseSwitchGetDeviceSwitchRoutingInterfaceOspfSettingsRs{}
+			return nil
 		}(),
 		OspfV3: func() *ResponseSwitchGetDeviceSwitchRoutingInterfaceOspfV3Rs {
 			if response.OspfV3 != nil {
@@ -806,9 +790,21 @@ func ResponseSwitchGetDeviceSwitchRoutingInterfaceItemToBodyRs(state DevicesSwit
 					}(),
 				}
 			}
-			return &ResponseSwitchGetDeviceSwitchRoutingInterfaceOspfV3Rs{}
+			return nil
 		}(),
 		Subnet: types.StringValue(response.Subnet),
+		UplinkV4: func() types.Bool {
+			if response.UplinkV4 != nil {
+				return types.BoolValue(*response.UplinkV4)
+			}
+			return types.Bool{}
+		}(),
+		UplinkV6: func() types.Bool {
+			if response.UplinkV6 != nil {
+				return types.BoolValue(*response.UplinkV6)
+			}
+			return types.Bool{}
+		}(),
 		VLANID: func() types.Int64 {
 			if response.VLANID != nil {
 				return types.Int64Value(int64(*response.VLANID))

@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -126,6 +127,8 @@ func (d *OrganizationsSmAdminsRolesDataSource) Read(ctx context.Context, req dat
 		queryParams1.StartingAfter = organizationsSmAdminsRoles.StartingAfter.ValueString()
 		queryParams1.EndingBefore = organizationsSmAdminsRoles.EndingBefore.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Sm.GetOrganizationSmAdminsRoles(vvOrganizationID, &queryParams1)
 
 		if err != nil || response1 == nil {
@@ -144,6 +147,8 @@ func (d *OrganizationsSmAdminsRolesDataSource) Read(ctx context.Context, req dat
 		log.Printf("[DEBUG] Selected method: GetOrganizationSmAdminsRole")
 		vvOrganizationID := organizationsSmAdminsRoles.OrganizationID.ValueString()
 		vvRoleID := organizationsSmAdminsRoles.RoleID.ValueString()
+
+		// has_unknown_response: None
 
 		response2, restyResp2, err := d.client.Sm.GetOrganizationSmAdminsRole(vvOrganizationID, vvRoleID)
 
@@ -182,7 +187,7 @@ type ResponseSmGetOrganizationSmAdminsRole struct {
 	Name   types.String `tfsdk:"name"`
 	RoleID types.String `tfsdk:"role_id"`
 	Scope  types.String `tfsdk:"scope"`
-	Tags   types.Set    `tfsdk:"tags"`
+	Tags   types.List   `tfsdk:"tags"`
 }
 
 // ToBody
@@ -191,7 +196,7 @@ func ResponseSmGetOrganizationSmAdminsRoleItemToBody(state OrganizationsSmAdmins
 		Name:   types.StringValue(response.Name),
 		RoleID: types.StringValue(response.RoleID),
 		Scope:  types.StringValue(response.Scope),
-		Tags:   StringSliceToSet(response.Tags),
+		Tags:   StringSliceToList(response.Tags),
 	}
 	state.Item = &itemState
 	return state

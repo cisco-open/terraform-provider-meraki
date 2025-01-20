@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE ACTION
@@ -5,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -86,15 +102,11 @@ func (r *DevicesLiveToolsPingDeviceResource) Schema(_ context.Context, _ resourc
 						Attributes: map[string]schema.Attribute{
 
 							"count": schema.Int64Attribute{
-								MarkdownDescription: `Number of pings to send`,
+								MarkdownDescription: `Number of pings to send. [1..5], default 5`,
 								Computed:            true,
 							},
 							"serial": schema.StringAttribute{
 								MarkdownDescription: `Device serial number`,
-								Computed:            true,
-							},
-							"target": schema.StringAttribute{
-								MarkdownDescription: `IP address or FQDN to ping`,
 								Computed:            true,
 							},
 						},
@@ -183,7 +195,7 @@ func (r *DevicesLiveToolsPingDeviceResource) Schema(_ context.Context, _ resourc
 }
 func (r *DevicesLiveToolsPingDeviceResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var data DevicesLiveToolsPingDeviceRs
+	var data DevicesLiveToolsPingDevice
 
 	var item types.Object
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &item)...)
@@ -226,20 +238,20 @@ func (r *DevicesLiveToolsPingDeviceResource) Create(ctx context.Context, req res
 }
 
 func (r *DevicesLiveToolsPingDeviceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *DevicesLiveToolsPingDeviceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *DevicesLiveToolsPingDeviceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
 // TF Structs Schema
-type DevicesLiveToolsPingDeviceRs struct {
+type DevicesLiveToolsPingDevice struct {
 	Serial     types.String                                     `tfsdk:"serial"`
 	Item       *ResponseDevicesCreateDeviceLiveToolsPingDevice  `tfsdk:"item"`
 	Parameters *RequestDevicesCreateDeviceLiveToolsPingDeviceRs `tfsdk:"parameters"`
@@ -262,7 +274,6 @@ type ResponseDevicesCreateDeviceLiveToolsPingDeviceCallback struct {
 type ResponseDevicesCreateDeviceLiveToolsPingDeviceRequest struct {
 	Count  types.Int64  `tfsdk:"count"`
 	Serial types.String `tfsdk:"serial"`
-	Target types.String `tfsdk:"target"`
 }
 
 type RequestDevicesCreateDeviceLiveToolsPingDeviceRs struct {
@@ -286,7 +297,7 @@ type RequestDevicesCreateDeviceLiveToolsPingDeviceCallbackPayloadTemplateRs stru
 }
 
 // FromBody
-func (r *DevicesLiveToolsPingDeviceRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestDevicesCreateDeviceLiveToolsPingDevice {
+func (r *DevicesLiveToolsPingDevice) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestDevicesCreateDeviceLiveToolsPingDevice {
 	re := *r.Parameters
 	var requestDevicesCreateDeviceLiveToolsPingDeviceCallback *merakigosdk.RequestDevicesCreateDeviceLiveToolsPingDeviceCallback
 	if re.Callback != nil {
@@ -327,7 +338,7 @@ func (r *DevicesLiveToolsPingDeviceRs) toSdkApiRequestCreate(ctx context.Context
 }
 
 // ToBody
-func ResponseDevicesCreateDeviceLiveToolsPingDeviceItemToBody(state DevicesLiveToolsPingDeviceRs, response *merakigosdk.ResponseDevicesCreateDeviceLiveToolsPingDevice) DevicesLiveToolsPingDeviceRs {
+func ResponseDevicesCreateDeviceLiveToolsPingDeviceItemToBody(state DevicesLiveToolsPingDevice, response *merakigosdk.ResponseDevicesCreateDeviceLiveToolsPingDevice) DevicesLiveToolsPingDevice {
 	itemState := ResponseDevicesCreateDeviceLiveToolsPingDevice{
 		Callback: func() *ResponseDevicesCreateDeviceLiveToolsPingDeviceCallback {
 			if response.Callback != nil {
@@ -337,7 +348,7 @@ func ResponseDevicesCreateDeviceLiveToolsPingDeviceItemToBody(state DevicesLiveT
 					URL:    types.StringValue(response.Callback.URL),
 				}
 			}
-			return &ResponseDevicesCreateDeviceLiveToolsPingDeviceCallback{}
+			return nil
 		}(),
 		PingID: types.StringValue(response.PingID),
 		Request: func() *ResponseDevicesCreateDeviceLiveToolsPingDeviceRequest {
@@ -350,10 +361,9 @@ func ResponseDevicesCreateDeviceLiveToolsPingDeviceItemToBody(state DevicesLiveT
 						return types.Int64{}
 					}(),
 					Serial: types.StringValue(response.Request.Serial),
-					Target: types.StringValue(response.Request.Target),
 				}
 			}
-			return &ResponseDevicesCreateDeviceLiveToolsPingDeviceRequest{}
+			return nil
 		}(),
 		Status: types.StringValue(response.Status),
 		URL:    types.StringValue(response.URL),

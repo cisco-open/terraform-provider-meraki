@@ -1,13 +1,30 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	"log"
+
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -91,9 +108,10 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 						},
 					},
 					"settings": schema.StringAttribute{
-						MarkdownDescription: `How bandwidth limits are enforced. Can be 'network default', 'ignore' or 'custom'.`,
-						Computed:            true,
-						Optional:            true,
+						MarkdownDescription: `How bandwidth limits are enforced. Can be 'network default', 'ignore' or 'custom'.
+                                        Allowed values: [custom,ignore,network default]`,
+						Computed: true,
+						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
@@ -135,7 +153,7 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 									},
 								},
 								"services": schema.SetAttribute{
-									MarkdownDescription: `A list of Bonjour services. At least one service must be specified. Available services are 'All Services', 'AirPlay', 'AFP', 'BitTorrent', 'FTP', 'iChat', 'iTunes', 'Printers', 'Samba', 'Scanners' and 'SSH'`,
+									MarkdownDescription: `A list of Bonjour services. At least one service must be specified. Available services are 'All Services', 'AFP', 'AirPlay', 'Apple screen share', 'BitTorrent', 'Chromecast', 'FTP', 'iChat', 'iTunes', 'Printers', 'Samba', 'Scanners', 'Spotify' and 'SSH'`,
 									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Set{
@@ -156,9 +174,10 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 						},
 					},
 					"settings": schema.StringAttribute{
-						MarkdownDescription: `How Bonjour rules are applied. Can be 'network default', 'ignore' or 'custom'.`,
-						Computed:            true,
-						Optional:            true,
+						MarkdownDescription: `How Bonjour rules are applied. Can be 'network default', 'ignore' or 'custom'.
+                                        Allowed values: [custom,ignore,network default]`,
+						Computed: true,
+						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
@@ -201,9 +220,10 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 								ElementType: types.StringType,
 							},
 							"settings": schema.StringAttribute{
-								MarkdownDescription: `How URL patterns are applied. Can be 'network default', 'append' or 'override'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `How URL patterns are applied. Can be 'network default', 'append' or 'override'.
+                                              Allowed values: [append,network default,override]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -237,9 +257,10 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 								ElementType: types.StringType,
 							},
 							"settings": schema.StringAttribute{
-								MarkdownDescription: `How URL categories are applied. Can be 'network default', 'append' or 'override'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `How URL categories are applied. Can be 'network default', 'append' or 'override'.
+                                              Allowed values: [append,network default,override]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -273,9 +294,10 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 								ElementType: types.StringType,
 							},
 							"settings": schema.StringAttribute{
-								MarkdownDescription: `How URL patterns are applied. Can be 'network default', 'append' or 'override'.`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `How URL patterns are applied. Can be 'network default', 'append' or 'override'.
+                                              Allowed values: [append,network default,override]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -365,9 +387,10 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 							Attributes: map[string]schema.Attribute{
 
 								"policy": schema.StringAttribute{
-									MarkdownDescription: `The policy applied to matching traffic. Must be 'deny'.`,
-									Computed:            true,
-									Optional:            true,
+									MarkdownDescription: `The policy applied to matching traffic. Must be 'deny'.
+                                              Allowed values: [deny]`,
+									Computed: true,
+									Optional: true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
 									},
@@ -378,9 +401,10 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 									},
 								},
 								"type": schema.StringAttribute{
-									MarkdownDescription: `Type of the L7 Rule. Must be 'application', 'applicationCategory', 'host', 'port' or 'ipRange'`,
-									Computed:            true,
-									Optional:            true,
+									MarkdownDescription: `Type of the L7 Rule. Must be 'application', 'applicationCategory', 'host', 'port' or 'ipRange'
+                                              Allowed values: [application,applicationCategory,host,ipRange,port]`,
+									Computed: true,
+									Optional: true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
 									},
@@ -406,9 +430,10 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 						},
 					},
 					"settings": schema.StringAttribute{
-						MarkdownDescription: `How firewall and traffic shaping rules are enforced. Can be 'network default', 'ignore' or 'custom'.`,
-						Computed:            true,
-						Optional:            true,
+						MarkdownDescription: `How firewall and traffic shaping rules are enforced. Can be 'network default', 'ignore' or 'custom'.
+                                        Allowed values: [custom,ignore,network default]`,
+						Computed: true,
+						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
@@ -445,9 +470,10 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 										Attributes: map[string]schema.Attribute{
 
 											"type": schema.StringAttribute{
-												MarkdownDescription: `The type of definition. Can be one of 'application', 'applicationCategory', 'host', 'port', 'ipRange' or 'localNet'.`,
-												Computed:            true,
-												Optional:            true,
+												MarkdownDescription: `The type of definition. Can be one of 'application', 'applicationCategory', 'host', 'port', 'ipRange' or 'localNet'.
+                                                    Allowed values: [application,applicationCategory,host,ipRange,localNet,port]`,
+												Computed: true,
+												Optional: true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
 												},
@@ -848,9 +874,10 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 				},
 			},
 			"splash_auth_settings": schema.StringAttribute{
-				MarkdownDescription: `Whether clients bound to your policy will bypass splash authorization or behave according to the network's rules. Can be one of 'network default' or 'bypass'. Only available if your network has a wireless configuration.`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `Whether clients bound to your policy will bypass splash authorization or behave according to the network's rules. Can be one of 'network default' or 'bypass'. Only available if your network has a wireless configuration.
+                                  Allowed values: [bypass,network default]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -871,9 +898,10 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 				Attributes: map[string]schema.Attribute{
 
 					"settings": schema.StringAttribute{
-						MarkdownDescription: `How VLAN tagging is applied. Can be 'network default', 'ignore' or 'custom'.`,
-						Computed:            true,
-						Optional:            true,
+						MarkdownDescription: `How VLAN tagging is applied. Can be 'network default', 'ignore' or 'custom'.
+                                        Allowed values: [custom,ignore,network default]`,
+						Computed: true,
+						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
@@ -1004,7 +1032,7 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter GroupPolicyID",
-				err.Error(),
+				"Error",
 			)
 			return
 		}
@@ -1159,7 +1187,7 @@ func (r *NetworksGroupPoliciesResource) Delete(ctx context.Context, req resource
 
 	vvNetworkID := state.NetworkID.ValueString()
 	vvGroupPolicyID := state.GroupPolicyID.ValueString()
-	_, err := r.client.Networks.DeleteNetworkGroupPolicy(vvNetworkID, vvGroupPolicyID)
+	_, err := r.client.Networks.DeleteNetworkGroupPolicy(vvNetworkID, vvGroupPolicyID, nil)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Failure when executing DeleteNetworkGroupPolicy", err.Error())
@@ -1178,10 +1206,10 @@ type NetworksGroupPoliciesRs struct {
 	BonjourForwarding         *ResponseNetworksGetNetworkGroupPolicyBonjourForwardingRs         `tfsdk:"bonjour_forwarding"`
 	ContentFiltering          *ResponseNetworksGetNetworkGroupPolicyContentFilteringRs          `tfsdk:"content_filtering"`
 	FirewallAndTrafficShaping *ResponseNetworksGetNetworkGroupPolicyFirewallAndTrafficShapingRs `tfsdk:"firewall_and_traffic_shaping"`
-	Name                      types.String                                                      `tfsdk:"name"`
 	Scheduling                *ResponseNetworksGetNetworkGroupPolicySchedulingRs                `tfsdk:"scheduling"`
 	SplashAuthSettings        types.String                                                      `tfsdk:"splash_auth_settings"`
 	VLANTagging               *ResponseNetworksGetNetworkGroupPolicyVlanTaggingRs               `tfsdk:"vlan_tagging"`
+	Name                      types.String                                                      `tfsdk:"name"`
 }
 
 type ResponseNetworksGetNetworkGroupPolicyBandwidthRs struct {
@@ -2264,6 +2292,7 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBodyRs(state NetworksGroupPolici
 										}
 										return nil
 									}(),
+									Priority: types.StringValue(trafficShapingRules.Priority),
 								}
 							}
 							return &result
@@ -2275,7 +2304,7 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBodyRs(state NetworksGroupPolici
 			return nil
 		}(),
 		GroupPolicyID: types.StringValue(response.GroupPolicyID),
-		Name:          types.StringValue(response.Name),
+		Name:          state.Name,
 		Scheduling: func() *ResponseNetworksGetNetworkGroupPolicySchedulingRs {
 			if response.Scheduling != nil {
 				return &ResponseNetworksGetNetworkGroupPolicySchedulingRs{

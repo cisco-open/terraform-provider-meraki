@@ -15,7 +15,7 @@ resource "meraki_organizations_admins" "example" {
 
   authentication_method = "Email"
   email                 = "devnetmerakiadmin23@yopmail.com"
-  name                  = "DevNet Admin 3455 Terraform"
+  name                  = "DevNet Admin 345 test"
   org_access            = "full"
   organization_id       = "828099381482762270"
 }

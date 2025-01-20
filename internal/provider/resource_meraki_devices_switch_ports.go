@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -61,9 +77,10 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 				},
 			},
 			"access_policy_type": schema.StringAttribute{
-				MarkdownDescription: `The type of the access policy of the switch port. Only applicable to access ports. Can be one of 'Open', 'Custom access policy', 'MAC allow list' or 'Sticky MAC allow list'.`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The type of the access policy of the switch port. Only applicable to access ports. Can be one of 'Open', 'Custom access policy', 'MAC allow list' or 'Sticky MAC allow list'.
+                                  Allowed values: [Custom access policy,MAC allow list,Open,Sticky MAC allow list]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -74,6 +91,21 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 						"Open",
 						"Sticky MAC allow list",
 					),
+				},
+			},
+			"adaptive_policy_group": schema.SingleNestedAttribute{
+				MarkdownDescription: `The adaptive policy group data of the port.`,
+				Computed:            true,
+				Attributes: map[string]schema.Attribute{
+
+					"id": schema.StringAttribute{
+						MarkdownDescription: `The ID of the adaptive policy group.`,
+						Computed:            true,
+					},
+					"name": schema.StringAttribute{
+						MarkdownDescription: `The name of the adaptive policy group.`,
+						Computed:            true,
+					},
 				},
 			},
 			"adaptive_policy_group_id": schema.StringAttribute{
@@ -98,6 +130,25 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"dot3az": schema.SingleNestedAttribute{
+				MarkdownDescription: `dot3az settings for the port`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
+				Attributes: map[string]schema.Attribute{
+
+					"enabled": schema.BoolAttribute{
+						MarkdownDescription: `The Energy Efficient Ethernet status of the switch port.`,
+						Computed:            true,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
+					},
 				},
 			},
 			"enabled": schema.BoolAttribute{
@@ -153,8 +204,9 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 				Attributes: map[string]schema.Attribute{
 
 					"mode": schema.StringAttribute{
-						MarkdownDescription: `The port mirror mode. Can be one of ('Destination port', 'Source port' or 'Not mirroring traffic').`,
-						Computed:            true,
+						MarkdownDescription: `The port mirror mode. Can be one of ('Destination port', 'Source port' or 'Not mirroring traffic').
+                                        Allowed values: [Destination port,Not mirroring traffic,Source port]`,
+						Computed: true,
 					},
 				},
 			},
@@ -248,9 +300,39 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"schedule": schema.SingleNestedAttribute{
+				MarkdownDescription: `The port schedule data.`,
+				Computed:            true,
+				Attributes: map[string]schema.Attribute{
+
+					"id": schema.StringAttribute{
+						MarkdownDescription: `The ID of the port schedule.`,
+						Computed:            true,
+					},
+					"name": schema.StringAttribute{
+						MarkdownDescription: `The name of the port schedule.`,
+						Computed:            true,
+					},
+				},
+			},
 			"serial": schema.StringAttribute{
 				MarkdownDescription: `serial path parameter.`,
 				Required:            true,
+			},
+			"stackwise_virtual": schema.SingleNestedAttribute{
+				MarkdownDescription: `Stackwise Virtual settings for the port`,
+				Computed:            true,
+				Attributes: map[string]schema.Attribute{
+
+					"is_dual_active_detector": schema.BoolAttribute{
+						MarkdownDescription: `For SVL devices, whether or not the port is used for Dual Active Detection.`,
+						Computed:            true,
+					},
+					"is_stack_wise_virtual_link": schema.BoolAttribute{
+						MarkdownDescription: `For SVL devices, whether or not the port is used for StackWise Virtual Link.`,
+						Computed:            true,
+					},
+				},
 			},
 			"sticky_mac_allow_list": schema.SetAttribute{
 				MarkdownDescription: `The initial list of MAC addresses for sticky Mac allow list. Only applicable when 'accessPolicyType' is 'Sticky MAC allow list'.`,
@@ -279,9 +361,10 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 				},
 			},
 			"stp_guard": schema.StringAttribute{
-				MarkdownDescription: `The state of the STP guard ('disabled', 'root guard', 'bpdu guard' or 'loop guard').`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The state of the STP guard ('disabled', 'root guard', 'bpdu guard' or 'loop guard').
+                                  Allowed values: [bpdu guard,disabled,loop guard,root guard]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -305,23 +388,26 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 				ElementType: types.StringType,
 			},
 			"type": schema.StringAttribute{
-				MarkdownDescription: `The type of the switch port ('trunk' or 'access').`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The type of the switch port ('trunk', 'access' or 'stack').
+                                  Allowed values: [access,stack,trunk]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 				Validators: []validator.String{
 					stringvalidator.OneOf(
 						"access",
+						"stack",
 						"trunk",
 					),
 				},
 			},
 			"udld": schema.StringAttribute{
-				MarkdownDescription: `The action to take when Unidirectional Link is detected (Alert only, Enforce). Default configuration is Alert only.`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The action to take when Unidirectional Link is detected (Alert only, Enforce). Default configuration is Alert only.
+                                  Allowed values: [Alert only,Enforce]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -542,36 +628,49 @@ func (r *DevicesSwitchPortsResource) Delete(ctx context.Context, req resource.De
 
 // TF Structs Schema
 type DevicesSwitchPortsRs struct {
-	Serial                      types.String                                `tfsdk:"serial"`
-	PortID                      types.String                                `tfsdk:"port_id"`
-	AccessPolicyNumber          types.Int64                                 `tfsdk:"access_policy_number"`
-	AccessPolicyType            types.String                                `tfsdk:"access_policy_type"`
-	AdaptivePolicyGroupID       types.String                                `tfsdk:"adaptive_policy_group_id"`
-	AllowedVLANs                types.String                                `tfsdk:"allowed_vlans"`
-	DaiTrusted                  types.Bool                                  `tfsdk:"dai_trusted"`
-	Enabled                     types.Bool                                  `tfsdk:"enabled"`
-	FlexibleStackingEnabled     types.Bool                                  `tfsdk:"flexible_stacking_enabled"`
-	IsolationEnabled            types.Bool                                  `tfsdk:"isolation_enabled"`
-	LinkNegotiation             types.String                                `tfsdk:"link_negotiation"`
-	LinkNegotiationCapabilities types.Set                                   `tfsdk:"link_negotiation_capabilities"`
-	MacAllowList                types.Set                                   `tfsdk:"mac_allow_list"`
-	Mirror                      *ResponseSwitchGetDeviceSwitchPortMirrorRs  `tfsdk:"mirror"`
-	Module                      *ResponseSwitchGetDeviceSwitchPortModuleRs  `tfsdk:"module"`
-	Name                        types.String                                `tfsdk:"name"`
-	PeerSgtCapable              types.Bool                                  `tfsdk:"peer_sgt_capable"`
-	PoeEnabled                  types.Bool                                  `tfsdk:"poe_enabled"`
-	PortScheduleID              types.String                                `tfsdk:"port_schedule_id"`
-	Profile                     *ResponseSwitchGetDeviceSwitchPortProfileRs `tfsdk:"profile"`
-	RstpEnabled                 types.Bool                                  `tfsdk:"rstp_enabled"`
-	StickyMacAllowList          types.Set                                   `tfsdk:"sticky_mac_allow_list"`
-	StickyMacAllowListLimit     types.Int64                                 `tfsdk:"sticky_mac_allow_list_limit"`
-	StormControlEnabled         types.Bool                                  `tfsdk:"storm_control_enabled"`
-	StpGuard                    types.String                                `tfsdk:"stp_guard"`
-	Tags                        types.Set                                   `tfsdk:"tags"`
-	Type                        types.String                                `tfsdk:"type"`
-	Udld                        types.String                                `tfsdk:"udld"`
-	VLAN                        types.Int64                                 `tfsdk:"vlan"`
-	VoiceVLAN                   types.Int64                                 `tfsdk:"voice_vlan"`
+	Serial                      types.String                                            `tfsdk:"serial"`
+	PortID                      types.String                                            `tfsdk:"port_id"`
+	AccessPolicyNumber          types.Int64                                             `tfsdk:"access_policy_number"`
+	AccessPolicyType            types.String                                            `tfsdk:"access_policy_type"`
+	AdaptivePolicyGroup         *ResponseSwitchGetDeviceSwitchPortAdaptivePolicyGroupRs `tfsdk:"adaptive_policy_group"`
+	AdaptivePolicyGroupID       types.String                                            `tfsdk:"adaptive_policy_group_id"`
+	AllowedVLANs                types.String                                            `tfsdk:"allowed_vlans"`
+	DaiTrusted                  types.Bool                                              `tfsdk:"dai_trusted"`
+	Dot3Az                      *ResponseSwitchGetDeviceSwitchPortDot3AzRs              `tfsdk:"dot3az"`
+	Enabled                     types.Bool                                              `tfsdk:"enabled"`
+	FlexibleStackingEnabled     types.Bool                                              `tfsdk:"flexible_stacking_enabled"`
+	IsolationEnabled            types.Bool                                              `tfsdk:"isolation_enabled"`
+	LinkNegotiation             types.String                                            `tfsdk:"link_negotiation"`
+	LinkNegotiationCapabilities types.Set                                               `tfsdk:"link_negotiation_capabilities"`
+	MacAllowList                types.Set                                               `tfsdk:"mac_allow_list"`
+	Mirror                      *ResponseSwitchGetDeviceSwitchPortMirrorRs              `tfsdk:"mirror"`
+	Module                      *ResponseSwitchGetDeviceSwitchPortModuleRs              `tfsdk:"module"`
+	Name                        types.String                                            `tfsdk:"name"`
+	PeerSgtCapable              types.Bool                                              `tfsdk:"peer_sgt_capable"`
+	PoeEnabled                  types.Bool                                              `tfsdk:"poe_enabled"`
+	PortScheduleID              types.String                                            `tfsdk:"port_schedule_id"`
+	Profile                     *ResponseSwitchGetDeviceSwitchPortProfileRs             `tfsdk:"profile"`
+	RstpEnabled                 types.Bool                                              `tfsdk:"rstp_enabled"`
+	Schedule                    *ResponseSwitchGetDeviceSwitchPortScheduleRs            `tfsdk:"schedule"`
+	StackwiseVirtual            *ResponseSwitchGetDeviceSwitchPortStackwiseVirtualRs    `tfsdk:"stackwise_virtual"`
+	StickyMacAllowList          types.Set                                               `tfsdk:"sticky_mac_allow_list"`
+	StickyMacAllowListLimit     types.Int64                                             `tfsdk:"sticky_mac_allow_list_limit"`
+	StormControlEnabled         types.Bool                                              `tfsdk:"storm_control_enabled"`
+	StpGuard                    types.String                                            `tfsdk:"stp_guard"`
+	Tags                        types.Set                                               `tfsdk:"tags"`
+	Type                        types.String                                            `tfsdk:"type"`
+	Udld                        types.String                                            `tfsdk:"udld"`
+	VLAN                        types.Int64                                             `tfsdk:"vlan"`
+	VoiceVLAN                   types.Int64                                             `tfsdk:"voice_vlan"`
+}
+
+type ResponseSwitchGetDeviceSwitchPortAdaptivePolicyGroupRs struct {
+	ID   types.String `tfsdk:"id"`
+	Name types.String `tfsdk:"name"`
+}
+
+type ResponseSwitchGetDeviceSwitchPortDot3AzRs struct {
+	Enabled types.Bool `tfsdk:"enabled"`
 }
 
 type ResponseSwitchGetDeviceSwitchPortMirrorRs struct {
@@ -586,6 +685,16 @@ type ResponseSwitchGetDeviceSwitchPortProfileRs struct {
 	Enabled types.Bool   `tfsdk:"enabled"`
 	ID      types.String `tfsdk:"id"`
 	Iname   types.String `tfsdk:"iname"`
+}
+
+type ResponseSwitchGetDeviceSwitchPortScheduleRs struct {
+	ID   types.String `tfsdk:"id"`
+	Name types.String `tfsdk:"name"`
+}
+
+type ResponseSwitchGetDeviceSwitchPortStackwiseVirtualRs struct {
+	IsDualActiveDetector   types.Bool `tfsdk:"is_dual_active_detector"`
+	IsStackWiseVirtualLink types.Bool `tfsdk:"is_stack_wise_virtual_link"`
 }
 
 // FromBody
@@ -620,6 +729,18 @@ func (r *DevicesSwitchPortsRs) toSdkApiRequestUpdate(ctx context.Context) *merak
 		*daiTrusted = r.DaiTrusted.ValueBool()
 	} else {
 		daiTrusted = nil
+	}
+	var requestSwitchUpdateDeviceSwitchPortDot3Az *merakigosdk.RequestSwitchUpdateDeviceSwitchPortDot3Az
+	if r.Dot3Az != nil {
+		enabled := func() *bool {
+			if !r.Dot3Az.Enabled.IsUnknown() && !r.Dot3Az.Enabled.IsNull() {
+				return r.Dot3Az.Enabled.ValueBoolPointer()
+			}
+			return nil
+		}()
+		requestSwitchUpdateDeviceSwitchPortDot3Az = &merakigosdk.RequestSwitchUpdateDeviceSwitchPortDot3Az{
+			Enabled: enabled,
+		}
 	}
 	enabled := new(bool)
 	if !r.Enabled.IsUnknown() && !r.Enabled.IsNull() {
@@ -745,6 +866,7 @@ func (r *DevicesSwitchPortsRs) toSdkApiRequestUpdate(ctx context.Context) *merak
 		AdaptivePolicyGroupID:   *adaptivePolicyGroupID,
 		AllowedVLANs:            *allowedVLANs,
 		DaiTrusted:              daiTrusted,
+		Dot3Az:                  requestSwitchUpdateDeviceSwitchPortDot3Az,
 		Enabled:                 enabled,
 		FlexibleStackingEnabled: flexibleStackingEnabled,
 		IsolationEnabled:        isolationEnabled,
@@ -778,7 +900,16 @@ func ResponseSwitchGetDeviceSwitchPortItemToBodyRs(state DevicesSwitchPortsRs, r
 			}
 			return types.Int64{}
 		}(),
-		AccessPolicyType:      types.StringValue(response.AccessPolicyType),
+		AccessPolicyType: types.StringValue(response.AccessPolicyType),
+		AdaptivePolicyGroup: func() *ResponseSwitchGetDeviceSwitchPortAdaptivePolicyGroupRs {
+			if response.AdaptivePolicyGroup != nil {
+				return &ResponseSwitchGetDeviceSwitchPortAdaptivePolicyGroupRs{
+					ID:   types.StringValue(response.AdaptivePolicyGroup.ID),
+					Name: types.StringValue(response.AdaptivePolicyGroup.Name),
+				}
+			}
+			return nil
+		}(),
 		AdaptivePolicyGroupID: types.StringValue(response.AdaptivePolicyGroupID),
 		AllowedVLANs:          types.StringValue(response.AllowedVLANs),
 		DaiTrusted: func() types.Bool {
@@ -786,6 +917,19 @@ func ResponseSwitchGetDeviceSwitchPortItemToBodyRs(state DevicesSwitchPortsRs, r
 				return types.BoolValue(*response.DaiTrusted)
 			}
 			return types.Bool{}
+		}(),
+		Dot3Az: func() *ResponseSwitchGetDeviceSwitchPortDot3AzRs {
+			if response.Dot3Az != nil {
+				return &ResponseSwitchGetDeviceSwitchPortDot3AzRs{
+					Enabled: func() types.Bool {
+						if response.Dot3Az.Enabled != nil {
+							return types.BoolValue(*response.Dot3Az.Enabled)
+						}
+						return types.Bool{}
+					}(),
+				}
+			}
+			return nil
 		}(),
 		Enabled: func() types.Bool {
 			if response.Enabled != nil {
@@ -814,7 +958,7 @@ func ResponseSwitchGetDeviceSwitchPortItemToBodyRs(state DevicesSwitchPortsRs, r
 					Mode: types.StringValue(response.Mirror.Mode),
 				}
 			}
-			return &ResponseSwitchGetDeviceSwitchPortMirrorRs{}
+			return nil
 		}(),
 		Module: func() *ResponseSwitchGetDeviceSwitchPortModuleRs {
 			if response.Module != nil {
@@ -822,7 +966,7 @@ func ResponseSwitchGetDeviceSwitchPortItemToBodyRs(state DevicesSwitchPortsRs, r
 					Model: types.StringValue(response.Module.Model),
 				}
 			}
-			return &ResponseSwitchGetDeviceSwitchPortModuleRs{}
+			return nil
 		}(),
 		Name: types.StringValue(response.Name),
 		PeerSgtCapable: func() types.Bool {
@@ -852,13 +996,41 @@ func ResponseSwitchGetDeviceSwitchPortItemToBodyRs(state DevicesSwitchPortsRs, r
 					Iname: types.StringValue(response.Profile.Iname),
 				}
 			}
-			return &ResponseSwitchGetDeviceSwitchPortProfileRs{}
+			return nil
 		}(),
 		RstpEnabled: func() types.Bool {
 			if response.RstpEnabled != nil {
 				return types.BoolValue(*response.RstpEnabled)
 			}
 			return types.Bool{}
+		}(),
+		Schedule: func() *ResponseSwitchGetDeviceSwitchPortScheduleRs {
+			if response.Schedule != nil {
+				return &ResponseSwitchGetDeviceSwitchPortScheduleRs{
+					ID:   types.StringValue(response.Schedule.ID),
+					Name: types.StringValue(response.Schedule.Name),
+				}
+			}
+			return nil
+		}(),
+		StackwiseVirtual: func() *ResponseSwitchGetDeviceSwitchPortStackwiseVirtualRs {
+			if response.StackwiseVirtual != nil {
+				return &ResponseSwitchGetDeviceSwitchPortStackwiseVirtualRs{
+					IsDualActiveDetector: func() types.Bool {
+						if response.StackwiseVirtual.IsDualActiveDetector != nil {
+							return types.BoolValue(*response.StackwiseVirtual.IsDualActiveDetector)
+						}
+						return types.Bool{}
+					}(),
+					IsStackWiseVirtualLink: func() types.Bool {
+						if response.StackwiseVirtual.IsStackWiseVirtualLink != nil {
+							return types.BoolValue(*response.StackwiseVirtual.IsStackWiseVirtualLink)
+						}
+						return types.Bool{}
+					}(),
+				}
+			}
+			return nil
 		}(),
 		StickyMacAllowList: StringSliceToSet(response.StickyMacAllowList),
 		StickyMacAllowListLimit: func() types.Int64 {

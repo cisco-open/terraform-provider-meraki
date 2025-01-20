@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -81,9 +97,10 @@ func (r *OrganizationsSamlRolesResource) Schema(_ context.Context, _ resource.Sc
 					Attributes: map[string]schema.Attribute{
 
 						"access": schema.StringAttribute{
-							MarkdownDescription: `The privilege of the SAML administrator on the network`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `The privilege of the SAML administrator on the network
+                                        Allowed values: [full,guest-ambassador,monitor-only,port-tags,read-only,ssid-admin]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -92,6 +109,7 @@ func (r *OrganizationsSamlRolesResource) Schema(_ context.Context, _ resource.Sc
 									"full",
 									"guest-ambassador",
 									"monitor-only",
+									"port-tags",
 									"read-only",
 									"ssid-admin",
 								),
@@ -109,9 +127,10 @@ func (r *OrganizationsSamlRolesResource) Schema(_ context.Context, _ resource.Sc
 				},
 			},
 			"org_access": schema.StringAttribute{
-				MarkdownDescription: `The privilege of the SAML administrator on the organization`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The privilege of the SAML administrator on the organization
+                                  Allowed values: [enterprise,full,none,read-only]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -154,9 +173,10 @@ func (r *OrganizationsSamlRolesResource) Schema(_ context.Context, _ resource.Sc
 					Attributes: map[string]schema.Attribute{
 
 						"access": schema.StringAttribute{
-							MarkdownDescription: `The privilege of the SAML administrator on the tag`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `The privilege of the SAML administrator on the tag
+                                        Allowed values: [full,guest-ambassador,monitor-only,read-only]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -184,8 +204,7 @@ func (r *OrganizationsSamlRolesResource) Schema(_ context.Context, _ resource.Sc
 	}
 }
 
-//path params to set ['samlRoleId']
-
+// path params to set ['samlRoleId']
 func (r *OrganizationsSamlRolesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
 	var data OrganizationsSamlRolesRs
@@ -287,7 +306,7 @@ func (r *OrganizationsSamlRolesResource) Create(ctx context.Context, req resourc
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter SamlRoleID",
-				err.Error(),
+				"Error",
 			)
 			return
 		}
@@ -606,7 +625,7 @@ func ResponseOrganizationsGetOrganizationSamlRoleItemToBodyRs(state Organization
 				}
 				return &result
 			}
-			return &[]ResponseOrganizationsGetOrganizationSamlRoleCameraRs{}
+			return nil
 		}(),
 		ID: types.StringValue(response.ID),
 		Networks: func() *[]ResponseOrganizationsGetOrganizationSamlRoleNetworksRs {
@@ -620,7 +639,7 @@ func ResponseOrganizationsGetOrganizationSamlRoleItemToBodyRs(state Organization
 				}
 				return &result
 			}
-			return &[]ResponseOrganizationsGetOrganizationSamlRoleNetworksRs{}
+			return nil
 		}(),
 		OrgAccess: types.StringValue(response.OrgAccess),
 		Role:      types.StringValue(response.Role),
@@ -635,7 +654,7 @@ func ResponseOrganizationsGetOrganizationSamlRoleItemToBodyRs(state Organization
 				}
 				return &result
 			}
-			return &[]ResponseOrganizationsGetOrganizationSamlRoleTagsRs{}
+			return nil
 		}(),
 	}
 	if is_read {

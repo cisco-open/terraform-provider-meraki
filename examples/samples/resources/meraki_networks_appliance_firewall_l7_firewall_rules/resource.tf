@@ -20,7 +20,7 @@ resource "meraki_networks_appliance_firewall_l7_firewall_rules" "my_mx" {
     type   = "applicationCategory"
     # value                   = "10.11.12.00/24"
     value_obj = {
-      name = "Sports"
+      name = "Sports 2"
       id   = "meraki:layer7/category/5"
     }
     }

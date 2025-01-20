@@ -1,10 +1,26 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -113,9 +129,6 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Schema(_ context.Con
 								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
-						"uplink": schema.StringAttribute{
-							Computed: true,
-						},
 					},
 				},
 			},
@@ -165,7 +178,7 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Create(ctx context.C
 		return
 	}
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.CellularGateway.UpdateDeviceCellularGatewayPortForwardingRules(vvSerial, dataRequest)
+	_, restyResp2, err := r.client.CellularGateway.UpdateDeviceCellularGatewayPortForwardingRules(vvSerial, dataRequest)
 
 	if err != nil || restyResp2 == nil {
 		if restyResp1 != nil {
@@ -256,6 +269,7 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Read(ctx context.Con
 	//update path params assigned
 	resp.Diagnostics.Append(diags...)
 }
+
 func (r *DevicesCellularGatewayPortForwardingRulesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("serial"), req.ID)...)
 }
@@ -273,8 +287,8 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Update(ctx context.C
 	//Path Params
 	vvSerial := data.Serial.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.CellularGateway.UpdateDeviceCellularGatewayPortForwardingRules(vvSerial, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.CellularGateway.UpdateDeviceCellularGatewayPortForwardingRules(vvSerial, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCellularGatewayPortForwardingRules",
@@ -307,13 +321,12 @@ type DevicesCellularGatewayPortForwardingRulesRs struct {
 
 type ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRulesRulesRs struct {
 	Access     types.String `tfsdk:"access"`
+	AllowedIPs types.Set    `tfsdk:"allowed_ips"`
 	LanIP      types.String `tfsdk:"lan_ip"`
 	LocalPort  types.String `tfsdk:"local_port"`
 	Name       types.String `tfsdk:"name"`
 	Protocol   types.String `tfsdk:"protocol"`
 	PublicPort types.String `tfsdk:"public_port"`
-	Uplink     types.String `tfsdk:"uplink"`
-	AllowedIPs types.Set    `tfsdk:"allowed_ips"`
 }
 
 // FromBody
@@ -343,7 +356,7 @@ func (r *DevicesCellularGatewayPortForwardingRulesRs) toSdkApiRequestUpdate(ctx 
 	}
 	out := merakigosdk.RequestCellularGatewayUpdateDeviceCellularGatewayPortForwardingRules{
 		Rules: func() *[]merakigosdk.RequestCellularGatewayUpdateDeviceCellularGatewayPortForwardingRulesRules {
-			if len(requestCellularGatewayUpdateDeviceCellularGatewayPortForwardingRulesRules) > 0 {
+			if len(requestCellularGatewayUpdateDeviceCellularGatewayPortForwardingRulesRules) > 0 || r.Rules != nil {
 				return &requestCellularGatewayUpdateDeviceCellularGatewayPortForwardingRulesRules
 			}
 			return nil
@@ -361,17 +374,17 @@ func ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRulesItemToBod
 				for i, rules := range *response.Rules {
 					result[i] = ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRulesRulesRs{
 						Access:     types.StringValue(rules.Access),
+						AllowedIPs: StringSliceToSet(rules.AllowedIPs),
 						LanIP:      types.StringValue(rules.LanIP),
 						LocalPort:  types.StringValue(rules.LocalPort),
 						Name:       types.StringValue(rules.Name),
 						Protocol:   types.StringValue(rules.Protocol),
 						PublicPort: types.StringValue(rules.PublicPort),
-						Uplink:     types.StringValue(rules.Uplink),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRulesRulesRs{}
+			return nil
 		}(),
 	}
 	if is_read {

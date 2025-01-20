@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -96,7 +113,7 @@ func (d *NetworksGroupPoliciesDataSource) Schema(_ context.Context, _ datasource
 											Computed:            true,
 										},
 										"services": schema.ListAttribute{
-											MarkdownDescription: `A list of Bonjour services. At least one service must be specified. Available services are 'All Services', 'AirPlay', 'AFP', 'BitTorrent', 'FTP', 'iChat', 'iTunes', 'Printers', 'Samba', 'Scanners' and 'SSH'`,
+											MarkdownDescription: `A list of Bonjour services. At least one service must be specified. Available services are 'All Services', 'AFP', 'AirPlay', 'Apple screen share', 'BitTorrent', 'Chromecast', 'FTP', 'iChat', 'iTunes', 'Printers', 'Samba', 'Scanners', 'Spotify' and 'SSH'`,
 											Computed:            true,
 											ElementType:         types.StringType,
 										},
@@ -533,7 +550,7 @@ func (d *NetworksGroupPoliciesDataSource) Schema(_ context.Context, _ datasource
 												Computed:            true,
 											},
 											"services": schema.ListAttribute{
-												MarkdownDescription: `A list of Bonjour services. At least one service must be specified. Available services are 'All Services', 'AirPlay', 'AFP', 'BitTorrent', 'FTP', 'iChat', 'iTunes', 'Printers', 'Samba', 'Scanners' and 'SSH'`,
+												MarkdownDescription: `A list of Bonjour services. At least one service must be specified. Available services are 'All Services', 'AFP', 'AirPlay', 'Apple screen share', 'BitTorrent', 'Chromecast', 'FTP', 'iChat', 'iTunes', 'Printers', 'Samba', 'Scanners', 'Spotify' and 'SSH'`,
 												Computed:            true,
 												ElementType:         types.StringType,
 											},
@@ -942,6 +959,8 @@ func (d *NetworksGroupPoliciesDataSource) Read(ctx context.Context, req datasour
 		log.Printf("[DEBUG] Selected method: GetNetworkGroupPolicies")
 		vvNetworkID := networksGroupPolicies.NetworkID.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Networks.GetNetworkGroupPolicies(vvNetworkID)
 
 		if err != nil || response1 == nil {
@@ -967,6 +986,8 @@ func (d *NetworksGroupPoliciesDataSource) Read(ctx context.Context, req datasour
 		log.Printf("[DEBUG] Selected method: GetNetworkGroupPolicy")
 		vvNetworkID := networksGroupPolicies.NetworkID.ValueString()
 		vvGroupPolicyID := networksGroupPolicies.GroupPolicyID.ValueString()
+
+		// has_unknown_response: None
 
 		response2, restyResp2, err := d.client.Networks.GetNetworkGroupPolicy(vvNetworkID, vvGroupPolicyID)
 
@@ -1334,12 +1355,12 @@ func ResponseNetworksGetNetworkGroupPoliciesItemsToBody(state NetworksGroupPolic
 									}(),
 								}
 							}
-							return &ResponseItemNetworksGetNetworkGroupPoliciesBandwidthBandwidthLimits{}
+							return nil
 						}(),
 						Settings: types.StringValue(item.Bandwidth.Settings),
 					}
 				}
-				return &ResponseItemNetworksGetNetworkGroupPoliciesBandwidth{}
+				return nil
 			}(),
 			BonjourForwarding: func() *ResponseItemNetworksGetNetworkGroupPoliciesBonjourForwarding {
 				if item.BonjourForwarding != nil {
@@ -1356,12 +1377,12 @@ func ResponseNetworksGetNetworkGroupPoliciesItemsToBody(state NetworksGroupPolic
 								}
 								return &result
 							}
-							return &[]ResponseItemNetworksGetNetworkGroupPoliciesBonjourForwardingRules{}
+							return nil
 						}(),
 						Settings: types.StringValue(item.BonjourForwarding.Settings),
 					}
 				}
-				return &ResponseItemNetworksGetNetworkGroupPoliciesBonjourForwarding{}
+				return nil
 			}(),
 			ContentFiltering: func() *ResponseItemNetworksGetNetworkGroupPoliciesContentFiltering {
 				if item.ContentFiltering != nil {
@@ -1373,7 +1394,7 @@ func ResponseNetworksGetNetworkGroupPoliciesItemsToBody(state NetworksGroupPolic
 									Settings: types.StringValue(item.ContentFiltering.AllowedURLPatterns.Settings),
 								}
 							}
-							return &ResponseItemNetworksGetNetworkGroupPoliciesContentFilteringAllowedUrlPatterns{}
+							return nil
 						}(),
 						BlockedURLCategories: func() *ResponseItemNetworksGetNetworkGroupPoliciesContentFilteringBlockedUrlCategories {
 							if item.ContentFiltering.BlockedURLCategories != nil {
@@ -1382,7 +1403,7 @@ func ResponseNetworksGetNetworkGroupPoliciesItemsToBody(state NetworksGroupPolic
 									Settings:   types.StringValue(item.ContentFiltering.BlockedURLCategories.Settings),
 								}
 							}
-							return &ResponseItemNetworksGetNetworkGroupPoliciesContentFilteringBlockedUrlCategories{}
+							return nil
 						}(),
 						BlockedURLPatterns: func() *ResponseItemNetworksGetNetworkGroupPoliciesContentFilteringBlockedUrlPatterns {
 							if item.ContentFiltering.BlockedURLPatterns != nil {
@@ -1391,11 +1412,11 @@ func ResponseNetworksGetNetworkGroupPoliciesItemsToBody(state NetworksGroupPolic
 									Settings: types.StringValue(item.ContentFiltering.BlockedURLPatterns.Settings),
 								}
 							}
-							return &ResponseItemNetworksGetNetworkGroupPoliciesContentFilteringBlockedUrlPatterns{}
+							return nil
 						}(),
 					}
 				}
-				return &ResponseItemNetworksGetNetworkGroupPoliciesContentFiltering{}
+				return nil
 			}(),
 			FirewallAndTrafficShaping: func() *ResponseItemNetworksGetNetworkGroupPoliciesFirewallAndTrafficShaping {
 				if item.FirewallAndTrafficShaping != nil {
@@ -1414,7 +1435,7 @@ func ResponseNetworksGetNetworkGroupPoliciesItemsToBody(state NetworksGroupPolic
 								}
 								return &result
 							}
-							return &[]ResponseItemNetworksGetNetworkGroupPoliciesFirewallAndTrafficShapingL3FirewallRules{}
+							return nil
 						}(),
 						L7FirewallRules: func() *[]ResponseItemNetworksGetNetworkGroupPoliciesFirewallAndTrafficShapingL7FirewallRules {
 							if item.FirewallAndTrafficShaping.L7FirewallRules != nil {
@@ -1428,7 +1449,7 @@ func ResponseNetworksGetNetworkGroupPoliciesItemsToBody(state NetworksGroupPolic
 								}
 								return &result
 							}
-							return &[]ResponseItemNetworksGetNetworkGroupPoliciesFirewallAndTrafficShapingL7FirewallRules{}
+							return nil
 						}(),
 						Settings: types.StringValue(item.FirewallAndTrafficShaping.Settings),
 						TrafficShapingRules: func() *[]ResponseItemNetworksGetNetworkGroupPoliciesFirewallAndTrafficShapingTrafficShapingRules {
@@ -1447,7 +1468,7 @@ func ResponseNetworksGetNetworkGroupPoliciesItemsToBody(state NetworksGroupPolic
 												}
 												return &result
 											}
-											return &[]ResponseItemNetworksGetNetworkGroupPoliciesFirewallAndTrafficShapingTrafficShapingRulesDefinitions{}
+											return nil
 										}(),
 										DscpTagValue: func() types.Int64 {
 											if trafficShapingRules.DscpTagValue != nil {
@@ -1481,23 +1502,23 @@ func ResponseNetworksGetNetworkGroupPoliciesItemsToBody(state NetworksGroupPolic
 																}(),
 															}
 														}
-														return &ResponseItemNetworksGetNetworkGroupPoliciesFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimitsBandwidthLimits{}
+														return nil
 													}(),
 													Settings: types.StringValue(trafficShapingRules.PerClientBandwidthLimits.Settings),
 												}
 											}
-											return &ResponseItemNetworksGetNetworkGroupPoliciesFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits{}
+											return nil
 										}(),
 										Priority: types.StringValue(trafficShapingRules.Priority),
 									}
 								}
 								return &result
 							}
-							return &[]ResponseItemNetworksGetNetworkGroupPoliciesFirewallAndTrafficShapingTrafficShapingRules{}
+							return nil
 						}(),
 					}
 				}
-				return &ResponseItemNetworksGetNetworkGroupPoliciesFirewallAndTrafficShaping{}
+				return nil
 			}(),
 			GroupPolicyID: types.StringValue(item.GroupPolicyID),
 			Scheduling: func() *ResponseItemNetworksGetNetworkGroupPoliciesScheduling {
@@ -1522,7 +1543,7 @@ func ResponseNetworksGetNetworkGroupPoliciesItemsToBody(state NetworksGroupPolic
 									To:   types.StringValue(item.Scheduling.Friday.To),
 								}
 							}
-							return &ResponseItemNetworksGetNetworkGroupPoliciesSchedulingFriday{}
+							return nil
 						}(),
 						Monday: func() *ResponseItemNetworksGetNetworkGroupPoliciesSchedulingMonday {
 							if item.Scheduling.Monday != nil {
@@ -1537,7 +1558,7 @@ func ResponseNetworksGetNetworkGroupPoliciesItemsToBody(state NetworksGroupPolic
 									To:   types.StringValue(item.Scheduling.Monday.To),
 								}
 							}
-							return &ResponseItemNetworksGetNetworkGroupPoliciesSchedulingMonday{}
+							return nil
 						}(),
 						Saturday: func() *ResponseItemNetworksGetNetworkGroupPoliciesSchedulingSaturday {
 							if item.Scheduling.Saturday != nil {
@@ -1552,7 +1573,7 @@ func ResponseNetworksGetNetworkGroupPoliciesItemsToBody(state NetworksGroupPolic
 									To:   types.StringValue(item.Scheduling.Saturday.To),
 								}
 							}
-							return &ResponseItemNetworksGetNetworkGroupPoliciesSchedulingSaturday{}
+							return nil
 						}(),
 						Sunday: func() *ResponseItemNetworksGetNetworkGroupPoliciesSchedulingSunday {
 							if item.Scheduling.Sunday != nil {
@@ -1567,7 +1588,7 @@ func ResponseNetworksGetNetworkGroupPoliciesItemsToBody(state NetworksGroupPolic
 									To:   types.StringValue(item.Scheduling.Sunday.To),
 								}
 							}
-							return &ResponseItemNetworksGetNetworkGroupPoliciesSchedulingSunday{}
+							return nil
 						}(),
 						Thursday: func() *ResponseItemNetworksGetNetworkGroupPoliciesSchedulingThursday {
 							if item.Scheduling.Thursday != nil {
@@ -1582,7 +1603,7 @@ func ResponseNetworksGetNetworkGroupPoliciesItemsToBody(state NetworksGroupPolic
 									To:   types.StringValue(item.Scheduling.Thursday.To),
 								}
 							}
-							return &ResponseItemNetworksGetNetworkGroupPoliciesSchedulingThursday{}
+							return nil
 						}(),
 						Tuesday: func() *ResponseItemNetworksGetNetworkGroupPoliciesSchedulingTuesday {
 							if item.Scheduling.Tuesday != nil {
@@ -1597,7 +1618,7 @@ func ResponseNetworksGetNetworkGroupPoliciesItemsToBody(state NetworksGroupPolic
 									To:   types.StringValue(item.Scheduling.Tuesday.To),
 								}
 							}
-							return &ResponseItemNetworksGetNetworkGroupPoliciesSchedulingTuesday{}
+							return nil
 						}(),
 						Wednesday: func() *ResponseItemNetworksGetNetworkGroupPoliciesSchedulingWednesday {
 							if item.Scheduling.Wednesday != nil {
@@ -1612,11 +1633,11 @@ func ResponseNetworksGetNetworkGroupPoliciesItemsToBody(state NetworksGroupPolic
 									To:   types.StringValue(item.Scheduling.Wednesday.To),
 								}
 							}
-							return &ResponseItemNetworksGetNetworkGroupPoliciesSchedulingWednesday{}
+							return nil
 						}(),
 					}
 				}
-				return &ResponseItemNetworksGetNetworkGroupPoliciesScheduling{}
+				return nil
 			}(),
 			SplashAuthSettings: types.StringValue(item.SplashAuthSettings),
 			VLANTagging: func() *ResponseItemNetworksGetNetworkGroupPoliciesVlanTagging {
@@ -1626,7 +1647,7 @@ func ResponseNetworksGetNetworkGroupPoliciesItemsToBody(state NetworksGroupPolic
 						VLANID:   types.StringValue(item.VLANTagging.VLANID),
 					}
 				}
-				return &ResponseItemNetworksGetNetworkGroupPoliciesVlanTagging{}
+				return nil
 			}(),
 		}
 		items = append(items, itemState)
@@ -1657,12 +1678,12 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBody(state NetworksGroupPolicies
 								}(),
 							}
 						}
-						return &ResponseNetworksGetNetworkGroupPolicyBandwidthBandwidthLimits{}
+						return nil
 					}(),
 					Settings: types.StringValue(response.Bandwidth.Settings),
 				}
 			}
-			return &ResponseNetworksGetNetworkGroupPolicyBandwidth{}
+			return nil
 		}(),
 		BonjourForwarding: func() *ResponseNetworksGetNetworkGroupPolicyBonjourForwarding {
 			if response.BonjourForwarding != nil {
@@ -1679,12 +1700,12 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBody(state NetworksGroupPolicies
 							}
 							return &result
 						}
-						return &[]ResponseNetworksGetNetworkGroupPolicyBonjourForwardingRules{}
+						return nil
 					}(),
 					Settings: types.StringValue(response.BonjourForwarding.Settings),
 				}
 			}
-			return &ResponseNetworksGetNetworkGroupPolicyBonjourForwarding{}
+			return nil
 		}(),
 		ContentFiltering: func() *ResponseNetworksGetNetworkGroupPolicyContentFiltering {
 			if response.ContentFiltering != nil {
@@ -1696,7 +1717,7 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBody(state NetworksGroupPolicies
 								Settings: types.StringValue(response.ContentFiltering.AllowedURLPatterns.Settings),
 							}
 						}
-						return &ResponseNetworksGetNetworkGroupPolicyContentFilteringAllowedUrlPatterns{}
+						return nil
 					}(),
 					BlockedURLCategories: func() *ResponseNetworksGetNetworkGroupPolicyContentFilteringBlockedUrlCategories {
 						if response.ContentFiltering.BlockedURLCategories != nil {
@@ -1705,7 +1726,7 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBody(state NetworksGroupPolicies
 								Settings:   types.StringValue(response.ContentFiltering.BlockedURLCategories.Settings),
 							}
 						}
-						return &ResponseNetworksGetNetworkGroupPolicyContentFilteringBlockedUrlCategories{}
+						return nil
 					}(),
 					BlockedURLPatterns: func() *ResponseNetworksGetNetworkGroupPolicyContentFilteringBlockedUrlPatterns {
 						if response.ContentFiltering.BlockedURLPatterns != nil {
@@ -1714,11 +1735,11 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBody(state NetworksGroupPolicies
 								Settings: types.StringValue(response.ContentFiltering.BlockedURLPatterns.Settings),
 							}
 						}
-						return &ResponseNetworksGetNetworkGroupPolicyContentFilteringBlockedUrlPatterns{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseNetworksGetNetworkGroupPolicyContentFiltering{}
+			return nil
 		}(),
 		FirewallAndTrafficShaping: func() *ResponseNetworksGetNetworkGroupPolicyFirewallAndTrafficShaping {
 			if response.FirewallAndTrafficShaping != nil {
@@ -1737,7 +1758,7 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBody(state NetworksGroupPolicies
 							}
 							return &result
 						}
-						return &[]ResponseNetworksGetNetworkGroupPolicyFirewallAndTrafficShapingL3FirewallRules{}
+						return nil
 					}(),
 					L7FirewallRules: func() *[]ResponseNetworksGetNetworkGroupPolicyFirewallAndTrafficShapingL7FirewallRules {
 						if response.FirewallAndTrafficShaping.L7FirewallRules != nil {
@@ -1751,7 +1772,7 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBody(state NetworksGroupPolicies
 							}
 							return &result
 						}
-						return &[]ResponseNetworksGetNetworkGroupPolicyFirewallAndTrafficShapingL7FirewallRules{}
+						return nil
 					}(),
 					Settings: types.StringValue(response.FirewallAndTrafficShaping.Settings),
 					TrafficShapingRules: func() *[]ResponseNetworksGetNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRules {
@@ -1770,7 +1791,7 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBody(state NetworksGroupPolicies
 											}
 											return &result
 										}
-										return &[]ResponseNetworksGetNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesDefinitions{}
+										return nil
 									}(),
 									DscpTagValue: func() types.Int64 {
 										if trafficShapingRules.DscpTagValue != nil {
@@ -1804,23 +1825,23 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBody(state NetworksGroupPolicies
 															}(),
 														}
 													}
-													return &ResponseNetworksGetNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimitsBandwidthLimits{}
+													return nil
 												}(),
 												Settings: types.StringValue(trafficShapingRules.PerClientBandwidthLimits.Settings),
 											}
 										}
-										return &ResponseNetworksGetNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits{}
+										return nil
 									}(),
 									Priority: types.StringValue(trafficShapingRules.Priority),
 								}
 							}
 							return &result
 						}
-						return &[]ResponseNetworksGetNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRules{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseNetworksGetNetworkGroupPolicyFirewallAndTrafficShaping{}
+			return nil
 		}(),
 		GroupPolicyID: types.StringValue(response.GroupPolicyID),
 		Scheduling: func() *ResponseNetworksGetNetworkGroupPolicyScheduling {
@@ -1845,7 +1866,7 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBody(state NetworksGroupPolicies
 								To:   types.StringValue(response.Scheduling.Friday.To),
 							}
 						}
-						return &ResponseNetworksGetNetworkGroupPolicySchedulingFriday{}
+						return nil
 					}(),
 					Monday: func() *ResponseNetworksGetNetworkGroupPolicySchedulingMonday {
 						if response.Scheduling.Monday != nil {
@@ -1860,7 +1881,7 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBody(state NetworksGroupPolicies
 								To:   types.StringValue(response.Scheduling.Monday.To),
 							}
 						}
-						return &ResponseNetworksGetNetworkGroupPolicySchedulingMonday{}
+						return nil
 					}(),
 					Saturday: func() *ResponseNetworksGetNetworkGroupPolicySchedulingSaturday {
 						if response.Scheduling.Saturday != nil {
@@ -1875,7 +1896,7 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBody(state NetworksGroupPolicies
 								To:   types.StringValue(response.Scheduling.Saturday.To),
 							}
 						}
-						return &ResponseNetworksGetNetworkGroupPolicySchedulingSaturday{}
+						return nil
 					}(),
 					Sunday: func() *ResponseNetworksGetNetworkGroupPolicySchedulingSunday {
 						if response.Scheduling.Sunday != nil {
@@ -1890,7 +1911,7 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBody(state NetworksGroupPolicies
 								To:   types.StringValue(response.Scheduling.Sunday.To),
 							}
 						}
-						return &ResponseNetworksGetNetworkGroupPolicySchedulingSunday{}
+						return nil
 					}(),
 					Thursday: func() *ResponseNetworksGetNetworkGroupPolicySchedulingThursday {
 						if response.Scheduling.Thursday != nil {
@@ -1905,7 +1926,7 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBody(state NetworksGroupPolicies
 								To:   types.StringValue(response.Scheduling.Thursday.To),
 							}
 						}
-						return &ResponseNetworksGetNetworkGroupPolicySchedulingThursday{}
+						return nil
 					}(),
 					Tuesday: func() *ResponseNetworksGetNetworkGroupPolicySchedulingTuesday {
 						if response.Scheduling.Tuesday != nil {
@@ -1920,7 +1941,7 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBody(state NetworksGroupPolicies
 								To:   types.StringValue(response.Scheduling.Tuesday.To),
 							}
 						}
-						return &ResponseNetworksGetNetworkGroupPolicySchedulingTuesday{}
+						return nil
 					}(),
 					Wednesday: func() *ResponseNetworksGetNetworkGroupPolicySchedulingWednesday {
 						if response.Scheduling.Wednesday != nil {
@@ -1935,11 +1956,11 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBody(state NetworksGroupPolicies
 								To:   types.StringValue(response.Scheduling.Wednesday.To),
 							}
 						}
-						return &ResponseNetworksGetNetworkGroupPolicySchedulingWednesday{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseNetworksGetNetworkGroupPolicyScheduling{}
+			return nil
 		}(),
 		SplashAuthSettings: types.StringValue(response.SplashAuthSettings),
 		VLANTagging: func() *ResponseNetworksGetNetworkGroupPolicyVlanTagging {
@@ -1949,7 +1970,7 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBody(state NetworksGroupPolicies
 					VLANID:   types.StringValue(response.VLANTagging.VLANID),
 				}
 			}
-			return &ResponseNetworksGetNetworkGroupPolicyVlanTagging{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

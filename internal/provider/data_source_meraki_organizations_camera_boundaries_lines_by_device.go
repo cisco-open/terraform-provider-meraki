@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -154,6 +155,8 @@ func (d *OrganizationsCameraBoundariesLinesByDeviceDataSource) Read(ctx context.
 
 		queryParams1.Serials = elementsToStrings(ctx, organizationsCameraBoundariesLinesByDevice.Serials)
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Camera.GetOrganizationCameraBoundariesLinesByDevice(vvOrganizationID, &queryParams1)
 
 		if err != nil || response1 == nil {
@@ -233,7 +236,7 @@ func ResponseCameraGetOrganizationCameraBoundariesLinesByDeviceItemsToBody(state
 									}(),
 								}
 							}
-							return &ResponseItemCameraGetOrganizationCameraBoundariesLinesByDeviceBoundariesDirectionVertex{}
+							return nil
 						}(),
 						ID:   types.StringValue(item.Boundaries.ID),
 						Name: types.StringValue(item.Boundaries.Name),
@@ -259,11 +262,11 @@ func ResponseCameraGetOrganizationCameraBoundariesLinesByDeviceItemsToBody(state
 								}
 								return &result
 							}
-							return &[]ResponseItemCameraGetOrganizationCameraBoundariesLinesByDeviceBoundariesVertices{}
+							return nil
 						}(),
 					}
 				}
-				return &ResponseItemCameraGetOrganizationCameraBoundariesLinesByDeviceBoundaries{}
+				return nil
 			}(),
 			NetworkID: types.StringValue(item.NetworkID),
 			Serial:    types.StringValue(item.Serial),

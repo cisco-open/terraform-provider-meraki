@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -66,12 +66,16 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsClaimKeyValidateResource)
 				Attributes: map[string]schema.Attribute{
 
 					"counts": schema.SingleNestedAttribute{
-						MarkdownDescription: `Numeric breakdown of network and entitlement counts`,
+						MarkdownDescription: `Numeric breakdown of network, organizations, entitlement counts`,
 						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
 							"networks": schema.Int64Attribute{
 								MarkdownDescription: `Number of networks bound to this subscription`,
+								Computed:            true,
+							},
+							"organizations": schema.Int64Attribute{
+								MarkdownDescription: `Number of organizations bound to this subscription`,
 								Computed:            true,
 							},
 							"seats": schema.SingleNestedAttribute{
@@ -103,6 +107,18 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsClaimKeyValidateResource)
 						MarkdownDescription: `Subscription expiration date`,
 						Computed:            true,
 					},
+					"enterprise_agreement": schema.SingleNestedAttribute{
+						MarkdownDescription: `enterprise agreement details`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"suites": schema.ListAttribute{
+								MarkdownDescription: `List of suites included. Empty for non-EA subscriptions.`,
+								Computed:            true,
+								ElementType:         types.StringType,
+							},
+						},
+					},
 					"entitlements": schema.SetNestedAttribute{
 						MarkdownDescription: `Entitlement info`,
 						Computed:            true,
@@ -132,8 +148,16 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsClaimKeyValidateResource)
 									MarkdownDescription: `SKU of the required product`,
 									Computed:            true,
 								},
+								"web_order_line_id": schema.StringAttribute{
+									MarkdownDescription: `Web order line ID`,
+									Computed:            true,
+								},
 							},
 						},
+					},
+					"last_updated_at": schema.StringAttribute{
+						MarkdownDescription: `When the subscription was last changed`,
+						Computed:            true,
 					},
 					"name": schema.StringAttribute{
 						MarkdownDescription: `Subscription name`,
@@ -144,17 +168,57 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsClaimKeyValidateResource)
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
+					"renewal_requested": schema.BoolAttribute{
+						MarkdownDescription: `Whether a renewal has been requested for the subscription`,
+						Computed:            true,
+					},
+					"smart_account": schema.SingleNestedAttribute{
+						MarkdownDescription: `Smart Account linkage information`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"account": schema.SingleNestedAttribute{
+								MarkdownDescription: `Smart Account data`,
+								Computed:            true,
+								Attributes: map[string]schema.Attribute{
+
+									"domain": schema.StringAttribute{
+										MarkdownDescription: `The domain of the Smart Account`,
+										Computed:            true,
+									},
+									"id": schema.StringAttribute{
+										MarkdownDescription: `Smart Account ID`,
+										Computed:            true,
+									},
+									"name": schema.StringAttribute{
+										MarkdownDescription: `The name of the smart account`,
+										Computed:            true,
+									},
+								},
+							},
+							"status": schema.StringAttribute{
+								MarkdownDescription: `Subscription Smart Account status`,
+								Computed:            true,
+							},
+						},
+					},
 					"start_date": schema.StringAttribute{
 						MarkdownDescription: `Subscription start date`,
 						Computed:            true,
 					},
 					"status": schema.StringAttribute{
-						MarkdownDescription: `Subscription status`,
-						Computed:            true,
+						MarkdownDescription: `Subscription status
+                                          Allowed values: [active,canceled,expired,inactive,out_of_compliance]`,
+						Computed: true,
 					},
 					"subscription_id": schema.StringAttribute{
 						MarkdownDescription: `Subscription's ID`,
 						Computed:            true,
+					},
+					"type": schema.StringAttribute{
+						MarkdownDescription: `Subscription type
+                                          Allowed values: [enterpriseAgreement,termed]`,
+						Computed: true,
 					},
 					"web_order_id": schema.StringAttribute{
 						MarkdownDescription: `Web order id`,
@@ -222,15 +286,15 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsClaimKeyValidateResource)
 }
 
 func (r *AdministeredLicensingSubscriptionSubscriptionsClaimKeyValidateResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *AdministeredLicensingSubscriptionSubscriptionsClaimKeyValidateResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *AdministeredLicensingSubscriptionSubscriptionsClaimKeyValidateResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -241,21 +305,27 @@ type AdministeredLicensingSubscriptionSubscriptionsClaimKeyValidate struct {
 }
 
 type ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKey struct {
-	Counts         *ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyCounts         `tfsdk:"counts"`
-	Description    types.String                                                                                   `tfsdk:"description"`
-	EndDate        types.String                                                                                   `tfsdk:"end_date"`
-	Entitlements   *[]ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyEntitlements `tfsdk:"entitlements"`
-	Name           types.String                                                                                   `tfsdk:"name"`
-	ProductTypes   types.Set                                                                                      `tfsdk:"product_types"`
-	StartDate      types.String                                                                                   `tfsdk:"start_date"`
-	Status         types.String                                                                                   `tfsdk:"status"`
-	SubscriptionID types.String                                                                                   `tfsdk:"subscription_id"`
-	WebOrderID     types.String                                                                                   `tfsdk:"web_order_id"`
+	Counts              *ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyCounts              `tfsdk:"counts"`
+	Description         types.String                                                                                        `tfsdk:"description"`
+	EndDate             types.String                                                                                        `tfsdk:"end_date"`
+	EnterpriseAgreement *ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyEnterpriseAgreement `tfsdk:"enterprise_agreement"`
+	Entitlements        *[]ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyEntitlements      `tfsdk:"entitlements"`
+	LastUpdatedAt       types.String                                                                                        `tfsdk:"last_updated_at"`
+	Name                types.String                                                                                        `tfsdk:"name"`
+	ProductTypes        types.Set                                                                                           `tfsdk:"product_types"`
+	RenewalRequested    types.Bool                                                                                          `tfsdk:"renewal_requested"`
+	SmartAccount        *ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeySmartAccount        `tfsdk:"smart_account"`
+	StartDate           types.String                                                                                        `tfsdk:"start_date"`
+	Status              types.String                                                                                        `tfsdk:"status"`
+	SubscriptionID      types.String                                                                                        `tfsdk:"subscription_id"`
+	Type                types.String                                                                                        `tfsdk:"type"`
+	WebOrderID          types.String                                                                                        `tfsdk:"web_order_id"`
 }
 
 type ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyCounts struct {
-	Networks types.Int64                                                                                 `tfsdk:"networks"`
-	Seats    *ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyCountsSeats `tfsdk:"seats"`
+	Networks      types.Int64                                                                                 `tfsdk:"networks"`
+	Organizations types.Int64                                                                                 `tfsdk:"organizations"`
+	Seats         *ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyCountsSeats `tfsdk:"seats"`
 }
 
 type ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyCountsSeats struct {
@@ -264,15 +334,31 @@ type ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClai
 	Limit     types.Int64 `tfsdk:"limit"`
 }
 
+type ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyEnterpriseAgreement struct {
+	Suites types.List `tfsdk:"suites"`
+}
+
 type ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyEntitlements struct {
-	Seats *ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyEntitlementsSeats `tfsdk:"seats"`
-	Sku   types.String                                                                                      `tfsdk:"sku"`
+	Seats          *ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyEntitlementsSeats `tfsdk:"seats"`
+	Sku            types.String                                                                                      `tfsdk:"sku"`
+	WebOrderLineID types.String                                                                                      `tfsdk:"web_order_line_id"`
 }
 
 type ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyEntitlementsSeats struct {
 	Assigned  types.Int64 `tfsdk:"assigned"`
 	Available types.Int64 `tfsdk:"available"`
 	Limit     types.Int64 `tfsdk:"limit"`
+}
+
+type ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeySmartAccount struct {
+	Account *ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeySmartAccountAccount `tfsdk:"account"`
+	Status  types.String                                                                                        `tfsdk:"status"`
+}
+
+type ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeySmartAccountAccount struct {
+	Domain types.String `tfsdk:"domain"`
+	ID     types.String `tfsdk:"id"`
+	Name   types.String `tfsdk:"name"`
 }
 
 type RequestLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyRs struct {
@@ -307,6 +393,12 @@ func ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClai
 						}
 						return types.Int64{}
 					}(),
+					Organizations: func() types.Int64 {
+						if response.Counts.Organizations != nil {
+							return types.Int64Value(int64(*response.Counts.Organizations))
+						}
+						return types.Int64{}
+					}(),
 					Seats: func() *ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyCountsSeats {
 						if response.Counts.Seats != nil {
 							return &ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyCountsSeats{
@@ -330,14 +422,22 @@ func ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClai
 								}(),
 							}
 						}
-						return &ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyCountsSeats{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyCounts{}
+			return nil
 		}(),
 		Description: types.StringValue(response.Description),
 		EndDate:     types.StringValue(response.EndDate),
+		EnterpriseAgreement: func() *ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyEnterpriseAgreement {
+			if response.EnterpriseAgreement != nil {
+				return &ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyEnterpriseAgreement{
+					Suites: StringSliceToList(response.EnterpriseAgreement.Suites),
+				}
+			}
+			return nil
+		}(),
 		Entitlements: func() *[]ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyEntitlements {
 			if response.Entitlements != nil {
 				result := make([]ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyEntitlements, len(*response.Entitlements))
@@ -366,20 +466,47 @@ func ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClai
 									}(),
 								}
 							}
-							return &ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyEntitlementsSeats{}
+							return nil
 						}(),
-						Sku: types.StringValue(entitlements.Sku),
+						Sku:            types.StringValue(entitlements.Sku),
+						WebOrderLineID: types.StringValue(entitlements.WebOrderLineID),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyEntitlements{}
+			return nil
 		}(),
-		Name:           types.StringValue(response.Name),
-		ProductTypes:   StringSliceToSet(response.ProductTypes),
+		LastUpdatedAt: types.StringValue(response.LastUpdatedAt),
+		Name:          types.StringValue(response.Name),
+		ProductTypes:  StringSliceToSet(response.ProductTypes),
+		RenewalRequested: func() types.Bool {
+			if response.RenewalRequested != nil {
+				return types.BoolValue(*response.RenewalRequested)
+			}
+			return types.Bool{}
+		}(),
+		SmartAccount: func() *ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeySmartAccount {
+			if response.SmartAccount != nil {
+				return &ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeySmartAccount{
+					Account: func() *ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeySmartAccountAccount {
+						if response.SmartAccount.Account != nil {
+							return &ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeySmartAccountAccount{
+								Domain: types.StringValue(response.SmartAccount.Account.Domain),
+								ID:     types.StringValue(response.SmartAccount.Account.ID),
+								Name:   types.StringValue(response.SmartAccount.Account.Name),
+							}
+						}
+						return nil
+					}(),
+					Status: types.StringValue(response.SmartAccount.Status),
+				}
+			}
+			return nil
+		}(),
 		StartDate:      types.StringValue(response.StartDate),
 		Status:         types.StringValue(response.Status),
 		SubscriptionID: types.StringValue(response.SubscriptionID),
+		Type:           types.StringValue(response.Type),
 		WebOrderID:     types.StringValue(response.WebOrderID),
 	}
 	state.Item = &itemState

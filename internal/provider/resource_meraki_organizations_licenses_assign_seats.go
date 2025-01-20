@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE ACTION
@@ -5,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -141,8 +157,9 @@ func (r *OrganizationsLicensesAssignSeatsResource) Schema(_ context.Context, _ r
 									Computed:            true,
 								},
 								"state": schema.StringAttribute{
-									MarkdownDescription: `The state of the license. All queued licenses have a status of *recentlyQueued*.`,
-									Computed:            true,
+									MarkdownDescription: `The state of the license. All queued licenses have a status of *recentlyQueued*.
+                                                Allowed values: [active,expired,expiring,recentlyQueued,unused,unusedActive]`,
+									Computed: true,
 								},
 								"total_duration_in_days": schema.Int64Attribute{
 									MarkdownDescription: `The duration of the license plus all permanently queued licenses associated with it`,
@@ -230,15 +247,15 @@ func (r *OrganizationsLicensesAssignSeatsResource) Create(ctx context.Context, r
 }
 
 func (r *OrganizationsLicensesAssignSeatsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *OrganizationsLicensesAssignSeatsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *OrganizationsLicensesAssignSeatsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -358,7 +375,7 @@ func ResponseOrganizationsAssignOrganizationLicensesSeatsItemToBody(state Organi
 								}
 								return &result
 							}
-							return &[]ResponseOrganizationsAssignOrganizationLicensesSeatsResultingLicensesPermanentlyQueuedLicenses{}
+							return nil
 						}(),
 						SeatCount: func() types.Int64 {
 							if resultingLicenses.SeatCount != nil {
@@ -377,7 +394,7 @@ func ResponseOrganizationsAssignOrganizationLicensesSeatsItemToBody(state Organi
 				}
 				return &result
 			}
-			return &[]ResponseOrganizationsAssignOrganizationLicensesSeatsResultingLicenses{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

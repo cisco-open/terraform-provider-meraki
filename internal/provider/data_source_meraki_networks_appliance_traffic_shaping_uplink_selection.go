@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -231,6 +248,27 @@ func (d *NetworksApplianceTrafficShapingUplinkSelectionDataSource) Schema(_ cont
 														Computed:            true,
 														Attributes: map[string]schema.Attribute{
 
+															"applications": schema.SetNestedAttribute{
+																MarkdownDescription: `list of application objects (either majorApplication or nbar)`,
+																Computed:            true,
+																NestedObject: schema.NestedAttributeObject{
+																	Attributes: map[string]schema.Attribute{
+
+																		"id": schema.StringAttribute{
+																			MarkdownDescription: `Id of the major application, or a list of NBAR Application Category or Application selections`,
+																			Computed:            true,
+																		},
+																		"name": schema.StringAttribute{
+																			MarkdownDescription: `Name of the major application or application category selected`,
+																			Computed:            true,
+																		},
+																		"type": schema.StringAttribute{
+																			MarkdownDescription: `app type (major or nbar)`,
+																			Computed:            true,
+																		},
+																	},
+																},
+															},
 															"cidr": schema.StringAttribute{
 																MarkdownDescription: `CIDR format address (e.g."192.168.10.1", which is the same as "192.168.10.1/32"), or "any"`,
 																Computed:            true,
@@ -293,6 +331,8 @@ func (d *NetworksApplianceTrafficShapingUplinkSelectionDataSource) Read(ctx cont
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetNetworkApplianceTrafficShapingUplinkSelection")
 		vvNetworkID := networksApplianceTrafficShapingUplinkSelection.NetworkID.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Appliance.GetNetworkApplianceTrafficShapingUplinkSelection(vvNetworkID)
 
@@ -399,8 +439,15 @@ type ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTraffic
 }
 
 type ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestination struct {
-	Cidr types.String `tfsdk:"cidr"`
-	Port types.String `tfsdk:"port"`
+	Applications *[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplications `tfsdk:"applications"`
+	Cidr         types.String                                                                                                                              `tfsdk:"cidr"`
+	Port         types.String                                                                                                                              `tfsdk:"port"`
+}
+
+type ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplications struct {
+	ID   types.String `tfsdk:"id"`
+	Name types.String `tfsdk:"name"`
+	Type types.String `tfsdk:"type"`
 }
 
 type ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueSource struct {
@@ -434,11 +481,11 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 								}(),
 							}
 						}
-						return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionFailoverAndFailbackImmediate{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionFailoverAndFailback{}
+			return nil
 		}(),
 		LoadBalancingEnabled: func() types.Bool {
 			if response.LoadBalancingEnabled != nil {
@@ -460,7 +507,7 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 									Type:                        types.StringValue(vpnTrafficUplinkPreferences.PerformanceClass.Type),
 								}
 							}
-							return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesPerformanceClass{}
+							return nil
 						}(),
 						PreferredUplink: types.StringValue(vpnTrafficUplinkPreferences.PreferredUplink),
 						TrafficFilters: func() *[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFilters {
@@ -493,7 +540,7 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 																}(),
 															}
 														}
-														return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueDestination{}
+														return nil
 													}(),
 													ID:       types.StringValue(trafficFilters.Value.ID),
 													Protocol: types.StringValue(trafficFilters.Value.Protocol),
@@ -517,23 +564,23 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 																}(),
 															}
 														}
-														return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueSource{}
+														return nil
 													}(),
 												}
 											}
-											return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValue{}
+											return nil
 										}(),
 									}
 								}
 								return &result
 							}
-							return &[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFilters{}
+							return nil
 						}(),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferences{}
+			return nil
 		}(),
 		WanTrafficUplinkPreferences: func() *[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferences {
 			if response.WanTrafficUplinkPreferences != nil {
@@ -553,11 +600,25 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 													Destination: func() *ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestination {
 														if trafficFilters.Value.Destination != nil {
 															return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestination{
+																Applications: func() *[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplications {
+																	if trafficFilters.Value.Destination.Applications != nil {
+																		result := make([]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplications, len(*trafficFilters.Value.Destination.Applications))
+																		for i, applications := range *trafficFilters.Value.Destination.Applications {
+																			result[i] = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplications{
+																				ID:   types.StringValue(applications.ID),
+																				Name: types.StringValue(applications.Name),
+																				Type: types.StringValue(applications.Type),
+																			}
+																		}
+																		return &result
+																	}
+																	return nil
+																}(),
 																Cidr: types.StringValue(trafficFilters.Value.Destination.Cidr),
 																Port: types.StringValue(trafficFilters.Value.Destination.Port),
 															}
 														}
-														return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestination{}
+														return nil
 													}(),
 													Protocol: types.StringValue(trafficFilters.Value.Protocol),
 													Source: func() *ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueSource {
@@ -579,23 +640,23 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 																}(),
 															}
 														}
-														return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueSource{}
+														return nil
 													}(),
 												}
 											}
-											return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValue{}
+											return nil
 										}(),
 									}
 								}
 								return &result
 							}
-							return &[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFilters{}
+							return nil
 						}(),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferences{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

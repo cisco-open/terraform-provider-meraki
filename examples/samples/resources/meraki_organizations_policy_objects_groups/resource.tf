@@ -13,8 +13,8 @@ provider "meraki" {
 
 resource "meraki_organizations_policy_objects_groups" "example" {
 
-  category        = "NetworkObjectGroup"
-  name            = "Issue 178"
+  category = "NetworkObjectGroup"
+  name     = "Issue 178"
   # object_ids      = [828099381482759082, 828099381482759083]
   object_ids      = [828099381482759082]
   organization_id = "828099381482762270"

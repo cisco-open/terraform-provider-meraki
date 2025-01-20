@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -53,6 +70,10 @@ func (d *NetworksWirelessSSIDsFirewallL3FirewallRulesDataSource) Schema(_ contex
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
+					"allow_lan_access": schema.BoolAttribute{
+						MarkdownDescription: `Allows wireless client access to local LAN (boolean value - true allows access and false denies access)`,
+						Computed:            true,
+					},
 					"rules": schema.SetNestedAttribute{
 						MarkdownDescription: `An ordered array of the firewall rules for this SSID (not including the local LAN access rule or the default rule).`,
 						Computed:            true,
@@ -101,6 +122,8 @@ func (d *NetworksWirelessSSIDsFirewallL3FirewallRulesDataSource) Read(ctx contex
 		vvNetworkID := networksWirelessSSIDsFirewallL3FirewallRules.NetworkID.ValueString()
 		vvNumber := networksWirelessSSIDsFirewallL3FirewallRules.Number.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Wireless.GetNetworkWirelessSSIDFirewallL3FirewallRules(vvNetworkID, vvNumber)
 
 		if err != nil || response1 == nil {
@@ -132,7 +155,8 @@ type NetworksWirelessSSIDsFirewallL3FirewallRules struct {
 }
 
 type ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRules struct {
-	Rules *[]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRules `tfsdk:"rules"`
+	AllowLanAccess types.Bool                                                            `tfsdk:"allow_lan_access"`
+	Rules          *[]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRules `tfsdk:"rules"`
 }
 
 type ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRules struct {
@@ -146,6 +170,12 @@ type ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRules struct {
 // ToBody
 func ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRulesItemToBody(state NetworksWirelessSSIDsFirewallL3FirewallRules, response *merakigosdk.ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRules) NetworksWirelessSSIDsFirewallL3FirewallRules {
 	itemState := ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRules{
+		AllowLanAccess: func() types.Bool {
+			if response.AllowLanAccess != nil {
+				return types.BoolValue(*response.AllowLanAccess)
+			}
+			return types.Bool{}
+		}(),
 		Rules: func() *[]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRules {
 			if response.Rules != nil {
 				result := make([]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRules, len(*response.Rules))
@@ -160,7 +190,7 @@ func ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRulesItemToBody(sta
 				}
 				return &result
 			}
-			return &[]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRules{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

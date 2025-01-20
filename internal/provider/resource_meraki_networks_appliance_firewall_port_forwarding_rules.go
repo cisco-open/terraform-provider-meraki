@@ -1,17 +1,36 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
+	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -50,7 +69,7 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Schema(_ context.
 				Required:            true,
 			},
 			"rules": schema.SetNestedAttribute{
-				MarkdownDescription: `An array of port forwarding params`,
+				MarkdownDescription: `An array of port forwarding rules`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
@@ -70,7 +89,7 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Schema(_ context.
 							ElementType: types.StringType,
 						},
 						"lan_ip": schema.StringAttribute{
-							MarkdownDescription: `The IP address of the server or device that hosts the internal resource that you wish to make available on the WAN`,
+							MarkdownDescription: `IP address of the device subject to port forwarding`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
@@ -78,7 +97,7 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Schema(_ context.
 							},
 						},
 						"local_port": schema.StringAttribute{
-							MarkdownDescription: `A port or port ranges that will receive the forwarded traffic from the WAN`,
+							MarkdownDescription: `The port or port range that receives forwarded traffic from the WAN`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
@@ -86,7 +105,7 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Schema(_ context.
 							},
 						},
 						"name": schema.StringAttribute{
-							MarkdownDescription: `A descriptive name for the rule`,
+							MarkdownDescription: `Name of the rule`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
@@ -94,15 +113,22 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Schema(_ context.
 							},
 						},
 						"protocol": schema.StringAttribute{
-							MarkdownDescription: `TCP or UDP`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `Protocol the rule applies to
+                                        Allowed values: [tcp,udp]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"tcp",
+									"udp",
+								),
+							},
 						},
 						"public_port": schema.StringAttribute{
-							MarkdownDescription: `A port or port ranges that will be forwarded to the host on the LAN`,
+							MarkdownDescription: `The port or port range forwarded to the host on the LAN`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
@@ -110,11 +136,20 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Schema(_ context.
 							},
 						},
 						"uplink": schema.StringAttribute{
-							MarkdownDescription: `The physical WAN interface on which the traffic will arrive ('internet1' or, if available, 'internet2' or 'both')`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `The physical WAN interface on which the traffic arrives; allowed values vary by appliance model and configuration
+                                        Allowed values: [both,internet1,internet2,internet3]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
+							},
+							Validators: []validator.String{
+								stringvalidator.OneOf(
+									"both",
+									"internet1",
+									"internet2",
+									"internet3",
+								),
 							},
 						},
 					},
@@ -162,9 +197,9 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Create(ctx contex
 		return
 	}
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallPortForwardingRules(vvNetworkID, dataRequest)
+	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallPortForwardingRules(vvNetworkID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallPortForwardingRules",
@@ -270,8 +305,8 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Update(ctx contex
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallPortForwardingRules(vvNetworkID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallPortForwardingRules(vvNetworkID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallPortForwardingRules",
@@ -337,11 +372,14 @@ func (r *NetworksApplianceFirewallPortForwardingRulesRs) toSdkApiRequestUpdate(c
 			})
 		}
 	}
+	log.Printf("[DEBUG] RULES: %v", r.Rules)
+	log.Printf("[DEBUG] RULES: %t", len(requestApplianceUpdateNetworkApplianceFirewallPortForwardingRulesRules) > 0 && r.Rules != nil)
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallPortForwardingRules{
 		Rules: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallPortForwardingRulesRules {
-
-			return &requestApplianceUpdateNetworkApplianceFirewallPortForwardingRulesRules
-
+			if len(requestApplianceUpdateNetworkApplianceFirewallPortForwardingRulesRules) > 0 || r.Rules != nil {
+				return &requestApplianceUpdateNetworkApplianceFirewallPortForwardingRulesRules
+			}
+			return nil
 		}(),
 	}
 	return &out
@@ -366,7 +404,7 @@ func ResponseApplianceGetNetworkApplianceFirewallPortForwardingRulesItemToBodyRs
 				}
 				return &result
 			}
-			return &[]ResponseApplianceGetNetworkApplianceFirewallPortForwardingRulesRulesRs{}
+			return nil
 		}(),
 	}
 	if is_read {

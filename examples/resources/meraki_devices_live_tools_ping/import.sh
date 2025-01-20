@@ -1,1 +1,0 @@
-terraform import meraki_devices_live_tools_ping.example "id,serial"

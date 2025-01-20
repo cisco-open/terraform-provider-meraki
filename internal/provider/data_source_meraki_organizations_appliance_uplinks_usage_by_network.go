@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -137,6 +138,8 @@ func (d *OrganizationsApplianceUplinksUsageByNetworkDataSource) Read(ctx context
 		queryParams1.T1 = organizationsApplianceUplinksUsageByNetwork.T1.ValueString()
 		queryParams1.Timespan = organizationsApplianceUplinksUsageByNetwork.Timespan.ValueFloat64()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Appliance.GetOrganizationApplianceUplinksUsageByNetwork(vvOrganizationID, &queryParams1)
 
 		if err != nil || response1 == nil {
@@ -210,7 +213,7 @@ func ResponseApplianceGetOrganizationApplianceUplinksUsageByNetworkItemsToBody(s
 					}
 					return &result
 				}
-				return &[]ResponseItemApplianceGetOrganizationApplianceUplinksUsageByNetworkByUplink{}
+				return nil
 			}(),
 			Name:      types.StringValue(item.Name),
 			NetworkID: types.StringValue(item.NetworkID),

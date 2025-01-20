@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -76,6 +93,17 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 					"dai_trusted": schema.BoolAttribute{
 						MarkdownDescription: `If true, ARP packets for this port will be considered trusted, and Dynamic ARP Inspection will allow the traffic.`,
 						Computed:            true,
+					},
+					"dot3az": schema.SingleNestedAttribute{
+						MarkdownDescription: `dot3az settings for the port`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"enabled": schema.BoolAttribute{
+								MarkdownDescription: `The Energy Efficient Ethernet status of the switch template port.`,
+								Computed:            true,
+							},
+						},
 					},
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `The status of the switch template port.`,
@@ -164,6 +192,36 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 						MarkdownDescription: `The rapid spanning tree protocol status.`,
 						Computed:            true,
 					},
+					"schedule": schema.SingleNestedAttribute{
+						MarkdownDescription: `The port schedule data.`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"id": schema.StringAttribute{
+								MarkdownDescription: `The ID of the port schedule.`,
+								Computed:            true,
+							},
+							"name": schema.StringAttribute{
+								MarkdownDescription: `The name of the port schedule.`,
+								Computed:            true,
+							},
+						},
+					},
+					"stackwise_virtual": schema.SingleNestedAttribute{
+						MarkdownDescription: `Stackwise Virtual settings for the port`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"is_dual_active_detector": schema.BoolAttribute{
+								MarkdownDescription: `For SVL devices, whether or not the port is used for Dual Active Detection.`,
+								Computed:            true,
+							},
+							"is_stack_wise_virtual_link": schema.BoolAttribute{
+								MarkdownDescription: `For SVL devices, whether or not the port is used for StackWise Virtual Link.`,
+								Computed:            true,
+							},
+						},
+					},
 					"sticky_mac_allow_list": schema.ListAttribute{
 						MarkdownDescription: `The initial list of MAC addresses for sticky Mac allow list. Only applicable when 'accessPolicyType' is 'Sticky MAC allow list'.`,
 						Computed:            true,
@@ -187,7 +245,7 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 						ElementType:         types.StringType,
 					},
 					"type": schema.StringAttribute{
-						MarkdownDescription: `The type of the switch template port ('trunk' or 'access').`,
+						MarkdownDescription: `The type of the switch template port ('trunk', 'access' or 'stack').`,
 						Computed:            true,
 					},
 					"udld": schema.StringAttribute{
@@ -226,6 +284,17 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 						"dai_trusted": schema.BoolAttribute{
 							MarkdownDescription: `If true, ARP packets for this port will be considered trusted, and Dynamic ARP Inspection will allow the traffic.`,
 							Computed:            true,
+						},
+						"dot3az": schema.SingleNestedAttribute{
+							MarkdownDescription: `dot3az settings for the port`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"enabled": schema.BoolAttribute{
+									MarkdownDescription: `The Energy Efficient Ethernet status of the switch template port.`,
+									Computed:            true,
+								},
+							},
 						},
 						"enabled": schema.BoolAttribute{
 							MarkdownDescription: `The status of the switch template port.`,
@@ -314,6 +383,36 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 							MarkdownDescription: `The rapid spanning tree protocol status.`,
 							Computed:            true,
 						},
+						"schedule": schema.SingleNestedAttribute{
+							MarkdownDescription: `The port schedule data.`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"id": schema.StringAttribute{
+									MarkdownDescription: `The ID of the port schedule.`,
+									Computed:            true,
+								},
+								"name": schema.StringAttribute{
+									MarkdownDescription: `The name of the port schedule.`,
+									Computed:            true,
+								},
+							},
+						},
+						"stackwise_virtual": schema.SingleNestedAttribute{
+							MarkdownDescription: `Stackwise Virtual settings for the port`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"is_dual_active_detector": schema.BoolAttribute{
+									MarkdownDescription: `For SVL devices, whether or not the port is used for Dual Active Detection.`,
+									Computed:            true,
+								},
+								"is_stack_wise_virtual_link": schema.BoolAttribute{
+									MarkdownDescription: `For SVL devices, whether or not the port is used for StackWise Virtual Link.`,
+									Computed:            true,
+								},
+							},
+						},
 						"sticky_mac_allow_list": schema.ListAttribute{
 							MarkdownDescription: `The initial list of MAC addresses for sticky Mac allow list. Only applicable when 'accessPolicyType' is 'Sticky MAC allow list'.`,
 							Computed:            true,
@@ -337,7 +436,7 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Schema(_ con
 							ElementType:         types.StringType,
 						},
 						"type": schema.StringAttribute{
-							MarkdownDescription: `The type of the switch template port ('trunk' or 'access').`,
+							MarkdownDescription: `The type of the switch template port ('trunk', 'access' or 'stack').`,
 							Computed:            true,
 						},
 						"udld": schema.StringAttribute{
@@ -378,6 +477,8 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Read(ctx con
 		vvConfigTemplateID := organizationsConfigTemplatesSwitchProfilesPorts.ConfigTemplateID.ValueString()
 		vvProfileID := organizationsConfigTemplatesSwitchProfilesPorts.ProfileID.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Switch.GetOrganizationConfigTemplateSwitchProfilePorts(vvOrganizationID, vvConfigTemplateID, vvProfileID)
 
 		if err != nil || response1 == nil {
@@ -405,6 +506,8 @@ func (d *OrganizationsConfigTemplatesSwitchProfilesPortsDataSource) Read(ctx con
 		vvConfigTemplateID := organizationsConfigTemplatesSwitchProfilesPorts.ConfigTemplateID.ValueString()
 		vvProfileID := organizationsConfigTemplatesSwitchProfilesPorts.ProfileID.ValueString()
 		vvPortID := organizationsConfigTemplatesSwitchProfilesPorts.PortID.ValueString()
+
+		// has_unknown_response: None
 
 		response2, restyResp2, err := d.client.Switch.GetOrganizationConfigTemplateSwitchProfilePort(vvOrganizationID, vvConfigTemplateID, vvProfileID, vvPortID)
 
@@ -440,33 +543,40 @@ type OrganizationsConfigTemplatesSwitchProfilesPorts struct {
 }
 
 type ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePorts struct {
-	AccessPolicyNumber          types.Int64                                                               `tfsdk:"access_policy_number"`
-	AccessPolicyType            types.String                                                              `tfsdk:"access_policy_type"`
-	AllowedVLANs                types.String                                                              `tfsdk:"allowed_vlans"`
-	DaiTrusted                  types.Bool                                                                `tfsdk:"dai_trusted"`
-	Enabled                     types.Bool                                                                `tfsdk:"enabled"`
-	FlexibleStackingEnabled     types.Bool                                                                `tfsdk:"flexible_stacking_enabled"`
-	IsolationEnabled            types.Bool                                                                `tfsdk:"isolation_enabled"`
-	LinkNegotiation             types.String                                                              `tfsdk:"link_negotiation"`
-	LinkNegotiationCapabilities types.List                                                                `tfsdk:"link_negotiation_capabilities"`
-	MacAllowList                types.List                                                                `tfsdk:"mac_allow_list"`
-	Mirror                      *ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsMirror  `tfsdk:"mirror"`
-	Module                      *ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsModule  `tfsdk:"module"`
-	Name                        types.String                                                              `tfsdk:"name"`
-	PoeEnabled                  types.Bool                                                                `tfsdk:"poe_enabled"`
-	PortID                      types.String                                                              `tfsdk:"port_id"`
-	PortScheduleID              types.String                                                              `tfsdk:"port_schedule_id"`
-	Profile                     *ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsProfile `tfsdk:"profile"`
-	RstpEnabled                 types.Bool                                                                `tfsdk:"rstp_enabled"`
-	StickyMacAllowList          types.List                                                                `tfsdk:"sticky_mac_allow_list"`
-	StickyMacAllowListLimit     types.Int64                                                               `tfsdk:"sticky_mac_allow_list_limit"`
-	StormControlEnabled         types.Bool                                                                `tfsdk:"storm_control_enabled"`
-	StpGuard                    types.String                                                              `tfsdk:"stp_guard"`
-	Tags                        types.List                                                                `tfsdk:"tags"`
-	Type                        types.String                                                              `tfsdk:"type"`
-	Udld                        types.String                                                              `tfsdk:"udld"`
-	VLAN                        types.Int64                                                               `tfsdk:"vlan"`
-	VoiceVLAN                   types.Int64                                                               `tfsdk:"voice_vlan"`
+	AccessPolicyNumber          types.Int64                                                                        `tfsdk:"access_policy_number"`
+	AccessPolicyType            types.String                                                                       `tfsdk:"access_policy_type"`
+	AllowedVLANs                types.String                                                                       `tfsdk:"allowed_vlans"`
+	DaiTrusted                  types.Bool                                                                         `tfsdk:"dai_trusted"`
+	Dot3Az                      *ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsDot3Az           `tfsdk:"dot3az"`
+	Enabled                     types.Bool                                                                         `tfsdk:"enabled"`
+	FlexibleStackingEnabled     types.Bool                                                                         `tfsdk:"flexible_stacking_enabled"`
+	IsolationEnabled            types.Bool                                                                         `tfsdk:"isolation_enabled"`
+	LinkNegotiation             types.String                                                                       `tfsdk:"link_negotiation"`
+	LinkNegotiationCapabilities types.List                                                                         `tfsdk:"link_negotiation_capabilities"`
+	MacAllowList                types.List                                                                         `tfsdk:"mac_allow_list"`
+	Mirror                      *ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsMirror           `tfsdk:"mirror"`
+	Module                      *ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsModule           `tfsdk:"module"`
+	Name                        types.String                                                                       `tfsdk:"name"`
+	PoeEnabled                  types.Bool                                                                         `tfsdk:"poe_enabled"`
+	PortID                      types.String                                                                       `tfsdk:"port_id"`
+	PortScheduleID              types.String                                                                       `tfsdk:"port_schedule_id"`
+	Profile                     *ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsProfile          `tfsdk:"profile"`
+	RstpEnabled                 types.Bool                                                                         `tfsdk:"rstp_enabled"`
+	Schedule                    *ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsSchedule         `tfsdk:"schedule"`
+	StackwiseVirtual            *ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsStackwiseVirtual `tfsdk:"stackwise_virtual"`
+	StickyMacAllowList          types.List                                                                         `tfsdk:"sticky_mac_allow_list"`
+	StickyMacAllowListLimit     types.Int64                                                                        `tfsdk:"sticky_mac_allow_list_limit"`
+	StormControlEnabled         types.Bool                                                                         `tfsdk:"storm_control_enabled"`
+	StpGuard                    types.String                                                                       `tfsdk:"stp_guard"`
+	Tags                        types.List                                                                         `tfsdk:"tags"`
+	Type                        types.String                                                                       `tfsdk:"type"`
+	Udld                        types.String                                                                       `tfsdk:"udld"`
+	VLAN                        types.Int64                                                                        `tfsdk:"vlan"`
+	VoiceVLAN                   types.Int64                                                                        `tfsdk:"voice_vlan"`
+}
+
+type ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsDot3Az struct {
+	Enabled types.Bool `tfsdk:"enabled"`
 }
 
 type ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsMirror struct {
@@ -483,34 +593,51 @@ type ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsProfile st
 	Iname   types.String `tfsdk:"iname"`
 }
 
+type ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsSchedule struct {
+	ID   types.String `tfsdk:"id"`
+	Name types.String `tfsdk:"name"`
+}
+
+type ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsStackwiseVirtual struct {
+	IsDualActiveDetector   types.Bool `tfsdk:"is_dual_active_detector"`
+	IsStackWiseVirtualLink types.Bool `tfsdk:"is_stack_wise_virtual_link"`
+}
+
 type ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePort struct {
-	AccessPolicyNumber          types.Int64                                                          `tfsdk:"access_policy_number"`
-	AccessPolicyType            types.String                                                         `tfsdk:"access_policy_type"`
-	AllowedVLANs                types.String                                                         `tfsdk:"allowed_vlans"`
-	DaiTrusted                  types.Bool                                                           `tfsdk:"dai_trusted"`
-	Enabled                     types.Bool                                                           `tfsdk:"enabled"`
-	FlexibleStackingEnabled     types.Bool                                                           `tfsdk:"flexible_stacking_enabled"`
-	IsolationEnabled            types.Bool                                                           `tfsdk:"isolation_enabled"`
-	LinkNegotiation             types.String                                                         `tfsdk:"link_negotiation"`
-	LinkNegotiationCapabilities types.List                                                           `tfsdk:"link_negotiation_capabilities"`
-	MacAllowList                types.List                                                           `tfsdk:"mac_allow_list"`
-	Mirror                      *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortMirror  `tfsdk:"mirror"`
-	Module                      *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortModule  `tfsdk:"module"`
-	Name                        types.String                                                         `tfsdk:"name"`
-	PoeEnabled                  types.Bool                                                           `tfsdk:"poe_enabled"`
-	PortID                      types.String                                                         `tfsdk:"port_id"`
-	PortScheduleID              types.String                                                         `tfsdk:"port_schedule_id"`
-	Profile                     *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortProfile `tfsdk:"profile"`
-	RstpEnabled                 types.Bool                                                           `tfsdk:"rstp_enabled"`
-	StickyMacAllowList          types.List                                                           `tfsdk:"sticky_mac_allow_list"`
-	StickyMacAllowListLimit     types.Int64                                                          `tfsdk:"sticky_mac_allow_list_limit"`
-	StormControlEnabled         types.Bool                                                           `tfsdk:"storm_control_enabled"`
-	StpGuard                    types.String                                                         `tfsdk:"stp_guard"`
-	Tags                        types.List                                                           `tfsdk:"tags"`
-	Type                        types.String                                                         `tfsdk:"type"`
-	Udld                        types.String                                                         `tfsdk:"udld"`
-	VLAN                        types.Int64                                                          `tfsdk:"vlan"`
-	VoiceVLAN                   types.Int64                                                          `tfsdk:"voice_vlan"`
+	AccessPolicyNumber          types.Int64                                                                   `tfsdk:"access_policy_number"`
+	AccessPolicyType            types.String                                                                  `tfsdk:"access_policy_type"`
+	AllowedVLANs                types.String                                                                  `tfsdk:"allowed_vlans"`
+	DaiTrusted                  types.Bool                                                                    `tfsdk:"dai_trusted"`
+	Dot3Az                      *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortDot3Az           `tfsdk:"dot3az"`
+	Enabled                     types.Bool                                                                    `tfsdk:"enabled"`
+	FlexibleStackingEnabled     types.Bool                                                                    `tfsdk:"flexible_stacking_enabled"`
+	IsolationEnabled            types.Bool                                                                    `tfsdk:"isolation_enabled"`
+	LinkNegotiation             types.String                                                                  `tfsdk:"link_negotiation"`
+	LinkNegotiationCapabilities types.List                                                                    `tfsdk:"link_negotiation_capabilities"`
+	MacAllowList                types.List                                                                    `tfsdk:"mac_allow_list"`
+	Mirror                      *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortMirror           `tfsdk:"mirror"`
+	Module                      *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortModule           `tfsdk:"module"`
+	Name                        types.String                                                                  `tfsdk:"name"`
+	PoeEnabled                  types.Bool                                                                    `tfsdk:"poe_enabled"`
+	PortID                      types.String                                                                  `tfsdk:"port_id"`
+	PortScheduleID              types.String                                                                  `tfsdk:"port_schedule_id"`
+	Profile                     *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortProfile          `tfsdk:"profile"`
+	RstpEnabled                 types.Bool                                                                    `tfsdk:"rstp_enabled"`
+	Schedule                    *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortSchedule         `tfsdk:"schedule"`
+	StackwiseVirtual            *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortStackwiseVirtual `tfsdk:"stackwise_virtual"`
+	StickyMacAllowList          types.List                                                                    `tfsdk:"sticky_mac_allow_list"`
+	StickyMacAllowListLimit     types.Int64                                                                   `tfsdk:"sticky_mac_allow_list_limit"`
+	StormControlEnabled         types.Bool                                                                    `tfsdk:"storm_control_enabled"`
+	StpGuard                    types.String                                                                  `tfsdk:"stp_guard"`
+	Tags                        types.List                                                                    `tfsdk:"tags"`
+	Type                        types.String                                                                  `tfsdk:"type"`
+	Udld                        types.String                                                                  `tfsdk:"udld"`
+	VLAN                        types.Int64                                                                   `tfsdk:"vlan"`
+	VoiceVLAN                   types.Int64                                                                   `tfsdk:"voice_vlan"`
+}
+
+type ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortDot3Az struct {
+	Enabled types.Bool `tfsdk:"enabled"`
 }
 
 type ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortMirror struct {
@@ -525,6 +652,16 @@ type ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortProfile struct 
 	Enabled types.Bool   `tfsdk:"enabled"`
 	ID      types.String `tfsdk:"id"`
 	Iname   types.String `tfsdk:"iname"`
+}
+
+type ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortSchedule struct {
+	ID   types.String `tfsdk:"id"`
+	Name types.String `tfsdk:"name"`
+}
+
+type ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortStackwiseVirtual struct {
+	IsDualActiveDetector   types.Bool `tfsdk:"is_dual_active_detector"`
+	IsStackWiseVirtualLink types.Bool `tfsdk:"is_stack_wise_virtual_link"`
 }
 
 // ToBody
@@ -545,6 +682,19 @@ func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortsItemsToBody(st
 					return types.BoolValue(*item.DaiTrusted)
 				}
 				return types.Bool{}
+			}(),
+			Dot3Az: func() *ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsDot3Az {
+				if item.Dot3Az != nil {
+					return &ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsDot3Az{
+						Enabled: func() types.Bool {
+							if item.Dot3Az.Enabled != nil {
+								return types.BoolValue(*item.Dot3Az.Enabled)
+							}
+							return types.Bool{}
+						}(),
+					}
+				}
+				return nil
 			}(),
 			Enabled: func() types.Bool {
 				if item.Enabled != nil {
@@ -573,7 +723,7 @@ func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortsItemsToBody(st
 						Mode: types.StringValue(item.Mirror.Mode),
 					}
 				}
-				return &ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsMirror{}
+				return nil
 			}(),
 			Module: func() *ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsModule {
 				if item.Module != nil {
@@ -581,7 +731,7 @@ func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortsItemsToBody(st
 						Model: types.StringValue(item.Module.Model),
 					}
 				}
-				return &ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsModule{}
+				return nil
 			}(),
 			Name: types.StringValue(item.Name),
 			PoeEnabled: func() types.Bool {
@@ -605,13 +755,41 @@ func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortsItemsToBody(st
 						Iname: types.StringValue(item.Profile.Iname),
 					}
 				}
-				return &ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsProfile{}
+				return nil
 			}(),
 			RstpEnabled: func() types.Bool {
 				if item.RstpEnabled != nil {
 					return types.BoolValue(*item.RstpEnabled)
 				}
 				return types.Bool{}
+			}(),
+			Schedule: func() *ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsSchedule {
+				if item.Schedule != nil {
+					return &ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsSchedule{
+						ID:   types.StringValue(item.Schedule.ID),
+						Name: types.StringValue(item.Schedule.Name),
+					}
+				}
+				return nil
+			}(),
+			StackwiseVirtual: func() *ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsStackwiseVirtual {
+				if item.StackwiseVirtual != nil {
+					return &ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfilePortsStackwiseVirtual{
+						IsDualActiveDetector: func() types.Bool {
+							if item.StackwiseVirtual.IsDualActiveDetector != nil {
+								return types.BoolValue(*item.StackwiseVirtual.IsDualActiveDetector)
+							}
+							return types.Bool{}
+						}(),
+						IsStackWiseVirtualLink: func() types.Bool {
+							if item.StackwiseVirtual.IsStackWiseVirtualLink != nil {
+								return types.BoolValue(*item.StackwiseVirtual.IsStackWiseVirtualLink)
+							}
+							return types.Bool{}
+						}(),
+					}
+				}
+				return nil
 			}(),
 			StickyMacAllowList: StringSliceToList(item.StickyMacAllowList),
 			StickyMacAllowListLimit: func() types.Int64 {
@@ -665,6 +843,19 @@ func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortItemToBody(stat
 			}
 			return types.Bool{}
 		}(),
+		Dot3Az: func() *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortDot3Az {
+			if response.Dot3Az != nil {
+				return &ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortDot3Az{
+					Enabled: func() types.Bool {
+						if response.Dot3Az.Enabled != nil {
+							return types.BoolValue(*response.Dot3Az.Enabled)
+						}
+						return types.Bool{}
+					}(),
+				}
+			}
+			return nil
+		}(),
 		Enabled: func() types.Bool {
 			if response.Enabled != nil {
 				return types.BoolValue(*response.Enabled)
@@ -692,7 +883,7 @@ func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortItemToBody(stat
 					Mode: types.StringValue(response.Mirror.Mode),
 				}
 			}
-			return &ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortMirror{}
+			return nil
 		}(),
 		Module: func() *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortModule {
 			if response.Module != nil {
@@ -700,7 +891,7 @@ func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortItemToBody(stat
 					Model: types.StringValue(response.Module.Model),
 				}
 			}
-			return &ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortModule{}
+			return nil
 		}(),
 		Name: types.StringValue(response.Name),
 		PoeEnabled: func() types.Bool {
@@ -724,13 +915,41 @@ func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortItemToBody(stat
 					Iname: types.StringValue(response.Profile.Iname),
 				}
 			}
-			return &ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortProfile{}
+			return nil
 		}(),
 		RstpEnabled: func() types.Bool {
 			if response.RstpEnabled != nil {
 				return types.BoolValue(*response.RstpEnabled)
 			}
 			return types.Bool{}
+		}(),
+		Schedule: func() *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortSchedule {
+			if response.Schedule != nil {
+				return &ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortSchedule{
+					ID:   types.StringValue(response.Schedule.ID),
+					Name: types.StringValue(response.Schedule.Name),
+				}
+			}
+			return nil
+		}(),
+		StackwiseVirtual: func() *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortStackwiseVirtual {
+			if response.StackwiseVirtual != nil {
+				return &ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortStackwiseVirtual{
+					IsDualActiveDetector: func() types.Bool {
+						if response.StackwiseVirtual.IsDualActiveDetector != nil {
+							return types.BoolValue(*response.StackwiseVirtual.IsDualActiveDetector)
+						}
+						return types.Bool{}
+					}(),
+					IsStackWiseVirtualLink: func() types.Bool {
+						if response.StackwiseVirtual.IsStackWiseVirtualLink != nil {
+							return types.BoolValue(*response.StackwiseVirtual.IsStackWiseVirtualLink)
+						}
+						return types.Bool{}
+					}(),
+				}
+			}
+			return nil
 		}(),
 		StickyMacAllowList: StringSliceToList(response.StickyMacAllowList),
 		StickyMacAllowListLimit: func() types.Int64 {

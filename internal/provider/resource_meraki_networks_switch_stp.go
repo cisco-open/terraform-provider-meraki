@@ -1,10 +1,26 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -108,6 +124,7 @@ func (r *NetworksSwitchStpResource) Schema(_ context.Context, _ resource.SchemaR
 			},
 			"stp_bridge_priority": schema.SetNestedAttribute{
 				MarkdownDescription: `STP bridge priority for switches/stacks or switch templates. An empty array will clear the STP bridge priority settings.`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
@@ -128,7 +145,7 @@ func (r *NetworksSwitchStpResource) Schema(_ context.Context, _ resource.SchemaR
 							Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
 						},
 						"stp_priority": schema.Int64Attribute{
-							MarkdownDescription: `STP priority for switch, stacks, or switch profiles`,
+							MarkdownDescription: `STP priority for switch, stacks, or switch templates`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
@@ -136,9 +153,9 @@ func (r *NetworksSwitchStpResource) Schema(_ context.Context, _ resource.SchemaR
 							},
 						},
 						"switch_profiles": schema.SetAttribute{
-							MarkdownDescription: `List of switch profile IDs`,
-							Optional:            true,
+							MarkdownDescription: `List of switch template IDs`,
 							Computed:            true,
+							Optional:            true,
 							PlanModifiers: []planmodifier.Set{
 								setplanmodifier.UseStateForUnknown(),
 							},
@@ -208,9 +225,9 @@ func (r *NetworksSwitchStpResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Switch.UpdateNetworkSwitchStp(vvNetworkID, dataRequest)
+	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchStp(vvNetworkID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStp",
@@ -324,8 +341,8 @@ func (r *NetworksSwitchStpResource) Update(ctx context.Context, req resource.Upd
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Switch.UpdateNetworkSwitchStp(vvNetworkID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchStp(vvNetworkID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStp",
@@ -359,10 +376,10 @@ type NetworksSwitchStpRs struct {
 }
 
 type ResponseSwitchGetNetworkSwitchStpStpBridgePriorityRs struct {
-	StpPriority    types.Int64 `tfsdk:"stp_priority"`
-	Switches       types.Set   `tfsdk:"switches"`
 	Stacks         types.Set   `tfsdk:"stacks"`
+	StpPriority    types.Int64 `tfsdk:"stp_priority"`
 	SwitchProfiles types.Set   `tfsdk:"switch_profiles"`
+	Switches       types.Set   `tfsdk:"switches"`
 }
 
 // FromBody

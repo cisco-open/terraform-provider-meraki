@@ -1,10 +1,26 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -59,9 +75,10 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 				},
 			},
 			"default_uplink": schema.StringAttribute{
-				MarkdownDescription: `The default uplink. Must be one of: 'wan1' or 'wan2'`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The default uplink. Must be one of: 'wan1' or 'wan2'
+                                  Allowed values: [wan1,wan2]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -125,9 +142,10 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 					Attributes: map[string]schema.Attribute{
 
 						"fail_over_criterion": schema.StringAttribute{
-							MarkdownDescription: `Fail over criterion for uplink preference rule. Must be one of: 'poorPerformance' or 'uplinkDown'`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `Fail over criterion for uplink preference rule. Must be one of: 'poorPerformance' or 'uplinkDown'
+                                        Allowed values: [poorPerformance,uplinkDown]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -148,9 +166,10 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 							Attributes: map[string]schema.Attribute{
 
 								"builtin_performance_class_name": schema.StringAttribute{
-									MarkdownDescription: `Name of builtin performance class. Must be present when performanceClass type is 'builtin' and value must be one of: 'VoIP'`,
-									Computed:            true,
-									Optional:            true,
+									MarkdownDescription: `Name of builtin performance class. Must be present when performanceClass type is 'builtin' and value must be one of: 'VoIP'
+                                              Allowed values: [VoIP]`,
+									Computed: true,
+									Optional: true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
 									},
@@ -169,9 +188,10 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 									},
 								},
 								"type": schema.StringAttribute{
-									MarkdownDescription: `Type of this performance class. Must be one of: 'builtin' or 'custom'`,
-									Computed:            true,
-									Optional:            true,
+									MarkdownDescription: `Type of this performance class. Must be one of: 'builtin' or 'custom'
+                                              Allowed values: [builtin,custom]`,
+									Computed: true,
+									Optional: true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
 									},
@@ -185,9 +205,10 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 							},
 						},
 						"preferred_uplink": schema.StringAttribute{
-							MarkdownDescription: `Preferred uplink for uplink preference rule. Must be one of: 'wan1', 'wan2', 'bestForVoIP', 'loadBalancing' or 'defaultUplink'`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `Preferred uplink for uplink preference rule. Must be one of: 'wan1', 'wan2', 'bestForVoIP', 'loadBalancing' or 'defaultUplink'
+                                        Allowed values: [bestForVoIP,defaultUplink,loadBalancing,wan1,wan2]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -212,9 +233,10 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 								Attributes: map[string]schema.Attribute{
 
 									"type": schema.StringAttribute{
-										MarkdownDescription: `Traffic filter type. Must be one of: 'applicationCategory', 'application' or 'custom'`,
-										Computed:            true,
-										Optional:            true,
+										MarkdownDescription: `Traffic filter type. Must be one of: 'applicationCategory', 'application' or 'custom'
+                                              Allowed values: [application,applicationCategory,custom]`,
+										Computed: true,
+										Optional: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
 										},
@@ -303,9 +325,10 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 												},
 											},
 											"protocol": schema.StringAttribute{
-												MarkdownDescription: `Protocol of 'custom' type traffic filter. Must be one of: 'tcp', 'udp', 'icmp', 'icmp6' or 'any'`,
-												Computed:            true,
-												Optional:            true,
+												MarkdownDescription: `Protocol of 'custom' type traffic filter. Must be one of: 'tcp', 'udp', 'icmp', 'icmp6' or 'any'
+                                                    Allowed values: [any,icmp,icmp6,tcp,udp]`,
+												Computed: true,
+												Optional: true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
 												},
@@ -389,9 +412,10 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 					Attributes: map[string]schema.Attribute{
 
 						"preferred_uplink": schema.StringAttribute{
-							MarkdownDescription: `Preferred uplink for uplink preference rule. Must be one of: 'wan1' or 'wan2'`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `Preferred uplink for uplink preference rule. Must be one of: 'wan1' or 'wan2'
+                                        Allowed values: [wan1,wan2]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -413,9 +437,10 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 								Attributes: map[string]schema.Attribute{
 
 									"type": schema.StringAttribute{
-										MarkdownDescription: `Traffic filter type. Must be "custom"`,
-										Computed:            true,
-										Optional:            true,
+										MarkdownDescription: `Traffic filter type. Must be "custom"
+                                              Allowed values: [custom]`,
+										Computed: true,
+										Optional: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
 										},
@@ -443,6 +468,27 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 												},
 												Attributes: map[string]schema.Attribute{
 
+													"applications": schema.SetNestedAttribute{
+														MarkdownDescription: `list of application objects (either majorApplication or nbar)`,
+														Computed:            true,
+														NestedObject: schema.NestedAttributeObject{
+															Attributes: map[string]schema.Attribute{
+
+																"id": schema.StringAttribute{
+																	MarkdownDescription: `Id of the major application, or a list of NBAR Application Category or Application selections`,
+																	Computed:            true,
+																},
+																"name": schema.StringAttribute{
+																	MarkdownDescription: `Name of the major application or application category selected`,
+																	Computed:            true,
+																},
+																"type": schema.StringAttribute{
+																	MarkdownDescription: `app type (major or nbar)`,
+																	Computed:            true,
+																},
+															},
+														},
+													},
 													"cidr": schema.StringAttribute{
 														MarkdownDescription: `CIDR format address (e.g."192.168.10.1", which is the same as "192.168.10.1/32"), or "any"`,
 														Computed:            true,
@@ -462,9 +508,10 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 												},
 											},
 											"protocol": schema.StringAttribute{
-												MarkdownDescription: `Protocol of 'custom' type traffic filter. Must be one of: 'tcp', 'udp', 'icmp6' or 'any'`,
-												Computed:            true,
-												Optional:            true,
+												MarkdownDescription: `Protocol of 'custom' type traffic filter. Must be one of: 'tcp', 'udp', 'icmp6' or 'any'
+                                                    Allowed values: [any,icmp6,tcp,udp]`,
+												Computed: true,
+												Optional: true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
 												},
@@ -782,8 +829,15 @@ type ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTraffic
 }
 
 type ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestinationRs struct {
-	Cidr types.String `tfsdk:"cidr"`
-	Port types.String `tfsdk:"port"`
+	Applications *[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplicationsRs `tfsdk:"applications"`
+	Cidr         types.String                                                                                                                                `tfsdk:"cidr"`
+	Port         types.String                                                                                                                                `tfsdk:"port"`
+}
+
+type ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplicationsRs struct {
+	ID   types.String `tfsdk:"id"`
+	Name types.String `tfsdk:"name"`
+	Type types.String `tfsdk:"type"`
 }
 
 type ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueSourceRs struct {
@@ -1141,13 +1195,13 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 								}
 								return &result
 							}
-							return &[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersRs{}
+							return nil
 						}(),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesRs{}
+			return nil
 		}(),
 		WanTrafficUplinkPreferences: func() *[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesRs {
 			if response.WanTrafficUplinkPreferences != nil {
@@ -1167,6 +1221,20 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 													Destination: func() *ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestinationRs {
 														if trafficFilters.Value.Destination != nil {
 															return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestinationRs{
+																Applications: func() *[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplicationsRs {
+																	if trafficFilters.Value.Destination.Applications != nil {
+																		result := make([]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplicationsRs, len(*trafficFilters.Value.Destination.Applications))
+																		for i, applications := range *trafficFilters.Value.Destination.Applications {
+																			result[i] = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplicationsRs{
+																				ID:   types.StringValue(applications.ID),
+																				Name: types.StringValue(applications.Name),
+																				Type: types.StringValue(applications.Type),
+																			}
+																		}
+																		return &result
+																	}
+																	return nil
+																}(),
 																Cidr: types.StringValue(trafficFilters.Value.Destination.Cidr),
 																Port: types.StringValue(trafficFilters.Value.Destination.Port),
 															}
@@ -1203,13 +1271,13 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 								}
 								return &result
 							}
-							return &[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersRs{}
+							return nil
 						}(),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesRs{}
+			return nil
 		}(),
 	}
 	if is_read {

@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -70,9 +86,10 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Schema(_ context.Context, _ re
 				},
 			},
 			"ip_version": schema.StringAttribute{
-				MarkdownDescription: `IP version of adpative policy ACL`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `IP version of adpative policy ACL
+                                  Allowed values: [any,ipv4,ipv6]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -115,9 +132,10 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Schema(_ context.Context, _ re
 							},
 						},
 						"policy": schema.StringAttribute{
-							MarkdownDescription: `'allow' or 'deny' traffic specified by this rule`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `'allow' or 'deny' traffic specified by this rule
+                                        Allowed values: [allow,deny]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -129,9 +147,10 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Schema(_ context.Context, _ re
 							},
 						},
 						"protocol": schema.StringAttribute{
-							MarkdownDescription: `The type of protocol`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `The type of protocol
+                                        Allowed values: [any,icmp,tcp,udp]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -266,7 +285,7 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Create(ctx context.Context, re
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter ACLID",
-				err.Error(),
+				"Error",
 			)
 			return
 		}
@@ -567,7 +586,7 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyACLItemToBodyRs(state Org
 				}
 				return &result
 			}
-			return &[]ResponseOrganizationsGetOrganizationAdaptivePolicyAclRulesRs{}
+			return nil
 		}(),
 		UpdatedAt: types.StringValue(response.UpdatedAt),
 	}

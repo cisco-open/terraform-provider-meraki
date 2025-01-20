@@ -1,10 +1,26 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -89,9 +105,10 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Schema(_ context.Context,
 								Attributes: map[string]schema.Attribute{
 
 									"type": schema.StringAttribute{
-										MarkdownDescription: `The type of definition. Can be one of 'application', 'applicationCategory', 'host', 'port', 'ipRange' or 'localNet'.`,
-										Computed:            true,
-										Optional:            true,
+										MarkdownDescription: `The type of definition. Can be one of 'application', 'applicationCategory', 'host', 'port', 'ipRange' or 'localNet'.
+                                              Allowed values: [application,applicationCategory,host,ipRange,localNet,port]`,
+										Computed: true,
+										Optional: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
 										},
@@ -529,7 +546,7 @@ func (r *NetworksApplianceTrafficShapingRulesRs) toSdkApiRequestUpdate(ctx conte
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingRules{
 		DefaultRulesEnabled: defaultRulesEnabled,
 		Rules: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingRulesRules {
-			if len(requestApplianceUpdateNetworkApplianceTrafficShapingRulesRules) > 0 {
+			if len(requestApplianceUpdateNetworkApplianceTrafficShapingRulesRules) > 0 || r.Rules != nil {
 				return &requestApplianceUpdateNetworkApplianceTrafficShapingRulesRules
 			}
 			return nil
@@ -583,7 +600,7 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingRulesItemToBodyRs(state N
 								}
 								return &result
 							}
-							return &[]ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesDefinitionsRs{}
+							return nil
 						}(),
 						DscpTagValue: func() types.Int64 {
 							if rules.DscpTagValue != nil {
@@ -611,19 +628,19 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingRulesItemToBodyRs(state N
 												}(),
 											}
 										}
-										return &ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesPerClientBandwidthLimitsBandwidthLimitsRs{}
+										return nil
 									}(),
 									Settings: types.StringValue(rules.PerClientBandwidthLimits.Settings),
 								}
 							}
-							return &ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesPerClientBandwidthLimitsRs{}
+							return nil
 						}(),
 						Priority: types.StringValue(rules.Priority),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesRs{}
+			return nil
 		}(),
 	}
 	if is_read {

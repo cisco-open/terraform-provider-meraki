@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -140,6 +141,8 @@ func (d *DevicesLiveToolsArpTableDataSource) Read(ctx context.Context, req datas
 		vvSerial := devicesLiveToolsArpTable.Serial.ValueString()
 		vvArpTableID := devicesLiveToolsArpTable.ArpTableID.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Devices.GetDeviceLiveToolsArpTable(vvSerial, vvArpTableID)
 
 		if err != nil || response1 == nil {
@@ -212,7 +215,7 @@ func ResponseDevicesGetDeviceLiveToolsArpTableItemToBody(state DevicesLiveToolsA
 				}
 				return &result
 			}
-			return &[]ResponseDevicesGetDeviceLiveToolsArpTableEntries{}
+			return nil
 		}(),
 		Error: types.StringValue(response.Error),
 		Request: func() *ResponseDevicesGetDeviceLiveToolsArpTableRequest {
@@ -221,7 +224,7 @@ func ResponseDevicesGetDeviceLiveToolsArpTableItemToBody(state DevicesLiveToolsA
 					Serial: types.StringValue(response.Request.Serial),
 				}
 			}
-			return &ResponseDevicesGetDeviceLiveToolsArpTableRequest{}
+			return nil
 		}(),
 		Status: types.StringValue(response.Status),
 		URL:    types.StringValue(response.URL),

@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE ACTION
@@ -5,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -85,12 +101,12 @@ func (r *OrganizationsNetworksCombineResource) Schema(_ context.Context, _ resou
 								MarkdownDescription: `Organization ID`,
 								Computed:            true,
 							},
-							"product_types": schema.SetAttribute{
+							"product_types": schema.ListAttribute{
 								MarkdownDescription: `List of the product types that the network supports`,
 								Computed:            true,
 								ElementType:         types.StringType,
 							},
-							"tags": schema.SetAttribute{
+							"tags": schema.ListAttribute{
 								MarkdownDescription: `Network tags`,
 								Computed:            true,
 								ElementType:         types.StringType,
@@ -126,7 +142,7 @@ func (r *OrganizationsNetworksCombineResource) Schema(_ context.Context, _ resou
 							stringplanmodifier.RequiresReplace(),
 						},
 					},
-					"network_ids": schema.SetAttribute{
+					"network_ids": schema.ListAttribute{
 						MarkdownDescription: `A list of the network IDs that will be combined. If an ID of a combined network is included in this list, the other networks in the list will be grouped into that network`,
 						Optional:            true,
 						Computed:            true,
@@ -182,15 +198,15 @@ func (r *OrganizationsNetworksCombineResource) Create(ctx context.Context, req r
 }
 
 func (r *OrganizationsNetworksCombineResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *OrganizationsNetworksCombineResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *OrganizationsNetworksCombineResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -212,8 +228,8 @@ type ResponseOrganizationsCombineOrganizationNetworksResultingNetwork struct {
 	Name                    types.String `tfsdk:"name"`
 	Notes                   types.String `tfsdk:"notes"`
 	OrganizationID          types.String `tfsdk:"organization_id"`
-	ProductTypes            types.Set    `tfsdk:"product_types"`
-	Tags                    types.Set    `tfsdk:"tags"`
+	ProductTypes            types.List   `tfsdk:"product_types"`
+	Tags                    types.List   `tfsdk:"tags"`
 	TimeZone                types.String `tfsdk:"time_zone"`
 	URL                     types.String `tfsdk:"url"`
 }
@@ -221,7 +237,7 @@ type ResponseOrganizationsCombineOrganizationNetworksResultingNetwork struct {
 type RequestOrganizationsCombineOrganizationNetworksRs struct {
 	EnrollmentString types.String `tfsdk:"enrollment_string"`
 	Name             types.String `tfsdk:"name"`
-	NetworkIDs       types.Set    `tfsdk:"network_ids"`
+	NetworkIDs       types.List   `tfsdk:"network_ids"`
 }
 
 // FromBody
@@ -267,13 +283,13 @@ func ResponseOrganizationsCombineOrganizationNetworksItemToBody(state Organizati
 					Name:           types.StringValue(response.ResultingNetwork.Name),
 					Notes:          types.StringValue(response.ResultingNetwork.Notes),
 					OrganizationID: types.StringValue(response.ResultingNetwork.OrganizationID),
-					ProductTypes:   StringSliceToSet(response.ResultingNetwork.ProductTypes),
-					Tags:           StringSliceToSet(response.ResultingNetwork.Tags),
+					ProductTypes:   StringSliceToList(response.ResultingNetwork.ProductTypes),
+					Tags:           StringSliceToList(response.ResultingNetwork.Tags),
 					TimeZone:       types.StringValue(response.ResultingNetwork.TimeZone),
 					URL:            types.StringValue(response.ResultingNetwork.URL),
 				}
 			}
-			return &ResponseOrganizationsCombineOrganizationNetworksResultingNetwork{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

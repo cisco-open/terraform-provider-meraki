@@ -1,13 +1,14 @@
 module github.com/cisco-open/terraform-provider-meraki
 
-go 1.21.5
+go 1.22.7
+
 toolchain go1.22.9
 
 require (
 	github.com/hashicorp/terraform-plugin-docs v0.20.1
 	github.com/hashicorp/terraform-plugin-framework v1.11.0
 	github.com/hashicorp/terraform-plugin-framework-validators v0.12.0
-	github.com/meraki/dashboard-api-go/v3 v3.0.10
+	github.com/meraki/dashboard-api-go/v4 v4.0.0
 )
 
 require (

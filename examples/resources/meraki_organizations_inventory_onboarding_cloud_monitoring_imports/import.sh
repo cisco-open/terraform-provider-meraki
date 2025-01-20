@@ -1,1 +1,0 @@
-terraform import meraki_organizations_inventory_onboarding_cloud_monitoring_imports.example "organization_id"

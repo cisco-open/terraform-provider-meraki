@@ -5,7 +5,7 @@ resource "meraki_networks_cellular_gateway_connectivity_monitoring_destinations"
 
     default     = false
     description = "Google"
-    ip          = "8.8.8.8"
+    ip          = "1.2.3.4"
   }]
   network_id = "string"
 }

@@ -14,7 +14,7 @@ provider "meraki" {
 
 resource "meraki_networks_appliance_content_filtering" "example" {
 
-  allowed_url_patterns   = ["http://www.example.org", "http://help.com.au"]
+  allowed_url_patterns   = ["http://www.example2.org", "http://help.com.au"]
   blocked_url_categories = []
   blocked_url_patterns   = ["http://www.example.com", "http://www.betting.com"]
   network_id             = "L_828099381482771185"

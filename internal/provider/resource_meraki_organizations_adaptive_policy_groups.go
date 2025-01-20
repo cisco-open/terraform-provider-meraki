@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -50,10 +66,11 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Schema(_ context.Context, _ 
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"created_at": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `Created at timestamp for the adaptive policy group`,
+				Computed:            true,
 			},
 			"description": schema.StringAttribute{
-				MarkdownDescription: `Description of the group (default: "")`,
+				MarkdownDescription: `The description for the adaptive policy group`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -61,10 +78,7 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Schema(_ context.Context, _ 
 				},
 			},
 			"group_id": schema.StringAttribute{
-				Computed: true,
-			},
-			"id": schema.StringAttribute{
-				MarkdownDescription: `id path parameter.`,
+				MarkdownDescription: `The ID of the adaptive policy group`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -72,10 +86,11 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Schema(_ context.Context, _ 
 				},
 			},
 			"is_default_group": schema.BoolAttribute{
-				Computed: true,
+				MarkdownDescription: `Whether the adaptive policy group is the default group`,
+				Computed:            true,
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: `Name of the group`,
+				MarkdownDescription: `The name of the adaptive policy group`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -90,7 +105,7 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Schema(_ context.Context, _ 
 				},
 			},
 			"policy_objects": schema.SetNestedAttribute{
-				MarkdownDescription: `The policy objects that belong to this group; traffic from addresses specified by these policy objects will be tagged with this group's SGT value if no other tagging scheme is being used (each requires one unique attribute) ()`,
+				MarkdownDescription: `The policy objects for the adaptive policy group`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
@@ -119,12 +134,13 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Schema(_ context.Context, _ 
 				},
 			},
 			"required_ip_mappings": schema.SetAttribute{
-				Computed:    true,
-				ElementType: types.StringType,
-				Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
+				MarkdownDescription: `List of required IP mappings for the adaptive policy group`,
+				Computed:            true,
+				ElementType:         types.StringType,
+				Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
 			},
 			"sgt": schema.Int64Attribute{
-				MarkdownDescription: `SGT value of the group`,
+				MarkdownDescription: `The security group tag for the adaptive policy group`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
@@ -132,7 +148,8 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Schema(_ context.Context, _ 
 				},
 			},
 			"updated_at": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `Updated at timestamp for the adaptive policy group`,
+				Computed:            true,
 			},
 		},
 	}
@@ -199,9 +216,9 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Create(ctx context.Context, 
 		}
 	}
 	dataRequest := data.toSdkApiRequestCreate(ctx)
-	restyResp2, err := r.client.Organizations.CreateOrganizationAdaptivePolicyGroup(vvOrganizationID, dataRequest)
+	response, restyResp2, err := r.client.Organizations.CreateOrganizationAdaptivePolicyGroup(vvOrganizationID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationAdaptivePolicyGroup",
@@ -241,7 +258,7 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Create(ctx context.Context, 
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter ID",
-				err.Error(),
+				"Error",
 			)
 			return
 		}
@@ -357,8 +374,8 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Update(ctx context.Context, 
 	// organization_id
 	vvID := data.GroupID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Organizations.UpdateOrganizationAdaptivePolicyGroup(vvOrganizationID, vvID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Organizations.UpdateOrganizationAdaptivePolicyGroup(vvOrganizationID, vvID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationAdaptivePolicyGroup",
@@ -541,7 +558,7 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyGroupItemToBodyRs(state O
 				}
 				return &result
 			}
-			return &[]ResponseOrganizationsGetOrganizationAdaptivePolicyGroupPolicyObjectsRs{}
+			return nil
 		}(),
 		RequiredIPMappings: StringSliceToSet(response.RequiredIPMappings),
 		Sgt: func() types.Int64 {

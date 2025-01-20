@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -114,8 +131,16 @@ func (d *NetworksClientsDataSource) Schema(_ context.Context, _ datasource.Schem
 						MarkdownDescription: `Manufacturer of the client`,
 						Computed:            true,
 					},
+					"notes": schema.StringAttribute{
+						MarkdownDescription: `The notes associated with the client`,
+						Computed:            true,
+					},
 					"os": schema.StringAttribute{
 						MarkdownDescription: `The operating system of the client`,
+						Computed:            true,
+					},
+					"recent_device_connection": schema.StringAttribute{
+						MarkdownDescription: `Client's most recent connection type`,
 						Computed:            true,
 					},
 					"recent_device_mac": schema.StringAttribute{
@@ -169,6 +194,8 @@ func (d *NetworksClientsDataSource) Read(ctx context.Context, req datasource.Rea
 		vvNetworkID := networksClients.NetworkID.ValueString()
 		vvClientID := networksClients.ClientID.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Networks.GetNetworkClient(vvNetworkID, vvClientID)
 
 		if err != nil || response1 == nil {
@@ -200,26 +227,28 @@ type NetworksClients struct {
 }
 
 type ResponseNetworksGetNetworkClient struct {
-	Cdp                  *[][]string                                             `tfsdk:"cdp"`
-	ClientVpnConnections *[]ResponseNetworksGetNetworkClientClientVpnConnections `tfsdk:"client_vpn_connections"`
-	Description          types.String                                            `tfsdk:"description"`
-	FirstSeen            types.Int64                                             `tfsdk:"first_seen"`
-	ID                   types.String                                            `tfsdk:"id"`
-	IP                   types.String                                            `tfsdk:"ip"`
-	IP6                  types.String                                            `tfsdk:"ip6"`
-	LastSeen             types.Int64                                             `tfsdk:"last_seen"`
-	Lldp                 *[][]string                                             `tfsdk:"lldp"`
-	Mac                  types.String                                            `tfsdk:"mac"`
-	Manufacturer         types.String                                            `tfsdk:"manufacturer"`
-	Os                   types.String                                            `tfsdk:"os"`
-	RecentDeviceMac      types.String                                            `tfsdk:"recent_device_mac"`
-	SmInstalled          types.Bool                                              `tfsdk:"sm_installed"`
-	SSID                 types.String                                            `tfsdk:"ssid"`
-	Status               types.String                                            `tfsdk:"status"`
-	Switchport           types.String                                            `tfsdk:"switchport"`
-	User                 types.String                                            `tfsdk:"user"`
-	VLAN                 types.String                                            `tfsdk:"vlan"`
-	WirelessCapabilities types.String                                            `tfsdk:"wireless_capabilities"`
+	Cdp                    *[][]string                                             `tfsdk:"cdp"`
+	ClientVpnConnections   *[]ResponseNetworksGetNetworkClientClientVpnConnections `tfsdk:"client_vpn_connections"`
+	Description            types.String                                            `tfsdk:"description"`
+	FirstSeen              types.Int64                                             `tfsdk:"first_seen"`
+	ID                     types.String                                            `tfsdk:"id"`
+	IP                     types.String                                            `tfsdk:"ip"`
+	IP6                    types.String                                            `tfsdk:"ip6"`
+	LastSeen               types.Int64                                             `tfsdk:"last_seen"`
+	Lldp                   *[][]string                                             `tfsdk:"lldp"`
+	Mac                    types.String                                            `tfsdk:"mac"`
+	Manufacturer           types.String                                            `tfsdk:"manufacturer"`
+	Notes                  types.String                                            `tfsdk:"notes"`
+	Os                     types.String                                            `tfsdk:"os"`
+	RecentDeviceConnection types.String                                            `tfsdk:"recent_device_connection"`
+	RecentDeviceMac        types.String                                            `tfsdk:"recent_device_mac"`
+	SmInstalled            types.Bool                                              `tfsdk:"sm_installed"`
+	SSID                   types.String                                            `tfsdk:"ssid"`
+	Status                 types.String                                            `tfsdk:"status"`
+	Switchport             types.String                                            `tfsdk:"switchport"`
+	User                   types.String                                            `tfsdk:"user"`
+	VLAN                   types.String                                            `tfsdk:"vlan"`
+	WirelessCapabilities   types.String                                            `tfsdk:"wireless_capabilities"`
 }
 
 type ResponseNetworksGetNetworkClientClientVpnConnections struct {
@@ -254,7 +283,7 @@ func ResponseNetworksGetNetworkClientItemToBody(state NetworksClients, response 
 				}
 				return &result
 			}
-			return &[]ResponseNetworksGetNetworkClientClientVpnConnections{}
+			return nil
 		}(),
 		Description: types.StringValue(response.Description),
 		FirstSeen: func() types.Int64 {
@@ -273,10 +302,12 @@ func ResponseNetworksGetNetworkClientItemToBody(state NetworksClients, response 
 			return types.Int64{}
 		}(),
 		//TODO [][]
-		Mac:             types.StringValue(response.Mac),
-		Manufacturer:    types.StringValue(response.Manufacturer),
-		Os:              types.StringValue(response.Os),
-		RecentDeviceMac: types.StringValue(response.RecentDeviceMac),
+		Mac:                    types.StringValue(response.Mac),
+		Manufacturer:           types.StringValue(response.Manufacturer),
+		Notes:                  types.StringValue(response.Notes),
+		Os:                     types.StringValue(response.Os),
+		RecentDeviceConnection: types.StringValue(response.RecentDeviceConnection),
+		RecentDeviceMac:        types.StringValue(response.RecentDeviceMac),
 		SmInstalled: func() types.Bool {
 			if response.SmInstalled != nil {
 				return types.BoolValue(*response.SmInstalled)

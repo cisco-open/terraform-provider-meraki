@@ -17,7 +17,7 @@ resource "meraki_networks_sensor_alerts_profiles" "this" {
   conditions = [
     {
       metric   = "temperature"
-      duration = 60
+      duration = 120
       threshold = {
         temperature = {
           quality = "good"

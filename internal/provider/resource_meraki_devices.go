@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -7,7 +23,7 @@ import (
 	"net/url"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -52,7 +68,7 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"address": schema.StringAttribute{
-				MarkdownDescription: `Physical address of the device`,
+				MarkdownDescription: `The address of a device`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -97,7 +113,7 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Computed:            true,
 			},
 			"lat": schema.Float64Attribute{
-				MarkdownDescription: `Latitude of the device`,
+				MarkdownDescription: `The latitude of a device`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Float64{
@@ -105,7 +121,7 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				},
 			},
 			"lng": schema.Float64Attribute{
-				MarkdownDescription: `Longitude of the device`,
+				MarkdownDescription: `The longitude of a device`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Float64{
@@ -129,7 +145,7 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: `Name of the device`,
+				MarkdownDescription: `The name of a device`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -141,7 +157,7 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Computed:            true,
 			},
 			"notes": schema.StringAttribute{
-				MarkdownDescription: `Notes for the device, limited to 255 characters`,
+				MarkdownDescription: `The notes for the device. String. Limited to 255 characters.`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -157,7 +173,7 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Computed:            true,
 			},
 			"serial": schema.StringAttribute{
-				MarkdownDescription: `Serial number of the device`,
+				MarkdownDescription: `serial path parameter.`,
 				Required:            true,
 			},
 			"switch_profile_id": schema.StringAttribute{
@@ -169,7 +185,7 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				},
 			},
 			"tags": schema.SetAttribute{
-				MarkdownDescription: `List of tags assigned to the device`,
+				MarkdownDescription: `The list of tags of a device`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
@@ -181,8 +197,6 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 		},
 	}
 }
-
-//path params to set ['serial']
 
 func (r *DevicesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
@@ -224,7 +238,7 @@ func (r *DevicesResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Devices.UpdateDevice(vvSerial, dataRequest)
+	_, restyResp2, err := r.client.Devices.UpdateDevice(vvSerial, dataRequest)
 
 	if err != nil || restyResp2 == nil {
 		if restyResp1 != nil {
@@ -258,7 +272,7 @@ func (r *DevicesResource) Create(ctx context.Context, req resource.CreateRequest
 		)
 		return
 	}
-	data = ResponseDevicesGetDeviceItemToBodyRs(data, responseGet, false)
+	data = ResponseDevicesGetOrganizationDevicesItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -310,7 +324,7 @@ func (r *DevicesResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 	//entro aqui 2
-	data = ResponseDevicesGetDeviceItemToBodyRs(data, responseGet, true)
+	data = ResponseDevicesGetOrganizationDevicesItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
 	resp.Diagnostics.Append(diags...)
@@ -332,7 +346,7 @@ func (r *DevicesResource) Update(ctx context.Context, req resource.UpdateRequest
 	//Path Params
 	vvSerial := data.Serial.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Devices.UpdateDevice(vvSerial, dataRequest)
+	_, restyResp2, err := r.client.Devices.UpdateDevice(vvSerial, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
@@ -453,7 +467,7 @@ func (r *DevicesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.Requ
 }
 
 // From gosdk to TF Structs Schema
-func ResponseDevicesGetDeviceItemToBodyRs(state DevicesRs, response *merakigosdk.ResponseDevicesGetDevice, is_read bool) DevicesRs {
+func ResponseDevicesGetOrganizationDevicesItemToBodyRs(state DevicesRs, response *merakigosdk.ResponseDevicesGetDevice, is_read bool) DevicesRs {
 	itemState := DevicesRs{
 		Address: types.StringValue(response.Address),
 		Details: func() *[]ResponseDevicesGetDeviceDetailsRs {
@@ -467,10 +481,9 @@ func ResponseDevicesGetDeviceItemToBodyRs(state DevicesRs, response *merakigosdk
 				}
 				return &result
 			}
-			return &[]ResponseDevicesGetDeviceDetailsRs{}
+			return nil
 		}(),
 		Firmware: types.StringValue(response.Firmware),
-		Imei:     types.StringValue(response.Imei),
 		LanIP:    types.StringValue(response.LanIP),
 		Lat: func() types.Float64 {
 			if response.Lat != nil {
@@ -484,14 +497,13 @@ func ResponseDevicesGetDeviceItemToBodyRs(state DevicesRs, response *merakigosdk
 			}
 			return types.Float64{}
 		}(),
-		Mac:         types.StringValue(response.Mac),
-		Model:       types.StringValue(response.Model),
-		Name:        types.StringValue(response.Name),
-		NetworkID:   types.StringValue(response.NetworkID),
-		Notes:       types.StringValue(response.Notes),
-		ProductType: types.StringValue(response.ProductType),
-		Serial:      types.StringValue(response.Serial),
-		Tags:        StringSliceToSet(response.Tags),
+		Mac:       types.StringValue(response.Mac),
+		Model:     types.StringValue(response.Model),
+		Name:      types.StringValue(response.Name),
+		NetworkID: types.StringValue(response.NetworkID),
+		Notes:     types.StringValue(response.Notes),
+		Serial:    types.StringValue(response.Serial),
+		Tags:      StringSliceToSet(response.Tags),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(DevicesRs)

@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -83,9 +83,10 @@ func (r *OrganizationsSmAdminsRolesResource) Schema(_ context.Context, _ resourc
 				},
 			},
 			"scope": schema.StringAttribute{
-				MarkdownDescription: `The scope of the limited access role`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The scope of the limited access role
+                                  Allowed values: [all_tags,some,without_all_tags,without_some]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},

@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -235,6 +236,8 @@ func (d *OrganizationsDevicesAvailabilitiesChangeHistoryDataSource) Read(ctx con
 		queryParams1.NetworkIDs = elementsToStrings(ctx, organizationsDevicesAvailabilitiesChangeHistory.NetworkIDs)
 		queryParams1.Statuses = elementsToStrings(ctx, organizationsDevicesAvailabilitiesChangeHistory.Statuses)
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Organizations.GetOrganizationDevicesAvailabilitiesChangeHistory(vvOrganizationID, &queryParams1)
 
 		if err != nil || response1 == nil {
@@ -329,7 +332,7 @@ func ResponseOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryItems
 								}
 								return &result
 							}
-							return &[]ResponseItemOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryDetailsNew{}
+							return nil
 						}(),
 						Old: func() *[]ResponseItemOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryDetailsOld {
 							if item.Details.Old != nil {
@@ -342,11 +345,11 @@ func ResponseOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryItems
 								}
 								return &result
 							}
-							return &[]ResponseItemOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryDetailsOld{}
+							return nil
 						}(),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryDetails{}
+				return nil
 			}(),
 			Device: func() *ResponseItemOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryDevice {
 				if item.Device != nil {
@@ -357,7 +360,7 @@ func ResponseOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryItems
 						Serial:      types.StringValue(item.Device.Serial),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryDevice{}
+				return nil
 			}(),
 			Network: func() *ResponseItemOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryNetwork {
 				if item.Network != nil {
@@ -368,7 +371,7 @@ func ResponseOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryItems
 						URL:  types.StringValue(item.Network.URL),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryNetwork{}
+				return nil
 			}(),
 			Ts: types.StringValue(item.Ts),
 		}

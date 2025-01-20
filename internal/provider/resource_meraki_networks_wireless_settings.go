@@ -1,10 +1,26 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -143,9 +159,10 @@ func (r *NetworksWirelessSettingsResource) Schema(_ context.Context, _ resource.
 				},
 			},
 			"upgradestrategy": schema.StringAttribute{
-				MarkdownDescription: `The upgrade strategy to apply to the network. Must be one of 'minimizeUpgradeTime' or 'minimizeClientDowntime'. Requires firmware version MR 26.8 or higher'`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The default strategy that network devices will use to perform an upgrade. Requires firmware version MR 26.8 or higher.
+                                  Allowed values: [minimizeClientDowntime,minimizeUpgradeTime]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -475,11 +492,11 @@ func ResponseWirelessGetNetworkWirelessSettingsItemToBodyRs(state NetworksWirele
 								}(),
 							}
 						}
-						return &ResponseWirelessGetNetworkWirelessSettingsNamedVlansPoolDhcpMonitoringRs{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSettingsNamedVlansRs{}
+			return nil
 		}(),
 		RegulatoryDomain: func() *ResponseWirelessGetNetworkWirelessSettingsRegulatoryDomainRs {
 			if response.RegulatoryDomain != nil {
@@ -494,7 +511,7 @@ func ResponseWirelessGetNetworkWirelessSettingsItemToBodyRs(state NetworksWirele
 					}(),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSettingsRegulatoryDomainRs{}
+			return nil
 		}(),
 		Upgradestrategy: types.StringValue(response.Upgradestrategy),
 	}

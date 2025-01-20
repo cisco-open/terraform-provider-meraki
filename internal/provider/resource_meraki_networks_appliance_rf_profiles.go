@@ -19,10 +19,13 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"fmt"
+	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
@@ -127,9 +130,10 @@ func (r *NetworksApplianceRfProfilesResource) Schema(_ context.Context, _ resour
 						Attributes: map[string]schema.Attribute{
 
 							"band_operation_mode": schema.StringAttribute{
-								MarkdownDescription: `Band mode of this SSID`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `Band mode of this SSID
+                                              Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -163,9 +167,10 @@ func (r *NetworksApplianceRfProfilesResource) Schema(_ context.Context, _ resour
 						Attributes: map[string]schema.Attribute{
 
 							"band_operation_mode": schema.StringAttribute{
-								MarkdownDescription: `Band mode of this SSID`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `Band mode of this SSID
+                                              Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -199,9 +204,10 @@ func (r *NetworksApplianceRfProfilesResource) Schema(_ context.Context, _ resour
 						Attributes: map[string]schema.Attribute{
 
 							"band_operation_mode": schema.StringAttribute{
-								MarkdownDescription: `Band mode of this SSID`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `Band mode of this SSID
+                                              Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -235,9 +241,10 @@ func (r *NetworksApplianceRfProfilesResource) Schema(_ context.Context, _ resour
 						Attributes: map[string]schema.Attribute{
 
 							"band_operation_mode": schema.StringAttribute{
-								MarkdownDescription: `Band mode of this SSID`,
-								Computed:            true,
-								Optional:            true,
+								MarkdownDescription: `Band mode of this SSID
+                                              Allowed values: [2.4ghz,5ghz,6ghz,dual,multi]`,
+								Computed: true,
+								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -473,6 +480,20 @@ func (r *NetworksApplianceRfProfilesResource) Read(ctx context.Context, req reso
 	//update path params assigned
 	resp.Diagnostics.Append(diags...)
 }
+func (r *NetworksApplianceRfProfilesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	idParts := strings.Split(req.ID, ",")
+
+	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
+		resp.Diagnostics.AddError(
+			"Unexpected Import Identifier",
+			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+		)
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), idParts[1])...)
+}
 
 func (r *NetworksApplianceRfProfilesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data NetworksApplianceRfProfilesRs
@@ -555,10 +576,10 @@ type ResponseApplianceGetNetworkApplianceRfProfileFiveGhzSettingsRs struct {
 }
 
 type ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettingsRs struct {
-	Status1 *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings1Rs `tfsdk:"1"`
-	Status2 *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings2Rs `tfsdk:"2"`
-	Status3 *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings3Rs `tfsdk:"3"`
-	Status4 *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings4Rs `tfsdk:"4"`
+	Status1 *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings1Rs `tfsdk:"status_1"`
+	Status2 *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings2Rs `tfsdk:"status_2"`
+	Status3 *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings3Rs `tfsdk:"status_3"`
+	Status4 *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings4Rs `tfsdk:"status_4"`
 }
 
 type ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings1Rs struct {
@@ -687,7 +708,12 @@ func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestCreate(ctx context.Contex
 			}
 			return nil
 		}()
-		minBitrate := r.TwoFourGhzSettings.MinBitrate.ValueFloat64Pointer()
+		minBitrate := func() *float64 {
+			if !r.TwoFourGhzSettings.MinBitrate.IsUnknown() && !r.TwoFourGhzSettings.MinBitrate.IsNull() {
+				return r.TwoFourGhzSettings.MinBitrate.ValueFloat64Pointer()
+			}
+			return nil
+		}()
 		requestApplianceCreateNetworkApplianceRfProfileTwoFourGhzSettings = &merakigosdk.RequestApplianceCreateNetworkApplianceRfProfileTwoFourGhzSettings{
 			AxEnabled:  axEnabled,
 			MinBitrate: minBitrate,
@@ -801,7 +827,12 @@ func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestUpdate(ctx context.Contex
 			}
 			return nil
 		}()
-		minBitrate := r.TwoFourGhzSettings.MinBitrate.ValueFloat64Pointer()
+		minBitrate := func() *float64 {
+			if !r.TwoFourGhzSettings.MinBitrate.IsUnknown() && !r.TwoFourGhzSettings.MinBitrate.IsNull() {
+				return r.TwoFourGhzSettings.MinBitrate.ValueFloat64Pointer()
+			}
+			return nil
+		}()
 		requestApplianceUpdateNetworkApplianceRfProfileTwoFourGhzSettings = &merakigosdk.RequestApplianceUpdateNetworkApplianceRfProfileTwoFourGhzSettings{
 			AxEnabled:  axEnabled,
 			MinBitrate: minBitrate,
@@ -836,7 +867,7 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBodyRs(state NetworksApp
 					}(),
 				}
 			}
-			return &ResponseApplianceGetNetworkApplianceRfProfileFiveGhzSettingsRs{}
+			return nil
 		}(),
 		ID:        types.StringValue(response.ID),
 		Name:      types.StringValue(response.Name),
@@ -856,7 +887,7 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBodyRs(state NetworksApp
 								}(),
 							}
 						}
-						return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings1Rs{}
+						return nil
 					}(),
 					Status2: func() *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings2Rs {
 						if response.PerSSIDSettings.Status2 != nil {
@@ -870,7 +901,7 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBodyRs(state NetworksApp
 								}(),
 							}
 						}
-						return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings2Rs{}
+						return nil
 					}(),
 					Status3: func() *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings3Rs {
 						if response.PerSSIDSettings.Status3 != nil {
@@ -884,7 +915,7 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBodyRs(state NetworksApp
 								}(),
 							}
 						}
-						return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings3Rs{}
+						return nil
 					}(),
 					Status4: func() *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings4Rs {
 						if response.PerSSIDSettings.Status4 != nil {
@@ -898,11 +929,11 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBodyRs(state NetworksApp
 								}(),
 							}
 						}
-						return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings4Rs{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettingsRs{}
+			return nil
 		}(),
 		TwoFourGhzSettings: func() *ResponseApplianceGetNetworkApplianceRfProfileTwoFourGhzSettingsRs {
 			if response.TwoFourGhzSettings != nil {
@@ -921,7 +952,7 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBodyRs(state NetworksApp
 					}(),
 				}
 			}
-			return &ResponseApplianceGetNetworkApplianceRfProfileTwoFourGhzSettingsRs{}
+			return nil
 		}(),
 	}
 	if is_read {

@@ -1,7 +1,7 @@
 
 resource "meraki_networks_wireless_ssids_identity_psks" "example" {
 
-  expires_at      = "2018-02-11T00:00:00.090209Z"
+  expires_at      = "2018-02-11T00:00:00.090210Z"
   group_policy_id = "101"
   name            = "Sample Identity PSK"
   network_id      = "string"

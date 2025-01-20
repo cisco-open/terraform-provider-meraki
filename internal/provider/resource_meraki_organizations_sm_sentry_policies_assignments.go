@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -117,8 +117,9 @@ func (r *OrganizationsSmSentryPoliciesAssignmentsResource) Schema(_ context.Cont
 												Computed:            true,
 											},
 											"scope": schema.StringAttribute{
-												MarkdownDescription: `The scope of the Sentry Policy`,
-												Computed:            true,
+												MarkdownDescription: `The scope of the Sentry Policy
+                                                      Allowed values: [all,none,withAll,withAny,withoutAll,withoutAny]`,
+												Computed: true,
 											},
 											"sm_network_id": schema.StringAttribute{
 												MarkdownDescription: `The Id of the Systems Manager Network the Sentry Policy is assigned to`,
@@ -179,9 +180,10 @@ func (r *OrganizationsSmSentryPoliciesAssignmentsResource) Schema(_ context.Cont
 												},
 											},
 											"scope": schema.StringAttribute{
-												MarkdownDescription: `The scope of the Sentry Policy`,
-												Optional:            true,
-												Computed:            true,
+												MarkdownDescription: `The scope of the Sentry Policy
+                                                    Allowed values: [all,none,withAll,withAny,withoutAll,withoutAny]`,
+												Optional: true,
+												Computed: true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.RequiresReplace(),
 												},
@@ -194,7 +196,7 @@ func (r *OrganizationsSmSentryPoliciesAssignmentsResource) Schema(_ context.Cont
 													stringplanmodifier.RequiresReplace(),
 												},
 											},
-											"tags": schema.SetAttribute{
+											"tags": schema.ListAttribute{
 												MarkdownDescription: `The tags for the Sentry Policy`,
 												Optional:            true,
 												Computed:            true,
@@ -256,15 +258,15 @@ func (r *OrganizationsSmSentryPoliciesAssignmentsResource) Create(ctx context.Co
 }
 
 func (r *OrganizationsSmSentryPoliciesAssignmentsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *OrganizationsSmSentryPoliciesAssignmentsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *OrganizationsSmSentryPoliciesAssignmentsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -294,7 +296,7 @@ type ResponseSmUpdateOrganizationSmSentryPoliciesAssignmentsItemsPolicies struct
 	Priority      types.String `tfsdk:"priority"`
 	Scope         types.String `tfsdk:"scope"`
 	SmNetworkID   types.String `tfsdk:"sm_network_id"`
-	Tags          types.Set    `tfsdk:"tags"`
+	Tags          types.List   `tfsdk:"tags"`
 }
 
 type RequestSmUpdateOrganizationSmSentryPoliciesAssignmentsRs struct {
@@ -311,7 +313,7 @@ type RequestSmUpdateOrganizationSmSentryPoliciesAssignmentsItemsPoliciesRs struc
 	PolicyID      types.String `tfsdk:"policy_id"`
 	Scope         types.String `tfsdk:"scope"`
 	SmNetworkID   types.String `tfsdk:"sm_network_id"`
-	Tags          types.Set    `tfsdk:"tags"`
+	Tags          types.List   `tfsdk:"tags"`
 }
 
 // FromBody
@@ -385,18 +387,18 @@ func ResponseSmUpdateOrganizationSmSentryPoliciesAssignmentsItemToBody(state Org
 										Priority:      types.StringValue(policies.Priority),
 										Scope:         types.StringValue(policies.Scope),
 										SmNetworkID:   types.StringValue(policies.SmNetworkID),
-										Tags:          StringSliceToSet(policies.Tags),
+										Tags:          StringSliceToList(policies.Tags),
 									}
 								}
 								return &result
 							}
-							return &[]ResponseSmUpdateOrganizationSmSentryPoliciesAssignmentsItemsPolicies{}
+							return nil
 						}(),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseSmUpdateOrganizationSmSentryPoliciesAssignmentsItems{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

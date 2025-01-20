@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -109,9 +125,10 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ res
 					Attributes: map[string]schema.Attribute{
 
 						"format": schema.StringAttribute{
-							MarkdownDescription: `The format for the realm ('1' or '0')`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `The format for the realm ('1' or '0')
+                                        Allowed values: [0,1]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -185,9 +202,10 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ res
 				},
 			},
 			"network_access_type": schema.StringAttribute{
-				MarkdownDescription: `The network type of this SSID ('Private network', 'Private network with guest access', 'Chargeable public network', 'Free public network', 'Personal device network', 'Emergency services only network', 'Test or experimental', 'Wildcard')`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `The network type of this SSID ('Private network', 'Private network with guest access', 'Chargeable public network', 'Free public network', 'Personal device network', 'Emergency services only network', 'Test or experimental', 'Wildcard')
+                                  Allowed values: [Chargeable public network,Emergency services only network,Free public network,Personal device network,Private network,Private network with guest access,Test or experimental,Wildcard]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -259,9 +277,10 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ res
 						},
 					},
 					"type": schema.StringAttribute{
-						MarkdownDescription: `Venue type ('Unspecified', 'Unspecified Assembly', 'Arena', 'Stadium', 'Passenger Terminal', 'Amphitheater', 'Amusement Park', 'Place of Worship', 'Convention Center', 'Library', 'Museum', 'Restaurant', 'Theater', 'Bar', 'Coffee Shop', 'Zoo or Aquarium', 'Emergency Coordination Center', 'Unspecified Business', 'Doctor or Dentist office', 'Bank', 'Fire Station', 'Police Station', 'Post Office', 'Professional Office', 'Research and Development Facility', 'Attorney Office', 'Unspecified Educational', 'School, Primary', 'School, Secondary', 'University or College', 'Unspecified Factory and Industrial', 'Factory', 'Unspecified Institutional', 'Hospital', 'Long-Term Care Facility', 'Alcohol and Drug Rehabilitation Center', 'Group Home', 'Prison or Jail', 'Unspecified Mercantile', 'Retail Store', 'Grocery Market', 'Automotive Service Station', 'Shopping Mall', 'Gas Station', 'Unspecified Residential', 'Private Residence', 'Hotel or Motel', 'Dormitory', 'Boarding House', 'Unspecified Storage', 'Unspecified Utility and Miscellaneous', 'Unspecified Vehicular', 'Automobile or Truck', 'Airplane', 'Bus', 'Ferry', 'Ship or Boat', 'Train', 'Motor Bike', 'Unspecified Outdoor', 'Muni-mesh Network', 'City Park', 'Rest Area', 'Traffic Control', 'Bus Stop', 'Kiosk')`,
-						Computed:            true,
-						Optional:            true,
+						MarkdownDescription: `Venue type ('Unspecified', 'Unspecified Assembly', 'Arena', 'Stadium', 'Passenger Terminal', 'Amphitheater', 'Amusement Park', 'Place of Worship', 'Convention Center', 'Library', 'Museum', 'Restaurant', 'Theater', 'Bar', 'Coffee Shop', 'Zoo or Aquarium', 'Emergency Coordination Center', 'Unspecified Business', 'Doctor or Dentist office', 'Bank', 'Fire Station', 'Police Station', 'Post Office', 'Professional Office', 'Research and Development Facility', 'Attorney Office', 'Unspecified Educational', 'School, Primary', 'School, Secondary', 'University or College', 'Unspecified Factory and Industrial', 'Factory', 'Unspecified Institutional', 'Hospital', 'Long-Term Care Facility', 'Alcohol and Drug Rehabilitation Center', 'Group Home', 'Prison or Jail', 'Unspecified Mercantile', 'Retail Store', 'Grocery Market', 'Automotive Service Station', 'Shopping Mall', 'Gas Station', 'Unspecified Residential', 'Private Residence', 'Hotel or Motel', 'Dormitory', 'Boarding House', 'Unspecified Storage', 'Unspecified Utility and Miscellaneous', 'Unspecified Vehicular', 'Automobile or Truck', 'Airplane', 'Bus', 'Ferry', 'Ship or Boat', 'Train', 'Motor Bike', 'Unspecified Outdoor', 'Muni-mesh Network', 'City Park', 'Rest Area', 'Traffic Control', 'Bus Stop', 'Kiosk')
+                                        Allowed values: [Airplane,Alcohol and Drug Rehabilitation Center,Amphitheater,Amusement Park,Arena,Attorney Office,Automobile or Truck,Automotive Service Station,Bank,Bar,Boarding House,Bus,Bus Stop,City Park,Coffee Shop,Convention Center,Doctor or Dentist office,Dormitory,Emergency Coordination Center,Factory,Ferry,Fire Station,Gas Station,Grocery Market,Group Home,Hospital,Hotel or Motel,Kiosk,Library,Long-Term Care Facility,Motor Bike,Muni-mesh Network,Museum,Passenger Terminal,Place of Worship,Police Station,Post Office,Prison or Jail,Private Residence,Professional Office,Research and Development Facility,Rest Area,Restaurant,Retail Store,School, Primary,School, Secondary,Ship or Boat,Shopping Mall,Stadium,Theater,Traffic Control,Train,University or College,Unspecified,Unspecified Assembly,Unspecified Business,Unspecified Educational,Unspecified Factory and Industrial,Unspecified Institutional,Unspecified Mercantile,Unspecified Outdoor,Unspecified Residential,Unspecified Storage,Unspecified Utility and Miscellaneous,Unspecified Vehicular,Zoo or Aquarium]`,
+						Computed: true,
+						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
@@ -341,6 +360,7 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ res
 		},
 	}
 }
+
 func (r *NetworksWirelessSSIDsHotspot20Resource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
 	var data NetworksWirelessSSIDsHotspot20Rs
@@ -695,7 +715,7 @@ func ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBodyRs(state NetworksW
 				}
 				return &result
 			}
-			return &[]ResponseWirelessGetNetworkWirelessSsidHotspot20MccMncsRs{}
+			return nil
 		}(),
 		NaiRealms: func() *[]ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealmsRs {
 			if response.NaiRealms != nil {
@@ -717,21 +737,21 @@ func ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBodyRs(state NetworksW
 													TunneledEapMethodCredentials: StringSliceToSet(methods.AuthenticationTypes.TunneledEapMethodCredentials),
 												}
 											}
-											return &ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealmsMethodsAuthenticationTypesRs{}
+											return nil
 										}(),
 										ID: types.StringValue(methods.ID),
 									}
 								}
 								return &result
 							}
-							return &[]ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealmsMethodsRs{}
+							return nil
 						}(),
 						Name: types.StringValue(naiRealms.Name),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealmsRs{}
+			return nil
 		}(),
 		NetworkAccessType: types.StringValue(response.NetworkAccessType),
 		Operator: func() *ResponseWirelessGetNetworkWirelessSsidHotspot20OperatorRs {
@@ -740,7 +760,7 @@ func ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBodyRs(state NetworksW
 					Name: types.StringValue(response.Operator.Name),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSsidHotspot20OperatorRs{}
+			return nil
 		}(),
 		RoamConsortOis: StringSliceToSet(response.RoamConsortOis),
 		Venue: func() *ResponseWirelessGetNetworkWirelessSsidHotspot20VenueRs {
@@ -750,7 +770,7 @@ func ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBodyRs(state NetworksW
 					Type: types.StringValue(response.Venue.Type),
 				}
 			}
-			return &ResponseWirelessGetNetworkWirelessSsidHotspot20VenueRs{}
+			return nil
 		}(),
 	}
 	if is_read {

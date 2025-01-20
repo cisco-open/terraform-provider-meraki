@@ -1,1 +1,1 @@
-terraform import meraki_organizations_admins.example "organization_id,admin_id"
+terraform import meraki_organizations_admins.example "organization_id"

@@ -21,7 +21,7 @@ resource "meraki_networks_alerts_settings" "example" {
       all_admins = false
     }
     type    = "ampMalwareDetected"
-    enabled = true
+    enabled = false
   }]
   default_destinations = {
     all_admins = true

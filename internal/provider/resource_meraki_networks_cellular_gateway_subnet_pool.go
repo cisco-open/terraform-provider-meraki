@@ -1,10 +1,26 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -54,7 +70,8 @@ func (r *NetworksCellularGatewaySubnetPoolResource) Schema(_ context.Context, _ 
 				},
 			},
 			"deployment_mode": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `Deployment mode for the cellular gateways in the network. (Passthrough/Routed)`,
+				Computed:            true,
 			},
 			"mask": schema.Int64Attribute{
 				MarkdownDescription: `Mask used for the subnet of all MGs in  this network.`,
@@ -69,21 +86,26 @@ func (r *NetworksCellularGatewaySubnetPoolResource) Schema(_ context.Context, _ 
 				Required:            true,
 			},
 			"subnets": schema.SetNestedAttribute{
-				Computed: true,
+				MarkdownDescription: `List of subnets of all MGs in this network.`,
+				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"appliance_ip": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Appliance IP of the MG device.`,
+							Computed:            true,
 						},
 						"name": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Name of the MG.`,
+							Computed:            true,
 						},
 						"serial": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Serial Number of the MG.`,
+							Computed:            true,
 						},
 						"subnet": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Subnet of MG device.`,
+							Computed:            true,
 						},
 					},
 				},
@@ -130,9 +152,9 @@ func (r *NetworksCellularGatewaySubnetPoolResource) Create(ctx context.Context, 
 		return
 	}
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.CellularGateway.UpdateNetworkCellularGatewaySubnetPool(vvNetworkID, dataRequest)
+	response, restyResp2, err := r.client.CellularGateway.UpdateNetworkCellularGatewaySubnetPool(vvNetworkID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCellularGatewaySubnetPool",
@@ -238,8 +260,8 @@ func (r *NetworksCellularGatewaySubnetPoolResource) Update(ctx context.Context, 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.CellularGateway.UpdateNetworkCellularGatewaySubnetPool(vvNetworkID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.CellularGateway.UpdateNetworkCellularGatewaySubnetPool(vvNetworkID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCellularGatewaySubnetPool",
@@ -326,7 +348,7 @@ func ResponseCellularGatewayGetNetworkCellularGatewaySubnetPoolItemToBodyRs(stat
 				}
 				return &result
 			}
-			return &[]ResponseCellularGatewayGetNetworkCellularGatewaySubnetPoolSubnetsRs{}
+			return nil
 		}(),
 	}
 	if is_read {

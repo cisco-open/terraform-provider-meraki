@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -258,50 +275,6 @@ func (d *OrganizationsAPIRequestsOverviewDataSource) Schema(_ context.Context, _
 								MarkdownDescription: `HTTP 500 response code count.`,
 								Computed:            true,
 							},
-							"status_501": schema.Int64Attribute{
-								MarkdownDescription: `HTTP 501 response code count.`,
-								Computed:            true,
-							},
-							"status_502": schema.Int64Attribute{
-								MarkdownDescription: `HTTP 502 response code count.`,
-								Computed:            true,
-							},
-							"status_503": schema.Int64Attribute{
-								MarkdownDescription: `HTTP 503 response code count.`,
-								Computed:            true,
-							},
-							"status_504": schema.Int64Attribute{
-								MarkdownDescription: `HTTP 504 response code count.`,
-								Computed:            true,
-							},
-							"status_505": schema.Int64Attribute{
-								MarkdownDescription: `HTTP 505 response code count.`,
-								Computed:            true,
-							},
-							"status_506": schema.Int64Attribute{
-								MarkdownDescription: `HTTP 506 response code count.`,
-								Computed:            true,
-							},
-							"status_507": schema.Int64Attribute{
-								MarkdownDescription: `HTTP 507 response code count.`,
-								Computed:            true,
-							},
-							"status_508": schema.Int64Attribute{
-								MarkdownDescription: `HTTP 508 response code count.`,
-								Computed:            true,
-							},
-							"status_509": schema.Int64Attribute{
-								MarkdownDescription: `HTTP 509 response code count.`,
-								Computed:            true,
-							},
-							"status_510": schema.Int64Attribute{
-								MarkdownDescription: `HTTP 510 response code count.`,
-								Computed:            true,
-							},
-							"status_511": schema.Int64Attribute{
-								MarkdownDescription: `HTTP 511 response code count.`,
-								Computed:            true,
-							},
 						},
 					},
 				},
@@ -326,6 +299,8 @@ func (d *OrganizationsAPIRequestsOverviewDataSource) Read(ctx context.Context, r
 		queryParams1.T0 = organizationsAPIRequestsOverview.T0.ValueString()
 		queryParams1.T1 = organizationsAPIRequestsOverview.T1.ValueString()
 		queryParams1.Timespan = organizationsAPIRequestsOverview.Timespan.ValueFloat64()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Organizations.GetOrganizationAPIRequestsOverview(vvOrganizationID, &queryParams1)
 
@@ -412,17 +387,6 @@ type ResponseOrganizationsGetOrganizationApiRequestsOverviewResponseCodeCounts s
 	Status431 types.Int64 `tfsdk:"status_431"`
 	Status451 types.Int64 `tfsdk:"status_451"`
 	Status500 types.Int64 `tfsdk:"status_500"`
-	Status501 types.Int64 `tfsdk:"status_501"`
-	Status502 types.Int64 `tfsdk:"status_502"`
-	Status503 types.Int64 `tfsdk:"status_503"`
-	Status504 types.Int64 `tfsdk:"status_504"`
-	Status505 types.Int64 `tfsdk:"status_505"`
-	Status506 types.Int64 `tfsdk:"status_506"`
-	Status507 types.Int64 `tfsdk:"status_507"`
-	Status508 types.Int64 `tfsdk:"status_508"`
-	Status509 types.Int64 `tfsdk:"status_509"`
-	Status510 types.Int64 `tfsdk:"status_510"`
-	Status511 types.Int64 `tfsdk:"status_511"`
 }
 
 // ToBody
@@ -719,75 +683,9 @@ func ResponseOrganizationsGetOrganizationAPIRequestsOverviewItemToBody(state Org
 						}
 						return types.Int64{}
 					}(),
-					Status501: func() types.Int64 {
-						if response.ResponseCodeCounts.Status501 != nil {
-							return types.Int64Value(int64(*response.ResponseCodeCounts.Status501))
-						}
-						return types.Int64{}
-					}(),
-					Status502: func() types.Int64 {
-						if response.ResponseCodeCounts.Status502 != nil {
-							return types.Int64Value(int64(*response.ResponseCodeCounts.Status502))
-						}
-						return types.Int64{}
-					}(),
-					Status503: func() types.Int64 {
-						if response.ResponseCodeCounts.Status503 != nil {
-							return types.Int64Value(int64(*response.ResponseCodeCounts.Status503))
-						}
-						return types.Int64{}
-					}(),
-					Status504: func() types.Int64 {
-						if response.ResponseCodeCounts.Status504 != nil {
-							return types.Int64Value(int64(*response.ResponseCodeCounts.Status504))
-						}
-						return types.Int64{}
-					}(),
-					Status505: func() types.Int64 {
-						if response.ResponseCodeCounts.Status505 != nil {
-							return types.Int64Value(int64(*response.ResponseCodeCounts.Status505))
-						}
-						return types.Int64{}
-					}(),
-					Status506: func() types.Int64 {
-						if response.ResponseCodeCounts.Status506 != nil {
-							return types.Int64Value(int64(*response.ResponseCodeCounts.Status506))
-						}
-						return types.Int64{}
-					}(),
-					Status507: func() types.Int64 {
-						if response.ResponseCodeCounts.Status507 != nil {
-							return types.Int64Value(int64(*response.ResponseCodeCounts.Status507))
-						}
-						return types.Int64{}
-					}(),
-					Status508: func() types.Int64 {
-						if response.ResponseCodeCounts.Status508 != nil {
-							return types.Int64Value(int64(*response.ResponseCodeCounts.Status508))
-						}
-						return types.Int64{}
-					}(),
-					Status509: func() types.Int64 {
-						if response.ResponseCodeCounts.Status509 != nil {
-							return types.Int64Value(int64(*response.ResponseCodeCounts.Status509))
-						}
-						return types.Int64{}
-					}(),
-					Status510: func() types.Int64 {
-						if response.ResponseCodeCounts.Status510 != nil {
-							return types.Int64Value(int64(*response.ResponseCodeCounts.Status510))
-						}
-						return types.Int64{}
-					}(),
-					Status511: func() types.Int64 {
-						if response.ResponseCodeCounts.Status511 != nil {
-							return types.Int64Value(int64(*response.ResponseCodeCounts.Status511))
-						}
-						return types.Int64{}
-					}(),
 				}
 			}
-			return &ResponseOrganizationsGetOrganizationApiRequestsOverviewResponseCodeCounts{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

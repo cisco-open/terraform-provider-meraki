@@ -33,7 +33,7 @@ resource "meraki_networks_wireless_ssids_firewall_l3_firewall_rules" "test-Terra
       # comment = ""
       dest_cidr = "0.0.0.0/16"
       dest_port = "any"
-      policy    = "deny"
+      policy    = "allow"
       protocol  = "any"
       ip_ver    = "ipv4"
     },

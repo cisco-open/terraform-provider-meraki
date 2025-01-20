@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -202,6 +203,8 @@ func (d *OrganizationsSmSentryPoliciesAssignmentsByNetworkDataSource) Read(ctx c
 		queryParams1.EndingBefore = organizationsSmSentryPoliciesAssignmentsByNetwork.EndingBefore.ValueString()
 		queryParams1.NetworkIDs = elementsToStrings(ctx, organizationsSmSentryPoliciesAssignmentsByNetwork.NetworkIDs)
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Sm.GetOrganizationSmSentryPoliciesAssignmentsByNetwork(vvOrganizationID, &queryParams1)
 
 		if err != nil || response1 == nil {
@@ -301,13 +304,13 @@ func ResponseSmGetOrganizationSmSentryPoliciesAssignmentsByNetworkItemsToBody(st
 									}
 									return &result
 								}
-								return &[]ResponseItemSmGetOrganizationSmSentryPoliciesAssignmentsByNetworkItemsPolicies{}
+								return nil
 							}(),
 						}
 					}
 					return &result
 				}
-				return &[]ResponseItemSmGetOrganizationSmSentryPoliciesAssignmentsByNetworkItems{}
+				return nil
 			}(),
 			Meta: func() *ResponseItemSmGetOrganizationSmSentryPoliciesAssignmentsByNetworkMeta {
 				if item.Meta != nil {
@@ -332,15 +335,15 @@ func ResponseSmGetOrganizationSmSentryPoliciesAssignmentsByNetworkItemsToBody(st
 												}(),
 											}
 										}
-										return &ResponseItemSmGetOrganizationSmSentryPoliciesAssignmentsByNetworkMetaCountsItems{}
+										return nil
 									}(),
 								}
 							}
-							return &ResponseItemSmGetOrganizationSmSentryPoliciesAssignmentsByNetworkMetaCounts{}
+							return nil
 						}(),
 					}
 				}
-				return &ResponseItemSmGetOrganizationSmSentryPoliciesAssignmentsByNetworkMeta{}
+				return nil
 			}(),
 		}
 		items = append(items, itemState)

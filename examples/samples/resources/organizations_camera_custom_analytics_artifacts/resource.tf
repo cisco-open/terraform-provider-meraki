@@ -13,7 +13,7 @@ provider "meraki" {
 
 resource "meraki_organizations_camera_custom_analytics_artifacts" "example" {
 
-  name            = "Test Terraform3"
+  name            = "Test Terraform4"
   organization_id = "828099381482762270"
 }
 

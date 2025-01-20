@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -69,9 +85,10 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Schema(_ context.
 					Attributes: map[string]schema.Attribute{
 
 						"policy": schema.StringAttribute{
-							MarkdownDescription: `'Deny' traffic specified by this rule`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `'Deny' traffic specified by this rule
+                                        Allowed values: [deny]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -82,9 +99,10 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Schema(_ context.
 							},
 						},
 						"type": schema.StringAttribute{
-							MarkdownDescription: `Type of the L7 firewall rule. One of: 'application', 'applicationCategory', 'host', 'port', 'ipRange'`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `Type of the L7 firewall rule. One of: 'application', 'applicationCategory', 'host', 'port', 'ipRange'
+                                        Allowed values: [application,applicationCategory,host,ipRange,port]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -381,7 +399,7 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesRs) toSdkApiRequestUpdate(c
 	}
 	out := merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDFirewallL7FirewallRules{
 		Rules: func() *[]merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDFirewallL7FirewallRulesRules {
-			if len(requestWirelessUpdateNetworkWirelessSSIDFirewallL7FirewallRulesRules) > 0 {
+			if len(requestWirelessUpdateNetworkWirelessSSIDFirewallL7FirewallRulesRules) > 0 || r.Rules != nil {
 				return &requestWirelessUpdateNetworkWirelessSSIDFirewallL7FirewallRulesRules
 			}
 			return nil
@@ -425,7 +443,7 @@ func ResponseWirelessGetNetworkWirelessSSIDFirewallL7FirewallRulesItemToBodyRs(s
 				}
 				return &result
 			}
-			return &[]ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesRs{}
+			return nil
 		}(),
 	}
 	if is_read {

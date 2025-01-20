@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -425,7 +441,7 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter FloorPlanID",
-				err.Error(),
+				"Error",
 			)
 			return
 		}
@@ -661,8 +677,18 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestCreate(ctx context.Context) *merak
 	emptyString := ""
 	var requestNetworksCreateNetworkFloorPlanBottomLeftCorner *merakigosdk.RequestNetworksCreateNetworkFloorPlanBottomLeftCorner
 	if r.BottomLeftCorner != nil {
-		lat := r.BottomLeftCorner.Lat.ValueFloat64Pointer()
-		lng := r.BottomLeftCorner.Lng.ValueFloat64Pointer()
+		lat := func() *float64 {
+			if !r.BottomLeftCorner.Lat.IsUnknown() && !r.BottomLeftCorner.Lat.IsNull() {
+				return r.BottomLeftCorner.Lat.ValueFloat64Pointer()
+			}
+			return nil
+		}()
+		lng := func() *float64 {
+			if !r.BottomLeftCorner.Lng.IsUnknown() && !r.BottomLeftCorner.Lng.IsNull() {
+				return r.BottomLeftCorner.Lng.ValueFloat64Pointer()
+			}
+			return nil
+		}()
 		requestNetworksCreateNetworkFloorPlanBottomLeftCorner = &merakigosdk.RequestNetworksCreateNetworkFloorPlanBottomLeftCorner{
 			Lat: lat,
 			Lng: lng,
@@ -670,8 +696,18 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestCreate(ctx context.Context) *merak
 	}
 	var requestNetworksCreateNetworkFloorPlanBottomRightCorner *merakigosdk.RequestNetworksCreateNetworkFloorPlanBottomRightCorner
 	if r.BottomRightCorner != nil {
-		lat := r.BottomRightCorner.Lat.ValueFloat64Pointer()
-		lng := r.BottomRightCorner.Lng.ValueFloat64Pointer()
+		lat := func() *float64 {
+			if !r.BottomRightCorner.Lat.IsUnknown() && !r.BottomRightCorner.Lat.IsNull() {
+				return r.BottomRightCorner.Lat.ValueFloat64Pointer()
+			}
+			return nil
+		}()
+		lng := func() *float64 {
+			if !r.BottomRightCorner.Lng.IsUnknown() && !r.BottomRightCorner.Lng.IsNull() {
+				return r.BottomRightCorner.Lng.ValueFloat64Pointer()
+			}
+			return nil
+		}()
 		requestNetworksCreateNetworkFloorPlanBottomRightCorner = &merakigosdk.RequestNetworksCreateNetworkFloorPlanBottomRightCorner{
 			Lat: lat,
 			Lng: lng,
@@ -679,8 +715,18 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestCreate(ctx context.Context) *merak
 	}
 	var requestNetworksCreateNetworkFloorPlanCenter *merakigosdk.RequestNetworksCreateNetworkFloorPlanCenter
 	if r.Center != nil {
-		lat := r.Center.Lat.ValueFloat64Pointer()
-		lng := r.Center.Lng.ValueFloat64Pointer()
+		lat := func() *float64 {
+			if !r.Center.Lat.IsUnknown() && !r.Center.Lat.IsNull() {
+				return r.Center.Lat.ValueFloat64Pointer()
+			}
+			return nil
+		}()
+		lng := func() *float64 {
+			if !r.Center.Lng.IsUnknown() && !r.Center.Lng.IsNull() {
+				return r.Center.Lng.ValueFloat64Pointer()
+			}
+			return nil
+		}()
 		requestNetworksCreateNetworkFloorPlanCenter = &merakigosdk.RequestNetworksCreateNetworkFloorPlanCenter{
 			Lat: lat,
 			Lng: lng,
@@ -700,8 +746,18 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestCreate(ctx context.Context) *merak
 	}
 	var requestNetworksCreateNetworkFloorPlanTopLeftCorner *merakigosdk.RequestNetworksCreateNetworkFloorPlanTopLeftCorner
 	if r.TopLeftCorner != nil {
-		lat := r.TopLeftCorner.Lat.ValueFloat64Pointer()
-		lng := r.TopLeftCorner.Lng.ValueFloat64Pointer()
+		lat := func() *float64 {
+			if !r.TopLeftCorner.Lat.IsUnknown() && !r.TopLeftCorner.Lat.IsNull() {
+				return r.TopLeftCorner.Lat.ValueFloat64Pointer()
+			}
+			return nil
+		}()
+		lng := func() *float64 {
+			if !r.TopLeftCorner.Lng.IsUnknown() && !r.TopLeftCorner.Lng.IsNull() {
+				return r.TopLeftCorner.Lng.ValueFloat64Pointer()
+			}
+			return nil
+		}()
 		requestNetworksCreateNetworkFloorPlanTopLeftCorner = &merakigosdk.RequestNetworksCreateNetworkFloorPlanTopLeftCorner{
 			Lat: lat,
 			Lng: lng,
@@ -709,8 +765,18 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestCreate(ctx context.Context) *merak
 	}
 	var requestNetworksCreateNetworkFloorPlanTopRightCorner *merakigosdk.RequestNetworksCreateNetworkFloorPlanTopRightCorner
 	if r.TopRightCorner != nil {
-		lat := r.TopRightCorner.Lat.ValueFloat64Pointer()
-		lng := r.TopRightCorner.Lng.ValueFloat64Pointer()
+		lat := func() *float64 {
+			if !r.TopRightCorner.Lat.IsUnknown() && !r.TopRightCorner.Lat.IsNull() {
+				return r.TopRightCorner.Lat.ValueFloat64Pointer()
+			}
+			return nil
+		}()
+		lng := func() *float64 {
+			if !r.TopRightCorner.Lng.IsUnknown() && !r.TopRightCorner.Lng.IsNull() {
+				return r.TopRightCorner.Lng.ValueFloat64Pointer()
+			}
+			return nil
+		}()
 		requestNetworksCreateNetworkFloorPlanTopRightCorner = &merakigosdk.RequestNetworksCreateNetworkFloorPlanTopRightCorner{
 			Lat: lat,
 			Lng: lng,
@@ -731,8 +797,18 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestUpdate(ctx context.Context) *merak
 	emptyString := ""
 	var requestNetworksUpdateNetworkFloorPlanBottomLeftCorner *merakigosdk.RequestNetworksUpdateNetworkFloorPlanBottomLeftCorner
 	if r.BottomLeftCorner != nil {
-		lat := r.BottomLeftCorner.Lat.ValueFloat64Pointer()
-		lng := r.BottomLeftCorner.Lng.ValueFloat64Pointer()
+		lat := func() *float64 {
+			if !r.BottomLeftCorner.Lat.IsUnknown() && !r.BottomLeftCorner.Lat.IsNull() {
+				return r.BottomLeftCorner.Lat.ValueFloat64Pointer()
+			}
+			return nil
+		}()
+		lng := func() *float64 {
+			if !r.BottomLeftCorner.Lng.IsUnknown() && !r.BottomLeftCorner.Lng.IsNull() {
+				return r.BottomLeftCorner.Lng.ValueFloat64Pointer()
+			}
+			return nil
+		}()
 		requestNetworksUpdateNetworkFloorPlanBottomLeftCorner = &merakigosdk.RequestNetworksUpdateNetworkFloorPlanBottomLeftCorner{
 			Lat: lat,
 			Lng: lng,
@@ -740,8 +816,18 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestUpdate(ctx context.Context) *merak
 	}
 	var requestNetworksUpdateNetworkFloorPlanBottomRightCorner *merakigosdk.RequestNetworksUpdateNetworkFloorPlanBottomRightCorner
 	if r.BottomRightCorner != nil {
-		lat := r.BottomRightCorner.Lat.ValueFloat64Pointer()
-		lng := r.BottomRightCorner.Lng.ValueFloat64Pointer()
+		lat := func() *float64 {
+			if !r.BottomRightCorner.Lat.IsUnknown() && !r.BottomRightCorner.Lat.IsNull() {
+				return r.BottomRightCorner.Lat.ValueFloat64Pointer()
+			}
+			return nil
+		}()
+		lng := func() *float64 {
+			if !r.BottomRightCorner.Lng.IsUnknown() && !r.BottomRightCorner.Lng.IsNull() {
+				return r.BottomRightCorner.Lng.ValueFloat64Pointer()
+			}
+			return nil
+		}()
 		requestNetworksUpdateNetworkFloorPlanBottomRightCorner = &merakigosdk.RequestNetworksUpdateNetworkFloorPlanBottomRightCorner{
 			Lat: lat,
 			Lng: lng,
@@ -749,8 +835,18 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestUpdate(ctx context.Context) *merak
 	}
 	var requestNetworksUpdateNetworkFloorPlanCenter *merakigosdk.RequestNetworksUpdateNetworkFloorPlanCenter
 	if r.Center != nil {
-		lat := r.Center.Lat.ValueFloat64Pointer()
-		lng := r.Center.Lng.ValueFloat64Pointer()
+		lat := func() *float64 {
+			if !r.Center.Lat.IsUnknown() && !r.Center.Lat.IsNull() {
+				return r.Center.Lat.ValueFloat64Pointer()
+			}
+			return nil
+		}()
+		lng := func() *float64 {
+			if !r.Center.Lng.IsUnknown() && !r.Center.Lng.IsNull() {
+				return r.Center.Lng.ValueFloat64Pointer()
+			}
+			return nil
+		}()
 		requestNetworksUpdateNetworkFloorPlanCenter = &merakigosdk.RequestNetworksUpdateNetworkFloorPlanCenter{
 			Lat: lat,
 			Lng: lng,
@@ -770,8 +866,18 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestUpdate(ctx context.Context) *merak
 	}
 	var requestNetworksUpdateNetworkFloorPlanTopLeftCorner *merakigosdk.RequestNetworksUpdateNetworkFloorPlanTopLeftCorner
 	if r.TopLeftCorner != nil {
-		lat := r.TopLeftCorner.Lat.ValueFloat64Pointer()
-		lng := r.TopLeftCorner.Lng.ValueFloat64Pointer()
+		lat := func() *float64 {
+			if !r.TopLeftCorner.Lat.IsUnknown() && !r.TopLeftCorner.Lat.IsNull() {
+				return r.TopLeftCorner.Lat.ValueFloat64Pointer()
+			}
+			return nil
+		}()
+		lng := func() *float64 {
+			if !r.TopLeftCorner.Lng.IsUnknown() && !r.TopLeftCorner.Lng.IsNull() {
+				return r.TopLeftCorner.Lng.ValueFloat64Pointer()
+			}
+			return nil
+		}()
 		requestNetworksUpdateNetworkFloorPlanTopLeftCorner = &merakigosdk.RequestNetworksUpdateNetworkFloorPlanTopLeftCorner{
 			Lat: lat,
 			Lng: lng,
@@ -779,8 +885,18 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestUpdate(ctx context.Context) *merak
 	}
 	var requestNetworksUpdateNetworkFloorPlanTopRightCorner *merakigosdk.RequestNetworksUpdateNetworkFloorPlanTopRightCorner
 	if r.TopRightCorner != nil {
-		lat := r.TopRightCorner.Lat.ValueFloat64Pointer()
-		lng := r.TopRightCorner.Lng.ValueFloat64Pointer()
+		lat := func() *float64 {
+			if !r.TopRightCorner.Lat.IsUnknown() && !r.TopRightCorner.Lat.IsNull() {
+				return r.TopRightCorner.Lat.ValueFloat64Pointer()
+			}
+			return nil
+		}()
+		lng := func() *float64 {
+			if !r.TopRightCorner.Lng.IsUnknown() && !r.TopRightCorner.Lng.IsNull() {
+				return r.TopRightCorner.Lng.ValueFloat64Pointer()
+			}
+			return nil
+		}()
 		requestNetworksUpdateNetworkFloorPlanTopRightCorner = &merakigosdk.RequestNetworksUpdateNetworkFloorPlanTopRightCorner{
 			Lat: lat,
 			Lng: lng,
@@ -818,7 +934,7 @@ func ResponseNetworksGetNetworkFloorPlanItemToBodyRs(state NetworksFloorPlansRs,
 					}(),
 				}
 			}
-			return &ResponseNetworksGetNetworkFloorPlanBottomLeftCornerRs{}
+			return nil
 		}(),
 		BottomRightCorner: func() *ResponseNetworksGetNetworkFloorPlanBottomRightCornerRs {
 			if response.BottomRightCorner != nil {
@@ -837,7 +953,7 @@ func ResponseNetworksGetNetworkFloorPlanItemToBodyRs(state NetworksFloorPlansRs,
 					}(),
 				}
 			}
-			return &ResponseNetworksGetNetworkFloorPlanBottomRightCornerRs{}
+			return nil
 		}(),
 		Center: func() *ResponseNetworksGetNetworkFloorPlanCenterRs {
 			if response.Center != nil {
@@ -856,7 +972,7 @@ func ResponseNetworksGetNetworkFloorPlanItemToBodyRs(state NetworksFloorPlansRs,
 					}(),
 				}
 			}
-			return &ResponseNetworksGetNetworkFloorPlanCenterRs{}
+			return nil
 		}(),
 		Devices: func() *[]ResponseNetworksGetNetworkFloorPlanDevicesRs {
 			if response.Devices != nil {
@@ -875,7 +991,7 @@ func ResponseNetworksGetNetworkFloorPlanItemToBodyRs(state NetworksFloorPlansRs,
 								}
 								return &result
 							}
-							return &[]ResponseNetworksGetNetworkFloorPlanDevicesDetailsRs{}
+							return nil
 						}(),
 						Firmware: types.StringValue(devices.Firmware),
 						Imei:     types.StringValue(devices.Imei),
@@ -904,7 +1020,7 @@ func ResponseNetworksGetNetworkFloorPlanItemToBodyRs(state NetworksFloorPlansRs,
 				}
 				return &result
 			}
-			return &[]ResponseNetworksGetNetworkFloorPlanDevicesRs{}
+			return nil
 		}(),
 		FloorPlanID: types.StringValue(response.FloorPlanID),
 		Height: func() types.Float64 {
@@ -935,7 +1051,7 @@ func ResponseNetworksGetNetworkFloorPlanItemToBodyRs(state NetworksFloorPlansRs,
 					}(),
 				}
 			}
-			return &ResponseNetworksGetNetworkFloorPlanTopLeftCornerRs{}
+			return nil
 		}(),
 		TopRightCorner: func() *ResponseNetworksGetNetworkFloorPlanTopRightCornerRs {
 			if response.TopRightCorner != nil {
@@ -954,7 +1070,7 @@ func ResponseNetworksGetNetworkFloorPlanItemToBodyRs(state NetworksFloorPlansRs,
 					}(),
 				}
 			}
-			return &ResponseNetworksGetNetworkFloorPlanTopRightCornerRs{}
+			return nil
 		}(),
 		Width: func() types.Float64 {
 			if response.Width != nil {

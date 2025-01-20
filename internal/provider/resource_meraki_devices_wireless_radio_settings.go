@@ -1,10 +1,26 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -56,23 +72,25 @@ func (r *DevicesWirelessRadioSettingsResource) Schema(_ context.Context, _ resou
 				Attributes: map[string]schema.Attribute{
 
 					"channel": schema.Int64Attribute{
-						MarkdownDescription: `Sets a manual channel for 5 GHz. Can be '36', '40', '44', '48', '52', '56', '60', '64', '100', '104', '108', '112', '116', '120', '124', '128', '132', '136', '140', '144', '149', '153', '157', '161', '165', '169', '173' or '177' or null for using auto channel.`,
-						Computed:            true,
-						Optional:            true,
+						MarkdownDescription: `Sets a manual channel for 5 GHz. Can be '36', '40', '44', '48', '52', '56', '60', '64', '100', '104', '108', '112', '116', '120', '124', '128', '132', '136', '140', '144', '149', '153', '157', '161', '165', '169', '173' or '177' or null for using auto channel.
+                                        Allowed values: [36,40,44,48,52,56,60,64,100,104,108,112,116,120,124,128,132,136,140,144,149,153,157,161,165,169,173,177]`,
+						Computed: true,
+						Optional: true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
 						},
 					},
-					"channel_width": schema.StringAttribute{
-						MarkdownDescription: `Sets a manual channel for 5 GHz. Can be '0', '20', '40', '80' or '160' or null for using auto channel width.`,
-						Computed:            true,
-						Optional:            true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
+					"channel_width": schema.Int64Attribute{
+						MarkdownDescription: `Sets a manual channel for 5 GHz. Can be '0', '20', '40', '80' or '160' or null for using auto channel width.
+                                        Allowed values: [0,20,40,80,160]`,
+						Computed: true,
+						Optional: true,
+						PlanModifiers: []planmodifier.Int64{
+							int64planmodifier.UseStateForUnknown(),
 						},
 					},
 					"target_power": schema.Int64Attribute{
-						MarkdownDescription: `Set a manual target power for 5 GHz. Can be between '8' or '30' or null for using auto power range.`,
+						MarkdownDescription: `Set a manual target power for 5 GHz (dBm). Enter null for using auto power range.`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
@@ -103,15 +121,16 @@ func (r *DevicesWirelessRadioSettingsResource) Schema(_ context.Context, _ resou
 				Attributes: map[string]schema.Attribute{
 
 					"channel": schema.Int64Attribute{
-						MarkdownDescription: `Sets a manual channel for 2.4 GHz. Can be '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13' or '14' or null for using auto channel.`,
-						Computed:            true,
-						Optional:            true,
+						MarkdownDescription: `Sets a manual channel for 2.4 GHz. Can be '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13' or '14' or null for using auto channel.
+                                        Allowed values: [1,2,3,4,5,6,7,8,9,10,11,12,13,14]`,
+						Computed: true,
+						Optional: true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
 						},
 					},
 					"target_power": schema.Int64Attribute{
-						MarkdownDescription: `Set a manual target power for 2.4 GHz. Can be between '5' or '30' or null for using auto power range.`,
+						MarkdownDescription: `Set a manual target power for 2.4 GHz (dBm). Enter null for using auto power range.`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
@@ -305,9 +324,9 @@ type DevicesWirelessRadioSettingsRs struct {
 }
 
 type ResponseWirelessGetDeviceWirelessRadioSettingsFiveGhzSettingsRs struct {
-	Channel      types.Int64  `tfsdk:"channel"`
-	ChannelWidth types.String `tfsdk:"channel_width"`
-	TargetPower  types.Int64  `tfsdk:"target_power"`
+	Channel      types.Int64 `tfsdk:"channel"`
+	ChannelWidth types.Int64 `tfsdk:"channel_width"`
+	TargetPower  types.Int64 `tfsdk:"target_power"`
 }
 
 type ResponseWirelessGetDeviceWirelessRadioSettingsTwoFourGhzSettingsRs struct {
@@ -326,7 +345,12 @@ func (r *DevicesWirelessRadioSettingsRs) toSdkApiRequestUpdate(ctx context.Conte
 			}
 			return nil
 		}()
-		channelWidth := r.FiveGhzSettings.ChannelWidth.ValueString()
+		channelWidth := func() *int64 {
+			if !r.FiveGhzSettings.ChannelWidth.IsUnknown() && !r.FiveGhzSettings.ChannelWidth.IsNull() {
+				return r.FiveGhzSettings.ChannelWidth.ValueInt64Pointer()
+			}
+			return nil
+		}()
 		targetPower := func() *int64 {
 			if !r.FiveGhzSettings.TargetPower.IsUnknown() && !r.FiveGhzSettings.TargetPower.IsNull() {
 				return r.FiveGhzSettings.TargetPower.ValueInt64Pointer()
@@ -335,7 +359,7 @@ func (r *DevicesWirelessRadioSettingsRs) toSdkApiRequestUpdate(ctx context.Conte
 		}()
 		requestWirelessUpdateDeviceWirelessRadioSettingsFiveGhzSettings = &merakigosdk.RequestWirelessUpdateDeviceWirelessRadioSettingsFiveGhzSettings{
 			Channel:      int64ToIntPointer(channel),
-			ChannelWidth: channelWidth,
+			ChannelWidth: int64ToIntPointer(channelWidth),
 			TargetPower:  int64ToIntPointer(targetPower),
 		}
 	}
@@ -384,7 +408,12 @@ func ResponseWirelessGetDeviceWirelessRadioSettingsItemToBodyRs(state DevicesWir
 						}
 						return types.Int64{}
 					}(),
-					ChannelWidth: types.StringValue(response.FiveGhzSettings.ChannelWidth),
+					ChannelWidth: func() types.Int64 {
+						if response.FiveGhzSettings.ChannelWidth != nil {
+							return types.Int64Value(int64(*response.FiveGhzSettings.ChannelWidth))
+						}
+						return types.Int64{}
+					}(),
 					TargetPower: func() types.Int64 {
 						if response.FiveGhzSettings.TargetPower != nil {
 							return types.Int64Value(int64(*response.FiveGhzSettings.TargetPower))
@@ -393,7 +422,7 @@ func ResponseWirelessGetDeviceWirelessRadioSettingsItemToBodyRs(state DevicesWir
 					}(),
 				}
 			}
-			return &ResponseWirelessGetDeviceWirelessRadioSettingsFiveGhzSettingsRs{}
+			return nil
 		}(),
 		RfProfileID: types.StringValue(response.RfProfileID),
 		Serial:      types.StringValue(response.Serial),
@@ -414,7 +443,7 @@ func ResponseWirelessGetDeviceWirelessRadioSettingsItemToBodyRs(state DevicesWir
 					}(),
 				}
 			}
-			return &ResponseWirelessGetDeviceWirelessRadioSettingsTwoFourGhzSettingsRs{}
+			return nil
 		}(),
 	}
 	if is_read {

@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -138,6 +155,14 @@ func (d *DevicesSwitchRoutingInterfacesDataSource) Schema(_ context.Context, _ d
 						MarkdownDescription: `IPv4 subnet`,
 						Computed:            true,
 					},
+					"uplink_v4": schema.BoolAttribute{
+						MarkdownDescription: `Whether this is the switch's IPv4 uplink`,
+						Computed:            true,
+					},
+					"uplink_v6": schema.BoolAttribute{
+						MarkdownDescription: `Whether this is the switch's IPv6 uplink`,
+						Computed:            true,
+					},
 					"vlan_id": schema.Int64Attribute{
 						MarkdownDescription: `VLAN id`,
 						Computed:            true,
@@ -236,6 +261,14 @@ func (d *DevicesSwitchRoutingInterfacesDataSource) Schema(_ context.Context, _ d
 							MarkdownDescription: `IPv4 subnet`,
 							Computed:            true,
 						},
+						"uplink_v4": schema.BoolAttribute{
+							MarkdownDescription: `Whether this is the switch's IPv4 uplink`,
+							Computed:            true,
+						},
+						"uplink_v6": schema.BoolAttribute{
+							MarkdownDescription: `Whether this is the switch's IPv6 uplink`,
+							Computed:            true,
+						},
 						"vlan_id": schema.Int64Attribute{
 							MarkdownDescription: `VLAN id`,
 							Computed:            true,
@@ -264,6 +297,8 @@ func (d *DevicesSwitchRoutingInterfacesDataSource) Read(ctx context.Context, req
 		log.Printf("[DEBUG] Selected method: GetDeviceSwitchRoutingInterfaces")
 		vvSerial := devicesSwitchRoutingInterfaces.Serial.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Switch.GetDeviceSwitchRoutingInterfaces(vvSerial)
 
 		if err != nil || response1 == nil {
@@ -289,6 +324,8 @@ func (d *DevicesSwitchRoutingInterfacesDataSource) Read(ctx context.Context, req
 		log.Printf("[DEBUG] Selected method: GetDeviceSwitchRoutingInterface")
 		vvSerial := devicesSwitchRoutingInterfaces.Serial.ValueString()
 		vvInterfaceID := devicesSwitchRoutingInterfaces.InterfaceID.ValueString()
+
+		// has_unknown_response: None
 
 		response2, restyResp2, err := d.client.Switch.GetDeviceSwitchRoutingInterface(vvSerial, vvInterfaceID)
 
@@ -331,6 +368,8 @@ type ResponseItemSwitchGetDeviceSwitchRoutingInterfaces struct {
 	OspfSettings     *ResponseItemSwitchGetDeviceSwitchRoutingInterfacesOspfSettings `tfsdk:"ospf_settings"`
 	OspfV3           *ResponseItemSwitchGetDeviceSwitchRoutingInterfacesOspfV3       `tfsdk:"ospf_v3"`
 	Subnet           types.String                                                    `tfsdk:"subnet"`
+	UplinkV4         types.Bool                                                      `tfsdk:"uplink_v4"`
+	UplinkV6         types.Bool                                                      `tfsdk:"uplink_v6"`
 	VLANID           types.Int64                                                     `tfsdk:"vlan_id"`
 }
 
@@ -363,6 +402,8 @@ type ResponseSwitchGetDeviceSwitchRoutingInterface struct {
 	OspfSettings     *ResponseSwitchGetDeviceSwitchRoutingInterfaceOspfSettings `tfsdk:"ospf_settings"`
 	OspfV3           *ResponseSwitchGetDeviceSwitchRoutingInterfaceOspfV3       `tfsdk:"ospf_v3"`
 	Subnet           types.String                                               `tfsdk:"subnet"`
+	UplinkV4         types.Bool                                                 `tfsdk:"uplink_v4"`
+	UplinkV6         types.Bool                                                 `tfsdk:"uplink_v6"`
 	VLANID           types.Int64                                                `tfsdk:"vlan_id"`
 }
 
@@ -402,7 +443,7 @@ func ResponseSwitchGetDeviceSwitchRoutingInterfacesItemsToBody(state DevicesSwit
 						Prefix:         types.StringValue(item.IPv6.Prefix),
 					}
 				}
-				return &ResponseItemSwitchGetDeviceSwitchRoutingInterfacesIpv6{}
+				return nil
 			}(),
 			MulticastRouting: types.StringValue(item.MulticastRouting),
 			Name:             types.StringValue(item.Name),
@@ -424,7 +465,7 @@ func ResponseSwitchGetDeviceSwitchRoutingInterfacesItemsToBody(state DevicesSwit
 						}(),
 					}
 				}
-				return &ResponseItemSwitchGetDeviceSwitchRoutingInterfacesOspfSettings{}
+				return nil
 			}(),
 			OspfV3: func() *ResponseItemSwitchGetDeviceSwitchRoutingInterfacesOspfV3 {
 				if item.OspfV3 != nil {
@@ -444,9 +485,21 @@ func ResponseSwitchGetDeviceSwitchRoutingInterfacesItemsToBody(state DevicesSwit
 						}(),
 					}
 				}
-				return &ResponseItemSwitchGetDeviceSwitchRoutingInterfacesOspfV3{}
+				return nil
 			}(),
 			Subnet: types.StringValue(item.Subnet),
+			UplinkV4: func() types.Bool {
+				if item.UplinkV4 != nil {
+					return types.BoolValue(*item.UplinkV4)
+				}
+				return types.Bool{}
+			}(),
+			UplinkV6: func() types.Bool {
+				if item.UplinkV6 != nil {
+					return types.BoolValue(*item.UplinkV6)
+				}
+				return types.Bool{}
+			}(),
 			VLANID: func() types.Int64 {
 				if item.VLANID != nil {
 					return types.Int64Value(int64(*item.VLANID))
@@ -474,7 +527,7 @@ func ResponseSwitchGetDeviceSwitchRoutingInterfaceItemToBody(state DevicesSwitch
 					Prefix:         types.StringValue(response.IPv6.Prefix),
 				}
 			}
-			return &ResponseSwitchGetDeviceSwitchRoutingInterfaceIpv6{}
+			return nil
 		}(),
 		MulticastRouting: types.StringValue(response.MulticastRouting),
 		Name:             types.StringValue(response.Name),
@@ -496,7 +549,7 @@ func ResponseSwitchGetDeviceSwitchRoutingInterfaceItemToBody(state DevicesSwitch
 					}(),
 				}
 			}
-			return &ResponseSwitchGetDeviceSwitchRoutingInterfaceOspfSettings{}
+			return nil
 		}(),
 		OspfV3: func() *ResponseSwitchGetDeviceSwitchRoutingInterfaceOspfV3 {
 			if response.OspfV3 != nil {
@@ -516,9 +569,21 @@ func ResponseSwitchGetDeviceSwitchRoutingInterfaceItemToBody(state DevicesSwitch
 					}(),
 				}
 			}
-			return &ResponseSwitchGetDeviceSwitchRoutingInterfaceOspfV3{}
+			return nil
 		}(),
 		Subnet: types.StringValue(response.Subnet),
+		UplinkV4: func() types.Bool {
+			if response.UplinkV4 != nil {
+				return types.BoolValue(*response.UplinkV4)
+			}
+			return types.Bool{}
+		}(),
+		UplinkV6: func() types.Bool {
+			if response.UplinkV6 != nil {
+				return types.BoolValue(*response.UplinkV6)
+			}
+			return types.Bool{}
+		}(),
 		VLANID: func() types.Int64 {
 			if response.VLANID != nil {
 				return types.Int64Value(int64(*response.VLANID))

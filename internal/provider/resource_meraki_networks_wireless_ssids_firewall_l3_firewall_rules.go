@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -51,7 +67,8 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Schema(_ context.
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"allow_lan_access": schema.BoolAttribute{
-				MarkdownDescription: `Allow wireless client access to local LAN (boolean value - true allows access and false denies access) (optional)`,
+				MarkdownDescription: `Allows wireless client access to local LAN (boolean value - true allows access and false denies access)`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -108,9 +125,10 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Schema(_ context.
 							},
 						},
 						"policy": schema.StringAttribute{
-							MarkdownDescription: `'allow' or 'deny' traffic specified by this rule`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `'allow' or 'deny' traffic specified by this rule
+                                        Allowed values: [allow,deny]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -122,9 +140,10 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Schema(_ context.
 							},
 						},
 						"protocol": schema.StringAttribute{
-							MarkdownDescription: `The type of protocol (must be 'tcp', 'udp', 'icmp', 'icmp6' or 'any')`,
-							Computed:            true,
-							Optional:            true,
+							MarkdownDescription: `The type of protocol (must be 'tcp', 'udp', 'icmp', 'icmp6' or 'any')
+                                        Allowed values: [any,icmp,icmp6,tcp,udp]`,
+							Computed: true,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -411,9 +430,9 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Delete(ctx contex
 type NetworksWirelessSSIDsFirewallL3FirewallRulesRs struct {
 	NetworkID      types.String                                                            `tfsdk:"network_id"`
 	Number         types.String                                                            `tfsdk:"number"`
-	Rules          *[]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs `tfsdk:"rules"`
 	RulesResponse  *[]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs `tfsdk:"rules_response"`
 	AllowLanAccess types.Bool                                                              `tfsdk:"allow_lan_access"`
+	Rules          *[]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs `tfsdk:"rules"`
 }
 
 type ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs struct {
@@ -455,7 +474,7 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesRs) toSdkApiRequestUpdate(c
 	out := merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDFirewallL3FirewallRules{
 		AllowLanAccess: allowLanAccess,
 		Rules: func() *[]merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDFirewallL3FirewallRulesRules {
-			if len(requestWirelessUpdateNetworkWirelessSSIDFirewallL3FirewallRulesRules) > 0 {
+			if len(requestWirelessUpdateNetworkWirelessSSIDFirewallL3FirewallRulesRules) > 0 || r.Rules != nil {
 				return &requestWirelessUpdateNetworkWirelessSSIDFirewallL3FirewallRulesRules
 			}
 			return nil
@@ -467,6 +486,12 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesRs) toSdkApiRequestUpdate(c
 // From gosdk to TF Structs Schema
 func ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRulesItemToBodyRs(state NetworksWirelessSSIDsFirewallL3FirewallRulesRs, response *merakigosdk.ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRules, is_read bool) NetworksWirelessSSIDsFirewallL3FirewallRulesRs {
 	itemState := NetworksWirelessSSIDsFirewallL3FirewallRulesRs{
+		AllowLanAccess: func() types.Bool {
+			if response.AllowLanAccess != nil {
+				return types.BoolValue(*response.AllowLanAccess)
+			}
+			return types.Bool{}
+		}(),
 		RulesResponse: func() *[]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs {
 			if response.Rules != nil {
 				result := make([]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs, len(*response.Rules))
@@ -482,7 +507,7 @@ func ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRulesItemToBodyRs(s
 				}
 				return &result
 			}
-			return &[]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs{}
+			return nil
 		}(),
 	}
 

@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -56,7 +73,7 @@ func (d *DevicesWirelessRadioSettingsDataSource) Schema(_ context.Context, _ dat
 							"channel": schema.Int64Attribute{
 								Computed: true,
 							},
-							"channel_width": schema.StringAttribute{
+							"channel_width": schema.Int64Attribute{
 								Computed: true,
 							},
 							"target_power": schema.Int64Attribute{
@@ -100,6 +117,8 @@ func (d *DevicesWirelessRadioSettingsDataSource) Read(ctx context.Context, req d
 		log.Printf("[DEBUG] Selected method: GetDeviceWirelessRadioSettings")
 		vvSerial := devicesWirelessRadioSettings.Serial.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Wireless.GetDeviceWirelessRadioSettings(vvSerial)
 
 		if err != nil || response1 == nil {
@@ -137,9 +156,9 @@ type ResponseWirelessGetDeviceWirelessRadioSettings struct {
 }
 
 type ResponseWirelessGetDeviceWirelessRadioSettingsFiveGhzSettings struct {
-	Channel      types.Int64  `tfsdk:"channel"`
-	ChannelWidth types.String `tfsdk:"channel_width"`
-	TargetPower  types.Int64  `tfsdk:"target_power"`
+	Channel      types.Int64 `tfsdk:"channel"`
+	ChannelWidth types.Int64 `tfsdk:"channel_width"`
+	TargetPower  types.Int64 `tfsdk:"target_power"`
 }
 
 type ResponseWirelessGetDeviceWirelessRadioSettingsTwoFourGhzSettings struct {
@@ -159,7 +178,12 @@ func ResponseWirelessGetDeviceWirelessRadioSettingsItemToBody(state DevicesWirel
 						}
 						return types.Int64{}
 					}(),
-					ChannelWidth: types.StringValue(response.FiveGhzSettings.ChannelWidth),
+					ChannelWidth: func() types.Int64 {
+						if response.FiveGhzSettings.ChannelWidth != nil {
+							return types.Int64Value(int64(*response.FiveGhzSettings.ChannelWidth))
+						}
+						return types.Int64{}
+					}(),
 					TargetPower: func() types.Int64 {
 						if response.FiveGhzSettings.TargetPower != nil {
 							return types.Int64Value(int64(*response.FiveGhzSettings.TargetPower))
@@ -168,7 +192,7 @@ func ResponseWirelessGetDeviceWirelessRadioSettingsItemToBody(state DevicesWirel
 					}(),
 				}
 			}
-			return &ResponseWirelessGetDeviceWirelessRadioSettingsFiveGhzSettings{}
+			return nil
 		}(),
 		RfProfileID: types.StringValue(response.RfProfileID),
 		Serial:      types.StringValue(response.Serial),
@@ -189,7 +213,7 @@ func ResponseWirelessGetDeviceWirelessRadioSettingsItemToBody(state DevicesWirel
 					}(),
 				}
 			}
-			return &ResponseWirelessGetDeviceWirelessRadioSettingsTwoFourGhzSettings{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

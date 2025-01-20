@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -168,6 +169,8 @@ func (d *NetworksVLANProfilesAssignmentsByDeviceDataSource) Read(ctx context.Con
 		queryParams1.ProductTypes = elementsToStrings(ctx, networksVLANProfilesAssignmentsByDevice.ProductTypes)
 		queryParams1.StackIDs = elementsToStrings(ctx, networksVLANProfilesAssignmentsByDevice.StackIDs)
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Networks.GetNetworkVLANProfilesAssignmentsByDevice(vvNetworkID, &queryParams1)
 
 		if err != nil || response1 == nil {
@@ -237,7 +240,7 @@ func ResponseNetworksGetNetworkVLANProfilesAssignmentsByDeviceItemsToBody(state 
 						ID: types.StringValue(item.Stack.ID),
 					}
 				}
-				return &ResponseItemNetworksGetNetworkVlanProfilesAssignmentsByDeviceStack{}
+				return nil
 			}(),
 			VLANProfile: func() *ResponseItemNetworksGetNetworkVlanProfilesAssignmentsByDeviceVlanProfile {
 				if item.VLANProfile != nil {
@@ -252,7 +255,7 @@ func ResponseNetworksGetNetworkVLANProfilesAssignmentsByDeviceItemsToBody(state 
 						Name: types.StringValue(item.VLANProfile.Name),
 					}
 				}
-				return &ResponseItemNetworksGetNetworkVlanProfilesAssignmentsByDeviceVlanProfile{}
+				return nil
 			}(),
 		}
 		items = append(items, itemState)

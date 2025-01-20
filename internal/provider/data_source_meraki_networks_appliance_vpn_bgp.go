@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -50,36 +67,88 @@ func (d *NetworksApplianceVpnBgpDataSource) Schema(_ context.Context, _ datasour
 				Attributes: map[string]schema.Attribute{
 
 					"as_number": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `The number of the Autonomous System to which the appliance belongs`,
+						Computed:            true,
 					},
 					"enabled": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Whether BGP is enabled on the appliance`,
+						Computed:            true,
 					},
 					"ibgp_hold_timer": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `The iBGP hold time in seconds`,
+						Computed:            true,
 					},
 					"neighbors": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `List of eBGP neighbor configurations`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"allow_transit": schema.BoolAttribute{
-									Computed: true,
+									MarkdownDescription: `Whether the appliance will advertise routes learned from other Autonomous Systems`,
+									Computed:            true,
+								},
+								"authentication": schema.SingleNestedAttribute{
+									MarkdownDescription: `Authentication settings between BGP peers`,
+									Computed:            true,
+									Attributes: map[string]schema.Attribute{
+
+										"password": schema.StringAttribute{
+											MarkdownDescription: `Password to configure MD5 authentication between BGP peers`,
+											Sensitive:           true,
+											Computed:            true,
+										},
+									},
 								},
 								"ebgp_hold_timer": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `The eBGP hold time in seconds for the neighbor`,
+									Computed:            true,
 								},
 								"ebgp_multihop": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `The number of hops the appliance must traverse to establish a peering relationship with the neighbor`,
+									Computed:            true,
 								},
 								"ip": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The IPv4 address of the neighbor`,
+									Computed:            true,
+								},
+								"ipv6": schema.SingleNestedAttribute{
+									MarkdownDescription: `Information regarding IPv6 address of the neighbor`,
+									Computed:            true,
+									Attributes: map[string]schema.Attribute{
+
+										"address": schema.StringAttribute{
+											MarkdownDescription: `The IPv6 address of the neighbor`,
+											Computed:            true,
+										},
+									},
+								},
+								"next_hop_ip": schema.StringAttribute{
+									MarkdownDescription: `The IPv4 address of the neighbor that will establish a TCP session with the appliance`,
+									Computed:            true,
 								},
 								"receive_limit": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `The maximum number of routes that the appliance can receive from the neighbor`,
+									Computed:            true,
 								},
 								"remote_as_number": schema.Int64Attribute{
-									Computed: true,
+									MarkdownDescription: `Remote AS number of the neighbor`,
+									Computed:            true,
+								},
+								"source_interface": schema.StringAttribute{
+									MarkdownDescription: `The output interface the appliance uses to establish a peering relationship with the neighbor`,
+									Computed:            true,
+								},
+								"ttl_security": schema.SingleNestedAttribute{
+									MarkdownDescription: `Settings for BGP TTL security to protect BGP peering sessions from forged IP attacks`,
+									Computed:            true,
+									Attributes: map[string]schema.Attribute{
+
+										"enabled": schema.BoolAttribute{
+											MarkdownDescription: `Whether BGP TTL security is enabled`,
+											Computed:            true,
+										},
+									},
 								},
 							},
 						},
@@ -101,6 +170,8 @@ func (d *NetworksApplianceVpnBgpDataSource) Read(ctx context.Context, req dataso
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetNetworkApplianceVpnBgp")
 		vvNetworkID := networksApplianceVpnBgp.NetworkID.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Appliance.GetNetworkApplianceVpnBgp(vvNetworkID)
 
@@ -139,12 +210,29 @@ type ResponseApplianceGetNetworkApplianceVpnBgp struct {
 }
 
 type ResponseApplianceGetNetworkApplianceVpnBgpNeighbors struct {
-	AllowTransit   types.Bool   `tfsdk:"allow_transit"`
-	EbgpHoldTimer  types.Int64  `tfsdk:"ebgp_hold_timer"`
-	EbgpMultihop   types.Int64  `tfsdk:"ebgp_multihop"`
-	IP             types.String `tfsdk:"ip"`
-	ReceiveLimit   types.Int64  `tfsdk:"receive_limit"`
-	RemoteAsNumber types.Int64  `tfsdk:"remote_as_number"`
+	AllowTransit    types.Bool                                                         `tfsdk:"allow_transit"`
+	Authentication  *ResponseApplianceGetNetworkApplianceVpnBgpNeighborsAuthentication `tfsdk:"authentication"`
+	EbgpHoldTimer   types.Int64                                                        `tfsdk:"ebgp_hold_timer"`
+	EbgpMultihop    types.Int64                                                        `tfsdk:"ebgp_multihop"`
+	IP              types.String                                                       `tfsdk:"ip"`
+	IPv6            *ResponseApplianceGetNetworkApplianceVpnBgpNeighborsIpv6           `tfsdk:"ipv6"`
+	NextHopIP       types.String                                                       `tfsdk:"next_hop_ip"`
+	ReceiveLimit    types.Int64                                                        `tfsdk:"receive_limit"`
+	RemoteAsNumber  types.Int64                                                        `tfsdk:"remote_as_number"`
+	SourceInterface types.String                                                       `tfsdk:"source_interface"`
+	TtlSecurity     *ResponseApplianceGetNetworkApplianceVpnBgpNeighborsTtlSecurity    `tfsdk:"ttl_security"`
+}
+
+type ResponseApplianceGetNetworkApplianceVpnBgpNeighborsAuthentication struct {
+	Password types.String `tfsdk:"password"`
+}
+
+type ResponseApplianceGetNetworkApplianceVpnBgpNeighborsIpv6 struct {
+	Address types.String `tfsdk:"address"`
+}
+
+type ResponseApplianceGetNetworkApplianceVpnBgpNeighborsTtlSecurity struct {
+	Enabled types.Bool `tfsdk:"enabled"`
 }
 
 // ToBody
@@ -179,6 +267,14 @@ func ResponseApplianceGetNetworkApplianceVpnBgpItemToBody(state NetworksApplianc
 							}
 							return types.Bool{}
 						}(),
+						Authentication: func() *ResponseApplianceGetNetworkApplianceVpnBgpNeighborsAuthentication {
+							if neighbors.Authentication != nil {
+								return &ResponseApplianceGetNetworkApplianceVpnBgpNeighborsAuthentication{
+									Password: types.StringValue(neighbors.Authentication.Password),
+								}
+							}
+							return nil
+						}(),
 						EbgpHoldTimer: func() types.Int64 {
 							if neighbors.EbgpHoldTimer != nil {
 								return types.Int64Value(int64(*neighbors.EbgpHoldTimer))
@@ -192,6 +288,15 @@ func ResponseApplianceGetNetworkApplianceVpnBgpItemToBody(state NetworksApplianc
 							return types.Int64{}
 						}(),
 						IP: types.StringValue(neighbors.IP),
+						IPv6: func() *ResponseApplianceGetNetworkApplianceVpnBgpNeighborsIpv6 {
+							if neighbors.IPv6 != nil {
+								return &ResponseApplianceGetNetworkApplianceVpnBgpNeighborsIpv6{
+									Address: types.StringValue(neighbors.IPv6.Address),
+								}
+							}
+							return nil
+						}(),
+						NextHopIP: types.StringValue(neighbors.NextHopIP),
 						ReceiveLimit: func() types.Int64 {
 							if neighbors.ReceiveLimit != nil {
 								return types.Int64Value(int64(*neighbors.ReceiveLimit))
@@ -204,11 +309,25 @@ func ResponseApplianceGetNetworkApplianceVpnBgpItemToBody(state NetworksApplianc
 							}
 							return types.Int64{}
 						}(),
+						SourceInterface: types.StringValue(neighbors.SourceInterface),
+						TtlSecurity: func() *ResponseApplianceGetNetworkApplianceVpnBgpNeighborsTtlSecurity {
+							if neighbors.TtlSecurity != nil {
+								return &ResponseApplianceGetNetworkApplianceVpnBgpNeighborsTtlSecurity{
+									Enabled: func() types.Bool {
+										if neighbors.TtlSecurity.Enabled != nil {
+											return types.BoolValue(*neighbors.TtlSecurity.Enabled)
+										}
+										return types.Bool{}
+									}(),
+								}
+							}
+							return nil
+						}(),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseApplianceGetNetworkApplianceVpnBgpNeighbors{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -21,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -240,6 +241,8 @@ func (d *OrganizationsCameraRolesDataSource) Read(ctx context.Context, req datas
 		log.Printf("[DEBUG] Selected method: GetOrganizationCameraRoles")
 		vvOrganizationID := organizationsCameraRoles.OrganizationID.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Camera.GetOrganizationCameraRoles(vvOrganizationID)
 
 		if err != nil || response1 == nil {
@@ -265,6 +268,8 @@ func (d *OrganizationsCameraRolesDataSource) Read(ctx context.Context, req datas
 		log.Printf("[DEBUG] Selected method: GetOrganizationCameraRole")
 		vvOrganizationID := organizationsCameraRoles.OrganizationID.ValueString()
 		vvRoleID := organizationsCameraRoles.RoleID.ValueString()
+
+		// has_unknown_response: None
 
 		response2, restyResp2, err := d.client.Camera.GetOrganizationCameraRole(vvOrganizationID, vvRoleID)
 
@@ -376,7 +381,7 @@ func ResponseCameraGetOrganizationCameraRolesItemsToBody(state OrganizationsCame
 					}
 					return &result
 				}
-				return &[]ResponseItemCameraGetOrganizationCameraRolesAppliedOnDevices{}
+				return nil
 			}(),
 			AppliedOnNetworks: func() *[]ResponseItemCameraGetOrganizationCameraRolesAppliedOnNetworks {
 				if item.AppliedOnNetworks != nil {
@@ -392,7 +397,7 @@ func ResponseCameraGetOrganizationCameraRolesItemsToBody(state OrganizationsCame
 					}
 					return &result
 				}
-				return &[]ResponseItemCameraGetOrganizationCameraRolesAppliedOnNetworks{}
+				return nil
 			}(),
 			AppliedOrgWide: func() *[]ResponseItemCameraGetOrganizationCameraRolesAppliedOrgWide {
 				if item.AppliedOrgWide != nil {
@@ -407,7 +412,7 @@ func ResponseCameraGetOrganizationCameraRolesItemsToBody(state OrganizationsCame
 					}
 					return &result
 				}
-				return &[]ResponseItemCameraGetOrganizationCameraRolesAppliedOrgWide{}
+				return nil
 			}(),
 			Name: types.StringValue(item.Name),
 		}
@@ -433,7 +438,7 @@ func ResponseCameraGetOrganizationCameraRoleItemToBody(state OrganizationsCamera
 				}
 				return &result
 			}
-			return &[]ResponseCameraGetOrganizationCameraRoleAppliedOnDevices{}
+			return nil
 		}(),
 		AppliedOnNetworks: func() *[]ResponseCameraGetOrganizationCameraRoleAppliedOnNetworks {
 			if response.AppliedOnNetworks != nil {
@@ -449,7 +454,7 @@ func ResponseCameraGetOrganizationCameraRoleItemToBody(state OrganizationsCamera
 				}
 				return &result
 			}
-			return &[]ResponseCameraGetOrganizationCameraRoleAppliedOnNetworks{}
+			return nil
 		}(),
 		AppliedOrgWide: func() *[]ResponseCameraGetOrganizationCameraRoleAppliedOrgWide {
 			if response.AppliedOrgWide != nil {
@@ -464,7 +469,7 @@ func ResponseCameraGetOrganizationCameraRoleItemToBody(state OrganizationsCamera
 				}
 				return &result
 			}
-			return &[]ResponseCameraGetOrganizationCameraRoleAppliedOrgWide{}
+			return nil
 		}(),
 		Name: types.StringValue(response.Name),
 	}

@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE ACTION
@@ -5,10 +21,11 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -46,153 +63,11 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringPrepareResource) Metadat
 func (r *OrganizationsInventoryOnboardingCloudMonitoringPrepareResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
 				Required:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
-				},
-			},
-			"items": schema.ListNestedAttribute{
-				MarkdownDescription: `Array of ResponseOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepare`,
-				Computed:            true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-
-						"config_params": schema.SingleNestedAttribute{
-							MarkdownDescription: `Params used in order to connect to the device`,
-							Computed:            true,
-							Attributes: map[string]schema.Attribute{
-
-								"cloud_static_ip": schema.StringAttribute{
-									MarkdownDescription: `Static IP Address used to connect to the device`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.RequiresReplace(),
-									},
-								},
-								"tunnel": schema.SingleNestedAttribute{
-									MarkdownDescription: `Configuration options used to connect to the device`,
-									Computed:            true,
-									Attributes: map[string]schema.Attribute{
-
-										"host": schema.StringAttribute{
-											MarkdownDescription: `SSH tunnel URL used to connect to the device`,
-											Computed:            true,
-											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.RequiresReplace(),
-											},
-										},
-										"mode": schema.StringAttribute{
-											Computed: true,
-											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.RequiresReplace(),
-											},
-										},
-										"name": schema.StringAttribute{
-											MarkdownDescription: `The name of the tunnel we are attempting to connect to`,
-											Computed:            true,
-											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.RequiresReplace(),
-											},
-										},
-										"port": schema.StringAttribute{
-											MarkdownDescription: `The port used for the ssh tunnel.`,
-											Computed:            true,
-											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.RequiresReplace(),
-											},
-										},
-										"root_certificate": schema.SingleNestedAttribute{
-											MarkdownDescription: `Root certificate information`,
-											Computed:            true,
-											Attributes: map[string]schema.Attribute{
-
-												"content": schema.StringAttribute{
-													MarkdownDescription: `Public certificate value`,
-													Computed:            true,
-													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.RequiresReplace(),
-													},
-												},
-												"name": schema.StringAttribute{
-													MarkdownDescription: `The name of the server protected by the certificate`,
-													Computed:            true,
-													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.RequiresReplace(),
-													},
-												},
-											},
-										},
-									},
-								},
-								"user": schema.SingleNestedAttribute{
-									MarkdownDescription: `User credentials used to connect to the device`,
-									Computed:            true,
-									Attributes: map[string]schema.Attribute{
-
-										"public_key": schema.StringAttribute{
-											MarkdownDescription: `The public key for the registered user`,
-											Computed:            true,
-											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.RequiresReplace(),
-											},
-										},
-										"secret": schema.SingleNestedAttribute{
-											MarkdownDescription: `Stores the user secret hash`,
-											Computed:            true,
-											Attributes: map[string]schema.Attribute{
-
-												"hash": schema.StringAttribute{
-													MarkdownDescription: `The hashed secret`,
-													Computed:            true,
-													PlanModifiers: []planmodifier.String{
-														stringplanmodifier.RequiresReplace(),
-													},
-												},
-											},
-										},
-										"username": schema.StringAttribute{
-											MarkdownDescription: `The username added to Catalyst device`,
-											Computed:            true,
-											PlanModifiers: []planmodifier.String{
-												stringplanmodifier.RequiresReplace(),
-											},
-										},
-									},
-								},
-							},
-						},
-						"device_id": schema.StringAttribute{
-							MarkdownDescription: `Import ID from the Import operation`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.RequiresReplace(),
-							},
-						},
-						"message": schema.StringAttribute{
-							MarkdownDescription: `Message related to whether or not the device was found and can be imported.`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.RequiresReplace(),
-							},
-						},
-						"status": schema.StringAttribute{
-							MarkdownDescription: `The import status of the device`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.RequiresReplace(),
-							},
-						},
-						"udi": schema.StringAttribute{
-							MarkdownDescription: `Device UDI certificate`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.RequiresReplace(),
-							},
-						},
-					},
 				},
 			},
 			"parameters": schema.SingleNestedAttribute{
@@ -392,6 +267,171 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringPrepareResource) Schema(
 							},
 						},
 					},
+					"items": schema.ListNestedAttribute{
+						Computed: true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+
+								"items": schema.ListNestedAttribute{
+									MarkdownDescription: `Array of ResponseOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepare`,
+									Computed:            true,
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
+
+											"config_params": schema.SingleNestedAttribute{
+												MarkdownDescription: `Params used in order to connect to the device`,
+												Computed:            true,
+												Attributes: map[string]schema.Attribute{
+
+													"cloud_static_ip": schema.StringAttribute{
+														MarkdownDescription: `Static IP Address used to connect to the device`,
+														Computed:            true,
+														PlanModifiers: []planmodifier.String{
+															stringplanmodifier.RequiresReplace(),
+														},
+													},
+													"tunnel": schema.SingleNestedAttribute{
+														MarkdownDescription: `Configuration options used to connect to the device`,
+														Computed:            true,
+														Attributes: map[string]schema.Attribute{
+
+															"host": schema.StringAttribute{
+																MarkdownDescription: `SSH tunnel URL used to connect to the device`,
+																Computed:            true,
+																PlanModifiers: []planmodifier.String{
+																	stringplanmodifier.RequiresReplace(),
+																},
+															},
+															"mode": schema.StringAttribute{
+																Computed: true,
+																PlanModifiers: []planmodifier.String{
+																	stringplanmodifier.RequiresReplace(),
+																},
+															},
+															"name": schema.StringAttribute{
+																MarkdownDescription: `The name of the tunnel we are attempting to connect to`,
+																Computed:            true,
+																PlanModifiers: []planmodifier.String{
+																	stringplanmodifier.RequiresReplace(),
+																},
+															},
+															"port": schema.StringAttribute{
+																MarkdownDescription: `The port used for the ssh tunnel.`,
+																Computed:            true,
+																PlanModifiers: []planmodifier.String{
+																	stringplanmodifier.RequiresReplace(),
+																},
+															},
+															"root_certificate": schema.SingleNestedAttribute{
+																MarkdownDescription: `Root certificate information`,
+																Computed:            true,
+																Attributes: map[string]schema.Attribute{
+
+																	"content": schema.StringAttribute{
+																		MarkdownDescription: `Public certificate value`,
+																		Computed:            true,
+																		PlanModifiers: []planmodifier.String{
+																			stringplanmodifier.RequiresReplace(),
+																		},
+																	},
+																	"name": schema.StringAttribute{
+																		MarkdownDescription: `The name of the server protected by the certificate`,
+																		Computed:            true,
+																		PlanModifiers: []planmodifier.String{
+																			stringplanmodifier.RequiresReplace(),
+																		},
+																	},
+																},
+															},
+														},
+													},
+													"user": schema.SingleNestedAttribute{
+														MarkdownDescription: `User credentials used to connect to the device`,
+														Computed:            true,
+														Attributes: map[string]schema.Attribute{
+
+															"public_key": schema.StringAttribute{
+																MarkdownDescription: `The public key for the registered user`,
+																Computed:            true,
+																PlanModifiers: []planmodifier.String{
+																	stringplanmodifier.RequiresReplace(),
+																},
+															},
+															"secret": schema.SingleNestedAttribute{
+																MarkdownDescription: `Stores the user secret hash`,
+																Computed:            true,
+																Attributes: map[string]schema.Attribute{
+
+																	"hash": schema.StringAttribute{
+																		MarkdownDescription: `The hashed secret`,
+																		Computed:            true,
+																		PlanModifiers: []planmodifier.String{
+																			stringplanmodifier.RequiresReplace(),
+																		},
+																	},
+																},
+															},
+															"username": schema.StringAttribute{
+																MarkdownDescription: `The username added to Catalyst device`,
+																Computed:            true,
+																PlanModifiers: []planmodifier.String{
+																	stringplanmodifier.RequiresReplace(),
+																},
+															},
+														},
+													},
+												},
+											},
+											"device_id": schema.StringAttribute{
+												MarkdownDescription: `Import ID from the Import operation`,
+												Computed:            true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.RequiresReplace(),
+												},
+											},
+											"message": schema.StringAttribute{
+												MarkdownDescription: `Message related to whether or not the device was found and can be imported.`,
+												Computed:            true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.RequiresReplace(),
+												},
+											},
+											"status": schema.StringAttribute{
+												MarkdownDescription: `The import status of the device`,
+												Computed:            true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.RequiresReplace(),
+												},
+											},
+											"udi": schema.StringAttribute{
+												MarkdownDescription: `Device UDI certificate`,
+												Computed:            true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.RequiresReplace(),
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"options": schema.SingleNestedAttribute{
+						MarkdownDescription: `Additional options for the import`,
+						Optional:            true,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"skip_commit": schema.BoolAttribute{
+								MarkdownDescription: `Flag to skip adding the device to RDM`,
+								Optional:            true,
+								Computed:            true,
+								PlanModifiers: []planmodifier.Bool{
+									boolplanmodifier.RequiresReplace(),
+								},
+							},
+						},
+					},
 				},
 			},
 		},
@@ -417,7 +457,6 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringPrepareResource) Create(
 	}
 	//Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Organizations.CreateOrganizationInventoryOnboardingCloudMonitoringPrepare(vvOrganizationID, dataRequest)
 
@@ -436,7 +475,7 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringPrepareResource) Create(
 		return
 	}
 	//Item
-
+	// //entro aqui 2
 	// data2 := ResponseOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepare(data, response)
 
 	diags := resp.State.Set(ctx, &data)
@@ -452,6 +491,7 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringPrepareResource) Update(
 }
 
 func (r *OrganizationsInventoryOnboardingCloudMonitoringPrepareResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -501,6 +541,7 @@ type ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitori
 
 type RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareRs struct {
 	Devices *[]RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesRs `tfsdk:"devices"`
+	Options *RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareOptionsRs   `tfsdk:"options"`
 }
 
 type RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesRs struct {
@@ -557,6 +598,10 @@ type RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPre
 
 type RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAuthorizationGroupRs struct {
 	Name types.String `tfsdk:"name"`
+}
+
+type RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareOptionsRs struct {
+	SkipCommit types.Bool `tfsdk:"skip_commit"`
 }
 
 // FromBody
@@ -680,6 +725,18 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringPrepare) toSdkApiRequest
 			})
 		}
 	}
+	var requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareOptions *merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareOptions
+	if re.Options != nil {
+		skipCommit := func() *bool {
+			if !re.Options.SkipCommit.IsUnknown() && !re.Options.SkipCommit.IsNull() {
+				return re.Options.SkipCommit.ValueBoolPointer()
+			}
+			return nil
+		}()
+		requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareOptions = &merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareOptions{
+			SkipCommit: skipCommit,
+		}
+	}
 	out := merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepare{
 		Devices: func() *[]merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevices {
 			if len(requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevices) > 0 {
@@ -687,6 +744,7 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringPrepare) toSdkApiRequest
 			}
 			return nil
 		}(),
+		Options: requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareOptions,
 	}
 	return &out
 }
@@ -714,11 +772,11 @@ func ResponseOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPr
 												Name:    types.StringValue(item.ConfigParams.Tunnel.RootCertificate.Name),
 											}
 										}
-										return &ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareConfigParamsTunnelRootCertificate{}
+										return nil
 									}(),
 								}
 							}
-							return &ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareConfigParamsTunnel{}
+							return nil
 						}(),
 						User: func() *ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareConfigParamsUser {
 							if item.ConfigParams.User != nil {
@@ -730,16 +788,16 @@ func ResponseOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPr
 												Hash: types.StringValue(item.ConfigParams.User.Secret.Hash),
 											}
 										}
-										return &ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareConfigParamsUserSecret{}
+										return nil
 									}(),
 									Username: types.StringValue(item.ConfigParams.User.Username),
 								}
 							}
-							return &ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareConfigParamsUser{}
+							return nil
 						}(),
 					}
 				}
-				return &ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareConfigParams{}
+				return nil
 			}(),
 			DeviceID: types.StringValue(item.DeviceID),
 			Message:  types.StringValue(item.Message),

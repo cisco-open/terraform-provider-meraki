@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -57,6 +74,11 @@ func (d *NetworksSwitchStormControlDataSource) Schema(_ context.Context, _ datas
 						MarkdownDescription: `Multicast threshold.`,
 						Computed:            true,
 					},
+					"treat_these_traffic_types_as_one_threshold": schema.ListAttribute{
+						MarkdownDescription: `Grouped traffic types`,
+						Computed:            true,
+						ElementType:         types.StringType,
+					},
 					"unknown_unicast_threshold": schema.Int64Attribute{
 						MarkdownDescription: `Unknown Unicast threshold.`,
 						Computed:            true,
@@ -78,6 +100,8 @@ func (d *NetworksSwitchStormControlDataSource) Read(ctx context.Context, req dat
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetNetworkSwitchStormControl")
 		vvNetworkID := networksSwitchStormControl.NetworkID.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Switch.GetNetworkSwitchStormControl(vvNetworkID)
 
@@ -109,9 +133,10 @@ type NetworksSwitchStormControl struct {
 }
 
 type ResponseSwitchGetNetworkSwitchStormControl struct {
-	BroadcastThreshold      types.Int64 `tfsdk:"broadcast_threshold"`
-	MulticastThreshold      types.Int64 `tfsdk:"multicast_threshold"`
-	UnknownUnicastThreshold types.Int64 `tfsdk:"unknown_unicast_threshold"`
+	BroadcastThreshold                   types.Int64 `tfsdk:"broadcast_threshold"`
+	MulticastThreshold                   types.Int64 `tfsdk:"multicast_threshold"`
+	TreatTheseTrafficTypesAsOneThreshold types.List  `tfsdk:"treat_these_traffic_types_as_one_threshold"`
+	UnknownUnicastThreshold              types.Int64 `tfsdk:"unknown_unicast_threshold"`
 }
 
 // ToBody
@@ -129,6 +154,7 @@ func ResponseSwitchGetNetworkSwitchStormControlItemToBody(state NetworksSwitchSt
 			}
 			return types.Int64{}
 		}(),
+		TreatTheseTrafficTypesAsOneThreshold: StringSliceToList(response.TreatTheseTrafficTypesAsOneThreshold),
 		UnknownUnicastThreshold: func() types.Int64 {
 			if response.UnknownUnicastThreshold != nil {
 				return types.Int64Value(int64(*response.UnknownUnicastThreshold))

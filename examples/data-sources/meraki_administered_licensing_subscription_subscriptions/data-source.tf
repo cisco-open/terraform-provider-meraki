@@ -3,6 +3,7 @@ data "meraki_administered_licensing_subscription_subscriptions" "example" {
 
   end_date         = "string"
   ending_before    = "string"
+  name             = "string"
   organization_ids = ["string"]
   per_page         = 1
   product_types    = ["string"]

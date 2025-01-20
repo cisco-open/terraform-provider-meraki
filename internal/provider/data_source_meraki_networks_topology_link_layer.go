@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -195,6 +212,8 @@ func (d *NetworksTopologyLinkLayerDataSource) Read(ctx context.Context, req data
 		log.Printf("[DEBUG] Selected method: GetNetworkTopologyLinkLayer")
 		vvNetworkID := networksTopologyLinkLayer.NetworkID.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Networks.GetNetworkTopologyLinkLayer(vvNetworkID)
 
 		if err != nil || response1 == nil {
@@ -308,7 +327,7 @@ func ResponseNetworksGetNetworkTopologyLinkLayerItemToBody(state NetworksTopolog
 													Serial: types.StringValue(ends.Device.Serial),
 												}
 											}
-											return &ResponseNetworksGetNetworkTopologyLinkLayerLinksEndsDevice{}
+											return nil
 										}(),
 										Discovered: func() *ResponseNetworksGetNetworkTopologyLinkLayerLinksEndsDiscovered {
 											if ends.Discovered != nil {
@@ -325,7 +344,7 @@ func ResponseNetworksGetNetworkTopologyLinkLayerItemToBody(state NetworksTopolog
 																PortID: types.StringValue(ends.Discovered.Cdp.PortID),
 															}
 														}
-														return &ResponseNetworksGetNetworkTopologyLinkLayerLinksEndsDiscoveredCdp{}
+														return nil
 													}(),
 													Lldp: func() *ResponseNetworksGetNetworkTopologyLinkLayerLinksEndsDiscoveredLldp {
 														if ends.Discovered.Lldp != nil {
@@ -334,11 +353,11 @@ func ResponseNetworksGetNetworkTopologyLinkLayerItemToBody(state NetworksTopolog
 																PortID:          types.StringValue(ends.Discovered.Lldp.PortID),
 															}
 														}
-														return &ResponseNetworksGetNetworkTopologyLinkLayerLinksEndsDiscoveredLldp{}
+														return nil
 													}(),
 												}
 											}
-											return &ResponseNetworksGetNetworkTopologyLinkLayerLinksEndsDiscovered{}
+											return nil
 										}(),
 										Node: func() *ResponseNetworksGetNetworkTopologyLinkLayerLinksEndsNode {
 											if ends.Node != nil {
@@ -347,20 +366,20 @@ func ResponseNetworksGetNetworkTopologyLinkLayerItemToBody(state NetworksTopolog
 													Type:      types.StringValue(ends.Node.Type),
 												}
 											}
-											return &ResponseNetworksGetNetworkTopologyLinkLayerLinksEndsNode{}
+											return nil
 										}(),
 									}
 								}
 								return &result
 							}
-							return &[]ResponseNetworksGetNetworkTopologyLinkLayerLinksEnds{}
+							return nil
 						}(),
 						LastReportedAt: types.StringValue(links.LastReportedAt),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseNetworksGetNetworkTopologyLinkLayerLinks{}
+			return nil
 		}(),
 		Nodes: func() *[]ResponseNetworksGetNetworkTopologyLinkLayerNodes {
 			if response.Nodes != nil {
@@ -382,11 +401,11 @@ func ResponseNetworksGetNetworkTopologyLinkLayerItemToBody(state NetworksTopolog
 												SystemName:         types.StringValue(nodes.Discovered.Lldp.SystemName),
 											}
 										}
-										return &ResponseNetworksGetNetworkTopologyLinkLayerNodesDiscoveredLldp{}
+										return nil
 									}(),
 								}
 							}
-							return &ResponseNetworksGetNetworkTopologyLinkLayerNodesDiscovered{}
+							return nil
 						}(),
 						Mac: types.StringValue(nodes.Mac),
 						Root: func() types.Bool {
@@ -400,7 +419,7 @@ func ResponseNetworksGetNetworkTopologyLinkLayerItemToBody(state NetworksTopolog
 				}
 				return &result
 			}
-			return &[]ResponseNetworksGetNetworkTopologyLinkLayerNodes{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

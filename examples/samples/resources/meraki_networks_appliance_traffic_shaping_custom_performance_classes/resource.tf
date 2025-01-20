@@ -21,8 +21,8 @@ resource "meraki_networks_appliance_traffic_shaping_custom_performance_classes" 
 
     max_jitter          = 100
     max_latency         = 100
-    max_loss_percentage = 5
-    name                = "myCustomPerformanceClass"
+    max_loss_percentage = 51
+    name                = "myCustomPerformanceClass2"
   }
 }
 

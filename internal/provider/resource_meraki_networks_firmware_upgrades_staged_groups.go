@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -261,7 +277,7 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Create(ctx context.Contex
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter GroupID",
-				err.Error(),
+				"Error",
 			)
 			return
 		}
@@ -523,7 +539,7 @@ func (r *NetworksFirmwareUpgradesStagedGroupsRs) toSdkApiRequestUpdate(ctx conte
 	if r.AssignedDevices != nil {
 		var requestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevicesDevices []merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevicesDevices
 		if r.AssignedDevices.Devices != nil {
-			for _, rItem1 := range *r.AssignedDevices.Devices {
+			for _, rItem1 := range *r.AssignedDevices.Devices { //AssignedDevices.Devices// name: devices
 				name := rItem1.Name.ValueString()
 				serial := rItem1.Serial.ValueString()
 				requestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevicesDevices = append(requestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevicesDevices, merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevicesDevices{
@@ -602,7 +618,7 @@ func ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupItemToBodyRs(state Net
 							}
 							return &result
 						}
-						return &[]ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupAssignedDevicesDevicesRs{}
+						return nil
 					}(),
 					SwitchStacks: func() *[]ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupAssignedDevicesSwitchStacksRs {
 						if response.AssignedDevices.SwitchStacks != nil {
@@ -615,11 +631,11 @@ func ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupItemToBodyRs(state Net
 							}
 							return &result
 						}
-						return &[]ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupAssignedDevicesSwitchStacksRs{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupAssignedDevicesRs{}
+			return nil
 		}(),
 		Description: types.StringValue(response.Description),
 		GroupID:     types.StringValue(response.GroupID),

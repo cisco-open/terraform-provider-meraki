@@ -1,16 +1,33 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -63,6 +80,16 @@ func (r *NetworksSwitchStormControlResource) Schema(_ context.Context, _ resourc
 			"network_id": schema.StringAttribute{
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
+			},
+			"treat_these_traffic_types_as_one_threshold": schema.SetAttribute{
+				MarkdownDescription: `Grouped traffic types`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+
+				ElementType: types.StringType,
 			},
 			"unknown_unicast_threshold": schema.Int64Attribute{
 				MarkdownDescription: `Unknown Unicast threshold.`,
@@ -250,10 +277,11 @@ func (r *NetworksSwitchStormControlResource) Delete(ctx context.Context, req res
 
 // TF Structs Schema
 type NetworksSwitchStormControlRs struct {
-	NetworkID               types.String `tfsdk:"network_id"`
-	BroadcastThreshold      types.Int64  `tfsdk:"broadcast_threshold"`
-	MulticastThreshold      types.Int64  `tfsdk:"multicast_threshold"`
-	UnknownUnicastThreshold types.Int64  `tfsdk:"unknown_unicast_threshold"`
+	NetworkID                            types.String `tfsdk:"network_id"`
+	BroadcastThreshold                   types.Int64  `tfsdk:"broadcast_threshold"`
+	MulticastThreshold                   types.Int64  `tfsdk:"multicast_threshold"`
+	TreatTheseTrafficTypesAsOneThreshold types.Set    `tfsdk:"treat_these_traffic_types_as_one_threshold"`
+	UnknownUnicastThreshold              types.Int64  `tfsdk:"unknown_unicast_threshold"`
 }
 
 // FromBody
@@ -299,6 +327,7 @@ func ResponseSwitchGetNetworkSwitchStormControlItemToBodyRs(state NetworksSwitch
 			}
 			return types.Int64{}
 		}(),
+		TreatTheseTrafficTypesAsOneThreshold: StringSliceToSet(response.TreatTheseTrafficTypesAsOneThreshold),
 		UnknownUnicastThreshold: func() types.Int64 {
 			if response.UnknownUnicastThreshold != nil {
 				return types.Int64Value(int64(*response.UnknownUnicastThreshold))

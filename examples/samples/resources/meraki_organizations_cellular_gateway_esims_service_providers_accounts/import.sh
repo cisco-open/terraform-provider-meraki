@@ -1,0 +1,1 @@
+terraform import meraki_organizations_cellular_gateway_esims_service_providers_accounts.example "organization_id"

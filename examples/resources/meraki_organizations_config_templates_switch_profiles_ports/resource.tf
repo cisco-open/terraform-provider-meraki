@@ -1,16 +1,20 @@
 
 resource "meraki_organizations_config_templates_switch_profiles_ports" "example" {
 
-  access_policy_number      = 2
-  access_policy_type        = "Sticky MAC allow list"
-  allowed_vlans             = "1,3,5-10"
-  config_template_id        = "string"
-  dai_trusted               = false
+  access_policy_number = 2
+  access_policy_type   = "Sticky MAC allow list"
+  allowed_vlans        = "1,3,5-10"
+  config_template_id   = "string"
+  dai_trusted          = false
+  dot3az = {
+
+    enabled = false
+  }
   enabled                   = true
   flexible_stacking_enabled = true
   isolation_enabled         = false
   link_negotiation          = "Auto negotiate"
-  mac_allow_list            = ["34:56:fe:ce:8e:b0", "34:56:fe:ce:8e:b1"]
+  mac_allow_list            = ["34:56:fe:ce:8e:a0", "34:56:fe:ce:8e:a1"]
   name                      = "My switch port"
   organization_id           = "string"
   poe_enabled               = true

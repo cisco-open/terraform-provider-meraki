@@ -17,7 +17,7 @@ variable "my_network_id" {
 }
 resource "meraki_networks_wireless_settings" "example" {
 
-  ipv6_bridge_enabled        = false
+  ipv6_bridge_enabled        = true
   led_lights_on              = false
   location_analytics_enabled = false
   meshing_enabled            = true

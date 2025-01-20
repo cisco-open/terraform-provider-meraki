@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -144,6 +161,18 @@ func (d *OrganizationsDevicesUplinksAddressesByDeviceDataSource) Schema(_ contex
 													MarkdownDescription: `Device uplink gateway address.`,
 													Computed:            true,
 												},
+												"nameservers": schema.SingleNestedAttribute{
+													MarkdownDescription: `Device DNS nameserver information.`,
+													Computed:            true,
+													Attributes: map[string]schema.Attribute{
+
+														"addresses": schema.ListAttribute{
+															MarkdownDescription: `Device DNS nameserver address.`,
+															Computed:            true,
+															ElementType:         types.StringType,
+														},
+													},
+												},
 												"protocol": schema.StringAttribute{
 													MarkdownDescription: `Type of address for the device uplink. Available options are: ipv4, ipv6.`,
 													Computed:            true,
@@ -155,6 +184,17 @@ func (d *OrganizationsDevicesUplinksAddressesByDeviceDataSource) Schema(_ contex
 
 														"address": schema.StringAttribute{
 															MarkdownDescription: `The device uplink public IP address.`,
+															Computed:            true,
+														},
+													},
+												},
+												"vlan": schema.SingleNestedAttribute{
+													MarkdownDescription: `VLAN information of the uplink interface`,
+													Computed:            true,
+													Attributes: map[string]schema.Attribute{
+
+														"id": schema.StringAttribute{
+															MarkdownDescription: `VLAN ID of the uplink interface`,
 															Computed:            true,
 														},
 													},
@@ -197,6 +237,8 @@ func (d *OrganizationsDevicesUplinksAddressesByDeviceDataSource) Read(ctx contex
 		queryParams1.Serials = elementsToStrings(ctx, organizationsDevicesUplinksAddressesByDevice.Serials)
 		queryParams1.Tags = elementsToStrings(ctx, organizationsDevicesUplinksAddressesByDevice.Tags)
 		queryParams1.TagsFilterType = organizationsDevicesUplinksAddressesByDevice.TagsFilterType.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Organizations.GetOrganizationDevicesUplinksAddressesByDevice(vvOrganizationID, &queryParams1)
 
@@ -255,15 +297,25 @@ type ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUpli
 }
 
 type ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddresses struct {
-	Address        types.String                                                                                   `tfsdk:"address"`
-	AssignmentMode types.String                                                                                   `tfsdk:"assignment_mode"`
-	Gateway        types.String                                                                                   `tfsdk:"gateway"`
-	Protocol       types.String                                                                                   `tfsdk:"protocol"`
-	Public         *ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesPublic `tfsdk:"public"`
+	Address        types.String                                                                                        `tfsdk:"address"`
+	AssignmentMode types.String                                                                                        `tfsdk:"assignment_mode"`
+	Gateway        types.String                                                                                        `tfsdk:"gateway"`
+	Nameservers    *ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesNameservers `tfsdk:"nameservers"`
+	Protocol       types.String                                                                                        `tfsdk:"protocol"`
+	Public         *ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesPublic      `tfsdk:"public"`
+	VLAN           *ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesVlan        `tfsdk:"vlan"`
+}
+
+type ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesNameservers struct {
+	Addresses types.List `tfsdk:"addresses"`
 }
 
 type ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesPublic struct {
 	Address types.String `tfsdk:"address"`
+}
+
+type ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesVlan struct {
+	ID types.String `tfsdk:"id"`
 }
 
 // ToBody
@@ -279,7 +331,7 @@ func ResponseOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceItemsToB
 						ID: types.StringValue(item.Network.ID),
 					}
 				}
-				return &ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceNetwork{}
+				return nil
 			}(),
 			ProductType: types.StringValue(item.ProductType),
 			Serial:      types.StringValue(item.Serial),
@@ -297,27 +349,43 @@ func ResponseOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceItemsToB
 											Address:        types.StringValue(addresses.Address),
 											AssignmentMode: types.StringValue(addresses.AssignmentMode),
 											Gateway:        types.StringValue(addresses.Gateway),
-											Protocol:       types.StringValue(addresses.Protocol),
+											Nameservers: func() *ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesNameservers {
+												if addresses.Nameservers != nil {
+													return &ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesNameservers{
+														Addresses: StringSliceToList(addresses.Nameservers.Addresses),
+													}
+												}
+												return nil
+											}(),
+											Protocol: types.StringValue(addresses.Protocol),
 											Public: func() *ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesPublic {
 												if addresses.Public != nil {
 													return &ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesPublic{
 														Address: types.StringValue(addresses.Public.Address),
 													}
 												}
-												return &ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesPublic{}
+												return nil
+											}(),
+											VLAN: func() *ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesVlan {
+												if addresses.VLAN != nil {
+													return &ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesVlan{
+														ID: types.StringValue(addresses.VLAN.ID),
+													}
+												}
+												return nil
 											}(),
 										}
 									}
 									return &result
 								}
-								return &[]ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddresses{}
+								return nil
 							}(),
 							Interface: types.StringValue(uplinks.Interface),
 						}
 					}
 					return &result
 				}
-				return &[]ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinks{}
+				return nil
 			}(),
 		}
 		items = append(items, itemState)

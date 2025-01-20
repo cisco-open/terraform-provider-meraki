@@ -8,6 +8,7 @@ data "meraki_organizations_devices_availabilities" "example" {
   product_types    = ["string"]
   serials          = ["string"]
   starting_after   = "string"
+  statuses         = ["string"]
   tags             = ["string"]
   tags_filter_type = "string"
 }

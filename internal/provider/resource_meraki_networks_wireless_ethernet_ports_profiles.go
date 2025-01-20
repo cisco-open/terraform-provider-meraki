@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -524,7 +524,7 @@ func ResponseWirelessGetNetworkWirelessEthernetPortsProfileItemToBodyRs(state Ne
 				}
 				return &result
 			}
-			return &[]ResponseWirelessGetNetworkWirelessEthernetPortsProfilePortsRs{}
+			return nil
 		}(),
 		ProfileID: types.StringValue(response.ProfileID),
 		UsbPorts: func() *[]ResponseWirelessGetNetworkWirelessEthernetPortsProfileUsbPortsRs {
@@ -549,7 +549,7 @@ func ResponseWirelessGetNetworkWirelessEthernetPortsProfileItemToBodyRs(state Ne
 				}
 				return &result
 			}
-			return &[]ResponseWirelessGetNetworkWirelessEthernetPortsProfileUsbPortsRs{}
+			return nil
 		}(),
 	}
 	if is_read {

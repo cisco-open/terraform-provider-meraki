@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE ACTION
@@ -5,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -46,12 +62,37 @@ func (r *NetworksApplianceTrafficShapingCustomPerformanceClassesResource) Metada
 func (r *NetworksApplianceTrafficShapingCustomPerformanceClassesResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-
 			"network_id": schema.StringAttribute{
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"item": schema.SingleNestedAttribute{
+				Computed: true,
+				Attributes: map[string]schema.Attribute{
+
+					"custom_performance_class_id": schema.StringAttribute{
+						MarkdownDescription: `ID of the custom performance class`,
+						Computed:            true,
+					},
+					"max_jitter": schema.Int64Attribute{
+						MarkdownDescription: `Maximum jitter in milliseconds`,
+						Computed:            true,
+					},
+					"max_latency": schema.Int64Attribute{
+						MarkdownDescription: `Maximum latency in milliseconds`,
+						Computed:            true,
+					},
+					"max_loss_percentage": schema.Int64Attribute{
+						MarkdownDescription: `Maximum percentage of packet loss`,
+						Computed:            true,
+					},
+					"name": schema.StringAttribute{
+						MarkdownDescription: `Name of the custom performance class`,
+						Computed:            true,
+					},
 				},
 			},
 			"parameters": schema.SingleNestedAttribute{
@@ -114,11 +155,10 @@ func (r *NetworksApplianceTrafficShapingCustomPerformanceClassesResource) Create
 	}
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	dataRequest := data.toSdkApiRequestCreate(ctx)
-	restyResp1, err := r.client.Appliance.CreateNetworkApplianceTrafficShapingCustomPerformanceClass(vvNetworkID, dataRequest)
+	response, restyResp1, err := r.client.Appliance.CreateNetworkApplianceTrafficShapingCustomPerformanceClass(vvNetworkID, dataRequest)
 
-	if err != nil {
+	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkApplianceTrafficShapingCustomPerformanceClass",
@@ -133,8 +173,7 @@ func (r *NetworksApplianceTrafficShapingCustomPerformanceClassesResource) Create
 		return
 	}
 	//Item
-
-	// data = ResponseApplianceCreateNetworkApplianceTrafficShapingCustomPerformanceClass(data, response)
+	data = ResponseApplianceCreateNetworkApplianceTrafficShapingCustomPerformanceClassItemToBody(data, response)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -149,13 +188,23 @@ func (r *NetworksApplianceTrafficShapingCustomPerformanceClassesResource) Update
 }
 
 func (r *NetworksApplianceTrafficShapingCustomPerformanceClassesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
 // TF Structs Schema
 type NetworksApplianceTrafficShapingCustomPerformanceClasses struct {
 	NetworkID  types.String                                                                  `tfsdk:"network_id"`
+	Item       *ResponseApplianceCreateNetworkApplianceTrafficShapingCustomPerformanceClass  `tfsdk:"item"`
 	Parameters *RequestApplianceCreateNetworkApplianceTrafficShapingCustomPerformanceClassRs `tfsdk:"parameters"`
+}
+
+type ResponseApplianceCreateNetworkApplianceTrafficShapingCustomPerformanceClass struct {
+	CustomPerformanceClassID types.String `tfsdk:"custom_performance_class_id"`
+	MaxJitter                types.Int64  `tfsdk:"max_jitter"`
+	MaxLatency               types.Int64  `tfsdk:"max_latency"`
+	MaxLossPercentage        types.Int64  `tfsdk:"max_loss_percentage"`
+	Name                     types.String `tfsdk:"name"`
 }
 
 type RequestApplianceCreateNetworkApplianceTrafficShapingCustomPerformanceClassRs struct {
@@ -202,4 +251,30 @@ func (r *NetworksApplianceTrafficShapingCustomPerformanceClasses) toSdkApiReques
 	return &out
 }
 
-//ToBody
+// ToBody
+func ResponseApplianceCreateNetworkApplianceTrafficShapingCustomPerformanceClassItemToBody(state NetworksApplianceTrafficShapingCustomPerformanceClasses, response *merakigosdk.ResponseApplianceCreateNetworkApplianceTrafficShapingCustomPerformanceClass) NetworksApplianceTrafficShapingCustomPerformanceClasses {
+	itemState := ResponseApplianceCreateNetworkApplianceTrafficShapingCustomPerformanceClass{
+		CustomPerformanceClassID: types.StringValue(response.CustomPerformanceClassID),
+		MaxJitter: func() types.Int64 {
+			if response.MaxJitter != nil {
+				return types.Int64Value(int64(*response.MaxJitter))
+			}
+			return types.Int64{}
+		}(),
+		MaxLatency: func() types.Int64 {
+			if response.MaxLatency != nil {
+				return types.Int64Value(int64(*response.MaxLatency))
+			}
+			return types.Int64{}
+		}(),
+		MaxLossPercentage: func() types.Int64 {
+			if response.MaxLossPercentage != nil {
+				return types.Int64Value(int64(*response.MaxLossPercentage))
+			}
+			return types.Int64{}
+		}(),
+		Name: types.StringValue(response.Name),
+	}
+	state.Item = &itemState
+	return state
+}

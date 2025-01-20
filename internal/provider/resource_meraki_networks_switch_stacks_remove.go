@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE ACTION
@@ -5,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -66,6 +82,40 @@ func (r *NetworksSwitchStacksRemoveResource) Schema(_ context.Context, _ resourc
 					"id": schema.StringAttribute{
 						MarkdownDescription: `ID of the Switch stack`,
 						Computed:            true,
+					},
+					"is_monitor_only": schema.BoolAttribute{
+						MarkdownDescription: `Tells if stack is Monitored Stack.`,
+						Computed:            true,
+					},
+					"members": schema.SetNestedAttribute{
+						MarkdownDescription: `Members of the Stack`,
+						Computed:            true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+
+								"mac": schema.StringAttribute{
+									MarkdownDescription: `MAC address of the device`,
+									Computed:            true,
+								},
+								"model": schema.StringAttribute{
+									MarkdownDescription: `Model of the device`,
+									Computed:            true,
+								},
+								"name": schema.StringAttribute{
+									MarkdownDescription: `Name of the device`,
+									Computed:            true,
+								},
+								"role": schema.StringAttribute{
+									MarkdownDescription: `Role of the device
+                                                Allowed values: [active,member,standby]`,
+									Computed: true,
+								},
+								"serial": schema.StringAttribute{
+									MarkdownDescription: `Serial number of the device`,
+									Computed:            true,
+								},
+							},
+						},
 					},
 					"name": schema.StringAttribute{
 						MarkdownDescription: `Name of the Switch stack`,
@@ -140,15 +190,15 @@ func (r *NetworksSwitchStacksRemoveResource) Create(ctx context.Context, req res
 }
 
 func (r *NetworksSwitchStacksRemoveResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *NetworksSwitchStacksRemoveResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
 func (r *NetworksSwitchStacksRemoveResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
@@ -161,9 +211,19 @@ type NetworksSwitchStacksRemove struct {
 }
 
 type ResponseSwitchRemoveNetworkSwitchStack struct {
-	ID      types.String `tfsdk:"id"`
-	Name    types.String `tfsdk:"name"`
-	Serials types.Set    `tfsdk:"serials"`
+	ID            types.String                                     `tfsdk:"id"`
+	IsMonitorOnly types.Bool                                       `tfsdk:"is_monitor_only"`
+	Members       *[]ResponseSwitchRemoveNetworkSwitchStackMembers `tfsdk:"members"`
+	Name          types.String                                     `tfsdk:"name"`
+	Serials       types.Set                                        `tfsdk:"serials"`
+}
+
+type ResponseSwitchRemoveNetworkSwitchStackMembers struct {
+	Mac    types.String `tfsdk:"mac"`
+	Model  types.String `tfsdk:"model"`
+	Name   types.String `tfsdk:"name"`
+	Role   types.String `tfsdk:"role"`
+	Serial types.String `tfsdk:"serial"`
 }
 
 type RequestSwitchRemoveNetworkSwitchStackRs struct {
@@ -189,7 +249,29 @@ func (r *NetworksSwitchStacksRemove) toSdkApiRequestCreate(ctx context.Context) 
 // ToBody
 func ResponseSwitchRemoveNetworkSwitchStackItemToBody(state NetworksSwitchStacksRemove, response *merakigosdk.ResponseSwitchRemoveNetworkSwitchStack) NetworksSwitchStacksRemove {
 	itemState := ResponseSwitchRemoveNetworkSwitchStack{
-		ID:      types.StringValue(response.ID),
+		ID: types.StringValue(response.ID),
+		IsMonitorOnly: func() types.Bool {
+			if response.IsMonitorOnly != nil {
+				return types.BoolValue(*response.IsMonitorOnly)
+			}
+			return types.Bool{}
+		}(),
+		Members: func() *[]ResponseSwitchRemoveNetworkSwitchStackMembers {
+			if response.Members != nil {
+				result := make([]ResponseSwitchRemoveNetworkSwitchStackMembers, len(*response.Members))
+				for i, members := range *response.Members {
+					result[i] = ResponseSwitchRemoveNetworkSwitchStackMembers{
+						Mac:    types.StringValue(members.Mac),
+						Model:  types.StringValue(members.Model),
+						Name:   types.StringValue(members.Name),
+						Role:   types.StringValue(members.Role),
+						Serial: types.StringValue(members.Serial),
+					}
+				}
+				return &result
+			}
+			return nil
+		}(),
 		Name:    types.StringValue(response.Name),
 		Serials: StringSliceToSet(response.Serials),
 	}

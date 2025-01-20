@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -466,6 +483,8 @@ func (d *NetworksFloorPlansDataSource) Read(ctx context.Context, req datasource.
 		log.Printf("[DEBUG] Selected method: GetNetworkFloorPlans")
 		vvNetworkID := networksFloorPlans.NetworkID.ValueString()
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.Networks.GetNetworkFloorPlans(vvNetworkID)
 
 		if err != nil || response1 == nil {
@@ -491,6 +510,8 @@ func (d *NetworksFloorPlansDataSource) Read(ctx context.Context, req datasource.
 		log.Printf("[DEBUG] Selected method: GetNetworkFloorPlan")
 		vvNetworkID := networksFloorPlans.NetworkID.ValueString()
 		vvFloorPlanID := networksFloorPlans.FloorPlanID.ValueString()
+
+		// has_unknown_response: None
 
 		response2, restyResp2, err := d.client.Networks.GetNetworkFloorPlan(vvNetworkID, vvFloorPlanID)
 
@@ -675,7 +696,7 @@ func ResponseNetworksGetNetworkFloorPlansItemsToBody(state NetworksFloorPlans, r
 						}(),
 					}
 				}
-				return &ResponseItemNetworksGetNetworkFloorPlansBottomLeftCorner{}
+				return nil
 			}(),
 			BottomRightCorner: func() *ResponseItemNetworksGetNetworkFloorPlansBottomRightCorner {
 				if item.BottomRightCorner != nil {
@@ -694,7 +715,7 @@ func ResponseNetworksGetNetworkFloorPlansItemsToBody(state NetworksFloorPlans, r
 						}(),
 					}
 				}
-				return &ResponseItemNetworksGetNetworkFloorPlansBottomRightCorner{}
+				return nil
 			}(),
 			Center: func() *ResponseItemNetworksGetNetworkFloorPlansCenter {
 				if item.Center != nil {
@@ -713,7 +734,7 @@ func ResponseNetworksGetNetworkFloorPlansItemsToBody(state NetworksFloorPlans, r
 						}(),
 					}
 				}
-				return &ResponseItemNetworksGetNetworkFloorPlansCenter{}
+				return nil
 			}(),
 			Devices: func() *[]ResponseItemNetworksGetNetworkFloorPlansDevices {
 				if item.Devices != nil {
@@ -732,7 +753,7 @@ func ResponseNetworksGetNetworkFloorPlansItemsToBody(state NetworksFloorPlans, r
 									}
 									return &result
 								}
-								return &[]ResponseItemNetworksGetNetworkFloorPlansDevicesDetails{}
+								return nil
 							}(),
 							Firmware: types.StringValue(devices.Firmware),
 							Imei:     types.StringValue(devices.Imei),
@@ -761,7 +782,7 @@ func ResponseNetworksGetNetworkFloorPlansItemsToBody(state NetworksFloorPlans, r
 					}
 					return &result
 				}
-				return &[]ResponseItemNetworksGetNetworkFloorPlansDevices{}
+				return nil
 			}(),
 			FloorPlanID: types.StringValue(item.FloorPlanID),
 			Height: func() types.Float64 {
@@ -792,7 +813,7 @@ func ResponseNetworksGetNetworkFloorPlansItemsToBody(state NetworksFloorPlans, r
 						}(),
 					}
 				}
-				return &ResponseItemNetworksGetNetworkFloorPlansTopLeftCorner{}
+				return nil
 			}(),
 			TopRightCorner: func() *ResponseItemNetworksGetNetworkFloorPlansTopRightCorner {
 				if item.TopRightCorner != nil {
@@ -811,7 +832,7 @@ func ResponseNetworksGetNetworkFloorPlansItemsToBody(state NetworksFloorPlans, r
 						}(),
 					}
 				}
-				return &ResponseItemNetworksGetNetworkFloorPlansTopRightCorner{}
+				return nil
 			}(),
 			Width: func() types.Float64 {
 				if item.Width != nil {
@@ -845,7 +866,7 @@ func ResponseNetworksGetNetworkFloorPlanItemToBody(state NetworksFloorPlans, res
 					}(),
 				}
 			}
-			return &ResponseNetworksGetNetworkFloorPlanBottomLeftCorner{}
+			return nil
 		}(),
 		BottomRightCorner: func() *ResponseNetworksGetNetworkFloorPlanBottomRightCorner {
 			if response.BottomRightCorner != nil {
@@ -864,7 +885,7 @@ func ResponseNetworksGetNetworkFloorPlanItemToBody(state NetworksFloorPlans, res
 					}(),
 				}
 			}
-			return &ResponseNetworksGetNetworkFloorPlanBottomRightCorner{}
+			return nil
 		}(),
 		Center: func() *ResponseNetworksGetNetworkFloorPlanCenter {
 			if response.Center != nil {
@@ -883,7 +904,7 @@ func ResponseNetworksGetNetworkFloorPlanItemToBody(state NetworksFloorPlans, res
 					}(),
 				}
 			}
-			return &ResponseNetworksGetNetworkFloorPlanCenter{}
+			return nil
 		}(),
 		Devices: func() *[]ResponseNetworksGetNetworkFloorPlanDevices {
 			if response.Devices != nil {
@@ -902,7 +923,7 @@ func ResponseNetworksGetNetworkFloorPlanItemToBody(state NetworksFloorPlans, res
 								}
 								return &result
 							}
-							return &[]ResponseNetworksGetNetworkFloorPlanDevicesDetails{}
+							return nil
 						}(),
 						Firmware: types.StringValue(devices.Firmware),
 						Imei:     types.StringValue(devices.Imei),
@@ -931,7 +952,7 @@ func ResponseNetworksGetNetworkFloorPlanItemToBody(state NetworksFloorPlans, res
 				}
 				return &result
 			}
-			return &[]ResponseNetworksGetNetworkFloorPlanDevices{}
+			return nil
 		}(),
 		FloorPlanID: types.StringValue(response.FloorPlanID),
 		Height: func() types.Float64 {
@@ -962,7 +983,7 @@ func ResponseNetworksGetNetworkFloorPlanItemToBody(state NetworksFloorPlans, res
 					}(),
 				}
 			}
-			return &ResponseNetworksGetNetworkFloorPlanTopLeftCorner{}
+			return nil
 		}(),
 		TopRightCorner: func() *ResponseNetworksGetNetworkFloorPlanTopRightCorner {
 			if response.TopRightCorner != nil {
@@ -981,7 +1002,7 @@ func ResponseNetworksGetNetworkFloorPlanItemToBody(state NetworksFloorPlans, res
 					}(),
 				}
 			}
-			return &ResponseNetworksGetNetworkFloorPlanTopRightCorner{}
+			return nil
 		}(),
 		Width: func() types.Float64 {
 			if response.Width != nil {

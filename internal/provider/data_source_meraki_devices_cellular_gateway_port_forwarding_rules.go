@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -50,30 +67,39 @@ func (d *DevicesCellularGatewayPortForwardingRulesDataSource) Schema(_ context.C
 				Attributes: map[string]schema.Attribute{
 
 					"rules": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `An array of port forwarding params`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"access": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `*any* or *restricted*. Specify the right to make inbound connections on the specified ports or port ranges. If *restricted*, a list of allowed IPs is mandatory.`,
+									Computed:            true,
+								},
+								"allowed_ips": schema.ListAttribute{
+									MarkdownDescription: `An array of ranges of WAN IP addresses that are allowed to make inbound connections on the specified ports or port ranges.`,
+									Computed:            true,
+									ElementType:         types.StringType,
 								},
 								"lan_ip": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `The IP address of the server or device that hosts the internal resource that you wish to make available on the WAN`,
+									Computed:            true,
 								},
 								"local_port": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `A port or port ranges that will receive the forwarded traffic from the WAN`,
+									Computed:            true,
 								},
 								"name": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `A descriptive name for the rule`,
+									Computed:            true,
 								},
 								"protocol": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `TCP or UDP`,
+									Computed:            true,
 								},
 								"public_port": schema.StringAttribute{
-									Computed: true,
-								},
-								"uplink": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `A port or port ranges that will be forwarded to the host on the LAN`,
+									Computed:            true,
 								},
 							},
 						},
@@ -95,6 +121,8 @@ func (d *DevicesCellularGatewayPortForwardingRulesDataSource) Read(ctx context.C
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetDeviceCellularGatewayPortForwardingRules")
 		vvSerial := devicesCellularGatewayPortForwardingRules.Serial.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.CellularGateway.GetDeviceCellularGatewayPortForwardingRules(vvSerial)
 
@@ -131,12 +159,12 @@ type ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRules struct {
 
 type ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRulesRules struct {
 	Access     types.String `tfsdk:"access"`
+	AllowedIPs types.List   `tfsdk:"allowed_ips"`
 	LanIP      types.String `tfsdk:"lan_ip"`
 	LocalPort  types.String `tfsdk:"local_port"`
 	Name       types.String `tfsdk:"name"`
 	Protocol   types.String `tfsdk:"protocol"`
 	PublicPort types.String `tfsdk:"public_port"`
-	Uplink     types.String `tfsdk:"uplink"`
 }
 
 // ToBody
@@ -148,17 +176,17 @@ func ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRulesItemToBod
 				for i, rules := range *response.Rules {
 					result[i] = ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRulesRules{
 						Access:     types.StringValue(rules.Access),
+						AllowedIPs: StringSliceToList(rules.AllowedIPs),
 						LanIP:      types.StringValue(rules.LanIP),
 						LocalPort:  types.StringValue(rules.LocalPort),
 						Name:       types.StringValue(rules.Name),
 						Protocol:   types.StringValue(rules.Protocol),
 						PublicPort: types.StringValue(rules.PublicPort),
-						Uplink:     types.StringValue(rules.Uplink),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRulesRules{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

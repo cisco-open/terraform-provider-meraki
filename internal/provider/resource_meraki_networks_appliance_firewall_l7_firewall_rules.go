@@ -1,10 +1,26 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -55,6 +71,7 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Schema(_ context.Cont
 			},
 			"rules": schema.SetNestedAttribute{
 				MarkdownDescription: `An ordered array of the MX L7 firewall rules`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
@@ -397,11 +414,6 @@ type ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesRs struct {
 	ValueObj  *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj `tfsdk:"value_obj"`
 }
 
-type ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj struct {
-	ID   types.String `tfsdk:"id"`
-	Name types.String `tfsdk:"name"`
-}
-
 // FromBody
 func (r *NetworksApplianceFirewallL7FirewallRulesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL7FirewallRules {
 	var requestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRules []merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRules
@@ -440,7 +452,7 @@ func (r *NetworksApplianceFirewallL7FirewallRulesRs) toSdkApiRequestUpdate(ctx c
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL7FirewallRules{
 		Rules: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRules {
-			if len(requestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRules) > 0 {
+			if len(requestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRules) > 0 || r.Rules != nil {
 				return &requestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRules
 			} else {
 				rules := make([]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRules, 0)
@@ -486,7 +498,7 @@ func ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesItemToBodyRs(sta
 				}
 				return &result
 			}
-			return &[]ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesRs{}
+			return nil
 		}(),
 		Rules: state.Rules,
 	}

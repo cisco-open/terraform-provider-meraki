@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -54,7 +71,8 @@ func (d *NetworksApplianceStaticRoutesDataSource) Schema(_ context.Context, _ da
 				Attributes: map[string]schema.Attribute{
 
 					"enabled": schema.BoolAttribute{
-						Computed: true,
+						MarkdownDescription: `Whether the route is enabled or not`,
+						Computed:            true,
 					},
 					"fixed_ip_assignments": schema.SingleNestedAttribute{
 						Computed: true,
@@ -75,42 +93,53 @@ func (d *NetworksApplianceStaticRoutesDataSource) Schema(_ context.Context, _ da
 						},
 					},
 					"gateway_ip": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Gateway IP address (next hop)`,
+						Computed:            true,
 					},
 					"gateway_vlan_id": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `Gateway VLAN ID`,
+						Computed:            true,
 					},
 					"id": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Route ID`,
+						Computed:            true,
 					},
 					"ip_version": schema.Int64Attribute{
-						Computed: true,
+						MarkdownDescription: `IP protocol version`,
+						Computed:            true,
 					},
 					"name": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Name of the route`,
+						Computed:            true,
 					},
 					"network_id": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Network ID`,
+						Computed:            true,
 					},
 					"reserved_ip_ranges": schema.SetNestedAttribute{
-						Computed: true,
+						MarkdownDescription: `DHCP reserved IP ranges`,
+						Computed:            true,
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"comment": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Description of the range`,
+									Computed:            true,
 								},
 								"end": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `Last address in the reserved range`,
+									Computed:            true,
 								},
 								"start": schema.StringAttribute{
-									Computed: true,
+									MarkdownDescription: `First address in the reserved range`,
+									Computed:            true,
 								},
 							},
 						},
 					},
 					"subnet": schema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: `Subnet of the route`,
+						Computed:            true,
 					},
 				},
 			},
@@ -122,7 +151,8 @@ func (d *NetworksApplianceStaticRoutesDataSource) Schema(_ context.Context, _ da
 					Attributes: map[string]schema.Attribute{
 
 						"enabled": schema.BoolAttribute{
-							Computed: true,
+							MarkdownDescription: `Whether the route is enabled or not`,
+							Computed:            true,
 						},
 						"fixed_ip_assignments": schema.SingleNestedAttribute{
 							Computed: true,
@@ -143,42 +173,53 @@ func (d *NetworksApplianceStaticRoutesDataSource) Schema(_ context.Context, _ da
 							},
 						},
 						"gateway_ip": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Gateway IP address (next hop)`,
+							Computed:            true,
 						},
 						"gateway_vlan_id": schema.Int64Attribute{
-							Computed: true,
+							MarkdownDescription: `Gateway VLAN ID`,
+							Computed:            true,
 						},
 						"id": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Route ID`,
+							Computed:            true,
 						},
 						"ip_version": schema.Int64Attribute{
-							Computed: true,
+							MarkdownDescription: `IP protocol version`,
+							Computed:            true,
 						},
 						"name": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Name of the route`,
+							Computed:            true,
 						},
 						"network_id": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Network ID`,
+							Computed:            true,
 						},
 						"reserved_ip_ranges": schema.SetNestedAttribute{
-							Computed: true,
+							MarkdownDescription: `DHCP reserved IP ranges`,
+							Computed:            true,
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 
 									"comment": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `Description of the range`,
+										Computed:            true,
 									},
 									"end": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `Last address in the reserved range`,
+										Computed:            true,
 									},
 									"start": schema.StringAttribute{
-										Computed: true,
+										MarkdownDescription: `First address in the reserved range`,
+										Computed:            true,
 									},
 								},
 							},
 						},
 						"subnet": schema.StringAttribute{
-							Computed: true,
+							MarkdownDescription: `Subnet of the route`,
+							Computed:            true,
 						},
 					},
 				},
@@ -342,11 +383,11 @@ func ResponseApplianceGetNetworkApplianceStaticRoutesItemsToBody(state NetworksA
 									Name: types.StringValue(item.FixedIPAssignments.Status223344556677.Name),
 								}
 							}
-							return &ResponseItemApplianceGetNetworkApplianceStaticRoutesFixedIpAssignments223344556677{}
+							return nil
 						}(),
 					}
 				}
-				return &ResponseItemApplianceGetNetworkApplianceStaticRoutesFixedIpAssignments{}
+				return nil
 			}(),
 			GatewayIP: types.StringValue(item.GatewayIP),
 			GatewayVLANID: func() types.Int64 {
@@ -376,7 +417,7 @@ func ResponseApplianceGetNetworkApplianceStaticRoutesItemsToBody(state NetworksA
 					}
 					return &result
 				}
-				return &[]ResponseItemApplianceGetNetworkApplianceStaticRoutesReservedIpRanges{}
+				return nil
 			}(),
 			Subnet: types.StringValue(item.Subnet),
 		}
@@ -404,11 +445,11 @@ func ResponseApplianceGetNetworkApplianceStaticRouteItemToBody(state NetworksApp
 								Name: types.StringValue(response.FixedIPAssignments.Status223344556677.Name),
 							}
 						}
-						return &ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignments223344556677{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignments{}
+			return nil
 		}(),
 		GatewayIP: types.StringValue(response.GatewayIP),
 		GatewayVLANID: func() types.Int64 {
@@ -438,7 +479,7 @@ func ResponseApplianceGetNetworkApplianceStaticRouteItemToBody(state NetworksApp
 				}
 				return &result
 			}
-			return &[]ResponseApplianceGetNetworkApplianceStaticRouteReservedIpRanges{}
+			return nil
 		}(),
 		Subnet: types.StringValue(response.Subnet),
 	}

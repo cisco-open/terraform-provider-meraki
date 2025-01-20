@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -69,6 +86,14 @@ func (d *NetworksEventsDataSource) Schema(_ context.Context, _ datasource.Schema
 				MarkdownDescription: `endingBefore query parameter. A token used by the server to indicate the end of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.`,
 				Optional:            true,
 			},
+			"event_details": schema.StringAttribute{
+				MarkdownDescription: `eventDetails query parameter. The details of the event(Catalyst device only) which the list of events will be filtered with`,
+				Optional:            true,
+			},
+			"event_severity": schema.StringAttribute{
+				MarkdownDescription: `eventSeverity query parameter. The severity of the event(Catalyst device only) which the list of events will be filtered with`,
+				Optional:            true,
+			},
 			"excluded_event_types": schema.ListAttribute{
 				MarkdownDescription: `excludedEventTypes query parameter. A list of event types. The returned events will be filtered to exclude events with these types.`,
 				Optional:            true,
@@ -79,6 +104,10 @@ func (d *NetworksEventsDataSource) Schema(_ context.Context, _ datasource.Schema
 				Optional:            true,
 				ElementType:         types.StringType,
 			},
+			"is_catalyst": schema.BoolAttribute{
+				MarkdownDescription: `isCatalyst query parameter. Boolean indicating that whether it is a Catalyst device. For Catalyst device, eventDetails and eventSeverity can be used to filter events.`,
+				Optional:            true,
+			},
 			"network_id": schema.StringAttribute{
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
@@ -88,7 +117,7 @@ func (d *NetworksEventsDataSource) Schema(_ context.Context, _ datasource.Schema
 				Optional:            true,
 			},
 			"product_type": schema.StringAttribute{
-				MarkdownDescription: `productType query parameter. The product type to fetch events for. This parameter is required for networks with multiple device types. Valid types are wireless, appliance, switch, systemsManager, camera, and cellularGateway`,
+				MarkdownDescription: `productType query parameter. The product type to fetch events for. This parameter is required for networks with multiple device types. Valid types are wireless, appliance, switch, systemsManager, camera, cellularGateway, wirelessController, and secureConnect`,
 				Optional:            true,
 			},
 			"sm_device_mac": schema.StringAttribute{
@@ -237,9 +266,14 @@ func (d *NetworksEventsDataSource) Read(ctx context.Context, req datasource.Read
 		queryParams1.ClientName = networksEvents.ClientName.ValueString()
 		queryParams1.SmDeviceMac = networksEvents.SmDeviceMac.ValueString()
 		queryParams1.SmDeviceName = networksEvents.SmDeviceName.ValueString()
+		queryParams1.EventDetails = networksEvents.EventDetails.ValueString()
+		queryParams1.EventSeverity = networksEvents.EventSeverity.ValueString()
+		queryParams1.IsCatalyst = networksEvents.IsCatalyst.ValueBool()
 		queryParams1.PerPage = int(networksEvents.PerPage.ValueInt64())
 		queryParams1.StartingAfter = networksEvents.StartingAfter.ValueString()
 		queryParams1.EndingBefore = networksEvents.EndingBefore.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Networks.GetNetworkEvents(vvNetworkID, &queryParams1)
 
@@ -278,6 +312,9 @@ type NetworksEvents struct {
 	ClientName         types.String                      `tfsdk:"client_name"`
 	SmDeviceMac        types.String                      `tfsdk:"sm_device_mac"`
 	SmDeviceName       types.String                      `tfsdk:"sm_device_name"`
+	EventDetails       types.String                      `tfsdk:"event_details"`
+	EventSeverity      types.String                      `tfsdk:"event_severity"`
+	IsCatalyst         types.Bool                        `tfsdk:"is_catalyst"`
 	PerPage            types.Int64                       `tfsdk:"per_page"`
 	StartingAfter      types.String                      `tfsdk:"starting_after"`
 	EndingBefore       types.String                      `tfsdk:"ending_before"`
@@ -343,7 +380,7 @@ func ResponseNetworksGetNetworkEventsItemToBody(state NetworksEvents, response *
 									Vap:       types.StringValue(events.EventData.Vap),
 								}
 							}
-							return &ResponseNetworksGetNetworkEventsEventsEventData{}
+							return nil
 						}(),
 						NetworkID:  types.StringValue(events.NetworkID),
 						OccurredAt: types.StringValue(events.OccurredAt),
@@ -358,7 +395,7 @@ func ResponseNetworksGetNetworkEventsItemToBody(state NetworksEvents, response *
 				}
 				return &result
 			}
-			return &[]ResponseNetworksGetNetworkEventsEvents{}
+			return nil
 		}(),
 		Message:     types.StringValue(response.Message),
 		PageEndAt:   types.StringValue(response.PageEndAt),

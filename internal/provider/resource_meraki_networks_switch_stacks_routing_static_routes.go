@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -55,6 +71,14 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Schema(_ context.Conte
 					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"management_next_hop": schema.StringAttribute{
+				MarkdownDescription: `Optional fallback IP address for management traffic`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name or description of the layer 3 static route`,
 				Computed:            true,
@@ -68,7 +92,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Schema(_ context.Conte
 				Required:            true,
 			},
 			"next_hop_ip": schema.StringAttribute{
-				MarkdownDescription: ` The IP address of the router to which traffic for this destination network should be sent`,
+				MarkdownDescription: `The IP address of the router to which traffic for this destination network should be sent`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -211,7 +235,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Create(ctx context.Con
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter StaticRouteID",
-				err.Error(),
+				"Error",
 			)
 			return
 		}
@@ -385,6 +409,7 @@ type NetworksSwitchStacksRoutingStaticRoutesRs struct {
 	SwitchStackID               types.String `tfsdk:"switch_stack_id"`
 	StaticRouteID               types.String `tfsdk:"static_route_id"`
 	AdvertiseViaOspfEnabled     types.Bool   `tfsdk:"advertise_via_ospf_enabled"`
+	ManagementNextHop           types.String `tfsdk:"management_next_hop"`
 	Name                        types.String `tfsdk:"name"`
 	NextHopIP                   types.String `tfsdk:"next_hop_ip"`
 	PreferOverOspfRoutesEnabled types.Bool   `tfsdk:"prefer_over_ospf_routes_enabled"`
@@ -435,12 +460,18 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesRs) toSdkApiRequestCreate(ctx co
 }
 func (r *NetworksSwitchStacksRoutingStaticRoutesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestSwitchUpdateNetworkSwitchStackRoutingStaticRoute {
 	emptyString := ""
-	// advertiseViaOspfEnabled := new(bool)
-	// if !r.AdvertiseViaOspfEnabled.IsUnknown() && !r.AdvertiseViaOspfEnabled.IsNull() {
-	// 	*advertiseViaOspfEnabled = r.AdvertiseViaOspfEnabled.ValueBool()
-	// } else {
-	// 	advertiseViaOspfEnabled = nil
-	// }
+	advertiseViaOspfEnabled := new(bool)
+	if !r.AdvertiseViaOspfEnabled.IsUnknown() && !r.AdvertiseViaOspfEnabled.IsNull() {
+		*advertiseViaOspfEnabled = r.AdvertiseViaOspfEnabled.ValueBool()
+	} else {
+		advertiseViaOspfEnabled = nil
+	}
+	managementNextHop := new(string)
+	if !r.ManagementNextHop.IsUnknown() && !r.ManagementNextHop.IsNull() {
+		*managementNextHop = r.ManagementNextHop.ValueString()
+	} else {
+		managementNextHop = &emptyString
+	}
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
 		*name = r.Name.ValueString()
@@ -453,12 +484,12 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesRs) toSdkApiRequestUpdate(ctx co
 	} else {
 		nextHopIP = &emptyString
 	}
-	// preferOverOspfRoutesEnabled := new(bool)
-	// if !r.PreferOverOspfRoutesEnabled.IsUnknown() && !r.PreferOverOspfRoutesEnabled.IsNull() {
-	// 	*preferOverOspfRoutesEnabled = r.PreferOverOspfRoutesEnabled.ValueBool()
-	// } else {
-	// 	preferOverOspfRoutesEnabled = nil
-	// }
+	preferOverOspfRoutesEnabled := new(bool)
+	if !r.PreferOverOspfRoutesEnabled.IsUnknown() && !r.PreferOverOspfRoutesEnabled.IsNull() {
+		*preferOverOspfRoutesEnabled = r.PreferOverOspfRoutesEnabled.ValueBool()
+	} else {
+		preferOverOspfRoutesEnabled = nil
+	}
 	subnet := new(string)
 	if !r.Subnet.IsUnknown() && !r.Subnet.IsNull() {
 		*subnet = r.Subnet.ValueString()
@@ -466,11 +497,12 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesRs) toSdkApiRequestUpdate(ctx co
 		subnet = &emptyString
 	}
 	out := merakigosdk.RequestSwitchUpdateNetworkSwitchStackRoutingStaticRoute{
-		// AdvertiseViaOspfEnabled:     advertiseViaOspfEnabled,
-		Name:      *name,
-		NextHopIP: *nextHopIP,
-		// PreferOverOspfRoutesEnabled: preferOverOspfRoutesEnabled,
-		Subnet: *subnet,
+		AdvertiseViaOspfEnabled:     advertiseViaOspfEnabled,
+		ManagementNextHop:           *managementNextHop,
+		Name:                        *name,
+		NextHopIP:                   *nextHopIP,
+		PreferOverOspfRoutesEnabled: preferOverOspfRoutesEnabled,
+		Subnet:                      *subnet,
 	}
 	return &out
 }
@@ -484,8 +516,9 @@ func ResponseSwitchGetNetworkSwitchStackRoutingStaticRouteItemToBodyRs(state Net
 			}
 			return types.Bool{}
 		}(),
-		Name:      types.StringValue(response.Name),
-		NextHopIP: types.StringValue(response.NextHopIP),
+		ManagementNextHop: types.StringValue(response.ManagementNextHop),
+		Name:              types.StringValue(response.Name),
+		NextHopIP:         types.StringValue(response.NextHopIP),
 		PreferOverOspfRoutesEnabled: func() types.Bool {
 			if response.PreferOverOspfRoutesEnabled != nil {
 				return types.BoolValue(*response.PreferOverOspfRoutesEnabled)

@@ -1,7 +1,8 @@
 
 resource "meraki_networks_devices_claim" "example" {
 
-  network_id = "string"
+  add_atomically = false
+  network_id     = "string"
   parameters = {
 
     serials = ["Q234-ABCD-0001", "Q234-ABCD-0002", "Q234-ABCD-0003"]

@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -63,7 +79,7 @@ func (r *NetworksSwitchLinkAggregationsResource) Schema(_ context.Context, _ res
 				Required:            true,
 			},
 			"switch_ports": schema.SetNestedAttribute{
-				MarkdownDescription: `Array of switch or stack ports for creating aggregation group. Minimum 2 and maximum 8 ports are supported.`,
+				MarkdownDescription: `The ID for the link aggregation.`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
@@ -73,7 +89,7 @@ func (r *NetworksSwitchLinkAggregationsResource) Schema(_ context.Context, _ res
 					Attributes: map[string]schema.Attribute{
 
 						"port_id": schema.StringAttribute{
-							MarkdownDescription: `Port identifier of switch port. For modules, the identifier is "SlotNumber_ModuleType_PortNumber" (Ex: "1_8X10G_1"), otherwise it is just the port number (Ex: "8").`,
+							MarkdownDescription: `The ID for the switch port.`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
@@ -81,7 +97,7 @@ func (r *NetworksSwitchLinkAggregationsResource) Schema(_ context.Context, _ res
 							},
 						},
 						"serial": schema.StringAttribute{
-							MarkdownDescription: `Serial number of the switch.`,
+							MarkdownDescription: `The serial number for the switch port.`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
@@ -310,7 +326,7 @@ func (r *NetworksSwitchLinkAggregationsResource) Update(ctx context.Context, req
 	// network_id
 	vvLinkAggregationID := data.ID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	restyResp2, err := r.client.Switch.UpdateNetworkSwitchLinkAggregation(vvNetworkID, vvLinkAggregationID, dataRequest)
+	_, restyResp2, err := r.client.Switch.UpdateNetworkSwitchLinkAggregation(vvNetworkID, vvLinkAggregationID, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(

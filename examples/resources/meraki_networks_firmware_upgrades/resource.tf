@@ -40,6 +40,18 @@ resource "meraki_networks_firmware_upgrades" "example" {
       }
       participate_in_next_beta_release = false
     }
+    secure_connect = {
+
+      next_upgrade = {
+
+        time = "2019-03-17T17:22:52Z"
+        to_version = {
+
+          id = "1007"
+        }
+      }
+      participate_in_next_beta_release = false
+    }
     sensor = {
 
       next_upgrade = {
@@ -84,6 +96,18 @@ resource "meraki_networks_firmware_upgrades" "example" {
         to_version = {
 
           id = "1000"
+        }
+      }
+      participate_in_next_beta_release = false
+    }
+    wireless_controller = {
+
+      next_upgrade = {
+
+        time = "2019-03-17T17:22:52Z"
+        to_version = {
+
+          id = "1006"
         }
       }
       participate_in_next_beta_release = false

@@ -1,3 +1,19 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 // RESOURCE NORMAL
@@ -6,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -62,9 +78,10 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 				},
 			},
 			"access_policy_type": schema.StringAttribute{
-				MarkdownDescription: `Access Type of the policy. Automatically 'Hybrid authentication' when hostMode is 'Multi-Domain'.`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `Access Type of the policy. Automatically 'Hybrid authentication' when hostMode is 'Multi-Domain'.
+                                  Allowed values: [802.1x,Hybrid authentication,MAC authentication bypass]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -113,9 +130,10 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 				Attributes: map[string]schema.Attribute{
 
 					"control_direction": schema.StringAttribute{
-						MarkdownDescription: `Supports either 'both' or 'inbound'. Set to 'inbound' to allow unauthorized egress on the switchport. Set to 'both' to control both traffic directions with authorization. Defaults to 'both'`,
-						Computed:            true,
-						Optional:            true,
+						MarkdownDescription: `Supports either 'both' or 'inbound'. Set to 'inbound' to allow unauthorized egress on the switchport. Set to 'both' to control both traffic directions with authorization. Defaults to 'both'
+                                        Allowed values: [both,inbound]`,
+						Computed: true,
+						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
 						},
@@ -138,15 +156,17 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 			},
 			"guest_vlan_id": schema.Int64Attribute{
 				MarkdownDescription: `ID for the guest VLAN allow unauthorized devices access to limited network resources`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
 			},
 			"host_mode": schema.StringAttribute{
-				MarkdownDescription: `Choose the Host Mode for the access policy.`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `Choose the Host Mode for the access policy.
+                                  Allowed values: [Multi-Auth,Multi-Domain,Multi-Host,Single-Host]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -187,6 +207,30 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 				},
 				Attributes: map[string]schema.Attribute{
 
+					"cache": schema.SingleNestedAttribute{
+						MarkdownDescription: `Object for RADIUS Cache Settings`,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseStateForUnknown(),
+						},
+						Attributes: map[string]schema.Attribute{
+
+							"enabled": schema.BoolAttribute{
+								MarkdownDescription: `Enable to cache authorization and authentication responses on the RADIUS server`,
+								Optional:            true,
+								PlanModifiers: []planmodifier.Bool{
+									boolplanmodifier.UseStateForUnknown(),
+								},
+							},
+							"timeout": schema.Int64Attribute{
+								MarkdownDescription: `If RADIUS caching is enabled, this value dictates how long the cache will remain in the RADIUS server, in hours, to allow network access without authentication`,
+								Optional:            true,
+								PlanModifiers: []planmodifier.Int64{
+									int64planmodifier.UseStateForUnknown(),
+								},
+							},
+						},
+					},
 					"critical_auth": schema.SingleNestedAttribute{
 						MarkdownDescription: `Critical auth settings for when authentication is rejected by the RADIUS server`,
 						Computed:            true,
@@ -248,8 +292,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 			},
 			"radius_accounting_servers": schema.SetNestedAttribute{
 				MarkdownDescription: `List of RADIUS accounting servers to require connecting devices to authenticate against before granting network access`,
-
-				Optional: true,
+				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
@@ -258,22 +301,34 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 
 						"host": schema.StringAttribute{
 							MarkdownDescription: `Public IP address of the RADIUS accounting server`,
-
-							Optional: true,
+							Optional:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"organization_radius_server_id": schema.StringAttribute{
+							MarkdownDescription: `Organization wide RADIUS server ID. This value will be empty if this RADIUS server is not an organization wide RADIUS server`,
+							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
 						"port": schema.Int64Attribute{
 							MarkdownDescription: `UDP port that the RADIUS Accounting server listens on for access requests`,
-
-							Optional: true,
+							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
 							},
 						},
 						"secret": schema.StringAttribute{
 							MarkdownDescription: `RADIUS client shared secret`,
+							Optional:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"server_id": schema.StringAttribute{
+							MarkdownDescription: `Unique ID of the RADIUS accounting server`,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -308,10 +363,24 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 								int64planmodifier.UseStateForUnknown(),
 							},
 						},
+						"organization_radius_server_id": schema.StringAttribute{
+							MarkdownDescription: `Organization wide RADIUS server ID. This value will be empty if this RADIUS server is not an organization wide RADIUS server`,
+							Computed:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
 						"secret": schema.StringAttribute{
 							MarkdownDescription: `RADIUS client shared secret`,
 							Computed:            true,
 							Default:             stringdefault.StaticString(""),
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"server_id": schema.StringAttribute{
+							MarkdownDescription: `Unique ID of the RADIUS accounting server`,
+							Computed:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -337,8 +406,8 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 			},
 			"radius_servers": schema.SetNestedAttribute{
 				MarkdownDescription: `List of RADIUS servers to require connecting devices to authenticate against before granting network access`,
-
-				Optional: true,
+				Computed:            true,
+				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
@@ -347,22 +416,34 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 
 						"host": schema.StringAttribute{
 							MarkdownDescription: `Public IP address of the RADIUS server`,
-
-							Optional: true,
+							Optional:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"organization_radius_server_id": schema.StringAttribute{
+							MarkdownDescription: `Organization wide RADIUS server ID. This value will be empty if this RADIUS server is not an organization wide RADIUS server`,
+							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
 						"port": schema.Int64Attribute{
 							MarkdownDescription: `UDP port that the RADIUS server listens on for access requests`,
-
-							Optional: true,
+							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
 							},
 						},
 						"secret": schema.StringAttribute{
 							MarkdownDescription: `RADIUS client shared secret`,
+							Optional:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"server_id": schema.StringAttribute{
+							MarkdownDescription: `Unique ID of the RADIUS server`,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -401,6 +482,22 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 							MarkdownDescription: `RADIUS client shared secret`,
 							Computed:            true,
 							Default:             stringdefault.StaticString(""),
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"organization_radius_server_id": schema.StringAttribute{
+							MarkdownDescription: `Organization wide RADIUS server ID. This value will be empty if this RADIUS server is not an organization wide RADIUS server`,
+							Computed:            true,
+							Optional:            true,
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"server_id": schema.StringAttribute{
+							MarkdownDescription: `Unique ID of the RADIUS server`,
+							Computed:            true,
+							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -548,7 +645,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Create(ctx context.Context, req r
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter AccessPolicyNumber",
-				err.Error(),
+				"Error",
 			)
 			return
 		}
@@ -750,9 +847,15 @@ type ResponseSwitchGetNetworkSwitchAccessPolicyDot1XRs struct {
 }
 
 type ResponseSwitchGetNetworkSwitchAccessPolicyRadiusRs struct {
+	Cache                    *ResponseSwitchGetNetworkSwitchAccessPolicyRadiusCacheRs        `tfsdk:"cache"`
 	CriticalAuth             *ResponseSwitchGetNetworkSwitchAccessPolicyRadiusCriticalAuthRs `tfsdk:"critical_auth"`
 	FailedAuthVLANID         types.Int64                                                     `tfsdk:"failed_auth_vlan_id"`
 	ReAuthenticationInterval types.Int64                                                     `tfsdk:"re_authentication_interval"`
+}
+
+type ResponseSwitchGetNetworkSwitchAccessPolicyRadiusCacheRs struct {
+	Enabled types.Bool  `tfsdk:"enabled"`
+	Timeout types.Int64 `tfsdk:"timeout"`
 }
 
 type ResponseSwitchGetNetworkSwitchAccessPolicyRadiusCriticalAuthRs struct {
@@ -762,15 +865,19 @@ type ResponseSwitchGetNetworkSwitchAccessPolicyRadiusCriticalAuthRs struct {
 }
 
 type ResponseSwitchGetNetworkSwitchAccessPolicyRadiusAccountingServersRs struct {
-	Host   types.String `tfsdk:"host"`
-	Port   types.Int64  `tfsdk:"port"`
-	Secret types.String `tfsdk:"secret"`
+	Host                       types.String `tfsdk:"host"`
+	OrganizationRadiusServerID types.String `tfsdk:"organization_radius_server_id"`
+	Port                       types.Int64  `tfsdk:"port"`
+	ServerID                   types.String `tfsdk:"server_id"`
+	Secret                     types.String `tfsdk:"secret"`
 }
 
 type ResponseSwitchGetNetworkSwitchAccessPolicyRadiusServersRs struct {
-	Host   types.String `tfsdk:"host"`
-	Port   types.Int64  `tfsdk:"port"`
-	Secret types.String `tfsdk:"secret"`
+	Host                       types.String `tfsdk:"host"`
+	OrganizationRadiusServerID types.String `tfsdk:"organization_radius_server_id"`
+	Port                       types.Int64  `tfsdk:"port"`
+	ServerID                   types.String `tfsdk:"server_id"`
+	Secret                     types.String `tfsdk:"secret"`
 }
 
 // FromBody
@@ -821,6 +928,25 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestCreate(ctx context.Conte
 	}
 	var requestSwitchCreateNetworkSwitchAccessPolicyRadius *merakigosdk.RequestSwitchCreateNetworkSwitchAccessPolicyRadius
 	if r.Radius != nil {
+		var requestSwitchCreateNetworkSwitchAccessPolicyRadiusCache *merakigosdk.RequestSwitchCreateNetworkSwitchAccessPolicyRadiusCache
+		if r.Radius.Cache != nil {
+			enabled := func() *bool {
+				if !r.Radius.Cache.Enabled.IsUnknown() && !r.Radius.Cache.Enabled.IsNull() {
+					return r.Radius.Cache.Enabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			timeout := func() *int64 {
+				if !r.Radius.Cache.Timeout.IsUnknown() && !r.Radius.Cache.Timeout.IsNull() {
+					return r.Radius.Cache.Timeout.ValueInt64Pointer()
+				}
+				return nil
+			}()
+			requestSwitchCreateNetworkSwitchAccessPolicyRadiusCache = &merakigosdk.RequestSwitchCreateNetworkSwitchAccessPolicyRadiusCache{
+				Enabled: enabled,
+				Timeout: int64ToIntPointer(timeout),
+			}
+		}
 		var requestSwitchCreateNetworkSwitchAccessPolicyRadiusCriticalAuth *merakigosdk.RequestSwitchCreateNetworkSwitchAccessPolicyRadiusCriticalAuth
 		if r.Radius.CriticalAuth != nil {
 			dataVLANID := func() *int64 {
@@ -860,6 +986,7 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestCreate(ctx context.Conte
 			return nil
 		}()
 		requestSwitchCreateNetworkSwitchAccessPolicyRadius = &merakigosdk.RequestSwitchCreateNetworkSwitchAccessPolicyRadius{
+			Cache:                    requestSwitchCreateNetworkSwitchAccessPolicyRadiusCache,
 			CriticalAuth:             requestSwitchCreateNetworkSwitchAccessPolicyRadiusCriticalAuth,
 			FailedAuthVLANID:         int64ToIntPointer(failedAuthVLANID),
 			ReAuthenticationInterval: int64ToIntPointer(reAuthenticationInterval),
@@ -875,6 +1002,7 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestCreate(ctx context.Conte
 	if r.RadiusAccountingServers != nil {
 		for _, rItem1 := range *r.RadiusAccountingServers {
 			host := rItem1.Host.ValueString()
+			organizationRadiusServerID := rItem1.OrganizationRadiusServerID.ValueString()
 			port := func() *int64 {
 				if !rItem1.Port.IsUnknown() && !rItem1.Port.IsNull() {
 					return rItem1.Port.ValueInt64Pointer()
@@ -883,9 +1011,10 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestCreate(ctx context.Conte
 			}()
 			secret := rItem1.Secret.ValueString()
 			requestSwitchCreateNetworkSwitchAccessPolicyRadiusAccountingServers = append(requestSwitchCreateNetworkSwitchAccessPolicyRadiusAccountingServers, merakigosdk.RequestSwitchCreateNetworkSwitchAccessPolicyRadiusAccountingServers{
-				Host:   host,
-				Port:   int64ToIntPointer(port),
-				Secret: secret,
+				Host:                       host,
+				OrganizationRadiusServerID: organizationRadiusServerID,
+				Port:                       int64ToIntPointer(port),
+				Secret:                     secret,
 			})
 		}
 	}
@@ -905,6 +1034,7 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestCreate(ctx context.Conte
 	if r.RadiusServers != nil {
 		for _, rItem1 := range *r.RadiusServers {
 			host := rItem1.Host.ValueString()
+			organizationRadiusServerID := rItem1.OrganizationRadiusServerID.ValueString()
 			port := func() *int64 {
 				if !rItem1.Port.IsUnknown() && !rItem1.Port.IsNull() {
 					return rItem1.Port.ValueInt64Pointer()
@@ -913,9 +1043,10 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestCreate(ctx context.Conte
 			}()
 			secret := rItem1.Secret.ValueString()
 			requestSwitchCreateNetworkSwitchAccessPolicyRadiusServers = append(requestSwitchCreateNetworkSwitchAccessPolicyRadiusServers, merakigosdk.RequestSwitchCreateNetworkSwitchAccessPolicyRadiusServers{
-				Host:   host,
-				Port:   int64ToIntPointer(port),
-				Secret: secret,
+				Host:                       host,
+				OrganizationRadiusServerID: organizationRadiusServerID,
+				Port:                       int64ToIntPointer(port),
+				Secret:                     secret,
 			})
 		}
 	}
@@ -1017,6 +1148,25 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestUpdate(ctx context.Conte
 	}
 	var requestSwitchUpdateNetworkSwitchAccessPolicyRadius *merakigosdk.RequestSwitchUpdateNetworkSwitchAccessPolicyRadius
 	if r.Radius != nil {
+		var requestSwitchUpdateNetworkSwitchAccessPolicyRadiusCache *merakigosdk.RequestSwitchUpdateNetworkSwitchAccessPolicyRadiusCache
+		if r.Radius.Cache != nil {
+			enabled := func() *bool {
+				if !r.Radius.Cache.Enabled.IsUnknown() && !r.Radius.Cache.Enabled.IsNull() {
+					return r.Radius.Cache.Enabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			timeout := func() *int64 {
+				if !r.Radius.Cache.Timeout.IsUnknown() && !r.Radius.Cache.Timeout.IsNull() {
+					return r.Radius.Cache.Timeout.ValueInt64Pointer()
+				}
+				return nil
+			}()
+			requestSwitchUpdateNetworkSwitchAccessPolicyRadiusCache = &merakigosdk.RequestSwitchUpdateNetworkSwitchAccessPolicyRadiusCache{
+				Enabled: enabled,
+				Timeout: int64ToIntPointer(timeout),
+			}
+		}
 		var requestSwitchUpdateNetworkSwitchAccessPolicyRadiusCriticalAuth *merakigosdk.RequestSwitchUpdateNetworkSwitchAccessPolicyRadiusCriticalAuth
 		if r.Radius.CriticalAuth != nil {
 			dataVLANID := func() *int64 {
@@ -1056,6 +1206,7 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestUpdate(ctx context.Conte
 			return nil
 		}()
 		requestSwitchUpdateNetworkSwitchAccessPolicyRadius = &merakigosdk.RequestSwitchUpdateNetworkSwitchAccessPolicyRadius{
+			Cache:                    requestSwitchUpdateNetworkSwitchAccessPolicyRadiusCache,
 			CriticalAuth:             requestSwitchUpdateNetworkSwitchAccessPolicyRadiusCriticalAuth,
 			FailedAuthVLANID:         int64ToIntPointer(failedAuthVLANID),
 			ReAuthenticationInterval: int64ToIntPointer(reAuthenticationInterval),
@@ -1071,6 +1222,7 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestUpdate(ctx context.Conte
 	if r.RadiusAccountingServers != nil {
 		for _, rItem1 := range *r.RadiusAccountingServers {
 			host := rItem1.Host.ValueString()
+			organizationRadiusServerID := rItem1.OrganizationRadiusServerID.ValueString()
 			port := func() *int64 {
 				if !rItem1.Port.IsUnknown() && !rItem1.Port.IsNull() {
 					return rItem1.Port.ValueInt64Pointer()
@@ -1078,10 +1230,13 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestUpdate(ctx context.Conte
 				return nil
 			}()
 			secret := rItem1.Secret.ValueString()
+			serverID := rItem1.ServerID.ValueString()
 			requestSwitchUpdateNetworkSwitchAccessPolicyRadiusAccountingServers = append(requestSwitchUpdateNetworkSwitchAccessPolicyRadiusAccountingServers, merakigosdk.RequestSwitchUpdateNetworkSwitchAccessPolicyRadiusAccountingServers{
-				Host:   host,
-				Port:   int64ToIntPointer(port),
-				Secret: secret,
+				Host:                       host,
+				OrganizationRadiusServerID: organizationRadiusServerID,
+				Port:                       int64ToIntPointer(port),
+				Secret:                     secret,
+				ServerID:                   serverID,
 			})
 		}
 	}
@@ -1101,6 +1256,7 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestUpdate(ctx context.Conte
 	if r.RadiusServers != nil {
 		for _, rItem1 := range *r.RadiusServers {
 			host := rItem1.Host.ValueString()
+			organizationRadiusServerID := rItem1.OrganizationRadiusServerID.ValueString()
 			port := func() *int64 {
 				if !rItem1.Port.IsUnknown() && !rItem1.Port.IsNull() {
 					return rItem1.Port.ValueInt64Pointer()
@@ -1108,10 +1264,13 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestUpdate(ctx context.Conte
 				return nil
 			}()
 			secret := rItem1.Secret.ValueString()
+			serverID := rItem1.ServerID.ValueString()
 			requestSwitchUpdateNetworkSwitchAccessPolicyRadiusServers = append(requestSwitchUpdateNetworkSwitchAccessPolicyRadiusServers, merakigosdk.RequestSwitchUpdateNetworkSwitchAccessPolicyRadiusServers{
-				Host:   host,
-				Port:   int64ToIntPointer(port),
-				Secret: secret,
+				Host:                       host,
+				OrganizationRadiusServerID: organizationRadiusServerID,
+				Port:                       int64ToIntPointer(port),
+				Secret:                     secret,
+				ServerID:                   serverID,
 			})
 		}
 	}
@@ -1186,11 +1345,11 @@ func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBodyRs(state NetworksSwitch
 								}(),
 							}
 						}
-						return &ResponseSwitchGetNetworkSwitchAccessPolicyCountsPortsRs{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseSwitchGetNetworkSwitchAccessPolicyCountsRs{}
+			return nil
 		}(),
 		Dot1X: func() *ResponseSwitchGetNetworkSwitchAccessPolicyDot1XRs {
 			if response.Dot1X != nil {
@@ -1198,7 +1357,7 @@ func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBodyRs(state NetworksSwitch
 					ControlDirection: types.StringValue(response.Dot1X.ControlDirection),
 				}
 			}
-			return &ResponseSwitchGetNetworkSwitchAccessPolicyDot1XRs{}
+			return nil
 		}(),
 		GuestPortBouncing: func() types.Bool {
 			if response.GuestPortBouncing != nil {
@@ -1223,6 +1382,25 @@ func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBodyRs(state NetworksSwitch
 		Radius: func() *ResponseSwitchGetNetworkSwitchAccessPolicyRadiusRs {
 			if response.Radius != nil {
 				return &ResponseSwitchGetNetworkSwitchAccessPolicyRadiusRs{
+					// Cache: func() *ResponseSwitchGetNetworkSwitchAccessPolicyRadiusCacheRs {
+					// 	if response.Radius.Cache != nil {
+					// 		return &ResponseSwitchGetNetworkSwitchAccessPolicyRadiusCacheRs{
+					// 			Enabled: func() types.Bool {
+					// 				if response.Radius.Cache.Enabled != nil {
+					// 					return types.BoolValue(*response.Radius.Cache.Enabled)
+					// 				}
+					// 				return types.Bool{}
+					// 			}(),
+					// 			Timeout: func() types.Int64 {
+					// 				if response.Radius.Cache.Timeout != nil {
+					// 					return types.Int64Value(int64(*response.Radius.Cache.Timeout))
+					// 				}
+					// 				return types.Int64{}
+					// 			}(),
+					// 		}
+					// 	}
+					// 	return nil
+					// }(),
 					CriticalAuth: func() *ResponseSwitchGetNetworkSwitchAccessPolicyRadiusCriticalAuthRs {
 						if response.Radius.CriticalAuth != nil {
 							return &ResponseSwitchGetNetworkSwitchAccessPolicyRadiusCriticalAuthRs{
@@ -1246,7 +1424,7 @@ func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBodyRs(state NetworksSwitch
 								}(),
 							}
 						}
-						return &ResponseSwitchGetNetworkSwitchAccessPolicyRadiusCriticalAuthRs{}
+						return nil
 					}(),
 					FailedAuthVLANID: func() types.Int64 {
 						if response.Radius.FailedAuthVLANID != nil {
@@ -1262,7 +1440,7 @@ func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBodyRs(state NetworksSwitch
 					}(),
 				}
 			}
-			return &ResponseSwitchGetNetworkSwitchAccessPolicyRadiusRs{}
+			return nil
 		}(),
 		RadiusAccountingEnabled: func() types.Bool {
 			if response.RadiusAccountingEnabled != nil {
@@ -1275,18 +1453,20 @@ func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBodyRs(state NetworksSwitch
 				result := make([]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusAccountingServersRs, len(*response.RadiusAccountingServers))
 				for i, radiusAccountingServers := range *response.RadiusAccountingServers {
 					result[i] = ResponseSwitchGetNetworkSwitchAccessPolicyRadiusAccountingServersRs{
-						Host: types.StringValue(radiusAccountingServers.Host),
+						Host:                       types.StringValue(radiusAccountingServers.Host),
+						OrganizationRadiusServerID: types.StringValue(radiusAccountingServers.OrganizationRadiusServerID),
 						Port: func() types.Int64 {
 							if radiusAccountingServers.Port != nil {
 								return types.Int64Value(int64(*radiusAccountingServers.Port))
 							}
 							return types.Int64{}
 						}(),
+						ServerID: types.StringValue(radiusAccountingServers.ServerID),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusAccountingServersRs{}
+			return nil
 		}(),
 		RadiusCoaSupportEnabled: func() types.Bool {
 			if response.RadiusCoaSupportEnabled != nil {
@@ -1300,18 +1480,20 @@ func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBodyRs(state NetworksSwitch
 				result := make([]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusServersRs, len(*response.RadiusServers))
 				for i, radiusServers := range *response.RadiusServers {
 					result[i] = ResponseSwitchGetNetworkSwitchAccessPolicyRadiusServersRs{
-						Host: types.StringValue(radiusServers.Host),
+						Host:                       types.StringValue(radiusServers.Host),
+						OrganizationRadiusServerID: types.StringValue(radiusServers.OrganizationRadiusServerID),
 						Port: func() types.Int64 {
 							if radiusServers.Port != nil {
 								return types.Int64Value(int64(*radiusServers.Port))
 							}
 							return types.Int64{}
 						}(),
+						ServerID: types.StringValue(radiusServers.ServerID),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusServersRs{}
+			return nil
 		}(),
 		RadiusTestingEnabled: func() types.Bool {
 			if response.RadiusTestingEnabled != nil {

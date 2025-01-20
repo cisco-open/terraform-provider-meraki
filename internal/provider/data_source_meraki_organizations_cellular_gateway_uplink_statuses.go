@@ -1,3 +1,20 @@
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
+
 package provider
 
 // DATA SOURCE NORMAL
@@ -5,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v3/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -137,7 +154,7 @@ func (d *OrganizationsCellularGatewayUplinkStatusesDataSource) Schema(_ context.
 										MarkdownDescription: `Uplink model`,
 										Computed:            true,
 									},
-									"provider": schema.StringAttribute{
+									"provider_r": schema.StringAttribute{
 										MarkdownDescription: `Network Provider`,
 										Computed:            true,
 									},
@@ -198,6 +215,8 @@ func (d *OrganizationsCellularGatewayUplinkStatusesDataSource) Read(ctx context.
 		queryParams1.Serials = elementsToStrings(ctx, organizationsCellularGatewayUplinkStatuses.Serials)
 		queryParams1.Iccids = elementsToStrings(ctx, organizationsCellularGatewayUplinkStatuses.Iccids)
 
+		// has_unknown_response: None
+
 		response1, restyResp1, err := d.client.CellularGateway.GetOrganizationCellularGatewayUplinkStatuses(vvOrganizationID, &queryParams1)
 
 		if err != nil || response1 == nil {
@@ -251,7 +270,7 @@ type ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUpli
 	Interface      types.String                                                                              `tfsdk:"interface"`
 	IP             types.String                                                                              `tfsdk:"ip"`
 	Model          types.String                                                                              `tfsdk:"model"`
-	Provider       types.String                                                                              `tfsdk:"provider"`
+	Provider       types.String                                                                              `tfsdk:"provider_r"`
 	PublicIP       types.String                                                                              `tfsdk:"public_ip"`
 	SignalStat     *ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUplinksSignalStat `tfsdk:"signal_stat"`
 	SignalType     types.String                                                                              `tfsdk:"signal_type"`
@@ -295,7 +314,7 @@ func ResponseCellularGatewayGetOrganizationCellularGatewayUplinkStatusesItemsToB
 										Rsrq: types.StringValue(uplinks.SignalStat.Rsrq),
 									}
 								}
-								return &ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUplinksSignalStat{}
+								return nil
 							}(),
 							SignalType: types.StringValue(uplinks.SignalType),
 							Status:     types.StringValue(uplinks.Status),
@@ -303,7 +322,7 @@ func ResponseCellularGatewayGetOrganizationCellularGatewayUplinkStatusesItemsToB
 					}
 					return &result
 				}
-				return &[]ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUplinks{}
+				return nil
 			}(),
 		}
 		items = append(items, itemState)

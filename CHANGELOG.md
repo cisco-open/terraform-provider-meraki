@@ -1,3 +1,7 @@
+## 1.0.1-beta (January 20, 2025)
+FEATURES:
+* **New Data Source** `data_source_meraki_networks_wireless_air_marshal_rules.go`
+* Added support for `-1` value in the `per_page` parameter of the data source. When set to `-1`, the response will include all available data without pagination.
 
 ## 1.0.0-beta (January 20, 2025)
 BREAKING CHANGES:

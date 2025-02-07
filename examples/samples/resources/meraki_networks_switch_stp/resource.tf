@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "1.0.0-beta"
+      version = "1.0.1-beta"
       source  = "hashicorp.com/edu/meraki"
       # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
@@ -22,7 +22,7 @@ resource "meraki_networks_switch_stp" "example" {
   rstp_enabled = true
   stp_bridge_priority = [{
 
-    stp_priority = 61440
+    stp_priority = 4096
     switches     = ["QBSB-VLHZ-JQCN"]
     },
   ]

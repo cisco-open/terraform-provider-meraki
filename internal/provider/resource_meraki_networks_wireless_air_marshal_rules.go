@@ -164,7 +164,7 @@ func (r *NetworksWirelessAirMarshalRulesResource) Schema(_ context.Context, _ re
 }
 func (r *NetworksWirelessAirMarshalRulesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var data NetworksWirelessAirMarshalRules
+	var data NetworksWirelessAirMarshalRulesRs
 
 	var item types.Object
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &item)...)
@@ -220,7 +220,7 @@ func (r *NetworksWirelessAirMarshalRulesResource) Delete(ctx context.Context, re
 }
 
 // TF Structs Schema
-type NetworksWirelessAirMarshalRules struct {
+type NetworksWirelessAirMarshalRulesRs struct {
 	NetworkID  types.String                                          `tfsdk:"network_id"`
 	Item       *ResponseWirelessCreateNetworkWirelessAirMarshalRule  `tfsdk:"item"`
 	Parameters *RequestWirelessCreateNetworkWirelessAirMarshalRuleRs `tfsdk:"parameters"`
@@ -256,7 +256,7 @@ type RequestWirelessCreateNetworkWirelessAirMarshalRuleMatchRs struct {
 }
 
 // FromBody
-func (r *NetworksWirelessAirMarshalRules) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestWirelessCreateNetworkWirelessAirMarshalRule {
+func (r *NetworksWirelessAirMarshalRulesRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestWirelessCreateNetworkWirelessAirMarshalRule {
 	emptyString := ""
 	re := *r.Parameters
 	var requestWirelessCreateNetworkWirelessAirMarshalRuleMatch *merakigosdk.RequestWirelessCreateNetworkWirelessAirMarshalRuleMatch
@@ -282,7 +282,7 @@ func (r *NetworksWirelessAirMarshalRules) toSdkApiRequestCreate(ctx context.Cont
 }
 
 // ToBody
-func ResponseWirelessCreateNetworkWirelessAirMarshalRuleItemToBody(state NetworksWirelessAirMarshalRules, response *merakigosdk.ResponseWirelessCreateNetworkWirelessAirMarshalRule) NetworksWirelessAirMarshalRules {
+func ResponseWirelessCreateNetworkWirelessAirMarshalRuleItemToBody(state NetworksWirelessAirMarshalRulesRs, response *merakigosdk.ResponseWirelessCreateNetworkWirelessAirMarshalRule) NetworksWirelessAirMarshalRulesRs {
 	itemState := ResponseWirelessCreateNetworkWirelessAirMarshalRule{
 		CreatedAt: types.StringValue(response.CreatedAt),
 		Match: func() *ResponseWirelessCreateNetworkWirelessAirMarshalRuleMatch {

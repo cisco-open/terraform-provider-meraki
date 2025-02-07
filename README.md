@@ -30,7 +30,7 @@ terraform {
   required_providers {
     meraki = {
       source = "cisco-open/meraki"
-      version = "1.0.0-beta"
+      version = "1.0.1-beta"
     }
   }
 }
@@ -68,7 +68,7 @@ terraform {
   required_providers {
     meraki = {
       source = "hashicorp.com/edu/meraki"
-      version = "1.0.0-beta"
+      version = "1.0.1-beta"
     }
   }
 }
@@ -120,9 +120,19 @@ The following table shows the supported versions.
 |-----------------------|-------------------------------------|------------------------------|
 | 1.33.0                | 0.1.0-alpha                         | 2.0.9                        |
 | 1.44.1                | 0.2.0-alpha                         | 3.0.0                        |
-| 1.53.0                | 1.0.0-beta                          | 4.0.0                        |
+| 1.53.0                | 1.0.1-beta                          | 4.0.0                        |
 
 If your SDK, Terraform provider is older please consider updating it first.
+
+## Fetch All Items of an Endpoint with Pagination
+
+- **Support for fetching all items with `per_page=-1`**  
+  A new feature has been introduced to the API endpoints, enabling clients to fetch all available items in a single request by setting the `per_page` parameter to `-1`. This enhancement allows you to retrieve the full dataset without needing to make multiple paginated requests.
+
+### Behavior
+
+- When `per_page` is set to `-1`, the server will return **all available items** for that endpoint, bypassing the pagination logic.
+- If a positive integer is passed for `per_page`, the endpoint will continue using traditional pagination and return only the number of items specified by `per_page`.
 
 # Contributing
 

@@ -1,1 +1,1 @@
-terraform import meraki_devices_live_tools_cable.example "id,serial"
+terraform import meraki_devices_live_tools_cable.example "serial,id"

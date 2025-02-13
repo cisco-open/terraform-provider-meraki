@@ -1,1 +1,1 @@
-terraform import meraki_organizations_adaptive_policy_acls.example "acl_id,organization_id"
+terraform import meraki_organizations_adaptive_policy_acls.example "organization_id,acl_id"

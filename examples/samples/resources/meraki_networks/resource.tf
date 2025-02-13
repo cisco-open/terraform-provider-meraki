@@ -14,7 +14,7 @@ provider "meraki" {
 resource "meraki_networks" "example" {
   name            = "My Test Network"
   organization_id = "828099381482762270"
-  notes           = "This is a test network created by my team"
+  notes           = "This is a test network created by my team by terraform"
   product_types   = ["appliance", "switch", "wireless", "cellularGateway"]
   time_zone       = "America/Los_Angeles"
 }

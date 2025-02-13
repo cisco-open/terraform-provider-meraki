@@ -121,10 +121,8 @@ func (r *NetworksResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 			},
 			"product_types": schema.SetAttribute{
 				MarkdownDescription: `List of the product types that the network supports`,
-				Computed:            true,
-				Optional:            true,
+				Required:            true,
 				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
 					SuppressDiffSet(),
 				},
 
@@ -527,6 +525,7 @@ func ResponseNetworksGetNetworkItemToBodyRs(state NetworksRs, response *merakigo
 		TimeZone:       types.StringValue(response.TimeZone),
 		URL:            types.StringValue(response.URL),
 	}
+	itemState.NetworkID = types.StringValue(response.ID)
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksRs)
 	}

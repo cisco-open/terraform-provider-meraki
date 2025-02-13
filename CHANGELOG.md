@@ -1,3 +1,10 @@
+## 1.0.2-beta (February 13, 2025)
+BUGFIXES:
+* Update import syntax in Meraki resource documentation and examples to reflect changes in required parameters. #201
+* meraki_networks_appliance_vpn_site_to_site_vpn, impossible to manage priority order. Changing to list to preserve order. #203
+* Resource 'meraki_networks' possibly missing required argument in documentation. Documentation updated. #202
+* Resource 'meraki_networks' map networkIds #181.
+
 ## 1.0.1-beta (January 20, 2025)
 FEATURES:
 * **New Data Source** `data_source_meraki_networks_wireless_air_marshal_rules.go`

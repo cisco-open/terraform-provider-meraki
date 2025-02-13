@@ -71,5 +71,5 @@ Read-Only:
 Import is supported using the following syntax:
 
 ```shell
-terraform import meraki_organizations_licenses.example "license_id,organization_id"
+terraform import meraki_organizations_licenses.example "organization_id,license_id"
 ```

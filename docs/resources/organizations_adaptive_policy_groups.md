@@ -66,5 +66,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import meraki_organizations_adaptive_policy_groups.example "id,organization_id"
+terraform import meraki_organizations_adaptive_policy_groups.example "organization_id,id"
 ```

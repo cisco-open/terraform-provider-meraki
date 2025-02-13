@@ -1,1 +1,1 @@
-terraform import meraki_organizations_adaptive_policy_policies.example "id,organization_id"
+terraform import meraki_organizations_adaptive_policy_policies.example "organization_id,id"

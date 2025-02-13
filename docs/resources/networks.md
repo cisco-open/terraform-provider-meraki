@@ -34,6 +34,7 @@ output "meraki_networks_example" {
 ### Required
 
 - `organization_id` (String) Organization ID
+- `product_types` (Set of String) List of the product types that the network supports
 
 ### Optional
 
@@ -41,7 +42,6 @@ output "meraki_networks_example" {
 - `name` (String) Network name
 - `network_id` (String) networkId path parameter. Network ID
 - `notes` (String) Notes for the network
-- `product_types` (Set of String) List of the product types that the network supports
 - `tags` (Set of String) Network tags
 - `time_zone` (String) Timezone of the network
 

@@ -156,7 +156,6 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 			},
 			"guest_vlan_id": schema.Int64Attribute{
 				MarkdownDescription: `ID for the guest VLAN allow unauthorized devices access to limited network resources`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -810,13 +809,14 @@ func (r *NetworksSwitchAccessPoliciesResource) Delete(ctx context.Context, req r
 
 // TF Structs Schema
 type NetworksSwitchAccessPoliciesRs struct {
-	NetworkID                       types.String                                                           `tfsdk:"network_id"`
-	AccessPolicyNumber              types.String                                                           `tfsdk:"access_policy_number"`
-	AccessPolicyType                types.String                                                           `tfsdk:"access_policy_type"`
-	Counts                          *ResponseSwitchGetNetworkSwitchAccessPolicyCountsRs                    `tfsdk:"counts"`
-	Dot1X                           *ResponseSwitchGetNetworkSwitchAccessPolicyDot1XRs                     `tfsdk:"dot1x"`
-	GuestPortBouncing               types.Bool                                                             `tfsdk:"guest_port_bouncing"`
-	GuestVLANID                     types.Int64                                                            `tfsdk:"guest_vlan_id"`
+	NetworkID          types.String                                        `tfsdk:"network_id"`
+	AccessPolicyNumber types.String                                        `tfsdk:"access_policy_number"`
+	AccessPolicyType   types.String                                        `tfsdk:"access_policy_type"`
+	Counts             *ResponseSwitchGetNetworkSwitchAccessPolicyCountsRs `tfsdk:"counts"`
+	Dot1X              *ResponseSwitchGetNetworkSwitchAccessPolicyDot1XRs  `tfsdk:"dot1x"`
+	GuestPortBouncing  types.Bool                                          `tfsdk:"guest_port_bouncing"`
+	GuestVLANID        types.Int64                                         `tfsdk:"guest_vlan_id"`
+	// GuestVLANIDResponse             types.Int64                                                            `tfsdk:"guest_vlan_id_response"`
 	HostMode                        types.String                                                           `tfsdk:"host_mode"`
 	IncreaseAccessSpeed             types.Bool                                                             `tfsdk:"increase_access_speed"`
 	Name                            types.String                                                           `tfsdk:"name"`
@@ -1518,6 +1518,7 @@ func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBodyRs(state NetworksSwitch
 
 	itemState.RadiusServers = state.RadiusServers
 	itemState.RadiusAccountingServers = state.RadiusAccountingServers
+	// itemState.GuestVLANID = state.GuestVLANID
 	// itemState.Name = state.Name
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksSwitchAccessPoliciesRs)

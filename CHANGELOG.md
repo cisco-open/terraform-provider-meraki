@@ -1,4 +1,10 @@
-## 1.0.2-beta (February 13, 2025)
+## 1.0.3-beta (February 24, 2025)
+BUGFIXES:
+* resource meraki_networks_switch_access_policies - guest_vlan_id not being saved #210.
+* resource meraki_networks_wireless_ssids - enterprise_admin_access trying to be flagged into state though not configured #211.
+* resource "meraki_networks_devices_claim" broken #215.
+
+## 1.0.3-beta (February 13, 2025)
 BUGFIXES:
 * Update import syntax in Meraki resource documentation and examples to reflect changes in required parameters. #201
 * meraki_networks_appliance_vpn_site_to_site_vpn, impossible to manage priority order. Changing to list to preserve order. #203

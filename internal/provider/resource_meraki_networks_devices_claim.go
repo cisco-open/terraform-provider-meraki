@@ -20,8 +20,8 @@ package provider
 
 import (
 	"context"
-
 	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -140,7 +140,15 @@ func (r *NetworksDevicesClaimResource) Create(ctx context.Context, req resource.
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
-	response, restyResp1, err := r.client.Networks.ClaimNetworkDevices(vvNetworkID, dataRequest, nil)
+	var query *merakigosdk.ClaimNetworkDevicesQueryParams
+	if !data.AddAtomically.IsNull() {
+		log.Printf("AddAtomically is not null")
+		query = &merakigosdk.ClaimNetworkDevicesQueryParams{}
+		query.AddAtomically = data.AddAtomically.ValueBool()
+		log.Printf("AddAtomically is not null %v", query.AddAtomically)
+	}
+	// log.Printf("AddAtomically is not null %v", query)
+	response, restyResp1, err := r.client.Networks.ClaimNetworkDevices(vvNetworkID, dataRequest, query)
 
 	if err != nil || response == nil {
 		if restyResp1 != nil {
@@ -178,9 +186,10 @@ func (r *NetworksDevicesClaimResource) Delete(ctx context.Context, req resource.
 
 // TF Structs Schema
 type NetworksDevicesClaim struct {
-	NetworkID  types.String                          `tfsdk:"network_id"`
-	Item       *ResponseNetworksClaimNetworkDevices  `tfsdk:"item"`
-	Parameters *RequestNetworksClaimNetworkDevicesRs `tfsdk:"parameters"`
+	NetworkID     types.String                          `tfsdk:"network_id"`
+	AddAtomically types.Bool                            `tfsdk:"add_atomically"`
+	Item          *ResponseNetworksClaimNetworkDevices  `tfsdk:"item"`
+	Parameters    *RequestNetworksClaimNetworkDevicesRs `tfsdk:"parameters"`
 }
 
 type ResponseNetworksClaimNetworkDevices struct {

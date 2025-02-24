@@ -9,11 +9,13 @@ terraform {
 }
 provider "meraki" {
   meraki_debug = "true"
+  meraki_base_url = "http://localhost:3002"
 }
 
 resource "meraki_networks_devices_claim" "example" {
 
   network_id = "L_828099381482775374"
+  add_atomically = false
   parameters = {
 
     serials = []

@@ -30,6 +30,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
@@ -289,11 +290,11 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"radius_accounting_servers": schema.SetNestedAttribute{
+			"radius_accounting_servers": schema.ListNestedAttribute{
 				MarkdownDescription: `List of RADIUS accounting servers to require connecting devices to authenticate against before granting network access`,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -403,12 +404,12 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"radius_servers": schema.SetNestedAttribute{
+			"radius_servers": schema.ListNestedAttribute{
 				MarkdownDescription: `List of RADIUS servers to require connecting devices to authenticate against before granting network access`,
 				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{

@@ -36,6 +36,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -852,11 +853,11 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 					int64planmodifier.UseStateForUnknown(),
 				},
 			},
-			"radius_accounting_servers": schema.SetNestedAttribute{
+			"radius_accounting_servers": schema.ListNestedAttribute{
 				MarkdownDescription: `List of RADIUS accounting 802.1X servers to be used for authentication`,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -1081,11 +1082,11 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 					int64planmodifier.UseStateForUnknown(),
 				},
 			},
-			"radius_servers": schema.SetNestedAttribute{
+			"radius_servers": schema.ListNestedAttribute{
 				MarkdownDescription: `The RADIUS 802.1X servers to be used for authentication. This param is only valid if the authMode is 'open-with-radius', '8021x-radius' or 'ipsk-with-radius'`,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{

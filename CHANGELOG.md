@@ -1,3 +1,8 @@
+## 1.0.4-beta (February 27, 2025)
+BUGFIXES:
+* resource meraki_networks_wireless_ssids - order of list of radius servers not maintained when applied. #218
+* resource meraki_networks_switch_access_policies - list of Radius servers not maintaining order. #217
+
 ## 1.0.3-beta (February 24, 2025)
 BUGFIXES:
 * resource meraki_networks_switch_access_policies - guest_vlan_id not being saved #210.

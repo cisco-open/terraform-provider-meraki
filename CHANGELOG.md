@@ -1,3 +1,9 @@
+## 1.0.5-beta (March 05, 2025)
+BUGFIXES:
+* Cannot create meraki_organizations_saml_idps resources #225.
+* Cannot create meraki_organizations_saml_roles resources #224.
+* Cannot import meraki_organizations_camera_roles resources #226.
+
 ## 1.0.4-beta (February 27, 2025)
 BUGFIXES:
 * resource meraki_networks_wireless_ssids - order of list of radius servers not maintained when applied. #218

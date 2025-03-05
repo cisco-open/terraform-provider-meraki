@@ -158,6 +158,7 @@ func (r *OrganizationsSamlRolesResource) Schema(_ context.Context, _ resource.Sc
 			"saml_role_id": schema.StringAttribute{
 				MarkdownDescription: `samlRoleId path parameter. Saml role ID`,
 				Optional:            true,
+				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -641,8 +642,9 @@ func ResponseOrganizationsGetOrganizationSamlRoleItemToBodyRs(state Organization
 			}
 			return nil
 		}(),
-		OrgAccess: types.StringValue(response.OrgAccess),
-		Role:      types.StringValue(response.Role),
+		OrgAccess:  types.StringValue(response.OrgAccess),
+		Role:       types.StringValue(response.Role),
+		SamlRoleID: types.StringValue(response.ID),
 		Tags: func() *[]ResponseOrganizationsGetOrganizationSamlRoleTagsRs {
 			if response.Tags != nil {
 				result := make([]ResponseOrganizationsGetOrganizationSamlRoleTagsRs, len(*response.Tags))

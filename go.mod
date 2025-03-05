@@ -8,7 +8,7 @@ require (
 	github.com/hashicorp/terraform-plugin-docs v0.21.0
 	github.com/hashicorp/terraform-plugin-framework v1.11.0
 	github.com/hashicorp/terraform-plugin-framework-validators v0.12.0
-	github.com/meraki/dashboard-api-go/v4 v4.0.3
+	github.com/meraki/dashboard-api-go/v4 v4.0.5
 )
 
 require (

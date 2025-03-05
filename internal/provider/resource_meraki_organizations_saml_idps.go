@@ -166,7 +166,7 @@ func (r *OrganizationsSamlIDpsResource) Create(ctx context.Context, req resource
 	}
 	//Items
 	res := *response
-	res2 := res[0]
+	res2 := res
 	vvIDpID = res2.IDpID
 	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationSamlIDp(vvOrganizationID, vvIDpID)
 	// Has item and has items

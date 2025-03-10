@@ -20,8 +20,9 @@ package provider
 
 import (
 	"context"
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 	"log"
+
+	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"

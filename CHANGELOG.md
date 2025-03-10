@@ -1,3 +1,8 @@
+## 1.0.6-beta (March 10, 2025)
+BUGFIXES:
+* meraki_organizations_saml_idps not mapped at the end [Fixed]. #225
+* meraki_organizations_camera_roles including ID parameter. #226
+
 ## 1.0.5-beta (March 05, 2025)
 BUGFIXES:
 * Cannot create meraki_organizations_saml_idps resources #225.

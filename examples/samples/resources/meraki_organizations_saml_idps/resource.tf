@@ -13,24 +13,13 @@ provider "meraki" {
   meraki_base_url = "http://localhost:3002"
 }
 
+resource "meraki_organizations_saml_idps" "example" {
 
-resource "meraki_organizations_saml_roles" "example" {
-
-  networks = [{
-
-    access = "full"
-    id     = "N_24329156"
-  }]
-  org_access      = "none"
-  organization_id = "string"
-  role            = "myrole"
-  tags = [{
-
-    access = "read-only"
-    tag    = "west"
-  }]
+  organization_id           = "123456"
+  slo_logout_url            = "https://login.remerge.io"
+  x509cert_sha1_fingerprint = "80:63:7E:86:9A:90:99:30:DF:50:F2:CD:51:15:2D:67:81:BB:8E:6B"
 }
 
-output "meraki_organizations_saml_roles_example" {
-  value = meraki_organizations_saml_roles.example
+output "meraki_organizations_saml_idps_example" {
+  value = meraki_organizations_saml_idps.example
 }

@@ -210,6 +210,14 @@ func (r *OrganizationsCameraRolesResource) Schema(_ context.Context, _ resource.
 			"role_id": schema.StringAttribute{
 				MarkdownDescription: `roleId path parameter. Role ID`,
 				Optional:            true,
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"id": schema.StringAttribute{
+				MarkdownDescription: `ID of the camera role`,
+				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -260,7 +268,7 @@ func (r *OrganizationsCameraRolesResource) Create(ctx context.Context, req resou
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 		if result != nil {
 			result2 := result.(map[string]interface{})
-			vvRoleID := result2["Name"].(string)
+			vvRoleID := result2["ID"].(string)
 			r.client.Camera.UpdateOrganizationCameraRole(vvOrganizationID, vvRoleID, data.toSdkApiRequestUpdate(ctx))
 			responseVerifyItem2, _, _ := r.client.Camera.GetOrganizationCameraRole(vvOrganizationID, vvRoleID)
 			if responseVerifyItem2 != nil {
@@ -310,7 +318,7 @@ func (r *OrganizationsCameraRolesResource) Create(ctx context.Context, req resou
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
 		result2 := result.(map[string]interface{})
-		vvRoleID := result2["Name"].(string)
+		vvRoleID := result2["ID"].(string)
 		responseVerifyItem2, restyRespGet, err := r.client.Camera.GetOrganizationCameraRole(vvOrganizationID, vvRoleID)
 		if responseVerifyItem2 != nil && err == nil {
 			data3 := ResponseCameraGetOrganizationCameraRoleItemToBodyRs(data, responseVerifyItem2, false)
@@ -479,6 +487,7 @@ type OrganizationsCameraRolesRs struct {
 	AppliedOnNetworks *[]ResponseCameraGetOrganizationCameraRoleAppliedOnNetworksRs `tfsdk:"applied_on_networks"`
 	AppliedOrgWide    *[]ResponseCameraGetOrganizationCameraRoleAppliedOrgWideRs    `tfsdk:"applied_org_wide"`
 	Name              types.String                                                  `tfsdk:"name"`
+	ID                types.String                                                  `tfsdk:"id"`
 }
 
 type ResponseCameraGetOrganizationCameraRoleAppliedOnDevicesRs struct {
@@ -698,7 +707,9 @@ func ResponseCameraGetOrganizationCameraRoleItemToBodyRs(state OrganizationsCame
 			}
 			return nil
 		}(),
-		Name: types.StringValue(response.Name),
+		Name:   types.StringValue(response.Name),
+		RoleID: types.StringValue(response.ID),
+		ID:     types.StringValue(response.ID),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsCameraRolesRs)

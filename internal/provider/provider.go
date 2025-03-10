@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	CUSTOM_USER_AGENT  = "MerakiTerraform/1.0.5-beta Cisco"
+	CUSTOM_USER_AGENT  = "MerakiTerraform/1.0.6-beta Cisco"
 	DEFAULT_USER_AGENT = "Meraki"
 )
 

@@ -185,6 +185,10 @@ func (r *OrganizationsSamlIDpsResource) Create(ctx context.Context, req resource
 		)
 		return
 	}
+	data = ResponseOrganizationsGetOrganizationSamlIDpItemToBodyRs(data, responseGet, false)
+	diags := resp.State.Set(ctx, &data)
+	resp.Diagnostics.Append(diags...)
+	return
 
 }
 

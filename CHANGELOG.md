@@ -1,3 +1,7 @@
+## Unreleased (- -, -)
+BUGFIXES:
+* meraki_organizations_policy_objects data source cannot unmarshal issue. [Fixed] #232
+
 ## 1.0.6-beta (March 10, 2025)
 BUGFIXES:
 * meraki_organizations_saml_idps not mapped at the end [Fixed]. #225

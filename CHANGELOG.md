@@ -1,6 +1,9 @@
 ## Unreleased (- -, -)
+
+## 1.0.7-beta (March 31, 2025)
 BUGFIXES:
 * meraki_organizations_policy_objects data source cannot unmarshal issue. [Fixed] #232
+* meraki_devices_appliance_vmx_authentication_token provider error. [Fixed] #237
 
 ## 1.0.6-beta (March 10, 2025)
 BUGFIXES:

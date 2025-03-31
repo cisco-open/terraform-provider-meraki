@@ -143,9 +143,8 @@ func (r *DevicesApplianceVmxAuthenticationTokenResource) Delete(ctx context.Cont
 
 // TF Structs Schema
 type DevicesApplianceVmxAuthenticationToken struct {
-	Serial     types.String                                                   `tfsdk:"serial"`
-	Item       *ResponseApplianceCreateDeviceApplianceVmxAuthenticationToken  `tfsdk:"item"`
-	Parameters *RequestApplianceCreateDeviceApplianceVmxAuthenticationTokenRs `tfsdk:"parameters"`
+	Serial types.String                                                  `tfsdk:"serial"`
+	Item   *ResponseApplianceCreateDeviceApplianceVmxAuthenticationToken `tfsdk:"item"`
 }
 
 type ResponseApplianceCreateDeviceApplianceVmxAuthenticationToken struct {

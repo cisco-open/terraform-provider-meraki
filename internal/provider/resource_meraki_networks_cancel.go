@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -100,7 +100,6 @@ func (r *NetworksCancelResource) Create(ctx context.Context, req resource.Create
 	vvNetworkID := data.NetworkID.ValueString()
 	vvJobID := data.JobID.ValueString()
 	restyResp1, err := r.client.Networks.CancelNetworkFloorPlansAutoLocateJob(vvNetworkID, vvJobID)
-
 	if err != nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -141,3 +140,7 @@ type NetworksCancel struct {
 	NetworkID types.String `tfsdk:"network_id"`
 	JobID     types.String `tfsdk:"job_id"`
 }
+
+type RequestNetworksCancelNetworkFloorPlansAutoLocateJobRs interface{}
+
+//FromBody

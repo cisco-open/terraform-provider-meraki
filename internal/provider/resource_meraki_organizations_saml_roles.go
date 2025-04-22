@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -205,7 +205,8 @@ func (r *OrganizationsSamlRolesResource) Schema(_ context.Context, _ resource.Sc
 	}
 }
 
-// path params to set ['samlRoleId']
+//path params to set ['samlRoleId']
+
 func (r *OrganizationsSamlRolesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
 	var data OrganizationsSamlRolesRs
@@ -224,12 +225,14 @@ func (r *OrganizationsSamlRolesResource) Create(ctx context.Context, req resourc
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
+	//Has Item and has items and post
+
 	vvRole := data.Role.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationSamlRoles(vvOrganizationID)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -241,6 +244,7 @@ func (r *OrganizationsSamlRolesResource) Create(ctx context.Context, req resourc
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Role", vvRole, simpleCmp)
@@ -255,6 +259,7 @@ func (r *OrganizationsSamlRolesResource) Create(ctx context.Context, req resourc
 				return
 			}
 			r.client.Organizations.UpdateOrganizationSamlRole(vvOrganizationID, vvSamlRoleID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Organizations.GetOrganizationSamlRole(vvOrganizationID, vvSamlRoleID)
 			if responseVerifyItem2 != nil {
 				data = ResponseOrganizationsGetOrganizationSamlRoleItemToBodyRs(data, responseVerifyItem2, false)
@@ -264,11 +269,11 @@ func (r *OrganizationsSamlRolesResource) Create(ctx context.Context, req resourc
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Organizations.CreateOrganizationSamlRole(vvOrganizationID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationSamlRole",
 				err.Error(),
@@ -281,9 +286,8 @@ func (r *OrganizationsSamlRolesResource) Create(ctx context.Context, req resourc
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationSamlRoles(vvOrganizationID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -299,6 +303,7 @@ func (r *OrganizationsSamlRolesResource) Create(ctx context.Context, req resourc
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Role", vvRole, simpleCmp)
 	if result != nil {
@@ -307,7 +312,7 @@ func (r *OrganizationsSamlRolesResource) Create(ctx context.Context, req resourc
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter SamlRoleID",
-				"Error",
+				"Fail Parsing SamlRoleID",
 			)
 			return
 		}
@@ -337,6 +342,7 @@ func (r *OrganizationsSamlRolesResource) Create(ctx context.Context, req resourc
 		)
 		return
 	}
+
 }
 
 func (r *OrganizationsSamlRolesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -501,14 +507,16 @@ type ResponseOrganizationsGetOrganizationSamlRoleTagsRs struct {
 func (r *OrganizationsSamlRolesRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestOrganizationsCreateOrganizationSamlRole {
 	emptyString := ""
 	var requestOrganizationsCreateOrganizationSamlRoleNetworks []merakigosdk.RequestOrganizationsCreateOrganizationSamlRoleNetworks
+
 	if r.Networks != nil {
 		for _, rItem1 := range *r.Networks {
 			access := rItem1.Access.ValueString()
-			iD := rItem1.ID.ValueString()
+			id := rItem1.ID.ValueString()
 			requestOrganizationsCreateOrganizationSamlRoleNetworks = append(requestOrganizationsCreateOrganizationSamlRoleNetworks, merakigosdk.RequestOrganizationsCreateOrganizationSamlRoleNetworks{
 				Access: access,
-				ID:     iD,
+				ID:     id,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	orgAccess := new(string)
@@ -524,6 +532,7 @@ func (r *OrganizationsSamlRolesRs) toSdkApiRequestCreate(ctx context.Context) *m
 		role = &emptyString
 	}
 	var requestOrganizationsCreateOrganizationSamlRoleTags []merakigosdk.RequestOrganizationsCreateOrganizationSamlRoleTags
+
 	if r.Tags != nil {
 		for _, rItem1 := range *r.Tags {
 			access := rItem1.Access.ValueString()
@@ -532,6 +541,7 @@ func (r *OrganizationsSamlRolesRs) toSdkApiRequestCreate(ctx context.Context) *m
 				Access: access,
 				Tag:    tag,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestOrganizationsCreateOrganizationSamlRole{
@@ -555,14 +565,16 @@ func (r *OrganizationsSamlRolesRs) toSdkApiRequestCreate(ctx context.Context) *m
 func (r *OrganizationsSamlRolesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestOrganizationsUpdateOrganizationSamlRole {
 	emptyString := ""
 	var requestOrganizationsUpdateOrganizationSamlRoleNetworks []merakigosdk.RequestOrganizationsUpdateOrganizationSamlRoleNetworks
+
 	if r.Networks != nil {
 		for _, rItem1 := range *r.Networks {
 			access := rItem1.Access.ValueString()
-			iD := rItem1.ID.ValueString()
+			id := rItem1.ID.ValueString()
 			requestOrganizationsUpdateOrganizationSamlRoleNetworks = append(requestOrganizationsUpdateOrganizationSamlRoleNetworks, merakigosdk.RequestOrganizationsUpdateOrganizationSamlRoleNetworks{
 				Access: access,
-				ID:     iD,
+				ID:     id,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	orgAccess := new(string)
@@ -578,6 +590,7 @@ func (r *OrganizationsSamlRolesRs) toSdkApiRequestUpdate(ctx context.Context) *m
 		role = &emptyString
 	}
 	var requestOrganizationsUpdateOrganizationSamlRoleTags []merakigosdk.RequestOrganizationsUpdateOrganizationSamlRoleTags
+
 	if r.Tags != nil {
 		for _, rItem1 := range *r.Tags {
 			access := rItem1.Access.ValueString()
@@ -586,6 +599,7 @@ func (r *OrganizationsSamlRolesRs) toSdkApiRequestUpdate(ctx context.Context) *m
 				Access: access,
 				Tag:    tag,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestOrganizationsUpdateOrganizationSamlRole{

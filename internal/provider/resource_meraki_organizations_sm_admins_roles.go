@@ -19,10 +19,13 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"fmt"
+	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -137,15 +140,13 @@ func (r *OrganizationsSmAdminsRolesResource) Create(ctx context.Context, req res
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Sm.GetOrganizationSmAdminsRoles(vvOrganizationID, nil)
 	//Have Create
-	if err != nil {
-		if restyResp1 != nil {
-			if restyResp1.StatusCode() != 404 {
-				resp.Diagnostics.AddError(
-					"Failure when executing GetOrganizationSmAdminsRoles",
-					err.Error(),
-				)
-				return
-			}
+	if err != nil || restyResp1 == nil {
+		if restyResp1.StatusCode() != 404 {
+			resp.Diagnostics.AddError(
+				"Failure when executing GetOrganizationSmAdminsRoles",
+				err.Error(),
+			)
+			return
 		}
 	}
 	if responseVerifyItem != nil {
@@ -244,6 +245,21 @@ func (r *OrganizationsSmAdminsRolesResource) Create(ctx context.Context, req res
 		)
 		return
 	}
+}
+
+func (r *OrganizationsSmAdminsRolesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	idParts := strings.Split(req.ID, ",")
+
+	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
+		resp.Diagnostics.AddError(
+			"Unexpected Import Identifier",
+			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+		)
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), idParts[0])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("role_id"), idParts[1])...)
 }
 
 func (r *OrganizationsSmAdminsRolesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {

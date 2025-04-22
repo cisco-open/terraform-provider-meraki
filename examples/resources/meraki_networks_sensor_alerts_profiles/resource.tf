@@ -85,8 +85,10 @@ resource "meraki_networks_sensor_alerts_profiles" "example" {
       }
     }
   }]
-  name       = "My Sensor Alert Profile"
-  network_id = "string"
+  includesensor_url = true
+  message           = "Check with Miles on what to do."
+  name              = "My Sensor Alert Profile"
+  network_id        = "string"
   recipients = {
 
     emails          = ["miles@meraki.com"]

@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -314,7 +314,7 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 												}
 												return &result
 											}
-											return &[]ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2StatusesChangeHistoryByDeviceItemsInterfacesChanges{}
+											return nil
 										}(),
 										Mac:  types.StringValue(interfaces.Mac),
 										Name: types.StringValue(interfaces.Name),
@@ -322,14 +322,14 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 								}
 								return &result
 							}
-							return &[]ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2StatusesChangeHistoryByDeviceItemsInterfaces{}
+							return nil
 						}(),
 						Serial: types.StringValue(items.Serial),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2StatusesChangeHistoryByDeviceItems{}
+			return nil
 		}(),
 		Meta: func() *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2StatusesChangeHistoryByDeviceMeta {
 			if response.Meta != nil {
@@ -354,15 +354,15 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 											}(),
 										}
 									}
-									return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2StatusesChangeHistoryByDeviceMetaCountsItems{}
+									return nil
 								}(),
 							}
 						}
-						return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2StatusesChangeHistoryByDeviceMetaCounts{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2StatusesChangeHistoryByDeviceMeta{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

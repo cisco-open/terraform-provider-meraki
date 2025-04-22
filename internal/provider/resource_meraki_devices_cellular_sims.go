@@ -20,7 +20,9 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	"log"
+
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -247,30 +249,37 @@ func (r *DevicesCellularSimsResource) Create(ctx context.Context, req resource.C
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvSerial := data.Serial.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Devices.GetDeviceCellularSims(vvSerial)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesCellularSims only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvSerial != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Devices.GetDeviceCellularSims(vvSerial)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesCellularSims  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesCellularSims only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesCellularSims only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Devices.UpdateDeviceCellularSims(vvSerial, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCellularSims",
 				err.Error(),
@@ -283,9 +292,10 @@ func (r *DevicesCellularSimsResource) Create(ctx context.Context, req resource.C
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Devices.GetDeviceCellularSims(vvSerial)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -300,11 +310,12 @@ func (r *DevicesCellularSimsResource) Create(ctx context.Context, req resource.C
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseDevicesGetDeviceCellularSimsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *DevicesCellularSimsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -436,6 +447,7 @@ type ResponseDevicesGetDeviceCellularSimsSimsApnsAuthenticationRs struct {
 // FromBody
 func (r *DevicesCellularSimsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestDevicesUpdateDeviceCellularSims {
 	var requestDevicesUpdateDeviceCellularSimsSimFailover *merakigosdk.RequestDevicesUpdateDeviceCellularSimsSimFailover
+
 	if r.SimFailover != nil {
 		enabled := func() *bool {
 			if !r.SimFailover.Enabled.IsUnknown() && !r.SimFailover.Enabled.IsNull() {
@@ -453,19 +465,25 @@ func (r *DevicesCellularSimsRs) toSdkApiRequestUpdate(ctx context.Context) *mera
 			Enabled: enabled,
 			Timeout: int64ToIntPointer(timeout),
 		}
+		//[debug] Is Array: False
 	}
 	var simOrdering []string = nil
 	r.SimOrdering.ElementsAs(ctx, &simOrdering, false)
 	var requestDevicesUpdateDeviceCellularSimsSims []merakigosdk.RequestDevicesUpdateDeviceCellularSimsSims
+
 	if r.Sims != nil {
 		for _, rItem1 := range *r.Sims {
+
+			log.Printf("[DEBUG] #TODO []RequestDevicesUpdateDeviceCellularSimsSimsApns")
 			var requestDevicesUpdateDeviceCellularSimsSimsApns []merakigosdk.RequestDevicesUpdateDeviceCellularSimsSimsApns
+
 			if rItem1.Apns != nil {
-				for _, rItem2 := range *rItem1.Apns { //Apns// name: apns
+				for _, rItem2 := range *rItem1.Apns {
+
 					var allowedIPTypes []string = nil
-					//Hoola aqui
 					rItem2.AllowedIPTypes.ElementsAs(ctx, &allowedIPTypes, false)
 					var requestDevicesUpdateDeviceCellularSimsSimsApnsAuthentication *merakigosdk.RequestDevicesUpdateDeviceCellularSimsSimsApnsAuthentication
+
 					if rItem2.Authentication != nil {
 						password := rItem2.Authentication.Password.ValueString()
 						typeR := rItem2.Authentication.Type.ValueString()
@@ -475,6 +493,7 @@ func (r *DevicesCellularSimsRs) toSdkApiRequestUpdate(ctx context.Context) *mera
 							Type:     typeR,
 							Username: username,
 						}
+						//[debug] Is Array: False
 					}
 					name := rItem2.Name.ValueString()
 					requestDevicesUpdateDeviceCellularSimsSimsApns = append(requestDevicesUpdateDeviceCellularSimsSimsApns, merakigosdk.RequestDevicesUpdateDeviceCellularSimsSimsApns{
@@ -482,6 +501,7 @@ func (r *DevicesCellularSimsRs) toSdkApiRequestUpdate(ctx context.Context) *mera
 						Authentication: requestDevicesUpdateDeviceCellularSimsSimsApnsAuthentication,
 						Name:           name,
 					})
+					//[debug] Is Array: True
 				}
 			}
 			isPrimary := func() *bool {
@@ -508,6 +528,7 @@ func (r *DevicesCellularSimsRs) toSdkApiRequestUpdate(ctx context.Context) *mera
 				SimOrder:  int64ToIntPointer(simOrder),
 				Slot:      slot,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestDevicesUpdateDeviceCellularSims{

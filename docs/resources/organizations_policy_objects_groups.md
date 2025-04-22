@@ -37,7 +37,7 @@ output "meraki_organizations_policy_objects_groups_example" {
 
 - `category` (String) Type of object groups. (NetworkObjectGroup, GeoLocationGroup, PortObjectGroup, ApplicationGroup)
 - `name` (String) Name of the Policy object group.
-- `object_ids` (Set of Number) Policy objects associated with Network Object Group or Port Object Group
+- `object_ids` (Set of String) Policy objects associated with Network Object Group or Port Object Group
 - `policy_object_group_id` (String) policyObjectGroupId path parameter. Policy object group ID
 
 ### Read-Only

@@ -20,7 +20,9 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	"log"
+
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -597,30 +599,37 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Create(ctx cont
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceTrafficShapingUplinkSelection(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceTrafficShapingUplinkSelection only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceTrafficShapingUplinkSelection(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceTrafficShapingUplinkSelection  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceTrafficShapingUplinkSelection only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceTrafficShapingUplinkSelection only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceTrafficShapingUplinkSelection(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceTrafficShapingUplinkSelection",
 				err.Error(),
@@ -633,9 +642,10 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Create(ctx cont
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceTrafficShapingUplinkSelection(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -650,11 +660,12 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Create(ctx cont
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -863,8 +874,10 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionRs) toSdkApiRequestUpdate
 		defaultUplink = &emptyString
 	}
 	var requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionFailoverAndFailback *merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionFailoverAndFailback
+
 	if r.FailoverAndFailback != nil {
 		var requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionFailoverAndFailbackImmediate *merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionFailoverAndFailbackImmediate
+
 		if r.FailoverAndFailback.Immediate != nil {
 			enabled := func() *bool {
 				if !r.FailoverAndFailback.Immediate.Enabled.IsUnknown() && !r.FailoverAndFailback.Immediate.Enabled.IsNull() {
@@ -875,10 +888,12 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionRs) toSdkApiRequestUpdate
 			requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionFailoverAndFailbackImmediate = &merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionFailoverAndFailbackImmediate{
 				Enabled: enabled,
 			}
+			//[debug] Is Array: False
 		}
 		requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionFailoverAndFailback = &merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionFailoverAndFailback{
 			Immediate: requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionFailoverAndFailbackImmediate,
 		}
+		//[debug] Is Array: False
 	}
 	loadBalancingEnabled := new(bool)
 	if !r.LoadBalancingEnabled.IsUnknown() && !r.LoadBalancingEnabled.IsNull() {
@@ -887,10 +902,12 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionRs) toSdkApiRequestUpdate
 		loadBalancingEnabled = nil
 	}
 	var requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferences []merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferences
+
 	if r.VpnTrafficUplinkPreferences != nil {
 		for _, rItem1 := range *r.VpnTrafficUplinkPreferences {
 			failOverCriterion := rItem1.FailOverCriterion.ValueString()
 			var requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesPerformanceClass *merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesPerformanceClass
+
 			if rItem1.PerformanceClass != nil {
 				builtinPerformanceClassName := rItem1.PerformanceClass.BuiltinPerformanceClassName.ValueString()
 				customPerformanceClassID := rItem1.PerformanceClass.CustomPerformanceClassID.ValueString()
@@ -900,15 +917,21 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionRs) toSdkApiRequestUpdate
 					CustomPerformanceClassID:    customPerformanceClassID,
 					Type:                        typeR,
 				}
+				//[debug] Is Array: False
 			}
 			preferredUplink := rItem1.PreferredUplink.ValueString()
+
+			log.Printf("[DEBUG] #TODO []RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFilters")
 			var requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFilters []merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFilters
+
 			if rItem1.TrafficFilters != nil {
-				for _, rItem2 := range *rItem1.TrafficFilters { //TrafficFilters// name: trafficFilters
+				for _, rItem2 := range *rItem1.TrafficFilters {
 					typeR := rItem2.Type.ValueString()
 					var requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValue *merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValue
+
 					if rItem2.Value != nil {
 						var requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueDestination *merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueDestination
+
 						if rItem2.Value.Destination != nil {
 							cidr := rItem2.Value.Destination.Cidr.ValueString()
 							fqdn := rItem2.Value.Destination.Fqdn.ValueString()
@@ -920,7 +943,7 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionRs) toSdkApiRequestUpdate
 							}()
 							network := rItem2.Value.Destination.Network.ValueString()
 							port := rItem2.Value.Destination.Port.ValueString()
-							vLAN := func() *int64 {
+							vlan := func() *int64 {
 								if !rItem2.Value.Destination.VLAN.IsUnknown() && !rItem2.Value.Destination.VLAN.IsNull() {
 									return rItem2.Value.Destination.VLAN.ValueInt64Pointer()
 								}
@@ -932,12 +955,14 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionRs) toSdkApiRequestUpdate
 								Host:    int64ToIntPointer(host),
 								Network: network,
 								Port:    port,
-								VLAN:    int64ToIntPointer(vLAN),
+								VLAN:    int64ToIntPointer(vlan),
 							}
+							//[debug] Is Array: False
 						}
-						iD := rItem2.Value.ID.ValueString()
+						id := rItem2.Value.ID.ValueString()
 						protocol := rItem2.Value.Protocol.ValueString()
 						var requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueSource *merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueSource
+
 						if rItem2.Value.Source != nil {
 							cidr := rItem2.Value.Source.Cidr.ValueString()
 							host := func() *int64 {
@@ -948,7 +973,7 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionRs) toSdkApiRequestUpdate
 							}()
 							network := rItem2.Value.Source.Network.ValueString()
 							port := rItem2.Value.Source.Port.ValueString()
-							vLAN := func() *int64 {
+							vlan := func() *int64 {
 								if !rItem2.Value.Source.VLAN.IsUnknown() && !rItem2.Value.Source.VLAN.IsNull() {
 									return rItem2.Value.Source.VLAN.ValueInt64Pointer()
 								}
@@ -959,20 +984,23 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionRs) toSdkApiRequestUpdate
 								Host:    int64ToIntPointer(host),
 								Network: network,
 								Port:    port,
-								VLAN:    int64ToIntPointer(vLAN),
+								VLAN:    int64ToIntPointer(vlan),
 							}
+							//[debug] Is Array: False
 						}
 						requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValue = &merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValue{
 							Destination: requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueDestination,
-							ID:          iD,
+							ID:          id,
 							Protocol:    protocol,
 							Source:      requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueSource,
 						}
+						//[debug] Is Array: False
 					}
 					requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFilters = append(requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFilters, merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFilters{
 						Type:  typeR,
 						Value: requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValue,
 					})
+					//[debug] Is Array: True
 				}
 			}
 			requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferences = append(requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferences, merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferences{
@@ -986,19 +1014,26 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionRs) toSdkApiRequestUpdate
 					return nil
 				}(),
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferences []merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferences
+
 	if r.WanTrafficUplinkPreferences != nil {
 		for _, rItem1 := range *r.WanTrafficUplinkPreferences {
 			preferredUplink := rItem1.PreferredUplink.ValueString()
+
+			log.Printf("[DEBUG] #TODO []RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFilters")
 			var requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFilters []merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFilters
+
 			if rItem1.TrafficFilters != nil {
-				for _, rItem2 := range *rItem1.TrafficFilters { //TrafficFilters// name: trafficFilters
+				for _, rItem2 := range *rItem1.TrafficFilters {
 					typeR := rItem2.Type.ValueString()
 					var requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValue *merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValue
+
 					if rItem2.Value != nil {
 						var requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestination *merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestination
+
 						if rItem2.Value.Destination != nil {
 							cidr := rItem2.Value.Destination.Cidr.ValueString()
 							port := rItem2.Value.Destination.Port.ValueString()
@@ -1006,9 +1041,11 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionRs) toSdkApiRequestUpdate
 								Cidr: cidr,
 								Port: port,
 							}
+							//[debug] Is Array: False
 						}
 						protocol := rItem2.Value.Protocol.ValueString()
 						var requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueSource *merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueSource
+
 						if rItem2.Value.Source != nil {
 							cidr := rItem2.Value.Source.Cidr.ValueString()
 							host := func() *int64 {
@@ -1018,7 +1055,7 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionRs) toSdkApiRequestUpdate
 								return nil
 							}()
 							port := rItem2.Value.Source.Port.ValueString()
-							vLAN := func() *int64 {
+							vlan := func() *int64 {
 								if !rItem2.Value.Source.VLAN.IsUnknown() && !rItem2.Value.Source.VLAN.IsNull() {
 									return rItem2.Value.Source.VLAN.ValueInt64Pointer()
 								}
@@ -1028,19 +1065,22 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionRs) toSdkApiRequestUpdate
 								Cidr: cidr,
 								Host: int64ToIntPointer(host),
 								Port: port,
-								VLAN: int64ToIntPointer(vLAN),
+								VLAN: int64ToIntPointer(vlan),
 							}
+							//[debug] Is Array: False
 						}
 						requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValue = &merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValue{
 							Destination: requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestination,
 							Protocol:    protocol,
 							Source:      requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueSource,
 						}
+						//[debug] Is Array: False
 					}
 					requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFilters = append(requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFilters, merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFilters{
 						Type:  typeR,
 						Value: requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValue,
 					})
+					//[debug] Is Array: True
 				}
 			}
 			requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferences = append(requestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferences, merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferences{
@@ -1052,6 +1092,7 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionRs) toSdkApiRequestUpdate
 					return nil
 				}(),
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkSelection{

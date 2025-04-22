@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -214,7 +214,6 @@ func (r *NetworksApplianceTrafficShapingVpnExclusionsResource) Create(ctx contex
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp1, err := r.client.Appliance.UpdateNetworkApplianceTrafficShapingVpnExclusions(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -231,7 +230,6 @@ func (r *NetworksApplianceTrafficShapingVpnExclusionsResource) Create(ctx contex
 	}
 	//Item
 	data = ResponseApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -294,6 +292,7 @@ type RequestApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsMajorAppli
 func (r *NetworksApplianceTrafficShapingVpnExclusions) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingVpnExclusions {
 	re := *r.Parameters
 	var requestApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsCustom []merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsCustom
+
 	if re.Custom != nil {
 		for _, rItem1 := range *re.Custom {
 			destination := rItem1.Destination.ValueString()
@@ -304,17 +303,20 @@ func (r *NetworksApplianceTrafficShapingVpnExclusions) toSdkApiRequestUpdate(ctx
 				Port:        port,
 				Protocol:    protocol,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var requestApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsMajorApplications []merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsMajorApplications
+
 	if re.MajorApplications != nil {
 		for _, rItem1 := range *re.MajorApplications {
-			iD := rItem1.ID.ValueString()
+			id := rItem1.ID.ValueString()
 			name := rItem1.Name.ValueString()
 			requestApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsMajorApplications = append(requestApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsMajorApplications, merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsMajorApplications{
-				ID:   iD,
+				ID:   id,
 				Name: name,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingVpnExclusions{

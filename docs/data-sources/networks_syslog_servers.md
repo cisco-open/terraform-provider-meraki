@@ -46,6 +46,6 @@ Read-Only:
 
 Read-Only:
 
-- `host` (String) The IP address of the syslog server
+- `host` (String) The IP address or FQDN of the syslog server
 - `port` (Number) The port of the syslog server
 - `roles` (List of String) A list of roles for the syslog server. Options (case-insensitive): 'Wireless event log', 'Appliance event log', 'Switch event log', 'Air Marshal events', 'Flows', 'URLs', 'IDS alerts', 'Security events'

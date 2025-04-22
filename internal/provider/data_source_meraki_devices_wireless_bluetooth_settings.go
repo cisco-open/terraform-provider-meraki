@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -67,16 +67,19 @@ func (d *DevicesWirelessBluetoothSettingsDataSource) Schema(_ context.Context, _
 				Attributes: map[string]schema.Attribute{
 
 					"major": schema.Int64Attribute{
-						MarkdownDescription: `Desired major value of the beacon. If the value is set to null it will reset to Dashboard's automatically generated value.`,
-						Computed:            true,
+						MarkdownDescription: `Desired major value of the beacon. If the value is set to null it will reset to
+          Dashboard's automatically generated value.`,
+						Computed: true,
 					},
 					"minor": schema.Int64Attribute{
-						MarkdownDescription: `Desired minor value of the beacon. If the value is set to null it will reset to Dashboard's automatically generated value.`,
-						Computed:            true,
+						MarkdownDescription: `Desired minor value of the beacon. If the value is set to null it will reset to
+          Dashboard's automatically generated value.`,
+						Computed: true,
 					},
 					"uuid": schema.StringAttribute{
-						MarkdownDescription: `Desired UUID of the beacon. If the value is set to null it will reset to Dashboard's automatically generated value.`,
-						Computed:            true,
+						MarkdownDescription: `Desired UUID of the beacon. If the value is set to null it will reset to Dashboard's
+          automatically generated value.`,
+						Computed: true,
 					},
 				},
 			},

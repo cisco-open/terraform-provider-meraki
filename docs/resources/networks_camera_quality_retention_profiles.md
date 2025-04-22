@@ -75,12 +75,14 @@ Optional:
 - `m_v33` (Attributes) Quality and resolution for MV33 camera models. (see [below for nested schema](#nestedatt--video_settings--m_v33))
 - `m_v33_m` (Attributes) Quality and resolution for MV33M camera models. (see [below for nested schema](#nestedatt--video_settings--m_v33_m))
 - `m_v52` (Attributes) Quality and resolution for MV52 camera models. (see [below for nested schema](#nestedatt--video_settings--m_v52))
+- `m_v53_x` (Attributes) Quality and resolution for MV53X camera models. (see [below for nested schema](#nestedatt--video_settings--m_v53_x))
 - `m_v63` (Attributes) Quality and resolution for MV63 camera models. (see [below for nested schema](#nestedatt--video_settings--m_v63))
 - `m_v63_m` (Attributes) Quality and resolution for MV63M camera models. (see [below for nested schema](#nestedatt--video_settings--m_v63_m))
 - `m_v63_x` (Attributes) Quality and resolution for MV63X camera models. (see [below for nested schema](#nestedatt--video_settings--m_v63_x))
 - `m_v73` (Attributes) Quality and resolution for MV73 camera models. (see [below for nested schema](#nestedatt--video_settings--m_v73))
 - `m_v73_m` (Attributes) Quality and resolution for MV73M camera models. (see [below for nested schema](#nestedatt--video_settings--m_v73_m))
 - `m_v73_x` (Attributes) Quality and resolution for MV73X camera models. (see [below for nested schema](#nestedatt--video_settings--m_v73_x))
+- `m_v84_x` (Attributes) Quality and resolution for MV84X camera models. (see [below for nested schema](#nestedatt--video_settings--m_v84_x))
 - `m_v93` (Attributes) Quality and resolution for MV93 camera models. (see [below for nested schema](#nestedatt--video_settings--m_v93))
 - `m_v93_m` (Attributes) Quality and resolution for MV93M camera models. (see [below for nested schema](#nestedatt--video_settings--m_v93_m))
 - `m_v93_x` (Attributes) Quality and resolution for MV93X camera models. (see [below for nested schema](#nestedatt--video_settings--m_v93_x))
@@ -228,6 +230,17 @@ Optional:
                                               Allowed values: [1280x720,1920x1080,2688x1512,3840x2160]
 
 
+<a id="nestedatt--video_settings--m_v53_x"></a>
+### Nested Schema for `video_settings.m_v53_x`
+
+Optional:
+
+- `quality` (String) Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
+                                              Allowed values: [Enhanced,High,Standard]
+- `resolution` (String) Resolution of the camera. Can be one of '1920x1080', '2688x1512' or '3840x2160'.
+                                              Allowed values: [1920x1080,2688x1512,3840x2160]
+
+
 <a id="nestedatt--video_settings--m_v63"></a>
 ### Nested Schema for `video_settings.m_v63`
 
@@ -292,6 +305,17 @@ Optional:
                                               Allowed values: [Enhanced,High,Standard]
 - `resolution` (String) Resolution of the camera. Can be one of '1920x1080', '2688x1512' or '3840x2160'.
                                               Allowed values: [1920x1080,2688x1512,3840x2160]
+
+
+<a id="nestedatt--video_settings--m_v84_x"></a>
+### Nested Schema for `video_settings.m_v84_x`
+
+Optional:
+
+- `quality` (String) Quality of the camera. Can be one of 'Standard' or 'Enhanced'.
+                                              Allowed values: [Enhanced,Standard]
+- `resolution` (String) Resolution of the camera. Can be one of '1440x1080' or '2560x1920'.
+                                              Allowed values: [1440x1080,2560x1920]
 
 
 <a id="nestedatt--video_settings--m_v93"></a>

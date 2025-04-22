@@ -62,7 +62,7 @@ Read-Only:
 - `dns_nameservers` (String) The DNS nameservers used for DHCP responses, either "upstream_dns", "google_dns", "opendns", or a newline seperated string of IP addresses or domain names
 - `fixed_ip_assignments` (String) The DHCP fixed IP assignments on the VLAN. This should be an object that contains mappings from MAC addresses to objects that themselves each contain "ip" and "name" string fields. See the sample request/response for more details.
 - `group_policy_id` (String) The id of the desired group policy to apply to the VLAN
-- `id` (Number) The VLAN ID of the VLAN
+- `id` (String) The VLAN ID of the VLAN
 - `interface_id` (String) The interface ID of the VLAN
 - `ipv6` (Attributes) IPv6 configuration on the VLAN (see [below for nested schema](#nestedatt--item--ipv6))
 - `mandatory_dhcp` (Attributes) Mandatory DHCP will enforce that clients connecting to this VLAN must use the IP address assigned by the DHCP server. Clients who use a static IP address won't be able to associate. Only available on firmware versions 17.0 and above (see [below for nested schema](#nestedatt--item--mandatory_dhcp))
@@ -148,7 +148,7 @@ Read-Only:
 - `dns_nameservers` (String) The DNS nameservers used for DHCP responses, either "upstream_dns", "google_dns", "opendns", or a newline seperated string of IP addresses or domain names
 - `fixed_ip_assignments` (String) The DHCP fixed IP assignments on the VLAN. This should be an object that contains mappings from MAC addresses to objects that themselves each contain "ip" and "name" string fields. See the sample request/response for more details.
 - `group_policy_id` (String) The id of the desired group policy to apply to the VLAN
-- `id` (Number) The VLAN ID of the VLAN
+- `id` (String) The VLAN ID of the VLAN
 - `interface_id` (String) The interface ID of the VLAN
 - `ipv6` (Attributes) IPv6 configuration on the VLAN (see [below for nested schema](#nestedatt--items--ipv6))
 - `mandatory_dhcp` (Attributes) Mandatory DHCP will enforce that clients connecting to this VLAN must use the IP address assigned by the DHCP server. Clients who use a static IP address won't be able to associate. Only available on firmware versions 17.0 and above (see [below for nested schema](#nestedatt--items--mandatory_dhcp))

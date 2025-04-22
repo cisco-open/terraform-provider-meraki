@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -140,13 +140,15 @@ func (r *NetworksSmBypassActivationLockAttemptsResource) Create(ctx context.Cont
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	vvAttemptID := data.AttemptID.ValueString()
-	//Item
-	if vvAttemptID != "" {
+	//Has Item and not has items
+
+	if vvNetworkID != "" && vvAttemptID != "" {
+		//dentro
 		responseVerifyItem, restyResp1, err := r.client.Sm.GetNetworkSmBypassActivationLockAttempt(vvNetworkID, vvAttemptID)
-		//Have Create
+		//Has Post
 		if err != nil {
 			if restyResp1 != nil {
 				if restyResp1.StatusCode() != 404 {
@@ -158,16 +160,17 @@ func (r *NetworksSmBypassActivationLockAttemptsResource) Create(ctx context.Cont
 				}
 			}
 		}
+
 		if responseVerifyItem != nil {
-			data := ResponseSmGetNetworkSmBypassActivationLockAttemptItemToBodyRs(data, responseVerifyItem, false)
+			data = ResponseSmGetNetworkSmBypassActivationLockAttemptItemToBodyRs(data, responseVerifyItem, false)
 			//Path params in update assigned
 			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 			return
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	restyResp2, err := r.client.Sm.CreateNetworkSmBypassActivationLockAttempt(vvNetworkID, dataRequest)
-
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
@@ -182,9 +185,10 @@ func (r *NetworksSmBypassActivationLockAttemptsResource) Create(ctx context.Cont
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Sm.GetNetworkSmBypassActivationLockAttempt(vvNetworkID, vvAttemptID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -199,11 +203,12 @@ func (r *NetworksSmBypassActivationLockAttemptsResource) Create(ctx context.Cont
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseSmGetNetworkSmBypassActivationLockAttemptItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksSmBypassActivationLockAttemptsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {

@@ -25,7 +25,7 @@ import (
 
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -431,6 +431,14 @@ func (r *NetworksApplianceVLANsResource) Schema(_ context.Context, _ resource.Sc
 					),
 				},
 			},
+			"vlan_id": schema.StringAttribute{
+				MarkdownDescription: `vlanId path parameter. Vlan ID`,
+				Optional:            true,
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"vpn_nat_subnet": schema.StringAttribute{
 				MarkdownDescription: `The translated VPN subnet if VPN and VPN subnet translation are enabled on the VLAN`,
 				Computed:            true,
@@ -754,7 +762,6 @@ type ResponseApplianceGetNetworkApplianceVlanReservedIpRangesRs struct {
 
 // FromBody
 func (r *NetworksApplianceVLANsRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestApplianceCreateNetworkApplianceVLAN {
-	log.Printf("ResquestCreate: %v", r.IPv6)
 	emptyString := ""
 	applianceIP := new(string)
 	if !r.ApplianceIP.IsUnknown() && !r.ApplianceIP.IsNull() {
@@ -768,6 +775,39 @@ func (r *NetworksApplianceVLANsRs) toSdkApiRequestCreate(ctx context.Context) *m
 	} else {
 		cidr = &emptyString
 	}
+	dhcpBootOptionsEnabled := new(bool)
+	if !r.DhcpBootOptionsEnabled.IsUnknown() && !r.DhcpBootOptionsEnabled.IsNull() {
+		*dhcpBootOptionsEnabled = r.DhcpBootOptionsEnabled.ValueBool()
+	} else {
+		dhcpBootOptionsEnabled = nil
+	}
+	dhcpHandling := new(string)
+	if !r.DhcpHandling.IsUnknown() && !r.DhcpHandling.IsNull() {
+		*dhcpHandling = r.DhcpHandling.ValueString()
+	} else {
+		dhcpHandling = &emptyString
+	}
+	dhcpLeaseTime := new(string)
+	if !r.DhcpLeaseTime.IsUnknown() && !r.DhcpLeaseTime.IsNull() {
+		*dhcpLeaseTime = r.DhcpLeaseTime.ValueString()
+	} else {
+		dhcpLeaseTime = &emptyString
+	}
+	var requestApplianceCreateNetworkApplianceVLANDhcpOptions []merakigosdk.RequestApplianceCreateNetworkApplianceVLANDhcpOptions
+
+	if r.DhcpOptions != nil {
+		for _, rItem1 := range *r.DhcpOptions {
+			code := rItem1.Code.ValueString()
+			typeR := rItem1.Type.ValueString()
+			value := rItem1.Value.ValueString()
+			requestApplianceCreateNetworkApplianceVLANDhcpOptions = append(requestApplianceCreateNetworkApplianceVLANDhcpOptions, merakigosdk.RequestApplianceCreateNetworkApplianceVLANDhcpOptions{
+				Code:  code,
+				Type:  typeR,
+				Value: value,
+			})
+			//[debug] Is Array: True
+		}
+	}
 	groupPolicyID := new(string)
 	if !r.GroupPolicyID.IsUnknown() && !r.GroupPolicyID.IsNull() {
 		*groupPolicyID = r.GroupPolicyID.ValueString()
@@ -776,11 +816,12 @@ func (r *NetworksApplianceVLANsRs) toSdkApiRequestCreate(ctx context.Context) *m
 	}
 	iD := new(string)
 	if !r.ID.IsUnknown() && !r.ID.IsNull() {
-		iD = r.ID.ValueStringPointer()
+		*iD = r.ID.ValueString()
 	} else {
 		iD = &emptyString
 	}
 	var requestApplianceCreateNetworkApplianceVLANIPv6 *merakigosdk.RequestApplianceCreateNetworkApplianceVLANIPv6
+
 	if r.IPv6 != nil {
 		enabled := func() *bool {
 			if !r.IPv6.Enabled.IsUnknown() && !r.IPv6.Enabled.IsNull() {
@@ -788,7 +829,10 @@ func (r *NetworksApplianceVLANsRs) toSdkApiRequestCreate(ctx context.Context) *m
 			}
 			return nil
 		}()
+
+		log.Printf("[DEBUG] #TODO []RequestApplianceCreateNetworkApplianceVlanIpv6PrefixAssignments")
 		var requestApplianceCreateNetworkApplianceVLANIPv6PrefixAssignments []merakigosdk.RequestApplianceCreateNetworkApplianceVLANIPv6PrefixAssignments
+
 		if r.IPv6.PrefixAssignments != nil {
 			for _, rItem1 := range *r.IPv6.PrefixAssignments {
 				autonomous := func() *bool {
@@ -798,14 +842,17 @@ func (r *NetworksApplianceVLANsRs) toSdkApiRequestCreate(ctx context.Context) *m
 					return nil
 				}()
 				var requestApplianceCreateNetworkApplianceVLANIPv6PrefixAssignmentsOrigin *merakigosdk.RequestApplianceCreateNetworkApplianceVLANIPv6PrefixAssignmentsOrigin
+
 				if rItem1.Origin != nil {
-					var interfaces []string
+
+					var interfaces []string = nil
 					rItem1.Origin.Interfaces.ElementsAs(ctx, &interfaces, false)
 					typeR := rItem1.Origin.Type.ValueString()
 					requestApplianceCreateNetworkApplianceVLANIPv6PrefixAssignmentsOrigin = &merakigosdk.RequestApplianceCreateNetworkApplianceVLANIPv6PrefixAssignmentsOrigin{
 						Interfaces: interfaces,
 						Type:       typeR,
 					}
+					//[debug] Is Array: False
 				}
 				staticApplianceIP6 := rItem1.StaticApplianceIP6.ValueString()
 				staticPrefix := rItem1.StaticPrefix.ValueString()
@@ -815,6 +862,7 @@ func (r *NetworksApplianceVLANsRs) toSdkApiRequestCreate(ctx context.Context) *m
 					StaticApplianceIP6: staticApplianceIP6,
 					StaticPrefix:       staticPrefix,
 				})
+				//[debug] Is Array: True
 			}
 		}
 		requestApplianceCreateNetworkApplianceVLANIPv6 = &merakigosdk.RequestApplianceCreateNetworkApplianceVLANIPv6{
@@ -826,8 +874,10 @@ func (r *NetworksApplianceVLANsRs) toSdkApiRequestCreate(ctx context.Context) *m
 				return nil
 			}(),
 		}
+		//[debug] Is Array: False
 	}
 	var requestApplianceCreateNetworkApplianceVLANMandatoryDhcp *merakigosdk.RequestApplianceCreateNetworkApplianceVLANMandatoryDhcp
+
 	if r.MandatoryDhcp != nil {
 		enabled := func() *bool {
 			if !r.MandatoryDhcp.Enabled.IsUnknown() && !r.MandatoryDhcp.Enabled.IsNull() {
@@ -838,6 +888,7 @@ func (r *NetworksApplianceVLANsRs) toSdkApiRequestCreate(ctx context.Context) *m
 		requestApplianceCreateNetworkApplianceVLANMandatoryDhcp = &merakigosdk.RequestApplianceCreateNetworkApplianceVLANMandatoryDhcp{
 			Enabled: enabled,
 		}
+		//[debug] Is Array: False
 	}
 	mask := new(int64)
 	if !r.Mask.IsUnknown() && !r.Mask.IsNull() {
@@ -864,8 +915,17 @@ func (r *NetworksApplianceVLANsRs) toSdkApiRequestCreate(ctx context.Context) *m
 		templateVLANType = &emptyString
 	}
 	out := merakigosdk.RequestApplianceCreateNetworkApplianceVLAN{
-		ApplianceIP:      *applianceIP,
-		Cidr:             *cidr,
+		ApplianceIP:            *applianceIP,
+		Cidr:                   *cidr,
+		DhcpBootOptionsEnabled: dhcpBootOptionsEnabled,
+		DhcpHandling:           *dhcpHandling,
+		DhcpLeaseTime:          *dhcpLeaseTime,
+		DhcpOptions: func() *[]merakigosdk.RequestApplianceCreateNetworkApplianceVLANDhcpOptions {
+			if len(requestApplianceCreateNetworkApplianceVLANDhcpOptions) > 0 {
+				return &requestApplianceCreateNetworkApplianceVLANDhcpOptions
+			}
+			return nil
+		}(),
 		GroupPolicyID:    *groupPolicyID,
 		ID:               *iD,
 		IPv6:             requestApplianceCreateNetworkApplianceVLANIPv6,
@@ -878,44 +938,51 @@ func (r *NetworksApplianceVLANsRs) toSdkApiRequestCreate(ctx context.Context) *m
 	return &out
 }
 func (r *NetworksApplianceVLANsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateNetworkApplianceVLAN {
-
-	applianceIP := ""
+	emptyString := ""
+	applianceIP := new(string)
 	if !r.ApplianceIP.IsUnknown() && !r.ApplianceIP.IsNull() {
-		applianceIP = r.ApplianceIP.ValueString()
+		*applianceIP = r.ApplianceIP.ValueString()
+	} else {
+		applianceIP = &emptyString
 	}
-
-	cidr := ""
+	cidr := new(string)
 	if !r.Cidr.IsUnknown() && !r.Cidr.IsNull() {
-		cidr = r.Cidr.ValueString()
+		*cidr = r.Cidr.ValueString()
+	} else {
+		cidr = &emptyString
 	}
-
-	dhcpBootFilename := ""
+	dhcpBootFilename := new(string)
 	if !r.DhcpBootFilename.IsUnknown() && !r.DhcpBootFilename.IsNull() {
-		dhcpBootFilename = r.DhcpBootFilename.ValueString()
+		*dhcpBootFilename = r.DhcpBootFilename.ValueString()
+	} else {
+		dhcpBootFilename = &emptyString
 	}
-
-	dhcpBootNextServer := ""
+	dhcpBootNextServer := new(string)
 	if !r.DhcpBootNextServer.IsUnknown() && !r.DhcpBootNextServer.IsNull() {
-		dhcpBootNextServer = r.DhcpBootNextServer.ValueString()
+		*dhcpBootNextServer = r.DhcpBootNextServer.ValueString()
+	} else {
+		dhcpBootNextServer = &emptyString
 	}
-
-	var dhcpBootOptionsEnabled *bool
+	dhcpBootOptionsEnabled := new(bool)
 	if !r.DhcpBootOptionsEnabled.IsUnknown() && !r.DhcpBootOptionsEnabled.IsNull() {
-		enabled := r.DhcpBootOptionsEnabled.ValueBool()
-		dhcpBootOptionsEnabled = &enabled
+		*dhcpBootOptionsEnabled = r.DhcpBootOptionsEnabled.ValueBool()
+	} else {
+		dhcpBootOptionsEnabled = nil
 	}
-
-	dhcpHandling := ""
+	dhcpHandling := new(string)
 	if !r.DhcpHandling.IsUnknown() && !r.DhcpHandling.IsNull() {
-		dhcpHandling = r.DhcpHandling.ValueString()
+		*dhcpHandling = r.DhcpHandling.ValueString()
+	} else {
+		dhcpHandling = &emptyString
 	}
-
-	dhcpLeaseTime := ""
+	dhcpLeaseTime := new(string)
 	if !r.DhcpLeaseTime.IsUnknown() && !r.DhcpLeaseTime.IsNull() {
-		dhcpLeaseTime = r.DhcpLeaseTime.ValueString()
+		*dhcpLeaseTime = r.DhcpLeaseTime.ValueString()
+	} else {
+		dhcpLeaseTime = &emptyString
 	}
-
 	var requestApplianceUpdateNetworkApplianceVLANDhcpOptions []merakigosdk.RequestApplianceUpdateNetworkApplianceVLANDhcpOptions
+
 	if r.DhcpOptions != nil {
 		for _, rItem1 := range *r.DhcpOptions {
 			code := rItem1.Code.ValueString()
@@ -926,29 +993,31 @@ func (r *NetworksApplianceVLANsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 				Type:  typeR,
 				Value: value,
 			})
+			//[debug] Is Array: True
 		}
 	}
-
-	var dhcpRelayServerIPs []string
+	var dhcpRelayServerIPs []string = nil
 	r.DhcpRelayServerIPs.ElementsAs(ctx, &dhcpRelayServerIPs, false)
-
-	dNSNameservers := ""
+	dNSNameservers := new(string)
 	if !r.DNSNameservers.IsUnknown() && !r.DNSNameservers.IsNull() {
-		dNSNameservers = r.DNSNameservers.ValueString()
+		*dNSNameservers = r.DNSNameservers.ValueString()
+	} else {
+		dNSNameservers = &emptyString
 	}
+	var requestApplianceUpdateNetworkApplianceVLANFixedIPAssignments *merakigosdk.RequestApplianceUpdateNetworkApplianceVLANFixedIPAssignments
 
-	// requestApplianceUpdateNetworkApplianceVLANFixedIPAssignments := r.FixedIPAssignments.ValueString()
-	// var intf interface{} = requestApplianceUpdateNetworkApplianceVLANFixedIPAssignments
-	// requestApplianceUpdateNetworkApplianceVLANFixedIPAssignments2, ok := intf.(merakigosdk.RequestApplianceUpdateNetworkApplianceVLANFixedIPAssignments)
-	// if !ok {
-	// 	requestApplianceUpdateNetworkApplianceVLANFixedIPAssignments2 = nil
+	// if r.FixedIPAssignments != nil {
+	// 	requestApplianceUpdateNetworkApplianceVLANFixedIPAssignments = &merakigosdk.RequestApplianceUpdateNetworkApplianceVLANFixedIPAssignments{}
+	// 	//[debug] Is Array: False
 	// }
-	groupPolicyID := ""
+	groupPolicyID := new(string)
 	if !r.GroupPolicyID.IsUnknown() && !r.GroupPolicyID.IsNull() {
-		groupPolicyID = r.GroupPolicyID.ValueString()
+		*groupPolicyID = r.GroupPolicyID.ValueString()
+	} else {
+		groupPolicyID = &emptyString
 	}
-
 	var requestApplianceUpdateNetworkApplianceVLANIPv6 *merakigosdk.RequestApplianceUpdateNetworkApplianceVLANIPv6
+
 	if r.IPv6 != nil {
 		enabled := func() *bool {
 			if !r.IPv6.Enabled.IsUnknown() && !r.IPv6.Enabled.IsNull() {
@@ -956,8 +1025,11 @@ func (r *NetworksApplianceVLANsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 			}
 			return nil
 		}()
+
+		log.Printf("[DEBUG] #TODO []RequestApplianceUpdateNetworkApplianceVlanIpv6PrefixAssignments")
 		var requestApplianceUpdateNetworkApplianceVLANIPv6PrefixAssignments []merakigosdk.RequestApplianceUpdateNetworkApplianceVLANIPv6PrefixAssignments
-		if r.IPv6.PrefixAssignments != nil && len(*r.IPv6.PrefixAssignments) > 0 {
+
+		if r.IPv6.PrefixAssignments != nil {
 			for _, rItem1 := range *r.IPv6.PrefixAssignments {
 				autonomous := func() *bool {
 					if !rItem1.Autonomous.IsUnknown() && !rItem1.Autonomous.IsNull() {
@@ -966,14 +1038,17 @@ func (r *NetworksApplianceVLANsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 					return nil
 				}()
 				var requestApplianceUpdateNetworkApplianceVLANIPv6PrefixAssignmentsOrigin *merakigosdk.RequestApplianceUpdateNetworkApplianceVLANIPv6PrefixAssignmentsOrigin
+
 				if rItem1.Origin != nil {
-					var interfaces []string
+
+					var interfaces []string = nil
 					rItem1.Origin.Interfaces.ElementsAs(ctx, &interfaces, false)
 					typeR := rItem1.Origin.Type.ValueString()
 					requestApplianceUpdateNetworkApplianceVLANIPv6PrefixAssignmentsOrigin = &merakigosdk.RequestApplianceUpdateNetworkApplianceVLANIPv6PrefixAssignmentsOrigin{
 						Interfaces: interfaces,
 						Type:       typeR,
 					}
+					//[debug] Is Array: False
 				}
 				staticApplianceIP6 := rItem1.StaticApplianceIP6.ValueString()
 				staticPrefix := rItem1.StaticPrefix.ValueString()
@@ -983,6 +1058,7 @@ func (r *NetworksApplianceVLANsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 					StaticApplianceIP6: staticApplianceIP6,
 					StaticPrefix:       staticPrefix,
 				})
+				//[debug] Is Array: True
 			}
 		}
 		requestApplianceUpdateNetworkApplianceVLANIPv6 = &merakigosdk.RequestApplianceUpdateNetworkApplianceVLANIPv6{
@@ -994,9 +1070,10 @@ func (r *NetworksApplianceVLANsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 				return nil
 			}(),
 		}
+		//[debug] Is Array: False
 	}
-
 	var requestApplianceUpdateNetworkApplianceVLANMandatoryDhcp *merakigosdk.RequestApplianceUpdateNetworkApplianceVLANMandatoryDhcp
+
 	if r.MandatoryDhcp != nil {
 		enabled := func() *bool {
 			if !r.MandatoryDhcp.Enabled.IsUnknown() && !r.MandatoryDhcp.Enabled.IsNull() {
@@ -1007,19 +1084,22 @@ func (r *NetworksApplianceVLANsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 		requestApplianceUpdateNetworkApplianceVLANMandatoryDhcp = &merakigosdk.RequestApplianceUpdateNetworkApplianceVLANMandatoryDhcp{
 			Enabled: enabled,
 		}
+		//[debug] Is Array: False
 	}
-
 	mask := new(int64)
 	if !r.Mask.IsUnknown() && !r.Mask.IsNull() {
 		*mask = r.Mask.ValueInt64()
+	} else {
+		mask = nil
 	}
-
-	name := ""
+	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
-		name = r.Name.ValueString()
+		*name = r.Name.ValueString()
+	} else {
+		name = &emptyString
 	}
-
 	var requestApplianceUpdateNetworkApplianceVLANReservedIPRanges []merakigosdk.RequestApplianceUpdateNetworkApplianceVLANReservedIPRanges
+
 	if r.ReservedIPRanges != nil {
 		for _, rItem1 := range *r.ReservedIPRanges {
 			comment := rItem1.Comment.ValueString()
@@ -1030,32 +1110,35 @@ func (r *NetworksApplianceVLANsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 				End:     end,
 				Start:   start,
 			})
+			//[debug] Is Array: True
 		}
 	}
-
-	subnet := ""
+	subnet := new(string)
 	if !r.Subnet.IsUnknown() && !r.Subnet.IsNull() {
-		subnet = r.Subnet.ValueString()
+		*subnet = r.Subnet.ValueString()
+	} else {
+		subnet = &emptyString
 	}
-
-	templateVLANType := ""
+	templateVLANType := new(string)
 	if !r.TemplateVLANType.IsUnknown() && !r.TemplateVLANType.IsNull() {
-		templateVLANType = r.TemplateVLANType.ValueString()
+		*templateVLANType = r.TemplateVLANType.ValueString()
+	} else {
+		templateVLANType = &emptyString
 	}
-
-	vpnNatSubnet := ""
+	vpnNatSubnet := new(string)
 	if !r.VpnNatSubnet.IsUnknown() && !r.VpnNatSubnet.IsNull() {
-		vpnNatSubnet = r.VpnNatSubnet.ValueString()
+		*vpnNatSubnet = r.VpnNatSubnet.ValueString()
+	} else {
+		vpnNatSubnet = &emptyString
 	}
-
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceVLAN{
-		ApplianceIP:            applianceIP,
-		Cidr:                   cidr,
-		DhcpBootFilename:       dhcpBootFilename,
-		DhcpBootNextServer:     dhcpBootNextServer,
+		ApplianceIP:            *applianceIP,
+		Cidr:                   *cidr,
+		DhcpBootFilename:       *dhcpBootFilename,
+		DhcpBootNextServer:     *dhcpBootNextServer,
 		DhcpBootOptionsEnabled: dhcpBootOptionsEnabled,
-		DhcpHandling:           dhcpHandling,
-		DhcpLeaseTime:          dhcpLeaseTime,
+		DhcpHandling:           *dhcpHandling,
+		DhcpLeaseTime:          *dhcpLeaseTime,
 		DhcpOptions: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceVLANDhcpOptions {
 			if len(requestApplianceUpdateNetworkApplianceVLANDhcpOptions) > 0 {
 				return &requestApplianceUpdateNetworkApplianceVLANDhcpOptions
@@ -1063,22 +1146,22 @@ func (r *NetworksApplianceVLANsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 			return nil
 		}(),
 		DhcpRelayServerIPs: dhcpRelayServerIPs,
-		DNSNameservers:     dNSNameservers,
-		// FixedIPAssignments:     func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceVLANFixedIPAssignments2 {
-		GroupPolicyID: groupPolicyID,
-		IPv6:          requestApplianceUpdateNetworkApplianceVLANIPv6,
-		MandatoryDhcp: requestApplianceUpdateNetworkApplianceVLANMandatoryDhcp,
-		Mask:          int64ToIntPointer(mask),
-		Name:          name,
+		DNSNameservers:     *dNSNameservers,
+		FixedIPAssignments: requestApplianceUpdateNetworkApplianceVLANFixedIPAssignments,
+		GroupPolicyID:      *groupPolicyID,
+		IPv6:               requestApplianceUpdateNetworkApplianceVLANIPv6,
+		MandatoryDhcp:      requestApplianceUpdateNetworkApplianceVLANMandatoryDhcp,
+		Mask:               int64ToIntPointer(mask),
+		Name:               *name,
 		ReservedIPRanges: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceVLANReservedIPRanges {
 			if len(requestApplianceUpdateNetworkApplianceVLANReservedIPRanges) > 0 {
 				return &requestApplianceUpdateNetworkApplianceVLANReservedIPRanges
 			}
 			return nil
 		}(),
-		Subnet:           subnet,
-		TemplateVLANType: templateVLANType,
-		VpnNatSubnet:     vpnNatSubnet,
+		Subnet:           *subnet,
+		TemplateVLANType: *templateVLANType,
+		VpnNatSubnet:     *vpnNatSubnet,
 	}
 	return &out
 }
@@ -1120,9 +1203,10 @@ func ResponseApplianceGetNetworkApplianceVLANItemToBodyRs(state NetworksApplianc
 		}(),
 		DhcpRelayServerIPs: StringSliceToSet(response.DhcpRelayServerIPs),
 		DNSNameservers:     types.StringValue(response.DNSNameservers),
-		GroupPolicyID:      types.StringValue(response.GroupPolicyID),
-		ID:                 types.StringValue(strconv.Itoa(*response.ID)),
-		InterfaceID:        types.StringValue(response.InterfaceID),
+		// FixedIPAssignments: types.StringValue(response.FixedIPAssignments), //TODO POSIBLE interface
+		GroupPolicyID: types.StringValue(response.GroupPolicyID),
+		ID:            types.StringValue(strconv.Itoa(int(*response.ID))),
+		InterfaceID:   types.StringValue(response.InterfaceID),
 		IPv6: func() *ResponseApplianceGetNetworkApplianceVlanIpv6Rs {
 			if response.IPv6 != nil {
 				return &ResponseApplianceGetNetworkApplianceVlanIpv6Rs{
@@ -1130,7 +1214,7 @@ func ResponseApplianceGetNetworkApplianceVLANItemToBodyRs(state NetworksApplianc
 						if response.IPv6.Enabled != nil {
 							return types.BoolValue(*response.IPv6.Enabled)
 						}
-						return types.BoolNull()
+						return types.Bool{}
 					}(),
 					PrefixAssignments: func() *[]ResponseApplianceGetNetworkApplianceVlanIpv6PrefixAssignmentsRs {
 						if response.IPv6.PrefixAssignments != nil {
@@ -1141,7 +1225,7 @@ func ResponseApplianceGetNetworkApplianceVLANItemToBodyRs(state NetworksApplianc
 										if prefixAssignments.Autonomous != nil {
 											return types.BoolValue(*prefixAssignments.Autonomous)
 										}
-										return types.BoolNull()
+										return types.Bool{}
 									}(),
 									Origin: func() *ResponseApplianceGetNetworkApplianceVlanIpv6PrefixAssignmentsOriginRs {
 										if prefixAssignments.Origin != nil {
@@ -1171,7 +1255,7 @@ func ResponseApplianceGetNetworkApplianceVLANItemToBodyRs(state NetworksApplianc
 						if response.MandatoryDhcp.Enabled != nil {
 							return types.BoolValue(*response.MandatoryDhcp.Enabled)
 						}
-						return types.BoolNull()
+						return types.Bool{}
 					}(),
 				}
 			}

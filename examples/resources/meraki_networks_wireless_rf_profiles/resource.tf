@@ -34,7 +34,7 @@ resource "meraki_networks_wireless_rf_profiles" "example" {
   network_id       = "string"
   per_ssid_settings = {
 
-    0 = {
+    status_0 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
@@ -44,7 +44,7 @@ resource "meraki_networks_wireless_rf_profiles" "example" {
       }
       min_bitrate = 11.0
     }
-    1 = {
+    status_1 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
@@ -54,7 +54,7 @@ resource "meraki_networks_wireless_rf_profiles" "example" {
       }
       min_bitrate = 11.0
     }
-    10 = {
+    status_10 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
@@ -64,7 +64,7 @@ resource "meraki_networks_wireless_rf_profiles" "example" {
       }
       min_bitrate = 11.0
     }
-    11 = {
+    status_11 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
@@ -74,7 +74,7 @@ resource "meraki_networks_wireless_rf_profiles" "example" {
       }
       min_bitrate = 11.0
     }
-    12 = {
+    status_12 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
@@ -84,7 +84,7 @@ resource "meraki_networks_wireless_rf_profiles" "example" {
       }
       min_bitrate = 11.0
     }
-    13 = {
+    status_13 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
@@ -94,7 +94,7 @@ resource "meraki_networks_wireless_rf_profiles" "example" {
       }
       min_bitrate = 11.0
     }
-    14 = {
+    status_14 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
@@ -104,7 +104,7 @@ resource "meraki_networks_wireless_rf_profiles" "example" {
       }
       min_bitrate = 11.0
     }
-    2 = {
+    status_2 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
@@ -114,7 +114,7 @@ resource "meraki_networks_wireless_rf_profiles" "example" {
       }
       min_bitrate = 11.0
     }
-    3 = {
+    status_3 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
@@ -124,7 +124,7 @@ resource "meraki_networks_wireless_rf_profiles" "example" {
       }
       min_bitrate = 11.0
     }
-    4 = {
+    status_4 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
@@ -134,7 +134,7 @@ resource "meraki_networks_wireless_rf_profiles" "example" {
       }
       min_bitrate = 11.0
     }
-    5 = {
+    status_5 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
@@ -144,7 +144,7 @@ resource "meraki_networks_wireless_rf_profiles" "example" {
       }
       min_bitrate = 11.0
     }
-    6 = {
+    status_6 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
@@ -154,7 +154,7 @@ resource "meraki_networks_wireless_rf_profiles" "example" {
       }
       min_bitrate = 11.0
     }
-    7 = {
+    status_7 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
@@ -164,7 +164,7 @@ resource "meraki_networks_wireless_rf_profiles" "example" {
       }
       min_bitrate = 11.0
     }
-    8 = {
+    status_8 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true
@@ -174,7 +174,7 @@ resource "meraki_networks_wireless_rf_profiles" "example" {
       }
       min_bitrate = 11.0
     }
-    9 = {
+    status_9 = {
 
       band_operation_mode   = "dual"
       band_steering_enabled = true

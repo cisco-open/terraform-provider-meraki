@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -150,7 +150,7 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringImportsResource) Schema(
 }
 func (r *OrganizationsInventoryOnboardingCloudMonitoringImportsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var data OrganizationsInventoryOnboardingCloudMonitoringImportsRs
+	var data OrganizationsInventoryOnboardingCloudMonitoringImports
 
 	var item types.Object
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &item)...)
@@ -170,7 +170,6 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringImportsResource) Create(
 	vvOrganizationID := data.OrganizationID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Organizations.CreateOrganizationInventoryOnboardingCloudMonitoringImport(vvOrganizationID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -186,9 +185,7 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringImportsResource) Create(
 		return
 	}
 	//Item
-	// //entro aqui 2
-	// data2 := ResponseOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImport(data, response)
-
+	data = ResponseOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImportItemsToBody(data, response)
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -207,10 +204,10 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringImportsResource) Delete(
 }
 
 // TF Structs Schema
-type OrganizationsInventoryOnboardingCloudMonitoringImportsRs struct {
+type OrganizationsInventoryOnboardingCloudMonitoringImports struct {
 	OrganizationID types.String                                                                           `tfsdk:"organization_id"`
 	Items          *[]ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImport `tfsdk:"items"`
-	Parameters     *RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImportRs      `tfsdk:"items"`
+	Parameters     *RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImportRs      `tfsdk:"parameters"`
 }
 
 type ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImport struct {
@@ -230,9 +227,10 @@ type RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImp
 }
 
 // FromBody
-func (r *OrganizationsInventoryOnboardingCloudMonitoringImportsRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImport {
+func (r *OrganizationsInventoryOnboardingCloudMonitoringImports) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImport {
 	re := *r.Parameters
 	var requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImportDevices []merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImportDevices
+
 	if re.Devices != nil {
 		for _, rItem1 := range *re.Devices {
 			deviceID := rItem1.DeviceID.ValueString()
@@ -243,6 +241,7 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringImportsRs) toSdkApiReque
 				NetworkID: networkID,
 				Udi:       udi,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImport{
@@ -257,7 +256,7 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringImportsRs) toSdkApiReque
 }
 
 // ToBody
-func ResponseOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImportItemsToBody(state OrganizationsInventoryOnboardingCloudMonitoringImportsRs, response *merakigosdk.ResponseOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImport) OrganizationsInventoryOnboardingCloudMonitoringImportsRs {
+func ResponseOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImportItemsToBody(state OrganizationsInventoryOnboardingCloudMonitoringImports, response *merakigosdk.ResponseOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImport) OrganizationsInventoryOnboardingCloudMonitoringImports {
 	var items []ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImport
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImport{

@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -281,33 +281,38 @@ func (r *NetworksFirmwareUpgradesStagedEventsResource) Create(ctx context.Contex
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkFirmwareUpgradesStagedEvents(vvNetworkID)
-	//Have Create
-	if err != nil {
-		if restyResp1 != nil {
-			if restyResp1.StatusCode() != 404 {
-				resp.Diagnostics.AddError(
-					"Failure when executing GetNetworkFirmwareUpgradesStagedEvents",
-					err.Error(),
-				)
-				return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkFirmwareUpgradesStagedEvents(vvNetworkID)
+		//Has Post
+		if err != nil {
+			if restyResp1 != nil {
+				if restyResp1.StatusCode() != 404 {
+					resp.Diagnostics.AddError(
+						"Failure when executing GetNetworkFirmwareUpgradesStagedEvents",
+						err.Error(),
+					)
+					return
+				}
 			}
 		}
+
+		if responseVerifyItem != nil {
+			data = ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsItemToBodyRs(data, responseVerifyItem, false)
+			//Path params in update assigned
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			return
+		}
 	}
-	if responseVerifyItem != nil {
-		data := ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsItemToBodyRs(data, responseVerifyItem, false)
-		//Path params in update assigned
-		resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-		return
-	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Networks.CreateNetworkFirmwareUpgradesStagedEvent(vvNetworkID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkFirmwareUpgradesStagedEvent",
 				err.Error(),
@@ -320,9 +325,10 @@ func (r *NetworksFirmwareUpgradesStagedEventsResource) Create(ctx context.Contex
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Networks.GetNetworkFirmwareUpgradesStagedEvents(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -337,11 +343,12 @@ func (r *NetworksFirmwareUpgradesStagedEventsResource) Create(ctx context.Contex
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksFirmwareUpgradesStagedEventsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -491,71 +498,91 @@ type ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsStagesMilestonesRs st
 // FromBody
 func (r *NetworksFirmwareUpgradesStagedEventsRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEvent {
 	var requestNetworksCreateNetworkFirmwareUpgradesStagedEventProducts *merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProducts
+
 	if r.Products != nil {
 		var requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitch *merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitch
+
 		if r.Products.Switch != nil {
 			var requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchNextUpgrade *merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchNextUpgrade
+
 			if r.Products.Switch.NextUpgrade != nil {
 				var requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchNextUpgradeToVersion *merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchNextUpgradeToVersion
+
 				if r.Products.Switch.NextUpgrade.ToVersion != nil {
-					iD := r.Products.Switch.NextUpgrade.ToVersion.ID.ValueString()
+					id := r.Products.Switch.NextUpgrade.ToVersion.ID.ValueString()
 					requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchNextUpgradeToVersion = &merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchNextUpgradeToVersion{
-						ID: iD,
+						ID: id,
 					}
+					//[debug] Is Array: False
 				}
 				requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchNextUpgrade = &merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchNextUpgrade{
 					ToVersion: requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchNextUpgradeToVersion,
 				}
+				//[debug] Is Array: False
 			}
 			requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitch = &merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitch{
 				NextUpgrade: requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchNextUpgrade,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalyst *merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalyst
+
 		if r.Products.SwitchCatalyst != nil {
 			var requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgrade *merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgrade
+
 			if r.Products.SwitchCatalyst.NextUpgrade != nil {
 				var requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgradeToVersion *merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgradeToVersion
+
 				if r.Products.SwitchCatalyst.NextUpgrade.ToVersion != nil {
-					iD := r.Products.SwitchCatalyst.NextUpgrade.ToVersion.ID.ValueString()
+					id := r.Products.SwitchCatalyst.NextUpgrade.ToVersion.ID.ValueString()
 					requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgradeToVersion = &merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgradeToVersion{
-						ID: iD,
+						ID: id,
 					}
+					//[debug] Is Array: False
 				}
 				requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgrade = &merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgrade{
 					ToVersion: requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgradeToVersion,
 				}
+				//[debug] Is Array: False
 			}
 			requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalyst = &merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalyst{
 				NextUpgrade: requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalystNextUpgrade,
 			}
+			//[debug] Is Array: False
 		}
 		requestNetworksCreateNetworkFirmwareUpgradesStagedEventProducts = &merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventProducts{
 			Switch:         requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitch,
 			SwitchCatalyst: requestNetworksCreateNetworkFirmwareUpgradesStagedEventProductsSwitchCatalyst,
 		}
+		//[debug] Is Array: False
 	}
 	var requestNetworksCreateNetworkFirmwareUpgradesStagedEventStages []merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventStages
+
 	if r.Stages != nil {
 		for _, rItem1 := range *r.Stages {
 			var requestNetworksCreateNetworkFirmwareUpgradesStagedEventStagesGroup *merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventStagesGroup
+
 			if rItem1.Group != nil {
-				iD := rItem1.Group.ID.ValueString()
+				id := rItem1.Group.ID.ValueString()
 				requestNetworksCreateNetworkFirmwareUpgradesStagedEventStagesGroup = &merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventStagesGroup{
-					ID: iD,
+					ID: id,
 				}
+				//[debug] Is Array: False
 			}
 			var requestNetworksCreateNetworkFirmwareUpgradesStagedEventStagesMilestones *merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventStagesMilestones
+
 			if rItem1.Milestones != nil {
 				scheduledFor := rItem1.Milestones.ScheduledFor.ValueString()
 				requestNetworksCreateNetworkFirmwareUpgradesStagedEventStagesMilestones = &merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventStagesMilestones{
 					ScheduledFor: scheduledFor,
 				}
+				//[debug] Is Array: False
 			}
 			requestNetworksCreateNetworkFirmwareUpgradesStagedEventStages = append(requestNetworksCreateNetworkFirmwareUpgradesStagedEventStages, merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEventStages{
 				Group:      requestNetworksCreateNetworkFirmwareUpgradesStagedEventStagesGroup,
 				Milestones: requestNetworksCreateNetworkFirmwareUpgradesStagedEventStagesMilestones,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedEvent{
@@ -571,26 +598,32 @@ func (r *NetworksFirmwareUpgradesStagedEventsRs) toSdkApiRequestCreate(ctx conte
 }
 func (r *NetworksFirmwareUpgradesStagedEventsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedEvents {
 	var requestNetworksUpdateNetworkFirmwareUpgradesStagedEventsStages []merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedEventsStages
+
 	if r.Stages != nil {
 		for _, rItem1 := range *r.Stages {
 			var requestNetworksUpdateNetworkFirmwareUpgradesStagedEventsStagesGroup *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedEventsStagesGroup
+
 			if rItem1.Group != nil {
-				iD := rItem1.Group.ID.ValueString()
+				id := rItem1.Group.ID.ValueString()
 				requestNetworksUpdateNetworkFirmwareUpgradesStagedEventsStagesGroup = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedEventsStagesGroup{
-					ID: iD,
+					ID: id,
 				}
+				//[debug] Is Array: False
 			}
 			var requestNetworksUpdateNetworkFirmwareUpgradesStagedEventsStagesMilestones *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedEventsStagesMilestones
+
 			if rItem1.Milestones != nil {
 				scheduledFor := rItem1.Milestones.ScheduledFor.ValueString()
 				requestNetworksUpdateNetworkFirmwareUpgradesStagedEventsStagesMilestones = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedEventsStagesMilestones{
 					ScheduledFor: scheduledFor,
 				}
+				//[debug] Is Array: False
 			}
 			requestNetworksUpdateNetworkFirmwareUpgradesStagedEventsStages = append(requestNetworksUpdateNetworkFirmwareUpgradesStagedEventsStages, merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedEventsStages{
 				Group:      requestNetworksUpdateNetworkFirmwareUpgradesStagedEventsStagesGroup,
 				Milestones: requestNetworksUpdateNetworkFirmwareUpgradesStagedEventsStagesMilestones,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedEvents{

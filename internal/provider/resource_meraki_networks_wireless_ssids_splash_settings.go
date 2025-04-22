@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -200,16 +200,35 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 			"self_registration": schema.SingleNestedAttribute{
 				MarkdownDescription: `Self-registration for splash with Meraki authentication.`,
 				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
 				Attributes: map[string]schema.Attribute{
 
 					"authorization_type": schema.StringAttribute{
 						MarkdownDescription: `How created user accounts should be authorized.
                                         Allowed values: [admin,auto,self_email]`,
 						Computed: true,
+						Optional: true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+						Validators: []validator.String{
+							stringvalidator.OneOf(
+								"admin",
+								"auto",
+								"self_email",
+							),
+						},
 					},
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Whether or not to allow users to create their own account on the network.`,
 						Computed:            true,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Bool{
+							boolplanmodifier.UseStateForUnknown(),
+						},
 					},
 				},
 			},
@@ -534,31 +553,38 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Create(ctx context.Context
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	vvNumber := data.Number.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDSplashSettings(vvNetworkID, vvNumber)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSSIDsSplashSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" && vvNumber != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDSplashSettings(vvNetworkID, vvNumber)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessSsidsSplashSettings  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessSsidsSplashSettings only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSSIDsSplashSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDSplashSettings(vvNetworkID, vvNumber, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDSplashSettings",
 				err.Error(),
@@ -571,9 +597,10 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Create(ctx context.Context
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDSplashSettings(vvNetworkID, vvNumber)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -588,11 +615,12 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Create(ctx context.Context
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksWirelessSSIDsSplashSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -801,8 +829,10 @@ func (r *NetworksWirelessSSIDsSplashSettingsRs) toSdkApiRequestUpdate(ctx contex
 		allowSimultaneousLogins = nil
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDSplashSettingsBilling *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsBilling
+
 	if r.Billing != nil {
 		var requestWirelessUpdateNetworkWirelessSSIDSplashSettingsBillingFreeAccess *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsBillingFreeAccess
+
 		if r.Billing.FreeAccess != nil {
 			durationInMinutes := func() *int64 {
 				if !r.Billing.FreeAccess.DurationInMinutes.IsUnknown() && !r.Billing.FreeAccess.DurationInMinutes.IsNull() {
@@ -820,6 +850,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsRs) toSdkApiRequestUpdate(ctx contex
 				DurationInMinutes: int64ToIntPointer(durationInMinutes),
 				Enabled:           enabled,
 			}
+			//[debug] Is Array: False
 		}
 		prepaidAccessFastLoginEnabled := func() *bool {
 			if !r.Billing.PrepaidAccessFastLoginEnabled.IsUnknown() && !r.Billing.PrepaidAccessFastLoginEnabled.IsNull() {
@@ -833,6 +864,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsRs) toSdkApiRequestUpdate(ctx contex
 			PrepaidAccessFastLoginEnabled: prepaidAccessFastLoginEnabled,
 			ReplyToEmailAddress:           replyToEmailAddress,
 		}
+		//[debug] Is Array: False
 	}
 	blockAllTrafficBeforeSignOn := new(bool)
 	if !r.BlockAllTrafficBeforeSignOn.IsUnknown() && !r.BlockAllTrafficBeforeSignOn.IsNull() {
@@ -847,6 +879,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsRs) toSdkApiRequestUpdate(ctx contex
 		controllerDisconnectionBehavior = &emptyString
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDSplashSettingsGuestSponsorship *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsGuestSponsorship
+
 	if r.GuestSponsorship != nil {
 		durationInMinutes := func() *int64 {
 			if !r.GuestSponsorship.DurationInMinutes.IsUnknown() && !r.GuestSponsorship.DurationInMinutes.IsNull() {
@@ -864,6 +897,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsRs) toSdkApiRequestUpdate(ctx contex
 			DurationInMinutes:        int64ToIntPointer(durationInMinutes),
 			GuestCanRequestTimeframe: guestCanRequestTimeframe,
 		}
+		//[debug] Is Array: False
 	}
 	redirectURL := new(string)
 	if !r.RedirectURL.IsUnknown() && !r.RedirectURL.IsNull() {
@@ -871,29 +905,51 @@ func (r *NetworksWirelessSSIDsSplashSettingsRs) toSdkApiRequestUpdate(ctx contex
 	} else {
 		redirectURL = &emptyString
 	}
+	var requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSelfRegistration *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsSelfRegistration
+
+	if r.SelfRegistration != nil {
+		authorizationType := r.SelfRegistration.AuthorizationType.ValueString()
+		enabled := func() *bool {
+			if !r.SelfRegistration.Enabled.IsUnknown() && !r.SelfRegistration.Enabled.IsNull() {
+				return r.SelfRegistration.Enabled.ValueBoolPointer()
+			}
+			return nil
+		}()
+		requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSelfRegistration = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsSelfRegistration{
+			AuthorizationType: authorizationType,
+			Enabled:           enabled,
+		}
+		//[debug] Is Array: False
+	}
 	var requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSentryEnrollment *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsSentryEnrollment
+
 	if r.SentryEnrollment != nil {
+
 		var enforcedSystems []string = nil
-		//Hoola aqui
 		r.SentryEnrollment.EnforcedSystems.ElementsAs(ctx, &enforcedSystems, false)
 		strength := r.SentryEnrollment.Strength.ValueString()
 		var requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSentryEnrollmentSystemsManagerNetwork *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsSentryEnrollmentSystemsManagerNetwork
+
 		if r.SentryEnrollment.SystemsManagerNetwork != nil {
-			iD := r.SentryEnrollment.SystemsManagerNetwork.ID.ValueString()
+			id := r.SentryEnrollment.SystemsManagerNetwork.ID.ValueString()
 			requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSentryEnrollmentSystemsManagerNetwork = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsSentryEnrollmentSystemsManagerNetwork{
-				ID: iD,
+				ID: id,
 			}
+			//[debug] Is Array: False
 		}
 		requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSentryEnrollment = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsSentryEnrollment{
 			EnforcedSystems:       enforcedSystems,
 			Strength:              strength,
 			SystemsManagerNetwork: requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSentryEnrollmentSystemsManagerNetwork,
 		}
+		//[debug] Is Array: False
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashImage *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashImage
+
 	if r.SplashImage != nil {
 		extension := r.SplashImage.Extension.ValueString()
 		var requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashImageImage *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashImageImage
+
 		if r.SplashImage.Image != nil {
 			contents := r.SplashImage.Image.Contents.ValueString()
 			format := r.SplashImage.Image.Format.ValueString()
@@ -901,6 +957,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsRs) toSdkApiRequestUpdate(ctx contex
 				Contents: contents,
 				Format:   format,
 			}
+			//[debug] Is Array: False
 		}
 		md5 := r.SplashImage.Md5.ValueString()
 		requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashImage = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashImage{
@@ -908,11 +965,14 @@ func (r *NetworksWirelessSSIDsSplashSettingsRs) toSdkApiRequestUpdate(ctx contex
 			Image:     requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashImageImage,
 			Md5:       md5,
 		}
+		//[debug] Is Array: False
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashLogo *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashLogo
+
 	if r.SplashLogo != nil {
 		extension := r.SplashLogo.Extension.ValueString()
 		var requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashLogoImage *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashLogoImage
+
 		if r.SplashLogo.Image != nil {
 			contents := r.SplashLogo.Image.Contents.ValueString()
 			format := r.SplashLogo.Image.Format.ValueString()
@@ -920,6 +980,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsRs) toSdkApiRequestUpdate(ctx contex
 				Contents: contents,
 				Format:   format,
 			}
+			//[debug] Is Array: False
 		}
 		md5 := r.SplashLogo.Md5.ValueString()
 		requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashLogo = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashLogo{
@@ -927,11 +988,14 @@ func (r *NetworksWirelessSSIDsSplashSettingsRs) toSdkApiRequestUpdate(ctx contex
 			Image:     requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashLogoImage,
 			Md5:       md5,
 		}
+		//[debug] Is Array: False
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashPrepaidFront *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashPrepaidFront
+
 	if r.SplashPrepaidFront != nil {
 		extension := r.SplashPrepaidFront.Extension.ValueString()
 		var requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashPrepaidFrontImage *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashPrepaidFrontImage
+
 		if r.SplashPrepaidFront.Image != nil {
 			contents := r.SplashPrepaidFront.Image.Contents.ValueString()
 			format := r.SplashPrepaidFront.Image.Format.ValueString()
@@ -939,6 +1003,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsRs) toSdkApiRequestUpdate(ctx contex
 				Contents: contents,
 				Format:   format,
 			}
+			//[debug] Is Array: False
 		}
 		md5 := r.SplashPrepaidFront.Md5.ValueString()
 		requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashPrepaidFront = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashPrepaidFront{
@@ -946,6 +1011,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsRs) toSdkApiRequestUpdate(ctx contex
 			Image:     requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashPrepaidFrontImage,
 			Md5:       md5,
 		}
+		//[debug] Is Array: False
 	}
 	splashTimeout := new(int64)
 	if !r.SplashTimeout.IsUnknown() && !r.SplashTimeout.IsNull() {
@@ -990,6 +1056,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsRs) toSdkApiRequestUpdate(ctx contex
 		ControllerDisconnectionBehavior: *controllerDisconnectionBehavior,
 		GuestSponsorship:                requestWirelessUpdateNetworkWirelessSSIDSplashSettingsGuestSponsorship,
 		RedirectURL:                     *redirectURL,
+		SelfRegistration:                requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSelfRegistration,
 		SentryEnrollment:                requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSentryEnrollment,
 		SplashImage:                     requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashImage,
 		SplashLogo:                      requestWirelessUpdateNetworkWirelessSSIDSplashSettingsSplashLogo,

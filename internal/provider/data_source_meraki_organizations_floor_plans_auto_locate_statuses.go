@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -147,7 +147,7 @@ func (d *OrganizationsFloorPlansAutoLocateStatusesDataSource) Schema(_ context.C
 																Computed:            true,
 															},
 															"type": schema.StringAttribute{
-																MarkdownDescription: `The type of error that occurred. Possible values: 'failure', 'no neighbors', 'missing anchors', 'wrong anchors', 'calculation failure', 'scheduling failure'`,
+																MarkdownDescription: `The type of error that occurred. Possible values: 'failure', 'no neighbors', 'missing anchors', 'wrong anchors', 'missing ranging data', 'calculation failure', 'scheduling failure'`,
 																Computed:            true,
 															},
 														},

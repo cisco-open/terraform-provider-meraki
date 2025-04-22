@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -142,7 +142,6 @@ func (r *NetworksFloorPlansDevicesBatchUpdateResource) Create(ctx context.Contex
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Networks.BatchNetworkFloorPlansDevicesUpdate(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -159,7 +158,6 @@ func (r *NetworksFloorPlansDevicesBatchUpdateResource) Create(ctx context.Contex
 	}
 	//Item
 	data = ResponseNetworksBatchNetworkFloorPlansDevicesUpdateItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -205,29 +203,28 @@ type RequestNetworksBatchNetworkFloorPlansDevicesUpdateAssignmentsFloorPlanRs st
 func (r *NetworksFloorPlansDevicesBatchUpdate) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestNetworksBatchNetworkFloorPlansDevicesUpdate {
 	re := *r.Parameters
 	var requestNetworksBatchNetworkFloorPlansDevicesUpdateAssignments []merakigosdk.RequestNetworksBatchNetworkFloorPlansDevicesUpdateAssignments
+
 	if re.Assignments != nil {
 		for _, rItem1 := range *re.Assignments {
 			var requestNetworksBatchNetworkFloorPlansDevicesUpdateAssignmentsFloorPlan *merakigosdk.RequestNetworksBatchNetworkFloorPlansDevicesUpdateAssignmentsFloorPlan
+
 			if rItem1.FloorPlan != nil {
-				iD := rItem1.FloorPlan.ID.ValueString()
+				id := rItem1.FloorPlan.ID.ValueString()
 				requestNetworksBatchNetworkFloorPlansDevicesUpdateAssignmentsFloorPlan = &merakigosdk.RequestNetworksBatchNetworkFloorPlansDevicesUpdateAssignmentsFloorPlan{
-					ID: iD,
+					ID: id,
 				}
+				//[debug] Is Array: False
 			}
 			serial := rItem1.Serial.ValueString()
 			requestNetworksBatchNetworkFloorPlansDevicesUpdateAssignments = append(requestNetworksBatchNetworkFloorPlansDevicesUpdateAssignments, merakigosdk.RequestNetworksBatchNetworkFloorPlansDevicesUpdateAssignments{
 				FloorPlan: requestNetworksBatchNetworkFloorPlansDevicesUpdateAssignmentsFloorPlan,
 				Serial:    serial,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestNetworksBatchNetworkFloorPlansDevicesUpdate{
-		Assignments: func() *[]merakigosdk.RequestNetworksBatchNetworkFloorPlansDevicesUpdateAssignments {
-			if len(requestNetworksBatchNetworkFloorPlansDevicesUpdateAssignments) > 0 {
-				return &requestNetworksBatchNetworkFloorPlansDevicesUpdateAssignments
-			}
-			return nil
-		}(),
+		Assignments: &requestNetworksBatchNetworkFloorPlansDevicesUpdateAssignments,
 	}
 	return &out
 }

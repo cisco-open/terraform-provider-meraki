@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -61,7 +61,6 @@ func (r *NetworksSmDevicesModifyTagsResource) Metadata(_ context.Context, req re
 func (r *NetworksSmDevicesModifyTagsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-
 			"network_id": schema.StringAttribute{
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
@@ -69,63 +68,71 @@ func (r *NetworksSmDevicesModifyTagsResource) Schema(_ context.Context, _ resour
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
-			"items": schema.ListNestedAttribute{
-				MarkdownDescription: `Array of ResponseSmModifyNetworkSmDevicesTags`,
-				Computed:            true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-
-						"id": schema.StringAttribute{
-							MarkdownDescription: `The Meraki Id of the device record.`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.RequiresReplace(),
-							},
-						},
-						"serial": schema.StringAttribute{
-							MarkdownDescription: `The device serial.`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.RequiresReplace(),
-							},
-						},
-						"tags": schema.SetAttribute{
-							MarkdownDescription: `An array of tags associated with the device.`,
-							Computed:            true,
-							ElementType:         types.StringType,
-						},
-						"wifi_mac": schema.StringAttribute{
-							MarkdownDescription: `The MAC of the device.`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.RequiresReplace(),
-							},
-						},
-					},
-				},
-			},
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"ids": schema.SetAttribute{
+					"ids": schema.ListAttribute{
 						MarkdownDescription: `The ids of the devices to be modified.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"scope": schema.SetAttribute{
+					"items": schema.ListNestedAttribute{
+						Computed: true,
+						NestedObject: schema.NestedAttributeObject{
+							Attributes: map[string]schema.Attribute{
+
+								"items": schema.ListNestedAttribute{
+									MarkdownDescription: `Array of ResponseSmModifyNetworkSmDevicesTags`,
+									Computed:            true,
+									NestedObject: schema.NestedAttributeObject{
+										Attributes: map[string]schema.Attribute{
+
+											"id": schema.StringAttribute{
+												MarkdownDescription: `The Meraki Id of the device record.`,
+												Computed:            true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.RequiresReplace(),
+												},
+											},
+											"serial": schema.StringAttribute{
+												MarkdownDescription: `The device serial.`,
+												Computed:            true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.RequiresReplace(),
+												},
+											},
+											"tags": schema.ListAttribute{
+												MarkdownDescription: `An array of tags associated with the device.`,
+												Computed:            true,
+												ElementType:         types.StringType,
+											},
+											"wifi_mac": schema.StringAttribute{
+												MarkdownDescription: `The MAC of the device.`,
+												Computed:            true,
+												PlanModifiers: []planmodifier.String{
+													stringplanmodifier.RequiresReplace(),
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+					"scope": schema.ListAttribute{
 						MarkdownDescription: `The scope (one of all, none, withAny, withAll, withoutAny, or withoutAll) and a set of tags of the devices to be modified.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `The serials of the devices to be modified.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"tags": schema.SetAttribute{
+					"tags": schema.ListAttribute{
 						MarkdownDescription: `The tags to be added, deleted, or updated.`,
 						Optional:            true,
 						Computed:            true,
@@ -139,7 +146,7 @@ func (r *NetworksSmDevicesModifyTagsResource) Schema(_ context.Context, _ resour
 							stringplanmodifier.RequiresReplace(),
 						},
 					},
-					"wifi_macs": schema.SetAttribute{
+					"wifi_macs": schema.ListAttribute{
 						MarkdownDescription: `The wifiMacs of the devices to be modified.`,
 						Optional:            true,
 						Computed:            true,
@@ -172,7 +179,6 @@ func (r *NetworksSmDevicesModifyTagsResource) Create(ctx context.Context, req re
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Sm.ModifyNetworkSmDevicesTags(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -188,9 +194,7 @@ func (r *NetworksSmDevicesModifyTagsResource) Create(ctx context.Context, req re
 		return
 	}
 	//Item
-	// //entro aqui 2
-	// data2 := ResponseSmModifyNetworkSmDevicesTags(data, response)
-
+	data = ResponseSmModifyNetworkSmDevicesTagsItemsToBody(data, response)
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -218,7 +222,7 @@ type NetworksSmDevicesModifyTags struct {
 type ResponseItemSmModifyNetworkSmDevicesTags struct {
 	ID      types.String `tfsdk:"id"`
 	Serial  types.String `tfsdk:"serial"`
-	Tags    types.Set    `tfsdk:"tags"`
+	Tags    types.List   `tfsdk:"tags"`
 	WifiMac types.String `tfsdk:"wifi_mac"`
 }
 
@@ -269,7 +273,7 @@ func ResponseSmModifyNetworkSmDevicesTagsItemsToBody(state NetworksSmDevicesModi
 		itemState := ResponseItemSmModifyNetworkSmDevicesTags{
 			ID:      types.StringValue(item.ID),
 			Serial:  types.StringValue(item.Serial),
-			Tags:    StringSliceToSet(item.Tags),
+			Tags:    StringSliceToList(item.Tags),
 			WifiMac: types.StringValue(item.WifiMac),
 		}
 		items = append(items, itemState)

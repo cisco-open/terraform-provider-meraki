@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -123,46 +123,51 @@ func (r *OrganizationsSplashThemesResource) Create(ctx context.Context, req reso
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
-	vvName := data.Name.ValueString()
-	//Items
-	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationSplashThemes(vvOrganizationID)
-	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizationSplashThemes",
-				err.Error(),
-			)
-			return
-		}
-	}
-	//TODO HAS ONLY ITEMS
-	// Create
+	//Only Items
 
-	responseStruct := structToMap(responseVerifyItem)
-	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
-	var responseVerifyItem2 merakigosdk.ResponseItemOrganizationsGetOrganizationSplashThemes
-	if result != nil {
-		err := mapToStruct(result.(map[string]interface{}), &responseVerifyItem2)
-		if err != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing mapToStruct in resource",
-				err.Error(),
-			)
-			return
+	vvName := data.Name.ValueString()
+
+	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationSplashThemes(vvOrganizationID)
+	//Has Post
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetOrganizationSplashThemes",
+					err.Error(),
+				)
+				return
+			}
 		}
-		data = ResponseOrganizationsGetOrganizationSplashThemesItemToBodyRs(data, &responseVerifyItem2, false)
-		diags := resp.State.Set(ctx, &data)
-		resp.Diagnostics.Append(diags...)
-		return
 	}
+
+	var responseVerifyItem2 merakigosdk.ResponseItemOrganizationsGetOrganizationSplashThemes
+	if responseVerifyItem != nil {
+		responseStruct := structToMap(responseVerifyItem)
+		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
+		if result != nil {
+			err := mapToStruct(result.(map[string]interface{}), &responseVerifyItem2)
+			if err != nil {
+				resp.Diagnostics.AddError(
+					"Failure when executing mapToStruct in resource",
+					err.Error(),
+				)
+				return
+			}
+			data = ResponseOrganizationsGetOrganizationSplashThemesItemToBodyRs(data, &responseVerifyItem2, false)
+			// Path params update assigned
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			return
+
+		}
+	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Organizations.CreateOrganizationSplashTheme(vvOrganizationID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationSplashTheme",
 				err.Error(),
@@ -175,9 +180,8 @@ func (r *OrganizationsSplashThemesResource) Create(ctx context.Context, req reso
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationSplashThemes(vvOrganizationID)
-	// Has only items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -193,8 +197,9 @@ func (r *OrganizationsSplashThemesResource) Create(ctx context.Context, req reso
 		)
 		return
 	}
-	responseStruct2 := structToMap(responseGet)
-	result2 := getDictResult(responseStruct2, "Name", vvName, simpleCmp)
+
+	responseStruct := structToMap(responseGet)
+	result2 := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result2 != nil {
 		err := mapToStruct(result2.(map[string]interface{}), &responseVerifyItem2)
 		if err != nil {
@@ -211,10 +216,11 @@ func (r *OrganizationsSplashThemesResource) Create(ctx context.Context, req reso
 	} else {
 		resp.Diagnostics.AddError(
 			"Failure when executing GetOrganizationSplashThemes Result",
-			err.Error(),
+			"Not Found",
 		)
 		return
 	}
+
 }
 
 func (r *OrganizationsSplashThemesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -347,8 +353,8 @@ type OrganizationsSplashThemesRs struct {
 	ID             types.String `tfsdk:"id"`
 	//TIENE ITEMS
 	Name        types.String                                                         `tfsdk:"name"`
-	BaseTheme   types.String                                                         `tfsdk:"base_theme"`
 	ThemeAssets *[]ResponseItemOrganizationsGetOrganizationSplashThemesThemeAssetsRs `tfsdk:"theme_assets"`
+	BaseTheme   types.String                                                         `tfsdk:"base_theme"`
 }
 
 type ResponseItemOrganizationsGetOrganizationSplashThemesThemeAssetsRs struct {
@@ -363,7 +369,7 @@ func (r *OrganizationsSplashThemesRs) toSdkApiRequestCreate(ctx context.Context)
 	if !r.BaseTheme.IsUnknown() && !r.BaseTheme.IsNull() {
 		*baseTheme = r.BaseTheme.ValueString()
 	} else {
-		baseTheme = nil
+		baseTheme = &emptyString
 	}
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {

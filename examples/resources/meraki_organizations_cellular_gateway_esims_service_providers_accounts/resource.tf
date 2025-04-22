@@ -1,7 +1,7 @@
 
 resource "meraki_organizations_cellular_gateway_esims_service_providers_accounts" "example" {
 
-  account_id      = "0987654321"
+  account_id      = 987654321
   api_key         = "foobarfoobarfoobarfoobarfoobarfoobar"
   organization_id = "string"
   service_provider = {

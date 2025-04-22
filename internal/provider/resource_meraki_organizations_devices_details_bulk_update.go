@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -72,7 +72,7 @@ func (r *OrganizationsDevicesDetailsBulkUpdateResource) Schema(_ context.Context
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `A list of serials of devices updated`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -108,7 +108,7 @@ func (r *OrganizationsDevicesDetailsBulkUpdateResource) Schema(_ context.Context
 							},
 						},
 					},
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `A list of serials of devices to update`,
 						Optional:            true,
 						Computed:            true,
@@ -141,7 +141,6 @@ func (r *OrganizationsDevicesDetailsBulkUpdateResource) Create(ctx context.Conte
 	vvOrganizationID := data.OrganizationID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Organizations.BulkUpdateOrganizationDevicesDetails(vvOrganizationID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -158,7 +157,6 @@ func (r *OrganizationsDevicesDetailsBulkUpdateResource) Create(ctx context.Conte
 	}
 	//Item
 	data = ResponseOrganizationsBulkUpdateOrganizationDevicesDetailsItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -184,7 +182,7 @@ type OrganizationsDevicesDetailsBulkUpdate struct {
 }
 
 type ResponseOrganizationsBulkUpdateOrganizationDevicesDetails struct {
-	Serials types.Set `tfsdk:"serials"`
+	Serials types.List `tfsdk:"serials"`
 }
 
 type RequestOrganizationsBulkUpdateOrganizationDevicesDetailsRs struct {
@@ -201,6 +199,7 @@ type RequestOrganizationsBulkUpdateOrganizationDevicesDetailsDetailsRs struct {
 func (r *OrganizationsDevicesDetailsBulkUpdate) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestOrganizationsBulkUpdateOrganizationDevicesDetails {
 	re := *r.Parameters
 	var requestOrganizationsBulkUpdateOrganizationDevicesDetailsDetails []merakigosdk.RequestOrganizationsBulkUpdateOrganizationDevicesDetailsDetails
+
 	if re.Details != nil {
 		for _, rItem1 := range *re.Details {
 			name := rItem1.Name.ValueString()
@@ -209,6 +208,7 @@ func (r *OrganizationsDevicesDetailsBulkUpdate) toSdkApiRequestCreate(ctx contex
 				Name:  name,
 				Value: value,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var serials []string = nil
@@ -228,7 +228,7 @@ func (r *OrganizationsDevicesDetailsBulkUpdate) toSdkApiRequestCreate(ctx contex
 // ToBody
 func ResponseOrganizationsBulkUpdateOrganizationDevicesDetailsItemToBody(state OrganizationsDevicesDetailsBulkUpdate, response *merakigosdk.ResponseOrganizationsBulkUpdateOrganizationDevicesDetails) OrganizationsDevicesDetailsBulkUpdate {
 	itemState := ResponseOrganizationsBulkUpdateOrganizationDevicesDetails{
-		Serials: StringSliceToSet(response.Serials),
+		Serials: StringSliceToList(response.Serials),
 	}
 	state.Item = &itemState
 	return state

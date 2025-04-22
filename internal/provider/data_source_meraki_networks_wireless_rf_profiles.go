@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -133,12 +133,6 @@ func (d *NetworksWirelessRfProfilesDataSource) Schema(_ context.Context, _ datas
 							"rxsop": schema.Int64Attribute{
 								MarkdownDescription: `The RX-SOP level controls the sensitivity of the radio. It is strongly recommended to use RX-SOP only after consulting a wireless expert. RX-SOP can be configured in the range of -65 to -95 (dBm). A value of null will reset this to the default.`,
 								Computed:            true,
-							},
-							"valid_auto_channels": schema.ListAttribute{
-								MarkdownDescription: `Sets valid auto channels for 2.4Ghz band. Can be one of '1', '6' or '11'. Defaults to [1, 6, 11].`,
-								Computed:            true,
-								ElementType:         types.Int64Type, //TODO FINAL ELSE param_schema.Elem.Type para revisar
-								// {'Type': 'schema.TypeInt'}
 							},
 						},
 					},
@@ -726,7 +720,7 @@ func (d *NetworksWirelessRfProfilesDataSource) Schema(_ context.Context, _ datas
 							"valid_auto_channels": schema.ListAttribute{
 								MarkdownDescription: `Sets valid auto channels for 6Ghz band. Can be one of '1', '5', '9', '13', '17', '21', '25', '29', '33', '37', '41', '45', '49', '53', '57', '61', '65', '69', '73', '77', '81', '85', '89', '93', '97', '101', '105', '109', '113', '117', '121', '125', '129', '133', '137', '141', '145', '149', '153', '157', '161', '165', '169', '173', '177', '181', '185', '189', '193', '197', '201', '205', '209', '213', '217', '221', '225', '229' or '233'. Defaults to auto.`,
 								Computed:            true,
-								ElementType:         types.Int64Type, //TODO FINAL ELSE param_schema.Elem.Type para revisar
+								ElementType:         types.StringType, //TODO FINAL ELSE param_schema.Elem.Type para revisar
 								// {'Type': 'schema.TypeInt'}
 							},
 						},
@@ -770,8 +764,8 @@ func (d *NetworksWirelessRfProfilesDataSource) Schema(_ context.Context, _ datas
 							"valid_auto_channels": schema.ListAttribute{
 								MarkdownDescription: `Sets valid auto channels for 2.4Ghz band. Can be one of '1', '6' or '11'. Defaults to [1, 6, 11].`,
 								Computed:            true,
-								ElementType:         types.Int64Type, //TODO FINAL ELSE param_schema.Elem.Type para revisar
-								// {'Type': 'schema.TypeInt'}
+								ElementType:         types.StringType, //TODO FINAL ELSE param_schema.Elem.Type para revisar
+
 							},
 						},
 					},

@@ -50,7 +50,7 @@ output "meraki_networks_switch_routing_multicast_rendezvous_points_example" {
 
 Read-Only:
 
-- `interface_ip` (String) The IP address of the interface to use.
+- `interface_ip` (String) The IP address of the interface to use.
 - `interface_name` (String) The name of the interface to use.
 - `multicast_group` (String) 'Any', or the IP address of a multicast group.
 - `rendezvous_point_id` (String) The id.
@@ -62,7 +62,7 @@ Read-Only:
 
 Read-Only:
 
-- `interface_ip` (String) The IP address of the interface to use.
+- `interface_ip` (String) The IP address of the interface to use.
 - `interface_name` (String) The name of the interface to use.
 - `multicast_group` (String) 'Any', or the IP address of a multicast group.
 - `rendezvous_point_id` (String) The id.

@@ -19,13 +19,9 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
-	"fmt"
-	"net/url"
-	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -68,7 +64,7 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"address": schema.StringAttribute{
-				MarkdownDescription: `The address of a device`,
+				MarkdownDescription: `Physical address of the device`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -104,16 +100,12 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"imei": schema.StringAttribute{
-				MarkdownDescription: `IMEI of the device, if applicable`,
-				Computed:            true,
-			},
 			"lan_ip": schema.StringAttribute{
 				MarkdownDescription: `LAN IP address of the device`,
 				Computed:            true,
 			},
 			"lat": schema.Float64Attribute{
-				MarkdownDescription: `The latitude of a device`,
+				MarkdownDescription: `Latitude of the device`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Float64{
@@ -121,7 +113,7 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				},
 			},
 			"lng": schema.Float64Attribute{
-				MarkdownDescription: `The longitude of a device`,
+				MarkdownDescription: `Longitude of the device`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Float64{
@@ -145,7 +137,7 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: `The name of a device`,
+				MarkdownDescription: `Name of the device`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -157,7 +149,7 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				Computed:            true,
 			},
 			"notes": schema.StringAttribute{
-				MarkdownDescription: `The notes for the device. String. Limited to 255 characters.`,
+				MarkdownDescription: `Notes for the device, limited to 255 characters`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -168,12 +160,8 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			// 	MarkdownDescription: `organizationId path parameter. Organization ID`,
 			// 	Required:            true,
 			// },
-			"product_type": schema.StringAttribute{
-				MarkdownDescription: `Product type of the device`,
-				Computed:            true,
-			},
 			"serial": schema.StringAttribute{
-				MarkdownDescription: `serial path parameter.`,
+				MarkdownDescription: `Serial number of the device`,
 				Required:            true,
 			},
 			"switch_profile_id": schema.StringAttribute{
@@ -185,7 +173,7 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 				},
 			},
 			"tags": schema.SetAttribute{
-				MarkdownDescription: `The list of tags of a device`,
+				MarkdownDescription: `List of tags assigned to the device`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
@@ -197,6 +185,8 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 		},
 	}
 }
+
+//path params to set ['serial']
 
 func (r *DevicesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
@@ -216,32 +206,37 @@ func (r *DevicesResource) Create(ctx context.Context, req resource.CreateRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	// vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
+	// Has Paths
 	vvSerial := data.Serial.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Devices.GetDevice(vvSerial)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource Devices only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource Devices only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	_, restyResp2, err := r.client.Devices.UpdateDevice(vvSerial, dataRequest)
+	//Has Item and has items and not post
 
-	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+	if vvSerial != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Devices.GetDevice(vvSerial)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource Devices  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource Devices only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+	}
+
+	// UPDATE NO CREATE
+	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	response, restyResp2, err := r.client.Devices.UpdateDevice(vvSerial, dataRequest)
+	//Update
+	if err != nil || restyResp2 == nil || response == nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDevice",
 				err.Error(),
@@ -254,28 +249,30 @@ func (r *DevicesResource) Create(ctx context.Context, req resource.CreateRequest
 		)
 		return
 	}
-	//Item
-	responseGet, restyResp1, err := r.client.Devices.GetDevice(vvSerial)
-	// Has only items
 
+	//Assign Path Params required
+
+	responseGet, restyResp1, err := r.client.Devices.GetDevice(vvSerial)
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizationDevices",
+				"Failure when executing GetDevice",
 				err.Error(),
 			)
 			return
 		}
 		resp.Diagnostics.AddError(
-			"Failure when executing GetOrganizationDevices",
+			"Failure when executing GetDevice",
 			err.Error(),
 		)
 		return
 	}
-	data = ResponseDevicesGetOrganizationDevicesItemToBodyRs(data, responseGet, false)
+
+	data = ResponseDevicesGetDeviceItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *DevicesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -324,7 +321,7 @@ func (r *DevicesResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 	//entro aqui 2
-	data = ResponseDevicesGetOrganizationDevicesItemToBodyRs(data, responseGet, true)
+	data = ResponseDevicesGetDeviceItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
 	resp.Diagnostics.Append(diags...)
@@ -346,8 +343,8 @@ func (r *DevicesResource) Update(ctx context.Context, req resource.UpdateRequest
 	//Path Params
 	vvSerial := data.Serial.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	_, restyResp2, err := r.client.Devices.UpdateDevice(vvSerial, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Devices.UpdateDevice(vvSerial, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDevice",
@@ -374,11 +371,12 @@ func (r *DevicesResource) Delete(ctx context.Context, req resource.DeleteRequest
 
 // TF Structs Schema
 type DevicesRs struct {
-	Serial          types.String                         `tfsdk:"serial"`
+	Serial types.String `tfsdk:"serial"`
+	// OrganizationID  types.String                              `tfsdk:"organization_id"`
 	Address         types.String                         `tfsdk:"address"`
 	Details         *[]ResponseDevicesGetDeviceDetailsRs `tfsdk:"details"`
 	Firmware        types.String                         `tfsdk:"firmware"`
-	Imei            types.String                         `tfsdk:"imei"`
+	FloorPlanID     types.String                         `tfsdk:"floor_plan_id"`
 	LanIP           types.String                         `tfsdk:"lan_ip"`
 	Lat             types.Float64                        `tfsdk:"lat"`
 	Lng             types.Float64                        `tfsdk:"lng"`
@@ -387,9 +385,7 @@ type DevicesRs struct {
 	Name            types.String                         `tfsdk:"name"`
 	NetworkID       types.String                         `tfsdk:"network_id"`
 	Notes           types.String                         `tfsdk:"notes"`
-	ProductType     types.String                         `tfsdk:"product_type"`
 	Tags            types.Set                            `tfsdk:"tags"`
-	FloorPlanID     types.String                         `tfsdk:"floor_plan_id"`
 	MoveMapMarker   types.Bool                           `tfsdk:"move_map_marker"`
 	SwitchProfileID types.String                         `tfsdk:"switch_profile_id"`
 }
@@ -467,7 +463,7 @@ func (r *DevicesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.Requ
 }
 
 // From gosdk to TF Structs Schema
-func ResponseDevicesGetOrganizationDevicesItemToBodyRs(state DevicesRs, response *merakigosdk.ResponseDevicesGetDevice, is_read bool) DevicesRs {
+func ResponseDevicesGetDeviceItemToBodyRs(state DevicesRs, response *merakigosdk.ResponseDevicesGetDevice, is_read bool) DevicesRs {
 	itemState := DevicesRs{
 		Address: types.StringValue(response.Address),
 		Details: func() *[]ResponseDevicesGetDeviceDetailsRs {
@@ -483,8 +479,9 @@ func ResponseDevicesGetOrganizationDevicesItemToBodyRs(state DevicesRs, response
 			}
 			return nil
 		}(),
-		Firmware: types.StringValue(response.Firmware),
-		LanIP:    types.StringValue(response.LanIP),
+		Firmware:    types.StringValue(response.Firmware),
+		FloorPlanID: types.StringValue(response.FloorPlanID),
+		LanIP:       types.StringValue(response.LanIP),
 		Lat: func() types.Float64 {
 			if response.Lat != nil {
 				return types.Float64Value(float64(*response.Lat))
@@ -509,40 +506,4 @@ func ResponseDevicesGetOrganizationDevicesItemToBodyRs(state DevicesRs, response
 		return mergeInterfacesOnlyPath(state, itemState).(DevicesRs)
 	}
 	return mergeInterfaces(state, itemState, true).(DevicesRs)
-}
-
-func getAllItemsDevices(client merakigosdk.Client, organizationId string) (merakigosdk.ResponseOrganizationsGetOrganizationDevices, *resty.Response, error) {
-	var all_response merakigosdk.ResponseOrganizationsGetOrganizationDevices
-	response, r2, er := client.Organizations.GetOrganizationDevices(organizationId, &merakigosdk.GetOrganizationDevicesQueryParams{
-		PerPage: 1000,
-	})
-	count := 0
-	if response != nil {
-		all_response = append(all_response, *response...)
-
-		for len(*response) >= 1000 {
-			count += 1
-			fmt.Println(count)
-			links := strings.Split(r2.Header().Get("Link"), ",")
-			var link string
-			if count > 1 {
-				link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[2], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
-			} else {
-				link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[1], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
-			}
-			myUrl, _ := url.Parse(link)
-			params, _ := url.ParseQuery(myUrl.RawQuery)
-			if params["endingBefore"] != nil {
-				response, r2, er = client.Organizations.GetOrganizationDevices(organizationId, &merakigosdk.GetOrganizationDevicesQueryParams{
-					PerPage:      1000,
-					EndingBefore: params["endingBefore"][0],
-				})
-				all_response = append(all_response, *response...)
-			} else {
-				break
-			}
-		}
-	}
-
-	return all_response, r2, er
 }

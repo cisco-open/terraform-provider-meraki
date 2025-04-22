@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -96,30 +96,37 @@ func (r *OrganizationsAdaptivePolicySettingsResource) Create(ctx context.Context
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationAdaptivePolicySettings(vvOrganizationID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource OrganizationsAdaptivePolicySettings only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvOrganizationID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationAdaptivePolicySettings(vvOrganizationID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource OrganizationsAdaptivePolicySettings  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource OrganizationsAdaptivePolicySettings only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource OrganizationsAdaptivePolicySettings only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationAdaptivePolicySettings(vvOrganizationID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationAdaptivePolicySettings",
 				err.Error(),
@@ -132,9 +139,10 @@ func (r *OrganizationsAdaptivePolicySettingsResource) Create(ctx context.Context
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationAdaptivePolicySettings(vvOrganizationID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -149,11 +157,12 @@ func (r *OrganizationsAdaptivePolicySettingsResource) Create(ctx context.Context
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseOrganizationsGetOrganizationAdaptivePolicySettingsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *OrganizationsAdaptivePolicySettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {

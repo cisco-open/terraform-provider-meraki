@@ -10,6 +10,8 @@ description: |-
 
 
 
+
+
 ~>Warning: This resource does not represent a real-world entity in Meraki Dashboard, therefore changing or deleting this resource on its own has no immediate effect. Instead, it is a task part of a Meraki Dashboard workflow. It is executed in Meraki without any additional verification. It does not check if it was executed before or if a similar configuration or action 
 already existed previously.
 
@@ -61,7 +63,7 @@ Read-Only:
 - `entitlements` (Attributes Set) Entitlement info (see [below for nested schema](#nestedatt--item--entitlements))
 - `last_updated_at` (String) When the subscription was last changed
 - `name` (String) Subscription name
-- `product_types` (Set of String) Products the subscription has entitlements for
+- `product_types` (List of String) Products the subscription has entitlements for
 - `renewal_requested` (Boolean) Whether a renewal has been requested for the subscription
 - `smart_account` (Attributes) Smart Account linkage information (see [below for nested schema](#nestedatt--item--smart_account))
 - `start_date` (String) Subscription start date

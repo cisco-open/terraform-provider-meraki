@@ -90,6 +90,7 @@ output "meraki_networks_appliance_vlans_example" {
 - `subnet` (String) The subnet of the VLAN
 - `template_vlan_type` (String) Type of subnetting of the VLAN. Applicable only for template network.
                                   Allowed values: [same,unique]
+- `vlan_id` (String) vlanId path parameter. Vlan ID
 - `vpn_nat_subnet` (String) The translated VPN subnet if VPN and VPN subnet translation are enabled on the VLAN
 
 ### Read-Only

@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -425,8 +425,8 @@ func (r *OrganizationsActionBatchesResource) Update(ctx context.Context, req res
 	vvOrganizationID := data.OrganizationID.ValueString()
 	vvActionBatchID := data.ActionBatchID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	_, restyResp2, err := r.client.Organizations.UpdateOrganizationActionBatch(vvOrganizationID, vvActionBatchID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Organizations.UpdateOrganizationActionBatch(vvOrganizationID, vvActionBatchID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationActionBatch",
@@ -527,11 +527,14 @@ type ResponseOrganizationsGetOrganizationActionBatchCallbackPayloadTemplateRs st
 // FromBody
 func (r *OrganizationsActionBatchesRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestOrganizationsCreateOrganizationActionBatch {
 	var requestOrganizationsCreateOrganizationActionBatchActions []merakigosdk.RequestOrganizationsCreateOrganizationActionBatchActions
+
 	if r.Actions != nil {
 		for _, rItem1 := range *r.Actions {
 			// var requestOrganizationsCreateOrganizationActionBatchActionsBody *merakigosdk.RequestOrganizationsCreateOrganizationActionBatchActionsBody
+
 			// if rItem1.Body != nil {
 			// 	requestOrganizationsCreateOrganizationActionBatchActionsBody = &merakigosdk.RequestOrganizationsCreateOrganizationActionBatchActionsBody{}
+			// 	//[debug] Is Array: False
 			// }
 			operation := rItem1.Operation.ValueString()
 			resource := rItem1.Resource.ValueString()
@@ -540,32 +543,39 @@ func (r *OrganizationsActionBatchesRs) toSdkApiRequestCreate(ctx context.Context
 				Operation: operation,
 				Resource:  resource,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var requestOrganizationsCreateOrganizationActionBatchCallback *merakigosdk.RequestOrganizationsCreateOrganizationActionBatchCallback
+
 	if r.Callback != nil {
 		var requestOrganizationsCreateOrganizationActionBatchCallbackHTTPServer *merakigosdk.RequestOrganizationsCreateOrganizationActionBatchCallbackHTTPServer
-		if r.Callback != nil {
-			iD := r.Callback.HTTPServer.ID.ValueString()
+
+		if r.Callback.HTTPServer != nil {
+			id := r.Callback.HTTPServer.ID.ValueString()
 			requestOrganizationsCreateOrganizationActionBatchCallbackHTTPServer = &merakigosdk.RequestOrganizationsCreateOrganizationActionBatchCallbackHTTPServer{
-				ID: iD,
+				ID: id,
 			}
+			//[debug] Is Array: False
 		}
 		var requestOrganizationsCreateOrganizationActionBatchCallbackPayloadTemplate *merakigosdk.RequestOrganizationsCreateOrganizationActionBatchCallbackPayloadTemplate
+
 		if r.Callback.PayloadTemplate != nil {
-			iD := r.Callback.PayloadTemplate.ID.ValueString()
+			id := r.Callback.PayloadTemplate.ID.ValueString()
 			requestOrganizationsCreateOrganizationActionBatchCallbackPayloadTemplate = &merakigosdk.RequestOrganizationsCreateOrganizationActionBatchCallbackPayloadTemplate{
-				ID: iD,
+				ID: id,
 			}
+			//[debug] Is Array: False
 		}
 		sharedSecret := r.Callback.SharedSecret.ValueString()
-		uRL := r.Callback.URL.ValueString()
+		url := r.Callback.URL.ValueString()
 		requestOrganizationsCreateOrganizationActionBatchCallback = &merakigosdk.RequestOrganizationsCreateOrganizationActionBatchCallback{
 			HTTPServer:      requestOrganizationsCreateOrganizationActionBatchCallbackHTTPServer,
 			PayloadTemplate: requestOrganizationsCreateOrganizationActionBatchCallbackPayloadTemplate,
 			SharedSecret:    sharedSecret,
-			URL:             uRL,
+			URL:             url,
 		}
+		//[debug] Is Array: False
 	}
 	confirmed := new(bool)
 	if !r.Confirmed.IsUnknown() && !r.Confirmed.IsNull() {

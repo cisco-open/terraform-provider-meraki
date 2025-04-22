@@ -20,7 +20,9 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	"log"
+
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -218,30 +220,37 @@ func (r *NetworksApplianceSingleLanResource) Create(ctx context.Context, req res
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceSingleLan(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceSingleLan only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceSingleLan(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceSingleLan  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceSingleLan only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceSingleLan only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceSingleLan(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceSingleLan",
 				err.Error(),
@@ -254,9 +263,10 @@ func (r *NetworksApplianceSingleLanResource) Create(ctx context.Context, req res
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceSingleLan(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -271,11 +281,12 @@ func (r *NetworksApplianceSingleLanResource) Create(ctx context.Context, req res
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseApplianceGetNetworkApplianceSingleLanItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksApplianceSingleLanResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -411,8 +422,8 @@ func (r *NetworksApplianceSingleLanRs) toSdkApiRequestUpdate(ctx context.Context
 	} else {
 		applianceIP = &emptyString
 	}
-
 	var requestApplianceUpdateNetworkApplianceSingleLanIPv6 *merakigosdk.RequestApplianceUpdateNetworkApplianceSingleLanIPv6
+
 	if r.IPv6 != nil {
 		enabled := func() *bool {
 			if !r.IPv6.Enabled.IsUnknown() && !r.IPv6.Enabled.IsNull() {
@@ -420,7 +431,10 @@ func (r *NetworksApplianceSingleLanRs) toSdkApiRequestUpdate(ctx context.Context
 			}
 			return nil
 		}()
+
+		log.Printf("[DEBUG] #TODO []RequestApplianceUpdateNetworkApplianceSingleLanIpv6PrefixAssignments")
 		var requestApplianceUpdateNetworkApplianceSingleLanIPv6PrefixAssignments []merakigosdk.RequestApplianceUpdateNetworkApplianceSingleLanIPv6PrefixAssignments
+
 		if r.IPv6.PrefixAssignments != nil {
 			for _, rItem1 := range *r.IPv6.PrefixAssignments {
 				autonomous := func() *bool {
@@ -429,31 +443,30 @@ func (r *NetworksApplianceSingleLanRs) toSdkApiRequestUpdate(ctx context.Context
 					}
 					return nil
 				}()
-
 				var requestApplianceUpdateNetworkApplianceSingleLanIPv6PrefixAssignmentsOrigin *merakigosdk.RequestApplianceUpdateNetworkApplianceSingleLanIPv6PrefixAssignmentsOrigin
+
 				if rItem1.Origin != nil {
-					var interfaces []string
+
+					var interfaces []string = nil
 					rItem1.Origin.Interfaces.ElementsAs(ctx, &interfaces, false)
 					typeR := rItem1.Origin.Type.ValueString()
-
 					requestApplianceUpdateNetworkApplianceSingleLanIPv6PrefixAssignmentsOrigin = &merakigosdk.RequestApplianceUpdateNetworkApplianceSingleLanIPv6PrefixAssignmentsOrigin{
 						Interfaces: interfaces,
 						Type:       typeR,
 					}
+					//[debug] Is Array: False
 				}
-
 				staticApplianceIP6 := rItem1.StaticApplianceIP6.ValueString()
 				staticPrefix := rItem1.StaticPrefix.ValueString()
-
 				requestApplianceUpdateNetworkApplianceSingleLanIPv6PrefixAssignments = append(requestApplianceUpdateNetworkApplianceSingleLanIPv6PrefixAssignments, merakigosdk.RequestApplianceUpdateNetworkApplianceSingleLanIPv6PrefixAssignments{
 					Autonomous:         autonomous,
 					Origin:             requestApplianceUpdateNetworkApplianceSingleLanIPv6PrefixAssignmentsOrigin,
 					StaticApplianceIP6: staticApplianceIP6,
 					StaticPrefix:       staticPrefix,
 				})
+				//[debug] Is Array: True
 			}
 		}
-
 		requestApplianceUpdateNetworkApplianceSingleLanIPv6 = &merakigosdk.RequestApplianceUpdateNetworkApplianceSingleLanIPv6{
 			Enabled: enabled,
 			PrefixAssignments: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceSingleLanIPv6PrefixAssignments {
@@ -463,9 +476,10 @@ func (r *NetworksApplianceSingleLanRs) toSdkApiRequestUpdate(ctx context.Context
 				return nil
 			}(),
 		}
+		//[debug] Is Array: False
 	}
-
 	var requestApplianceUpdateNetworkApplianceSingleLanMandatoryDhcp *merakigosdk.RequestApplianceUpdateNetworkApplianceSingleLanMandatoryDhcp
+
 	if r.MandatoryDhcp != nil {
 		enabled := func() *bool {
 			if !r.MandatoryDhcp.Enabled.IsUnknown() && !r.MandatoryDhcp.Enabled.IsNull() {
@@ -476,15 +490,14 @@ func (r *NetworksApplianceSingleLanRs) toSdkApiRequestUpdate(ctx context.Context
 		requestApplianceUpdateNetworkApplianceSingleLanMandatoryDhcp = &merakigosdk.RequestApplianceUpdateNetworkApplianceSingleLanMandatoryDhcp{
 			Enabled: enabled,
 		}
+		//[debug] Is Array: False
 	}
-
 	subnet := new(string)
 	if !r.Subnet.IsUnknown() && !r.Subnet.IsNull() {
 		*subnet = r.Subnet.ValueString()
 	} else {
 		subnet = &emptyString
 	}
-
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceSingleLan{
 		ApplianceIP:   *applianceIP,
 		IPv6:          requestApplianceUpdateNetworkApplianceSingleLanIPv6,

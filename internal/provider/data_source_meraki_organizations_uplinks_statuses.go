@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -157,6 +157,10 @@ func (d *OrganizationsUplinksStatusesDataSource) Schema(_ context.Context, _ dat
 										MarkdownDescription: `Integrated Circuit Card Identification Number`,
 										Computed:            true,
 									},
+									"imsi": schema.StringAttribute{
+										MarkdownDescription: `International Mobile Subscriber Identity`,
+										Computed:            true,
+									},
 									"interface": schema.StringAttribute{
 										MarkdownDescription: `Uplink interface`,
 										Computed:            true,
@@ -167,6 +171,22 @@ func (d *OrganizationsUplinksStatusesDataSource) Schema(_ context.Context, _ dat
 									},
 									"ip_assigned_by": schema.StringAttribute{
 										MarkdownDescription: `The way in which the IP is assigned`,
+										Computed:            true,
+									},
+									"mcc": schema.StringAttribute{
+										MarkdownDescription: `Mobile Country Code`,
+										Computed:            true,
+									},
+									"mnc": schema.StringAttribute{
+										MarkdownDescription: `Mobile Network Code`,
+										Computed:            true,
+									},
+									"msisdn": schema.StringAttribute{
+										MarkdownDescription: `Mobile Station Integrated Services Digital Network`,
+										Computed:            true,
+									},
+									"mtu": schema.Int64Attribute{
+										MarkdownDescription: `Maximum Transmission Unit`,
 										Computed:            true,
 									},
 									"primary_dns": schema.StringAttribute{
@@ -180,6 +200,17 @@ func (d *OrganizationsUplinksStatusesDataSource) Schema(_ context.Context, _ dat
 									"public_ip": schema.StringAttribute{
 										MarkdownDescription: `Public IP`,
 										Computed:            true,
+									},
+									"roaming": schema.SingleNestedAttribute{
+										MarkdownDescription: `Roaming Status`,
+										Computed:            true,
+										Attributes: map[string]schema.Attribute{
+
+											"status": schema.StringAttribute{
+												MarkdownDescription: `Roaming Status`,
+												Computed:            true,
+											},
+										},
 									},
 									"secondary_dns": schema.StringAttribute{
 										MarkdownDescription: `Secondary DNS IP`,
@@ -296,16 +327,26 @@ type ResponseItemOrganizationsGetOrganizationUplinksStatusesUplinks struct {
 	DNS2           types.String                                                              `tfsdk:"dns2"`
 	Gateway        types.String                                                              `tfsdk:"gateway"`
 	Iccid          types.String                                                              `tfsdk:"iccid"`
+	Imsi           types.String                                                              `tfsdk:"imsi"`
 	Interface      types.String                                                              `tfsdk:"interface"`
 	IP             types.String                                                              `tfsdk:"ip"`
 	IPAssignedBy   types.String                                                              `tfsdk:"ip_assigned_by"`
+	Mcc            types.String                                                              `tfsdk:"mcc"`
+	Mnc            types.String                                                              `tfsdk:"mnc"`
+	Msisdn         types.String                                                              `tfsdk:"msisdn"`
+	Mtu            types.Int64                                                               `tfsdk:"mtu"`
 	PrimaryDNS     types.String                                                              `tfsdk:"primary_dns"`
 	Provider       types.String                                                              `tfsdk:"provider_r"`
 	PublicIP       types.String                                                              `tfsdk:"public_ip"`
+	Roaming        *ResponseItemOrganizationsGetOrganizationUplinksStatusesUplinksRoaming    `tfsdk:"roaming"`
 	SecondaryDNS   types.String                                                              `tfsdk:"secondary_dns"`
 	SignalStat     *ResponseItemOrganizationsGetOrganizationUplinksStatusesUplinksSignalStat `tfsdk:"signal_stat"`
 	SignalType     types.String                                                              `tfsdk:"signal_type"`
 	Status         types.String                                                              `tfsdk:"status"`
+}
+
+type ResponseItemOrganizationsGetOrganizationUplinksStatusesUplinksRoaming struct {
+	Status types.String `tfsdk:"status"`
 }
 
 type ResponseItemOrganizationsGetOrganizationUplinksStatusesUplinksSignalStat struct {
@@ -347,13 +388,31 @@ func ResponseOrganizationsGetOrganizationUplinksStatusesItemsToBody(state Organi
 							DNS2:           types.StringValue(uplinks.DNS2),
 							Gateway:        types.StringValue(uplinks.Gateway),
 							Iccid:          types.StringValue(uplinks.Iccid),
+							Imsi:           types.StringValue(uplinks.Imsi),
 							Interface:      types.StringValue(uplinks.Interface),
 							IP:             types.StringValue(uplinks.IP),
 							IPAssignedBy:   types.StringValue(uplinks.IPAssignedBy),
-							PrimaryDNS:     types.StringValue(uplinks.PrimaryDNS),
-							Provider:       types.StringValue(uplinks.Provider),
-							PublicIP:       types.StringValue(uplinks.PublicIP),
-							SecondaryDNS:   types.StringValue(uplinks.SecondaryDNS),
+							Mcc:            types.StringValue(uplinks.Mcc),
+							Mnc:            types.StringValue(uplinks.Mnc),
+							Msisdn:         types.StringValue(uplinks.Msisdn),
+							Mtu: func() types.Int64 {
+								if uplinks.Mtu != nil {
+									return types.Int64Value(int64(*uplinks.Mtu))
+								}
+								return types.Int64{}
+							}(),
+							PrimaryDNS: types.StringValue(uplinks.PrimaryDNS),
+							Provider:   types.StringValue(uplinks.Provider),
+							PublicIP:   types.StringValue(uplinks.PublicIP),
+							Roaming: func() *ResponseItemOrganizationsGetOrganizationUplinksStatusesUplinksRoaming {
+								if uplinks.Roaming != nil {
+									return &ResponseItemOrganizationsGetOrganizationUplinksStatusesUplinksRoaming{
+										Status: types.StringValue(uplinks.Roaming.Status),
+									}
+								}
+								return nil
+							}(),
+							SecondaryDNS: types.StringValue(uplinks.SecondaryDNS),
 							SignalStat: func() *ResponseItemOrganizationsGetOrganizationUplinksStatusesUplinksSignalStat {
 								if uplinks.SignalStat != nil {
 									return &ResponseItemOrganizationsGetOrganizationUplinksStatusesUplinksSignalStat{

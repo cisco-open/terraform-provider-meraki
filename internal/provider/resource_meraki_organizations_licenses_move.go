@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -76,7 +76,7 @@ func (r *OrganizationsLicensesMoveResource) Schema(_ context.Context, _ resource
 						MarkdownDescription: `The ID of the organization to move the licenses to`,
 						Computed:            true,
 					},
-					"license_ids": schema.SetAttribute{
+					"license_ids": schema.ListAttribute{
 						MarkdownDescription: `A list of IDs of licenses to move to the new organization`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -94,7 +94,7 @@ func (r *OrganizationsLicensesMoveResource) Schema(_ context.Context, _ resource
 							stringplanmodifier.RequiresReplace(),
 						},
 					},
-					"license_ids": schema.SetAttribute{
+					"license_ids": schema.ListAttribute{
 						MarkdownDescription: `A list of IDs of licenses to move to the new organization`,
 						Optional:            true,
 						Computed:            true,
@@ -127,7 +127,6 @@ func (r *OrganizationsLicensesMoveResource) Create(ctx context.Context, req reso
 	vvOrganizationID := data.OrganizationID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Organizations.MoveOrganizationLicenses(vvOrganizationID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -144,7 +143,6 @@ func (r *OrganizationsLicensesMoveResource) Create(ctx context.Context, req reso
 	}
 	//Item
 	data = ResponseOrganizationsMoveOrganizationLicensesItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -171,7 +169,7 @@ type OrganizationsLicensesMove struct {
 
 type ResponseOrganizationsMoveOrganizationLicenses struct {
 	DestOrganizationID types.String `tfsdk:"dest_organization_id"`
-	LicenseIDs         types.Set    `tfsdk:"license_ids"`
+	LicenseIDs         types.List   `tfsdk:"license_ids"`
 }
 
 type RequestOrganizationsMoveOrganizationLicensesRs struct {
@@ -202,7 +200,7 @@ func (r *OrganizationsLicensesMove) toSdkApiRequestCreate(ctx context.Context) *
 func ResponseOrganizationsMoveOrganizationLicensesItemToBody(state OrganizationsLicensesMove, response *merakigosdk.ResponseOrganizationsMoveOrganizationLicenses) OrganizationsLicensesMove {
 	itemState := ResponseOrganizationsMoveOrganizationLicenses{
 		DestOrganizationID: types.StringValue(response.DestOrganizationID),
-		LicenseIDs:         StringSliceToSet(response.LicenseIDs),
+		LicenseIDs:         StringSliceToList(response.LicenseIDs),
 	}
 	state.Item = &itemState
 	return state

@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -397,7 +397,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Schema(_ context.Context, _ resou
 				},
 			},
 			"radius_group_attribute": schema.StringAttribute{
-				MarkdownDescription: `Acceptable values are *""* for None, or *"11"* for Group Policies ACL`,
+				MarkdownDescription: `Acceptable values are **""** for None, or **"11"** for Group Policies ACL`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -562,12 +562,14 @@ func (r *NetworksSwitchAccessPoliciesResource) Create(ctx context.Context, req r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchAccessPolicies(vvNetworkID)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -579,6 +581,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Create(ctx context.Context, req r
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -593,6 +596,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Create(ctx context.Context, req r
 				return
 			}
 			r.client.Switch.UpdateNetworkSwitchAccessPolicy(vvNetworkID, vvAccessPolicyNumber, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Switch.GetNetworkSwitchAccessPolicy(vvNetworkID, vvAccessPolicyNumber)
 			if responseVerifyItem2 != nil {
 				data = ResponseSwitchGetNetworkSwitchAccessPolicyItemToBodyRs(data, responseVerifyItem2, false)
@@ -602,11 +606,11 @@ func (r *NetworksSwitchAccessPoliciesResource) Create(ctx context.Context, req r
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Switch.CreateNetworkSwitchAccessPolicy(vvNetworkID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchAccessPolicy",
 				err.Error(),
@@ -619,9 +623,8 @@ func (r *NetworksSwitchAccessPoliciesResource) Create(ctx context.Context, req r
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchAccessPolicies(vvNetworkID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -637,6 +640,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Create(ctx context.Context, req r
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -645,7 +649,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Create(ctx context.Context, req r
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter AccessPolicyNumber",
-				"Error",
+				"Fail Parsing AccessPolicyNumber",
 			)
 			return
 		}
@@ -675,6 +679,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Create(ctx context.Context, req r
 		)
 		return
 	}
+
 }
 
 func (r *NetworksSwitchAccessPoliciesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -810,14 +815,13 @@ func (r *NetworksSwitchAccessPoliciesResource) Delete(ctx context.Context, req r
 
 // TF Structs Schema
 type NetworksSwitchAccessPoliciesRs struct {
-	NetworkID          types.String                                        `tfsdk:"network_id"`
-	AccessPolicyNumber types.String                                        `tfsdk:"access_policy_number"`
-	AccessPolicyType   types.String                                        `tfsdk:"access_policy_type"`
-	Counts             *ResponseSwitchGetNetworkSwitchAccessPolicyCountsRs `tfsdk:"counts"`
-	Dot1X              *ResponseSwitchGetNetworkSwitchAccessPolicyDot1XRs  `tfsdk:"dot1x"`
-	GuestPortBouncing  types.Bool                                          `tfsdk:"guest_port_bouncing"`
-	GuestVLANID        types.Int64                                         `tfsdk:"guest_vlan_id"`
-	// GuestVLANIDResponse             types.Int64                                                            `tfsdk:"guest_vlan_id_response"`
+	NetworkID                       types.String                                                           `tfsdk:"network_id"`
+	AccessPolicyNumber              types.String                                                           `tfsdk:"access_policy_number"`
+	AccessPolicyType                types.String                                                           `tfsdk:"access_policy_type"`
+	Counts                          *ResponseSwitchGetNetworkSwitchAccessPolicyCountsRs                    `tfsdk:"counts"`
+	Dot1X                           *ResponseSwitchGetNetworkSwitchAccessPolicyDot1XRs                     `tfsdk:"dot1x"`
+	GuestPortBouncing               types.Bool                                                             `tfsdk:"guest_port_bouncing"`
+	GuestVLANID                     types.Int64                                                            `tfsdk:"guest_vlan_id"`
 	HostMode                        types.String                                                           `tfsdk:"host_mode"`
 	IncreaseAccessSpeed             types.Bool                                                             `tfsdk:"increase_access_speed"`
 	Name                            types.String                                                           `tfsdk:"name"`
@@ -891,11 +895,13 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestCreate(ctx context.Conte
 		accessPolicyType = &emptyString
 	}
 	var requestSwitchCreateNetworkSwitchAccessPolicyDot1X *merakigosdk.RequestSwitchCreateNetworkSwitchAccessPolicyDot1X
+
 	if r.Dot1X != nil {
 		controlDirection := r.Dot1X.ControlDirection.ValueString()
 		requestSwitchCreateNetworkSwitchAccessPolicyDot1X = &merakigosdk.RequestSwitchCreateNetworkSwitchAccessPolicyDot1X{
 			ControlDirection: controlDirection,
 		}
+		//[debug] Is Array: False
 	}
 	guestPortBouncing := new(bool)
 	if !r.GuestPortBouncing.IsUnknown() && !r.GuestPortBouncing.IsNull() {
@@ -928,8 +934,10 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestCreate(ctx context.Conte
 		name = &emptyString
 	}
 	var requestSwitchCreateNetworkSwitchAccessPolicyRadius *merakigosdk.RequestSwitchCreateNetworkSwitchAccessPolicyRadius
+
 	if r.Radius != nil {
 		var requestSwitchCreateNetworkSwitchAccessPolicyRadiusCache *merakigosdk.RequestSwitchCreateNetworkSwitchAccessPolicyRadiusCache
+
 		if r.Radius.Cache != nil {
 			enabled := func() *bool {
 				if !r.Radius.Cache.Enabled.IsUnknown() && !r.Radius.Cache.Enabled.IsNull() {
@@ -947,8 +955,10 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestCreate(ctx context.Conte
 				Enabled: enabled,
 				Timeout: int64ToIntPointer(timeout),
 			}
+			//[debug] Is Array: False
 		}
 		var requestSwitchCreateNetworkSwitchAccessPolicyRadiusCriticalAuth *merakigosdk.RequestSwitchCreateNetworkSwitchAccessPolicyRadiusCriticalAuth
+
 		if r.Radius.CriticalAuth != nil {
 			dataVLANID := func() *int64 {
 				if !r.Radius.CriticalAuth.DataVLANID.IsUnknown() && !r.Radius.CriticalAuth.DataVLANID.IsNull() {
@@ -973,6 +983,7 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestCreate(ctx context.Conte
 				SuspendPortBounce: suspendPortBounce,
 				VoiceVLANID:       int64ToIntPointer(voiceVLANID),
 			}
+			//[debug] Is Array: False
 		}
 		failedAuthVLANID := func() *int64 {
 			if !r.Radius.FailedAuthVLANID.IsUnknown() && !r.Radius.FailedAuthVLANID.IsNull() {
@@ -992,6 +1003,7 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestCreate(ctx context.Conte
 			FailedAuthVLANID:         int64ToIntPointer(failedAuthVLANID),
 			ReAuthenticationInterval: int64ToIntPointer(reAuthenticationInterval),
 		}
+		//[debug] Is Array: False
 	}
 	radiusAccountingEnabled := new(bool)
 	if !r.RadiusAccountingEnabled.IsUnknown() && !r.RadiusAccountingEnabled.IsNull() {
@@ -1000,6 +1012,7 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestCreate(ctx context.Conte
 		radiusAccountingEnabled = nil
 	}
 	var requestSwitchCreateNetworkSwitchAccessPolicyRadiusAccountingServers []merakigosdk.RequestSwitchCreateNetworkSwitchAccessPolicyRadiusAccountingServers
+
 	if r.RadiusAccountingServers != nil {
 		for _, rItem1 := range *r.RadiusAccountingServers {
 			host := rItem1.Host.ValueString()
@@ -1017,6 +1030,7 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestCreate(ctx context.Conte
 				Port:                       int64ToIntPointer(port),
 				Secret:                     secret,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	radiusCoaSupportEnabled := new(bool)
@@ -1032,6 +1046,7 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestCreate(ctx context.Conte
 		radiusGroupAttribute = &emptyString
 	}
 	var requestSwitchCreateNetworkSwitchAccessPolicyRadiusServers []merakigosdk.RequestSwitchCreateNetworkSwitchAccessPolicyRadiusServers
+
 	if r.RadiusServers != nil {
 		for _, rItem1 := range *r.RadiusServers {
 			host := rItem1.Host.ValueString()
@@ -1049,6 +1064,7 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestCreate(ctx context.Conte
 				Port:                       int64ToIntPointer(port),
 				Secret:                     secret,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	radiusTestingEnabled := new(bool)
@@ -1111,11 +1127,13 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestUpdate(ctx context.Conte
 		accessPolicyType = &emptyString
 	}
 	var requestSwitchUpdateNetworkSwitchAccessPolicyDot1X *merakigosdk.RequestSwitchUpdateNetworkSwitchAccessPolicyDot1X
+
 	if r.Dot1X != nil {
 		controlDirection := r.Dot1X.ControlDirection.ValueString()
 		requestSwitchUpdateNetworkSwitchAccessPolicyDot1X = &merakigosdk.RequestSwitchUpdateNetworkSwitchAccessPolicyDot1X{
 			ControlDirection: controlDirection,
 		}
+		//[debug] Is Array: False
 	}
 	guestPortBouncing := new(bool)
 	if !r.GuestPortBouncing.IsUnknown() && !r.GuestPortBouncing.IsNull() {
@@ -1148,8 +1166,10 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestUpdate(ctx context.Conte
 		name = &emptyString
 	}
 	var requestSwitchUpdateNetworkSwitchAccessPolicyRadius *merakigosdk.RequestSwitchUpdateNetworkSwitchAccessPolicyRadius
+
 	if r.Radius != nil {
 		var requestSwitchUpdateNetworkSwitchAccessPolicyRadiusCache *merakigosdk.RequestSwitchUpdateNetworkSwitchAccessPolicyRadiusCache
+
 		if r.Radius.Cache != nil {
 			enabled := func() *bool {
 				if !r.Radius.Cache.Enabled.IsUnknown() && !r.Radius.Cache.Enabled.IsNull() {
@@ -1167,8 +1187,10 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestUpdate(ctx context.Conte
 				Enabled: enabled,
 				Timeout: int64ToIntPointer(timeout),
 			}
+			//[debug] Is Array: False
 		}
 		var requestSwitchUpdateNetworkSwitchAccessPolicyRadiusCriticalAuth *merakigosdk.RequestSwitchUpdateNetworkSwitchAccessPolicyRadiusCriticalAuth
+
 		if r.Radius.CriticalAuth != nil {
 			dataVLANID := func() *int64 {
 				if !r.Radius.CriticalAuth.DataVLANID.IsUnknown() && !r.Radius.CriticalAuth.DataVLANID.IsNull() {
@@ -1193,6 +1215,7 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestUpdate(ctx context.Conte
 				SuspendPortBounce: suspendPortBounce,
 				VoiceVLANID:       int64ToIntPointer(voiceVLANID),
 			}
+			//[debug] Is Array: False
 		}
 		failedAuthVLANID := func() *int64 {
 			if !r.Radius.FailedAuthVLANID.IsUnknown() && !r.Radius.FailedAuthVLANID.IsNull() {
@@ -1212,6 +1235,7 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestUpdate(ctx context.Conte
 			FailedAuthVLANID:         int64ToIntPointer(failedAuthVLANID),
 			ReAuthenticationInterval: int64ToIntPointer(reAuthenticationInterval),
 		}
+		//[debug] Is Array: False
 	}
 	radiusAccountingEnabled := new(bool)
 	if !r.RadiusAccountingEnabled.IsUnknown() && !r.RadiusAccountingEnabled.IsNull() {
@@ -1220,6 +1244,7 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestUpdate(ctx context.Conte
 		radiusAccountingEnabled = nil
 	}
 	var requestSwitchUpdateNetworkSwitchAccessPolicyRadiusAccountingServers []merakigosdk.RequestSwitchUpdateNetworkSwitchAccessPolicyRadiusAccountingServers
+
 	if r.RadiusAccountingServers != nil {
 		for _, rItem1 := range *r.RadiusAccountingServers {
 			host := rItem1.Host.ValueString()
@@ -1239,6 +1264,7 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestUpdate(ctx context.Conte
 				Secret:                     secret,
 				ServerID:                   serverID,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	radiusCoaSupportEnabled := new(bool)
@@ -1254,6 +1280,7 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestUpdate(ctx context.Conte
 		radiusGroupAttribute = &emptyString
 	}
 	var requestSwitchUpdateNetworkSwitchAccessPolicyRadiusServers []merakigosdk.RequestSwitchUpdateNetworkSwitchAccessPolicyRadiusServers
+
 	if r.RadiusServers != nil {
 		for _, rItem1 := range *r.RadiusServers {
 			host := rItem1.Host.ValueString()
@@ -1273,6 +1300,7 @@ func (r *NetworksSwitchAccessPoliciesRs) toSdkApiRequestUpdate(ctx context.Conte
 				Secret:                     secret,
 				ServerID:                   serverID,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	radiusTestingEnabled := new(bool)
@@ -1516,7 +1544,6 @@ func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBodyRs(state NetworksSwitch
 			return types.Bool{}
 		}(),
 	}
-
 	itemState.RadiusServers = state.RadiusServers
 	itemState.RadiusAccountingServers = state.RadiusAccountingServers
 	// itemState.GuestVLANID = state.GuestVLANID

@@ -20,9 +20,8 @@ package provider
 
 import (
 	"context"
-	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -99,7 +98,7 @@ func (r *NetworksDevicesClaimResource) Schema(_ context.Context, _ resource.Sche
 							},
 						},
 					},
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `The serials of the devices`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -109,7 +108,7 @@ func (r *NetworksDevicesClaimResource) Schema(_ context.Context, _ resource.Sche
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `A list of serials of devices to claim`,
 						Optional:            true,
 						Computed:            true,
@@ -141,16 +140,7 @@ func (r *NetworksDevicesClaimResource) Create(ctx context.Context, req resource.
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
-	var query *merakigosdk.ClaimNetworkDevicesQueryParams
-	if !data.AddAtomically.IsNull() {
-		log.Printf("AddAtomically is not null")
-		query = &merakigosdk.ClaimNetworkDevicesQueryParams{}
-		query.AddAtomically = data.AddAtomically.ValueBool()
-		log.Printf("AddAtomically is not null %v", query.AddAtomically)
-	}
-	// log.Printf("AddAtomically is not null %v", query)
-	response, restyResp1, err := r.client.Networks.ClaimNetworkDevices(vvNetworkID, dataRequest, query)
-
+	response, restyResp1, err := r.client.Networks.ClaimNetworkDevices(vvNetworkID, dataRequest, nil)
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -167,7 +157,6 @@ func (r *NetworksDevicesClaimResource) Create(ctx context.Context, req resource.
 	}
 	//Item
 	data = ResponseNetworksClaimNetworkDevicesItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -195,7 +184,7 @@ type NetworksDevicesClaim struct {
 
 type ResponseNetworksClaimNetworkDevices struct {
 	Errors  *[]ResponseNetworksClaimNetworkDevicesErrors `tfsdk:"errors"`
-	Serials types.Set                                    `tfsdk:"serials"`
+	Serials types.List                                   `tfsdk:"serials"`
 }
 
 type ResponseNetworksClaimNetworkDevicesErrors struct {
@@ -204,7 +193,7 @@ type ResponseNetworksClaimNetworkDevicesErrors struct {
 }
 
 type RequestNetworksClaimNetworkDevicesRs struct {
-	Serials types.Set `tfsdk:"serials"`
+	Serials types.List `tfsdk:"serials"`
 }
 
 // FromBody
@@ -234,7 +223,7 @@ func ResponseNetworksClaimNetworkDevicesItemToBody(state NetworksDevicesClaim, r
 			}
 			return nil
 		}(),
-		Serials: StringSliceToSet(response.Serials),
+		Serials: StringSliceToList(response.Serials),
 	}
 	state.Item = &itemState
 	return state

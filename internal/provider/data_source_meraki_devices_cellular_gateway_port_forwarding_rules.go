@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -73,7 +73,7 @@ func (d *DevicesCellularGatewayPortForwardingRulesDataSource) Schema(_ context.C
 							Attributes: map[string]schema.Attribute{
 
 								"access": schema.StringAttribute{
-									MarkdownDescription: `*any* or *restricted*. Specify the right to make inbound connections on the specified ports or port ranges. If *restricted*, a list of allowed IPs is mandatory.`,
+									MarkdownDescription: `*any* or **restricted**. Specify the right to make inbound connections on the specified ports or port ranges. If **restricted**, a list of allowed IPs is mandatory.`,
 									Computed:            true,
 								},
 								"allowed_ips": schema.ListAttribute{

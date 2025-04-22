@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -133,13 +133,13 @@ func (d *OrganizationsPolicyObjectsDataSource) Read(ctx context.Context, req dat
 		return
 	}
 
-	// method1 := []bool{!organizationsPolicyObjects.OrganizationID.IsNull(), !organizationsPolicyObjects.PerPage.IsNull(), !organizationsPolicyObjects.StartingAfter.IsNull(), !organizationsPolicyObjects.EndingBefore.IsNull()}
-	// log.Printf("[DEBUG] Selecting method. Method 1 %v", method1)
-	// method2 := []bool{!organizationsPolicyObjects.OrganizationID.IsNull(), !organizationsPolicyObjects.PolicyObjectID.IsNull()}
-	// log.Printf("[DEBUG] Selecting method. Method 2 %v", method2)
+	method1 := []bool{!organizationsPolicyObjects.OrganizationID.IsNull(), !organizationsPolicyObjects.PerPage.IsNull(), !organizationsPolicyObjects.StartingAfter.IsNull(), !organizationsPolicyObjects.EndingBefore.IsNull()}
+	log.Printf("[DEBUG] Selecting method. Method 1 %v", method1)
+	method2 := []bool{!organizationsPolicyObjects.OrganizationID.IsNull(), !organizationsPolicyObjects.PolicyObjectID.IsNull()}
+	log.Printf("[DEBUG] Selecting method. Method 2 %v", method2)
 
-	// selectedMethod := pickMethod([][]bool{method1, method2})
-	if organizationsPolicyObjects.PolicyObjectID.IsNull() {
+	selectedMethod := pickMethod([][]bool{method1, method2})
+	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetOrganizationPolicyObjects")
 		vvOrganizationID := organizationsPolicyObjects.OrganizationID.ValueString()
 		queryParams1 := merakigosdk.GetOrganizationPolicyObjectsQueryParams{}
@@ -164,7 +164,7 @@ func (d *OrganizationsPolicyObjectsDataSource) Read(ctx context.Context, req dat
 		}
 
 	}
-	if !organizationsPolicyObjects.PolicyObjectID.IsNull() {
+	if selectedMethod == 2 {
 		log.Printf("[DEBUG] Selected method: GetOrganizationPolicyObject")
 		vvOrganizationID := organizationsPolicyObjects.OrganizationID.ValueString()
 		vvPolicyObjectID := organizationsPolicyObjects.PolicyObjectID.ValueString()

@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -168,7 +168,6 @@ func (r *NetworksRecalculateResource) Create(ctx context.Context, req resource.C
 	vvJobID := data.JobID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Networks.RecalculateNetworkFloorPlansAutoLocateJob(vvNetworkID, vvJobID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -185,7 +184,6 @@ func (r *NetworksRecalculateResource) Create(ctx context.Context, req resource.C
 	}
 	//Item
 	data = ResponseNetworksRecalculateNetworkFloorPlansAutoLocateJobItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -234,9 +232,11 @@ type RequestNetworksRecalculateNetworkFloorPlansAutoLocateJobDevicesAutoLocateRs
 func (r *NetworksRecalculate) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestNetworksRecalculateNetworkFloorPlansAutoLocateJob {
 	re := *r.Parameters
 	var requestNetworksRecalculateNetworkFloorPlansAutoLocateJobDevices []merakigosdk.RequestNetworksRecalculateNetworkFloorPlansAutoLocateJobDevices
+
 	if re.Devices != nil {
 		for _, rItem1 := range *re.Devices {
 			var requestNetworksRecalculateNetworkFloorPlansAutoLocateJobDevicesAutoLocate *merakigosdk.RequestNetworksRecalculateNetworkFloorPlansAutoLocateJobDevicesAutoLocate
+
 			if rItem1.AutoLocate != nil {
 				isAnchor := func() *bool {
 					if !rItem1.AutoLocate.IsAnchor.IsUnknown() && !rItem1.AutoLocate.IsAnchor.IsNull() {
@@ -261,21 +261,18 @@ func (r *NetworksRecalculate) toSdkApiRequestCreate(ctx context.Context) *meraki
 					Lat:      lat,
 					Lng:      lng,
 				}
+				//[debug] Is Array: False
 			}
 			serial := rItem1.Serial.ValueString()
 			requestNetworksRecalculateNetworkFloorPlansAutoLocateJobDevices = append(requestNetworksRecalculateNetworkFloorPlansAutoLocateJobDevices, merakigosdk.RequestNetworksRecalculateNetworkFloorPlansAutoLocateJobDevices{
 				AutoLocate: requestNetworksRecalculateNetworkFloorPlansAutoLocateJobDevicesAutoLocate,
 				Serial:     serial,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestNetworksRecalculateNetworkFloorPlansAutoLocateJob{
-		Devices: func() *[]merakigosdk.RequestNetworksRecalculateNetworkFloorPlansAutoLocateJobDevices {
-			if len(requestNetworksRecalculateNetworkFloorPlansAutoLocateJobDevices) > 0 {
-				return &requestNetworksRecalculateNetworkFloorPlansAutoLocateJobDevices
-			}
-			return nil
-		}(),
+		Devices: &requestNetworksRecalculateNetworkFloorPlansAutoLocateJobDevices,
 	}
 	return &out
 }

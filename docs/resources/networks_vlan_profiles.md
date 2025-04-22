@@ -91,5 +91,5 @@ Read-Only:
 Import is supported using the following syntax:
 
 ```shell
-terraform import meraki_networks_vlan_profiles.example "network_id,iname"
+terraform import meraki_networks_vlan_profiles.example "iname,network_id"
 ```

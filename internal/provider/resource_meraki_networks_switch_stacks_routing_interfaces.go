@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -80,7 +80,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 				Computed:            true,
 			},
 			"interface_id": schema.StringAttribute{
-				MarkdownDescription: `The id`,
+				MarkdownDescription: `The ID`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -176,7 +176,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 				Attributes: map[string]schema.Attribute{
 
 					"area": schema.StringAttribute{
-						MarkdownDescription: `Area id`,
+						MarkdownDescription: `Area ID`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
@@ -207,7 +207,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 				Attributes: map[string]schema.Attribute{
 
 					"area": schema.StringAttribute{
-						MarkdownDescription: `Area id`,
+						MarkdownDescription: `Area ID`,
 						Computed:            true,
 					},
 					"cost": schema.Int64Attribute{
@@ -233,15 +233,15 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Schema(_ context.Context
 				Required:            true,
 			},
 			"uplink_v4": schema.BoolAttribute{
-				MarkdownDescription: `Whether this is the switch's IPv4 uplink`,
+				MarkdownDescription: `When true, this interface is used as static IPv4 uplink`,
 				Computed:            true,
 			},
 			"uplink_v6": schema.BoolAttribute{
-				MarkdownDescription: `Whether this is the switch's IPv6 uplink`,
+				MarkdownDescription: `When true, this interface is used as static IPv6 uplink`,
 				Computed:            true,
 			},
 			"vlan_id": schema.Int64Attribute{
-				MarkdownDescription: `VLAN id`,
+				MarkdownDescription: `VLAN ID`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
@@ -272,13 +272,15 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Create(ctx context.Conte
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	vvSwitchStackID := data.SwitchStackID.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
-	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchStackRoutingInterfaces(vvNetworkID, vvSwitchStackID)
-	//Have Create
+
+	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchStackRoutingInterfaces(vvNetworkID, vvSwitchStackID, nil)
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -290,6 +292,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Create(ctx context.Conte
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -304,6 +307,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Create(ctx context.Conte
 				return
 			}
 			r.client.Switch.UpdateNetworkSwitchStackRoutingInterface(vvNetworkID, vvSwitchStackID, vvInterfaceID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Switch.GetNetworkSwitchStackRoutingInterface(vvNetworkID, vvSwitchStackID, vvInterfaceID)
 			if responseVerifyItem2 != nil {
 				data = ResponseSwitchGetNetworkSwitchStackRoutingInterfaceItemToBodyRs(data, responseVerifyItem2, false)
@@ -313,11 +317,11 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Create(ctx context.Conte
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Switch.CreateNetworkSwitchStackRoutingInterface(vvNetworkID, vvSwitchStackID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchStackRoutingInterface",
 				err.Error(),
@@ -330,9 +334,8 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Create(ctx context.Conte
 		)
 		return
 	}
-	//Items
-	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchStackRoutingInterfaces(vvNetworkID, vvSwitchStackID)
-	// Has item and has items
+
+	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchStackRoutingInterfaces(vvNetworkID, vvSwitchStackID, nil)
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -348,6 +351,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Create(ctx context.Conte
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -356,7 +360,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Create(ctx context.Conte
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter InterfaceID",
-				"Error",
+				"Fail Parsing InterfaceID",
 			)
 			return
 		}
@@ -386,6 +390,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Create(ctx context.Conte
 		)
 		return
 	}
+
 }
 
 func (r *NetworksSwitchStacksRoutingInterfacesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -578,6 +583,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesRs) toSdkApiRequestCreate(ctx cont
 		interfaceIP = &emptyString
 	}
 	var requestSwitchCreateNetworkSwitchStackRoutingInterfaceIPv6 *merakigosdk.RequestSwitchCreateNetworkSwitchStackRoutingInterfaceIPv6
+
 	if r.IPv6 != nil {
 		address := r.IPv6.Address.ValueString()
 		assignmentMode := r.IPv6.AssignmentMode.ValueString()
@@ -589,6 +595,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesRs) toSdkApiRequestCreate(ctx cont
 			Gateway:        gateway,
 			Prefix:         prefix,
 		}
+		//[debug] Is Array: False
 	}
 	multicastRouting := new(string)
 	if !r.MulticastRouting.IsUnknown() && !r.MulticastRouting.IsNull() {
@@ -603,6 +610,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesRs) toSdkApiRequestCreate(ctx cont
 		name = &emptyString
 	}
 	var requestSwitchCreateNetworkSwitchStackRoutingInterfaceOspfSettings *merakigosdk.RequestSwitchCreateNetworkSwitchStackRoutingInterfaceOspfSettings
+
 	if r.OspfSettings != nil {
 		area := r.OspfSettings.Area.ValueString()
 		cost := func() *int64 {
@@ -622,6 +630,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesRs) toSdkApiRequestCreate(ctx cont
 			Cost:             int64ToIntPointer(cost),
 			IsPassiveEnabled: isPassiveEnabled,
 		}
+		//[debug] Is Array: False
 	}
 	subnet := new(string)
 	if !r.Subnet.IsUnknown() && !r.Subnet.IsNull() {
@@ -665,6 +674,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesRs) toSdkApiRequestUpdate(ctx cont
 		interfaceIP = &emptyString
 	}
 	var requestSwitchUpdateNetworkSwitchStackRoutingInterfaceIPv6 *merakigosdk.RequestSwitchUpdateNetworkSwitchStackRoutingInterfaceIPv6
+
 	if r.IPv6 != nil {
 		address := r.IPv6.Address.ValueString()
 		assignmentMode := r.IPv6.AssignmentMode.ValueString()
@@ -676,6 +686,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesRs) toSdkApiRequestUpdate(ctx cont
 			// Gateway:        gateway,
 			Prefix: prefix,
 		}
+		//[debug] Is Array: False
 	}
 	multicastRouting := new(string)
 	if !r.MulticastRouting.IsUnknown() && !r.MulticastRouting.IsNull() {
@@ -690,6 +701,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesRs) toSdkApiRequestUpdate(ctx cont
 		name = &emptyString
 	}
 	var requestSwitchUpdateNetworkSwitchStackRoutingInterfaceOspfSettings *merakigosdk.RequestSwitchUpdateNetworkSwitchStackRoutingInterfaceOspfSettings
+
 	if r.OspfSettings != nil {
 		area := r.OspfSettings.Area.ValueString()
 		cost := func() *int64 {
@@ -709,6 +721,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesRs) toSdkApiRequestUpdate(ctx cont
 			Cost:             int64ToIntPointer(cost),
 			IsPassiveEnabled: isPassiveEnabled,
 		}
+		//[debug] Is Array: False
 	}
 	subnet := new(string)
 	if !r.Subnet.IsUnknown() && !r.Subnet.IsNull() {

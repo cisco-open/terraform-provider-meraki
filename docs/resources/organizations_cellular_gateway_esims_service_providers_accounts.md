@@ -15,7 +15,7 @@ description: |-
 ```terraform
 resource "meraki_organizations_cellular_gateway_esims_service_providers_accounts" "example" {
 
-  account_id      = "0987654321"
+  account_id      = 987654321
   api_key         = "foobarfoobarfoobarfoobarfoobarfoobar"
   organization_id = "string"
   service_provider = {
@@ -41,7 +41,7 @@ output "meraki_organizations_cellular_gateway_esims_service_providers_accounts_e
 ### Optional
 
 - `account_id` (String) Service provider account ID
-- `api_key` (String) Service provider account API key
+- `api_key` (String, Sensitive) Service provider account API key
 - `service_provider` (Attributes) Service Provider information (see [below for nested schema](#nestedatt--service_provider))
 - `title` (String) Service provider account name
 - `username` (String) Service provider account username

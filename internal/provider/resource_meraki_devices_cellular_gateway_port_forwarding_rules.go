@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -72,7 +72,7 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Schema(_ context.Con
 					Attributes: map[string]schema.Attribute{
 
 						"access": schema.StringAttribute{
-							MarkdownDescription: `*any* or *restricted*. Specify the right to make inbound connections on the specified ports or port ranges. If *restricted*, a list of allowed IPs is mandatory.`,
+							MarkdownDescription: `**any** or **restricted**. Specify the right to make inbound connections on the specified ports or port ranges. If **restricted**, a list of allowed IPs is mandatory.`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
@@ -158,30 +158,37 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Create(ctx context.C
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvSerial := data.Serial.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.CellularGateway.GetDeviceCellularGatewayPortForwardingRules(vvSerial)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesCellularGatewayPortForwardingRules only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesCellularGatewayPortForwardingRules only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	_, restyResp2, err := r.client.CellularGateway.UpdateDeviceCellularGatewayPortForwardingRules(vvSerial, dataRequest)
+	//Has Item and not has items
 
-	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+	if vvSerial != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.CellularGateway.GetDeviceCellularGatewayPortForwardingRules(vvSerial)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesCellularGatewayPortForwardingRules  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesCellularGatewayPortForwardingRules only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+	}
+
+	// UPDATE NO CREATE
+	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	response, restyResp2, err := r.client.CellularGateway.UpdateDeviceCellularGatewayPortForwardingRules(vvSerial, dataRequest)
+	//Update
+	if err != nil || restyResp2 == nil || response == nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCellularGatewayPortForwardingRules",
 				err.Error(),
@@ -194,9 +201,10 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Create(ctx context.C
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.CellularGateway.GetDeviceCellularGatewayPortForwardingRules(vvSerial)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -211,11 +219,12 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Create(ctx context.C
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRulesItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *DevicesCellularGatewayPortForwardingRulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -269,7 +278,6 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Read(ctx context.Con
 	//update path params assigned
 	resp.Diagnostics.Append(diags...)
 }
-
 func (r *DevicesCellularGatewayPortForwardingRulesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("serial"), req.ID)...)
 }
@@ -332,11 +340,12 @@ type ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRulesRulesRs s
 // FromBody
 func (r *DevicesCellularGatewayPortForwardingRulesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestCellularGatewayUpdateDeviceCellularGatewayPortForwardingRules {
 	var requestCellularGatewayUpdateDeviceCellularGatewayPortForwardingRulesRules []merakigosdk.RequestCellularGatewayUpdateDeviceCellularGatewayPortForwardingRulesRules
+
 	if r.Rules != nil {
 		for _, rItem1 := range *r.Rules {
 			access := rItem1.Access.ValueString()
+
 			var allowedIPs []string = nil
-			//Hoola aqui
 			rItem1.AllowedIPs.ElementsAs(ctx, &allowedIPs, false)
 			lanIP := rItem1.LanIP.ValueString()
 			localPort := rItem1.LocalPort.ValueString()
@@ -352,6 +361,7 @@ func (r *DevicesCellularGatewayPortForwardingRulesRs) toSdkApiRequestUpdate(ctx 
 				Protocol:   protocol,
 				PublicPort: publicPort,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestCellularGatewayUpdateDeviceCellularGatewayPortForwardingRules{

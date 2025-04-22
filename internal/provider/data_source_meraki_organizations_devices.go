@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -170,7 +170,7 @@ func (d *OrganizationsDevicesDataSource) Schema(_ context.Context, _ datasource.
 							MarkdownDescription: `Firmware version of the device`,
 							Computed:            true,
 						},
-						"imei": schema.Float64Attribute{
+						"imei": schema.StringAttribute{
 							MarkdownDescription: `IMEI of the device, if applicable`,
 							Computed:            true,
 						},
@@ -309,7 +309,7 @@ type ResponseItemOrganizationsGetOrganizationDevices struct {
 	Address     types.String                                              `tfsdk:"address"`
 	Details     *[]ResponseItemOrganizationsGetOrganizationDevicesDetails `tfsdk:"details"`
 	Firmware    types.String                                              `tfsdk:"firmware"`
-	Imei        types.Float64                                             `tfsdk:"imei"`
+	Imei        types.String                                              `tfsdk:"imei"`
 	LanIP       types.String                                              `tfsdk:"lan_ip"`
 	Lat         types.Float64                                             `tfsdk:"lat"`
 	Lng         types.Float64                                             `tfsdk:"lng"`
@@ -348,13 +348,8 @@ func ResponseOrganizationsGetOrganizationDevicesItemsToBody(state OrganizationsD
 				return nil
 			}(),
 			Firmware: types.StringValue(item.Firmware),
-			Imei: func() types.Float64 {
-				if item.Imei != nil {
-					return types.Float64Value(float64(*item.Imei))
-				}
-				return types.Float64{}
-			}(),
-			LanIP: types.StringValue(item.LanIP),
+			Imei:     types.StringValue(item.Imei),
+			LanIP:    types.StringValue(item.LanIP),
 			Lat: func() types.Float64 {
 				if item.Lat != nil {
 					return types.Float64Value(float64(*item.Lat))

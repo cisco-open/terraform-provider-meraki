@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -152,7 +152,7 @@ func (r *OrganizationsLoginSecurityResource) Schema(_ context.Context, _ resourc
 				},
 			},
 			"enforce_strong_passwords": schema.BoolAttribute{
-				MarkdownDescription: `Boolean indicating whether users will be forced to choose strong passwords for their accounts. Strong passwords are at least 8 characters that contain 3 of the following: number, uppercase letter, lowercase letter, and symbol`,
+				MarkdownDescription: `Deprecated. This will always be 'true'.`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
@@ -184,6 +184,14 @@ func (r *OrganizationsLoginSecurityResource) Schema(_ context.Context, _ resourc
 				},
 
 				ElementType: types.StringType,
+			},
+			"minimum_password_length": schema.Int64Attribute{
+				MarkdownDescription: `The minimum number of characters required in admins' passwords.`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
+				},
 			},
 			"num_different_passwords": schema.Int64Attribute{
 				MarkdownDescription: `Number of recent passwords that new password must be distinct from.`,
@@ -227,30 +235,37 @@ func (r *OrganizationsLoginSecurityResource) Create(ctx context.Context, req res
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationLoginSecurity(vvOrganizationID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource OrganizationsLoginSecurity only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvOrganizationID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationLoginSecurity(vvOrganizationID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource OrganizationsLoginSecurity  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource OrganizationsLoginSecurity only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource OrganizationsLoginSecurity only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationLoginSecurity(vvOrganizationID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationLoginSecurity",
 				err.Error(),
@@ -263,9 +278,10 @@ func (r *OrganizationsLoginSecurityResource) Create(ctx context.Context, req res
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationLoginSecurity(vvOrganizationID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -280,11 +296,12 @@ func (r *OrganizationsLoginSecurityResource) Create(ctx context.Context, req res
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseOrganizationsGetOrganizationLoginSecurityItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *OrganizationsLoginSecurityResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -395,6 +412,7 @@ type OrganizationsLoginSecurityRs struct {
 	EnforceTwoFactorAuth      types.Bool                                                            `tfsdk:"enforce_two_factor_auth"`
 	IDleTimeoutMinutes        types.Int64                                                           `tfsdk:"idle_timeout_minutes"`
 	LoginIPRanges             types.Set                                                             `tfsdk:"login_ip_ranges"`
+	MinimumPasswordLength     types.Int64                                                           `tfsdk:"minimum_password_length"`
 	NumDifferentPasswords     types.Int64                                                           `tfsdk:"num_different_passwords"`
 	PasswordExpirationDays    types.Int64                                                           `tfsdk:"password_expiration_days"`
 }
@@ -417,8 +435,10 @@ func (r *OrganizationsLoginSecurityRs) toSdkApiRequestUpdate(ctx context.Context
 		accountLockoutAttempts = nil
 	}
 	var requestOrganizationsUpdateOrganizationLoginSecurityAPIAuthentication *merakigosdk.RequestOrganizationsUpdateOrganizationLoginSecurityAPIAuthentication
+
 	if r.APIAuthentication != nil {
 		var requestOrganizationsUpdateOrganizationLoginSecurityAPIAuthenticationIPRestrictionsForKeys *merakigosdk.RequestOrganizationsUpdateOrganizationLoginSecurityAPIAuthenticationIPRestrictionsForKeys
+
 		if r.APIAuthentication.IPRestrictionsForKeys != nil {
 			enabled := func() *bool {
 				if !r.APIAuthentication.IPRestrictionsForKeys.Enabled.IsUnknown() && !r.APIAuthentication.IPRestrictionsForKeys.Enabled.IsNull() {
@@ -426,17 +446,19 @@ func (r *OrganizationsLoginSecurityRs) toSdkApiRequestUpdate(ctx context.Context
 				}
 				return nil
 			}()
+
 			var ranges []string = nil
-			//Hoola aqui
 			r.APIAuthentication.IPRestrictionsForKeys.Ranges.ElementsAs(ctx, &ranges, false)
 			requestOrganizationsUpdateOrganizationLoginSecurityAPIAuthenticationIPRestrictionsForKeys = &merakigosdk.RequestOrganizationsUpdateOrganizationLoginSecurityAPIAuthenticationIPRestrictionsForKeys{
 				Enabled: enabled,
 				Ranges:  ranges,
 			}
+			//[debug] Is Array: False
 		}
 		requestOrganizationsUpdateOrganizationLoginSecurityAPIAuthentication = &merakigosdk.RequestOrganizationsUpdateOrganizationLoginSecurityAPIAuthentication{
 			IPRestrictionsForKeys: requestOrganizationsUpdateOrganizationLoginSecurityAPIAuthenticationIPRestrictionsForKeys,
 		}
+		//[debug] Is Array: False
 	}
 	enforceAccountLockout := new(bool)
 	if !r.EnforceAccountLockout.IsUnknown() && !r.EnforceAccountLockout.IsNull() {
@@ -488,6 +510,12 @@ func (r *OrganizationsLoginSecurityRs) toSdkApiRequestUpdate(ctx context.Context
 	}
 	var loginIPRanges []string = nil
 	r.LoginIPRanges.ElementsAs(ctx, &loginIPRanges, false)
+	minimumPasswordLength := new(int64)
+	if !r.MinimumPasswordLength.IsUnknown() && !r.MinimumPasswordLength.IsNull() {
+		*minimumPasswordLength = r.MinimumPasswordLength.ValueInt64()
+	} else {
+		minimumPasswordLength = nil
+	}
 	numDifferentPasswords := new(int64)
 	if !r.NumDifferentPasswords.IsUnknown() && !r.NumDifferentPasswords.IsNull() {
 		*numDifferentPasswords = r.NumDifferentPasswords.ValueInt64()
@@ -512,6 +540,7 @@ func (r *OrganizationsLoginSecurityRs) toSdkApiRequestUpdate(ctx context.Context
 		EnforceTwoFactorAuth:      enforceTwoFactorAuth,
 		IDleTimeoutMinutes:        int64ToIntPointer(iDleTimeoutMinutes),
 		LoginIPRanges:             loginIPRanges,
+		MinimumPasswordLength:     int64ToIntPointer(minimumPasswordLength),
 		NumDifferentPasswords:     int64ToIntPointer(numDifferentPasswords),
 		PasswordExpirationDays:    int64ToIntPointer(passwordExpirationDays),
 	}
@@ -597,6 +626,12 @@ func ResponseOrganizationsGetOrganizationLoginSecurityItemToBodyRs(state Organiz
 			return types.Int64{}
 		}(),
 		LoginIPRanges: StringSliceToSet(response.LoginIPRanges),
+		MinimumPasswordLength: func() types.Int64 {
+			if response.MinimumPasswordLength != nil {
+				return types.Int64Value(int64(*response.MinimumPasswordLength))
+			}
+			return types.Int64{}
+		}(),
 		NumDifferentPasswords: func() types.Int64 {
 			if response.NumDifferentPasswords != nil {
 				return types.Int64Value(int64(*response.NumDifferentPasswords))

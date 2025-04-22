@@ -223,8 +223,15 @@ resource "meraki_networks_wireless_ssids" "example" {
   radius_load_balancing_policy        = "Round robin"
   radius_override                     = false
   radius_proxy_enabled                = false
-  radius_server_attempts_limit        = 5
-  radius_server_timeout               = 5
+  radius_radsec = {
+
+    tls_tunnel = {
+
+      timeout = 600
+    }
+  }
+  radius_server_attempts_limit = 5
+  radius_server_timeout        = 5
   radius_servers = [{
 
     ca_certificate              = <<EOT

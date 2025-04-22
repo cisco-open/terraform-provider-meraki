@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -129,6 +129,21 @@ func (d *OrganizationsAPIRequestsDataSource) Schema(_ context.Context, _ datasou
 						"admin_id": schema.StringAttribute{
 							MarkdownDescription: `Database ID for the admin user who made the API request.`,
 							Computed:            true,
+						},
+						"client": schema.SingleNestedAttribute{
+							MarkdownDescription: `Client information`,
+							Computed:            true,
+							Attributes: map[string]schema.Attribute{
+
+								"id": schema.StringAttribute{
+									MarkdownDescription: `ID for the client which made the request, if applicable.`,
+									Computed:            true,
+								},
+								"type": schema.StringAttribute{
+									MarkdownDescription: `Type of client which made the request, if applicable. Available options are: oauth, api_key`,
+									Computed:            true,
+								},
+							},
 						},
 						"host": schema.StringAttribute{
 							MarkdownDescription: `The host which the API request was directed at.`,
@@ -251,17 +266,23 @@ type OrganizationsAPIRequests struct {
 }
 
 type ResponseItemOrganizationsGetOrganizationApiRequests struct {
-	AdminID      types.String `tfsdk:"admin_id"`
-	Host         types.String `tfsdk:"host"`
-	Method       types.String `tfsdk:"method"`
-	OperationID  types.String `tfsdk:"operation_id"`
-	Path         types.String `tfsdk:"path"`
-	QueryString  types.String `tfsdk:"query_string"`
-	ResponseCode types.Int64  `tfsdk:"response_code"`
-	SourceIP     types.String `tfsdk:"source_ip"`
-	Ts           types.String `tfsdk:"ts"`
-	UserAgent    types.String `tfsdk:"user_agent"`
-	Version      types.Int64  `tfsdk:"version"`
+	AdminID      types.String                                               `tfsdk:"admin_id"`
+	Client       *ResponseItemOrganizationsGetOrganizationApiRequestsClient `tfsdk:"client"`
+	Host         types.String                                               `tfsdk:"host"`
+	Method       types.String                                               `tfsdk:"method"`
+	OperationID  types.String                                               `tfsdk:"operation_id"`
+	Path         types.String                                               `tfsdk:"path"`
+	QueryString  types.String                                               `tfsdk:"query_string"`
+	ResponseCode types.Int64                                                `tfsdk:"response_code"`
+	SourceIP     types.String                                               `tfsdk:"source_ip"`
+	Ts           types.String                                               `tfsdk:"ts"`
+	UserAgent    types.String                                               `tfsdk:"user_agent"`
+	Version      types.Int64                                                `tfsdk:"version"`
+}
+
+type ResponseItemOrganizationsGetOrganizationApiRequestsClient struct {
+	ID   types.String `tfsdk:"id"`
+	Type types.String `tfsdk:"type"`
 }
 
 // ToBody
@@ -269,7 +290,16 @@ func ResponseOrganizationsGetOrganizationAPIRequestsItemsToBody(state Organizati
 	var items []ResponseItemOrganizationsGetOrganizationApiRequests
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationApiRequests{
-			AdminID:     types.StringValue(item.AdminID),
+			AdminID: types.StringValue(item.AdminID),
+			Client: func() *ResponseItemOrganizationsGetOrganizationApiRequestsClient {
+				if item.Client != nil {
+					return &ResponseItemOrganizationsGetOrganizationApiRequestsClient{
+						ID:   types.StringValue(item.Client.ID),
+						Type: types.StringValue(item.Client.Type),
+					}
+				}
+				return nil
+			}(),
 			Host:        types.StringValue(item.Host),
 			Method:      types.StringValue(item.Method),
 			OperationID: types.StringValue(item.OperationID),

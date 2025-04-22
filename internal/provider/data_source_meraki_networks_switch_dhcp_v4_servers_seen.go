@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -563,7 +563,7 @@ type ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenLastPacketFields struct 
 	Giaddr      types.String                                                                  `tfsdk:"giaddr"`
 	Hlen        types.Int64                                                                   `tfsdk:"hlen"`
 	Hops        types.Int64                                                                   `tfsdk:"hops"`
-	Htype       types.Int64                                                                   `tfsdk:"htype"`
+	HtypeR      types.Int64                                                                   `tfsdk:"htype"`
 	MagicCookie types.String                                                                  `tfsdk:"magic_cookie"`
 	Op          types.Int64                                                                   `tfsdk:"op"`
 	Options     *[]ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenLastPacketFieldsOptions `tfsdk:"options"`
@@ -730,9 +730,9 @@ func ResponseSwitchGetNetworkSwitchDhcpV4ServersSeenItemsToBody(state NetworksSw
 										}
 										return types.Int64{}
 									}(),
-									Htype: func() types.Int64 {
-										if item.LastPacket.Fields.Htype != nil {
-											return types.Int64Value(int64(*item.LastPacket.Fields.Htype))
+									HtypeR: func() types.Int64 {
+										if item.LastPacket.Fields.HtypeR != nil {
+											return types.Int64Value(int64(*item.LastPacket.Fields.HtypeR))
 										}
 										return types.Int64{}
 									}(),

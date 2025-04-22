@@ -51,3 +51,13 @@ Read-Only:
 - `policy` (String) 'Deny' traffic specified by this rule
 - `type` (String) Type of the L7 firewall rule. One of: 'application', 'applicationCategory', 'host', 'port', 'ipRange'
 - `value` (String) The value of what needs to get blocked. Format of the value varies depending on type of the firewall rule selected.
+- `value_list` (Set of String)
+- `value_obj` (Attributes) (see [below for nested schema](#nestedatt--item--rules--value_obj))
+
+<a id="nestedatt--item--rules--value_obj"></a>
+### Nested Schema for `item.rules.value_obj`
+
+Read-Only:
+
+- `id` (String)
+- `name` (String)

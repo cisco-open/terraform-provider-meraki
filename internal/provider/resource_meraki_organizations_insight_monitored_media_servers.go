@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -126,12 +126,14 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Create(ctx context.C
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Insight.GetOrganizationInsightMonitoredMediaServers(vvOrganizationID)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -143,6 +145,7 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Create(ctx context.C
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -157,6 +160,7 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Create(ctx context.C
 				return
 			}
 			r.client.Insight.UpdateOrganizationInsightMonitoredMediaServer(vvOrganizationID, vvMonitoredMediaServerID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Insight.GetOrganizationInsightMonitoredMediaServer(vvOrganizationID, vvMonitoredMediaServerID)
 			if responseVerifyItem2 != nil {
 				data = ResponseInsightGetOrganizationInsightMonitoredMediaServerItemToBodyRs(data, responseVerifyItem2, false)
@@ -166,11 +170,11 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Create(ctx context.C
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Insight.CreateOrganizationInsightMonitoredMediaServer(vvOrganizationID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationInsightMonitoredMediaServer",
 				err.Error(),
@@ -183,9 +187,8 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Create(ctx context.C
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Insight.GetOrganizationInsightMonitoredMediaServers(vvOrganizationID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -201,6 +204,7 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Create(ctx context.C
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -209,7 +213,7 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Create(ctx context.C
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter MonitoredMediaServerID",
-				"Error",
+				"Fail Parsing MonitoredMediaServerID",
 			)
 			return
 		}
@@ -239,6 +243,7 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Create(ctx context.C
 		)
 		return
 	}
+
 }
 
 func (r *OrganizationsInsightMonitoredMediaServersResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {

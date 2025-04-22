@@ -10,6 +10,8 @@ description: |-
 
 
 
+
+
 ~>Warning: This resource does not represent a real-world entity in Meraki Dashboard, therefore changing or deleting this resource on its own has no immediate effect. Instead, it is a task part of a Meraki Dashboard workflow. It is executed in Meraki without any additional verification. It does not check if it was executed before or if a similar configuration or action 
 already existed previously.
 
@@ -62,7 +64,7 @@ Read-Only:
 - `name` (String) Network name
 - `notes` (String) Notes for the network
 - `organization_id` (String) Organization ID
-- `product_types` (Set of String) List of the product types that the network supports
-- `tags` (Set of String) Network tags
+- `product_types` (List of String) List of the product types that the network supports
+- `tags` (List of String) Network tags
 - `time_zone` (String) Timezone of the network
 - `url` (String) URL to the network Dashboard UI

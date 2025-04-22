@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -100,7 +100,7 @@ func (r *NetworksFloorPlansAutoLocateJobsBatchResource) Schema(_ context.Context
 												Computed:            true,
 											},
 											"type": schema.StringAttribute{
-												MarkdownDescription: `The type of error that occurred. Possible values: 'failure', 'no neighbors', 'missing anchors', 'wrong anchors', 'calculation failure', 'scheduling failure'`,
+												MarkdownDescription: `The type of error that occurred. Possible values: 'failure', 'no neighbors', 'missing anchors', 'wrong anchors', 'missing ranging data', 'calculation failure', 'scheduling failure'`,
 												Computed:            true,
 											},
 										},
@@ -193,7 +193,7 @@ func (r *NetworksFloorPlansAutoLocateJobsBatchResource) Schema(_ context.Context
 										stringplanmodifier.RequiresReplace(),
 									},
 								},
-								"refresh": schema.SetAttribute{
+								"refresh": schema.ListAttribute{
 									MarkdownDescription: `The types of location data that should be refreshed for this job. The list must either contain both 'gnss' and 'ranging' or be empty, as we currently only support refreshing both 'gnss' and 'ranging', or neither.`,
 									Optional:            true,
 									Computed:            true,
@@ -237,7 +237,6 @@ func (r *NetworksFloorPlansAutoLocateJobsBatchResource) Create(ctx context.Conte
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Networks.BatchNetworkFloorPlansAutoLocateJobs(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -254,7 +253,6 @@ func (r *NetworksFloorPlansAutoLocateJobsBatchResource) Create(ctx context.Conte
 	}
 	//Item
 	data = ResponseNetworksBatchNetworkFloorPlansAutoLocateJobsItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -336,11 +334,12 @@ type RequestNetworksBatchNetworkFloorPlansAutoLocateJobsJobsRs struct {
 func (r *NetworksFloorPlansAutoLocateJobsBatch) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestNetworksBatchNetworkFloorPlansAutoLocateJobs {
 	re := *r.Parameters
 	var requestNetworksBatchNetworkFloorPlansAutoLocateJobsJobs []merakigosdk.RequestNetworksBatchNetworkFloorPlansAutoLocateJobsJobs
+
 	if re.Jobs != nil {
 		for _, rItem1 := range *re.Jobs {
 			floorPlanID := rItem1.FloorPlanID.ValueString()
+
 			var refresh []string = nil
-			//Hoola aqui
 			rItem1.Refresh.ElementsAs(ctx, &refresh, false)
 			scheduledAt := rItem1.ScheduledAt.ValueString()
 			requestNetworksBatchNetworkFloorPlansAutoLocateJobsJobs = append(requestNetworksBatchNetworkFloorPlansAutoLocateJobsJobs, merakigosdk.RequestNetworksBatchNetworkFloorPlansAutoLocateJobsJobs{
@@ -348,15 +347,11 @@ func (r *NetworksFloorPlansAutoLocateJobsBatch) toSdkApiRequestCreate(ctx contex
 				Refresh:     refresh,
 				ScheduledAt: scheduledAt,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestNetworksBatchNetworkFloorPlansAutoLocateJobs{
-		Jobs: func() *[]merakigosdk.RequestNetworksBatchNetworkFloorPlansAutoLocateJobsJobs {
-			if len(requestNetworksBatchNetworkFloorPlansAutoLocateJobsJobs) > 0 {
-				return &requestNetworksBatchNetworkFloorPlansAutoLocateJobsJobs
-			}
-			return nil
-		}(),
+		Jobs: &requestNetworksBatchNetworkFloorPlansAutoLocateJobsJobs,
 	}
 	return &out
 }

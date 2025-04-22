@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -76,7 +76,7 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 				},
 			},
 			"interface_id": schema.StringAttribute{
-				MarkdownDescription: `The id`,
+				MarkdownDescription: `The ID`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -168,7 +168,7 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 				Attributes: map[string]schema.Attribute{
 
 					"area": schema.StringAttribute{
-						MarkdownDescription: `Area id`,
+						MarkdownDescription: `Area ID`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
@@ -203,7 +203,7 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 				Attributes: map[string]schema.Attribute{
 
 					"area": schema.StringAttribute{
-						MarkdownDescription: `Area id`,
+						MarkdownDescription: `Area ID`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
@@ -241,15 +241,15 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 				},
 			},
 			"uplink_v4": schema.BoolAttribute{
-				MarkdownDescription: `Whether this is the switch's IPv4 uplink`,
+				MarkdownDescription: `When true, this interface is used as static IPv4 uplink`,
 				Computed:            true,
 			},
 			"uplink_v6": schema.BoolAttribute{
-				MarkdownDescription: `Whether this is the switch's IPv6 uplink`,
+				MarkdownDescription: `When true, this interface is used as static IPv6 uplink`,
 				Computed:            true,
 			},
 			"vlan_id": schema.Int64Attribute{
-				MarkdownDescription: `VLAN id`,
+				MarkdownDescription: `VLAN ID`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
@@ -280,12 +280,14 @@ func (r *DevicesSwitchRoutingInterfacesResource) Create(ctx context.Context, req
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvSerial := data.Serial.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
-	responseVerifyItem, restyResp1, err := r.client.Switch.GetDeviceSwitchRoutingInterfaces(vvSerial)
-	//Have Create
+
+	responseVerifyItem, restyResp1, err := r.client.Switch.GetDeviceSwitchRoutingInterfaces(vvSerial, nil)
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -297,6 +299,7 @@ func (r *DevicesSwitchRoutingInterfacesResource) Create(ctx context.Context, req
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -311,6 +314,7 @@ func (r *DevicesSwitchRoutingInterfacesResource) Create(ctx context.Context, req
 				return
 			}
 			r.client.Switch.UpdateDeviceSwitchRoutingInterface(vvSerial, vvInterfaceID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Switch.GetDeviceSwitchRoutingInterface(vvSerial, vvInterfaceID)
 			if responseVerifyItem2 != nil {
 				data = ResponseSwitchGetDeviceSwitchRoutingInterfaceItemToBodyRs(data, responseVerifyItem2, false)
@@ -320,11 +324,11 @@ func (r *DevicesSwitchRoutingInterfacesResource) Create(ctx context.Context, req
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Switch.CreateDeviceSwitchRoutingInterface(vvSerial, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateDeviceSwitchRoutingInterface",
 				err.Error(),
@@ -337,9 +341,8 @@ func (r *DevicesSwitchRoutingInterfacesResource) Create(ctx context.Context, req
 		)
 		return
 	}
-	//Items
-	responseGet, restyResp1, err := r.client.Switch.GetDeviceSwitchRoutingInterfaces(vvSerial)
-	// Has item and has items
+
+	responseGet, restyResp1, err := r.client.Switch.GetDeviceSwitchRoutingInterfaces(vvSerial, nil)
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -355,6 +358,7 @@ func (r *DevicesSwitchRoutingInterfacesResource) Create(ctx context.Context, req
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -363,7 +367,7 @@ func (r *DevicesSwitchRoutingInterfacesResource) Create(ctx context.Context, req
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter InterfaceID",
-				"Error",
+				"Fail Parsing InterfaceID",
 			)
 			return
 		}
@@ -393,6 +397,7 @@ func (r *DevicesSwitchRoutingInterfacesResource) Create(ctx context.Context, req
 		)
 		return
 	}
+
 }
 
 func (r *DevicesSwitchRoutingInterfacesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -578,6 +583,7 @@ func (r *DevicesSwitchRoutingInterfacesRs) toSdkApiRequestCreate(ctx context.Con
 		interfaceIP = &emptyString
 	}
 	var requestSwitchCreateDeviceSwitchRoutingInterfaceIPv6 *merakigosdk.RequestSwitchCreateDeviceSwitchRoutingInterfaceIPv6
+
 	if r.IPv6 != nil {
 		address := r.IPv6.Address.ValueString()
 		assignmentMode := r.IPv6.AssignmentMode.ValueString()
@@ -589,6 +595,7 @@ func (r *DevicesSwitchRoutingInterfacesRs) toSdkApiRequestCreate(ctx context.Con
 			Gateway:        gateway,
 			Prefix:         prefix,
 		}
+		//[debug] Is Array: False
 	}
 	multicastRouting := new(string)
 	if !r.MulticastRouting.IsUnknown() && !r.MulticastRouting.IsNull() {
@@ -603,6 +610,7 @@ func (r *DevicesSwitchRoutingInterfacesRs) toSdkApiRequestCreate(ctx context.Con
 		name = &emptyString
 	}
 	var requestSwitchCreateDeviceSwitchRoutingInterfaceOspfSettings *merakigosdk.RequestSwitchCreateDeviceSwitchRoutingInterfaceOspfSettings
+
 	if r.OspfSettings != nil {
 		area := r.OspfSettings.Area.ValueString()
 		cost := func() *int64 {
@@ -622,6 +630,7 @@ func (r *DevicesSwitchRoutingInterfacesRs) toSdkApiRequestCreate(ctx context.Con
 			Cost:             int64ToIntPointer(cost),
 			IsPassiveEnabled: isPassiveEnabled,
 		}
+		//[debug] Is Array: False
 	}
 	subnet := new(string)
 	if !r.Subnet.IsUnknown() && !r.Subnet.IsNull() {
@@ -662,6 +671,7 @@ func (r *DevicesSwitchRoutingInterfacesRs) toSdkApiRequestUpdate(ctx context.Con
 		interfaceIP = &emptyString
 	}
 	var requestSwitchUpdateDeviceSwitchRoutingInterfaceIPv6 *merakigosdk.RequestSwitchUpdateDeviceSwitchRoutingInterfaceIPv6
+
 	if r.IPv6 != nil {
 		address := r.IPv6.Address.ValueString()
 		assignmentMode := r.IPv6.AssignmentMode.ValueString()
@@ -673,6 +683,7 @@ func (r *DevicesSwitchRoutingInterfacesRs) toSdkApiRequestUpdate(ctx context.Con
 			Gateway:        gateway,
 			Prefix:         prefix,
 		}
+		//[debug] Is Array: False
 	}
 	multicastRouting := new(string)
 	if !r.MulticastRouting.IsUnknown() && !r.MulticastRouting.IsNull() {
@@ -687,6 +698,7 @@ func (r *DevicesSwitchRoutingInterfacesRs) toSdkApiRequestUpdate(ctx context.Con
 		name = &emptyString
 	}
 	var requestSwitchUpdateDeviceSwitchRoutingInterfaceOspfSettings *merakigosdk.RequestSwitchUpdateDeviceSwitchRoutingInterfaceOspfSettings
+
 	if r.OspfSettings != nil {
 		area := r.OspfSettings.Area.ValueString()
 		cost := func() *int64 {
@@ -706,6 +718,7 @@ func (r *DevicesSwitchRoutingInterfacesRs) toSdkApiRequestUpdate(ctx context.Con
 			Cost:             int64ToIntPointer(cost),
 			IsPassiveEnabled: isPassiveEnabled,
 		}
+		//[debug] Is Array: False
 	}
 	subnet := new(string)
 	if !r.Subnet.IsUnknown() && !r.Subnet.IsNull() {
@@ -719,7 +732,6 @@ func (r *DevicesSwitchRoutingInterfacesRs) toSdkApiRequestUpdate(ctx context.Con
 	} else {
 		vLANID = nil
 	}
-
 	out := merakigosdk.RequestSwitchUpdateDeviceSwitchRoutingInterface{
 		DefaultGateway:   *defaultGateway,
 		InterfaceIP:      *interfaceIP,

@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -72,7 +72,7 @@ func (r *OrganizationsInventoryReleaseResource) Schema(_ context.Context, _ reso
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `Serials of the devices that were released`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -82,7 +82,7 @@ func (r *OrganizationsInventoryReleaseResource) Schema(_ context.Context, _ reso
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `Serials of the devices that should be released`,
 						Optional:            true,
 						Computed:            true,
@@ -115,7 +115,6 @@ func (r *OrganizationsInventoryReleaseResource) Create(ctx context.Context, req 
 	vvOrganizationID := data.OrganizationID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Organizations.ReleaseFromOrganizationInventory(vvOrganizationID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -132,7 +131,6 @@ func (r *OrganizationsInventoryReleaseResource) Create(ctx context.Context, req 
 	}
 	//Item
 	data = ResponseOrganizationsReleaseFromOrganizationInventoryItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -158,7 +156,7 @@ type OrganizationsInventoryRelease struct {
 }
 
 type ResponseOrganizationsReleaseFromOrganizationInventory struct {
-	Serials types.Set `tfsdk:"serials"`
+	Serials types.List `tfsdk:"serials"`
 }
 
 type RequestOrganizationsReleaseFromOrganizationInventoryRs struct {
@@ -179,7 +177,7 @@ func (r *OrganizationsInventoryRelease) toSdkApiRequestCreate(ctx context.Contex
 // ToBody
 func ResponseOrganizationsReleaseFromOrganizationInventoryItemToBody(state OrganizationsInventoryRelease, response *merakigosdk.ResponseOrganizationsReleaseFromOrganizationInventory) OrganizationsInventoryRelease {
 	itemState := ResponseOrganizationsReleaseFromOrganizationInventory{
-		Serials: StringSliceToSet(response.Serials),
+		Serials: StringSliceToList(response.Serials),
 	}
 	state.Item = &itemState
 	return state

@@ -22,7 +22,9 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	"log"
+
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -379,31 +381,38 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Create(ctx context.Context, req
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	vvNumber := data.Number.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDHotspot20(vvNetworkID, vvNumber)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSSIDsHotspot20 only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" && vvNumber != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDHotspot20(vvNetworkID, vvNumber)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessSsidsHotspot20  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessSsidsHotspot20 only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSSIDsHotspot20 only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDHotspot20(vvNetworkID, vvNumber, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDHotspot20",
 				err.Error(),
@@ -416,9 +425,10 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Create(ctx context.Context, req
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDHotspot20(vvNetworkID, vvNumber)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -433,11 +443,12 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Create(ctx context.Context, req
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksWirelessSSIDsHotspot20Resource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -606,6 +617,7 @@ func (r *NetworksWirelessSSIDsHotspot20Rs) toSdkApiRequestUpdate(ctx context.Con
 		enabled = nil
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDHotspot20MccMncs []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDHotspot20MccMncs
+
 	if r.MccMncs != nil {
 		for _, rItem1 := range *r.MccMncs {
 			mcc := rItem1.Mcc.ValueString()
@@ -614,24 +626,32 @@ func (r *NetworksWirelessSSIDsHotspot20Rs) toSdkApiRequestUpdate(ctx context.Con
 				Mcc: mcc,
 				Mnc: mnc,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealms []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealms
+
 	if r.NaiRealms != nil {
 		for _, rItem1 := range *r.NaiRealms {
 			format := rItem1.Format.ValueString()
+
+			log.Printf("[DEBUG] #TODO []RequestWirelessUpdateNetworkWirelessSsidHotspot20NaiRealmsMethods")
 			var requestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethods []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethods
+
 			if rItem1.Methods != nil {
-				for _, rItem2 := range *rItem1.Methods { //Methods// name: methods
+				for _, rItem2 := range *rItem1.Methods {
 					// var requestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethodsAuthenticationTypes *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethodsAuthenticationTypes
+
 					// if rItem2.AuthenticationTypes != nil {
 					// 	requestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethodsAuthenticationTypes = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethodsAuthenticationTypes{}
+					// 	//[debug] Is Array: False
 					// }
-					iD := rItem2.ID.ValueString()
+					id := rItem2.ID.ValueString()
 					requestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethods = append(requestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethods, merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethods{
 						// AuthenticationTypes: requestWirelessUpdateNetworkWirelessSSIDHotspot20NaiRealmsMethodsAuthenticationTypes,
-						ID: iD,
+						ID: id,
 					})
+					//[debug] Is Array: True
 				}
 			}
 			realm := rItem1.Realm.ValueString()
@@ -645,6 +665,7 @@ func (r *NetworksWirelessSSIDsHotspot20Rs) toSdkApiRequestUpdate(ctx context.Con
 				}(),
 				Realm: realm,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	networkAccessType := new(string)
@@ -654,15 +675,18 @@ func (r *NetworksWirelessSSIDsHotspot20Rs) toSdkApiRequestUpdate(ctx context.Con
 		networkAccessType = &emptyString
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDHotspot20Operator *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDHotspot20Operator
+
 	if r.Operator != nil {
 		name := r.Operator.Name.ValueString()
 		requestWirelessUpdateNetworkWirelessSSIDHotspot20Operator = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDHotspot20Operator{
 			Name: name,
 		}
+		//[debug] Is Array: False
 	}
 	var roamConsortOis []string = nil
 	r.RoamConsortOis.ElementsAs(ctx, &roamConsortOis, false)
 	var requestWirelessUpdateNetworkWirelessSSIDHotspot20Venue *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDHotspot20Venue
+
 	if r.Venue != nil {
 		name := r.Venue.Name.ValueString()
 		typeR := r.Venue.Type.ValueString()
@@ -670,6 +694,7 @@ func (r *NetworksWirelessSSIDsHotspot20Rs) toSdkApiRequestUpdate(ctx context.Con
 			Name: name,
 			Type: typeR,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDHotspot20{
 		Domains: domains,

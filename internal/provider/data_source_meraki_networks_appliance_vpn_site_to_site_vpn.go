@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -87,6 +87,24 @@ func (d *NetworksApplianceVpnSiteToSiteVpnDataSource) Schema(_ context.Context, 
 						MarkdownDescription: `The site-to-site VPN mode.`,
 						Computed:            true,
 					},
+					"subnet": schema.SingleNestedAttribute{
+						MarkdownDescription: `Configuration of subnet features`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"nat": schema.SingleNestedAttribute{
+								MarkdownDescription: `Configuration of NAT for subnets`,
+								Computed:            true,
+								Attributes: map[string]schema.Attribute{
+
+									"is_allowed": schema.BoolAttribute{
+										MarkdownDescription: `If enabled, VPN subnet translation can be used to translate any local subnets that are allowed to use the VPN into a new subnet with the same number of addresses.`,
+										Computed:            true,
+									},
+								},
+							},
+						},
+					},
 					"subnets": schema.SetNestedAttribute{
 						MarkdownDescription: `The list of subnets and their VPN presence.`,
 						Computed:            true,
@@ -96,6 +114,21 @@ func (d *NetworksApplianceVpnSiteToSiteVpnDataSource) Schema(_ context.Context, 
 								"local_subnet": schema.StringAttribute{
 									MarkdownDescription: `The CIDR notation subnet used within the VPN`,
 									Computed:            true,
+								},
+								"nat": schema.SingleNestedAttribute{
+									MarkdownDescription: `Configuration of NAT for the subnet`,
+									Computed:            true,
+									Attributes: map[string]schema.Attribute{
+
+										"enabled": schema.BoolAttribute{
+											MarkdownDescription: `Whether or not VPN subnet translation is enabled for the subnet`,
+											Computed:            true,
+										},
+										"remote_subnet": schema.StringAttribute{
+											MarkdownDescription: `The translated subnet to be used in the VPN`,
+											Computed:            true,
+										},
+									},
 								},
 								"use_vpn": schema.BoolAttribute{
 									MarkdownDescription: `Indicates the presence of the subnet in the VPN`,
@@ -156,6 +189,7 @@ type NetworksApplianceVpnSiteToSiteVpn struct {
 type ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpn struct {
 	Hubs    *[]ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnHubs    `tfsdk:"hubs"`
 	Mode    types.String                                                   `tfsdk:"mode"`
+	Subnet  *ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnet    `tfsdk:"subnet"`
 	Subnets *[]ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnets `tfsdk:"subnets"`
 }
 
@@ -164,9 +198,23 @@ type ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnHubs struct {
 	UseDefaultRoute types.Bool   `tfsdk:"use_default_route"`
 }
 
+type ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnet struct {
+	Nat *ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetNat `tfsdk:"nat"`
+}
+
+type ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetNat struct {
+	IsAllowed types.Bool `tfsdk:"is_allowed"`
+}
+
 type ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnets struct {
-	LocalSubnet types.String `tfsdk:"local_subnet"`
-	UseVpn      types.Bool   `tfsdk:"use_vpn"`
+	LocalSubnet types.String                                                    `tfsdk:"local_subnet"`
+	Nat         *ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetsNat `tfsdk:"nat"`
+	UseVpn      types.Bool                                                      `tfsdk:"use_vpn"`
+}
+
+type ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetsNat struct {
+	Enabled      types.Bool   `tfsdk:"enabled"`
+	RemoteSubnet types.String `tfsdk:"remote_subnet"`
 }
 
 // ToBody
@@ -191,12 +239,46 @@ func ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnItemToBody(state Networ
 			return nil
 		}(),
 		Mode: types.StringValue(response.Mode),
+		Subnet: func() *ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnet {
+			if response.Subnet != nil {
+				return &ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnet{
+					Nat: func() *ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetNat {
+						if response.Subnet.Nat != nil {
+							return &ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetNat{
+								IsAllowed: func() types.Bool {
+									if response.Subnet.Nat.IsAllowed != nil {
+										return types.BoolValue(*response.Subnet.Nat.IsAllowed)
+									}
+									return types.Bool{}
+								}(),
+							}
+						}
+						return nil
+					}(),
+				}
+			}
+			return nil
+		}(),
 		Subnets: func() *[]ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnets {
 			if response.Subnets != nil {
 				result := make([]ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnets, len(*response.Subnets))
 				for i, subnets := range *response.Subnets {
 					result[i] = ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnets{
 						LocalSubnet: types.StringValue(subnets.LocalSubnet),
+						Nat: func() *ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetsNat {
+							if subnets.Nat != nil {
+								return &ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetsNat{
+									Enabled: func() types.Bool {
+										if subnets.Nat.Enabled != nil {
+											return types.BoolValue(*subnets.Nat.Enabled)
+										}
+										return types.Bool{}
+									}(),
+									RemoteSubnet: types.StringValue(subnets.Nat.RemoteSubnet),
+								}
+							}
+							return nil
+						}(),
 						UseVpn: func() types.Bool {
 							if subnets.UseVpn != nil {
 								return types.BoolValue(*subnets.UseVpn)

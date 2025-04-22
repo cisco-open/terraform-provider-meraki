@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -228,6 +228,14 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 					},
 				},
 			},
+			"floor_number": schema.Float64Attribute{
+				MarkdownDescription: `The floor number of the floor within the building.`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.Float64{
+					float64planmodifier.UseStateForUnknown(),
+				},
+			},
 			"floor_plan_id": schema.StringAttribute{
 				MarkdownDescription: `Floor plan ID`,
 				Computed:            true,
@@ -358,12 +366,14 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkFloorPlans(vvNetworkID)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -375,6 +385,7 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -389,6 +400,7 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 				return
 			}
 			r.client.Networks.UpdateNetworkFloorPlan(vvNetworkID, vvFloorPlanID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Networks.GetNetworkFloorPlan(vvNetworkID, vvFloorPlanID)
 			if responseVerifyItem2 != nil {
 				data = ResponseNetworksGetNetworkFloorPlanItemToBodyRs(data, responseVerifyItem2, false)
@@ -398,11 +410,11 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Networks.CreateNetworkFloorPlan(vvNetworkID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkFloorPlan",
 				err.Error(),
@@ -415,9 +427,8 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Networks.GetNetworkFloorPlans(vvNetworkID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -433,6 +444,7 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -441,7 +453,7 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter FloorPlanID",
-				"Error",
+				"Fail Parsing FloorPlanID",
 			)
 			return
 		}
@@ -471,6 +483,7 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 		)
 		return
 	}
+
 }
 
 func (r *NetworksFloorPlansResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -612,6 +625,7 @@ type NetworksFloorPlansRs struct {
 	BottomRightCorner *ResponseNetworksGetNetworkFloorPlanBottomRightCornerRs `tfsdk:"bottom_right_corner"`
 	Center            *ResponseNetworksGetNetworkFloorPlanCenterRs            `tfsdk:"center"`
 	Devices           *[]ResponseNetworksGetNetworkFloorPlanDevicesRs         `tfsdk:"devices"`
+	FloorNumber       types.Float64                                           `tfsdk:"floor_number"`
 	Height            types.Float64                                           `tfsdk:"height"`
 	ImageExtension    types.String                                            `tfsdk:"image_extension"`
 	ImageMd5          types.String                                            `tfsdk:"image_md5"`
@@ -676,6 +690,7 @@ type ResponseNetworksGetNetworkFloorPlanTopRightCornerRs struct {
 func (r *NetworksFloorPlansRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestNetworksCreateNetworkFloorPlan {
 	emptyString := ""
 	var requestNetworksCreateNetworkFloorPlanBottomLeftCorner *merakigosdk.RequestNetworksCreateNetworkFloorPlanBottomLeftCorner
+
 	if r.BottomLeftCorner != nil {
 		lat := func() *float64 {
 			if !r.BottomLeftCorner.Lat.IsUnknown() && !r.BottomLeftCorner.Lat.IsNull() {
@@ -693,8 +708,10 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestCreate(ctx context.Context) *merak
 			Lat: lat,
 			Lng: lng,
 		}
+		//[debug] Is Array: False
 	}
 	var requestNetworksCreateNetworkFloorPlanBottomRightCorner *merakigosdk.RequestNetworksCreateNetworkFloorPlanBottomRightCorner
+
 	if r.BottomRightCorner != nil {
 		lat := func() *float64 {
 			if !r.BottomRightCorner.Lat.IsUnknown() && !r.BottomRightCorner.Lat.IsNull() {
@@ -712,8 +729,10 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestCreate(ctx context.Context) *merak
 			Lat: lat,
 			Lng: lng,
 		}
+		//[debug] Is Array: False
 	}
 	var requestNetworksCreateNetworkFloorPlanCenter *merakigosdk.RequestNetworksCreateNetworkFloorPlanCenter
+
 	if r.Center != nil {
 		lat := func() *float64 {
 			if !r.Center.Lat.IsUnknown() && !r.Center.Lat.IsNull() {
@@ -731,6 +750,13 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestCreate(ctx context.Context) *merak
 			Lat: lat,
 			Lng: lng,
 		}
+		//[debug] Is Array: False
+	}
+	floorNumber := new(float64)
+	if !r.FloorNumber.IsUnknown() && !r.FloorNumber.IsNull() {
+		*floorNumber = r.FloorNumber.ValueFloat64()
+	} else {
+		floorNumber = nil
 	}
 	imageContents := new(string)
 	if !r.ImageContents.IsUnknown() && !r.ImageContents.IsNull() {
@@ -745,6 +771,7 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestCreate(ctx context.Context) *merak
 		name = &emptyString
 	}
 	var requestNetworksCreateNetworkFloorPlanTopLeftCorner *merakigosdk.RequestNetworksCreateNetworkFloorPlanTopLeftCorner
+
 	if r.TopLeftCorner != nil {
 		lat := func() *float64 {
 			if !r.TopLeftCorner.Lat.IsUnknown() && !r.TopLeftCorner.Lat.IsNull() {
@@ -762,8 +789,10 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestCreate(ctx context.Context) *merak
 			Lat: lat,
 			Lng: lng,
 		}
+		//[debug] Is Array: False
 	}
 	var requestNetworksCreateNetworkFloorPlanTopRightCorner *merakigosdk.RequestNetworksCreateNetworkFloorPlanTopRightCorner
+
 	if r.TopRightCorner != nil {
 		lat := func() *float64 {
 			if !r.TopRightCorner.Lat.IsUnknown() && !r.TopRightCorner.Lat.IsNull() {
@@ -781,11 +810,13 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestCreate(ctx context.Context) *merak
 			Lat: lat,
 			Lng: lng,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestNetworksCreateNetworkFloorPlan{
 		BottomLeftCorner:  requestNetworksCreateNetworkFloorPlanBottomLeftCorner,
 		BottomRightCorner: requestNetworksCreateNetworkFloorPlanBottomRightCorner,
 		Center:            requestNetworksCreateNetworkFloorPlanCenter,
+		FloorNumber:       floorNumber,
 		ImageContents:     *imageContents,
 		Name:              *name,
 		TopLeftCorner:     requestNetworksCreateNetworkFloorPlanTopLeftCorner,
@@ -796,6 +827,7 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestCreate(ctx context.Context) *merak
 func (r *NetworksFloorPlansRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestNetworksUpdateNetworkFloorPlan {
 	emptyString := ""
 	var requestNetworksUpdateNetworkFloorPlanBottomLeftCorner *merakigosdk.RequestNetworksUpdateNetworkFloorPlanBottomLeftCorner
+
 	if r.BottomLeftCorner != nil {
 		lat := func() *float64 {
 			if !r.BottomLeftCorner.Lat.IsUnknown() && !r.BottomLeftCorner.Lat.IsNull() {
@@ -813,8 +845,10 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestUpdate(ctx context.Context) *merak
 			Lat: lat,
 			Lng: lng,
 		}
+		//[debug] Is Array: False
 	}
 	var requestNetworksUpdateNetworkFloorPlanBottomRightCorner *merakigosdk.RequestNetworksUpdateNetworkFloorPlanBottomRightCorner
+
 	if r.BottomRightCorner != nil {
 		lat := func() *float64 {
 			if !r.BottomRightCorner.Lat.IsUnknown() && !r.BottomRightCorner.Lat.IsNull() {
@@ -832,8 +866,10 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestUpdate(ctx context.Context) *merak
 			Lat: lat,
 			Lng: lng,
 		}
+		//[debug] Is Array: False
 	}
 	var requestNetworksUpdateNetworkFloorPlanCenter *merakigosdk.RequestNetworksUpdateNetworkFloorPlanCenter
+
 	if r.Center != nil {
 		lat := func() *float64 {
 			if !r.Center.Lat.IsUnknown() && !r.Center.Lat.IsNull() {
@@ -851,6 +887,13 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestUpdate(ctx context.Context) *merak
 			Lat: lat,
 			Lng: lng,
 		}
+		//[debug] Is Array: False
+	}
+	floorNumber := new(float64)
+	if !r.FloorNumber.IsUnknown() && !r.FloorNumber.IsNull() {
+		*floorNumber = r.FloorNumber.ValueFloat64()
+	} else {
+		floorNumber = nil
 	}
 	imageContents := new(string)
 	if !r.ImageContents.IsUnknown() && !r.ImageContents.IsNull() {
@@ -865,6 +908,7 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestUpdate(ctx context.Context) *merak
 		name = &emptyString
 	}
 	var requestNetworksUpdateNetworkFloorPlanTopLeftCorner *merakigosdk.RequestNetworksUpdateNetworkFloorPlanTopLeftCorner
+
 	if r.TopLeftCorner != nil {
 		lat := func() *float64 {
 			if !r.TopLeftCorner.Lat.IsUnknown() && !r.TopLeftCorner.Lat.IsNull() {
@@ -882,8 +926,10 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestUpdate(ctx context.Context) *merak
 			Lat: lat,
 			Lng: lng,
 		}
+		//[debug] Is Array: False
 	}
 	var requestNetworksUpdateNetworkFloorPlanTopRightCorner *merakigosdk.RequestNetworksUpdateNetworkFloorPlanTopRightCorner
+
 	if r.TopRightCorner != nil {
 		lat := func() *float64 {
 			if !r.TopRightCorner.Lat.IsUnknown() && !r.TopRightCorner.Lat.IsNull() {
@@ -901,11 +947,13 @@ func (r *NetworksFloorPlansRs) toSdkApiRequestUpdate(ctx context.Context) *merak
 			Lat: lat,
 			Lng: lng,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestNetworksUpdateNetworkFloorPlan{
 		BottomLeftCorner:  requestNetworksUpdateNetworkFloorPlanBottomLeftCorner,
 		BottomRightCorner: requestNetworksUpdateNetworkFloorPlanBottomRightCorner,
 		Center:            requestNetworksUpdateNetworkFloorPlanCenter,
+		FloorNumber:       floorNumber,
 		ImageContents:     *imageContents,
 		Name:              *name,
 		TopLeftCorner:     requestNetworksUpdateNetworkFloorPlanTopLeftCorner,
@@ -1021,6 +1069,12 @@ func ResponseNetworksGetNetworkFloorPlanItemToBodyRs(state NetworksFloorPlansRs,
 				return &result
 			}
 			return nil
+		}(),
+		FloorNumber: func() types.Float64 {
+			if response.FloorNumber != nil {
+				return types.Float64Value(float64(*response.FloorNumber))
+			}
+			return types.Float64{}
 		}(),
 		FloorPlanID: types.StringValue(response.FloorPlanID),
 		Height: func() types.Float64 {

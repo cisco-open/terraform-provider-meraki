@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -116,30 +116,37 @@ func (r *OrganizationsApplianceSecurityIntrusionResource) Create(ctx context.Con
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Appliance.GetOrganizationApplianceSecurityIntrusion(vvOrganizationID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource OrganizationsApplianceSecurityIntrusion only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvOrganizationID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Appliance.GetOrganizationApplianceSecurityIntrusion(vvOrganizationID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource OrganizationsApplianceSecurityIntrusion  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource OrganizationsApplianceSecurityIntrusion only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource OrganizationsApplianceSecurityIntrusion only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateOrganizationApplianceSecurityIntrusion(vvOrganizationID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationApplianceSecurityIntrusion",
 				err.Error(),
@@ -152,9 +159,10 @@ func (r *OrganizationsApplianceSecurityIntrusionResource) Create(ctx context.Con
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Appliance.GetOrganizationApplianceSecurityIntrusion(vvOrganizationID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -169,11 +177,12 @@ func (r *OrganizationsApplianceSecurityIntrusionResource) Create(ctx context.Con
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseApplianceGetOrganizationApplianceSecurityIntrusionItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *OrganizationsApplianceSecurityIntrusionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -284,6 +293,7 @@ type ResponseApplianceGetOrganizationApplianceSecurityIntrusionAllowedRulesRs st
 // FromBody
 func (r *OrganizationsApplianceSecurityIntrusionRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateOrganizationApplianceSecurityIntrusion {
 	var requestApplianceUpdateOrganizationApplianceSecurityIntrusionAllowedRules []merakigosdk.RequestApplianceUpdateOrganizationApplianceSecurityIntrusionAllowedRules
+
 	if r.AllowedRules != nil {
 		for _, rItem1 := range *r.AllowedRules {
 			message := rItem1.Message.ValueString()
@@ -292,6 +302,7 @@ func (r *OrganizationsApplianceSecurityIntrusionRs) toSdkApiRequestUpdate(ctx co
 				Message: message,
 				RuleID:  ruleID,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestApplianceUpdateOrganizationApplianceSecurityIntrusion{

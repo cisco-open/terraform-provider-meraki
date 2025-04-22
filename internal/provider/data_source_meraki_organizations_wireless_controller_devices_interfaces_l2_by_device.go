@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -343,7 +343,7 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 													}(),
 												}
 											}
-											return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2ByDeviceItemsInterfacesChannelGroup{}
+											return nil
 										}(),
 										Description: types.StringValue(interfaces.Description),
 										Enabled: func() types.Bool {
@@ -372,7 +372,7 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 													Model: types.StringValue(interfaces.Module.Model),
 												}
 											}
-											return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2ByDeviceItemsInterfacesModule{}
+											return nil
 										}(),
 										Name:   types.StringValue(interfaces.Name),
 										Speed:  types.StringValue(interfaces.Speed),
@@ -387,14 +387,14 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 								}
 								return &result
 							}
-							return &[]ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2ByDeviceItemsInterfaces{}
+							return nil
 						}(),
 						Serial: types.StringValue(items.Serial),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2ByDeviceItems{}
+			return nil
 		}(),
 		Meta: func() *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2ByDeviceMeta {
 			if response.Meta != nil {
@@ -419,15 +419,15 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 											}(),
 										}
 									}
-									return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2ByDeviceMetaCountsItems{}
+									return nil
 								}(),
 							}
 						}
-						return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2ByDeviceMetaCounts{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2ByDeviceMeta{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

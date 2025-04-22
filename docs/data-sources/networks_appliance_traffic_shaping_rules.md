@@ -59,6 +59,17 @@ Read-Only:
 
 - `type` (String)
 - `value` (String)
+- `value_list` (Set of String)
+- `value_obj` (Attributes) (see [below for nested schema](#nestedatt--item--rules--definitions--value_obj))
+
+<a id="nestedatt--item--rules--definitions--value_obj"></a>
+### Nested Schema for `item.rules.definitions.value_obj`
+
+Read-Only:
+
+- `id` (String)
+- `name` (String)
+
 
 
 <a id="nestedatt--item--rules--per_client_bandwidth_limits"></a>

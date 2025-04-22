@@ -99,8 +99,10 @@ resource "meraki_networks_sensor_alerts_profiles" "example" {
       }
     }
   }]
-  name       = "My Sensor Alert Profile"
-  network_id = "string"
+  includesensor_url = true
+  message           = "Check with Miles on what to do."
+  name              = "My Sensor Alert Profile"
+  network_id        = "string"
   recipients = {
 
     emails          = ["miles@meraki.com"]
@@ -130,6 +132,8 @@ output "meraki_networks_sensor_alerts_profiles_example" {
 
 - `conditions` (Attributes Set) List of conditions that will cause the profile to send an alert. (see [below for nested schema](#nestedatt--conditions))
 - `id` (String) id path parameter.
+- `include_sensor_url` (Boolean) Include dashboard link to sensor in messages (default: true).
+- `message` (String) A custom message that will appear in email and text message alerts.
 - `name` (String) Name of the sensor alert profile.
 - `recipients` (Attributes) List of recipients that will receive the alert. (see [below for nested schema](#nestedatt--recipients))
 - `schedule` (Attributes) The sensor schedule to use with the alert profile. (see [below for nested schema](#nestedatt--schedule))
@@ -146,11 +150,11 @@ output "meraki_networks_sensor_alerts_profiles_example" {
 Optional:
 
 - `direction` (String) If 'above', an alert will be sent when a sensor reads above the threshold. If 'below', an alert will be sent when a sensor reads below the threshold. Only applicable for temperature, humidity, realPower, apparentPower, powerFactor, voltage, current, and frequency thresholds.
-                                        Allowed values: [above,below]
+                            Allowed values: [above,below]
 - `duration` (Number) Length of time in seconds that the triggering state must persist before an alert is sent. Available options are 0 seconds, 1 minute, 2 minutes, 3 minutes, 4 minutes, 5 minutes, 10 minutes, 15 minutes, 30 minutes, 1 hour, 2 hours, 4 hours, and 8 hours. Default is 0.
-                                        Allowed values: [0,60,120,180,240,300,600,900,1800,3600,7200,14400,28800]
+                            Allowed values: [0,60,120,180,240,300,600,900,1800,3600,7200,14400,28800]
 - `metric` (String) The type of sensor metric that will be monitored for changes.
-                                        Allowed values: [apparentPower,co2,current,door,frequency,humidity,indoorAirQuality,noise,pm25,powerFactor,realPower,temperature,tvoc,upstreamPower,voltage,water]
+                            Allowed values: [apparentPower,co2,current,door,frequency,humidity,indoorAirQuality,noise,pm25,powerFactor,realPower,temperature,tvoc,upstreamPower,voltage,water]
 - `threshold` (Attributes) Threshold for sensor readings that will cause an alert to be sent. This object should contain a single property key matching the condition's 'metric' value. (see [below for nested schema](#nestedatt--conditions--threshold))
 
 <a id="nestedatt--conditions--threshold"></a>
@@ -190,7 +194,7 @@ Optional:
 
 - `concentration` (Number) Alerting threshold as CO2 parts per million.
 - `quality` (String) Alerting threshold as a qualitative CO2 level.
-                                                    Allowed values: [fair,good,inadequate,poor]
+                                        Allowed values: [fair,good,inadequate,poor]
 
 
 <a id="nestedatt--conditions--threshold--current"></a>
@@ -223,7 +227,7 @@ Optional:
 Optional:
 
 - `quality` (String) Alerting threshold as a qualitative humidity level.
-                                                    Allowed values: [fair,good,inadequate,poor]
+                                        Allowed values: [fair,good,inadequate,poor]
 - `relative_percentage` (Number) Alerting threshold in %RH.
 
 
@@ -233,7 +237,7 @@ Optional:
 Optional:
 
 - `quality` (String) Alerting threshold as a qualitative indoor air quality level.
-                                                    Allowed values: [fair,good,inadequate,poor]
+                                        Allowed values: [fair,good,inadequate,poor]
 - `score` (Number) Alerting threshold as indoor air quality score.
 
 
@@ -251,7 +255,7 @@ Optional:
 
 - `level` (Number) Alerting threshold as adjusted decibels.
 - `quality` (String) Alerting threshold as a qualitative ambient noise level.
-                                                          Allowed values: [fair,good,inadequate,poor]
+                                              Allowed values: [fair,good,inadequate,poor]
 
 
 
@@ -262,7 +266,7 @@ Optional:
 
 - `concentration` (Number) Alerting threshold as PM2.5 parts per million.
 - `quality` (String) Alerting threshold as a qualitative PM2.5 level.
-                                                    Allowed values: [fair,good,inadequate,poor]
+                                        Allowed values: [fair,good,inadequate,poor]
 
 
 <a id="nestedatt--conditions--threshold--power_factor"></a>
@@ -289,7 +293,7 @@ Optional:
 - `celsius` (Number) Alerting threshold in degrees Celsius.
 - `fahrenheit` (Number) Alerting threshold in degrees Fahrenheit.
 - `quality` (String) Alerting threshold as a qualitative temperature level.
-                                                    Allowed values: [fair,good,inadequate,poor]
+                                        Allowed values: [fair,good,inadequate,poor]
 
 
 <a id="nestedatt--conditions--threshold--tvoc"></a>
@@ -299,7 +303,7 @@ Optional:
 
 - `concentration` (Number) Alerting threshold as TVOC micrograms per cubic meter.
 - `quality` (String) Alerting threshold as a qualitative TVOC level.
-                                                    Allowed values: [fair,good,inadequate,poor]
+                                        Allowed values: [fair,good,inadequate,poor]
 
 
 <a id="nestedatt--conditions--threshold--upstream_power"></a>
@@ -366,6 +370,7 @@ Read-Only:
 Read-Only:
 
 - `apparent_power` (Attributes) Apparent power threshold. 'draw' must be provided. (see [below for nested schema](#nestedatt--conditions_response--threshold--apparent_power))
+- `co2` (Attributes) CO2 concentration threshold. One of 'concentration' or 'quality' must be provided. (see [below for nested schema](#nestedatt--conditions_response--threshold--co2))
 - `current` (Attributes) Electrical current threshold. 'level' must be provided. (see [below for nested schema](#nestedatt--conditions_response--threshold--current))
 - `door` (Attributes) Door open threshold. 'open' must be provided and set to true. (see [below for nested schema](#nestedatt--conditions_response--threshold--door))
 - `frequency` (Attributes) Electrical frequency threshold. 'level' must be provided. (see [below for nested schema](#nestedatt--conditions_response--threshold--frequency))
@@ -387,6 +392,16 @@ Read-Only:
 Read-Only:
 
 - `draw` (Number) Alerting threshold in volt-amps. Must be between 0 and 3750.
+
+
+<a id="nestedatt--conditions_response--threshold--co2"></a>
+### Nested Schema for `conditions_response.threshold.co2`
+
+Read-Only:
+
+- `concentration` (Number) Alerting threshold as CO2 parts per million.
+- `quality` (String) Alerting threshold as a qualitative CO2 level.
+                                                    Allowed values: [fair,good,inadequate,poor]
 
 
 <a id="nestedatt--conditions_response--threshold--current"></a>

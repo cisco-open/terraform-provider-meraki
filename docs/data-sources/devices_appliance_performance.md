@@ -48,4 +48,4 @@ output "meraki_devices_appliance_performance_example" {
 
 Read-Only:
 
-- `perf_score` (Number)
+- `perf_score` (Number) Utilization for the MX device

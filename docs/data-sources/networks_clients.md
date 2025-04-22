@@ -56,6 +56,8 @@ Read-Only:
 - `os` (String) The operating system of the client
 - `recent_device_connection` (String) Client's most recent connection type
 - `recent_device_mac` (String) The MAC address of the node that the device was last connected to
+- `recent_device_name` (String) The name of the node that the device was last connected to
+- `recent_device_serial` (String) The serial of the node that the device was last connected to
 - `sm_installed` (Boolean) Status of SM for the client
 - `ssid` (String) The name of the SSID that the client is connected to
 - `status` (String) The connection status of the client

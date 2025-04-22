@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -239,75 +239,75 @@ func (d *OrganizationsWirelessControllerDevicesRedundancyFailoverHistoryDataSour
 
 // structs
 type OrganizationsWirelessControllerDevicesRedundancyFailoverHistory struct {
-	OrganizationID types.String                                                                                   `tfsdk:"organization_id"`
-	Serials        types.List                                                                                     `tfsdk:"serials"`
-	T0             types.String                                                                                   `tfsdk:"t0"`
-	T1             types.String                                                                                   `tfsdk:"t1"`
-	Timespan       types.Float64                                                                                  `tfsdk:"timespan"`
-	PerPage        types.Int64                                                                                    `tfsdk:"per_page"`
-	StartingAfter  types.String                                                                                   `tfsdk:"starting_after"`
-	EndingBefore   types.String                                                                                   `tfsdk:"ending_before"`
-	Items          *[]ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistory `tfsdk:"items"`
+	OrganizationID types.String                                                                                       `tfsdk:"organization_id"`
+	Serials        types.List                                                                                         `tfsdk:"serials"`
+	T0             types.String                                                                                       `tfsdk:"t0"`
+	T1             types.String                                                                                       `tfsdk:"t1"`
+	Timespan       types.Float64                                                                                      `tfsdk:"timespan"`
+	PerPage        types.Int64                                                                                        `tfsdk:"per_page"`
+	StartingAfter  types.String                                                                                       `tfsdk:"starting_after"`
+	EndingBefore   types.String                                                                                       `tfsdk:"ending_before"`
+	Items          *[]ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistory `tfsdk:"items"`
 }
 
-type ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistory struct {
-	Items *[]ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItems `tfsdk:"items"`
-	Meta  *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMeta    `tfsdk:"meta"`
+type ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistory struct {
+	Items *[]ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItems `tfsdk:"items"`
+	Meta  *ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMeta    `tfsdk:"meta"`
 }
 
-type ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItems struct {
-	Active *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsActive `tfsdk:"active"`
-	Failed *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsFailed `tfsdk:"failed"`
-	Reason types.String                                                                                            `tfsdk:"reason"`
-	Serial types.String                                                                                            `tfsdk:"serial"`
-	Ts     types.String                                                                                            `tfsdk:"ts"`
+type ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItems struct {
+	Active *ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsActive `tfsdk:"active"`
+	Failed *ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsFailed `tfsdk:"failed"`
+	Reason types.String                                                                                                `tfsdk:"reason"`
+	Serial types.String                                                                                                `tfsdk:"serial"`
+	Ts     types.String                                                                                                `tfsdk:"ts"`
 }
 
-type ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsActive struct {
-	Chassis *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsActiveChassis `tfsdk:"chassis"`
+type ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsActive struct {
+	Chassis *ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsActiveChassis `tfsdk:"chassis"`
 }
 
-type ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsActiveChassis struct {
+type ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsActiveChassis struct {
 	Name types.String `tfsdk:"name"`
 }
 
-type ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsFailed struct {
-	Chassis *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsFailedChassis `tfsdk:"chassis"`
+type ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsFailed struct {
+	Chassis *ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsFailedChassis `tfsdk:"chassis"`
 }
 
-type ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsFailedChassis struct {
+type ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsFailedChassis struct {
 	Name types.String `tfsdk:"name"`
 }
 
-type ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMeta struct {
-	Counts *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMetaCounts `tfsdk:"counts"`
+type ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMeta struct {
+	Counts *ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMetaCounts `tfsdk:"counts"`
 }
 
-type ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMetaCounts struct {
-	Items *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMetaCountsItems `tfsdk:"items"`
+type ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMetaCounts struct {
+	Items *ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMetaCountsItems `tfsdk:"items"`
 }
 
-type ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMetaCountsItems struct {
+type ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMetaCountsItems struct {
 	Remaining types.Int64 `tfsdk:"remaining"`
 	Total     types.Int64 `tfsdk:"total"`
 }
 
 // ToBody
 func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsToBody(state OrganizationsWirelessControllerDevicesRedundancyFailoverHistory, response *merakigosdk.ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistory) OrganizationsWirelessControllerDevicesRedundancyFailoverHistory {
-	var items []ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistory
+	var items []ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistory
 	for _, item := range *response {
-		itemState := ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistory{
-			Items: func() *[]ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItems {
+		itemState := ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistory{
+			Items: func() *[]ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItems {
 				if item.Items != nil {
-					result := make([]ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItems, len(*item.Items))
+					result := make([]ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItems, len(*item.Items))
 					for i, items := range *item.Items {
-						result[i] = ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItems{
-							Active: func() *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsActive {
+						result[i] = ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItems{
+							Active: func() *ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsActive {
 								if items.Active != nil {
-									return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsActive{
-										Chassis: func() *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsActiveChassis {
+									return &ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsActive{
+										Chassis: func() *ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsActiveChassis {
 											if items.Active.Chassis != nil {
-												return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsActiveChassis{
+												return &ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsActiveChassis{
 													Name: types.StringValue(items.Active.Chassis.Name),
 												}
 											}
@@ -317,12 +317,12 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundanc
 								}
 								return nil
 							}(),
-							Failed: func() *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsFailed {
+							Failed: func() *ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsFailed {
 								if items.Failed != nil {
-									return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsFailed{
-										Chassis: func() *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsFailedChassis {
+									return &ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsFailed{
+										Chassis: func() *ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsFailedChassis {
 											if items.Failed.Chassis != nil {
-												return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsFailedChassis{
+												return &ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsFailedChassis{
 													Name: types.StringValue(items.Failed.Chassis.Name),
 												}
 											}
@@ -341,15 +341,15 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundanc
 				}
 				return nil
 			}(),
-			Meta: func() *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMeta {
+			Meta: func() *ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMeta {
 				if item.Meta != nil {
-					return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMeta{
-						Counts: func() *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMetaCounts {
+					return &ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMeta{
+						Counts: func() *ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMetaCounts {
 							if item.Meta.Counts != nil {
-								return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMetaCounts{
-									Items: func() *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMetaCountsItems {
+								return &ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMetaCounts{
+									Items: func() *ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMetaCountsItems {
 										if item.Meta.Counts.Items != nil {
-											return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMetaCountsItems{
+											return &ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryMetaCountsItems{
 												Remaining: func() types.Int64 {
 													if item.Meta.Counts.Items.Remaining != nil {
 														return types.Int64Value(int64(*item.Meta.Counts.Items.Remaining))

@@ -21,6 +21,7 @@ resource "meraki_networks_settings" "example" {
 
       enabled  = false
       password = "miles123"
+      username = "admin"
     }
   }
   local_status_page_enabled = true
@@ -74,9 +75,6 @@ Optional:
 
 - `enabled` (Boolean) Enables / disables the authentication on Local Status page(s).
 - `password` (String, Sensitive) The password used for Local Status Page(s). Set this to null to clear the password.
-
-Read-Only:
-
 - `username` (String) The username used for Local Status Page(s).
 
 

@@ -41,6 +41,7 @@ Read-Only:
 
 - `hubs` (Attributes Set) The list of VPN hubs, in order of preference. (see [below for nested schema](#nestedatt--item--hubs))
 - `mode` (String) The site-to-site VPN mode.
+- `subnet` (Attributes) Configuration of subnet features (see [below for nested schema](#nestedatt--item--subnet))
 - `subnets` (Attributes Set) The list of subnets and their VPN presence. (see [below for nested schema](#nestedatt--item--subnets))
 
 <a id="nestedatt--item--hubs"></a>
@@ -52,10 +53,35 @@ Read-Only:
 - `use_default_route` (Boolean) Indicates whether default route traffic should be sent to this hub.
 
 
+<a id="nestedatt--item--subnet"></a>
+### Nested Schema for `item.subnet`
+
+Read-Only:
+
+- `nat` (Attributes) Configuration of NAT for subnets (see [below for nested schema](#nestedatt--item--subnet--nat))
+
+<a id="nestedatt--item--subnet--nat"></a>
+### Nested Schema for `item.subnet.nat`
+
+Read-Only:
+
+- `is_allowed` (Boolean) If enabled, VPN subnet translation can be used to translate any local subnets that are allowed to use the VPN into a new subnet with the same number of addresses.
+
+
+
 <a id="nestedatt--item--subnets"></a>
 ### Nested Schema for `item.subnets`
 
 Read-Only:
 
 - `local_subnet` (String) The CIDR notation subnet used within the VPN
+- `nat` (Attributes) Configuration of NAT for the subnet (see [below for nested schema](#nestedatt--item--subnets--nat))
 - `use_vpn` (Boolean) Indicates the presence of the subnet in the VPN
+
+<a id="nestedatt--item--subnets--nat"></a>
+### Nested Schema for `item.subnets.nat`
+
+Read-Only:
+
+- `enabled` (Boolean) Whether or not VPN subnet translation is enabled for the subnet
+- `remote_subnet` (String) The translated subnet to be used in the VPN

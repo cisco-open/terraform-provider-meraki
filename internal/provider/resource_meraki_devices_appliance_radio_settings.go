@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -161,30 +161,37 @@ func (r *DevicesApplianceRadioSettingsResource) Create(ctx context.Context, req 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvSerial := data.Serial.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Appliance.GetDeviceApplianceRadioSettings(vvSerial)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesApplianceRadioSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvSerial != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Appliance.GetDeviceApplianceRadioSettings(vvSerial)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesApplianceRadioSettings  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesApplianceRadioSettings only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesApplianceRadioSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateDeviceApplianceRadioSettings(vvSerial, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceApplianceRadioSettings",
 				err.Error(),
@@ -197,9 +204,10 @@ func (r *DevicesApplianceRadioSettingsResource) Create(ctx context.Context, req 
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Appliance.GetDeviceApplianceRadioSettings(vvSerial)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -214,11 +222,12 @@ func (r *DevicesApplianceRadioSettingsResource) Create(ctx context.Context, req 
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseApplianceGetDeviceApplianceRadioSettingsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *DevicesApplianceRadioSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -338,6 +347,7 @@ type ResponseApplianceGetDeviceApplianceRadioSettingsTwoFourGhzSettingsRs struct
 func (r *DevicesApplianceRadioSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateDeviceApplianceRadioSettings {
 	emptyString := ""
 	var requestApplianceUpdateDeviceApplianceRadioSettingsFiveGhzSettings *merakigosdk.RequestApplianceUpdateDeviceApplianceRadioSettingsFiveGhzSettings
+
 	if r.FiveGhzSettings != nil {
 		channel := func() *int64 {
 			if !r.FiveGhzSettings.Channel.IsUnknown() && !r.FiveGhzSettings.Channel.IsNull() {
@@ -362,6 +372,7 @@ func (r *DevicesApplianceRadioSettingsRs) toSdkApiRequestUpdate(ctx context.Cont
 			ChannelWidth: int64ToIntPointer(channelWidth),
 			TargetPower:  int64ToIntPointer(targetPower),
 		}
+		//[debug] Is Array: False
 	}
 	rfProfileID := new(string)
 	if !r.RfProfileID.IsUnknown() && !r.RfProfileID.IsNull() {
@@ -370,6 +381,7 @@ func (r *DevicesApplianceRadioSettingsRs) toSdkApiRequestUpdate(ctx context.Cont
 		rfProfileID = &emptyString
 	}
 	var requestApplianceUpdateDeviceApplianceRadioSettingsTwoFourGhzSettings *merakigosdk.RequestApplianceUpdateDeviceApplianceRadioSettingsTwoFourGhzSettings
+
 	if r.TwoFourGhzSettings != nil {
 		channel := func() *int64 {
 			if !r.TwoFourGhzSettings.Channel.IsUnknown() && !r.TwoFourGhzSettings.Channel.IsNull() {
@@ -387,6 +399,7 @@ func (r *DevicesApplianceRadioSettingsRs) toSdkApiRequestUpdate(ctx context.Cont
 			Channel:     int64ToIntPointer(channel),
 			TargetPower: int64ToIntPointer(targetPower),
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestApplianceUpdateDeviceApplianceRadioSettings{
 		FiveGhzSettings:    requestApplianceUpdateDeviceApplianceRadioSettingsFiveGhzSettings,

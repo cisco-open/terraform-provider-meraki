@@ -141,6 +141,7 @@ Read-Only:
 - `chassis_name` (String) Wireless LAN controller chassis name
 - `id` (String) Wireless LAN controller redundancy ID
 - `management` (Attributes) Wireless LAN controller redundancy management interface information (see [below for nested schema](#nestedatt--item--items--redundancy--management))
+- `redundant_serial` (String) Wireless LAN controller redundant device serial
 - `role` (String) Wireless LAN controller role(Active, Active recovery, Standby hot, Standby recovery and Offline)
 
 <a id="nestedatt--item--items--redundancy--management"></a>

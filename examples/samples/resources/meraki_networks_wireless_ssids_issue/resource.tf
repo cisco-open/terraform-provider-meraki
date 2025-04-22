@@ -11,13 +11,13 @@ terraform {
 variable "wifi_disable" {
   description = "Indica si se debe deshabilitar la red Wi-Fi"
   type        = bool
-  default     = false  # Establecido en falso, indicando que la red Wi-Fi está habilitada por defecto.
+  default     = false # Establecido en falso, indicando que la red Wi-Fi está habilitada por defecto.
 }
 
 variable "wpa3_enable" {
   description = "Indica si se debe habilitar WPA3"
   type        = bool
-  default     = true  # Establecido en verdadero, habilitando WPA3.
+  default     = true # Establecido en verdadero, habilitando WPA3.
 }
 
 variable "ise_servers" {
@@ -41,36 +41,36 @@ variable "ise_servers" {
 variable "network_id" {
   description = "ID de la red en Meraki"
   type        = string
-  default     = "1234567890"  # ID de ejemplo para la red Meraki.
+  default     = "1234567890" # ID de ejemplo para la red Meraki.
 }
 
 variable "SSID_NAME" {
   description = "Nombre de la red SSID"
   type        = string
-  default     = "Mi_SSID"  # Nombre de ejemplo para el SSID.
+  default     = "Mi_SSID" # Nombre de ejemplo para el SSID.
 }
 
 variable "node_mac" {
   description = "Dirección MAC del nodo"
   type        = string
-  default     = "00:11:22:33:44:55"  # Dirección MAC de ejemplo.
+  default     = "00:11:22:33:44:55" # Dirección MAC de ejemplo.
 }
 
 variable "vap_name" {
   description = "Nombre del VAP"
   type        = string
-  default     = "VAP_1"  # Nombre de ejemplo para el VAP.
+  default     = "VAP_1" # Nombre de ejemplo para el VAP.
 }
 
 variable "vap_num" {
   description = "Número del VAP"
   type        = number
-  default     = 1  # Número de VAP de ejemplo.
+  default     = 1 # Número de VAP de ejemplo.
 }
 
 
 provider "meraki" {
-  meraki_debug = true
+  meraki_debug    = true
   meraki_base_url = "http://localhost:3002"
 }
 

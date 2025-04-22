@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -134,9 +134,8 @@ func (r *NetworksSwitchStpResource) Schema(_ context.Context, _ resource.SchemaR
 
 						"stacks": schema.SetAttribute{
 							MarkdownDescription: `List of stack IDs`,
-							Optional:            true,
 							Computed:            true,
-
+							Optional:            true,
 							PlanModifiers: []planmodifier.Set{
 								setplanmodifier.UseStateForUnknown(),
 							},
@@ -205,30 +204,37 @@ func (r *NetworksSwitchStpResource) Create(ctx context.Context, req resource.Cre
 		)
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchStp(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchStp only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchStp(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchStp  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchStp only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchStp only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchStp(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStp",
 				err.Error(),
@@ -241,9 +247,10 @@ func (r *NetworksSwitchStpResource) Create(ctx context.Context, req resource.Cre
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchStp(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -258,11 +265,12 @@ func (r *NetworksSwitchStpResource) Create(ctx context.Context, req resource.Cre
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseSwitchGetNetworkSwitchStpItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksSwitchStpResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -391,10 +399,11 @@ func (r *NetworksSwitchStpRs) toSdkApiRequestUpdate(ctx context.Context) *meraki
 		rstpEnabled = nil
 	}
 	var requestSwitchUpdateNetworkSwitchStpStpBridgePriority []merakigosdk.RequestSwitchUpdateNetworkSwitchStpStpBridgePriority
+
 	if r.StpBridgePriority != nil {
 		for _, rItem1 := range *r.StpBridgePriority {
+
 			var stacks []string = nil
-			//Hoola aqui
 			rItem1.Stacks.ElementsAs(ctx, &stacks, false)
 			stpPriority := func() *int64 {
 				if !rItem1.StpPriority.IsUnknown() && !rItem1.StpPriority.IsNull() {
@@ -402,11 +411,11 @@ func (r *NetworksSwitchStpRs) toSdkApiRequestUpdate(ctx context.Context) *meraki
 				}
 				return nil
 			}()
+
 			var switchProfiles []string = nil
-			//Hoola aqui
 			rItem1.SwitchProfiles.ElementsAs(ctx, &switchProfiles, false)
+
 			var switches []string = nil
-			//Hoola aqui
 			rItem1.Switches.ElementsAs(ctx, &switches, false)
 			requestSwitchUpdateNetworkSwitchStpStpBridgePriority = append(requestSwitchUpdateNetworkSwitchStpStpBridgePriority, merakigosdk.RequestSwitchUpdateNetworkSwitchStpStpBridgePriority{
 				Stacks:         stacks,
@@ -414,6 +423,7 @@ func (r *NetworksSwitchStpRs) toSdkApiRequestUpdate(ctx context.Context) *meraki
 				SwitchProfiles: switchProfiles,
 				Switches:       switches,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestSwitchUpdateNetworkSwitchStp{

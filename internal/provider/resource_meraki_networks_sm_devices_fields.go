@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -198,7 +198,6 @@ func (r *NetworksSmDevicesFieldsResource) Create(ctx context.Context, req resour
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp1, err := r.client.Sm.UpdateNetworkSmDevicesFields(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -214,9 +213,7 @@ func (r *NetworksSmDevicesFieldsResource) Create(ctx context.Context, req resour
 		return
 	}
 	//Item
-	// //entro aqui 2
-	// data2 := ResponseSmUpdateNetworkSmDevicesFields(data, response)
-
+	data = ResponseSmUpdateNetworkSmDevicesFieldsItemsToBody(data, response)
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -266,6 +263,7 @@ func (r *NetworksSmDevicesFields) toSdkApiRequestUpdate(ctx context.Context) *me
 	emptyString := ""
 	re := *r.Parameters
 	var requestSmUpdateNetworkSmDevicesFieldsDeviceFields *merakigosdk.RequestSmUpdateNetworkSmDevicesFieldsDeviceFields
+
 	if re.DeviceFields != nil {
 		name := re.DeviceFields.Name.ValueString()
 		notes := re.DeviceFields.Notes.ValueString()
@@ -273,6 +271,7 @@ func (r *NetworksSmDevicesFields) toSdkApiRequestUpdate(ctx context.Context) *me
 			Name:  name,
 			Notes: notes,
 		}
+		//[debug] Is Array: False
 	}
 	iD := new(string)
 	if !re.ID.IsUnknown() && !re.ID.IsNull() {

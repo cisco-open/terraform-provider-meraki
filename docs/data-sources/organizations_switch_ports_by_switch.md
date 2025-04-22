@@ -97,6 +97,6 @@ Read-Only:
 - `sticky_mac_allow_list_limit` (Number) The maximum number of MAC addresses for sticky MAC allow list. Only applicable when 'accessPolicyType' is 'Sticky MAC allow list'.
 - `stp_guard` (String) The state of the STP guard ('disabled', 'root guard', 'bpdu guard' or 'loop guard').
 - `tags` (List of String) The list of tags of the switch port.
-- `type` (String) The type of the switch port ('trunk', 'access' or 'stack').
+- `type` (String) The type of the switch port ('trunk', 'access', 'stack' or 'routed').
 - `vlan` (Number) The VLAN of the switch port. For a trunk port, this is the native VLAN. A null value will clear the value set for trunk ports.
 - `voice_vlan` (Number) The voice VLAN of the switch port. Only applicable to access ports.

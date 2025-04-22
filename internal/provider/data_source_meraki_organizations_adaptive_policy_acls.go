@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -100,6 +100,11 @@ func (d *OrganizationsAdaptivePolicyACLsDataSource) Schema(_ context.Context, _ 
 									MarkdownDescription: `Destination port`,
 									Computed:            true,
 								},
+								"log": schema.BoolAttribute{
+									MarkdownDescription: `If enabled, when this rule is hit an entry will be logged to the event log
+`,
+									Computed: true,
+								},
 								"policy": schema.StringAttribute{
 									MarkdownDescription: `'allow' or 'deny' traffic specified by this rule`,
 									Computed:            true,
@@ -111,6 +116,11 @@ func (d *OrganizationsAdaptivePolicyACLsDataSource) Schema(_ context.Context, _ 
 								"src_port": schema.StringAttribute{
 									MarkdownDescription: `Source port`,
 									Computed:            true,
+								},
+								"tcp_established": schema.BoolAttribute{
+									MarkdownDescription: `If enabled, means TCP connection with this node must be established.
+`,
+									Computed: true,
 								},
 							},
 						},
@@ -158,6 +168,11 @@ func (d *OrganizationsAdaptivePolicyACLsDataSource) Schema(_ context.Context, _ 
 										MarkdownDescription: `Destination port`,
 										Computed:            true,
 									},
+									"log": schema.BoolAttribute{
+										MarkdownDescription: `If enabled, when this rule is hit an entry will be logged to the event log
+`,
+										Computed: true,
+									},
 									"policy": schema.StringAttribute{
 										MarkdownDescription: `'allow' or 'deny' traffic specified by this rule`,
 										Computed:            true,
@@ -169,6 +184,11 @@ func (d *OrganizationsAdaptivePolicyACLsDataSource) Schema(_ context.Context, _ 
 									"src_port": schema.StringAttribute{
 										MarkdownDescription: `Source port`,
 										Computed:            true,
+									},
+									"tcp_established": schema.BoolAttribute{
+										MarkdownDescription: `If enabled, means TCP connection with this node must be established.
+`,
+										Computed: true,
 									},
 								},
 							},
@@ -273,10 +293,12 @@ type ResponseItemOrganizationsGetOrganizationAdaptivePolicyAcls struct {
 }
 
 type ResponseItemOrganizationsGetOrganizationAdaptivePolicyAclsRules struct {
-	DstPort  types.String `tfsdk:"dst_port"`
-	Policy   types.String `tfsdk:"policy"`
-	Protocol types.String `tfsdk:"protocol"`
-	SrcPort  types.String `tfsdk:"src_port"`
+	DstPort        types.String `tfsdk:"dst_port"`
+	Log            types.Bool   `tfsdk:"log"`
+	Policy         types.String `tfsdk:"policy"`
+	Protocol       types.String `tfsdk:"protocol"`
+	SrcPort        types.String `tfsdk:"src_port"`
+	TCPEstablished types.Bool   `tfsdk:"tcp_established"`
 }
 
 type ResponseOrganizationsGetOrganizationAdaptivePolicyAcl struct {
@@ -290,10 +312,12 @@ type ResponseOrganizationsGetOrganizationAdaptivePolicyAcl struct {
 }
 
 type ResponseOrganizationsGetOrganizationAdaptivePolicyAclRules struct {
-	DstPort  types.String `tfsdk:"dst_port"`
-	Policy   types.String `tfsdk:"policy"`
-	Protocol types.String `tfsdk:"protocol"`
-	SrcPort  types.String `tfsdk:"src_port"`
+	DstPort        types.String `tfsdk:"dst_port"`
+	Log            types.Bool   `tfsdk:"log"`
+	Policy         types.String `tfsdk:"policy"`
+	Protocol       types.String `tfsdk:"protocol"`
+	SrcPort        types.String `tfsdk:"src_port"`
+	TCPEstablished types.Bool   `tfsdk:"tcp_established"`
 }
 
 // ToBody
@@ -311,10 +335,22 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyACLsItemsToBody(state Org
 					result := make([]ResponseItemOrganizationsGetOrganizationAdaptivePolicyAclsRules, len(*item.Rules))
 					for i, rules := range *item.Rules {
 						result[i] = ResponseItemOrganizationsGetOrganizationAdaptivePolicyAclsRules{
-							DstPort:  types.StringValue(rules.DstPort),
+							DstPort: types.StringValue(rules.DstPort),
+							Log: func() types.Bool {
+								if rules.Log != nil {
+									return types.BoolValue(*rules.Log)
+								}
+								return types.Bool{}
+							}(),
 							Policy:   types.StringValue(rules.Policy),
 							Protocol: types.StringValue(rules.Protocol),
 							SrcPort:  types.StringValue(rules.SrcPort),
+							TCPEstablished: func() types.Bool {
+								if rules.TCPEstablished != nil {
+									return types.BoolValue(*rules.TCPEstablished)
+								}
+								return types.Bool{}
+							}(),
 						}
 					}
 					return &result
@@ -341,10 +377,22 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyACLItemToBody(state Organ
 				result := make([]ResponseOrganizationsGetOrganizationAdaptivePolicyAclRules, len(*response.Rules))
 				for i, rules := range *response.Rules {
 					result[i] = ResponseOrganizationsGetOrganizationAdaptivePolicyAclRules{
-						DstPort:  types.StringValue(rules.DstPort),
+						DstPort: types.StringValue(rules.DstPort),
+						Log: func() types.Bool {
+							if rules.Log != nil {
+								return types.BoolValue(*rules.Log)
+							}
+							return types.Bool{}
+						}(),
 						Policy:   types.StringValue(rules.Policy),
 						Protocol: types.StringValue(rules.Protocol),
 						SrcPort:  types.StringValue(rules.SrcPort),
+						TCPEstablished: func() types.Bool {
+							if rules.TCPEstablished != nil {
+								return types.BoolValue(*rules.TCPEstablished)
+							}
+							return types.Bool{}
+						}(),
 					}
 				}
 				return &result

@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -110,6 +110,10 @@ func (r *NetworksSettingsResource) Schema(_ context.Context, _ resource.SchemaRe
 							"username": schema.StringAttribute{
 								MarkdownDescription: `The username used for Local Status Page(s).`,
 								Computed:            true,
+								Optional:            true,
+								PlanModifiers: []planmodifier.String{
+									stringplanmodifier.UseStateForUnknown(),
+								},
 							},
 						},
 					},
@@ -195,30 +199,37 @@ func (r *NetworksSettingsResource) Create(ctx context.Context, req resource.Crea
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkSettings(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkSettings(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSettings  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSettings only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkSettings(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSettings",
 				err.Error(),
@@ -231,9 +242,10 @@ func (r *NetworksSettingsResource) Create(ctx context.Context, req resource.Crea
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Networks.GetNetworkSettings(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -248,11 +260,12 @@ func (r *NetworksSettingsResource) Create(ctx context.Context, req resource.Crea
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseNetworksGetNetworkSettingsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -385,8 +398,10 @@ type ResponseNetworksGetNetworkSettingsSecurePortRs struct {
 // FromBody
 func (r *NetworksSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestNetworksUpdateNetworkSettings {
 	var requestNetworksUpdateNetworkSettingsLocalStatusPage *merakigosdk.RequestNetworksUpdateNetworkSettingsLocalStatusPage
+
 	if r.LocalStatusPage != nil {
 		var requestNetworksUpdateNetworkSettingsLocalStatusPageAuthentication *merakigosdk.RequestNetworksUpdateNetworkSettingsLocalStatusPageAuthentication
+
 		if r.LocalStatusPage.Authentication != nil {
 			enabled := func() *bool {
 				if !r.LocalStatusPage.Authentication.Enabled.IsUnknown() && !r.LocalStatusPage.Authentication.Enabled.IsNull() {
@@ -395,14 +410,18 @@ func (r *NetworksSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *merakig
 				return nil
 			}()
 			password := r.LocalStatusPage.Authentication.Password.ValueString()
+			username := r.LocalStatusPage.Authentication.Username.ValueString()
 			requestNetworksUpdateNetworkSettingsLocalStatusPageAuthentication = &merakigosdk.RequestNetworksUpdateNetworkSettingsLocalStatusPageAuthentication{
 				Enabled:  enabled,
 				Password: password,
+				Username: username,
 			}
+			//[debug] Is Array: False
 		}
 		requestNetworksUpdateNetworkSettingsLocalStatusPage = &merakigosdk.RequestNetworksUpdateNetworkSettingsLocalStatusPage{
 			Authentication: requestNetworksUpdateNetworkSettingsLocalStatusPageAuthentication,
 		}
+		//[debug] Is Array: False
 	}
 	localStatusPageEnabled := new(bool)
 	if !r.LocalStatusPageEnabled.IsUnknown() && !r.LocalStatusPageEnabled.IsNull() {
@@ -411,6 +430,7 @@ func (r *NetworksSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *merakig
 		localStatusPageEnabled = nil
 	}
 	var requestNetworksUpdateNetworkSettingsNamedVLANs *merakigosdk.RequestNetworksUpdateNetworkSettingsNamedVLANs
+
 	if r.NamedVLANs != nil {
 		enabled := func() *bool {
 			if !r.NamedVLANs.Enabled.IsUnknown() && !r.NamedVLANs.Enabled.IsNull() {
@@ -421,6 +441,7 @@ func (r *NetworksSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *merakig
 		requestNetworksUpdateNetworkSettingsNamedVLANs = &merakigosdk.RequestNetworksUpdateNetworkSettingsNamedVLANs{
 			Enabled: enabled,
 		}
+		//[debug] Is Array: False
 	}
 	remoteStatusPageEnabled := new(bool)
 	if !r.RemoteStatusPageEnabled.IsUnknown() && !r.RemoteStatusPageEnabled.IsNull() {
@@ -429,6 +450,7 @@ func (r *NetworksSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *merakig
 		remoteStatusPageEnabled = nil
 	}
 	var requestNetworksUpdateNetworkSettingsSecurePort *merakigosdk.RequestNetworksUpdateNetworkSettingsSecurePort
+
 	if r.SecurePort != nil {
 		enabled := func() *bool {
 			if !r.SecurePort.Enabled.IsUnknown() && !r.SecurePort.Enabled.IsNull() {
@@ -439,6 +461,7 @@ func (r *NetworksSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *merakig
 		requestNetworksUpdateNetworkSettingsSecurePort = &merakigosdk.RequestNetworksUpdateNetworkSettingsSecurePort{
 			Enabled: enabled,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestNetworksUpdateNetworkSettings{
 		LocalStatusPage:         requestNetworksUpdateNetworkSettingsLocalStatusPage,

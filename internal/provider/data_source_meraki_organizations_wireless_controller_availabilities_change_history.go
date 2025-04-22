@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -272,14 +272,14 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerAvailabilitiesCh
 								}
 								return &result
 							}
-							return &[]ResponseWirelessControllerGetOrganizationWirelessControllerAvailabilitiesChangeHistoryItemsChanges{}
+							return nil
 						}(),
 						Serial: types.StringValue(items.Serial),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseWirelessControllerGetOrganizationWirelessControllerAvailabilitiesChangeHistoryItems{}
+			return nil
 		}(),
 		Meta: func() *ResponseWirelessControllerGetOrganizationWirelessControllerAvailabilitiesChangeHistoryMeta {
 			if response.Meta != nil {
@@ -304,15 +304,15 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerAvailabilitiesCh
 											}(),
 										}
 									}
-									return &ResponseWirelessControllerGetOrganizationWirelessControllerAvailabilitiesChangeHistoryMetaCountsItems{}
+									return nil
 								}(),
 							}
 						}
-						return &ResponseWirelessControllerGetOrganizationWirelessControllerAvailabilitiesChangeHistoryMetaCounts{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseWirelessControllerGetOrganizationWirelessControllerAvailabilitiesChangeHistoryMeta{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

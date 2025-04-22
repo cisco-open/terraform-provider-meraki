@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -62,17 +62,19 @@ func (r *DevicesWirelessBluetoothSettingsResource) Schema(_ context.Context, _ r
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"major": schema.Int64Attribute{
-				MarkdownDescription: `Desired major value of the beacon. If the value is set to null it will reset to Dashboard's automatically generated value.`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `Desired major value of the beacon. If the value is set to null it will reset to
+          Dashboard's automatically generated value.`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
 			},
 			"minor": schema.Int64Attribute{
-				MarkdownDescription: `Desired minor value of the beacon. If the value is set to null it will reset to Dashboard's automatically generated value.`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `Desired minor value of the beacon. If the value is set to null it will reset to
+          Dashboard's automatically generated value.`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
@@ -82,9 +84,10 @@ func (r *DevicesWirelessBluetoothSettingsResource) Schema(_ context.Context, _ r
 				Required:            true,
 			},
 			"uuid": schema.StringAttribute{
-				MarkdownDescription: `Desired UUID of the beacon. If the value is set to null it will reset to Dashboard's automatically generated value.`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `Desired UUID of the beacon. If the value is set to null it will reset to Dashboard's
+          automatically generated value.`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -111,30 +114,37 @@ func (r *DevicesWirelessBluetoothSettingsResource) Create(ctx context.Context, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvSerial := data.Serial.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Wireless.GetDeviceWirelessBluetoothSettings(vvSerial)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesWirelessBluetoothSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvSerial != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Wireless.GetDeviceWirelessBluetoothSettings(vvSerial)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesWirelessBluetoothSettings  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesWirelessBluetoothSettings only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesWirelessBluetoothSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateDeviceWirelessBluetoothSettings(vvSerial, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceWirelessBluetoothSettings",
 				err.Error(),
@@ -147,9 +157,10 @@ func (r *DevicesWirelessBluetoothSettingsResource) Create(ctx context.Context, r
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Wireless.GetDeviceWirelessBluetoothSettings(vvSerial)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -164,11 +175,12 @@ func (r *DevicesWirelessBluetoothSettingsResource) Create(ctx context.Context, r
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseWirelessGetDeviceWirelessBluetoothSettingsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *DevicesWirelessBluetoothSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {

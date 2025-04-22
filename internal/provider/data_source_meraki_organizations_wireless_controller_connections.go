@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -269,7 +269,7 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerConnectionsItemT
 									Serial: types.StringValue(items.Controller.Serial),
 								}
 							}
-							return &ResponseWirelessControllerGetOrganizationWirelessControllerConnectionsItemsController{}
+							return nil
 						}(),
 						Network: func() *ResponseWirelessControllerGetOrganizationWirelessControllerConnectionsItemsNetwork {
 							if items.Network != nil {
@@ -279,14 +279,14 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerConnectionsItemT
 									URL:  types.StringValue(items.Network.URL),
 								}
 							}
-							return &ResponseWirelessControllerGetOrganizationWirelessControllerConnectionsItemsNetwork{}
+							return nil
 						}(),
 						Serial: types.StringValue(items.Serial),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseWirelessControllerGetOrganizationWirelessControllerConnectionsItems{}
+			return nil
 		}(),
 		Meta: func() *ResponseWirelessControllerGetOrganizationWirelessControllerConnectionsMeta {
 			if response.Meta != nil {
@@ -311,15 +311,15 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerConnectionsItemT
 											}(),
 										}
 									}
-									return &ResponseWirelessControllerGetOrganizationWirelessControllerConnectionsMetaCountsItems{}
+									return nil
 								}(),
 							}
 						}
-						return &ResponseWirelessControllerGetOrganizationWirelessControllerConnectionsMetaCounts{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseWirelessControllerGetOrganizationWirelessControllerConnectionsMeta{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

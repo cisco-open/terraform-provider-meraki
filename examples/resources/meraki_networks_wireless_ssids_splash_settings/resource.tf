@@ -22,6 +22,11 @@ resource "meraki_networks_wireless_ssids_splash_settings" "example" {
   network_id   = "string"
   number       = "string"
   redirect_url = "https://example.com"
+  self_registration = {
+
+    authorization_type = "admin"
+    enabled            = true
+  }
   sentry_enrollment = {
 
     enforced_systems = ["iOS"]

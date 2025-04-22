@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -182,30 +182,37 @@ func (r *NetworksSwitchDhcpServerPolicyResource) Create(ctx context.Context, req
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchDhcpServerPolicy(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchDhcpServerPolicy only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchDhcpServerPolicy(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchDhcpServerPolicy  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchDhcpServerPolicy only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchDhcpServerPolicy only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchDhcpServerPolicy(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchDhcpServerPolicy",
 				err.Error(),
@@ -218,9 +225,10 @@ func (r *NetworksSwitchDhcpServerPolicyResource) Create(ctx context.Context, req
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchDhcpServerPolicy(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -235,11 +243,12 @@ func (r *NetworksSwitchDhcpServerPolicyResource) Create(ctx context.Context, req
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseSwitchGetNetworkSwitchDhcpServerPolicyItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksSwitchDhcpServerPolicyResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -363,8 +372,10 @@ type ResponseSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionRs struct {
 func (r *NetworksSwitchDhcpServerPolicyRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestSwitchUpdateNetworkSwitchDhcpServerPolicy {
 	emptyString := ""
 	var requestSwitchUpdateNetworkSwitchDhcpServerPolicyAlerts *merakigosdk.RequestSwitchUpdateNetworkSwitchDhcpServerPolicyAlerts
+
 	if r.Alerts != nil {
 		var requestSwitchUpdateNetworkSwitchDhcpServerPolicyAlertsEmail *merakigosdk.RequestSwitchUpdateNetworkSwitchDhcpServerPolicyAlertsEmail
+
 		if r.Alerts.Email != nil {
 			enabled := func() *bool {
 				if !r.Alerts.Email.Enabled.IsUnknown() && !r.Alerts.Email.Enabled.IsNull() {
@@ -375,14 +386,17 @@ func (r *NetworksSwitchDhcpServerPolicyRs) toSdkApiRequestUpdate(ctx context.Con
 			requestSwitchUpdateNetworkSwitchDhcpServerPolicyAlertsEmail = &merakigosdk.RequestSwitchUpdateNetworkSwitchDhcpServerPolicyAlertsEmail{
 				Enabled: enabled,
 			}
+			//[debug] Is Array: False
 		}
 		requestSwitchUpdateNetworkSwitchDhcpServerPolicyAlerts = &merakigosdk.RequestSwitchUpdateNetworkSwitchDhcpServerPolicyAlerts{
 			Email: requestSwitchUpdateNetworkSwitchDhcpServerPolicyAlertsEmail,
 		}
+		//[debug] Is Array: False
 	}
 	var allowedServers []string = nil
 	r.AllowedServers.ElementsAs(ctx, &allowedServers, false)
 	var requestSwitchUpdateNetworkSwitchDhcpServerPolicyArpInspection *merakigosdk.RequestSwitchUpdateNetworkSwitchDhcpServerPolicyArpInspection
+
 	if r.ArpInspection != nil {
 		enabled := func() *bool {
 			if !r.ArpInspection.Enabled.IsUnknown() && !r.ArpInspection.Enabled.IsNull() {
@@ -393,6 +407,7 @@ func (r *NetworksSwitchDhcpServerPolicyRs) toSdkApiRequestUpdate(ctx context.Con
 		requestSwitchUpdateNetworkSwitchDhcpServerPolicyArpInspection = &merakigosdk.RequestSwitchUpdateNetworkSwitchDhcpServerPolicyArpInspection{
 			Enabled: enabled,
 		}
+		//[debug] Is Array: False
 	}
 	var blockedServers []string = nil
 	r.BlockedServers.ElementsAs(ctx, &blockedServers, false)

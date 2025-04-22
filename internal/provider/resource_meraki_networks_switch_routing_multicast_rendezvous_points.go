@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -63,7 +63,7 @@ func (r *NetworksSwitchRoutingMulticastRendezvousPointsResource) Schema(_ contex
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"interface_ip": schema.StringAttribute{
-				MarkdownDescription: `The IP address of the interface to use.`,
+				MarkdownDescription: `The IP address of the interface to use.`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -215,9 +215,7 @@ func (r *NetworksSwitchRoutingMulticastRendezvousPointsResource) Read(ctx contex
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvRendezvousPointID := data.RendezvousPointID.ValueString()
-	// rendezvous_point_id
 	responseGet, restyRespGet, err := r.client.Switch.GetNetworkSwitchRoutingMulticastRendezvousPoint(vvNetworkID, vvRendezvousPointID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -241,7 +239,7 @@ func (r *NetworksSwitchRoutingMulticastRendezvousPointsResource) Read(ctx contex
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchRoutingMulticastRendezvousPointItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -274,11 +272,10 @@ func (r *NetworksSwitchRoutingMulticastRendezvousPointsResource) Update(ctx cont
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvRendezvousPointID := data.RendezvousPointID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	_, restyResp2, err := r.client.Switch.UpdateNetworkSwitchRoutingMulticastRendezvousPoint(vvNetworkID, vvRendezvousPointID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchRoutingMulticastRendezvousPoint(vvNetworkID, vvRendezvousPointID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchRoutingMulticastRendezvousPoint",

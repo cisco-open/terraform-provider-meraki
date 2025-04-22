@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -192,7 +192,6 @@ func (r *NetworksWirelessAirMarshalRulesUpdateResource) Create(ctx context.Conte
 	vvRuleID := data.RuleID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp1, err := r.client.Wireless.UpdateNetworkWirelessAirMarshalRule(vvNetworkID, vvRuleID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -209,7 +208,6 @@ func (r *NetworksWirelessAirMarshalRulesUpdateResource) Create(ctx context.Conte
 	}
 	//Item
 	data = ResponseWirelessUpdateNetworkWirelessAirMarshalRuleItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -269,6 +267,7 @@ func (r *NetworksWirelessAirMarshalRulesUpdate) toSdkApiRequestUpdate(ctx contex
 	emptyString := ""
 	re := *r.Parameters
 	var requestWirelessUpdateNetworkWirelessAirMarshalRuleMatch *merakigosdk.RequestWirelessUpdateNetworkWirelessAirMarshalRuleMatch
+
 	if re.Match != nil {
 		string := re.Match.String.ValueString()
 		typeR := re.Match.Type.ValueString()
@@ -276,6 +275,7 @@ func (r *NetworksWirelessAirMarshalRulesUpdate) toSdkApiRequestUpdate(ctx contex
 			String: string,
 			Type:   typeR,
 		}
+		//[debug] Is Array: False
 	}
 	typeR := new(string)
 	if !re.Type.IsUnknown() && !re.Type.IsNull() {

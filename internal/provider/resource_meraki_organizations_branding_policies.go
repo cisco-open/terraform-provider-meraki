@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -490,12 +490,14 @@ func (r *OrganizationsBrandingPoliciesResource) Create(ctx context.Context, req 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationBrandingPolicies(vvOrganizationID)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -507,6 +509,7 @@ func (r *OrganizationsBrandingPoliciesResource) Create(ctx context.Context, req 
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -521,6 +524,7 @@ func (r *OrganizationsBrandingPoliciesResource) Create(ctx context.Context, req 
 				return
 			}
 			r.client.Organizations.UpdateOrganizationBrandingPolicy(vvOrganizationID, vvBrandingPolicyID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Organizations.GetOrganizationBrandingPolicy(vvOrganizationID, vvBrandingPolicyID)
 			if responseVerifyItem2 != nil {
 				data = ResponseOrganizationsGetOrganizationBrandingPolicyItemToBodyRs(data, responseVerifyItem2, false)
@@ -530,11 +534,11 @@ func (r *OrganizationsBrandingPoliciesResource) Create(ctx context.Context, req 
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Organizations.CreateOrganizationBrandingPolicy(vvOrganizationID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationBrandingPolicy",
 				err.Error(),
@@ -547,9 +551,8 @@ func (r *OrganizationsBrandingPoliciesResource) Create(ctx context.Context, req 
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationBrandingPolicies(vvOrganizationID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -565,22 +568,23 @@ func (r *OrganizationsBrandingPoliciesResource) Create(ctx context.Context, req 
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
 		result2 := result.(map[string]interface{})
-		vvBrandingPolicyID, ok := result2["BrandingPolicyID"].(string)
+		vvBrandingPolicyID, ok := result2["ID"].(string)
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter BrandingPolicyID",
-				"Error",
+				"Fail Parsing BrandingPolicyID",
 			)
 			return
 		}
 		responseVerifyItem2, restyRespGet, err := r.client.Organizations.GetOrganizationBrandingPolicy(vvOrganizationID, vvBrandingPolicyID)
 		if responseVerifyItem2 != nil && err == nil {
-			data3 := ResponseOrganizationsGetOrganizationBrandingPolicyItemToBodyRs(data, responseVerifyItem2, false)
-			resp.Diagnostics.Append(resp.State.Set(ctx, &data3)...)
+			data = ResponseOrganizationsGetOrganizationBrandingPolicyItemToBodyRs(data, responseVerifyItem2, false)
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 			return
 		} else {
 			if restyRespGet != nil {
@@ -603,6 +607,7 @@ func (r *OrganizationsBrandingPoliciesResource) Create(ctx context.Context, req 
 		)
 		return
 	}
+
 }
 
 func (r *OrganizationsBrandingPoliciesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -790,17 +795,20 @@ type ResponseOrganizationsGetOrganizationBrandingPolicyHelpSettingsRs struct {
 func (r *OrganizationsBrandingPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestOrganizationsCreateOrganizationBrandingPolicy {
 	emptyString := ""
 	var requestOrganizationsCreateOrganizationBrandingPolicyAdminSettings *merakigosdk.RequestOrganizationsCreateOrganizationBrandingPolicyAdminSettings
+
 	if r.AdminSettings != nil {
 		appliesTo := r.AdminSettings.AppliesTo.ValueString()
+
 		var values []string = nil
-		//Hoola aqui
 		r.AdminSettings.Values.ElementsAs(ctx, &values, false)
 		requestOrganizationsCreateOrganizationBrandingPolicyAdminSettings = &merakigosdk.RequestOrganizationsCreateOrganizationBrandingPolicyAdminSettings{
 			AppliesTo: appliesTo,
 			Values:    values,
 		}
+		//[debug] Is Array: False
 	}
 	var requestOrganizationsCreateOrganizationBrandingPolicyCustomLogo *merakigosdk.RequestOrganizationsCreateOrganizationBrandingPolicyCustomLogo
+
 	if r.CustomLogo != nil {
 		enabled := func() *bool {
 			if !r.CustomLogo.Enabled.IsUnknown() && !r.CustomLogo.Enabled.IsNull() {
@@ -809,6 +817,7 @@ func (r *OrganizationsBrandingPoliciesRs) toSdkApiRequestCreate(ctx context.Cont
 			return nil
 		}()
 		var requestOrganizationsCreateOrganizationBrandingPolicyCustomLogoImage *merakigosdk.RequestOrganizationsCreateOrganizationBrandingPolicyCustomLogoImage
+
 		if r.CustomLogo.Image != nil {
 			contents := r.CustomLogo.Image.Contents.ValueString()
 			format := r.CustomLogo.Image.Format.ValueString()
@@ -816,11 +825,13 @@ func (r *OrganizationsBrandingPoliciesRs) toSdkApiRequestCreate(ctx context.Cont
 				Contents: contents,
 				Format:   format,
 			}
+			//[debug] Is Array: False
 		}
 		requestOrganizationsCreateOrganizationBrandingPolicyCustomLogo = &merakigosdk.RequestOrganizationsCreateOrganizationBrandingPolicyCustomLogo{
 			Enabled: enabled,
 			Image:   requestOrganizationsCreateOrganizationBrandingPolicyCustomLogoImage,
 		}
+		//[debug] Is Array: False
 	}
 	enabled := new(bool)
 	if !r.Enabled.IsUnknown() && !r.Enabled.IsNull() {
@@ -829,8 +840,9 @@ func (r *OrganizationsBrandingPoliciesRs) toSdkApiRequestCreate(ctx context.Cont
 		enabled = nil
 	}
 	var requestOrganizationsCreateOrganizationBrandingPolicyHelpSettings *merakigosdk.RequestOrganizationsCreateOrganizationBrandingPolicyHelpSettings
+
 	if r.HelpSettings != nil {
-		aPIDocsSubtab := r.HelpSettings.APIDocsSubtab.ValueString()
+		apiDocsSubtab := r.HelpSettings.APIDocsSubtab.ValueString()
 		casesSubtab := r.HelpSettings.CasesSubtab.ValueString()
 		ciscoMerakiProductDocumentation := r.HelpSettings.CiscoMerakiProductDocumentation.ValueString()
 		communitySubtab := r.HelpSettings.CommunitySubtab.ValueString()
@@ -846,7 +858,7 @@ func (r *OrganizationsBrandingPoliciesRs) toSdkApiRequestCreate(ctx context.Cont
 		supportContactInfo := r.HelpSettings.SupportContactInfo.ValueString()
 		universalSearchKnowledgeBaseSearch := r.HelpSettings.UniversalSearchKnowledgeBaseSearch.ValueString()
 		requestOrganizationsCreateOrganizationBrandingPolicyHelpSettings = &merakigosdk.RequestOrganizationsCreateOrganizationBrandingPolicyHelpSettings{
-			APIDocsSubtab:                      aPIDocsSubtab,
+			APIDocsSubtab:                      apiDocsSubtab,
 			CasesSubtab:                        casesSubtab,
 			CiscoMerakiProductDocumentation:    ciscoMerakiProductDocumentation,
 			CommunitySubtab:                    communitySubtab,
@@ -862,6 +874,7 @@ func (r *OrganizationsBrandingPoliciesRs) toSdkApiRequestCreate(ctx context.Cont
 			SupportContactInfo:                 supportContactInfo,
 			UniversalSearchKnowledgeBaseSearch: universalSearchKnowledgeBaseSearch,
 		}
+		//[debug] Is Array: False
 	}
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
@@ -881,17 +894,20 @@ func (r *OrganizationsBrandingPoliciesRs) toSdkApiRequestCreate(ctx context.Cont
 func (r *OrganizationsBrandingPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestOrganizationsUpdateOrganizationBrandingPolicy {
 	emptyString := ""
 	var requestOrganizationsUpdateOrganizationBrandingPolicyAdminSettings *merakigosdk.RequestOrganizationsUpdateOrganizationBrandingPolicyAdminSettings
+
 	if r.AdminSettings != nil {
 		appliesTo := r.AdminSettings.AppliesTo.ValueString()
+
 		var values []string = nil
-		//Hoola aqui
 		r.AdminSettings.Values.ElementsAs(ctx, &values, false)
 		requestOrganizationsUpdateOrganizationBrandingPolicyAdminSettings = &merakigosdk.RequestOrganizationsUpdateOrganizationBrandingPolicyAdminSettings{
 			AppliesTo: appliesTo,
 			Values:    values,
 		}
+		//[debug] Is Array: False
 	}
 	var requestOrganizationsUpdateOrganizationBrandingPolicyCustomLogo *merakigosdk.RequestOrganizationsUpdateOrganizationBrandingPolicyCustomLogo
+
 	if r.CustomLogo != nil {
 		enabled := func() *bool {
 			if !r.CustomLogo.Enabled.IsUnknown() && !r.CustomLogo.Enabled.IsNull() {
@@ -900,6 +916,7 @@ func (r *OrganizationsBrandingPoliciesRs) toSdkApiRequestUpdate(ctx context.Cont
 			return nil
 		}()
 		var requestOrganizationsUpdateOrganizationBrandingPolicyCustomLogoImage *merakigosdk.RequestOrganizationsUpdateOrganizationBrandingPolicyCustomLogoImage
+
 		if r.CustomLogo.Image != nil {
 			contents := r.CustomLogo.Image.Contents.ValueString()
 			format := r.CustomLogo.Image.Format.ValueString()
@@ -907,11 +924,13 @@ func (r *OrganizationsBrandingPoliciesRs) toSdkApiRequestUpdate(ctx context.Cont
 				Contents: contents,
 				Format:   format,
 			}
+			//[debug] Is Array: False
 		}
 		requestOrganizationsUpdateOrganizationBrandingPolicyCustomLogo = &merakigosdk.RequestOrganizationsUpdateOrganizationBrandingPolicyCustomLogo{
 			Enabled: enabled,
 			Image:   requestOrganizationsUpdateOrganizationBrandingPolicyCustomLogoImage,
 		}
+		//[debug] Is Array: False
 	}
 	enabled := new(bool)
 	if !r.Enabled.IsUnknown() && !r.Enabled.IsNull() {
@@ -920,8 +939,9 @@ func (r *OrganizationsBrandingPoliciesRs) toSdkApiRequestUpdate(ctx context.Cont
 		enabled = nil
 	}
 	var requestOrganizationsUpdateOrganizationBrandingPolicyHelpSettings *merakigosdk.RequestOrganizationsUpdateOrganizationBrandingPolicyHelpSettings
+
 	if r.HelpSettings != nil {
-		aPIDocsSubtab := r.HelpSettings.APIDocsSubtab.ValueString()
+		apiDocsSubtab := r.HelpSettings.APIDocsSubtab.ValueString()
 		casesSubtab := r.HelpSettings.CasesSubtab.ValueString()
 		ciscoMerakiProductDocumentation := r.HelpSettings.CiscoMerakiProductDocumentation.ValueString()
 		communitySubtab := r.HelpSettings.CommunitySubtab.ValueString()
@@ -937,7 +957,7 @@ func (r *OrganizationsBrandingPoliciesRs) toSdkApiRequestUpdate(ctx context.Cont
 		supportContactInfo := r.HelpSettings.SupportContactInfo.ValueString()
 		universalSearchKnowledgeBaseSearch := r.HelpSettings.UniversalSearchKnowledgeBaseSearch.ValueString()
 		requestOrganizationsUpdateOrganizationBrandingPolicyHelpSettings = &merakigosdk.RequestOrganizationsUpdateOrganizationBrandingPolicyHelpSettings{
-			APIDocsSubtab:                      aPIDocsSubtab,
+			APIDocsSubtab:                      apiDocsSubtab,
 			CasesSubtab:                        casesSubtab,
 			CiscoMerakiProductDocumentation:    ciscoMerakiProductDocumentation,
 			CommunitySubtab:                    communitySubtab,
@@ -953,6 +973,7 @@ func (r *OrganizationsBrandingPoliciesRs) toSdkApiRequestUpdate(ctx context.Cont
 			SupportContactInfo:                 supportContactInfo,
 			UniversalSearchKnowledgeBaseSearch: universalSearchKnowledgeBaseSearch,
 		}
+		//[debug] Is Array: False
 	}
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {

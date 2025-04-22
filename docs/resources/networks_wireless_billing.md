@@ -53,13 +53,10 @@ output "meraki_networks_wireless_billing_example" {
 Optional:
 
 - `bandwidth_limits` (Attributes) The uplink bandwidth settings for the pricing plan. (see [below for nested schema](#nestedatt--plans--bandwidth_limits))
+- `id` (String) The id of the pricing plan to update.
 - `price` (Number) The price of the billing plan.
 - `time_limit` (String) The time limit of the pricing plan in minutes.
                                         Allowed values: [1 day,1 hour,1 week,30 days]
-
-Read-Only:
-
-- `id` (String) The id of the pricing plan to update.
 
 <a id="nestedatt--plans--bandwidth_limits"></a>
 ### Nested Schema for `plans.bandwidth_limits`

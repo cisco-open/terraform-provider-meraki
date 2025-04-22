@@ -79,7 +79,7 @@ Read-Only:
 - `storm_control_enabled` (Boolean) The storm control status of the switch port.
 - `stp_guard` (String) The state of the STP guard ('disabled', 'root guard', 'bpdu guard' or 'loop guard').
 - `tags` (List of String) The list of tags of the switch port.
-- `type` (String) The type of the switch port ('trunk', 'access' or 'stack').
+- `type` (String) The type of the switch port ('trunk', 'access', 'stack' or 'routed').
 - `udld` (String) The action to take when Unidirectional Link is detected (Alert only, Enforce). Default configuration is Alert only.
 - `vlan` (Number) The VLAN of the switch port. For a trunk port, this is the native VLAN. A null value will clear the value set for trunk ports.
 - `voice_vlan` (Number) The voice VLAN of the switch port. Only applicable to access ports.
@@ -180,7 +180,7 @@ Read-Only:
 - `storm_control_enabled` (Boolean) The storm control status of the switch port.
 - `stp_guard` (String) The state of the STP guard ('disabled', 'root guard', 'bpdu guard' or 'loop guard').
 - `tags` (List of String) The list of tags of the switch port.
-- `type` (String) The type of the switch port ('trunk', 'access' or 'stack').
+- `type` (String) The type of the switch port ('trunk', 'access', 'stack' or 'routed').
 - `udld` (String) The action to take when Unidirectional Link is detected (Alert only, Enforce). Default configuration is Alert only.
 - `vlan` (Number) The VLAN of the switch port. For a trunk port, this is the native VLAN. A null value will clear the value set for trunk ports.
 - `voice_vlan` (Number) The voice VLAN of the switch port. Only applicable to access ports.

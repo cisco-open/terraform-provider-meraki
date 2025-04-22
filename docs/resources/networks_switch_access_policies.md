@@ -91,10 +91,10 @@ output "meraki_networks_switch_access_policies_example" {
 - `name` (String) Name of the access policy
 - `radius` (Attributes) Object for RADIUS Settings (see [below for nested schema](#nestedatt--radius))
 - `radius_accounting_enabled` (Boolean) Enable to send start, interim-update and stop messages to a configured RADIUS accounting server for tracking connected clients
-- `radius_accounting_servers` (Attributes Set) List of RADIUS accounting servers to require connecting devices to authenticate against before granting network access (see [below for nested schema](#nestedatt--radius_accounting_servers))
+- `radius_accounting_servers` (Attributes List) List of RADIUS accounting servers to require connecting devices to authenticate against before granting network access (see [below for nested schema](#nestedatt--radius_accounting_servers))
 - `radius_coa_support_enabled` (Boolean) Change of authentication for RADIUS re-authentication and disconnection
-- `radius_group_attribute` (String) Acceptable values are *""* for None, or *"11"* for Group Policies ACL
-- `radius_servers` (Attributes Set) List of RADIUS servers to require connecting devices to authenticate against before granting network access (see [below for nested schema](#nestedatt--radius_servers))
+- `radius_group_attribute` (String) Acceptable values are **""** for None, or **"11"** for Group Policies ACL
+- `radius_servers` (Attributes List) List of RADIUS servers to require connecting devices to authenticate against before granting network access (see [below for nested schema](#nestedatt--radius_servers))
 - `radius_testing_enabled` (Boolean) If enabled, Meraki devices will periodically send access-request messages to these RADIUS servers
 - `url_redirect_walled_garden_enabled` (Boolean) Enable to restrict access for clients to a response_objectific set of IP addresses or hostnames prior to authentication
 - `url_redirect_walled_garden_ranges` (Set of String) IP address ranges, in CIDR notation, to restrict access for clients to a specific set of IP addresses or hostnames prior to authentication
@@ -191,12 +191,19 @@ Read-Only:
 Read-Only:
 
 - `host` (String) Public IP address of the RADIUS accounting server
+- `organization_radius_server_id` (String) Organization wide RADIUS server ID. This value will be empty if this RADIUS server is not an organization wide RADIUS server
 - `port` (Number) UDP port that the RADIUS Accounting server listens on for access requests
 - `secret` (String) RADIUS client shared secret
+- `server_id` (String) Unique ID of the RADIUS accounting server
 
 
 <a id="nestedatt--radius_servers_response"></a>
 ### Nested Schema for `radius_servers_response`
+
+Optional:
+
+- `organization_radius_server_id` (String) Organization wide RADIUS server ID. This value will be empty if this RADIUS server is not an organization wide RADIUS server
+- `server_id` (String) Unique ID of the RADIUS server
 
 Read-Only:
 
@@ -209,5 +216,5 @@ Read-Only:
 Import is supported using the following syntax:
 
 ```shell
-terraform import meraki_networks_switch_access_policies.example "network_id,access_policy_number"
+terraform import meraki_networks_switch_access_policies.example "access_policy_number,network_id"
 ```

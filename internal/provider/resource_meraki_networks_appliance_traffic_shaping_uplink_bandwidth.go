@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -179,30 +179,37 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Create(ctx cont
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceTrafficShapingUplinkBandwidth(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceTrafficShapingUplinkBandwidth only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceTrafficShapingUplinkBandwidth(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceTrafficShapingUplinkBandwidth  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceTrafficShapingUplinkBandwidth only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceTrafficShapingUplinkBandwidth only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceTrafficShapingUplinkBandwidth(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceTrafficShapingUplinkBandwidth",
 				err.Error(),
@@ -215,9 +222,10 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Create(ctx cont
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceTrafficShapingUplinkBandwidth(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -232,11 +240,12 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Create(ctx cont
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkBandwidthItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -363,8 +372,10 @@ type ResponseApplianceGetNetworkApplianceTrafficShapingUplinkBandwidthBandwidthL
 // FromBody
 func (r *NetworksApplianceTrafficShapingUplinkBandwidthRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkBandwidth {
 	var requestApplianceUpdateNetworkApplianceTrafficShapingUplinkBandwidthBandwidthLimits *merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkBandwidthBandwidthLimits
+
 	if r.BandwidthLimits != nil {
 		var requestApplianceUpdateNetworkApplianceTrafficShapingUplinkBandwidthBandwidthLimitsCellular *merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkBandwidthBandwidthLimitsCellular
+
 		if r.BandwidthLimits.Cellular != nil {
 			limitDown := func() *int64 {
 				if !r.BandwidthLimits.Cellular.LimitDown.IsUnknown() && !r.BandwidthLimits.Cellular.LimitDown.IsNull() {
@@ -382,8 +393,10 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthRs) toSdkApiRequestUpdate
 				LimitDown: int64ToIntPointer(limitDown),
 				LimitUp:   int64ToIntPointer(limitUp),
 			}
+			//[debug] Is Array: False
 		}
 		var requestApplianceUpdateNetworkApplianceTrafficShapingUplinkBandwidthBandwidthLimitsWan1 *merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkBandwidthBandwidthLimitsWan1
+
 		if r.BandwidthLimits.Wan1 != nil {
 			limitDown := func() *int64 {
 				if !r.BandwidthLimits.Wan1.LimitDown.IsUnknown() && !r.BandwidthLimits.Wan1.LimitDown.IsNull() {
@@ -401,8 +414,10 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthRs) toSdkApiRequestUpdate
 				LimitDown: int64ToIntPointer(limitDown),
 				LimitUp:   int64ToIntPointer(limitUp),
 			}
+			//[debug] Is Array: False
 		}
 		var requestApplianceUpdateNetworkApplianceTrafficShapingUplinkBandwidthBandwidthLimitsWan2 *merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkBandwidthBandwidthLimitsWan2
+
 		if r.BandwidthLimits.Wan2 != nil {
 			limitDown := func() *int64 {
 				if !r.BandwidthLimits.Wan2.LimitDown.IsUnknown() && !r.BandwidthLimits.Wan2.LimitDown.IsNull() {
@@ -420,12 +435,14 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthRs) toSdkApiRequestUpdate
 				LimitDown: int64ToIntPointer(limitDown),
 				LimitUp:   int64ToIntPointer(limitUp),
 			}
+			//[debug] Is Array: False
 		}
 		requestApplianceUpdateNetworkApplianceTrafficShapingUplinkBandwidthBandwidthLimits = &merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkBandwidthBandwidthLimits{
 			Cellular: requestApplianceUpdateNetworkApplianceTrafficShapingUplinkBandwidthBandwidthLimitsCellular,
 			Wan1:     requestApplianceUpdateNetworkApplianceTrafficShapingUplinkBandwidthBandwidthLimitsWan1,
 			Wan2:     requestApplianceUpdateNetworkApplianceTrafficShapingUplinkBandwidthBandwidthLimitsWan2,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingUplinkBandwidth{
 		BandwidthLimits: requestApplianceUpdateNetworkApplianceTrafficShapingUplinkBandwidthBandwidthLimits,

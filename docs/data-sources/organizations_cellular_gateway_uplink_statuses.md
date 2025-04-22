@@ -71,14 +71,28 @@ Read-Only:
 - `dns2` (String) Secondary DNS IP
 - `gateway` (String) Gateway IP
 - `iccid` (String) Integrated Circuit Card Identification Number
+- `imsi` (String) International Mobile Subscriber Identity
 - `interface` (String) Uplink interface
 - `ip` (String) Uplink IP
+- `mcc` (String) Mobile Country Code
+- `mnc` (String) Mobile Network Code
 - `model` (String) Uplink model
+- `msisdn` (String) Mobile Station Integrated Services Digital Network
+- `mtu` (Number) Maximum Transmission Unit
 - `provider_r` (String) Network Provider
 - `public_ip` (String) Public IP
+- `roaming` (Attributes) Roaming Status (see [below for nested schema](#nestedatt--items--uplinks--roaming))
 - `signal_stat` (Attributes) Tower Signal Status (see [below for nested schema](#nestedatt--items--uplinks--signal_stat))
 - `signal_type` (String) Signal Type
 - `status` (String) Uplink status
+
+<a id="nestedatt--items--uplinks--roaming"></a>
+### Nested Schema for `items.uplinks.roaming`
+
+Read-Only:
+
+- `status` (String) Roaming Status
+
 
 <a id="nestedatt--items--uplinks--signal_stat"></a>
 ### Nested Schema for `items.uplinks.signal_stat`

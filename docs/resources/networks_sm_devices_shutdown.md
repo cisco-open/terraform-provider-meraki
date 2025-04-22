@@ -10,6 +10,8 @@ description: |-
 
 
 
+
+
 ~>Warning: This resource does not represent a real-world entity in Meraki Dashboard, therefore changing or deleting this resource on its own has no immediate effect. Instead, it is a task part of a Meraki Dashboard workflow. It is executed in Meraki without any additional verification. It does not check if it was executed before or if a similar configuration or action 
 already existed previously.
 
@@ -51,10 +53,10 @@ output "meraki_networks_sm_devices_shutdown_example" {
 
 Optional:
 
-- `ids` (Set of String) The ids of the endpoints to be shutdown.
-- `scope` (Set of String) The scope (one of all, none, withAny, withAll, withoutAny, or withoutAll) and a set of tags of the endpoints to be shutdown.
-- `serials` (Set of String) The serials of the endpoints to be shutdown.
-- `wifi_macs` (Set of String) The wifiMacs of the endpoints to be shutdown.
+- `ids` (List of String) The ids of the endpoints to be shutdown.
+- `scope` (List of String) The scope (one of all, none, withAny, withAll, withoutAny, or withoutAll) and a set of tags of the endpoints to be shutdown.
+- `serials` (List of String) The serials of the endpoints to be shutdown.
+- `wifi_macs` (List of String) The wifiMacs of the endpoints to be shutdown.
 
 
 <a id="nestedatt--item"></a>
@@ -62,4 +64,4 @@ Optional:
 
 Read-Only:
 
-- `ids` (Set of String) The Meraki Ids of the set of endpoints.
+- `ids` (List of String) The Meraki Ids of the set of endpoints.

@@ -46,6 +46,7 @@ output "meraki_organizations_admins_example" {
 
 ### Optional
 
+- `admin_id` (String) adminId path parameter. Admin ID
 - `authentication_method` (String) Admin's authentication method
                                   Allowed values: [Cisco SecureX Sign-On,Email]
 - `email` (String) Admin's email address

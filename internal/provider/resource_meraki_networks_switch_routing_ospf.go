@@ -20,7 +20,9 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	"log"
+
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -276,30 +278,37 @@ func (r *NetworksSwitchRoutingOspfResource) Create(ctx context.Context, req reso
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchRoutingOspf(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchRoutingOspf only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchRoutingOspf(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchRoutingOspf  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchRoutingOspf only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchRoutingOspf only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchRoutingOspf(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchRoutingOspf",
 				err.Error(),
@@ -312,9 +321,10 @@ func (r *NetworksSwitchRoutingOspfResource) Create(ctx context.Context, req reso
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchRoutingOspf(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -329,11 +339,12 @@ func (r *NetworksSwitchRoutingOspfResource) Create(ctx context.Context, req reso
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseSwitchGetNetworkSwitchRoutingOspfItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksSwitchRoutingOspfResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -469,6 +480,7 @@ type ResponseSwitchGetNetworkSwitchRoutingOspfV3AreasRs struct {
 // FromBody
 func (r *NetworksSwitchRoutingOspfRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspf {
 	var requestSwitchUpdateNetworkSwitchRoutingOspfAreas []merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspfAreas
+
 	if r.Areas != nil {
 		for _, rItem1 := range *r.Areas {
 			areaID := rItem1.AreaID.ValueInt64()
@@ -479,6 +491,7 @@ func (r *NetworksSwitchRoutingOspfRs) toSdkApiRequestUpdate(ctx context.Context)
 				AreaName: areaName,
 				AreaType: areaType,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	deadTimerInSeconds := new(int64)
@@ -506,8 +519,9 @@ func (r *NetworksSwitchRoutingOspfRs) toSdkApiRequestUpdate(ctx context.Context)
 		md5AuthenticationEnabled = nil
 	}
 	var requestSwitchUpdateNetworkSwitchRoutingOspfMd5AuthenticationKey *merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspfMd5AuthenticationKey
+
 	if r.Md5AuthenticationKey != nil {
-		iD := func() *int64 {
+		id := func() *int64 {
 			if !r.Md5AuthenticationKey.ID.IsUnknown() && !r.Md5AuthenticationKey.ID.IsNull() {
 				return r.Md5AuthenticationKey.ID.ValueInt64Pointer()
 			}
@@ -515,15 +529,20 @@ func (r *NetworksSwitchRoutingOspfRs) toSdkApiRequestUpdate(ctx context.Context)
 		}()
 		passphrase := r.Md5AuthenticationKey.Passphrase.ValueString()
 		requestSwitchUpdateNetworkSwitchRoutingOspfMd5AuthenticationKey = &merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspfMd5AuthenticationKey{
-			ID:         int64ToIntPointer(iD),
+			ID:         int64ToIntPointer(id),
 			Passphrase: passphrase,
 		}
+		//[debug] Is Array: False
 	}
 	var requestSwitchUpdateNetworkSwitchRoutingOspfV3 *merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspfV3
+
 	if r.V3 != nil {
+
+		log.Printf("[DEBUG] #TODO []RequestSwitchUpdateNetworkSwitchRoutingOspfV3Areas")
 		var requestSwitchUpdateNetworkSwitchRoutingOspfV3Areas []merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspfV3Areas
+
 		if r.V3.Areas != nil {
-			for _, rItem1 := range *r.V3.Areas { //V3.Areas// name: areas
+			for _, rItem1 := range *r.V3.Areas {
 				areaID := rItem1.AreaID.ValueInt64()
 				areaName := rItem1.AreaName.ValueString()
 				areaType := rItem1.AreaType.ValueString()
@@ -532,23 +551,24 @@ func (r *NetworksSwitchRoutingOspfRs) toSdkApiRequestUpdate(ctx context.Context)
 					AreaName: areaName,
 					AreaType: areaType,
 				})
+				//[debug] Is Array: True
 			}
 		}
 		deadTimerInSeconds := func() *int64 {
-			if !r.DeadTimerInSeconds.IsUnknown() && !r.DeadTimerInSeconds.IsNull() {
-				return r.DeadTimerInSeconds.ValueInt64Pointer()
+			if !r.V3.DeadTimerInSeconds.IsUnknown() && !r.V3.DeadTimerInSeconds.IsNull() {
+				return r.V3.DeadTimerInSeconds.ValueInt64Pointer()
 			}
 			return nil
 		}()
 		enabled := func() *bool {
-			if !r.Enabled.IsUnknown() && !r.Enabled.IsNull() {
-				return r.Enabled.ValueBoolPointer()
+			if !r.V3.Enabled.IsUnknown() && !r.V3.Enabled.IsNull() {
+				return r.V3.Enabled.ValueBoolPointer()
 			}
 			return nil
 		}()
 		helloTimerInSeconds := func() *int64 {
-			if !r.HelloTimerInSeconds.IsUnknown() && !r.HelloTimerInSeconds.IsNull() {
-				return r.HelloTimerInSeconds.ValueInt64Pointer()
+			if !r.V3.HelloTimerInSeconds.IsUnknown() && !r.V3.HelloTimerInSeconds.IsNull() {
+				return r.V3.HelloTimerInSeconds.ValueInt64Pointer()
 			}
 			return nil
 		}()
@@ -563,6 +583,7 @@ func (r *NetworksSwitchRoutingOspfRs) toSdkApiRequestUpdate(ctx context.Context)
 			Enabled:             enabled,
 			HelloTimerInSeconds: int64ToIntPointer(helloTimerInSeconds),
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspf{
 		Areas: func() *[]merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspfAreas {

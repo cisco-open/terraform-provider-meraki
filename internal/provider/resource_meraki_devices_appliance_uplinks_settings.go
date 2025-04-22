@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -585,30 +585,37 @@ func (r *DevicesApplianceUplinksSettingsResource) Create(ctx context.Context, re
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvSerial := data.Serial.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Appliance.GetDeviceApplianceUplinksSettings(vvSerial)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesApplianceUplinksSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvSerial != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Appliance.GetDeviceApplianceUplinksSettings(vvSerial)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesApplianceUplinksSettings  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesApplianceUplinksSettings only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesApplianceUplinksSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateDeviceApplianceUplinksSettings(vvSerial, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceApplianceUplinksSettings",
 				err.Error(),
@@ -621,9 +628,10 @@ func (r *DevicesApplianceUplinksSettingsResource) Create(ctx context.Context, re
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Appliance.GetDeviceApplianceUplinksSettings(vvSerial)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -638,11 +646,12 @@ func (r *DevicesApplianceUplinksSettingsResource) Create(ctx context.Context, re
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *DevicesApplianceUplinksSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -853,8 +862,10 @@ type ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2VlanTagging
 // FromBody
 func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettings {
 	var requestApplianceUpdateDeviceApplianceUplinksSettingsInterfaces *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfaces
+
 	if r.Interfaces != nil {
 		var requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1 *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1
+
 		if r.Interfaces.Wan1 != nil {
 			enabled := func() *bool {
 				if !r.Interfaces.Wan1.Enabled.IsUnknown() && !r.Interfaces.Wan1.Enabled.IsNull() {
@@ -863,8 +874,10 @@ func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Co
 				return nil
 			}()
 			var requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1Pppoe *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1Pppoe
+
 			if r.Interfaces.Wan1.Pppoe != nil {
 				var requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1PppoeAuthentication *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1PppoeAuthentication
+
 				if r.Interfaces.Wan1.Pppoe.Authentication != nil {
 					enabled := func() *bool {
 						if !r.Interfaces.Wan1.Pppoe.Authentication.Enabled.IsUnknown() && !r.Interfaces.Wan1.Pppoe.Authentication.Enabled.IsNull() {
@@ -879,6 +892,7 @@ func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Co
 						Password: password,
 						Username: username,
 					}
+					//[debug] Is Array: False
 				}
 				enabled := func() *bool {
 					if !r.Interfaces.Wan1.Pppoe.Enabled.IsUnknown() && !r.Interfaces.Wan1.Pppoe.Enabled.IsNull() {
@@ -890,54 +904,52 @@ func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Co
 					Authentication: requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1PppoeAuthentication,
 					Enabled:        enabled,
 				}
+				//[debug] Is Array: False
 			}
 			var requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1Svis *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1Svis
+
 			if r.Interfaces.Wan1.Svis != nil {
 				var requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv4 *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv4
+
 				if r.Interfaces.Wan1.Svis.IPv4 != nil {
 					address := r.Interfaces.Wan1.Svis.IPv4.Address.ValueString()
 					assignmentMode := r.Interfaces.Wan1.Svis.IPv4.AssignmentMode.ValueString()
 					gateway := r.Interfaces.Wan1.Svis.IPv4.Gateway.ValueString()
 					var requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv4Nameservers *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv4Nameservers
+
 					if r.Interfaces.Wan1.Svis.IPv4.Nameservers != nil {
+
 						var addresses []string = nil
-						//Hoola aqui
 						r.Interfaces.Wan1.Svis.IPv4.Nameservers.Addresses.ElementsAs(ctx, &addresses, false)
 						requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv4Nameservers = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv4Nameservers{
 							Addresses: addresses,
 						}
+						//[debug] Is Array: False
 					}
-					if r.Interfaces.Wan1.Svis.IPv4.Nameservers != nil {
-						if r.Interfaces.Wan1.Svis.IPv4.Nameservers.Addresses.IsNull() {
-							requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv4Nameservers = nil
-						}
-					}
-
 					requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv4 = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv4{
 						Address:        address,
 						AssignmentMode: assignmentMode,
 						Gateway:        gateway,
 						Nameservers:    requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv4Nameservers,
 					}
+					//[debug] Is Array: False
 				}
 				var requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv6 *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv6
+
 				if r.Interfaces.Wan1.Svis.IPv6 != nil {
 					address := r.Interfaces.Wan1.Svis.IPv6.Address.ValueString()
 					assignmentMode := r.Interfaces.Wan1.Svis.IPv6.AssignmentMode.ValueString()
 					gateway := r.Interfaces.Wan1.Svis.IPv6.Gateway.ValueString()
 					var requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv6Nameservers *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv6Nameservers
+
 					if r.Interfaces.Wan1.Svis.IPv6.Nameservers != nil {
+
 						var addresses []string = nil
-						//Hoola aqui
 						r.Interfaces.Wan1.Svis.IPv6.Nameservers.Addresses.ElementsAs(ctx, &addresses, false)
 						requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv6Nameservers = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv6Nameservers{
 							Addresses: addresses,
 						}
-					}
-					if r.Interfaces.Wan1.Svis.IPv6.Nameservers != nil {
-						if r.Interfaces.Wan1.Svis.IPv6.Nameservers.Addresses.IsNull() {
-							requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv6Nameservers = nil
-						}
+						//[debug] Is Array: False
 					}
 					requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv6 = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv6{
 						Address:        address,
@@ -945,13 +957,16 @@ func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Co
 						Gateway:        gateway,
 						Nameservers:    requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv6Nameservers,
 					}
+					//[debug] Is Array: False
 				}
 				requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1Svis = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1Svis{
 					IPv4: requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv4,
 					IPv6: requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1SvisIPv6,
 				}
+				//[debug] Is Array: False
 			}
 			var requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1VLANTagging *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1VLANTagging
+
 			if r.Interfaces.Wan1.VLANTagging != nil {
 				enabled := func() *bool {
 					if !r.Interfaces.Wan1.VLANTagging.Enabled.IsUnknown() && !r.Interfaces.Wan1.VLANTagging.Enabled.IsNull() {
@@ -959,7 +974,7 @@ func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Co
 					}
 					return nil
 				}()
-				vLANID := func() *int64 {
+				vlanID := func() *int64 {
 					if !r.Interfaces.Wan1.VLANTagging.VLANID.IsUnknown() && !r.Interfaces.Wan1.VLANTagging.VLANID.IsNull() {
 						return r.Interfaces.Wan1.VLANTagging.VLANID.ValueInt64Pointer()
 					}
@@ -967,8 +982,9 @@ func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Co
 				}()
 				requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1VLANTagging = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1VLANTagging{
 					Enabled: enabled,
-					VLANID:  int64ToIntPointer(vLANID),
+					VLANID:  int64ToIntPointer(vlanID),
 				}
+				//[debug] Is Array: False
 			}
 			requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1 = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1{
 				Enabled:     enabled,
@@ -976,8 +992,10 @@ func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Co
 				Svis:        requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1Svis,
 				VLANTagging: requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1VLANTagging,
 			}
+			//[debug] Is Array: False
 		}
 		var requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2 *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2
+
 		if r.Interfaces.Wan2 != nil {
 			enabled := func() *bool {
 				if !r.Interfaces.Wan2.Enabled.IsUnknown() && !r.Interfaces.Wan2.Enabled.IsNull() {
@@ -986,8 +1004,10 @@ func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Co
 				return nil
 			}()
 			var requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2Pppoe *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2Pppoe
+
 			if r.Interfaces.Wan2.Pppoe != nil {
 				var requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2PppoeAuthentication *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2PppoeAuthentication
+
 				if r.Interfaces.Wan2.Pppoe.Authentication != nil {
 					enabled := func() *bool {
 						if !r.Interfaces.Wan2.Pppoe.Authentication.Enabled.IsUnknown() && !r.Interfaces.Wan2.Pppoe.Authentication.Enabled.IsNull() {
@@ -1002,6 +1022,7 @@ func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Co
 						Password: password,
 						Username: username,
 					}
+					//[debug] Is Array: False
 				}
 				enabled := func() *bool {
 					if !r.Interfaces.Wan2.Pppoe.Enabled.IsUnknown() && !r.Interfaces.Wan2.Pppoe.Enabled.IsNull() {
@@ -1013,27 +1034,27 @@ func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Co
 					Authentication: requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2PppoeAuthentication,
 					Enabled:        enabled,
 				}
+				//[debug] Is Array: False
 			}
 			var requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2Svis *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2Svis
+
 			if r.Interfaces.Wan2.Svis != nil {
 				var requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv4 *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv4
+
 				if r.Interfaces.Wan2.Svis.IPv4 != nil {
 					address := r.Interfaces.Wan2.Svis.IPv4.Address.ValueString()
 					assignmentMode := r.Interfaces.Wan2.Svis.IPv4.AssignmentMode.ValueString()
 					gateway := r.Interfaces.Wan2.Svis.IPv4.Gateway.ValueString()
 					var requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv4Nameservers *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv4Nameservers
+
 					if r.Interfaces.Wan2.Svis.IPv4.Nameservers != nil {
+
 						var addresses []string = nil
-						//Hoola aqui
 						r.Interfaces.Wan2.Svis.IPv4.Nameservers.Addresses.ElementsAs(ctx, &addresses, false)
 						requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv4Nameservers = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv4Nameservers{
 							Addresses: addresses,
 						}
-					}
-					if r.Interfaces.Wan2.Svis.IPv4.Nameservers != nil {
-						if r.Interfaces.Wan2.Svis.IPv4.Nameservers.Addresses.IsNull() {
-							requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv4Nameservers = nil
-						}
+						//[debug] Is Array: False
 					}
 					requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv4 = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv4{
 						Address:        address,
@@ -1041,25 +1062,24 @@ func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Co
 						Gateway:        gateway,
 						Nameservers:    requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv4Nameservers,
 					}
+					//[debug] Is Array: False
 				}
 				var requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv6 *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv6
+
 				if r.Interfaces.Wan2.Svis.IPv6 != nil {
 					address := r.Interfaces.Wan2.Svis.IPv6.Address.ValueString()
 					assignmentMode := r.Interfaces.Wan2.Svis.IPv6.AssignmentMode.ValueString()
 					gateway := r.Interfaces.Wan2.Svis.IPv6.Gateway.ValueString()
 					var requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv6Nameservers *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv6Nameservers
+
 					if r.Interfaces.Wan2.Svis.IPv6.Nameservers != nil {
+
 						var addresses []string = nil
-						//Hoola aqui
 						r.Interfaces.Wan2.Svis.IPv6.Nameservers.Addresses.ElementsAs(ctx, &addresses, false)
 						requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv6Nameservers = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv6Nameservers{
 							Addresses: addresses,
 						}
-					}
-					if r.Interfaces.Wan2.Svis.IPv6.Nameservers != nil {
-						if r.Interfaces.Wan2.Svis.IPv6.Nameservers.Addresses.IsNull() {
-							requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv6Nameservers = nil
-						}
+						//[debug] Is Array: False
 					}
 					requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv6 = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv6{
 						Address:        address,
@@ -1067,13 +1087,16 @@ func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Co
 						Gateway:        gateway,
 						Nameservers:    requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv6Nameservers,
 					}
+					//[debug] Is Array: False
 				}
 				requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2Svis = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2Svis{
 					IPv4: requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv4,
 					IPv6: requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2SvisIPv6,
 				}
+				//[debug] Is Array: False
 			}
 			var requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2VLANTagging *merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2VLANTagging
+
 			if r.Interfaces.Wan2.VLANTagging != nil {
 				enabled := func() *bool {
 					if !r.Interfaces.Wan2.VLANTagging.Enabled.IsUnknown() && !r.Interfaces.Wan2.VLANTagging.Enabled.IsNull() {
@@ -1081,7 +1104,7 @@ func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Co
 					}
 					return nil
 				}()
-				vLANID := func() *int64 {
+				vlanID := func() *int64 {
 					if !r.Interfaces.Wan2.VLANTagging.VLANID.IsUnknown() && !r.Interfaces.Wan2.VLANTagging.VLANID.IsNull() {
 						return r.Interfaces.Wan2.VLANTagging.VLANID.ValueInt64Pointer()
 					}
@@ -1089,8 +1112,9 @@ func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Co
 				}()
 				requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2VLANTagging = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2VLANTagging{
 					Enabled: enabled,
-					VLANID:  int64ToIntPointer(vLANID),
+					VLANID:  int64ToIntPointer(vlanID),
 				}
+				//[debug] Is Array: False
 			}
 			requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2 = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2{
 				Enabled:     enabled,
@@ -1098,11 +1122,13 @@ func (r *DevicesApplianceUplinksSettingsRs) toSdkApiRequestUpdate(ctx context.Co
 				Svis:        requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2Svis,
 				VLANTagging: requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2VLANTagging,
 			}
+			//[debug] Is Array: False
 		}
 		requestApplianceUpdateDeviceApplianceUplinksSettingsInterfaces = &merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettingsInterfaces{
 			Wan1: requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan1,
 			Wan2: requestApplianceUpdateDeviceApplianceUplinksSettingsInterfacesWan2,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestApplianceUpdateDeviceApplianceUplinksSettings{
 		Interfaces: requestApplianceUpdateDeviceApplianceUplinksSettingsInterfaces,

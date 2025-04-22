@@ -1,0 +1,1 @@
+terraform import meraki_organizations_appliance_dns_local_records.example "organization_id"

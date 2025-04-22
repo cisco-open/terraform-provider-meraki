@@ -22,7 +22,9 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	"log"
+
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -243,31 +245,38 @@ func (r *NetworksWirelessSSIDsVpnResource) Create(ctx context.Context, req resou
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	vvNumber := data.Number.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDVpn(vvNetworkID, vvNumber)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSSIDsVpn only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" && vvNumber != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDVpn(vvNetworkID, vvNumber)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessSsidsVpn  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessSsidsVpn only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSSIDsVpn only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDVpn(vvNetworkID, vvNumber, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDVpn",
 				err.Error(),
@@ -280,9 +289,10 @@ func (r *NetworksWirelessSSIDsVpnResource) Create(ctx context.Context, req resou
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDVpn(vvNetworkID, vvNumber)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -297,11 +307,12 @@ func (r *NetworksWirelessSSIDsVpnResource) Create(ctx context.Context, req resou
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseWirelessGetNetworkWirelessSSIDVpnItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksWirelessSSIDsVpnResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -448,9 +459,10 @@ type ResponseWirelessGetNetworkWirelessSsidVpnSplitTunnelRulesRs struct {
 // FromBody
 func (r *NetworksWirelessSSIDsVpnRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDVpn {
 	var requestWirelessUpdateNetworkWirelessSSIDVpnConcentrator *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDVpnConcentrator
+
 	if r.Concentrator != nil {
 		networkID := r.Concentrator.NetworkID.ValueString()
-		vLANID := func() *int64 {
+		vlanID := func() *int64 {
 			if !r.Concentrator.VLANID.IsUnknown() && !r.Concentrator.VLANID.IsNull() {
 				return r.Concentrator.VLANID.ValueInt64Pointer()
 			}
@@ -458,10 +470,12 @@ func (r *NetworksWirelessSSIDsVpnRs) toSdkApiRequestUpdate(ctx context.Context) 
 		}()
 		requestWirelessUpdateNetworkWirelessSSIDVpnConcentrator = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDVpnConcentrator{
 			NetworkID: networkID,
-			VLANID:    int64ToIntPointer(vLANID),
+			VLANID:    int64ToIntPointer(vlanID),
 		}
+		//[debug] Is Array: False
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDVpnFailover *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDVpnFailover
+
 	if r.Failover != nil {
 		heartbeatInterval := func() *int64 {
 			if !r.Failover.HeartbeatInterval.IsUnknown() && !r.Failover.HeartbeatInterval.IsNull() {
@@ -469,7 +483,7 @@ func (r *NetworksWirelessSSIDsVpnRs) toSdkApiRequestUpdate(ctx context.Context) 
 			}
 			return nil
 		}()
-		iDleTimeout := func() *int64 {
+		idleTimeout := func() *int64 {
 			if !r.Failover.IDleTimeout.IsUnknown() && !r.Failover.IDleTimeout.IsNull() {
 				return r.Failover.IDleTimeout.ValueInt64Pointer()
 			}
@@ -478,11 +492,13 @@ func (r *NetworksWirelessSSIDsVpnRs) toSdkApiRequestUpdate(ctx context.Context) 
 		requestIP := r.Failover.RequestIP.ValueString()
 		requestWirelessUpdateNetworkWirelessSSIDVpnFailover = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDVpnFailover{
 			HeartbeatInterval: int64ToIntPointer(heartbeatInterval),
-			IDleTimeout:       int64ToIntPointer(iDleTimeout),
+			IDleTimeout:       int64ToIntPointer(idleTimeout),
 			RequestIP:         requestIP,
 		}
+		//[debug] Is Array: False
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDVpnSplitTunnel *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDVpnSplitTunnel
+
 	if r.SplitTunnel != nil {
 		enabled := func() *bool {
 			if !r.SplitTunnel.Enabled.IsUnknown() && !r.SplitTunnel.Enabled.IsNull() {
@@ -490,9 +506,12 @@ func (r *NetworksWirelessSSIDsVpnRs) toSdkApiRequestUpdate(ctx context.Context) 
 			}
 			return nil
 		}()
+
+		log.Printf("[DEBUG] #TODO []RequestWirelessUpdateNetworkWirelessSsidVpnSplitTunnelRules")
 		var requestWirelessUpdateNetworkWirelessSSIDVpnSplitTunnelRules []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDVpnSplitTunnelRules
+
 		if r.SplitTunnel.Rules != nil {
-			for _, rItem1 := range *r.SplitTunnel.Rules { //SplitTunnel.Rules// name: rules
+			for _, rItem1 := range *r.SplitTunnel.Rules {
 				comment := rItem1.Comment.ValueString()
 				destCidr := rItem1.DestCidr.ValueString()
 				destPort := rItem1.DestPort.ValueString()
@@ -505,6 +524,7 @@ func (r *NetworksWirelessSSIDsVpnRs) toSdkApiRequestUpdate(ctx context.Context) 
 					Policy:   policy,
 					Protocol: protocol,
 				})
+				//[debug] Is Array: True
 			}
 		}
 		requestWirelessUpdateNetworkWirelessSSIDVpnSplitTunnel = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDVpnSplitTunnel{
@@ -516,6 +536,7 @@ func (r *NetworksWirelessSSIDsVpnRs) toSdkApiRequestUpdate(ctx context.Context) 
 				return nil
 			}(),
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDVpn{
 		Concentrator: requestWirelessUpdateNetworkWirelessSSIDVpnConcentrator,

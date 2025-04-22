@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -141,7 +141,7 @@ func (r *NetworksDevicesClaimVmxResource) Schema(_ context.Context, _ resource.S
 						MarkdownDescription: `Serial number of the device`,
 						Computed:            true,
 					},
-					"tags": schema.SetAttribute{
+					"tags": schema.ListAttribute{
 						MarkdownDescription: `List of tags assigned to the device`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -187,7 +187,6 @@ func (r *NetworksDevicesClaimVmxResource) Create(ctx context.Context, req resour
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Networks.VmxNetworkDevicesClaim(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -204,7 +203,6 @@ func (r *NetworksDevicesClaimVmxResource) Create(ctx context.Context, req resour
 	}
 	//Item
 	data = ResponseNetworksVmxNetworkDevicesClaimItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -244,7 +242,7 @@ type ResponseNetworksVmxNetworkDevicesClaim struct {
 	Notes       types.String                                     `tfsdk:"notes"`
 	ProductType types.String                                     `tfsdk:"product_type"`
 	Serial      types.String                                     `tfsdk:"serial"`
-	Tags        types.Set                                        `tfsdk:"tags"`
+	Tags        types.List                                       `tfsdk:"tags"`
 }
 
 type ResponseNetworksVmxNetworkDevicesClaimDetails struct {
@@ -311,7 +309,7 @@ func ResponseNetworksVmxNetworkDevicesClaimItemToBody(state NetworksDevicesClaim
 		Notes:       types.StringValue(response.Notes),
 		ProductType: types.StringValue(response.ProductType),
 		Serial:      types.StringValue(response.Serial),
-		Tags:        StringSliceToSet(response.Tags),
+		Tags:        StringSliceToList(response.Tags),
 	}
 	state.Item = &itemState
 	return state

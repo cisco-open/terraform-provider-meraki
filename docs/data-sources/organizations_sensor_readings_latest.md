@@ -39,7 +39,7 @@ output "meraki_organizations_sensor_readings_latest_example" {
 ### Optional
 
 - `ending_before` (String) endingBefore query parameter. A token used by the server to indicate the end of the page. Often this is a timestamp or an ID but it is not limited to those. This parameter should not be defined by client applications. The link for the first, last, prev, or next page in the HTTP Link header should define it.
-- `metrics` (List of String) metrics query parameter. Types of sensor readings to retrieve. If no metrics are supplied, all available types of readings will be retrieved. Allowed values are apparentPower, battery, button, co2, current, door, downstreamPower, frequency, humidity, indoorAirQuality, noise, pm25, powerFactor, realPower, remoteLockoutSwitch, temperature, tvoc, voltage, and water.
+- `metrics` (List of String) metrics query parameter. Types of sensor readings to retrieve. If no metrics are supplied, all available types of readings will be retrieved.
 - `network_ids` (List of String) networkIds query parameter. Optional parameter to filter readings by network.
 - `per_page` (Number) perPage query parameter. The number of entries per page returned. Acceptable range is 3 1000. Default is 1000.
 - `serials` (List of String) serials query parameter. Optional parameter to filter readings by sensor.

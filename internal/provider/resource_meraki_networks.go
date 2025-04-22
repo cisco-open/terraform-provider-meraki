@@ -19,14 +19,9 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
-	"fmt"
-	"log"
-	"net/url"
-	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -175,12 +170,14 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
 	vvName := data.Name.ValueString()
-	//Items
-	responseVerifyItem, restyResp1, err := getAllItemsNetworks(*r.client, vvOrganizationID)
-	//Have Create
+
+	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationNetworks(vvOrganizationID, &merakigosdk.GetOrganizationNetworksQueryParams{
+		PerPage: -1,
+	})
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -192,11 +189,10 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
-		log.Print("responseStruct: ", responseStruct)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
-		log.Print("Result: ", result)
 		if result != nil {
 			result2 := result.(map[string]interface{})
 			vvNetworkID, ok := result2["ID"].(string)
@@ -208,8 +204,8 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 				return
 			}
 			r.client.Networks.UpdateNetwork(vvNetworkID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Networks.GetNetwork(vvNetworkID)
-			data.NetworkID = types.StringValue(responseVerifyItem2.ID)
 			if responseVerifyItem2 != nil {
 				data = ResponseNetworksGetNetworkItemToBodyRs(data, responseVerifyItem2, false)
 				// Path params update assigned
@@ -218,11 +214,11 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Organizations.CreateOrganizationNetwork(vvOrganizationID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationNetwork",
 				err.Error(),
@@ -235,9 +231,10 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 		)
 		return
 	}
-	//Items
-	responseGet, restyResp1, err := getAllItemsNetworks(*r.client, vvOrganizationID)
-	// Has item and has items
+
+	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationNetworks(vvOrganizationID, &merakigosdk.GetOrganizationNetworksQueryParams{
+		PerPage: -1,
+	})
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -253,6 +250,7 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -261,7 +259,7 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter NetworkID",
-				"Error",
+				"Fail Parsing NetworkID",
 			)
 			return
 		}
@@ -292,6 +290,7 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 		)
 		return
 	}
+
 }
 
 func (r *NetworksResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -530,38 +529,4 @@ func ResponseNetworksGetNetworkItemToBodyRs(state NetworksRs, response *merakigo
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksRs)
 	}
 	return mergeInterfaces(state, itemState, true).(NetworksRs)
-}
-
-func getAllItemsNetworks(client merakigosdk.Client, organizationId string) (merakigosdk.ResponseOrganizationsGetOrganizationNetworks, *resty.Response, error) {
-	var all_response merakigosdk.ResponseOrganizationsGetOrganizationNetworks
-	response, r2, er := client.Organizations.GetOrganizationNetworks(organizationId, &merakigosdk.GetOrganizationNetworksQueryParams{
-		PerPage: 1000,
-	})
-	count := 0
-	if response != nil {
-		all_response = append(all_response, *response...)
-		for len(*response) >= 1000 {
-			count += 1
-			fmt.Println(count)
-			links := strings.Split(r2.Header().Get("Link"), ",")
-			var link string
-			if count > 1 {
-				link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[2], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
-			} else {
-				link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[1], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
-			}
-			myUrl, _ := url.Parse(link)
-			params, _ := url.ParseQuery(myUrl.RawQuery)
-			if params["endingBefore"] != nil {
-				response, r2, er = client.Organizations.GetOrganizationNetworks(organizationId, &merakigosdk.GetOrganizationNetworksQueryParams{
-					PerPage:      1000,
-					EndingBefore: params["endingBefore"][0],
-				})
-				all_response = append(all_response, *response...)
-			} else {
-				break
-			}
-		}
-	}
-	return all_response, r2, er
 }

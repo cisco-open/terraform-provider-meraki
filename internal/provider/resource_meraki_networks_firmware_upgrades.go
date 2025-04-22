@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -1793,30 +1793,37 @@ func (r *NetworksFirmwareUpgradesResource) Create(ctx context.Context, req resou
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkFirmwareUpgrades(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksFirmwareUpgrades only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkFirmwareUpgrades(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksFirmwareUpgrades  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksFirmwareUpgrades only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksFirmwareUpgrades only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkFirmwareUpgrades(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkFirmwareUpgrades",
 				err.Error(),
@@ -1829,9 +1836,10 @@ func (r *NetworksFirmwareUpgradesResource) Create(ctx context.Context, req resou
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Networks.GetNetworkFirmwareUpgrades(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -1846,11 +1854,12 @@ func (r *NetworksFirmwareUpgradesResource) Create(ctx context.Context, req resou
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseNetworksGetNetworkFirmwareUpgradesItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksFirmwareUpgradesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -2462,23 +2471,29 @@ type RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgra
 func (r *NetworksFirmwareUpgradesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgrades {
 	emptyString := ""
 	var requestNetworksUpdateNetworkFirmwareUpgradesProducts *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProducts
+
 	if r.Products != nil {
 		var requestNetworksUpdateNetworkFirmwareUpgradesProductsAppliance *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsAppliance
+
 		if r.Products.Appliance != nil {
 			var requestNetworksUpdateNetworkFirmwareUpgradesProductsApplianceNextUpgrade *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsApplianceNextUpgrade
+
 			if r.Products.Appliance.NextUpgrade != nil {
 				time := r.Products.Appliance.NextUpgrade.Time.ValueString()
 				var requestNetworksUpdateNetworkFirmwareUpgradesProductsApplianceNextUpgradeToVersion *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsApplianceNextUpgradeToVersion
+
 				if r.Products.Appliance.NextUpgrade.ToVersion != nil {
-					iD := r.Products.Appliance.NextUpgrade.ToVersion.ID.ValueString()
+					id := r.Products.Appliance.NextUpgrade.ToVersion.ID.ValueString()
 					requestNetworksUpdateNetworkFirmwareUpgradesProductsApplianceNextUpgradeToVersion = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsApplianceNextUpgradeToVersion{
-						ID: iD,
+						ID: id,
 					}
+					//[debug] Is Array: False
 				}
 				requestNetworksUpdateNetworkFirmwareUpgradesProductsApplianceNextUpgrade = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsApplianceNextUpgrade{
 					Time:      time,
 					ToVersion: requestNetworksUpdateNetworkFirmwareUpgradesProductsApplianceNextUpgradeToVersion,
 				}
+				//[debug] Is Array: False
 			}
 			participateInNextBetaRelease := func() *bool {
 				if !r.Products.Appliance.ParticipateInNextBetaRelease.IsUnknown() && !r.Products.Appliance.ParticipateInNextBetaRelease.IsNull() {
@@ -2490,23 +2505,29 @@ func (r *NetworksFirmwareUpgradesRs) toSdkApiRequestUpdate(ctx context.Context) 
 				NextUpgrade:                  requestNetworksUpdateNetworkFirmwareUpgradesProductsApplianceNextUpgrade,
 				ParticipateInNextBetaRelease: participateInNextBetaRelease,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkFirmwareUpgradesProductsCamera *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsCamera
+
 		if r.Products.Camera != nil {
 			var requestNetworksUpdateNetworkFirmwareUpgradesProductsCameraNextUpgrade *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsCameraNextUpgrade
+
 			if r.Products.Camera.NextUpgrade != nil {
 				time := r.Products.Camera.NextUpgrade.Time.ValueString()
 				var requestNetworksUpdateNetworkFirmwareUpgradesProductsCameraNextUpgradeToVersion *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsCameraNextUpgradeToVersion
+
 				if r.Products.Camera.NextUpgrade.ToVersion != nil {
-					iD := r.Products.Camera.NextUpgrade.ToVersion.ID.ValueString()
+					id := r.Products.Camera.NextUpgrade.ToVersion.ID.ValueString()
 					requestNetworksUpdateNetworkFirmwareUpgradesProductsCameraNextUpgradeToVersion = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsCameraNextUpgradeToVersion{
-						ID: iD,
+						ID: id,
 					}
+					//[debug] Is Array: False
 				}
 				requestNetworksUpdateNetworkFirmwareUpgradesProductsCameraNextUpgrade = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsCameraNextUpgrade{
 					Time:      time,
 					ToVersion: requestNetworksUpdateNetworkFirmwareUpgradesProductsCameraNextUpgradeToVersion,
 				}
+				//[debug] Is Array: False
 			}
 			participateInNextBetaRelease := func() *bool {
 				if !r.Products.Camera.ParticipateInNextBetaRelease.IsUnknown() && !r.Products.Camera.ParticipateInNextBetaRelease.IsNull() {
@@ -2518,23 +2539,29 @@ func (r *NetworksFirmwareUpgradesRs) toSdkApiRequestUpdate(ctx context.Context) 
 				NextUpgrade:                  requestNetworksUpdateNetworkFirmwareUpgradesProductsCameraNextUpgrade,
 				ParticipateInNextBetaRelease: participateInNextBetaRelease,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkFirmwareUpgradesProductsCellularGateway *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsCellularGateway
+
 		if r.Products.CellularGateway != nil {
 			var requestNetworksUpdateNetworkFirmwareUpgradesProductsCellularGatewayNextUpgrade *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsCellularGatewayNextUpgrade
+
 			if r.Products.CellularGateway.NextUpgrade != nil {
 				time := r.Products.CellularGateway.NextUpgrade.Time.ValueString()
 				var requestNetworksUpdateNetworkFirmwareUpgradesProductsCellularGatewayNextUpgradeToVersion *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsCellularGatewayNextUpgradeToVersion
+
 				if r.Products.CellularGateway.NextUpgrade.ToVersion != nil {
-					iD := r.Products.CellularGateway.NextUpgrade.ToVersion.ID.ValueString()
+					id := r.Products.CellularGateway.NextUpgrade.ToVersion.ID.ValueString()
 					requestNetworksUpdateNetworkFirmwareUpgradesProductsCellularGatewayNextUpgradeToVersion = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsCellularGatewayNextUpgradeToVersion{
-						ID: iD,
+						ID: id,
 					}
+					//[debug] Is Array: False
 				}
 				requestNetworksUpdateNetworkFirmwareUpgradesProductsCellularGatewayNextUpgrade = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsCellularGatewayNextUpgrade{
 					Time:      time,
 					ToVersion: requestNetworksUpdateNetworkFirmwareUpgradesProductsCellularGatewayNextUpgradeToVersion,
 				}
+				//[debug] Is Array: False
 			}
 			participateInNextBetaRelease := func() *bool {
 				if !r.Products.CellularGateway.ParticipateInNextBetaRelease.IsUnknown() && !r.Products.CellularGateway.ParticipateInNextBetaRelease.IsNull() {
@@ -2546,23 +2573,29 @@ func (r *NetworksFirmwareUpgradesRs) toSdkApiRequestUpdate(ctx context.Context) 
 				NextUpgrade:                  requestNetworksUpdateNetworkFirmwareUpgradesProductsCellularGatewayNextUpgrade,
 				ParticipateInNextBetaRelease: participateInNextBetaRelease,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkFirmwareUpgradesProductsSecureConnect *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSecureConnect
+
 		if r.Products.SecureConnect != nil {
 			var requestNetworksUpdateNetworkFirmwareUpgradesProductsSecureConnectNextUpgrade *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSecureConnectNextUpgrade
+
 			if r.Products.SecureConnect.NextUpgrade != nil {
 				time := r.Products.SecureConnect.NextUpgrade.Time.ValueString()
 				var requestNetworksUpdateNetworkFirmwareUpgradesProductsSecureConnectNextUpgradeToVersion *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSecureConnectNextUpgradeToVersion
+
 				if r.Products.SecureConnect.NextUpgrade.ToVersion != nil {
-					iD := r.Products.SecureConnect.NextUpgrade.ToVersion.ID.ValueString()
+					id := r.Products.SecureConnect.NextUpgrade.ToVersion.ID.ValueString()
 					requestNetworksUpdateNetworkFirmwareUpgradesProductsSecureConnectNextUpgradeToVersion = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSecureConnectNextUpgradeToVersion{
-						ID: iD,
+						ID: id,
 					}
+					//[debug] Is Array: False
 				}
 				requestNetworksUpdateNetworkFirmwareUpgradesProductsSecureConnectNextUpgrade = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSecureConnectNextUpgrade{
 					Time:      time,
 					ToVersion: requestNetworksUpdateNetworkFirmwareUpgradesProductsSecureConnectNextUpgradeToVersion,
 				}
+				//[debug] Is Array: False
 			}
 			participateInNextBetaRelease := func() *bool {
 				if !r.Products.SecureConnect.ParticipateInNextBetaRelease.IsUnknown() && !r.Products.SecureConnect.ParticipateInNextBetaRelease.IsNull() {
@@ -2574,23 +2607,29 @@ func (r *NetworksFirmwareUpgradesRs) toSdkApiRequestUpdate(ctx context.Context) 
 				NextUpgrade:                  requestNetworksUpdateNetworkFirmwareUpgradesProductsSecureConnectNextUpgrade,
 				ParticipateInNextBetaRelease: participateInNextBetaRelease,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkFirmwareUpgradesProductsSensor *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSensor
+
 		if r.Products.Sensor != nil {
 			var requestNetworksUpdateNetworkFirmwareUpgradesProductsSensorNextUpgrade *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSensorNextUpgrade
+
 			if r.Products.Sensor.NextUpgrade != nil {
 				time := r.Products.Sensor.NextUpgrade.Time.ValueString()
 				var requestNetworksUpdateNetworkFirmwareUpgradesProductsSensorNextUpgradeToVersion *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSensorNextUpgradeToVersion
+
 				if r.Products.Sensor.NextUpgrade.ToVersion != nil {
-					iD := r.Products.Sensor.NextUpgrade.ToVersion.ID.ValueString()
+					id := r.Products.Sensor.NextUpgrade.ToVersion.ID.ValueString()
 					requestNetworksUpdateNetworkFirmwareUpgradesProductsSensorNextUpgradeToVersion = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSensorNextUpgradeToVersion{
-						ID: iD,
+						ID: id,
 					}
+					//[debug] Is Array: False
 				}
 				requestNetworksUpdateNetworkFirmwareUpgradesProductsSensorNextUpgrade = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSensorNextUpgrade{
 					Time:      time,
 					ToVersion: requestNetworksUpdateNetworkFirmwareUpgradesProductsSensorNextUpgradeToVersion,
 				}
+				//[debug] Is Array: False
 			}
 			participateInNextBetaRelease := func() *bool {
 				if !r.Products.Sensor.ParticipateInNextBetaRelease.IsUnknown() && !r.Products.Sensor.ParticipateInNextBetaRelease.IsNull() {
@@ -2602,23 +2641,29 @@ func (r *NetworksFirmwareUpgradesRs) toSdkApiRequestUpdate(ctx context.Context) 
 				NextUpgrade:                  requestNetworksUpdateNetworkFirmwareUpgradesProductsSensorNextUpgrade,
 				ParticipateInNextBetaRelease: participateInNextBetaRelease,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitch *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitch
+
 		if r.Products.Switch != nil {
 			var requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchNextUpgrade *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchNextUpgrade
+
 			if r.Products.Switch.NextUpgrade != nil {
 				time := r.Products.Switch.NextUpgrade.Time.ValueString()
 				var requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchNextUpgradeToVersion *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchNextUpgradeToVersion
+
 				if r.Products.Switch.NextUpgrade.ToVersion != nil {
-					iD := r.Products.Switch.NextUpgrade.ToVersion.ID.ValueString()
+					id := r.Products.Switch.NextUpgrade.ToVersion.ID.ValueString()
 					requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchNextUpgradeToVersion = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchNextUpgradeToVersion{
-						ID: iD,
+						ID: id,
 					}
+					//[debug] Is Array: False
 				}
 				requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchNextUpgrade = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchNextUpgrade{
 					Time:      time,
 					ToVersion: requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchNextUpgradeToVersion,
 				}
+				//[debug] Is Array: False
 			}
 			participateInNextBetaRelease := func() *bool {
 				if !r.Products.Switch.ParticipateInNextBetaRelease.IsUnknown() && !r.Products.Switch.ParticipateInNextBetaRelease.IsNull() {
@@ -2630,23 +2675,29 @@ func (r *NetworksFirmwareUpgradesRs) toSdkApiRequestUpdate(ctx context.Context) 
 				NextUpgrade:                  requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchNextUpgrade,
 				ParticipateInNextBetaRelease: participateInNextBetaRelease,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalyst *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalyst
+
 		if r.Products.SwitchCatalyst != nil {
 			var requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgrade *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgrade
+
 			if r.Products.SwitchCatalyst.NextUpgrade != nil {
 				time := r.Products.SwitchCatalyst.NextUpgrade.Time.ValueString()
 				var requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgradeToVersion *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgradeToVersion
+
 				if r.Products.SwitchCatalyst.NextUpgrade.ToVersion != nil {
-					iD := r.Products.SwitchCatalyst.NextUpgrade.ToVersion.ID.ValueString()
+					id := r.Products.SwitchCatalyst.NextUpgrade.ToVersion.ID.ValueString()
 					requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgradeToVersion = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgradeToVersion{
-						ID: iD,
+						ID: id,
 					}
+					//[debug] Is Array: False
 				}
 				requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgrade = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgrade{
 					Time:      time,
 					ToVersion: requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgradeToVersion,
 				}
+				//[debug] Is Array: False
 			}
 			participateInNextBetaRelease := func() *bool {
 				if !r.Products.SwitchCatalyst.ParticipateInNextBetaRelease.IsUnknown() && !r.Products.SwitchCatalyst.ParticipateInNextBetaRelease.IsNull() {
@@ -2658,23 +2709,29 @@ func (r *NetworksFirmwareUpgradesRs) toSdkApiRequestUpdate(ctx context.Context) 
 				NextUpgrade:                  requestNetworksUpdateNetworkFirmwareUpgradesProductsSwitchCatalystNextUpgrade,
 				ParticipateInNextBetaRelease: participateInNextBetaRelease,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkFirmwareUpgradesProductsWireless *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsWireless
+
 		if r.Products.Wireless != nil {
 			var requestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessNextUpgrade *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessNextUpgrade
+
 			if r.Products.Wireless.NextUpgrade != nil {
 				time := r.Products.Wireless.NextUpgrade.Time.ValueString()
 				var requestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessNextUpgradeToVersion *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessNextUpgradeToVersion
+
 				if r.Products.Wireless.NextUpgrade.ToVersion != nil {
-					iD := r.Products.Wireless.NextUpgrade.ToVersion.ID.ValueString()
+					id := r.Products.Wireless.NextUpgrade.ToVersion.ID.ValueString()
 					requestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessNextUpgradeToVersion = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessNextUpgradeToVersion{
-						ID: iD,
+						ID: id,
 					}
+					//[debug] Is Array: False
 				}
 				requestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessNextUpgrade = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessNextUpgrade{
 					Time:      time,
 					ToVersion: requestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessNextUpgradeToVersion,
 				}
+				//[debug] Is Array: False
 			}
 			participateInNextBetaRelease := func() *bool {
 				if !r.Products.Wireless.ParticipateInNextBetaRelease.IsUnknown() && !r.Products.Wireless.ParticipateInNextBetaRelease.IsNull() {
@@ -2686,23 +2743,29 @@ func (r *NetworksFirmwareUpgradesRs) toSdkApiRequestUpdate(ctx context.Context) 
 				NextUpgrade:                  requestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessNextUpgrade,
 				ParticipateInNextBetaRelease: participateInNextBetaRelease,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessController *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessController
+
 		if r.Products.WirelessController != nil {
 			var requestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessControllerNextUpgrade *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessControllerNextUpgrade
+
 			if r.Products.WirelessController.NextUpgrade != nil {
 				time := r.Products.WirelessController.NextUpgrade.Time.ValueString()
 				var requestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessControllerNextUpgradeToVersion *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessControllerNextUpgradeToVersion
+
 				if r.Products.WirelessController.NextUpgrade.ToVersion != nil {
-					iD := r.Products.WirelessController.NextUpgrade.ToVersion.ID.ValueString()
+					id := r.Products.WirelessController.NextUpgrade.ToVersion.ID.ValueString()
 					requestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessControllerNextUpgradeToVersion = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessControllerNextUpgradeToVersion{
-						ID: iD,
+						ID: id,
 					}
+					//[debug] Is Array: False
 				}
 				requestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessControllerNextUpgrade = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessControllerNextUpgrade{
 					Time:      time,
 					ToVersion: requestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessControllerNextUpgradeToVersion,
 				}
+				//[debug] Is Array: False
 			}
 			participateInNextBetaRelease := func() *bool {
 				if !r.Products.WirelessController.ParticipateInNextBetaRelease.IsUnknown() && !r.Products.WirelessController.ParticipateInNextBetaRelease.IsNull() {
@@ -2714,6 +2777,7 @@ func (r *NetworksFirmwareUpgradesRs) toSdkApiRequestUpdate(ctx context.Context) 
 				NextUpgrade:                  requestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessControllerNextUpgrade,
 				ParticipateInNextBetaRelease: participateInNextBetaRelease,
 			}
+			//[debug] Is Array: False
 		}
 		requestNetworksUpdateNetworkFirmwareUpgradesProducts = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesProducts{
 			Appliance:          requestNetworksUpdateNetworkFirmwareUpgradesProductsAppliance,
@@ -2726,6 +2790,7 @@ func (r *NetworksFirmwareUpgradesRs) toSdkApiRequestUpdate(ctx context.Context) 
 			Wireless:           requestNetworksUpdateNetworkFirmwareUpgradesProductsWireless,
 			WirelessController: requestNetworksUpdateNetworkFirmwareUpgradesProductsWirelessController,
 		}
+		//[debug] Is Array: False
 	}
 	timezone := new(string)
 	if !r.Timezone.IsUnknown() && !r.Timezone.IsNull() {
@@ -2734,6 +2799,7 @@ func (r *NetworksFirmwareUpgradesRs) toSdkApiRequestUpdate(ctx context.Context) 
 		timezone = &emptyString
 	}
 	var requestNetworksUpdateNetworkFirmwareUpgradesUpgradeWindow *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesUpgradeWindow
+
 	if r.UpgradeWindow != nil {
 		dayOfWeek := r.UpgradeWindow.DayOfWeek.ValueString()
 		hourOfDay := r.UpgradeWindow.HourOfDay.ValueString()
@@ -2741,6 +2807,7 @@ func (r *NetworksFirmwareUpgradesRs) toSdkApiRequestUpdate(ctx context.Context) 
 			DayOfWeek: dayOfWeek,
 			HourOfDay: hourOfDay,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgrades{
 		Products:      requestNetworksUpdateNetworkFirmwareUpgradesProducts,

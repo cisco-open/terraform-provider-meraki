@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -207,6 +207,10 @@ func (d *OrganizationsWirelessControllerOverviewByDeviceDataSource) Schema(_ con
 												},
 											},
 										},
+										"redundant_serial": schema.StringAttribute{
+											MarkdownDescription: `Wireless LAN controller redundant device serial`,
+											Computed:            true,
+										},
 										"role": schema.StringAttribute{
 											MarkdownDescription: `Wireless LAN controller role(Active, Active recovery, Standby hot, Standby recovery and Offline)`,
 											Computed:            true,
@@ -359,10 +363,11 @@ type ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDevice
 }
 
 type ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDeviceItemsRedundancy struct {
-	ChassisName types.String                                                                                          `tfsdk:"chassis_name"`
-	ID          types.String                                                                                          `tfsdk:"id"`
-	Management  *ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDeviceItemsRedundancyManagement `tfsdk:"management"`
-	Role        types.String                                                                                          `tfsdk:"role"`
+	ChassisName     types.String                                                                                          `tfsdk:"chassis_name"`
+	ID              types.String                                                                                          `tfsdk:"id"`
+	Management      *ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDeviceItemsRedundancyManagement `tfsdk:"management"`
+	RedundantSerial types.String                                                                                          `tfsdk:"redundant_serial"`
+	Role            types.String                                                                                          `tfsdk:"role"`
 }
 
 type ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDeviceItemsRedundancyManagement struct {
@@ -500,7 +505,8 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDevice
 										}
 										return nil
 									}(),
-									Role: types.StringValue(items.Redundancy.Role),
+									RedundantSerial: types.StringValue(items.Redundancy.RedundantSerial),
+									Role:            types.StringValue(items.Redundancy.Role),
 								}
 							}
 							return nil

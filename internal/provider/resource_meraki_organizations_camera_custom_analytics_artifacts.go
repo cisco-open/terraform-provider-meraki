@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -119,31 +119,26 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Create(ctx context
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	// name
+
 	responseVerifyItem, restyResp1, err := r.client.Camera.GetOrganizationCameraCustomAnalyticsArtifacts(vvOrganizationID)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
-			if restyResp1 == nil {
+			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
-					"Failure when executing Get",
+					"Failure when executing GetOrganizationCameraCustomAnalyticsArtifacts",
 					err.Error(),
 				)
 				return
 			}
-			if restyResp1.StatusCode() != 404 {
-			}
-			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizationCameraCustomAnalyticsArtifacts",
-				err.Error(),
-			)
-			return
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -157,7 +152,6 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Create(ctx context
 				)
 				return
 			}
-			// r.client..( data.toSdkApiRequestUpdate(ctx))
 			responseVerifyItem2, _, _ := r.client.Camera.GetOrganizationCameraCustomAnalyticsArtifact(vvOrganizationID, vvArtifactID)
 			if responseVerifyItem2 != nil {
 				data = ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactItemToBodyRs(data, responseVerifyItem2, false)
@@ -167,11 +161,11 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Create(ctx context
 			}
 		}
 	}
-	dataRequest := data.toSdkApiRequestCreate(ctx)
-	_, restyResp2, err := r.client.Camera.CreateOrganizationCameraCustomAnalyticsArtifact(vvOrganizationID, dataRequest)
 
-	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+	dataRequest := data.toSdkApiRequestCreate(ctx)
+	response, restyResp2, err := r.client.Camera.CreateOrganizationCameraCustomAnalyticsArtifact(vvOrganizationID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationCameraCustomAnalyticsArtifact",
 				err.Error(),
@@ -184,9 +178,8 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Create(ctx context
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Camera.GetOrganizationCameraCustomAnalyticsArtifacts(vvOrganizationID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -202,6 +195,7 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Create(ctx context
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -210,7 +204,7 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Create(ctx context
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter ArtifactID",
-				"Error",
+				"Fail Parsing ArtifactID",
 			)
 			return
 		}
@@ -240,6 +234,7 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Create(ctx context
 		)
 		return
 	}
+
 }
 
 func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -264,7 +259,6 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Read(ctx context.C
 	// Has Item2
 
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
 	vvArtifactID := data.ArtifactID.ValueString()
 	responseGet, restyRespGet, err := r.client.Camera.GetOrganizationCameraCustomAnalyticsArtifact(vvOrganizationID, vvArtifactID)
 	if err != nil || restyRespGet == nil {
@@ -289,7 +283,7 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Read(ctx context.C
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned

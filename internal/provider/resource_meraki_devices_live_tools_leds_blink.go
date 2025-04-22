@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -220,7 +220,6 @@ func (r *DevicesLiveToolsLedsBlinkResource) Create(ctx context.Context, req reso
 	vvSerial := data.Serial.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Devices.CreateDeviceLiveToolsLedsBlink(vvSerial, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -237,7 +236,6 @@ func (r *DevicesLiveToolsLedsBlinkResource) Create(ctx context.Context, req reso
 	}
 	//Item
 	data = ResponseDevicesCreateDeviceLiveToolsLedsBlinkItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -306,29 +304,35 @@ type RequestDevicesCreateDeviceLiveToolsLedsBlinkCallbackPayloadTemplateRs struc
 func (r *DevicesLiveToolsLedsBlink) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestDevicesCreateDeviceLiveToolsLedsBlink {
 	re := *r.Parameters
 	var requestDevicesCreateDeviceLiveToolsLedsBlinkCallback *merakigosdk.RequestDevicesCreateDeviceLiveToolsLedsBlinkCallback
+
 	if re.Callback != nil {
 		var requestDevicesCreateDeviceLiveToolsLedsBlinkCallbackHTTPServer *merakigosdk.RequestDevicesCreateDeviceLiveToolsLedsBlinkCallbackHTTPServer
+
 		if re.Callback.HTTPServer != nil {
-			iD := re.Callback.HTTPServer.ID.ValueString()
+			id := re.Callback.HTTPServer.ID.ValueString()
 			requestDevicesCreateDeviceLiveToolsLedsBlinkCallbackHTTPServer = &merakigosdk.RequestDevicesCreateDeviceLiveToolsLedsBlinkCallbackHTTPServer{
-				ID: iD,
+				ID: id,
 			}
+			//[debug] Is Array: False
 		}
 		var requestDevicesCreateDeviceLiveToolsLedsBlinkCallbackPayloadTemplate *merakigosdk.RequestDevicesCreateDeviceLiveToolsLedsBlinkCallbackPayloadTemplate
+
 		if re.Callback.PayloadTemplate != nil {
-			iD := re.Callback.PayloadTemplate.ID.ValueString()
+			id := re.Callback.PayloadTemplate.ID.ValueString()
 			requestDevicesCreateDeviceLiveToolsLedsBlinkCallbackPayloadTemplate = &merakigosdk.RequestDevicesCreateDeviceLiveToolsLedsBlinkCallbackPayloadTemplate{
-				ID: iD,
+				ID: id,
 			}
+			//[debug] Is Array: False
 		}
 		sharedSecret := re.Callback.SharedSecret.ValueString()
-		uRL := re.Callback.URL.ValueString()
+		url := re.Callback.URL.ValueString()
 		requestDevicesCreateDeviceLiveToolsLedsBlinkCallback = &merakigosdk.RequestDevicesCreateDeviceLiveToolsLedsBlinkCallback{
 			HTTPServer:      requestDevicesCreateDeviceLiveToolsLedsBlinkCallbackHTTPServer,
 			PayloadTemplate: requestDevicesCreateDeviceLiveToolsLedsBlinkCallbackPayloadTemplate,
 			SharedSecret:    sharedSecret,
-			URL:             uRL,
+			URL:             url,
 		}
+		//[debug] Is Array: False
 	}
 	duration := new(int64)
 	if !re.Duration.IsUnknown() && !re.Duration.IsNull() {

@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -141,7 +141,6 @@ func (r *DevicesBlinkLedsResource) Create(ctx context.Context, req resource.Crea
 	vvSerial := data.Serial.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Devices.BlinkDeviceLeds(vvSerial, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -158,7 +157,6 @@ func (r *DevicesBlinkLedsResource) Create(ctx context.Context, req resource.Crea
 	}
 	//Item
 	data = ResponseDevicesBlinkDeviceLedsItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }

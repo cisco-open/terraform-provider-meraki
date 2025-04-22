@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -72,7 +72,7 @@ func (r *DevicesSwitchPortsCycleResource) Schema(_ context.Context, _ resource.S
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"ports": schema.SetAttribute{
+					"ports": schema.ListAttribute{
 						MarkdownDescription: `List of switch ports`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -82,7 +82,7 @@ func (r *DevicesSwitchPortsCycleResource) Schema(_ context.Context, _ resource.S
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"ports": schema.SetAttribute{
+					"ports": schema.ListAttribute{
 						MarkdownDescription: `List of switch ports`,
 						Optional:            true,
 						Computed:            true,
@@ -115,7 +115,6 @@ func (r *DevicesSwitchPortsCycleResource) Create(ctx context.Context, req resour
 	vvSerial := data.Serial.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Switch.CycleDeviceSwitchPorts(vvSerial, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -132,7 +131,6 @@ func (r *DevicesSwitchPortsCycleResource) Create(ctx context.Context, req resour
 	}
 	//Item
 	data = ResponseSwitchCycleDeviceSwitchPortsItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -158,7 +156,7 @@ type DevicesSwitchPortsCycle struct {
 }
 
 type ResponseSwitchCycleDeviceSwitchPorts struct {
-	Ports types.Set `tfsdk:"ports"`
+	Ports types.List `tfsdk:"ports"`
 }
 
 type RequestSwitchCycleDeviceSwitchPortsRs struct {
@@ -179,7 +177,7 @@ func (r *DevicesSwitchPortsCycle) toSdkApiRequestCreate(ctx context.Context) *me
 // ToBody
 func ResponseSwitchCycleDeviceSwitchPortsItemToBody(state DevicesSwitchPortsCycle, response *merakigosdk.ResponseSwitchCycleDeviceSwitchPorts) DevicesSwitchPortsCycle {
 	itemState := ResponseSwitchCycleDeviceSwitchPorts{
-		Ports: StringSliceToSet(response.Ports),
+		Ports: StringSliceToList(response.Ports),
 	}
 	state.Item = &itemState
 	return state

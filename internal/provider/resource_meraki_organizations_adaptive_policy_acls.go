@@ -22,12 +22,13 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -131,6 +132,15 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Schema(_ context.Context, _ re
 								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
+						"log": schema.BoolAttribute{
+							MarkdownDescription: `If enabled, when this rule is hit an entry will be logged to the event log
+`,
+							Computed: true,
+							Optional: true,
+							PlanModifiers: []planmodifier.Bool{
+								boolplanmodifier.UseStateForUnknown(),
+							},
+						},
 						"policy": schema.StringAttribute{
 							MarkdownDescription: `'allow' or 'deny' traffic specified by this rule
                                         Allowed values: [allow,deny]`,
@@ -171,6 +181,15 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Schema(_ context.Context, _ re
 								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
+						"tcp_established": schema.BoolAttribute{
+							MarkdownDescription: `If enabled, means TCP connection with this node must be established.
+`,
+							Computed: true,
+							Optional: true,
+							PlanModifiers: []planmodifier.Bool{
+								boolplanmodifier.UseStateForUnknown(),
+							},
+						},
 					},
 				},
 			},
@@ -202,12 +221,14 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Create(ctx context.Context, re
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationAdaptivePolicyACLs(vvOrganizationID)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -219,6 +240,7 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Create(ctx context.Context, re
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -233,6 +255,7 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Create(ctx context.Context, re
 				return
 			}
 			r.client.Organizations.UpdateOrganizationAdaptivePolicyACL(vvOrganizationID, vvACLID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Organizations.GetOrganizationAdaptivePolicyACL(vvOrganizationID, vvACLID)
 			if responseVerifyItem2 != nil {
 				data = ResponseOrganizationsGetOrganizationAdaptivePolicyACLItemToBodyRs(data, responseVerifyItem2, false)
@@ -242,11 +265,11 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Create(ctx context.Context, re
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Organizations.CreateOrganizationAdaptivePolicyACL(vvOrganizationID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationAdaptivePolicyACL",
 				err.Error(),
@@ -259,9 +282,8 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Create(ctx context.Context, re
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationAdaptivePolicyACLs(vvOrganizationID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -277,6 +299,7 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Create(ctx context.Context, re
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -285,7 +308,7 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Create(ctx context.Context, re
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter ACLID",
-				"Error",
+				"Fail Parsing ACLID",
 			)
 			return
 		}
@@ -315,6 +338,7 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Create(ctx context.Context, re
 		)
 		return
 	}
+
 }
 
 func (r *OrganizationsAdaptivePolicyACLsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -461,10 +485,12 @@ type OrganizationsAdaptivePolicyACLsRs struct {
 }
 
 type ResponseOrganizationsGetOrganizationAdaptivePolicyAclRulesRs struct {
-	DstPort  types.String `tfsdk:"dst_port"`
-	Policy   types.String `tfsdk:"policy"`
-	Protocol types.String `tfsdk:"protocol"`
-	SrcPort  types.String `tfsdk:"src_port"`
+	DstPort        types.String `tfsdk:"dst_port"`
+	Log            types.Bool   `tfsdk:"log"`
+	Policy         types.String `tfsdk:"policy"`
+	Protocol       types.String `tfsdk:"protocol"`
+	SrcPort        types.String `tfsdk:"src_port"`
+	TCPEstablished types.Bool   `tfsdk:"tcp_established"`
 }
 
 // FromBody
@@ -489,18 +515,34 @@ func (r *OrganizationsAdaptivePolicyACLsRs) toSdkApiRequestCreate(ctx context.Co
 		name = &emptyString
 	}
 	var requestOrganizationsCreateOrganizationAdaptivePolicyACLRules []merakigosdk.RequestOrganizationsCreateOrganizationAdaptivePolicyACLRules
+
 	if r.Rules != nil {
 		for _, rItem1 := range *r.Rules {
 			dstPort := rItem1.DstPort.ValueString()
+			log := func() *bool {
+				if !rItem1.Log.IsUnknown() && !rItem1.Log.IsNull() {
+					return rItem1.Log.ValueBoolPointer()
+				}
+				return nil
+			}()
 			policy := rItem1.Policy.ValueString()
 			protocol := rItem1.Protocol.ValueString()
 			srcPort := rItem1.SrcPort.ValueString()
+			tcpEstablished := func() *bool {
+				if !rItem1.TCPEstablished.IsUnknown() && !rItem1.TCPEstablished.IsNull() {
+					return rItem1.TCPEstablished.ValueBoolPointer()
+				}
+				return nil
+			}()
 			requestOrganizationsCreateOrganizationAdaptivePolicyACLRules = append(requestOrganizationsCreateOrganizationAdaptivePolicyACLRules, merakigosdk.RequestOrganizationsCreateOrganizationAdaptivePolicyACLRules{
-				DstPort:  dstPort,
-				Policy:   policy,
-				Protocol: protocol,
-				SrcPort:  srcPort,
+				DstPort:        dstPort,
+				Log:            log,
+				Policy:         policy,
+				Protocol:       protocol,
+				SrcPort:        srcPort,
+				TCPEstablished: tcpEstablished,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestOrganizationsCreateOrganizationAdaptivePolicyACL{
@@ -537,18 +579,34 @@ func (r *OrganizationsAdaptivePolicyACLsRs) toSdkApiRequestUpdate(ctx context.Co
 		name = &emptyString
 	}
 	var requestOrganizationsUpdateOrganizationAdaptivePolicyACLRules []merakigosdk.RequestOrganizationsUpdateOrganizationAdaptivePolicyACLRules
+
 	if r.Rules != nil {
 		for _, rItem1 := range *r.Rules {
 			dstPort := rItem1.DstPort.ValueString()
+			log := func() *bool {
+				if !rItem1.Log.IsUnknown() && !rItem1.Log.IsNull() {
+					return rItem1.Log.ValueBoolPointer()
+				}
+				return nil
+			}()
 			policy := rItem1.Policy.ValueString()
 			protocol := rItem1.Protocol.ValueString()
 			srcPort := rItem1.SrcPort.ValueString()
+			tcpEstablished := func() *bool {
+				if !rItem1.TCPEstablished.IsUnknown() && !rItem1.TCPEstablished.IsNull() {
+					return rItem1.TCPEstablished.ValueBoolPointer()
+				}
+				return nil
+			}()
 			requestOrganizationsUpdateOrganizationAdaptivePolicyACLRules = append(requestOrganizationsUpdateOrganizationAdaptivePolicyACLRules, merakigosdk.RequestOrganizationsUpdateOrganizationAdaptivePolicyACLRules{
-				DstPort:  dstPort,
-				Policy:   policy,
-				Protocol: protocol,
-				SrcPort:  srcPort,
+				DstPort:        dstPort,
+				Log:            log,
+				Policy:         policy,
+				Protocol:       protocol,
+				SrcPort:        srcPort,
+				TCPEstablished: tcpEstablished,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestOrganizationsUpdateOrganizationAdaptivePolicyACL{
@@ -578,10 +636,22 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyACLItemToBodyRs(state Org
 				result := make([]ResponseOrganizationsGetOrganizationAdaptivePolicyAclRulesRs, len(*response.Rules))
 				for i, rules := range *response.Rules {
 					result[i] = ResponseOrganizationsGetOrganizationAdaptivePolicyAclRulesRs{
-						DstPort:  types.StringValue(rules.DstPort),
+						DstPort: types.StringValue(rules.DstPort),
+						Log: func() types.Bool {
+							if rules.Log != nil {
+								return types.BoolValue(*rules.Log)
+							}
+							return types.Bool{}
+						}(),
 						Policy:   types.StringValue(rules.Policy),
 						Protocol: types.StringValue(rules.Protocol),
 						SrcPort:  types.StringValue(rules.SrcPort),
+						TCPEstablished: func() types.Bool {
+							if rules.TCPEstablished != nil {
+								return types.BoolValue(*rules.TCPEstablished)
+							}
+							return types.Bool{}
+						}(),
 					}
 				}
 				return &result

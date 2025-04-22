@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -32,19 +32,19 @@ import (
 )
 
 var (
-	_ resource.Resource              = &NetworksWirelessAirMarshalRulesResource{}
-	_ resource.ResourceWithConfigure = &NetworksWirelessAirMarshalRulesResource{}
+	_ resource.Resource              = &NetworksWirelessAirMarshalRulesCreateResource{}
+	_ resource.ResourceWithConfigure = &NetworksWirelessAirMarshalRulesCreateResource{}
 )
 
-func NewNetworksWirelessAirMarshalRulesResource() resource.Resource {
-	return &NetworksWirelessAirMarshalRulesResource{}
+func NewNetworksWirelessAirMarshalRulesCreateResource() resource.Resource {
+	return &NetworksWirelessAirMarshalRulesCreateResource{}
 }
 
-type NetworksWirelessAirMarshalRulesResource struct {
+type NetworksWirelessAirMarshalRulesCreateResource struct {
 	client *merakigosdk.Client
 }
 
-func (r *NetworksWirelessAirMarshalRulesResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *NetworksWirelessAirMarshalRulesCreateResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -53,12 +53,12 @@ func (r *NetworksWirelessAirMarshalRulesResource) Configure(ctx context.Context,
 }
 
 // Metadata returns the data source type name.
-func (r *NetworksWirelessAirMarshalRulesResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_networks_wireless_air_marshal_rules"
+func (r *NetworksWirelessAirMarshalRulesCreateResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_networks_wireless_air_marshal_rules_create"
 }
 
 // resourceAction
-func (r *NetworksWirelessAirMarshalRulesResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *NetworksWirelessAirMarshalRulesCreateResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"network_id": schema.StringAttribute{
@@ -162,9 +162,9 @@ func (r *NetworksWirelessAirMarshalRulesResource) Schema(_ context.Context, _ re
 		},
 	}
 }
-func (r *NetworksWirelessAirMarshalRulesResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *NetworksWirelessAirMarshalRulesCreateResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var data NetworksWirelessAirMarshalRulesRs
+	var data NetworksWirelessAirMarshalRulesCreate
 
 	var item types.Object
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &item)...)
@@ -184,7 +184,6 @@ func (r *NetworksWirelessAirMarshalRulesResource) Create(ctx context.Context, re
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Wireless.CreateNetworkWirelessAirMarshalRule(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -201,26 +200,25 @@ func (r *NetworksWirelessAirMarshalRulesResource) Create(ctx context.Context, re
 	}
 	//Item
 	data = ResponseWirelessCreateNetworkWirelessAirMarshalRuleItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *NetworksWirelessAirMarshalRulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *NetworksWirelessAirMarshalRulesCreateResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
-func (r *NetworksWirelessAirMarshalRulesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *NetworksWirelessAirMarshalRulesCreateResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
-func (r *NetworksWirelessAirMarshalRulesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *NetworksWirelessAirMarshalRulesCreateResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
 // TF Structs Schema
-type NetworksWirelessAirMarshalRulesRs struct {
+type NetworksWirelessAirMarshalRulesCreate struct {
 	NetworkID  types.String                                          `tfsdk:"network_id"`
 	Item       *ResponseWirelessCreateNetworkWirelessAirMarshalRule  `tfsdk:"item"`
 	Parameters *RequestWirelessCreateNetworkWirelessAirMarshalRuleRs `tfsdk:"parameters"`
@@ -256,10 +254,11 @@ type RequestWirelessCreateNetworkWirelessAirMarshalRuleMatchRs struct {
 }
 
 // FromBody
-func (r *NetworksWirelessAirMarshalRulesRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestWirelessCreateNetworkWirelessAirMarshalRule {
+func (r *NetworksWirelessAirMarshalRulesCreate) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestWirelessCreateNetworkWirelessAirMarshalRule {
 	emptyString := ""
 	re := *r.Parameters
 	var requestWirelessCreateNetworkWirelessAirMarshalRuleMatch *merakigosdk.RequestWirelessCreateNetworkWirelessAirMarshalRuleMatch
+
 	if re.Match != nil {
 		string := re.Match.String.ValueString()
 		typeR := re.Match.Type.ValueString()
@@ -267,6 +266,7 @@ func (r *NetworksWirelessAirMarshalRulesRs) toSdkApiRequestCreate(ctx context.Co
 			String: string,
 			Type:   typeR,
 		}
+		//[debug] Is Array: False
 	}
 	typeR := new(string)
 	if !re.Type.IsUnknown() && !re.Type.IsNull() {
@@ -282,7 +282,7 @@ func (r *NetworksWirelessAirMarshalRulesRs) toSdkApiRequestCreate(ctx context.Co
 }
 
 // ToBody
-func ResponseWirelessCreateNetworkWirelessAirMarshalRuleItemToBody(state NetworksWirelessAirMarshalRulesRs, response *merakigosdk.ResponseWirelessCreateNetworkWirelessAirMarshalRule) NetworksWirelessAirMarshalRulesRs {
+func ResponseWirelessCreateNetworkWirelessAirMarshalRuleItemToBody(state NetworksWirelessAirMarshalRulesCreate, response *merakigosdk.ResponseWirelessCreateNetworkWirelessAirMarshalRule) NetworksWirelessAirMarshalRulesCreate {
 	itemState := ResponseWirelessCreateNetworkWirelessAirMarshalRule{
 		CreatedAt: types.StringValue(response.CreatedAt),
 		Match: func() *ResponseWirelessCreateNetworkWirelessAirMarshalRuleMatch {

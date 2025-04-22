@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -84,6 +84,21 @@ func (d *NetworksApplianceTrafficShapingRulesDataSource) Schema(_ context.Contex
 											},
 											"value": schema.StringAttribute{
 												Computed: true,
+											},
+											"value_list": schema.SetAttribute{
+												Computed:    true,
+												ElementType: types.StringType,
+											},
+											"value_obj": schema.SingleNestedAttribute{
+												Computed: true,
+												Attributes: map[string]schema.Attribute{
+													"id": schema.StringAttribute{
+														Computed: true,
+													},
+													"name": schema.StringAttribute{
+														Computed: true,
+													},
+												},
 											},
 										},
 									},
@@ -184,11 +199,6 @@ type ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesDefinitions str
 	Value     types.String                                                              `tfsdk:"value"`
 	ValueList types.Set                                                                 `tfsdk:"value_list"`
 	ValueObj  *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj `tfsdk:"value_obj"`
-}
-
-type ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj struct {
-	ID   types.String `tfsdk:"id"`
-	Name types.String `tfsdk:"name"`
 }
 
 type ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesPerClientBandwidthLimits struct {

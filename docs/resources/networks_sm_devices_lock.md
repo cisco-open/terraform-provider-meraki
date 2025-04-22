@@ -10,6 +10,8 @@ description: |-
 
 
 
+
+
 ~>Warning: This resource does not represent a real-world entity in Meraki Dashboard, therefore changing or deleting this resource on its own has no immediate effect. Instead, it is a task part of a Meraki Dashboard workflow. It is executed in Meraki without any additional verification. It does not check if it was executed before or if a similar configuration or action 
 already existed previously.
 
@@ -52,11 +54,11 @@ output "meraki_networks_sm_devices_lock_example" {
 
 Optional:
 
-- `ids` (Set of String) The ids of the devices to be locked.
+- `ids` (List of String) The ids of the devices to be locked.
 - `pin` (Number) The pin number for locking macOS devices (a six digit number). Required only for macOS devices.
-- `scope` (Set of String) The scope (one of all, none, withAny, withAll, withoutAny, or withoutAll) and a set of tags of the devices to be locked.
-- `serials` (Set of String) The serials of the devices to be locked.
-- `wifi_macs` (Set of String) The wifiMacs of the devices to be locked.
+- `scope` (List of String) The scope (one of all, none, withAny, withAll, withoutAny, or withoutAll) and a set of tags of the devices to be locked.
+- `serials` (List of String) The serials of the devices to be locked.
+- `wifi_macs` (List of String) The wifiMacs of the devices to be locked.
 
 
 <a id="nestedatt--item"></a>
@@ -64,4 +66,4 @@ Optional:
 
 Read-Only:
 
-- `ids` (Set of String) The Meraki Ids of the set of devices.
+- `ids` (List of String) The Meraki Ids of the set of devices.

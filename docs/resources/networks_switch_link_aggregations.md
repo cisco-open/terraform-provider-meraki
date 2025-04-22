@@ -48,7 +48,7 @@ output "meraki_networks_switch_link_aggregations_example" {
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) The ID for the link aggregation.
 
 <a id="nestedatt--switch_ports"></a>
 ### Nested Schema for `switch_ports`

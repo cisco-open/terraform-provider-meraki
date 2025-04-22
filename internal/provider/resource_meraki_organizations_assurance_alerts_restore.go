@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -104,7 +104,6 @@ func (r *OrganizationsAssuranceAlertsRestoreResource) Create(ctx context.Context
 	vvOrganizationID := data.OrganizationID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	restyResp1, err := r.client.Organizations.RestoreOrganizationAssuranceAlerts(vvOrganizationID, dataRequest)
-
 	if err != nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(

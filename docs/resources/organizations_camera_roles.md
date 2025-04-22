@@ -55,6 +55,10 @@ output "meraki_organizations_camera_roles_example" {
 - `name` (String) The name of the new role. Must be unique. This parameter is required.
 - `role_id` (String) roleId path parameter. Role ID
 
+### Read-Only
+
+- `id` (String) ID of the camera role
+
 <a id="nestedatt--applied_on_devices"></a>
 ### Nested Schema for `applied_on_devices`
 

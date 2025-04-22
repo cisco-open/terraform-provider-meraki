@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -312,6 +312,14 @@ func (d *NetworksSensorAlertsProfilesDataSource) Schema(_ context.Context, _ dat
 								},
 							},
 						},
+					},
+					"includesensor_url": schema.BoolAttribute{
+						MarkdownDescription: `Include dashboard link to sensor in messages (default: true).`,
+						Computed:            true,
+					},
+					"message": schema.StringAttribute{
+						MarkdownDescription: `A custom message that will appear in email and text message alerts.`,
+						Computed:            true,
 					},
 					"name": schema.StringAttribute{
 						MarkdownDescription: `Name of the sensor alert profile.`,
@@ -615,6 +623,14 @@ func (d *NetworksSensorAlertsProfilesDataSource) Schema(_ context.Context, _ dat
 								},
 							},
 						},
+						"includesensor_url": schema.BoolAttribute{
+							MarkdownDescription: `Include dashboard link to sensor in messages (default: true).`,
+							Computed:            true,
+						},
+						"message": schema.StringAttribute{
+							MarkdownDescription: `A custom message that will appear in email and text message alerts.`,
+							Computed:            true,
+						},
 						"name": schema.StringAttribute{
 							MarkdownDescription: `Name of the sensor alert profile.`,
 							Computed:            true,
@@ -751,12 +767,14 @@ type NetworksSensorAlertsProfiles struct {
 }
 
 type ResponseItemSensorGetNetworkSensorAlertsProfiles struct {
-	Conditions *[]ResponseItemSensorGetNetworkSensorAlertsProfilesConditions `tfsdk:"conditions"`
-	Name       types.String                                                  `tfsdk:"name"`
-	ProfileID  types.String                                                  `tfsdk:"profile_id"`
-	Recipients *ResponseItemSensorGetNetworkSensorAlertsProfilesRecipients   `tfsdk:"recipients"`
-	Schedule   *ResponseItemSensorGetNetworkSensorAlertsProfilesSchedule     `tfsdk:"schedule"`
-	Serials    types.List                                                    `tfsdk:"serials"`
+	Conditions       *[]ResponseItemSensorGetNetworkSensorAlertsProfilesConditions `tfsdk:"conditions"`
+	IncludesensorURL types.Bool                                                    `tfsdk:"include_sensor_url"`
+	Message          types.String                                                  `tfsdk:"message"`
+	Name             types.String                                                  `tfsdk:"name"`
+	ProfileID        types.String                                                  `tfsdk:"profile_id"`
+	Recipients       *ResponseItemSensorGetNetworkSensorAlertsProfilesRecipients   `tfsdk:"recipients"`
+	Schedule         *ResponseItemSensorGetNetworkSensorAlertsProfilesSchedule     `tfsdk:"schedule"`
+	Serials          types.List                                                    `tfsdk:"serials"`
 }
 
 type ResponseItemSensorGetNetworkSensorAlertsProfilesConditions struct {
@@ -873,12 +891,14 @@ type ResponseItemSensorGetNetworkSensorAlertsProfilesSchedule struct {
 }
 
 type ResponseSensorGetNetworkSensorAlertsProfile struct {
-	Conditions *[]ResponseSensorGetNetworkSensorAlertsProfileConditions `tfsdk:"conditions"`
-	Name       types.String                                             `tfsdk:"name"`
-	ProfileID  types.String                                             `tfsdk:"profile_id"`
-	Recipients *ResponseSensorGetNetworkSensorAlertsProfileRecipients   `tfsdk:"recipients"`
-	Schedule   *ResponseSensorGetNetworkSensorAlertsProfileSchedule     `tfsdk:"schedule"`
-	Serials    types.List                                               `tfsdk:"serials"`
+	Conditions       *[]ResponseSensorGetNetworkSensorAlertsProfileConditions `tfsdk:"conditions"`
+	IncludesensorURL types.Bool                                               `tfsdk:"include_sensor_url"`
+	Message          types.String                                             `tfsdk:"message"`
+	Name             types.String                                             `tfsdk:"name"`
+	ProfileID        types.String                                             `tfsdk:"profile_id"`
+	Recipients       *ResponseSensorGetNetworkSensorAlertsProfileRecipients   `tfsdk:"recipients"`
+	Schedule         *ResponseSensorGetNetworkSensorAlertsProfileSchedule     `tfsdk:"schedule"`
+	Serials          types.List                                               `tfsdk:"serials"`
 }
 
 type ResponseSensorGetNetworkSensorAlertsProfileConditions struct {
@@ -1253,6 +1273,13 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 				}
 				return nil
 			}(),
+			IncludesensorURL: func() types.Bool {
+				if item.IncludesensorURL != nil {
+					return types.BoolValue(*item.IncludesensorURL)
+				}
+				return types.Bool{}
+			}(),
+			Message:   types.StringValue(item.Message),
 			Name:      types.StringValue(item.Name),
 			ProfileID: types.StringValue(item.ProfileID),
 			Recipients: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesRecipients {
@@ -1538,6 +1565,13 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 			}
 			return nil
 		}(),
+		IncludesensorURL: func() types.Bool {
+			if response.IncludesensorURL != nil {
+				return types.BoolValue(*response.IncludesensorURL)
+			}
+			return types.Bool{}
+		}(),
+		Message:   types.StringValue(response.Message),
 		Name:      types.StringValue(response.Name),
 		ProfileID: types.StringValue(response.ProfileID),
 		Recipients: func() *ResponseSensorGetNetworkSensorAlertsProfileRecipients {

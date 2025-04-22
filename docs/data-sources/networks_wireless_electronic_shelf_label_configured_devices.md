@@ -41,3 +41,4 @@ Read-Only:
 
 - `enabled` (Boolean) Turn ESL features on and off for this network
 - `hostname` (String) Desired ESL hostname of the network
+- `mode` (String) Electronic shelf label mode of the network. Valid options are 'Bluetooth', 'high frequency'

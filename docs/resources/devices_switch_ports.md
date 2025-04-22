@@ -92,8 +92,8 @@ output "meraki_devices_switch_ports_example" {
 - `stp_guard` (String) The state of the STP guard ('disabled', 'root guard', 'bpdu guard' or 'loop guard').
                                   Allowed values: [bpdu guard,disabled,loop guard,root guard]
 - `tags` (Set of String) The list of tags of the switch port.
-- `type` (String) The type of the switch port ('trunk', 'access' or 'stack').
-                                  Allowed values: [access,stack,trunk]
+- `type` (String) The type of the switch port ('trunk', 'access', 'stack' or 'routed').
+                                  Allowed values: [access,routed,stack,trunk]
 - `udld` (String) The action to take when Unidirectional Link is detected (Alert only, Enforce). Default configuration is Alert only.
                                   Allowed values: [Alert only,Enforce]
 - `vlan` (Number) The VLAN of the switch port. For a trunk port, this is the native VLAN. A null value will clear the value set for trunk ports.
@@ -174,5 +174,5 @@ Read-Only:
 Import is supported using the following syntax:
 
 ```shell
-terraform import meraki_devices_switch_ports.example "serial,port_id"
+terraform import meraki_devices_switch_ports.example "port_id,serial"
 ```

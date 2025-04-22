@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -143,28 +143,41 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Create(ctx context.Context, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvSerial := data.Serial.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Switch.GetDeviceSwitchRoutingStaticRoutes(vvSerial)
-	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetDeviceSwitchRoutingStaticRoutes",
-				err.Error(),
-			)
-			return
+	//Has Post
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetDeviceSwitchRoutingStaticRoutes",
+					err.Error(),
+				)
+				return
+			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 		if result != nil {
 			result2 := result.(map[string]interface{})
-			vvStaticRouteID := result2["StaticRouteID"].(string)
+			vvStaticRouteID, ok := result2["StaticRouteID"].(string)
+			if !ok {
+				resp.Diagnostics.AddError(
+					"Failure when parsing path parameter StaticRouteID",
+					"Fail Parsing StaticRouteID",
+				)
+				return
+			}
 			r.client.Switch.UpdateDeviceSwitchRoutingStaticRoute(vvSerial, vvStaticRouteID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Switch.GetDeviceSwitchRoutingStaticRoute(vvSerial, vvStaticRouteID)
 			if responseVerifyItem2 != nil {
 				data = ResponseSwitchGetDeviceSwitchRoutingStaticRouteItemToBodyRs(data, responseVerifyItem2, false)
@@ -174,11 +187,11 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Create(ctx context.Context, r
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Switch.CreateDeviceSwitchRoutingStaticRoute(vvSerial, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateDeviceSwitchRoutingStaticRoute",
 				err.Error(),
@@ -191,9 +204,8 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Create(ctx context.Context, r
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Switch.GetDeviceSwitchRoutingStaticRoutes(vvSerial)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -209,15 +221,23 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Create(ctx context.Context, r
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
 		result2 := result.(map[string]interface{})
-		vvStaticRouteID := result2["StaticRouteID"].(string)
+		vvStaticRouteID, ok := result2["StaticRouteID"].(string)
+		if !ok {
+			resp.Diagnostics.AddError(
+				"Failure when parsing path parameter StaticRouteID",
+				"Fail Parsing StaticRouteID",
+			)
+			return
+		}
 		responseVerifyItem2, restyRespGet, err := r.client.Switch.GetDeviceSwitchRoutingStaticRoute(vvSerial, vvStaticRouteID)
 		if responseVerifyItem2 != nil && err == nil {
-			data3 := ResponseSwitchGetDeviceSwitchRoutingStaticRouteItemToBodyRs(data, responseVerifyItem2, false)
-			resp.Diagnostics.Append(resp.State.Set(ctx, &data3)...)
+			data = ResponseSwitchGetDeviceSwitchRoutingStaticRouteItemToBodyRs(data, responseVerifyItem2, false)
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 			return
 		} else {
 			if restyRespGet != nil {
@@ -240,6 +260,7 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Create(ctx context.Context, r
 		)
 		return
 	}
+
 }
 
 func (r *DevicesSwitchRoutingStaticRoutesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -294,7 +315,6 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Read(ctx context.Context, req
 	//update path params assigned
 	resp.Diagnostics.Append(diags...)
 }
-
 func (r *DevicesSwitchRoutingStaticRoutesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
 

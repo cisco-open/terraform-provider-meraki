@@ -15,6 +15,7 @@ description: |-
 ```terraform
 resource "meraki_networks" "example" {
 
+  copy_from_network_id = "N_24329156"
   name                 = "Main Office"
   notes                = "Additional description of the network"
   organization_id      = "string"
@@ -56,5 +57,5 @@ output "meraki_networks_example" {
 Import is supported using the following syntax:
 
 ```shell
-terraform import meraki_networks.example "network_id"
+terraform import meraki_networks.example "network_id,organization_id"
 ```

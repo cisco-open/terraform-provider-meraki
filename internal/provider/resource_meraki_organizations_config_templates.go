@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -132,12 +132,14 @@ func (r *OrganizationsConfigTemplatesResource) Create(ctx context.Context, req r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationConfigTemplates(vvOrganizationID)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -149,6 +151,7 @@ func (r *OrganizationsConfigTemplatesResource) Create(ctx context.Context, req r
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -163,6 +166,7 @@ func (r *OrganizationsConfigTemplatesResource) Create(ctx context.Context, req r
 				return
 			}
 			r.client.Organizations.UpdateOrganizationConfigTemplate(vvOrganizationID, vvConfigTemplateID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Organizations.GetOrganizationConfigTemplate(vvOrganizationID, vvConfigTemplateID)
 			if responseVerifyItem2 != nil {
 				data = ResponseOrganizationsGetOrganizationConfigTemplateItemToBodyRs(data, responseVerifyItem2, false)
@@ -172,11 +176,11 @@ func (r *OrganizationsConfigTemplatesResource) Create(ctx context.Context, req r
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Organizations.CreateOrganizationConfigTemplate(vvOrganizationID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationConfigTemplate",
 				err.Error(),
@@ -189,9 +193,8 @@ func (r *OrganizationsConfigTemplatesResource) Create(ctx context.Context, req r
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationConfigTemplates(vvOrganizationID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -207,6 +210,7 @@ func (r *OrganizationsConfigTemplatesResource) Create(ctx context.Context, req r
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -215,7 +219,7 @@ func (r *OrganizationsConfigTemplatesResource) Create(ctx context.Context, req r
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter ConfigTemplateID",
-				"Error",
+				"Fail Parsing ConfigTemplateID",
 			)
 			return
 		}
@@ -245,6 +249,7 @@ func (r *OrganizationsConfigTemplatesResource) Create(ctx context.Context, req r
 		)
 		return
 	}
+
 }
 
 func (r *OrganizationsConfigTemplatesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {

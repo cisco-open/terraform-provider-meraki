@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -242,33 +242,10 @@ func (d *OrganizationsAssuranceAlertsDataSource) Schema(_ context.Context, _ dat
 										},
 									},
 								},
-								"peers": schema.SetNestedAttribute{
-									MarkdownDescription: `Peers related to the alert`,
+								"peers": schema.ListAttribute{
+									MarkdownDescription: `Peers affected by the alert`,
 									Computed:            true,
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-
-											"network": schema.SingleNestedAttribute{
-												MarkdownDescription: `Network of the peer`,
-												Computed:            true,
-												Attributes: map[string]schema.Attribute{
-
-													"id": schema.StringAttribute{
-														MarkdownDescription: `Id of the network`,
-														Computed:            true,
-													},
-													"name": schema.StringAttribute{
-														MarkdownDescription: `Name of the network`,
-														Computed:            true,
-													},
-												},
-											},
-											"url": schema.StringAttribute{
-												MarkdownDescription: `URL to the peer`,
-												Computed:            true,
-											},
-										},
-									},
+									ElementType:         types.StringType,
 								},
 							},
 						},
@@ -419,15 +396,7 @@ type ResponseItemOrganizationsGetOrganizationAssuranceAlertsScopeDevicesLldp str
 	Port types.String `tfsdk:"port"`
 }
 
-type ResponseItemOrganizationsGetOrganizationAssuranceAlertsScopePeers struct {
-	Network *ResponseItemOrganizationsGetOrganizationAssuranceAlertsScopePeersNetwork `tfsdk:"network"`
-	URL     types.String                                                              `tfsdk:"url"`
-}
-
-type ResponseItemOrganizationsGetOrganizationAssuranceAlertsScopePeersNetwork struct {
-	ID   types.String `tfsdk:"id"`
-	Name types.String `tfsdk:"name"`
-}
+type ResponseItemOrganizationsGetOrganizationAssuranceAlertsScopePeers interface{}
 
 // ToBody
 func ResponseOrganizationsGetOrganizationAssuranceAlertsItemsToBody(state OrganizationsAssuranceAlerts, response *merakigosdk.ResponseOrganizationsGetOrganizationAssuranceAlerts) OrganizationsAssuranceAlerts {
@@ -452,7 +421,7 @@ func ResponseOrganizationsGetOrganizationAssuranceAlertsItemsToBody(state Organi
 			Scope: func() *ResponseItemOrganizationsGetOrganizationAssuranceAlertsScope {
 				if item.Scope != nil {
 					return &ResponseItemOrganizationsGetOrganizationAssuranceAlertsScope{
-						// Applications: StringSliceToList(item.Scope.Applications), //Interface{}
+						// Applications: StringSliceToList(item.Scope.Applications),
 						Devices: func() *[]ResponseItemOrganizationsGetOrganizationAssuranceAlertsScopeDevices {
 							if item.Scope.Devices != nil {
 								result := make([]ResponseItemOrganizationsGetOrganizationAssuranceAlertsScopeDevices, len(*item.Scope.Devices))
@@ -484,27 +453,16 @@ func ResponseOrganizationsGetOrganizationAssuranceAlertsItemsToBody(state Organi
 							}
 							return nil
 						}(),
-						Peers: func() *[]ResponseItemOrganizationsGetOrganizationAssuranceAlertsScopePeers {
-							if item.Scope.Peers != nil {
-								result := make([]ResponseItemOrganizationsGetOrganizationAssuranceAlertsScopePeers, len(*item.Scope.Peers))
-								for i, peers := range *item.Scope.Peers {
-									result[i] = ResponseItemOrganizationsGetOrganizationAssuranceAlertsScopePeers{
-										Network: func() *ResponseItemOrganizationsGetOrganizationAssuranceAlertsScopePeersNetwork {
-											if peers.Network != nil {
-												return &ResponseItemOrganizationsGetOrganizationAssuranceAlertsScopePeersNetwork{
-													ID:   types.StringValue(peers.Network.ID),
-													Name: types.StringValue(peers.Network.Name),
-												}
-											}
-											return nil
-										}(),
-										URL: types.StringValue(peers.URL),
-									}
-								}
-								return &result
-							}
-							return nil
-						}(),
+						// // Peers: func() *[]ResponseItemOrganizationsGetOrganizationAssuranceAlertsScopePeers {
+						// 	if item.Scope.Peers != nil {
+						// 		result := make([]ResponseItemOrganizationsGetOrganizationAssuranceAlertsScopePeers, len(*item.Scope.Peers))
+						// 		for i, peers := range *item.Scope.Peers {
+						// 			result[i] = ResponseItemOrganizationsGetOrganizationAssuranceAlertsScopePeers(peers)
+						// 		}
+						// 		return &result
+						// 	}
+						// 	return nil
+						// }(),
 					}
 				}
 				return nil

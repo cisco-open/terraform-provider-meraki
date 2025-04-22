@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -160,30 +160,37 @@ func (r *NetworksSwitchAlternateManagementInterfaceResource) Create(ctx context.
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchAlternateManagementInterface(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchAlternateManagementInterface only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchAlternateManagementInterface(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchAlternateManagementInterface  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchAlternateManagementInterface only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchAlternateManagementInterface only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchAlternateManagementInterface(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchAlternateManagementInterface",
 				err.Error(),
@@ -196,9 +203,10 @@ func (r *NetworksSwitchAlternateManagementInterfaceResource) Create(ctx context.
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchAlternateManagementInterface(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -213,11 +221,12 @@ func (r *NetworksSwitchAlternateManagementInterfaceResource) Create(ctx context.
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseSwitchGetNetworkSwitchAlternateManagementInterfaceItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksSwitchAlternateManagementInterfaceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -341,6 +350,7 @@ func (r *NetworksSwitchAlternateManagementInterfaceRs) toSdkApiRequestUpdate(ctx
 	var protocols []string = nil
 	r.Protocols.ElementsAs(ctx, &protocols, false)
 	var requestSwitchUpdateNetworkSwitchAlternateManagementInterfaceSwitches []merakigosdk.RequestSwitchUpdateNetworkSwitchAlternateManagementInterfaceSwitches
+
 	if r.Switches != nil {
 		for _, rItem1 := range *r.Switches {
 			alternateManagementIP := rItem1.AlternateManagementIP.ValueString()
@@ -353,6 +363,7 @@ func (r *NetworksSwitchAlternateManagementInterfaceRs) toSdkApiRequestUpdate(ctx
 				Serial:                serial,
 				SubnetMask:            subnetMask,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	vLANID := new(int64)

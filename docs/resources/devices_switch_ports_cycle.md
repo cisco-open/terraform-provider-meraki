@@ -10,6 +10,8 @@ description: |-
 
 
 
+
+
 ~>Warning: This resource does not represent a real-world entity in Meraki Dashboard, therefore changing or deleting this resource on its own has no immediate effect. Instead, it is a task part of a Meraki Dashboard workflow. It is executed in Meraki without any additional verification. It does not check if it was executed before or if a similar configuration or action 
 already existed previously.
 
@@ -48,7 +50,7 @@ output "meraki_devices_switch_ports_cycle_example" {
 
 Optional:
 
-- `ports` (Set of String) List of switch ports
+- `ports` (List of String) List of switch ports
 
 
 <a id="nestedatt--item"></a>
@@ -56,4 +58,4 @@ Optional:
 
 Read-Only:
 
-- `ports` (Set of String) List of switch ports
+- `ports` (List of String) List of switch ports

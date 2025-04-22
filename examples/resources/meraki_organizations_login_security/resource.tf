@@ -19,6 +19,7 @@ resource "meraki_organizations_login_security" "example" {
   enforce_two_factor_auth     = true
   idle_timeout_minutes        = 30
   login_ip_ranges             = ["192.195.83.1", "192.195.83.255"]
+  minimum_password_length     = 12
   num_different_passwords     = 3
   organization_id             = "string"
   password_expiration_days    = 90

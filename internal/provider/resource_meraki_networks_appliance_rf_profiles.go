@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -332,15 +332,13 @@ func (r *NetworksApplianceRfProfilesResource) Create(ctx context.Context, req re
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceRfProfiles(vvNetworkID)
 	//Have Create
-	if err != nil {
-		if restyResp1 != nil {
-			if restyResp1.StatusCode() != 404 {
-				resp.Diagnostics.AddError(
-					"Failure when executing GetNetworkApplianceRfProfiles",
-					err.Error(),
-				)
-				return
-			}
+	if err != nil || restyResp1 == nil {
+		if restyResp1.StatusCode() != 404 {
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkApplianceRfProfiles",
+				err.Error(),
+			)
+			return
 		}
 	}
 
@@ -611,6 +609,7 @@ type ResponseApplianceGetNetworkApplianceRfProfileTwoFourGhzSettingsRs struct {
 func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestApplianceCreateNetworkApplianceRfProfile {
 	emptyString := ""
 	var requestApplianceCreateNetworkApplianceRfProfileFiveGhzSettings *merakigosdk.RequestApplianceCreateNetworkApplianceRfProfileFiveGhzSettings
+
 	if r.FiveGhzSettings != nil {
 		axEnabled := func() *bool {
 			if !r.FiveGhzSettings.AxEnabled.IsUnknown() && !r.FiveGhzSettings.AxEnabled.IsNull() {
@@ -628,6 +627,7 @@ func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestCreate(ctx context.Contex
 			AxEnabled:  axEnabled,
 			MinBitrate: int64ToIntPointer(minBitrate),
 		}
+		//[debug] Is Array: False
 	}
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
@@ -636,8 +636,10 @@ func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestCreate(ctx context.Contex
 		name = &emptyString
 	}
 	var requestApplianceCreateNetworkApplianceRfProfilePerSSIDSettings *merakigosdk.RequestApplianceCreateNetworkApplianceRfProfilePerSSIDSettings
+
 	if r.PerSSIDSettings != nil {
 		var requestApplianceCreateNetworkApplianceRfProfilePerSSIDSettings1 *merakigosdk.RequestApplianceCreateNetworkApplianceRfProfilePerSSIDSettings1
+
 		if r.PerSSIDSettings.Status1 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status1.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -650,8 +652,10 @@ func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestCreate(ctx context.Contex
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 			}
+			//[debug] Is Array: False
 		}
 		var requestApplianceCreateNetworkApplianceRfProfilePerSSIDSettings2 *merakigosdk.RequestApplianceCreateNetworkApplianceRfProfilePerSSIDSettings2
+
 		if r.PerSSIDSettings.Status2 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status2.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -664,8 +668,10 @@ func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestCreate(ctx context.Contex
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 			}
+			//[debug] Is Array: False
 		}
 		var requestApplianceCreateNetworkApplianceRfProfilePerSSIDSettings3 *merakigosdk.RequestApplianceCreateNetworkApplianceRfProfilePerSSIDSettings3
+
 		if r.PerSSIDSettings.Status3 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status3.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -678,8 +684,10 @@ func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestCreate(ctx context.Contex
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 			}
+			//[debug] Is Array: False
 		}
 		var requestApplianceCreateNetworkApplianceRfProfilePerSSIDSettings4 *merakigosdk.RequestApplianceCreateNetworkApplianceRfProfilePerSSIDSettings4
+
 		if r.PerSSIDSettings.Status4 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status4.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -692,6 +700,7 @@ func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestCreate(ctx context.Contex
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 			}
+			//[debug] Is Array: False
 		}
 		requestApplianceCreateNetworkApplianceRfProfilePerSSIDSettings = &merakigosdk.RequestApplianceCreateNetworkApplianceRfProfilePerSSIDSettings{
 			Status1: requestApplianceCreateNetworkApplianceRfProfilePerSSIDSettings1,
@@ -699,8 +708,10 @@ func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestCreate(ctx context.Contex
 			Status3: requestApplianceCreateNetworkApplianceRfProfilePerSSIDSettings3,
 			Status4: requestApplianceCreateNetworkApplianceRfProfilePerSSIDSettings4,
 		}
+		//[debug] Is Array: False
 	}
 	var requestApplianceCreateNetworkApplianceRfProfileTwoFourGhzSettings *merakigosdk.RequestApplianceCreateNetworkApplianceRfProfileTwoFourGhzSettings
+
 	if r.TwoFourGhzSettings != nil {
 		axEnabled := func() *bool {
 			if !r.TwoFourGhzSettings.AxEnabled.IsUnknown() && !r.TwoFourGhzSettings.AxEnabled.IsNull() {
@@ -718,6 +729,7 @@ func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestCreate(ctx context.Contex
 			AxEnabled:  axEnabled,
 			MinBitrate: minBitrate,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestApplianceCreateNetworkApplianceRfProfile{
 		FiveGhzSettings:    requestApplianceCreateNetworkApplianceRfProfileFiveGhzSettings,
@@ -730,6 +742,7 @@ func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestCreate(ctx context.Contex
 func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateNetworkApplianceRfProfile {
 	emptyString := ""
 	var requestApplianceUpdateNetworkApplianceRfProfileFiveGhzSettings *merakigosdk.RequestApplianceUpdateNetworkApplianceRfProfileFiveGhzSettings
+
 	if r.FiveGhzSettings != nil {
 		axEnabled := func() *bool {
 			if !r.FiveGhzSettings.AxEnabled.IsUnknown() && !r.FiveGhzSettings.AxEnabled.IsNull() {
@@ -747,6 +760,7 @@ func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestUpdate(ctx context.Contex
 			AxEnabled:  axEnabled,
 			MinBitrate: int64ToIntPointer(minBitrate),
 		}
+		//[debug] Is Array: False
 	}
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
@@ -755,8 +769,10 @@ func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestUpdate(ctx context.Contex
 		name = &emptyString
 	}
 	var requestApplianceUpdateNetworkApplianceRfProfilePerSSIDSettings *merakigosdk.RequestApplianceUpdateNetworkApplianceRfProfilePerSSIDSettings
+
 	if r.PerSSIDSettings != nil {
 		var requestApplianceUpdateNetworkApplianceRfProfilePerSSIDSettings1 *merakigosdk.RequestApplianceUpdateNetworkApplianceRfProfilePerSSIDSettings1
+
 		if r.PerSSIDSettings.Status1 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status1.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -769,8 +785,10 @@ func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestUpdate(ctx context.Contex
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 			}
+			//[debug] Is Array: False
 		}
 		var requestApplianceUpdateNetworkApplianceRfProfilePerSSIDSettings2 *merakigosdk.RequestApplianceUpdateNetworkApplianceRfProfilePerSSIDSettings2
+
 		if r.PerSSIDSettings.Status2 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status2.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -783,8 +801,10 @@ func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestUpdate(ctx context.Contex
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 			}
+			//[debug] Is Array: False
 		}
 		var requestApplianceUpdateNetworkApplianceRfProfilePerSSIDSettings3 *merakigosdk.RequestApplianceUpdateNetworkApplianceRfProfilePerSSIDSettings3
+
 		if r.PerSSIDSettings.Status3 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status3.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -797,8 +817,10 @@ func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestUpdate(ctx context.Contex
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 			}
+			//[debug] Is Array: False
 		}
 		var requestApplianceUpdateNetworkApplianceRfProfilePerSSIDSettings4 *merakigosdk.RequestApplianceUpdateNetworkApplianceRfProfilePerSSIDSettings4
+
 		if r.PerSSIDSettings.Status4 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status4.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -811,6 +833,7 @@ func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestUpdate(ctx context.Contex
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 			}
+			//[debug] Is Array: False
 		}
 		requestApplianceUpdateNetworkApplianceRfProfilePerSSIDSettings = &merakigosdk.RequestApplianceUpdateNetworkApplianceRfProfilePerSSIDSettings{
 			Status1: requestApplianceUpdateNetworkApplianceRfProfilePerSSIDSettings1,
@@ -818,8 +841,10 @@ func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestUpdate(ctx context.Contex
 			Status3: requestApplianceUpdateNetworkApplianceRfProfilePerSSIDSettings3,
 			Status4: requestApplianceUpdateNetworkApplianceRfProfilePerSSIDSettings4,
 		}
+		//[debug] Is Array: False
 	}
 	var requestApplianceUpdateNetworkApplianceRfProfileTwoFourGhzSettings *merakigosdk.RequestApplianceUpdateNetworkApplianceRfProfileTwoFourGhzSettings
+
 	if r.TwoFourGhzSettings != nil {
 		axEnabled := func() *bool {
 			if !r.TwoFourGhzSettings.AxEnabled.IsUnknown() && !r.TwoFourGhzSettings.AxEnabled.IsNull() {
@@ -837,6 +862,7 @@ func (r *NetworksApplianceRfProfilesRs) toSdkApiRequestUpdate(ctx context.Contex
 			AxEnabled:  axEnabled,
 			MinBitrate: minBitrate,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceRfProfile{
 		FiveGhzSettings:    requestApplianceUpdateNetworkApplianceRfProfileFiveGhzSettings,

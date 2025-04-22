@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -227,7 +227,6 @@ func (r *DevicesLiveToolsPingResource) Create(ctx context.Context, req resource.
 	vvSerial := data.Serial.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Devices.CreateDeviceLiveToolsPing(vvSerial, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -244,7 +243,6 @@ func (r *DevicesLiveToolsPingResource) Create(ctx context.Context, req resource.
 	}
 	//Item
 	data = ResponseDevicesCreateDeviceLiveToolsPingItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -315,29 +313,35 @@ func (r *DevicesLiveToolsPing) toSdkApiRequestCreate(ctx context.Context) *merak
 	emptyString := ""
 	re := *r.Parameters
 	var requestDevicesCreateDeviceLiveToolsPingCallback *merakigosdk.RequestDevicesCreateDeviceLiveToolsPingCallback
+
 	if re.Callback != nil {
 		var requestDevicesCreateDeviceLiveToolsPingCallbackHTTPServer *merakigosdk.RequestDevicesCreateDeviceLiveToolsPingCallbackHTTPServer
+
 		if re.Callback.HTTPServer != nil {
-			iD := re.Callback.HTTPServer.ID.ValueString()
+			id := re.Callback.HTTPServer.ID.ValueString()
 			requestDevicesCreateDeviceLiveToolsPingCallbackHTTPServer = &merakigosdk.RequestDevicesCreateDeviceLiveToolsPingCallbackHTTPServer{
-				ID: iD,
+				ID: id,
 			}
+			//[debug] Is Array: False
 		}
 		var requestDevicesCreateDeviceLiveToolsPingCallbackPayloadTemplate *merakigosdk.RequestDevicesCreateDeviceLiveToolsPingCallbackPayloadTemplate
+
 		if re.Callback.PayloadTemplate != nil {
-			iD := re.Callback.PayloadTemplate.ID.ValueString()
+			id := re.Callback.PayloadTemplate.ID.ValueString()
 			requestDevicesCreateDeviceLiveToolsPingCallbackPayloadTemplate = &merakigosdk.RequestDevicesCreateDeviceLiveToolsPingCallbackPayloadTemplate{
-				ID: iD,
+				ID: id,
 			}
+			//[debug] Is Array: False
 		}
 		sharedSecret := re.Callback.SharedSecret.ValueString()
-		uRL := re.Callback.URL.ValueString()
+		url := re.Callback.URL.ValueString()
 		requestDevicesCreateDeviceLiveToolsPingCallback = &merakigosdk.RequestDevicesCreateDeviceLiveToolsPingCallback{
 			HTTPServer:      requestDevicesCreateDeviceLiveToolsPingCallbackHTTPServer,
 			PayloadTemplate: requestDevicesCreateDeviceLiveToolsPingCallbackPayloadTemplate,
 			SharedSecret:    sharedSecret,
-			URL:             uRL,
+			URL:             url,
 		}
+		//[debug] Is Array: False
 	}
 	count := new(int64)
 	if !re.Count.IsUnknown() && !re.Count.IsNull() {

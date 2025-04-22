@@ -21,10 +21,12 @@ resource "meraki_organizations_adaptive_policy_acls" "example" {
   organization_id = "string"
   rules = [{
 
-    dst_port = "22-30"
-    policy   = "deny"
-    protocol = "tcp"
-    src_port = "1,33"
+    dst_port        = "22-30"
+    log             = true
+    policy          = "deny"
+    protocol        = "tcp"
+    src_port        = "1,33"
+    tcp_established = true
   }]
 }
 
@@ -60,16 +62,18 @@ output "meraki_organizations_adaptive_policy_acls_example" {
 Optional:
 
 - `dst_port` (String) Destination port
+- `log` (Boolean) If enabled, when this rule is hit an entry will be logged to the event log
 - `policy` (String) 'allow' or 'deny' traffic specified by this rule
                                         Allowed values: [allow,deny]
 - `protocol` (String) The type of protocol
                                         Allowed values: [any,icmp,tcp,udp]
 - `src_port` (String) Source port
+- `tcp_established` (Boolean) If enabled, means TCP connection with this node must be established.
 
 ## Import
 
 Import is supported using the following syntax:
 
 ```shell
-terraform import meraki_organizations_adaptive_policy_acls.example "organization_id,acl_id"
+terraform import meraki_organizations_adaptive_policy_acls.example "acl_id,organization_id"
 ```

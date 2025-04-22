@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -176,30 +176,37 @@ func (r *NetworksSwitchRoutingMulticastResource) Create(ctx context.Context, req
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchRoutingMulticast(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchRoutingMulticast only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchRoutingMulticast(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchRoutingMulticast  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchRoutingMulticast only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchRoutingMulticast only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchRoutingMulticast(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchRoutingMulticast",
 				err.Error(),
@@ -212,9 +219,10 @@ func (r *NetworksSwitchRoutingMulticastResource) Create(ctx context.Context, req
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchRoutingMulticast(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -229,11 +237,12 @@ func (r *NetworksSwitchRoutingMulticastResource) Create(ctx context.Context, req
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseSwitchGetNetworkSwitchRoutingMulticastItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksSwitchRoutingMulticastResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -353,6 +362,7 @@ type ResponseSwitchGetNetworkSwitchRoutingMulticastOverridesRs struct {
 // FromBody
 func (r *NetworksSwitchRoutingMulticastRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingMulticast {
 	var requestSwitchUpdateNetworkSwitchRoutingMulticastDefaultSettings *merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingMulticastDefaultSettings
+
 	if r.DefaultSettings != nil {
 		floodUnknownMulticastTrafficEnabled := func() *bool {
 			if !r.DefaultSettings.FloodUnknownMulticastTrafficEnabled.IsUnknown() && !r.DefaultSettings.FloodUnknownMulticastTrafficEnabled.IsNull() {
@@ -370,8 +380,10 @@ func (r *NetworksSwitchRoutingMulticastRs) toSdkApiRequestUpdate(ctx context.Con
 			FloodUnknownMulticastTrafficEnabled: floodUnknownMulticastTrafficEnabled,
 			IgmpSnoopingEnabled:                 igmpSnoopingEnabled,
 		}
+		//[debug] Is Array: False
 	}
 	var requestSwitchUpdateNetworkSwitchRoutingMulticastOverrides []merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingMulticastOverrides
+
 	if r.Overrides != nil {
 		for _, rItem1 := range *r.Overrides {
 			floodUnknownMulticastTrafficEnabled := func() *bool {
@@ -386,14 +398,14 @@ func (r *NetworksSwitchRoutingMulticastRs) toSdkApiRequestUpdate(ctx context.Con
 				}
 				return nil
 			}()
+
 			var stacks []string = nil
-			//Hoola aqui
 			rItem1.Stacks.ElementsAs(ctx, &stacks, false)
+
 			var switchProfiles []string = nil
-			//Hoola aqui
 			rItem1.SwitchProfiles.ElementsAs(ctx, &switchProfiles, false)
+
 			var switches []string = nil
-			//Hoola aqui
 			rItem1.Switches.ElementsAs(ctx, &switches, false)
 			requestSwitchUpdateNetworkSwitchRoutingMulticastOverrides = append(requestSwitchUpdateNetworkSwitchRoutingMulticastOverrides, merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingMulticastOverrides{
 				FloodUnknownMulticastTrafficEnabled: floodUnknownMulticastTrafficEnabled,
@@ -402,6 +414,7 @@ func (r *NetworksSwitchRoutingMulticastRs) toSdkApiRequestUpdate(ctx context.Con
 				SwitchProfiles:                      switchProfiles,
 				Switches:                            switches,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingMulticast{

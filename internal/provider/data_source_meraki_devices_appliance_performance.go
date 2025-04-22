@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -22,7 +21,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -78,8 +77,9 @@ func (d *DevicesAppliancePerformanceDataSource) Schema(_ context.Context, _ data
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"perf_score": schema.Int64Attribute{
-						Computed: true,
+					"perf_score": schema.Float64Attribute{
+						MarkdownDescription: `Utilization for the MX device`,
+						Computed:            true,
 					},
 				},
 			},
@@ -139,17 +139,17 @@ type DevicesAppliancePerformance struct {
 }
 
 type ResponseApplianceGetDeviceAppliancePerformance struct {
-	PerfScore types.Int64 `tfsdk:"perf_score"`
+	PerfScore types.Float64 `tfsdk:"perf_score"`
 }
 
 // ToBody
 func ResponseApplianceGetDeviceAppliancePerformanceItemToBody(state DevicesAppliancePerformance, response *merakigosdk.ResponseApplianceGetDeviceAppliancePerformance) DevicesAppliancePerformance {
 	itemState := ResponseApplianceGetDeviceAppliancePerformance{
-		PerfScore: func() types.Int64 {
+		PerfScore: func() types.Float64 {
 			if response.PerfScore != nil {
-				return types.Int64Value(int64(*response.PerfScore))
+				return types.Float64Value(float64(*response.PerfScore))
 			}
-			return types.Int64{}
+			return types.Float64{}
 		}(),
 	}
 	state.Item = &itemState

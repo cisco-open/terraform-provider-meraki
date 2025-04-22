@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -199,9 +199,9 @@ func (d *OrganizationsCellularGatewayEsimsServiceProvidersAccountsDataSource) Re
 
 // structs
 type OrganizationsCellularGatewayEsimsServiceProvidersAccounts struct {
-	OrganizationID types.String                                                                              `tfsdk:"organization_id"`
-	AccountIDs     types.List                                                                                `tfsdk:"account_ids"`
-	Items          *[]ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccounts `tfsdk:"items"`
+	OrganizationID types.String                                                                            `tfsdk:"organization_id"`
+	AccountIDs     types.List                                                                              `tfsdk:"account_ids"`
+	Items          *ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccounts `tfsdk:"items"`
 }
 
 type ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccounts struct {
@@ -240,11 +240,11 @@ type ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvid
 }
 
 // ToBody
-func ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItemsToBody(state OrganizationsCellularGatewayEsimsServiceProvidersAccounts, item *merakigosdk.ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccounts) OrganizationsCellularGatewayEsimsServiceProvidersAccounts {
-	var items []ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccounts
-
+func ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItemsToBody(state OrganizationsCellularGatewayEsimsServiceProvidersAccounts, response *merakigosdk.ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccounts) OrganizationsCellularGatewayEsimsServiceProvidersAccounts {
+	item := response
 	itemState := ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccounts{
 		Items: func() *[]ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItems {
+
 			if item.Items != nil {
 				result := make([]ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItems, len(*item.Items))
 				for i, items := range *item.Items {
@@ -309,8 +309,6 @@ func ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersA
 			return nil
 		}(),
 	}
-	items = append(items, itemState)
-
-	state.Items = &items
+	state.Items = &itemState
 	return state
 }

@@ -50,7 +50,7 @@ output "meraki_networks_wireless_settings_example" {
 - `location_analytics_enabled` (Boolean) Toggle for enabling or disabling location analytics for your network
 - `meshing_enabled` (Boolean) Toggle for enabling or disabling meshing in a network
 - `named_vlans` (Attributes) Named VLAN settings for wireless networks. (see [below for nested schema](#nestedatt--named_vlans))
-- `upgradestrategy` (String) The default strategy that network devices will use to perform an upgrade. Requires firmware version MR 26.8 or higher.
+- `upgrade_strategy` (String) The default strategy that network devices will use to perform an upgrade. Requires firmware version MR 26.8 or higher.
                                   Allowed values: [minimizeClientDowntime,minimizeUpgradeTime]
 
 ### Read-Only

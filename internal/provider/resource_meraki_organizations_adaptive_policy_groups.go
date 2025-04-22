@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -80,6 +80,9 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Schema(_ context.Context, _ 
 			"group_id": schema.StringAttribute{
 				MarkdownDescription: `The ID of the adaptive policy group`,
 				Computed:            true,
+			},
+			"id": schema.StringAttribute{
+				MarkdownDescription: `id path parameter.`,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -175,12 +178,14 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Create(ctx context.Context, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationAdaptivePolicyGroups(vvOrganizationID)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -192,6 +197,7 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Create(ctx context.Context, 
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -206,6 +212,7 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Create(ctx context.Context, 
 				return
 			}
 			r.client.Organizations.UpdateOrganizationAdaptivePolicyGroup(vvOrganizationID, vvID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Organizations.GetOrganizationAdaptivePolicyGroup(vvOrganizationID, vvID)
 			if responseVerifyItem2 != nil {
 				data = ResponseOrganizationsGetOrganizationAdaptivePolicyGroupItemToBodyRs(data, responseVerifyItem2, false)
@@ -215,11 +222,11 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Create(ctx context.Context, 
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Organizations.CreateOrganizationAdaptivePolicyGroup(vvOrganizationID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationAdaptivePolicyGroup",
 				err.Error(),
@@ -232,9 +239,8 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Create(ctx context.Context, 
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationAdaptivePolicyGroups(vvOrganizationID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -250,6 +256,7 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Create(ctx context.Context, 
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -257,8 +264,8 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Create(ctx context.Context, 
 		vvID, ok := result2["GroupID"].(string)
 		if !ok {
 			resp.Diagnostics.AddError(
-				"Failure when parsing path parameter ID",
-				"Error",
+				"Failure when parsing path parameter GroupID",
+				"Fail Parsing GroupID",
 			)
 			return
 		}
@@ -288,6 +295,7 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Create(ctx context.Context, 
 		)
 		return
 	}
+
 }
 
 func (r *OrganizationsAdaptivePolicyGroupsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -460,14 +468,16 @@ func (r *OrganizationsAdaptivePolicyGroupsRs) toSdkApiRequestCreate(ctx context.
 		name = &emptyString
 	}
 	var requestOrganizationsCreateOrganizationAdaptivePolicyGroupPolicyObjects []merakigosdk.RequestOrganizationsCreateOrganizationAdaptivePolicyGroupPolicyObjects
+
 	if r.PolicyObjects != nil {
 		for _, rItem1 := range *r.PolicyObjects {
-			iD := rItem1.ID.ValueString()
+			id := rItem1.ID.ValueString()
 			name := rItem1.Name.ValueString()
 			requestOrganizationsCreateOrganizationAdaptivePolicyGroupPolicyObjects = append(requestOrganizationsCreateOrganizationAdaptivePolicyGroupPolicyObjects, merakigosdk.RequestOrganizationsCreateOrganizationAdaptivePolicyGroupPolicyObjects{
-				ID:   iD,
+				ID:   id,
 				Name: name,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	sgt := new(int64)
@@ -504,14 +514,16 @@ func (r *OrganizationsAdaptivePolicyGroupsRs) toSdkApiRequestUpdate(ctx context.
 		name = &emptyString
 	}
 	var requestOrganizationsUpdateOrganizationAdaptivePolicyGroupPolicyObjects []merakigosdk.RequestOrganizationsUpdateOrganizationAdaptivePolicyGroupPolicyObjects
+
 	if r.PolicyObjects != nil {
 		for _, rItem1 := range *r.PolicyObjects {
-			iD := rItem1.ID.ValueString()
+			id := rItem1.ID.ValueString()
 			name := rItem1.Name.ValueString()
 			requestOrganizationsUpdateOrganizationAdaptivePolicyGroupPolicyObjects = append(requestOrganizationsUpdateOrganizationAdaptivePolicyGroupPolicyObjects, merakigosdk.RequestOrganizationsUpdateOrganizationAdaptivePolicyGroupPolicyObjects{
-				ID:   iD,
+				ID:   id,
 				Name: name,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	sgt := new(int64)

@@ -10,6 +10,8 @@ description: |-
 
 
 
+
+
 ~>Warning: This resource does not represent a real-world entity in Meraki Dashboard, therefore changing or deleting this resource on its own has no immediate effect. Instead, it is a task part of a Meraki Dashboard workflow. It is executed in Meraki without any additional verification. It does not check if it was executed before or if a similar configuration or action 
 already existed previously.
 
@@ -55,8 +57,8 @@ output "meraki_organizations_claim_example" {
 Optional:
 
 - `licenses` (Attributes Set) The licenses that should be claimed (see [below for nested schema](#nestedatt--parameters--licenses))
-- `orders` (Set of String) The numbers of the orders that should be claimed
-- `serials` (Set of String) The serials of the devices that should be claimed
+- `orders` (List of String) The numbers of the orders that should be claimed
+- `serials` (List of String) The serials of the devices that should be claimed
 
 <a id="nestedatt--parameters--licenses"></a>
 ### Nested Schema for `parameters.licenses`
@@ -75,8 +77,8 @@ Optional:
 Read-Only:
 
 - `licenses` (Attributes Set) The licenses claimed (see [below for nested schema](#nestedatt--item--licenses))
-- `orders` (Set of String) The numbers of the orders claimed
-- `serials` (Set of String) The serials of the devices claimed
+- `orders` (List of String) The numbers of the orders claimed
+- `serials` (List of String) The serials of the devices claimed
 
 <a id="nestedatt--item--licenses"></a>
 ### Nested Schema for `item.licenses`

@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -176,30 +176,37 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Create(ctx contex
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessAlternateManagementInterface(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessAlternateManagementInterface only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessAlternateManagementInterface(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessAlternateManagementInterface  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessAlternateManagementInterface only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessAlternateManagementInterface only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Wireless.UpdateNetworkWirelessAlternateManagementInterface(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessAlternateManagementInterface",
 				err.Error(),
@@ -212,9 +219,10 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Create(ctx contex
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessAlternateManagementInterface(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -229,11 +237,12 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Create(ctx contex
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseWirelessGetNetworkWirelessAlternateManagementInterfaceItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksWirelessAlternateManagementInterfaceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -351,22 +360,24 @@ type ResponseWirelessGetNetworkWirelessAlternateManagementInterfaceAccessPointsR
 // FromBody
 func (r *NetworksWirelessAlternateManagementInterfaceRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestWirelessUpdateNetworkWirelessAlternateManagementInterface {
 	var requestWirelessUpdateNetworkWirelessAlternateManagementInterfaceAccessPoints []merakigosdk.RequestWirelessUpdateNetworkWirelessAlternateManagementInterfaceAccessPoints
+
 	if r.AccessPoints != nil {
 		for _, rItem1 := range *r.AccessPoints {
 			alternateManagementIP := rItem1.AlternateManagementIP.ValueString()
-			dNS1 := rItem1.DNS1.ValueString()
-			dNS2 := rItem1.DNS2.ValueString()
+			dns1 := rItem1.DNS1.ValueString()
+			dns2 := rItem1.DNS2.ValueString()
 			gateway := rItem1.Gateway.ValueString()
 			serial := rItem1.Serial.ValueString()
 			subnetMask := rItem1.SubnetMask.ValueString()
 			requestWirelessUpdateNetworkWirelessAlternateManagementInterfaceAccessPoints = append(requestWirelessUpdateNetworkWirelessAlternateManagementInterfaceAccessPoints, merakigosdk.RequestWirelessUpdateNetworkWirelessAlternateManagementInterfaceAccessPoints{
 				AlternateManagementIP: alternateManagementIP,
-				DNS1:                  dNS1,
-				DNS2:                  dNS2,
+				DNS1:                  dns1,
+				DNS2:                  dns2,
 				Gateway:               gateway,
 				Serial:                serial,
 				SubnetMask:            subnetMask,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	enabled := new(bool)

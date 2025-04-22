@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -171,7 +171,7 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsClaimResource) Schema(_ c
 						MarkdownDescription: `Subscription name`,
 						Computed:            true,
 					},
-					"product_types": schema.SetAttribute{
+					"product_types": schema.ListAttribute{
 						MarkdownDescription: `Products the subscription has entitlements for`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -295,7 +295,6 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsClaimResource) Create(ctx
 	//Has Paths
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Licensing.ClaimAdministeredLicensingSubscriptionSubscriptions(dataRequest, nil)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -312,7 +311,6 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsClaimResource) Create(ctx
 	}
 	//Item
 	data = ResponseLicensingClaimAdministeredLicensingSubscriptionSubscriptionsItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -344,7 +342,7 @@ type ResponseLicensingClaimAdministeredLicensingSubscriptionSubscriptions struct
 	Entitlements        *[]ResponseLicensingClaimAdministeredLicensingSubscriptionSubscriptionsEntitlements      `tfsdk:"entitlements"`
 	LastUpdatedAt       types.String                                                                             `tfsdk:"last_updated_at"`
 	Name                types.String                                                                             `tfsdk:"name"`
-	ProductTypes        types.Set                                                                                `tfsdk:"product_types"`
+	ProductTypes        types.List                                                                               `tfsdk:"product_types"`
 	RenewalRequested    types.Bool                                                                               `tfsdk:"renewal_requested"`
 	SmartAccount        *ResponseLicensingClaimAdministeredLicensingSubscriptionSubscriptionsSmartAccount        `tfsdk:"smart_account"`
 	StartDate           types.String                                                                             `tfsdk:"start_date"`
@@ -534,7 +532,7 @@ func ResponseLicensingClaimAdministeredLicensingSubscriptionSubscriptionsItemToB
 		}(),
 		LastUpdatedAt: types.StringValue(response.LastUpdatedAt),
 		Name:          types.StringValue(response.Name),
-		ProductTypes:  StringSliceToSet(response.ProductTypes),
+		ProductTypes:  StringSliceToList(response.ProductTypes),
 		RenewalRequested: func() types.Bool {
 			if response.RenewalRequested != nil {
 				return types.BoolValue(*response.RenewalRequested)

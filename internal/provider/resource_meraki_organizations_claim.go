@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -89,12 +89,12 @@ func (r *OrganizationsClaimResource) Schema(_ context.Context, _ resource.Schema
 							},
 						},
 					},
-					"orders": schema.SetAttribute{
+					"orders": schema.ListAttribute{
 						MarkdownDescription: `The numbers of the orders claimed`,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `The serials of the devices claimed`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -131,13 +131,13 @@ func (r *OrganizationsClaimResource) Schema(_ context.Context, _ resource.Schema
 							},
 						},
 					},
-					"orders": schema.SetAttribute{
+					"orders": schema.ListAttribute{
 						MarkdownDescription: `The numbers of the orders that should be claimed`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `The serials of the devices that should be claimed`,
 						Optional:            true,
 						Computed:            true,
@@ -170,7 +170,6 @@ func (r *OrganizationsClaimResource) Create(ctx context.Context, req resource.Cr
 	vvOrganizationID := data.OrganizationID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Organizations.ClaimIntoOrganization(vvOrganizationID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -187,7 +186,6 @@ func (r *OrganizationsClaimResource) Create(ctx context.Context, req resource.Cr
 	}
 	//Item
 	data = ResponseOrganizationsClaimIntoOrganizationItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -214,8 +212,8 @@ type OrganizationsClaim struct {
 
 type ResponseOrganizationsClaimIntoOrganization struct {
 	Licenses *[]ResponseOrganizationsClaimIntoOrganizationLicenses `tfsdk:"licenses"`
-	Orders   types.Set                                             `tfsdk:"orders"`
-	Serials  types.Set                                             `tfsdk:"serials"`
+	Orders   types.List                                            `tfsdk:"orders"`
+	Serials  types.List                                            `tfsdk:"serials"`
 }
 
 type ResponseOrganizationsClaimIntoOrganizationLicenses struct {
@@ -238,6 +236,7 @@ type RequestOrganizationsClaimIntoOrganizationLicensesRs struct {
 func (r *OrganizationsClaim) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestOrganizationsClaimIntoOrganization {
 	re := *r.Parameters
 	var requestOrganizationsClaimIntoOrganizationLicenses []merakigosdk.RequestOrganizationsClaimIntoOrganizationLicenses
+
 	if re.Licenses != nil {
 		for _, rItem1 := range *re.Licenses {
 			key := rItem1.Key.ValueString()
@@ -246,6 +245,7 @@ func (r *OrganizationsClaim) toSdkApiRequestCreate(ctx context.Context) *merakig
 				Key:  key,
 				Mode: mode,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var orders []string = nil
@@ -281,8 +281,8 @@ func ResponseOrganizationsClaimIntoOrganizationItemToBody(state OrganizationsCla
 			}
 			return nil
 		}(),
-		Orders:  StringSliceToSet(response.Orders),
-		Serials: StringSliceToSet(response.Serials),
+		Orders:  StringSliceToList(response.Orders),
+		Serials: StringSliceToList(response.Serials),
 	}
 	state.Item = &itemState
 	return state

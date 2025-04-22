@@ -7,6 +7,7 @@ resource "meraki_networks_settings" "example" {
 
       enabled  = false
       password = "miles123"
+      username = "admin"
     }
   }
   local_status_page_enabled = true

@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -373,6 +373,14 @@ func (r *OrganizationsAlertsProfilesResource) Read(ctx context.Context, req reso
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
+			if restyResp1.StatusCode() == 404 {
+				resp.Diagnostics.AddWarning(
+					"Resource not found",
+					"Deleting resource",
+				)
+				resp.State.RemoveResource(ctx)
+				return
+			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationAlertsProfiles",
 				err.Error(),
@@ -428,11 +436,10 @@ func (r *OrganizationsAlertsProfilesResource) Update(ctx context.Context, req re
 
 	//Path Params
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
 	vvAlertConfigID := data.AlertConfigID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	_, restyResp2, err := r.client.Organizations.UpdateOrganizationAlertsProfile(vvOrganizationID, vvAlertConfigID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Organizations.UpdateOrganizationAlertsProfile(vvOrganizationID, vvAlertConfigID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationAlertsProfile",
@@ -515,8 +522,9 @@ type ResponseItemOrganizationsGetOrganizationAlertsProfilesRecipientsRs struct {
 func (r *OrganizationsAlertsProfilesRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestOrganizationsCreateOrganizationAlertsProfile {
 	emptyString := ""
 	var requestOrganizationsCreateOrganizationAlertsProfileAlertCondition *merakigosdk.RequestOrganizationsCreateOrganizationAlertsProfileAlertCondition
+
 	if r.AlertCondition != nil {
-		bitRateBps := func() *int64 {
+		bitratebps := func() *int64 {
 			if !r.AlertCondition.BitRateBps.IsUnknown() && !r.AlertCondition.BitRateBps.IsNull() {
 				return r.AlertCondition.BitRateBps.ValueInt64Pointer()
 			}
@@ -529,19 +537,19 @@ func (r *OrganizationsAlertsProfilesRs) toSdkApiRequestCreate(ctx context.Contex
 			return nil
 		}()
 		interfaceR := r.AlertCondition.Interface.ValueString()
-		jitterMs := func() *int64 {
+		jitterms := func() *int64 {
 			if !r.AlertCondition.JitterMs.IsUnknown() && !r.AlertCondition.JitterMs.IsNull() {
 				return r.AlertCondition.JitterMs.ValueInt64Pointer()
 			}
 			return nil
 		}()
-		latencyMs := func() *int64 {
+		latencyms := func() *int64 {
 			if !r.AlertCondition.LatencyMs.IsUnknown() && !r.AlertCondition.LatencyMs.IsNull() {
 				return r.AlertCondition.LatencyMs.ValueInt64Pointer()
 			}
 			return nil
 		}()
-		lossRatio := func() *float64 {
+		lossratio := func() *float64 {
 			if !r.AlertCondition.LossRatio.IsUnknown() && !r.AlertCondition.LossRatio.IsNull() {
 				return r.AlertCondition.LossRatio.ValueFloat64Pointer()
 			}
@@ -560,15 +568,16 @@ func (r *OrganizationsAlertsProfilesRs) toSdkApiRequestCreate(ctx context.Contex
 			return nil
 		}()
 		requestOrganizationsCreateOrganizationAlertsProfileAlertCondition = &merakigosdk.RequestOrganizationsCreateOrganizationAlertsProfileAlertCondition{
-			BitRateBps: int64ToIntPointer(bitRateBps),
+			BitRateBps: int64ToIntPointer(bitratebps),
 			Duration:   int64ToIntPointer(duration),
 			Interface:  interfaceR,
-			JitterMs:   int64ToIntPointer(jitterMs),
-			LatencyMs:  int64ToIntPointer(latencyMs),
-			LossRatio:  lossRatio,
+			JitterMs:   int64ToIntPointer(jitterms),
+			LatencyMs:  int64ToIntPointer(latencyms),
+			LossRatio:  lossratio,
 			Mos:        mos,
 			Window:     int64ToIntPointer(window),
 		}
+		//[debug] Is Array: False
 	}
 	description := new(string)
 	if !r.Description.IsUnknown() && !r.Description.IsNull() {
@@ -579,17 +588,19 @@ func (r *OrganizationsAlertsProfilesRs) toSdkApiRequestCreate(ctx context.Contex
 	var networkTags []string = nil
 	r.NetworkTags.ElementsAs(ctx, &networkTags, false)
 	var requestOrganizationsCreateOrganizationAlertsProfileRecipients *merakigosdk.RequestOrganizationsCreateOrganizationAlertsProfileRecipients
+
 	if r.Recipients != nil {
+
 		var emails []string = nil
-		//Hoola aqui
 		r.Recipients.Emails.ElementsAs(ctx, &emails, false)
+
 		var httpServerIDs []string = nil
-		//Hoola aqui
 		r.Recipients.HTTPServerIDs.ElementsAs(ctx, &httpServerIDs, false)
 		requestOrganizationsCreateOrganizationAlertsProfileRecipients = &merakigosdk.RequestOrganizationsCreateOrganizationAlertsProfileRecipients{
 			Emails:        emails,
 			HTTPServerIDs: httpServerIDs,
 		}
+		//[debug] Is Array: False
 	}
 	typeR := new(string)
 	if !r.Type.IsUnknown() && !r.Type.IsNull() {
@@ -609,8 +620,9 @@ func (r *OrganizationsAlertsProfilesRs) toSdkApiRequestCreate(ctx context.Contex
 func (r *OrganizationsAlertsProfilesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestOrganizationsUpdateOrganizationAlertsProfile {
 	emptyString := ""
 	var requestOrganizationsUpdateOrganizationAlertsProfileAlertCondition *merakigosdk.RequestOrganizationsUpdateOrganizationAlertsProfileAlertCondition
+
 	if r.AlertCondition != nil {
-		bitRateBps := func() *int64 {
+		bitratebps := func() *int64 {
 			if !r.AlertCondition.BitRateBps.IsUnknown() && !r.AlertCondition.BitRateBps.IsNull() {
 				return r.AlertCondition.BitRateBps.ValueInt64Pointer()
 			}
@@ -623,19 +635,19 @@ func (r *OrganizationsAlertsProfilesRs) toSdkApiRequestUpdate(ctx context.Contex
 			return nil
 		}()
 		interfaceR := r.AlertCondition.Interface.ValueString()
-		jitterMs := func() *int64 {
+		jitterms := func() *int64 {
 			if !r.AlertCondition.JitterMs.IsUnknown() && !r.AlertCondition.JitterMs.IsNull() {
 				return r.AlertCondition.JitterMs.ValueInt64Pointer()
 			}
 			return nil
 		}()
-		latencyMs := func() *int64 {
+		latencyms := func() *int64 {
 			if !r.AlertCondition.LatencyMs.IsUnknown() && !r.AlertCondition.LatencyMs.IsNull() {
 				return r.AlertCondition.LatencyMs.ValueInt64Pointer()
 			}
 			return nil
 		}()
-		lossRatio := func() *float64 {
+		lossratio := func() *float64 {
 			if !r.AlertCondition.LossRatio.IsUnknown() && !r.AlertCondition.LossRatio.IsNull() {
 				return r.AlertCondition.LossRatio.ValueFloat64Pointer()
 			}
@@ -654,15 +666,16 @@ func (r *OrganizationsAlertsProfilesRs) toSdkApiRequestUpdate(ctx context.Contex
 			return nil
 		}()
 		requestOrganizationsUpdateOrganizationAlertsProfileAlertCondition = &merakigosdk.RequestOrganizationsUpdateOrganizationAlertsProfileAlertCondition{
-			BitRateBps: int64ToIntPointer(bitRateBps),
+			BitRateBps: int64ToIntPointer(bitratebps),
 			Duration:   int64ToIntPointer(duration),
 			Interface:  interfaceR,
-			JitterMs:   int64ToIntPointer(jitterMs),
-			LatencyMs:  int64ToIntPointer(latencyMs),
-			LossRatio:  lossRatio,
+			JitterMs:   int64ToIntPointer(jitterms),
+			LatencyMs:  int64ToIntPointer(latencyms),
+			LossRatio:  lossratio,
 			Mos:        mos,
 			Window:     int64ToIntPointer(window),
 		}
+		//[debug] Is Array: False
 	}
 	description := new(string)
 	if !r.Description.IsUnknown() && !r.Description.IsNull() {
@@ -679,17 +692,19 @@ func (r *OrganizationsAlertsProfilesRs) toSdkApiRequestUpdate(ctx context.Contex
 	var networkTags []string = nil
 	r.NetworkTags.ElementsAs(ctx, &networkTags, false)
 	var requestOrganizationsUpdateOrganizationAlertsProfileRecipients *merakigosdk.RequestOrganizationsUpdateOrganizationAlertsProfileRecipients
+
 	if r.Recipients != nil {
+
 		var emails []string = nil
-		//Hoola aqui
 		r.Recipients.Emails.ElementsAs(ctx, &emails, false)
+
 		var httpServerIDs []string = nil
-		//Hoola aqui
 		r.Recipients.HTTPServerIDs.ElementsAs(ctx, &httpServerIDs, false)
 		requestOrganizationsUpdateOrganizationAlertsProfileRecipients = &merakigosdk.RequestOrganizationsUpdateOrganizationAlertsProfileRecipients{
 			Emails:        emails,
 			HTTPServerIDs: httpServerIDs,
 		}
+		//[debug] Is Array: False
 	}
 	typeR := new(string)
 	if !r.Type.IsUnknown() && !r.Type.IsNull() {

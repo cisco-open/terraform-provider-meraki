@@ -41,7 +41,7 @@ output "meraki_organizations_adaptive_policy_groups_example" {
 ### Optional
 
 - `description` (String) The description for the adaptive policy group
-- `group_id` (String) The ID of the adaptive policy group
+- `id` (String) id path parameter.
 - `name` (String) The name of the adaptive policy group
 - `policy_objects` (Attributes Set) The policy objects for the adaptive policy group (see [below for nested schema](#nestedatt--policy_objects))
 - `sgt` (Number) The security group tag for the adaptive policy group
@@ -49,6 +49,7 @@ output "meraki_organizations_adaptive_policy_groups_example" {
 ### Read-Only
 
 - `created_at` (String) Created at timestamp for the adaptive policy group
+- `group_id` (String) The ID of the adaptive policy group
 - `is_default_group` (Boolean) Whether the adaptive policy group is the default group
 - `required_ip_mappings` (Set of String) List of required IP mappings for the adaptive policy group
 - `updated_at` (String) Updated at timestamp for the adaptive policy group
@@ -66,5 +67,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import meraki_organizations_adaptive_policy_groups.example "organization_id,id"
+terraform import meraki_organizations_adaptive_policy_groups.example "id,organization_id"
 ```

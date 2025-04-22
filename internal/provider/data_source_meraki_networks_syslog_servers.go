@@ -23,7 +23,7 @@ import (
 	"log"
 	"strconv"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -74,7 +74,7 @@ func (d *NetworksSyslogServersDataSource) Schema(_ context.Context, _ datasource
 							Attributes: map[string]schema.Attribute{
 
 								"host": schema.StringAttribute{
-									MarkdownDescription: `The IP address of the syslog server`,
+									MarkdownDescription: `The IP address or FQDN of the syslog server`,
 									Computed:            true,
 								},
 								"port": schema.Int64Attribute{

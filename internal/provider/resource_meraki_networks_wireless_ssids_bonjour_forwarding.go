@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -161,31 +161,38 @@ func (r *NetworksWirelessSSIDsBonjourForwardingResource) Create(ctx context.Cont
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	vvNumber := data.Number.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDBonjourForwarding(vvNetworkID, vvNumber)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSSIDsBonjourForwarding only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" && vvNumber != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDBonjourForwarding(vvNetworkID, vvNumber)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessSsidsBonjourForwarding  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessSsidsBonjourForwarding only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSSIDsBonjourForwarding only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDBonjourForwarding(vvNetworkID, vvNumber, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDBonjourForwarding",
 				err.Error(),
@@ -198,9 +205,10 @@ func (r *NetworksWirelessSSIDsBonjourForwardingResource) Create(ctx context.Cont
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDBonjourForwarding(vvNetworkID, vvNumber)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -215,11 +223,12 @@ func (r *NetworksWirelessSSIDsBonjourForwardingResource) Create(ctx context.Cont
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseWirelessGetNetworkWirelessSSIDBonjourForwardingItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksWirelessSSIDsBonjourForwardingResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -357,6 +366,7 @@ func (r *NetworksWirelessSSIDsBonjourForwardingRs) toSdkApiRequestUpdate(ctx con
 		enabled = nil
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDBonjourForwardingException *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDBonjourForwardingException
+
 	if r.Exception != nil {
 		enabled := func() *bool {
 			if !r.Exception.Enabled.IsUnknown() && !r.Exception.Enabled.IsNull() {
@@ -367,20 +377,23 @@ func (r *NetworksWirelessSSIDsBonjourForwardingRs) toSdkApiRequestUpdate(ctx con
 		requestWirelessUpdateNetworkWirelessSSIDBonjourForwardingException = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDBonjourForwardingException{
 			Enabled: enabled,
 		}
+		//[debug] Is Array: False
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDBonjourForwardingRules []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDBonjourForwardingRules
+
 	if r.Rules != nil {
 		for _, rItem1 := range *r.Rules {
 			description := rItem1.Description.ValueString()
+
 			var services []string = nil
-			//Hoola aqui
 			rItem1.Services.ElementsAs(ctx, &services, false)
-			vLANID := rItem1.VLANID.ValueString()
+			vlanID := rItem1.VLANID.ValueString()
 			requestWirelessUpdateNetworkWirelessSSIDBonjourForwardingRules = append(requestWirelessUpdateNetworkWirelessSSIDBonjourForwardingRules, merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDBonjourForwardingRules{
 				Description: description,
 				Services:    services,
-				VLANID:      vLANID,
+				VLANID:      vlanID,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDBonjourForwarding{

@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -282,30 +282,37 @@ func (r *NetworksSwitchAccessControlListsResource) Create(ctx context.Context, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchAccessControlLists(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchAccessControlLists only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchAccessControlLists(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchAccessControlLists  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchAccessControlLists only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchAccessControlLists only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchAccessControlLists(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchAccessControlLists",
 				err.Error(),
@@ -318,9 +325,10 @@ func (r *NetworksSwitchAccessControlListsResource) Create(ctx context.Context, r
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchAccessControlLists(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -335,11 +343,12 @@ func (r *NetworksSwitchAccessControlListsResource) Create(ctx context.Context, r
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseSwitchGetNetworkSwitchAccessControlListsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksSwitchAccessControlListsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -458,28 +467,30 @@ type ResponseSwitchGetNetworkSwitchAccessControlListsRulesRs struct {
 // FromBody
 func (r *NetworksSwitchAccessControlListsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestSwitchUpdateNetworkSwitchAccessControlLists {
 	var requestSwitchUpdateNetworkSwitchAccessControlListsRules []merakigosdk.RequestSwitchUpdateNetworkSwitchAccessControlListsRules
+
 	if r.Rules != nil {
 		for _, rItem1 := range *r.Rules {
 			comment := rItem1.Comment.ValueString()
 			dstCidr := rItem1.DstCidr.ValueString()
 			dstPort := rItem1.DstPort.ValueString()
-			iPVersion := rItem1.IPVersion.ValueString()
+			ipVersion := rItem1.IPVersion.ValueString()
 			policy := rItem1.Policy.ValueString()
 			protocol := rItem1.Protocol.ValueString()
 			srcCidr := rItem1.SrcCidr.ValueString()
 			srcPort := rItem1.SrcPort.ValueString()
-			vLAN := rItem1.VLAN.ValueString()
+			vlan := rItem1.VLAN.ValueString()
 			requestSwitchUpdateNetworkSwitchAccessControlListsRules = append(requestSwitchUpdateNetworkSwitchAccessControlListsRules, merakigosdk.RequestSwitchUpdateNetworkSwitchAccessControlListsRules{
 				Comment:   comment,
 				DstCidr:   dstCidr,
 				DstPort:   dstPort,
-				IPVersion: iPVersion,
+				IPVersion: ipVersion,
 				Policy:    policy,
 				Protocol:  protocol,
 				SrcCidr:   srcCidr,
 				SrcPort:   srcPort,
-				VLAN:      vLAN,
+				VLAN:      vlan,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestSwitchUpdateNetworkSwitchAccessControlLists{

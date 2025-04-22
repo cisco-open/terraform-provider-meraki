@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -122,12 +122,14 @@ func (r *NetworksSmTargetGroupsResource) Create(ctx context.Context, req resourc
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Sm.GetNetworkSmTargetGroups(vvNetworkID, nil)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -139,12 +141,13 @@ func (r *NetworksSmTargetGroupsResource) Create(ctx context.Context, req resourc
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 		if result != nil {
 			result2 := result.(map[string]interface{})
-			vvTargetGroupID, ok := result2["TargetGroupID"].(string)
+			vvTargetGroupID, ok := result2["ID"].(string)
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter TargetGroupID",
@@ -153,6 +156,7 @@ func (r *NetworksSmTargetGroupsResource) Create(ctx context.Context, req resourc
 				return
 			}
 			r.client.Sm.UpdateNetworkSmTargetGroup(vvNetworkID, vvTargetGroupID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Sm.GetNetworkSmTargetGroup(vvNetworkID, vvTargetGroupID, nil)
 			if responseVerifyItem2 != nil {
 				data = ResponseSmGetNetworkSmTargetGroupItemToBodyRs(data, responseVerifyItem2, false)
@@ -162,11 +166,11 @@ func (r *NetworksSmTargetGroupsResource) Create(ctx context.Context, req resourc
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Sm.CreateNetworkSmTargetGroup(vvNetworkID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSmTargetGroup",
 				err.Error(),
@@ -179,9 +183,8 @@ func (r *NetworksSmTargetGroupsResource) Create(ctx context.Context, req resourc
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Sm.GetNetworkSmTargetGroups(vvNetworkID, nil)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -197,15 +200,16 @@ func (r *NetworksSmTargetGroupsResource) Create(ctx context.Context, req resourc
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
 		result2 := result.(map[string]interface{})
-		vvTargetGroupID, ok := result2["TargetGroupID"].(string)
+		vvTargetGroupID, ok := result2["ID"].(string)
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter TargetGroupID",
-				"Error",
+				"Fail Parsing TargetGroupID",
 			)
 			return
 		}
@@ -235,6 +239,7 @@ func (r *NetworksSmTargetGroupsResource) Create(ctx context.Context, req resourc
 		)
 		return
 	}
+
 }
 
 func (r *NetworksSmTargetGroupsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {

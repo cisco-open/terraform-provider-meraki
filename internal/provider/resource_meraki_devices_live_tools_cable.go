@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -254,14 +254,15 @@ func (r *DevicesLiveToolsCableResource) Create(ctx context.Context, req resource
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvSerial := data.Serial.ValueString()
 	vvID := data.ID.ValueString()
-	//Item
-	if vvID != "" {
+	//Has Item and not has items
 
+	if vvSerial != "" && vvID != "" {
+		//dentro
 		responseVerifyItem, restyResp1, err := r.client.Devices.GetDeviceLiveToolsCableTest(vvSerial, vvID)
-		//Have Create
+		//Has Post
 		if err != nil {
 			if restyResp1 != nil {
 				if restyResp1.StatusCode() != 404 {
@@ -273,16 +274,17 @@ func (r *DevicesLiveToolsCableResource) Create(ctx context.Context, req resource
 				}
 			}
 		}
+
 		if responseVerifyItem != nil {
-			data := ResponseDevicesGetDeviceLiveToolsCableTestItemToBodyRs(data, responseVerifyItem, false)
+			data = ResponseDevicesGetDeviceLiveToolsCableTestItemToBodyRs(data, responseVerifyItem, false)
 			//Path params in update assigned
 			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 			return
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Devices.CreateDeviceLiveToolsCableTest(vvSerial, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
@@ -297,9 +299,10 @@ func (r *DevicesLiveToolsCableResource) Create(ctx context.Context, req resource
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Devices.GetDeviceLiveToolsCableTest(vvSerial, vvID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -314,11 +317,12 @@ func (r *DevicesLiveToolsCableResource) Create(ctx context.Context, req resource
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseDevicesGetDeviceLiveToolsCableTestItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *DevicesLiveToolsCableResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -463,29 +467,35 @@ type RequestDevicesCreateDeviceLiveToolsCableTestCallbackPayloadTemplateRs struc
 // FromBody
 func (r *DevicesLiveToolsCableRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestDevicesCreateDeviceLiveToolsCableTest {
 	var requestDevicesCreateDeviceLiveToolsCableTestCallback *merakigosdk.RequestDevicesCreateDeviceLiveToolsCableTestCallback
+
 	if r.Callback != nil {
 		var requestDevicesCreateDeviceLiveToolsCableTestCallbackHTTPServer *merakigosdk.RequestDevicesCreateDeviceLiveToolsCableTestCallbackHTTPServer
+
 		if r.Callback.HTTPServer != nil {
-			iD := r.Callback.HTTPServer.ID.ValueString()
+			id := r.Callback.HTTPServer.ID.ValueString()
 			requestDevicesCreateDeviceLiveToolsCableTestCallbackHTTPServer = &merakigosdk.RequestDevicesCreateDeviceLiveToolsCableTestCallbackHTTPServer{
-				ID: iD,
+				ID: id,
 			}
+			//[debug] Is Array: False
 		}
 		var requestDevicesCreateDeviceLiveToolsCableTestCallbackPayloadTemplate *merakigosdk.RequestDevicesCreateDeviceLiveToolsCableTestCallbackPayloadTemplate
+
 		if r.Callback.PayloadTemplate != nil {
-			iD := r.Callback.PayloadTemplate.ID.ValueString()
+			id := r.Callback.PayloadTemplate.ID.ValueString()
 			requestDevicesCreateDeviceLiveToolsCableTestCallbackPayloadTemplate = &merakigosdk.RequestDevicesCreateDeviceLiveToolsCableTestCallbackPayloadTemplate{
-				ID: iD,
+				ID: id,
 			}
+			//[debug] Is Array: False
 		}
 		sharedSecret := r.Callback.SharedSecret.ValueString()
-		uRL := r.Callback.URL.ValueString()
+		url := r.Callback.URL.ValueString()
 		requestDevicesCreateDeviceLiveToolsCableTestCallback = &merakigosdk.RequestDevicesCreateDeviceLiveToolsCableTestCallback{
 			HTTPServer:      requestDevicesCreateDeviceLiveToolsCableTestCallbackHTTPServer,
 			PayloadTemplate: requestDevicesCreateDeviceLiveToolsCableTestCallbackPayloadTemplate,
 			SharedSecret:    sharedSecret,
-			URL:             uRL,
+			URL:             url,
 		}
+		//[debug] Is Array: False
 	}
 	var ports []string = nil
 	r.Ports.ElementsAs(ctx, &ports, false)

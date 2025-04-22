@@ -71,6 +71,7 @@ output "meraki_organizations_api_requests_example" {
 Read-Only:
 
 - `admin_id` (String) Database ID for the admin user who made the API request.
+- `client` (Attributes) Client information (see [below for nested schema](#nestedatt--items--client))
 - `host` (String) The host which the API request was directed at.
 - `method` (String) HTTP method used in the API request.
 - `operation_id` (String) Operation ID for the endpoint.
@@ -81,3 +82,11 @@ Read-Only:
 - `ts` (String) Timestamp, in iso8601 format, indicating when the API request was made.
 - `user_agent` (String) The API request user agent.
 - `version` (Number) API version of the endpoint.
+
+<a id="nestedatt--items--client"></a>
+### Nested Schema for `items.client`
+
+Read-Only:
+
+- `id` (String) ID for the client which made the request, if applicable.
+- `type` (String) Type of client which made the request, if applicable. Available options are: oauth, api_key

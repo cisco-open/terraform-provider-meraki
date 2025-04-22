@@ -23,7 +23,7 @@ import (
 	"strconv"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -307,33 +307,36 @@ func (r *NetworksApplianceSSIDsResource) Create(ctx context.Context, req resourc
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	// network_id
 	a := int(data.Number.ValueInt64())
 	vvNumber := strconv.Itoa(a)
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceSSID(vvNetworkID, vvNumber)
+	// No Post
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
 		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceSSIDs only have update context, not create.",
+			"Resource NetworksApplianceSsids  only have update context, not create.",
 			err.Error(),
 		)
 		return
 	}
-	//Only Item
+
 	if responseVerifyItem == nil {
 		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceSSIDs only have update context, not create.",
+			"Resource NetworksApplianceSsids only have update context, not create.",
 			err.Error(),
 		)
 		return
 	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceSSID(vvNetworkID, vvNumber, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceSSID",
 				err.Error(),
@@ -346,28 +349,30 @@ func (r *NetworksApplianceSSIDsResource) Create(ctx context.Context, req resourc
 		)
 		return
 	}
-	//Item
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceSSID(vvNetworkID, vvNumber)
-	// Has only items
 
+	//Assign Path Params required
+
+	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceSSID(vvNetworkID, vvNumber)
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceSSIDs",
+				"Failure when executing GetNetworkApplianceSSID",
 				err.Error(),
 			)
 			return
 		}
 		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkApplianceSSIDs",
+			"Failure when executing GetNetworkApplianceSSID",
 			err.Error(),
 		)
 		return
 	}
+
 	data = ResponseApplianceGetNetworkApplianceSSIDItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksApplianceSSIDsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -561,6 +566,7 @@ func (r *NetworksApplianceSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 		defaultVLANID = nil
 	}
 	var requestApplianceUpdateNetworkApplianceSSIDDhcpEnforcedDeauthentication *merakigosdk.RequestApplianceUpdateNetworkApplianceSSIDDhcpEnforcedDeauthentication
+
 	if r.DhcpEnforcedDeauthentication != nil {
 		enabled := func() *bool {
 			if !r.DhcpEnforcedDeauthentication.Enabled.IsUnknown() && !r.DhcpEnforcedDeauthentication.Enabled.IsNull() {
@@ -571,8 +577,10 @@ func (r *NetworksApplianceSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 		requestApplianceUpdateNetworkApplianceSSIDDhcpEnforcedDeauthentication = &merakigosdk.RequestApplianceUpdateNetworkApplianceSSIDDhcpEnforcedDeauthentication{
 			Enabled: enabled,
 		}
+		//[debug] Is Array: False
 	}
 	var requestApplianceUpdateNetworkApplianceSSIDDot11W *merakigosdk.RequestApplianceUpdateNetworkApplianceSSIDDot11W
+
 	if r.Dot11W != nil {
 		enabled := func() *bool {
 			if !r.Dot11W.Enabled.IsUnknown() && !r.Dot11W.Enabled.IsNull() {
@@ -590,6 +598,7 @@ func (r *NetworksApplianceSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 			Enabled:  enabled,
 			Required: required,
 		}
+		//[debug] Is Array: False
 	}
 	enabled := new(bool)
 	if !r.Enabled.IsUnknown() && !r.Enabled.IsNull() {
@@ -616,6 +625,7 @@ func (r *NetworksApplianceSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 		psk = &emptyString
 	}
 	var requestApplianceUpdateNetworkApplianceSSIDRadiusServers []merakigosdk.RequestApplianceUpdateNetworkApplianceSSIDRadiusServers
+
 	if r.RadiusServers != nil {
 		for _, rItem1 := range *r.RadiusServers {
 			host := rItem1.Host.ValueString()
@@ -631,6 +641,7 @@ func (r *NetworksApplianceSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 				Port:   int64ToIntPointer(port),
 				Secret: secret,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	visible := new(bool)

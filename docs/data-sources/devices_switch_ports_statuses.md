@@ -121,7 +121,7 @@ Read-Only:
 Read-Only:
 
 - `allowed_vlans` (String) The VLANs allowed on the . Only applicable to trunk ports.
-- `type` (String) The type of the  ('trunk', 'access' or 'stack').
+- `type` (String) The type of the  ('trunk', 'access', 'stack' or 'routed').
 - `vlan` (Number) The VLAN of the . For a trunk port, this is the native VLAN. A null value will clear the value set for trunk ports.
 - `voice_vlan` (Number) The voice VLAN of the . Only applicable to access ports.
 

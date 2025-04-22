@@ -21,7 +21,9 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	"log"
+
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -426,7 +428,6 @@ func (r *NetworksApplianceSdwanInternetPoliciesResource) Create(ctx context.Cont
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp1, err := r.client.Appliance.UpdateNetworkApplianceSdwanInternetPolicies(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -443,7 +444,6 @@ func (r *NetworksApplianceSdwanInternetPoliciesResource) Create(ctx context.Cont
 	}
 	//Item
 	data = ResponseApplianceUpdateNetworkApplianceSdwanInternetPoliciesItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -566,10 +566,12 @@ type RequestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplink
 func (r *NetworksApplianceSdwanInternetPolicies) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateNetworkApplianceSdwanInternetPolicies {
 	re := *r.Parameters
 	var requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferences []merakigosdk.RequestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferences
+
 	if re.WanTrafficUplinkPreferences != nil {
 		for _, rItem1 := range *re.WanTrafficUplinkPreferences {
 			failOverCriterion := rItem1.FailOverCriterion.ValueString()
 			var requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesPerformanceClass *merakigosdk.RequestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesPerformanceClass
+
 			if rItem1.PerformanceClass != nil {
 				builtinPerformanceClassName := rItem1.PerformanceClass.BuiltinPerformanceClassName.ValueString()
 				customPerformanceClassID := rItem1.PerformanceClass.CustomPerformanceClassID.ValueString()
@@ -579,27 +581,37 @@ func (r *NetworksApplianceSdwanInternetPolicies) toSdkApiRequestUpdate(ctx conte
 					CustomPerformanceClassID:    customPerformanceClassID,
 					Type:                        typeR,
 				}
+				//[debug] Is Array: False
 			}
 			preferredUplink := rItem1.PreferredUplink.ValueString()
+
+			log.Printf("[DEBUG] #TODO []RequestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFilters")
 			var requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFilters []merakigosdk.RequestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFilters
+
 			if rItem1.TrafficFilters != nil {
 				for _, rItem2 := range *rItem1.TrafficFilters {
 					typeR := rItem2.Type.ValueString()
 					var requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValue *merakigosdk.RequestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValue
+
 					if rItem2.Value != nil {
 						var requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValueDestination *merakigosdk.RequestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValueDestination
+
 						if rItem2.Value.Destination != nil {
+
+							log.Printf("[DEBUG] #TODO []RequestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplications")
 							var requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplications []merakigosdk.RequestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplications
+
 							if rItem2.Value.Destination.Applications != nil {
 								for _, rItem3 := range *rItem2.Value.Destination.Applications {
-									iD := rItem3.ID.ValueString()
+									id := rItem3.ID.ValueString()
 									name := rItem3.Name.ValueString()
 									typeR := rItem3.Type.ValueString()
 									requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplications = append(requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplications, merakigosdk.RequestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplications{
-										ID:   iD,
+										ID:   id,
 										Name: name,
 										Type: typeR,
 									})
+									//[debug] Is Array: True
 								}
 							}
 							cidr := rItem2.Value.Destination.Cidr.ValueString()
@@ -614,9 +626,11 @@ func (r *NetworksApplianceSdwanInternetPolicies) toSdkApiRequestUpdate(ctx conte
 								Cidr: cidr,
 								Port: port,
 							}
+							//[debug] Is Array: False
 						}
 						protocol := rItem2.Value.Protocol.ValueString()
 						var requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValueSource *merakigosdk.RequestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValueSource
+
 						if rItem2.Value.Source != nil {
 							cidr := rItem2.Value.Source.Cidr.ValueString()
 							host := func() *int64 {
@@ -626,7 +640,7 @@ func (r *NetworksApplianceSdwanInternetPolicies) toSdkApiRequestUpdate(ctx conte
 								return nil
 							}()
 							port := rItem2.Value.Source.Port.ValueString()
-							vLAN := func() *int64 {
+							vlan := func() *int64 {
 								if !rItem2.Value.Source.VLAN.IsUnknown() && !rItem2.Value.Source.VLAN.IsNull() {
 									return rItem2.Value.Source.VLAN.ValueInt64Pointer()
 								}
@@ -636,19 +650,22 @@ func (r *NetworksApplianceSdwanInternetPolicies) toSdkApiRequestUpdate(ctx conte
 								Cidr: cidr,
 								Host: int64ToIntPointer(host),
 								Port: port,
-								VLAN: int64ToIntPointer(vLAN),
+								VLAN: int64ToIntPointer(vlan),
 							}
+							//[debug] Is Array: False
 						}
 						requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValue = &merakigosdk.RequestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValue{
 							Destination: requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValueDestination,
 							Protocol:    protocol,
 							Source:      requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValueSource,
 						}
+						//[debug] Is Array: False
 					}
 					requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFilters = append(requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFilters, merakigosdk.RequestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFilters{
 						Type:  typeR,
 						Value: requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValue,
 					})
+					//[debug] Is Array: True
 				}
 			}
 			requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferences = append(requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferences, merakigosdk.RequestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferences{
@@ -662,6 +679,7 @@ func (r *NetworksApplianceSdwanInternetPolicies) toSdkApiRequestUpdate(ctx conte
 					return nil
 				}(),
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceSdwanInternetPolicies{

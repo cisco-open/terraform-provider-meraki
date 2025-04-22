@@ -21,12 +21,12 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -90,16 +90,16 @@ func (r *OrganizationsInventoryClaimResource) Schema(_ context.Context, _ resour
 							},
 						},
 					},
-					"orders": schema.SetAttribute{
+					"orders": schema.ListAttribute{
 						MarkdownDescription: `The numbers of the orders claimed`,
 						Computed:            true,
-						Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
+						Default:             listdefault.StaticValue(types.ListNull(types.StringType)),
 						ElementType:         types.StringType,
 					},
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `The serials of the devices claimed`,
 						Computed:            true,
-						Default:             setdefault.StaticValue(types.SetNull(types.StringType)),
+						Default:             listdefault.StaticValue(types.ListNull(types.StringType)),
 						ElementType:         types.StringType,
 					},
 				},
@@ -134,13 +134,13 @@ func (r *OrganizationsInventoryClaimResource) Schema(_ context.Context, _ resour
 							},
 						},
 					},
-					"orders": schema.SetAttribute{
+					"orders": schema.ListAttribute{
 						MarkdownDescription: `The numbers of the orders that should be claimed`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `The serials of the devices that should be claimed`,
 						Optional:            true,
 						Computed:            true,
@@ -173,7 +173,6 @@ func (r *OrganizationsInventoryClaimResource) Create(ctx context.Context, req re
 	vvOrganizationID := data.OrganizationID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Organizations.ClaimIntoOrganizationInventory(vvOrganizationID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -190,7 +189,6 @@ func (r *OrganizationsInventoryClaimResource) Create(ctx context.Context, req re
 	}
 	//Item
 	data = ResponseOrganizationsClaimIntoOrganizationInventoryItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -217,8 +215,8 @@ type OrganizationsInventoryClaim struct {
 
 type ResponseOrganizationsClaimIntoOrganizationInventory struct {
 	Licenses *[]ResponseOrganizationsClaimIntoOrganizationInventoryLicenses `tfsdk:"licenses"`
-	Orders   types.Set                                                      `tfsdk:"orders"`
-	Serials  types.Set                                                      `tfsdk:"serials"`
+	Orders   types.List                                                     `tfsdk:"orders"`
+	Serials  types.List                                                     `tfsdk:"serials"`
 }
 
 type ResponseOrganizationsClaimIntoOrganizationInventoryLicenses struct {
@@ -241,6 +239,7 @@ type RequestOrganizationsClaimIntoOrganizationInventoryLicensesRs struct {
 func (r *OrganizationsInventoryClaim) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestOrganizationsClaimIntoOrganizationInventory {
 	re := *r.Parameters
 	var requestOrganizationsClaimIntoOrganizationInventoryLicenses []merakigosdk.RequestOrganizationsClaimIntoOrganizationInventoryLicenses
+
 	if re.Licenses != nil {
 		for _, rItem1 := range *re.Licenses {
 			key := rItem1.Key.ValueString()
@@ -249,6 +248,7 @@ func (r *OrganizationsInventoryClaim) toSdkApiRequestCreate(ctx context.Context)
 				Key:  key,
 				Mode: mode,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var orders []string = nil
@@ -284,8 +284,8 @@ func ResponseOrganizationsClaimIntoOrganizationInventoryItemToBody(state Organiz
 			}
 			return nil
 		}(),
-		Orders:  StringSliceToSet(response.Orders),
-		Serials: StringSliceToSet(response.Serials),
+		Orders:  StringSliceToList(response.Orders),
+		Serials: StringSliceToList(response.Serials),
 	}
 	state.Item = &itemState
 	return state

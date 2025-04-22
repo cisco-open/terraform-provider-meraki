@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -73,7 +73,7 @@ func (d *AdministeredLicensingSubscriptionSubscriptionsDataSource) Schema(_ cont
 			},
 			"organization_ids": schema.ListAttribute{
 				MarkdownDescription: `organizationIds query parameter. Organizations to get associated subscriptions for`,
-				Optional:            true,
+				Required:            true,
 				ElementType:         types.StringType,
 			},
 			"per_page": schema.Int64Attribute{
@@ -292,6 +292,7 @@ func (d *AdministeredLicensingSubscriptionSubscriptionsDataSource) Read(ctx cont
 		queryParams1.EndingBefore = administeredLicensingSubscriptionSubscriptions.EndingBefore.ValueString()
 		queryParams1.SubscriptionIDs = elementsToStrings(ctx, administeredLicensingSubscriptionSubscriptions.SubscriptionIDs)
 		queryParams1.OrganizationIDs = elementsToStrings(ctx, administeredLicensingSubscriptionSubscriptions.OrganizationIDs)
+
 		queryParams1.Statuses = elementsToStrings(ctx, administeredLicensingSubscriptionSubscriptions.Statuses)
 		queryParams1.ProductTypes = elementsToStrings(ctx, administeredLicensingSubscriptionSubscriptions.ProductTypes)
 		queryParams1.Name = administeredLicensingSubscriptionSubscriptions.Name.ValueString()

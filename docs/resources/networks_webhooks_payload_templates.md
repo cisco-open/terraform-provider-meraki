@@ -42,7 +42,7 @@ output "meraki_networks_webhooks_payload_templates_example" {
 ### Optional
 
 - `body` (String) The body of the payload template, in liquid template
-- `body_file` (String) A Base64 encoded file containing liquid template used for the body of the webhook message. Either *body* or *bodyFile* must be specified.
+- `body_file` (String) A Base64 encoded file containing liquid template used for the body of the webhook message. Either **body** or **bodyFile** must be specified.
 - `headers` (Attributes Set) The payload template headers, will be rendered as a key-value pair in the webhook. (see [below for nested schema](#nestedatt--headers))
 - `headers_file` (String) A Base64 encoded file containing the liquid template used with the webhook headers.
 - `name` (String) The name of the payload template

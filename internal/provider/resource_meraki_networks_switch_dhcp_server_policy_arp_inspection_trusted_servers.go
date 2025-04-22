@@ -19,13 +19,9 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
-	"fmt"
-	"net/url"
-	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -137,13 +133,16 @@ func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersResource) Crea
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
+	//Only Items
+
 	vvMac := data.Mac.ValueString()
-	//Items
-	responseVerifyItem, restyResp1, err := getAllItemsNetworksSwitchDhcpServerPolicyArpInspectionTrustedServers(*r.client, vvNetworkID)
-	//Have Create
+
+	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServers(vvNetworkID, &merakigosdk.GetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServersQueryParams{
+		PerPage: -1,
+	})
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -155,31 +154,32 @@ func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersResource) Crea
 			}
 		}
 	}
-	//TODO HAS ONLY ITEMS
-	// Create
 
-	responseStruct := structToMap(responseVerifyItem)
-	result := getDictResult(responseStruct, "Mac", vvMac, simpleCmp)
 	var responseVerifyItem2 merakigosdk.ResponseItemSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServers
-	if result != nil {
-		err := mapToStruct(result.(map[string]interface{}), &responseVerifyItem2)
-		if err != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing mapToStruct in resource",
-				err.Error(),
-			)
+	if responseVerifyItem != nil {
+		responseStruct := structToMap(responseVerifyItem)
+		result := getDictResult(responseStruct, "Mac", vvMac, simpleCmp)
+		if result != nil {
+			err := mapToStruct(result.(map[string]interface{}), &responseVerifyItem2)
+			if err != nil {
+				resp.Diagnostics.AddError(
+					"Failure when executing mapToStruct in resource",
+					err.Error(),
+				)
+				return
+			}
+			data = ResponseSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServersItemToBodyRs(data, &responseVerifyItem2, false)
+			// Path params update assigned
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 			return
+
 		}
-		data = ResponseSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServersItemToBodyRs(data, &responseVerifyItem2, false)
-		diags := resp.State.Set(ctx, &data)
-		resp.Diagnostics.Append(diags...)
-		return
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Switch.CreateNetworkSwitchDhcpServerPolicyArpInspectionTrustedServer(vvNetworkID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchDhcpServerPolicyArpInspectionTrustedServer",
 				err.Error(),
@@ -192,9 +192,8 @@ func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersResource) Crea
 		)
 		return
 	}
-	//Items
-	responseGet, restyResp1, err := getAllItemsNetworksSwitchDhcpServerPolicyArpInspectionTrustedServers(*r.client, vvNetworkID)
-	// Has only items
+
+	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServers(vvNetworkID, nil)
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -210,8 +209,9 @@ func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersResource) Crea
 		)
 		return
 	}
-	responseStruct2 := structToMap(responseGet)
-	result2 := getDictResult(responseStruct2, "Mac", vvMac, simpleCmp)
+
+	responseStruct := structToMap(responseGet)
+	result2 := getDictResult(responseStruct, "Mac", vvMac, simpleCmp)
 	if result2 != nil {
 		err := mapToStruct(result2.(map[string]interface{}), &responseVerifyItem2)
 		if err != nil {
@@ -227,11 +227,12 @@ func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersResource) Crea
 		return
 	} else {
 		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkSwitchLinkAggregations Result",
+			"Failure when executing GetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServers Result",
 			"Not Found",
 		)
 		return
 	}
+
 }
 
 func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -256,14 +257,22 @@ func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersResource) Read
 	// Not has Item
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvMac := data.Mac.ValueString()
-	// mac
 
-	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServers(vvNetworkID, nil)
+	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServers(vvNetworkID, &merakigosdk.GetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServersQueryParams{
+		PerPage: -1,
+	})
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
+			if restyResp1.StatusCode() == 404 {
+				resp.Diagnostics.AddWarning(
+					"Resource not found",
+					"Deleting resource",
+				)
+				resp.State.RemoveResource(ctx)
+				return
+			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServers",
 				err.Error(),
@@ -294,11 +303,10 @@ func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersResource) Read
 		resp.Diagnostics.Append(diags...)
 		return
 	} else {
-		resp.Diagnostics.AddWarning(
-			"Resource not found",
-			"Deleting resource",
+		resp.Diagnostics.AddError(
+			"Failure when executing GetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServers Result",
+			err.Error(),
 		)
-		resp.State.RemoveResource(ctx)
 		return
 	}
 }
@@ -319,7 +327,6 @@ func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersResource) Upda
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvTrustedServerID := data.TrustedServerID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchDhcpServerPolicyArpInspectionTrustedServer(vvNetworkID, vvTrustedServerID, dataRequest)
@@ -390,11 +397,13 @@ type ResponseItemSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServe
 func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestSwitchCreateNetworkSwitchDhcpServerPolicyArpInspectionTrustedServer {
 	emptyString := ""
 	var requestSwitchCreateNetworkSwitchDhcpServerPolicyArpInspectionTrustedServerIPv4 *merakigosdk.RequestSwitchCreateNetworkSwitchDhcpServerPolicyArpInspectionTrustedServerIPv4
+
 	if r.IPv4 != nil {
 		address := r.IPv4.Address.ValueString()
 		requestSwitchCreateNetworkSwitchDhcpServerPolicyArpInspectionTrustedServerIPv4 = &merakigosdk.RequestSwitchCreateNetworkSwitchDhcpServerPolicyArpInspectionTrustedServerIPv4{
 			Address: address,
 		}
+		//[debug] Is Array: False
 	}
 	mac := new(string)
 	if !r.Mac.IsUnknown() && !r.Mac.IsNull() {
@@ -418,11 +427,13 @@ func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersRs) toSdkApiRe
 func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestSwitchUpdateNetworkSwitchDhcpServerPolicyArpInspectionTrustedServer {
 	emptyString := ""
 	var requestSwitchUpdateNetworkSwitchDhcpServerPolicyArpInspectionTrustedServerIPv4 *merakigosdk.RequestSwitchUpdateNetworkSwitchDhcpServerPolicyArpInspectionTrustedServerIPv4
+
 	if r.IPv4 != nil {
 		address := r.IPv4.Address.ValueString()
 		requestSwitchUpdateNetworkSwitchDhcpServerPolicyArpInspectionTrustedServerIPv4 = &merakigosdk.RequestSwitchUpdateNetworkSwitchDhcpServerPolicyArpInspectionTrustedServerIPv4{
 			Address: address,
 		}
+		//[debug] Is Array: False
 	}
 	mac := new(string)
 	if !r.Mac.IsUnknown() && !r.Mac.IsNull() {
@@ -467,37 +478,4 @@ func ResponseSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServersIt
 	}
 	state = itemState
 	return state
-}
-
-func getAllItemsNetworksSwitchDhcpServerPolicyArpInspectionTrustedServers(client merakigosdk.Client, networkId string) (merakigosdk.ResponseSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServers, *resty.Response, error) {
-	var all_response merakigosdk.ResponseSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServers
-	response, r2, er := client.Switch.GetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServers(networkId, &merakigosdk.GetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServersQueryParams{
-		PerPage: 1000,
-	})
-	count := 0
-	all_response = append(all_response, *response...)
-	for len(*response) >= 1000 {
-		count += 1
-		fmt.Println(count)
-		links := strings.Split(r2.Header().Get("Link"), ",")
-		var link string
-		if count > 1 {
-			link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[2], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
-		} else {
-			link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[1], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
-		}
-		myUrl, _ := url.Parse(link)
-		params, _ := url.ParseQuery(myUrl.RawQuery)
-		if params["endingBefore"] != nil {
-			response, r2, er = client.Switch.GetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServers(networkId, &merakigosdk.GetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServersQueryParams{
-				PerPage:      1000,
-				EndingBefore: params["endingBefore"][0],
-			})
-			all_response = append(all_response, *response...)
-		} else {
-			break
-		}
-	}
-
-	return all_response, r2, er
 }

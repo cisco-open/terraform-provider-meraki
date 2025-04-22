@@ -1,1 +1,1 @@
-terraform import meraki_networks_group_policies.example "network_id,group_policy_id"
+terraform import meraki_networks_group_policies.example "group_policy_id,network_id"

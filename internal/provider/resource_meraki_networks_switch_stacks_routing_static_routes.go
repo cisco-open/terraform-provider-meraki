@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -151,13 +151,15 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Create(ctx context.Con
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	vvSwitchStackID := data.SwitchStackID.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchStackRoutingStaticRoutes(vvNetworkID, vvSwitchStackID)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -169,6 +171,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Create(ctx context.Con
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -183,6 +186,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Create(ctx context.Con
 				return
 			}
 			r.client.Switch.UpdateNetworkSwitchStackRoutingStaticRoute(vvNetworkID, vvSwitchStackID, vvStaticRouteID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Switch.GetNetworkSwitchStackRoutingStaticRoute(vvNetworkID, vvSwitchStackID, vvStaticRouteID)
 			if responseVerifyItem2 != nil {
 				data = ResponseSwitchGetNetworkSwitchStackRoutingStaticRouteItemToBodyRs(data, responseVerifyItem2, false)
@@ -192,11 +196,11 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Create(ctx context.Con
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Switch.CreateNetworkSwitchStackRoutingStaticRoute(vvNetworkID, vvSwitchStackID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchStackRoutingStaticRoute",
 				err.Error(),
@@ -209,9 +213,8 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Create(ctx context.Con
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchStackRoutingStaticRoutes(vvNetworkID, vvSwitchStackID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -227,6 +230,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Create(ctx context.Con
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -235,7 +239,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Create(ctx context.Con
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter StaticRouteID",
-				"Error",
+				"Fail Parsing StaticRouteID",
 			)
 			return
 		}
@@ -265,6 +269,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Create(ctx context.Con
 		)
 		return
 	}
+
 }
 
 func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {

@@ -21,7 +21,7 @@ import (
 	"context"
 	"fmt"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -136,30 +136,37 @@ func (r *DevicesCameraCustomAnalyticsResource) Create(ctx context.Context, req r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvSerial := data.Serial.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Camera.GetDeviceCameraCustomAnalytics(vvSerial)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesCameraCustomAnalytics only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvSerial != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Camera.GetDeviceCameraCustomAnalytics(vvSerial)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesCameraCustomAnalytics  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesCameraCustomAnalytics only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesCameraCustomAnalytics only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Camera.UpdateDeviceCameraCustomAnalytics(vvSerial, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCameraCustomAnalytics",
 				err.Error(),
@@ -172,9 +179,10 @@ func (r *DevicesCameraCustomAnalyticsResource) Create(ctx context.Context, req r
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Camera.GetDeviceCameraCustomAnalytics(vvSerial)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -189,11 +197,12 @@ func (r *DevicesCameraCustomAnalyticsResource) Create(ctx context.Context, req r
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseCameraGetDeviceCameraCustomAnalyticsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *DevicesCameraCustomAnalyticsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -319,6 +328,7 @@ func (r *DevicesCameraCustomAnalyticsRs) toSdkApiRequestUpdate(ctx context.Conte
 		enabled = nil
 	}
 	var requestCameraUpdateDeviceCameraCustomAnalyticsParameters []merakigosdk.RequestCameraUpdateDeviceCameraCustomAnalyticsParameters
+
 	if r.Parameters != nil {
 		for _, rItem1 := range *r.Parameters {
 			name := rItem1.Name.ValueString()
@@ -330,6 +340,7 @@ func (r *DevicesCameraCustomAnalyticsRs) toSdkApiRequestUpdate(ctx context.Conte
 				Name:  name,
 				Value: value,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestCameraUpdateDeviceCameraCustomAnalytics{

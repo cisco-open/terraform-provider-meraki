@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -121,30 +121,37 @@ func (r *NetworksSwitchStormControlResource) Create(ctx context.Context, req res
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchStormControl(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchStormControl only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchStormControl(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchStormControl  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchStormControl only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchStormControl only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchStormControl(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStormControl",
 				err.Error(),
@@ -157,9 +164,10 @@ func (r *NetworksSwitchStormControlResource) Create(ctx context.Context, req res
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchStormControl(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -174,11 +182,12 @@ func (r *NetworksSwitchStormControlResource) Create(ctx context.Context, req res
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseSwitchGetNetworkSwitchStormControlItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksSwitchStormControlResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -298,6 +307,8 @@ func (r *NetworksSwitchStormControlRs) toSdkApiRequestUpdate(ctx context.Context
 	} else {
 		multicastThreshold = nil
 	}
+	var treatTheseTrafficTypesAsOneThreshold []string = nil
+	r.TreatTheseTrafficTypesAsOneThreshold.ElementsAs(ctx, &treatTheseTrafficTypesAsOneThreshold, false)
 	unknownUnicastThreshold := new(int64)
 	if !r.UnknownUnicastThreshold.IsUnknown() && !r.UnknownUnicastThreshold.IsNull() {
 		*unknownUnicastThreshold = r.UnknownUnicastThreshold.ValueInt64()
@@ -305,9 +316,10 @@ func (r *NetworksSwitchStormControlRs) toSdkApiRequestUpdate(ctx context.Context
 		unknownUnicastThreshold = nil
 	}
 	out := merakigosdk.RequestSwitchUpdateNetworkSwitchStormControl{
-		BroadcastThreshold:      int64ToIntPointer(broadcastThreshold),
-		MulticastThreshold:      int64ToIntPointer(multicastThreshold),
-		UnknownUnicastThreshold: int64ToIntPointer(unknownUnicastThreshold),
+		BroadcastThreshold:                   int64ToIntPointer(broadcastThreshold),
+		MulticastThreshold:                   int64ToIntPointer(multicastThreshold),
+		TreatTheseTrafficTypesAsOneThreshold: treatTheseTrafficTypesAsOneThreshold,
+		UnknownUnicastThreshold:              int64ToIntPointer(unknownUnicastThreshold),
 	}
 	return &out
 }

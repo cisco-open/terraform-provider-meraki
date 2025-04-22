@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -729,6 +729,49 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							},
 						},
 					},
+					"m_v53_x": schema.SingleNestedAttribute{
+						MarkdownDescription: `Quality and resolution for MV53X camera models.`,
+						Computed:            true,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseStateForUnknown(),
+						},
+						Attributes: map[string]schema.Attribute{
+
+							"quality": schema.StringAttribute{
+								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
+                                              Allowed values: [Enhanced,High,Standard]`,
+								Computed: true,
+								Optional: true,
+								PlanModifiers: []planmodifier.String{
+									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"Enhanced",
+										"High",
+										"Standard",
+									),
+								},
+							},
+							"resolution": schema.StringAttribute{
+								MarkdownDescription: `Resolution of the camera. Can be one of '1920x1080', '2688x1512' or '3840x2160'.
+                                              Allowed values: [1920x1080,2688x1512,3840x2160]`,
+								Computed: true,
+								Optional: true,
+								PlanModifiers: []planmodifier.String{
+									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"1920x1080",
+										"2688x1512",
+										"3840x2160",
+									),
+								},
+							},
+						},
+					},
 					"m_v63": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV63 camera models.`,
 						Computed:            true,
@@ -987,6 +1030,47 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							},
 						},
 					},
+					"m_v84_x": schema.SingleNestedAttribute{
+						MarkdownDescription: `Quality and resolution for MV84X camera models.`,
+						Computed:            true,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseStateForUnknown(),
+						},
+						Attributes: map[string]schema.Attribute{
+
+							"quality": schema.StringAttribute{
+								MarkdownDescription: `Quality of the camera. Can be one of 'Standard' or 'Enhanced'.
+                                              Allowed values: [Enhanced,Standard]`,
+								Computed: true,
+								Optional: true,
+								PlanModifiers: []planmodifier.String{
+									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"Enhanced",
+										"Standard",
+									),
+								},
+							},
+							"resolution": schema.StringAttribute{
+								MarkdownDescription: `Resolution of the camera. Can be one of '1440x1080' or '2560x1920'.
+                                              Allowed values: [1440x1080,2560x1920]`,
+								Computed: true,
+								Optional: true,
+								PlanModifiers: []planmodifier.String{
+									stringplanmodifier.UseStateForUnknown(),
+								},
+								Validators: []validator.String{
+									stringvalidator.OneOf(
+										"1440x1080",
+										"2560x1920",
+									),
+								},
+							},
+						},
+					},
 					"m_v93": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV93 camera models.`,
 						Computed:            true,
@@ -1142,12 +1226,14 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Create(ctx context.Cont
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Camera.GetNetworkCameraQualityRetentionProfiles(vvNetworkID)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -1159,6 +1245,7 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Create(ctx context.Cont
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -1173,6 +1260,7 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Create(ctx context.Cont
 				return
 			}
 			r.client.Camera.UpdateNetworkCameraQualityRetentionProfile(vvNetworkID, vvQualityRetentionProfileID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Camera.GetNetworkCameraQualityRetentionProfile(vvNetworkID, vvQualityRetentionProfileID)
 			if responseVerifyItem2 != nil {
 				data = ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBodyRs(data, responseVerifyItem2, false)
@@ -1182,11 +1270,11 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Create(ctx context.Cont
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	restyResp2, err := r.client.Camera.CreateNetworkCameraQualityRetentionProfile(vvNetworkID, dataRequest)
-
 	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkCameraQualityRetentionProfile",
 				err.Error(),
@@ -1199,9 +1287,8 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Create(ctx context.Cont
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Camera.GetNetworkCameraQualityRetentionProfiles(vvNetworkID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -1217,6 +1304,7 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Create(ctx context.Cont
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -1225,7 +1313,7 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Create(ctx context.Cont
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter QualityRetentionProfileID",
-				"Error",
+				"Fail Parsing QualityRetentionProfileID",
 			)
 			return
 		}
@@ -1255,6 +1343,7 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Create(ctx context.Cont
 		)
 		return
 	}
+
 }
 
 func (r *NetworksCameraQualityRetentionProfilesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -1432,6 +1521,8 @@ type ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsRs struct
 	MV93         *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV93Rs       `tfsdk:"m_v93"`
 	MV93M        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV93MRs      `tfsdk:"m_v93_m"`
 	MV93X        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV93XRs      `tfsdk:"m_v93_x"`
+	MV84X        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV84XRs      `tfsdk:"m_v84_x"`
+	MV53X        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV53XRs      `tfsdk:"m_v53_x"`
 }
 
 type ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV12MV22MV72Rs struct {
@@ -1499,6 +1590,11 @@ type RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV52Rs 
 	Resolution types.String `tfsdk:"resolution"`
 }
 
+type RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV53XRs struct {
+	Quality    types.String `tfsdk:"quality"`
+	Resolution types.String `tfsdk:"resolution"`
+}
+
 type RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV63Rs struct {
 	Quality    types.String `tfsdk:"quality"`
 	Resolution types.String `tfsdk:"resolution"`
@@ -1525,6 +1621,11 @@ type RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV73MRs
 }
 
 type RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV73XRs struct {
+	Quality    types.String `tfsdk:"quality"`
+	Resolution types.String `tfsdk:"resolution"`
+}
+
+type RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV84XRs struct {
 	Quality    types.String `tfsdk:"quality"`
 	Resolution types.String `tfsdk:"resolution"`
 }
@@ -1596,6 +1697,7 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 		scheduleID = &emptyString
 	}
 	var requestCameraCreateNetworkCameraQualityRetentionProfileSmartRetention *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileSmartRetention
+
 	if r.SmartRetention != nil {
 		enabled := func() *bool {
 			if !r.SmartRetention.Enabled.IsUnknown() && !r.SmartRetention.Enabled.IsNull() {
@@ -1606,10 +1708,13 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 		requestCameraCreateNetworkCameraQualityRetentionProfileSmartRetention = &merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileSmartRetention{
 			Enabled: enabled,
 		}
+		//[debug] Is Array: False
 	}
 	var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettings *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettings
+
 	if r.VideoSettings != nil {
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV12MV22MV72 *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV12MV22MV72
+
 		if r.VideoSettings.MV12MV22MV72 != nil {
 			quality := r.VideoSettings.MV12MV22MV72.Quality.ValueString()
 			resolution := r.VideoSettings.MV12MV22MV72.Resolution.ValueString()
@@ -1617,8 +1722,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV12WE *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV12WE
+
 		if r.VideoSettings.MV12WE != nil {
 			quality := r.VideoSettings.MV12WE.Quality.ValueString()
 			resolution := r.VideoSettings.MV12WE.Resolution.ValueString()
@@ -1626,8 +1733,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV13 *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV13
+
 		if r.VideoSettings.MV13 != nil {
 			quality := r.VideoSettings.MV13.Quality.ValueString()
 			resolution := r.VideoSettings.MV13.Resolution.ValueString()
@@ -1635,8 +1744,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV13M *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV13M
+
 		if r.VideoSettings.MV13M != nil {
 			quality := r.VideoSettings.MV13M.Quality.ValueString()
 			resolution := r.VideoSettings.MV13M.Resolution.ValueString()
@@ -1644,8 +1755,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV21MV71 *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV21MV71
+
 		if r.VideoSettings.MV21MV71 != nil {
 			quality := r.VideoSettings.MV21MV71.Quality.ValueString()
 			resolution := r.VideoSettings.MV21MV71.Resolution.ValueString()
@@ -1653,8 +1766,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV22XMV72X *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV22XMV72X
+
 		if r.VideoSettings.MV22XMV72X != nil {
 			quality := r.VideoSettings.MV22XMV72X.Quality.ValueString()
 			resolution := r.VideoSettings.MV22XMV72X.Resolution.ValueString()
@@ -1662,8 +1777,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV23 *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV23
+
 		if r.VideoSettings.MV23 != nil {
 			quality := r.VideoSettings.MV23.Quality.ValueString()
 			resolution := r.VideoSettings.MV23.Resolution.ValueString()
@@ -1671,8 +1788,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV23M *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV23M
+
 		if r.VideoSettings.MV23M != nil {
 			quality := r.VideoSettings.MV23M.Quality.ValueString()
 			resolution := r.VideoSettings.MV23M.Resolution.ValueString()
@@ -1680,8 +1799,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV23X *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV23X
+
 		if r.VideoSettings.MV23X != nil {
 			quality := r.VideoSettings.MV23X.Quality.ValueString()
 			resolution := r.VideoSettings.MV23X.Resolution.ValueString()
@@ -1689,8 +1810,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV32 *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV32
+
 		if r.VideoSettings.MV32 != nil {
 			quality := r.VideoSettings.MV32.Quality.ValueString()
 			resolution := r.VideoSettings.MV32.Resolution.ValueString()
@@ -1698,8 +1821,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV33 *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV33
+
 		if r.VideoSettings.MV33 != nil {
 			quality := r.VideoSettings.MV33.Quality.ValueString()
 			resolution := r.VideoSettings.MV33.Resolution.ValueString()
@@ -1707,8 +1832,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV33M *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV33M
+
 		if r.VideoSettings.MV33M != nil {
 			quality := r.VideoSettings.MV33M.Quality.ValueString()
 			resolution := r.VideoSettings.MV33M.Resolution.ValueString()
@@ -1716,8 +1843,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV52 *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV52
+
 		if r.VideoSettings.MV52 != nil {
 			quality := r.VideoSettings.MV52.Quality.ValueString()
 			resolution := r.VideoSettings.MV52.Resolution.ValueString()
@@ -1725,8 +1854,21 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
+		}
+		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV53X *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV53X
+
+		if r.VideoSettings.MV53X != nil {
+			quality := r.VideoSettings.MV53X.Quality.ValueString()
+			resolution := r.VideoSettings.MV53X.Resolution.ValueString()
+			requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV53X = &merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV53X{
+				Quality:    quality,
+				Resolution: resolution,
+			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV63 *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV63
+
 		if r.VideoSettings.MV63 != nil {
 			quality := r.VideoSettings.MV63.Quality.ValueString()
 			resolution := r.VideoSettings.MV63.Resolution.ValueString()
@@ -1734,8 +1876,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV63M *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV63M
+
 		if r.VideoSettings.MV63M != nil {
 			quality := r.VideoSettings.MV63M.Quality.ValueString()
 			resolution := r.VideoSettings.MV63M.Resolution.ValueString()
@@ -1743,8 +1887,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV63X *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV63X
+
 		if r.VideoSettings.MV63X != nil {
 			quality := r.VideoSettings.MV63X.Quality.ValueString()
 			resolution := r.VideoSettings.MV63X.Resolution.ValueString()
@@ -1752,8 +1898,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV73 *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV73
+
 		if r.VideoSettings.MV73 != nil {
 			quality := r.VideoSettings.MV73.Quality.ValueString()
 			resolution := r.VideoSettings.MV73.Resolution.ValueString()
@@ -1761,8 +1909,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV73M *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV73M
+
 		if r.VideoSettings.MV73M != nil {
 			quality := r.VideoSettings.MV73M.Quality.ValueString()
 			resolution := r.VideoSettings.MV73M.Resolution.ValueString()
@@ -1770,8 +1920,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV73X *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV73X
+
 		if r.VideoSettings.MV73X != nil {
 			quality := r.VideoSettings.MV73X.Quality.ValueString()
 			resolution := r.VideoSettings.MV73X.Resolution.ValueString()
@@ -1779,8 +1931,21 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
+		}
+		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV84X *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV84X
+
+		if r.VideoSettings.MV84X != nil {
+			quality := r.VideoSettings.MV84X.Quality.ValueString()
+			resolution := r.VideoSettings.MV84X.Resolution.ValueString()
+			requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV84X = &merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV84X{
+				Quality:    quality,
+				Resolution: resolution,
+			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV93 *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV93
+
 		if r.VideoSettings.MV93 != nil {
 			quality := r.VideoSettings.MV93.Quality.ValueString()
 			resolution := r.VideoSettings.MV93.Resolution.ValueString()
@@ -1788,8 +1953,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV93M *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV93M
+
 		if r.VideoSettings.MV93M != nil {
 			quality := r.VideoSettings.MV93M.Quality.ValueString()
 			resolution := r.VideoSettings.MV93M.Resolution.ValueString()
@@ -1797,8 +1964,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV93X *merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV93X
+
 		if r.VideoSettings.MV93X != nil {
 			quality := r.VideoSettings.MV93X.Quality.ValueString()
 			resolution := r.VideoSettings.MV93X.Resolution.ValueString()
@@ -1806,6 +1975,7 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettings = &merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfileVideoSettings{
 			MV12MV22MV72: requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV12MV22MV72,
@@ -1821,16 +1991,19 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestCreate(ctx con
 			MV33:         requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV33,
 			MV33M:        requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV33M,
 			MV52:         requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV52,
+			MV53X:        requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV53X,
 			MV63:         requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV63,
 			MV63M:        requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV63M,
 			MV63X:        requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV63X,
 			MV73:         requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV73,
 			MV73M:        requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV73M,
 			MV73X:        requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV73X,
+			MV84X:        requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV84X,
 			MV93:         requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV93,
 			MV93M:        requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV93M,
 			MV93X:        requestCameraCreateNetworkCameraQualityRetentionProfileVideoSettingsMV93X,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestCameraCreateNetworkCameraQualityRetentionProfile{
 		AudioRecordingEnabled:          audioRecordingEnabled,
@@ -1897,6 +2070,7 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 		scheduleID = &emptyString
 	}
 	var requestCameraUpdateNetworkCameraQualityRetentionProfileSmartRetention *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileSmartRetention
+
 	if r.SmartRetention != nil {
 		enabled := func() *bool {
 			if !r.SmartRetention.Enabled.IsUnknown() && !r.SmartRetention.Enabled.IsNull() {
@@ -1907,10 +2081,13 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 		requestCameraUpdateNetworkCameraQualityRetentionProfileSmartRetention = &merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileSmartRetention{
 			Enabled: enabled,
 		}
+		//[debug] Is Array: False
 	}
 	var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettings *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettings
+
 	if r.VideoSettings != nil {
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV12MV22MV72 *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV12MV22MV72
+
 		if r.VideoSettings.MV12MV22MV72 != nil {
 			quality := r.VideoSettings.MV12MV22MV72.Quality.ValueString()
 			resolution := r.VideoSettings.MV12MV22MV72.Resolution.ValueString()
@@ -1918,8 +2095,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV12WE *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV12WE
+
 		if r.VideoSettings.MV12WE != nil {
 			quality := r.VideoSettings.MV12WE.Quality.ValueString()
 			resolution := r.VideoSettings.MV12WE.Resolution.ValueString()
@@ -1927,8 +2106,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV13 *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV13
+
 		if r.VideoSettings.MV13 != nil {
 			quality := r.VideoSettings.MV13.Quality.ValueString()
 			resolution := r.VideoSettings.MV13.Resolution.ValueString()
@@ -1936,8 +2117,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV13M *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV13M
+
 		if r.VideoSettings.MV13M != nil {
 			quality := r.VideoSettings.MV13M.Quality.ValueString()
 			resolution := r.VideoSettings.MV13M.Resolution.ValueString()
@@ -1945,8 +2128,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV21MV71 *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV21MV71
+
 		if r.VideoSettings.MV21MV71 != nil {
 			quality := r.VideoSettings.MV21MV71.Quality.ValueString()
 			resolution := r.VideoSettings.MV21MV71.Resolution.ValueString()
@@ -1954,8 +2139,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV22XMV72X *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV22XMV72X
+
 		if r.VideoSettings.MV22XMV72X != nil {
 			quality := r.VideoSettings.MV22XMV72X.Quality.ValueString()
 			resolution := r.VideoSettings.MV22XMV72X.Resolution.ValueString()
@@ -1963,8 +2150,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV23 *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV23
+
 		if r.VideoSettings.MV23 != nil {
 			quality := r.VideoSettings.MV23.Quality.ValueString()
 			resolution := r.VideoSettings.MV23.Resolution.ValueString()
@@ -1972,8 +2161,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV23M *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV23M
+
 		if r.VideoSettings.MV23M != nil {
 			quality := r.VideoSettings.MV23M.Quality.ValueString()
 			resolution := r.VideoSettings.MV23M.Resolution.ValueString()
@@ -1981,8 +2172,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV23X *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV23X
+
 		if r.VideoSettings.MV23X != nil {
 			quality := r.VideoSettings.MV23X.Quality.ValueString()
 			resolution := r.VideoSettings.MV23X.Resolution.ValueString()
@@ -1990,8 +2183,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV32 *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV32
+
 		if r.VideoSettings.MV32 != nil {
 			quality := r.VideoSettings.MV32.Quality.ValueString()
 			resolution := r.VideoSettings.MV32.Resolution.ValueString()
@@ -1999,8 +2194,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV33 *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV33
+
 		if r.VideoSettings.MV33 != nil {
 			quality := r.VideoSettings.MV33.Quality.ValueString()
 			resolution := r.VideoSettings.MV33.Resolution.ValueString()
@@ -2008,8 +2205,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV33M *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV33M
+
 		if r.VideoSettings.MV33M != nil {
 			quality := r.VideoSettings.MV33M.Quality.ValueString()
 			resolution := r.VideoSettings.MV33M.Resolution.ValueString()
@@ -2017,8 +2216,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV52 *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV52
+
 		if r.VideoSettings.MV52 != nil {
 			quality := r.VideoSettings.MV52.Quality.ValueString()
 			resolution := r.VideoSettings.MV52.Resolution.ValueString()
@@ -2026,8 +2227,21 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
+		}
+		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV53X *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV53X
+
+		if r.VideoSettings.MV53X != nil {
+			quality := r.VideoSettings.MV53X.Quality.ValueString()
+			resolution := r.VideoSettings.MV53X.Resolution.ValueString()
+			requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV53X = &merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV53X{
+				Quality:    quality,
+				Resolution: resolution,
+			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV63 *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV63
+
 		if r.VideoSettings.MV63 != nil {
 			quality := r.VideoSettings.MV63.Quality.ValueString()
 			resolution := r.VideoSettings.MV63.Resolution.ValueString()
@@ -2035,8 +2249,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV63M *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV63M
+
 		if r.VideoSettings.MV63M != nil {
 			quality := r.VideoSettings.MV63M.Quality.ValueString()
 			resolution := r.VideoSettings.MV63M.Resolution.ValueString()
@@ -2044,8 +2260,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV63X *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV63X
+
 		if r.VideoSettings.MV63X != nil {
 			quality := r.VideoSettings.MV63X.Quality.ValueString()
 			resolution := r.VideoSettings.MV63X.Resolution.ValueString()
@@ -2053,8 +2271,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV73 *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV73
+
 		if r.VideoSettings.MV73 != nil {
 			quality := r.VideoSettings.MV73.Quality.ValueString()
 			resolution := r.VideoSettings.MV73.Resolution.ValueString()
@@ -2062,8 +2282,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV73M *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV73M
+
 		if r.VideoSettings.MV73M != nil {
 			quality := r.VideoSettings.MV73M.Quality.ValueString()
 			resolution := r.VideoSettings.MV73M.Resolution.ValueString()
@@ -2071,8 +2293,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV73X *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV73X
+
 		if r.VideoSettings.MV73X != nil {
 			quality := r.VideoSettings.MV73X.Quality.ValueString()
 			resolution := r.VideoSettings.MV73X.Resolution.ValueString()
@@ -2080,8 +2304,21 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
+		}
+		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV84X *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV84X
+
+		if r.VideoSettings.MV84X != nil {
+			quality := r.VideoSettings.MV84X.Quality.ValueString()
+			resolution := r.VideoSettings.MV84X.Resolution.ValueString()
+			requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV84X = &merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV84X{
+				Quality:    quality,
+				Resolution: resolution,
+			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV93 *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV93
+
 		if r.VideoSettings.MV93 != nil {
 			quality := r.VideoSettings.MV93.Quality.ValueString()
 			resolution := r.VideoSettings.MV93.Resolution.ValueString()
@@ -2089,8 +2326,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV93M *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV93M
+
 		if r.VideoSettings.MV93M != nil {
 			quality := r.VideoSettings.MV93M.Quality.ValueString()
 			resolution := r.VideoSettings.MV93M.Resolution.ValueString()
@@ -2098,8 +2337,10 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		var requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV93X *merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV93X
+
 		if r.VideoSettings.MV93X != nil {
 			quality := r.VideoSettings.MV93X.Quality.ValueString()
 			resolution := r.VideoSettings.MV93X.Resolution.ValueString()
@@ -2107,6 +2348,7 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 				Quality:    quality,
 				Resolution: resolution,
 			}
+			//[debug] Is Array: False
 		}
 		requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettings = &merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettings{
 			MV12MV22MV72: requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV12MV22MV72,
@@ -2122,16 +2364,19 @@ func (r *NetworksCameraQualityRetentionProfilesRs) toSdkApiRequestUpdate(ctx con
 			MV33:         requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV33,
 			MV33M:        requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV33M,
 			MV52:         requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV52,
+			MV53X:        requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV53X,
 			MV63:         requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV63,
 			MV63M:        requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV63M,
 			MV63X:        requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV63X,
 			MV73:         requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV73,
 			MV73M:        requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV73M,
 			MV73X:        requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV73X,
+			MV84X:        requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV84X,
 			MV93:         requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV93,
 			MV93M:        requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV93M,
 			MV93X:        requestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV93X,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestCameraUpdateNetworkCameraQualityRetentionProfile{
 		AudioRecordingEnabled:          audioRecordingEnabled,

@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -249,30 +249,37 @@ func (r *NetworksApplianceVpnBgpResource) Create(ctx context.Context, req resour
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceVpnBgp(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceVpnBgp only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceVpnBgp(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceVpnBgp  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceVpnBgp only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceVpnBgp only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceVpnBgp(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceVpnBgp",
 				err.Error(),
@@ -285,9 +292,10 @@ func (r *NetworksApplianceVpnBgpResource) Create(ctx context.Context, req resour
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceVpnBgp(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -302,11 +310,12 @@ func (r *NetworksApplianceVpnBgpResource) Create(ctx context.Context, req resour
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseApplianceGetNetworkApplianceVpnBgpItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksApplianceVpnBgpResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -459,6 +468,7 @@ func (r *NetworksApplianceVpnBgpRs) toSdkApiRequestUpdate(ctx context.Context) *
 		ibgpHoldTimer = nil
 	}
 	var requestApplianceUpdateNetworkApplianceVpnBgpNeighbors []merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighbors
+
 	if r.Neighbors != nil {
 		for _, rItem1 := range *r.Neighbors {
 			allowTransit := func() *bool {
@@ -468,11 +478,13 @@ func (r *NetworksApplianceVpnBgpRs) toSdkApiRequestUpdate(ctx context.Context) *
 				return nil
 			}()
 			var requestApplianceUpdateNetworkApplianceVpnBgpNeighborsAuthentication *merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighborsAuthentication
+
 			if rItem1.Authentication != nil {
 				password := rItem1.Authentication.Password.ValueString()
 				requestApplianceUpdateNetworkApplianceVpnBgpNeighborsAuthentication = &merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighborsAuthentication{
 					Password: password,
 				}
+				//[debug] Is Array: False
 			}
 			ebgpHoldTimer := func() *int64 {
 				if !rItem1.EbgpHoldTimer.IsUnknown() && !rItem1.EbgpHoldTimer.IsNull() {
@@ -486,13 +498,15 @@ func (r *NetworksApplianceVpnBgpRs) toSdkApiRequestUpdate(ctx context.Context) *
 				}
 				return nil
 			}()
-			iP := rItem1.IP.ValueString()
+			ip := rItem1.IP.ValueString()
 			var requestApplianceUpdateNetworkApplianceVpnBgpNeighborsIPv6 *merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighborsIPv6
+
 			if rItem1.IPv6 != nil {
 				address := rItem1.IPv6.Address.ValueString()
 				requestApplianceUpdateNetworkApplianceVpnBgpNeighborsIPv6 = &merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighborsIPv6{
 					Address: address,
 				}
+				//[debug] Is Array: False
 			}
 			nextHopIP := rItem1.NextHopIP.ValueString()
 			receiveLimit := func() *int64 {
@@ -509,6 +523,7 @@ func (r *NetworksApplianceVpnBgpRs) toSdkApiRequestUpdate(ctx context.Context) *
 			}()
 			sourceInterface := rItem1.SourceInterface.ValueString()
 			var requestApplianceUpdateNetworkApplianceVpnBgpNeighborsTtlSecurity *merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighborsTtlSecurity
+
 			if rItem1.TtlSecurity != nil {
 				enabled := func() *bool {
 					if !rItem1.TtlSecurity.Enabled.IsUnknown() && !rItem1.TtlSecurity.Enabled.IsNull() {
@@ -519,13 +534,14 @@ func (r *NetworksApplianceVpnBgpRs) toSdkApiRequestUpdate(ctx context.Context) *
 				requestApplianceUpdateNetworkApplianceVpnBgpNeighborsTtlSecurity = &merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighborsTtlSecurity{
 					Enabled: enabled,
 				}
+				//[debug] Is Array: False
 			}
 			requestApplianceUpdateNetworkApplianceVpnBgpNeighbors = append(requestApplianceUpdateNetworkApplianceVpnBgpNeighbors, merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgpNeighbors{
 				AllowTransit:    allowTransit,
 				Authentication:  requestApplianceUpdateNetworkApplianceVpnBgpNeighborsAuthentication,
 				EbgpHoldTimer:   int64ToIntPointer(ebgpHoldTimer),
 				EbgpMultihop:    int64ToIntPointer(ebgpMultihop),
-				IP:              iP,
+				IP:              ip,
 				IPv6:            requestApplianceUpdateNetworkApplianceVpnBgpNeighborsIPv6,
 				NextHopIP:       nextHopIP,
 				ReceiveLimit:    int64ToIntPointer(receiveLimit),
@@ -533,6 +549,7 @@ func (r *NetworksApplianceVpnBgpRs) toSdkApiRequestUpdate(ctx context.Context) *
 				SourceInterface: sourceInterface,
 				TtlSecurity:     requestApplianceUpdateNetworkApplianceVpnBgpNeighborsTtlSecurity,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceVpnBgp{

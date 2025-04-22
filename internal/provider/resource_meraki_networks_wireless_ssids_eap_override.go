@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -163,31 +163,38 @@ func (r *NetworksWirelessSSIDsEapOverrideResource) Create(ctx context.Context, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	vvNumber := data.Number.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDEapOverride(vvNetworkID, vvNumber)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSSIDsEapOverride only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" && vvNumber != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDEapOverride(vvNetworkID, vvNumber)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessSsidsEapOverride  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessSsidsEapOverride only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSSIDsEapOverride only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDEapOverride(vvNetworkID, vvNumber, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDEapOverride",
 				err.Error(),
@@ -200,9 +207,10 @@ func (r *NetworksWirelessSSIDsEapOverrideResource) Create(ctx context.Context, r
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDEapOverride(vvNetworkID, vvNumber)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -217,11 +225,12 @@ func (r *NetworksWirelessSSIDsEapOverrideResource) Create(ctx context.Context, r
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseWirelessGetNetworkWirelessSSIDEapOverrideItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksWirelessSSIDsEapOverrideResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -354,6 +363,7 @@ type ResponseWirelessGetNetworkWirelessSsidEapOverrideIdentityRs struct {
 // FromBody
 func (r *NetworksWirelessSSIDsEapOverrideRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDEapOverride {
 	var requestWirelessUpdateNetworkWirelessSSIDEapOverrideEapolKey *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDEapOverrideEapolKey
+
 	if r.EapolKey != nil {
 		retries := func() *int64 {
 			if !r.EapolKey.Retries.IsUnknown() && !r.EapolKey.Retries.IsNull() {
@@ -371,8 +381,10 @@ func (r *NetworksWirelessSSIDsEapOverrideRs) toSdkApiRequestUpdate(ctx context.C
 			Retries:     int64ToIntPointer(retries),
 			TimeoutInMs: int64ToIntPointer(timeoutInMs),
 		}
+		//[debug] Is Array: False
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDEapOverrideIDentity *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDEapOverrideIDentity
+
 	if r.IDentity != nil {
 		retries := func() *int64 {
 			if !r.IDentity.Retries.IsUnknown() && !r.IDentity.Retries.IsNull() {
@@ -390,6 +402,7 @@ func (r *NetworksWirelessSSIDsEapOverrideRs) toSdkApiRequestUpdate(ctx context.C
 			Retries: int64ToIntPointer(retries),
 			Timeout: int64ToIntPointer(timeout),
 		}
+		//[debug] Is Array: False
 	}
 	maxRetries := new(int64)
 	if !r.MaxRetries.IsUnknown() && !r.MaxRetries.IsNull() {

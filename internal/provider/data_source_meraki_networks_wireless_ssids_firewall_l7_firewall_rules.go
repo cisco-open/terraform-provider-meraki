@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -88,6 +88,21 @@ func (d *NetworksWirelessSSIDsFirewallL7FirewallRulesDataSource) Schema(_ contex
 									MarkdownDescription: `The value of what needs to get blocked. Format of the value varies depending on type of the firewall rule selected.`,
 									Computed:            true,
 								},
+								"value_list": schema.SetAttribute{
+									Computed:    true,
+									ElementType: types.StringType,
+								},
+								"value_obj": schema.SingleNestedAttribute{
+									Computed: true,
+									Attributes: map[string]schema.Attribute{
+										"id": schema.StringAttribute{
+											Computed: true,
+										},
+										"name": schema.StringAttribute{
+											Computed: true,
+										},
+									},
+								},
 							},
 						},
 					},
@@ -147,11 +162,16 @@ type ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRules struct {
 }
 
 type ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRules struct {
-	Policy    types.String                                                              `tfsdk:"policy"`
-	Type      types.String                                                              `tfsdk:"type"`
-	Value     types.String                                                              `tfsdk:"value"`
-	ValueList types.Set                                                                 `tfsdk:"value_list"`
-	ValueObj  *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj `tfsdk:"value_obj"`
+	Policy    types.String                                                                `tfsdk:"policy"`
+	Type      types.String                                                                `tfsdk:"type"`
+	Value     types.String                                                                `tfsdk:"value"`
+	ValueList types.Set                                                                   `tfsdk:"value_list"`
+	ValueObj  *ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesValueObj `tfsdk:"value_obj"`
+}
+
+type ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesValueObj struct {
+	ID   types.String `tfsdk:"id"`
+	Name types.String `tfsdk:"name"`
 }
 
 // ToBody
@@ -176,11 +196,11 @@ func ResponseWirelessGetNetworkWirelessSSIDFirewallL7FirewallRulesItemToBody(sta
 							}
 							return StringSliceToSet(*rules.ValueList)
 						}(),
-						ValueObj: func() *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj {
+						ValueObj: func() *ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesValueObj {
 							if rules.ValueObj == nil {
 								return nil
 							}
-							return &ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj{
+							return &ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesValueObj{
 								ID:   types.StringValue(rules.ValueObj.ID),
 								Name: types.StringValue(rules.ValueObj.Name),
 							}

@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -580,7 +580,6 @@ func (r *NetworksClientsProvisionResource) Create(ctx context.Context, req resou
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Networks.ProvisionNetworkClients(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -597,7 +596,6 @@ func (r *NetworksClientsProvisionResource) Create(ctx context.Context, req resou
 	}
 	//Item
 	data = ResponseNetworksProvisionNetworkClientsItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -750,6 +748,7 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 	emptyString := ""
 	re := *r.Parameters
 	var requestNetworksProvisionNetworkClientsClients []merakigosdk.RequestNetworksProvisionNetworkClientsClients
+
 	if re.Clients != nil {
 		for _, rItem1 := range *re.Clients {
 			mac := rItem1.Mac.ValueString()
@@ -758,6 +757,7 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 				Mac:  mac,
 				Name: name,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	devicePolicy := new(string)
@@ -773,15 +773,19 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 		groupPolicyID = &emptyString
 	}
 	var requestNetworksProvisionNetworkClientsPoliciesBySecurityAppliance *merakigosdk.RequestNetworksProvisionNetworkClientsPoliciesBySecurityAppliance
+
 	if re.PoliciesBySecurityAppliance != nil {
 		devicePolicy := re.PoliciesBySecurityAppliance.DevicePolicy.ValueString()
 		requestNetworksProvisionNetworkClientsPoliciesBySecurityAppliance = &merakigosdk.RequestNetworksProvisionNetworkClientsPoliciesBySecurityAppliance{
 			DevicePolicy: devicePolicy,
 		}
+		//[debug] Is Array: False
 	}
 	var requestNetworksProvisionNetworkClientsPoliciesBySSID *merakigosdk.RequestNetworksProvisionNetworkClientsPoliciesBySSID
+
 	if re.PoliciesBySSID != nil {
 		var requestNetworksProvisionNetworkClientsPoliciesBySSID0 *merakigosdk.RequestNetworksProvisionNetworkClientsPoliciesBySSID0
+
 		if re.PoliciesBySSID.Status0 != nil {
 			devicePolicy := re.PoliciesBySSID.Status0.DevicePolicy.ValueString()
 			groupPolicyID := re.PoliciesBySSID.Status0.GroupPolicyID.ValueString()
@@ -789,8 +793,10 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 				DevicePolicy:  devicePolicy,
 				GroupPolicyID: groupPolicyID,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksProvisionNetworkClientsPoliciesBySSID1 *merakigosdk.RequestNetworksProvisionNetworkClientsPoliciesBySSID1
+
 		if re.PoliciesBySSID.Status1 != nil {
 			devicePolicy := re.PoliciesBySSID.Status1.DevicePolicy.ValueString()
 			groupPolicyID := re.PoliciesBySSID.Status1.GroupPolicyID.ValueString()
@@ -798,8 +804,10 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 				DevicePolicy:  devicePolicy,
 				GroupPolicyID: groupPolicyID,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksProvisionNetworkClientsPoliciesBySSID10 *merakigosdk.RequestNetworksProvisionNetworkClientsPoliciesBySSID10
+
 		if re.PoliciesBySSID.Status10 != nil {
 			devicePolicy := re.PoliciesBySSID.Status10.DevicePolicy.ValueString()
 			groupPolicyID := re.PoliciesBySSID.Status10.GroupPolicyID.ValueString()
@@ -807,8 +815,10 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 				DevicePolicy:  devicePolicy,
 				GroupPolicyID: groupPolicyID,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksProvisionNetworkClientsPoliciesBySSID11 *merakigosdk.RequestNetworksProvisionNetworkClientsPoliciesBySSID11
+
 		if re.PoliciesBySSID.Status11 != nil {
 			devicePolicy := re.PoliciesBySSID.Status11.DevicePolicy.ValueString()
 			groupPolicyID := re.PoliciesBySSID.Status11.GroupPolicyID.ValueString()
@@ -816,8 +826,10 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 				DevicePolicy:  devicePolicy,
 				GroupPolicyID: groupPolicyID,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksProvisionNetworkClientsPoliciesBySSID12 *merakigosdk.RequestNetworksProvisionNetworkClientsPoliciesBySSID12
+
 		if re.PoliciesBySSID.Status12 != nil {
 			devicePolicy := re.PoliciesBySSID.Status12.DevicePolicy.ValueString()
 			groupPolicyID := re.PoliciesBySSID.Status12.GroupPolicyID.ValueString()
@@ -825,8 +837,10 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 				DevicePolicy:  devicePolicy,
 				GroupPolicyID: groupPolicyID,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksProvisionNetworkClientsPoliciesBySSID13 *merakigosdk.RequestNetworksProvisionNetworkClientsPoliciesBySSID13
+
 		if re.PoliciesBySSID.Status13 != nil {
 			devicePolicy := re.PoliciesBySSID.Status13.DevicePolicy.ValueString()
 			groupPolicyID := re.PoliciesBySSID.Status13.GroupPolicyID.ValueString()
@@ -834,8 +848,10 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 				DevicePolicy:  devicePolicy,
 				GroupPolicyID: groupPolicyID,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksProvisionNetworkClientsPoliciesBySSID14 *merakigosdk.RequestNetworksProvisionNetworkClientsPoliciesBySSID14
+
 		if re.PoliciesBySSID.Status14 != nil {
 			devicePolicy := re.PoliciesBySSID.Status14.DevicePolicy.ValueString()
 			groupPolicyID := re.PoliciesBySSID.Status14.GroupPolicyID.ValueString()
@@ -843,8 +859,10 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 				DevicePolicy:  devicePolicy,
 				GroupPolicyID: groupPolicyID,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksProvisionNetworkClientsPoliciesBySSID2 *merakigosdk.RequestNetworksProvisionNetworkClientsPoliciesBySSID2
+
 		if re.PoliciesBySSID.Status2 != nil {
 			devicePolicy := re.PoliciesBySSID.Status2.DevicePolicy.ValueString()
 			groupPolicyID := re.PoliciesBySSID.Status2.GroupPolicyID.ValueString()
@@ -852,8 +870,10 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 				DevicePolicy:  devicePolicy,
 				GroupPolicyID: groupPolicyID,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksProvisionNetworkClientsPoliciesBySSID3 *merakigosdk.RequestNetworksProvisionNetworkClientsPoliciesBySSID3
+
 		if re.PoliciesBySSID.Status3 != nil {
 			devicePolicy := re.PoliciesBySSID.Status3.DevicePolicy.ValueString()
 			groupPolicyID := re.PoliciesBySSID.Status3.GroupPolicyID.ValueString()
@@ -861,8 +881,10 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 				DevicePolicy:  devicePolicy,
 				GroupPolicyID: groupPolicyID,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksProvisionNetworkClientsPoliciesBySSID4 *merakigosdk.RequestNetworksProvisionNetworkClientsPoliciesBySSID4
+
 		if re.PoliciesBySSID.Status4 != nil {
 			devicePolicy := re.PoliciesBySSID.Status4.DevicePolicy.ValueString()
 			groupPolicyID := re.PoliciesBySSID.Status4.GroupPolicyID.ValueString()
@@ -870,8 +892,10 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 				DevicePolicy:  devicePolicy,
 				GroupPolicyID: groupPolicyID,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksProvisionNetworkClientsPoliciesBySSID5 *merakigosdk.RequestNetworksProvisionNetworkClientsPoliciesBySSID5
+
 		if re.PoliciesBySSID.Status5 != nil {
 			devicePolicy := re.PoliciesBySSID.Status5.DevicePolicy.ValueString()
 			groupPolicyID := re.PoliciesBySSID.Status5.GroupPolicyID.ValueString()
@@ -879,8 +903,10 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 				DevicePolicy:  devicePolicy,
 				GroupPolicyID: groupPolicyID,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksProvisionNetworkClientsPoliciesBySSID6 *merakigosdk.RequestNetworksProvisionNetworkClientsPoliciesBySSID6
+
 		if re.PoliciesBySSID.Status6 != nil {
 			devicePolicy := re.PoliciesBySSID.Status6.DevicePolicy.ValueString()
 			groupPolicyID := re.PoliciesBySSID.Status6.GroupPolicyID.ValueString()
@@ -888,8 +914,10 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 				DevicePolicy:  devicePolicy,
 				GroupPolicyID: groupPolicyID,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksProvisionNetworkClientsPoliciesBySSID7 *merakigosdk.RequestNetworksProvisionNetworkClientsPoliciesBySSID7
+
 		if re.PoliciesBySSID.Status7 != nil {
 			devicePolicy := re.PoliciesBySSID.Status7.DevicePolicy.ValueString()
 			groupPolicyID := re.PoliciesBySSID.Status7.GroupPolicyID.ValueString()
@@ -897,8 +925,10 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 				DevicePolicy:  devicePolicy,
 				GroupPolicyID: groupPolicyID,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksProvisionNetworkClientsPoliciesBySSID8 *merakigosdk.RequestNetworksProvisionNetworkClientsPoliciesBySSID8
+
 		if re.PoliciesBySSID.Status8 != nil {
 			devicePolicy := re.PoliciesBySSID.Status8.DevicePolicy.ValueString()
 			groupPolicyID := re.PoliciesBySSID.Status8.GroupPolicyID.ValueString()
@@ -906,8 +936,10 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 				DevicePolicy:  devicePolicy,
 				GroupPolicyID: groupPolicyID,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksProvisionNetworkClientsPoliciesBySSID9 *merakigosdk.RequestNetworksProvisionNetworkClientsPoliciesBySSID9
+
 		if re.PoliciesBySSID.Status9 != nil {
 			devicePolicy := re.PoliciesBySSID.Status9.DevicePolicy.ValueString()
 			groupPolicyID := re.PoliciesBySSID.Status9.GroupPolicyID.ValueString()
@@ -915,6 +947,7 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 				DevicePolicy:  devicePolicy,
 				GroupPolicyID: groupPolicyID,
 			}
+			//[debug] Is Array: False
 		}
 		requestNetworksProvisionNetworkClientsPoliciesBySSID = &merakigosdk.RequestNetworksProvisionNetworkClientsPoliciesBySSID{
 			Status0:  requestNetworksProvisionNetworkClientsPoliciesBySSID0,
@@ -933,6 +966,7 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 			Status8:  requestNetworksProvisionNetworkClientsPoliciesBySSID8,
 			Status9:  requestNetworksProvisionNetworkClientsPoliciesBySSID9,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestNetworksProvisionNetworkClients{
 		Clients: func() *[]merakigosdk.RequestNetworksProvisionNetworkClientsClients {

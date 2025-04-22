@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -100,7 +100,6 @@ func (r *NetworksSmUserAccessDevicesDeleteResource) Create(ctx context.Context, 
 	vvNetworkID := data.NetworkID.ValueString()
 	vvUserAccessDeviceID := data.UserAccessDeviceID.ValueString()
 	restyResp1, err := r.client.Sm.DeleteNetworkSmUserAccessDevice(vvNetworkID, vvUserAccessDeviceID)
-
 	if err != nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(

@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -95,14 +95,14 @@ func (d *DevicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
-				Required:            true,
+				Optional:            true,
 			},
 			"per_page": schema.Int64Attribute{
 				MarkdownDescription: `perPage query parameter. The number of entries per page returned. Acceptable range is 3 1000. Default is 1000.`,
 				Optional:            true,
 			},
 			"product_types": schema.ListAttribute{
-				MarkdownDescription: `productTypes query parameter. Optional parameter to filter devices by product type. Valid types are wireless, appliance, switch, systemsManager, camera, cellularGateway, and sensor.`,
+				MarkdownDescription: `productTypes query parameter. Optional parameter to filter devices by product type. Valid types are wireless, appliance, switch, systemsManager, camera, cellularGateway, sensor, wirelessController, and secureConnect.`,
 				Optional:            true,
 				ElementType:         types.StringType,
 			},
@@ -146,6 +146,25 @@ func (d *DevicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 						MarkdownDescription: `Physical address of the device`,
 						Computed:            true,
 					},
+					"beacon_id_params": schema.SingleNestedAttribute{
+						MarkdownDescription: `Beacon Id parameters with an identifier and major and minor versions`,
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+
+							"major": schema.Int64Attribute{
+								MarkdownDescription: `The major number to be used in the beacon identifier`,
+								Computed:            true,
+							},
+							"minor": schema.Int64Attribute{
+								MarkdownDescription: `The minor number to be used in the beacon identifier`,
+								Computed:            true,
+							},
+							"uuid": schema.StringAttribute{
+								MarkdownDescription: `The UUID to be used in the beacon identifier`,
+								Computed:            true,
+							},
+						},
+					},
 					"details": schema.SetNestedAttribute{
 						MarkdownDescription: `Additional device information`,
 						Computed:            true,
@@ -167,8 +186,8 @@ func (d *DevicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 						MarkdownDescription: `Firmware version of the device`,
 						Computed:            true,
 					},
-					"imei": schema.StringAttribute{
-						MarkdownDescription: `IMEI of the device, if applicable`,
+					"floor_plan_id": schema.StringAttribute{
+						MarkdownDescription: `The floor plan to associate to this device. null disassociates the device from the floorplan.`,
 						Computed:            true,
 					},
 					"lan_ip": schema.StringAttribute{
@@ -203,10 +222,6 @@ func (d *DevicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 						MarkdownDescription: `Notes for the device, limited to 255 characters`,
 						Computed:            true,
 					},
-					"product_type": schema.StringAttribute{
-						MarkdownDescription: `Product type of the device`,
-						Computed:            true,
-					},
 					"serial": schema.StringAttribute{
 						MarkdownDescription: `Serial number of the device`,
 						Computed:            true,
@@ -220,7 +235,7 @@ func (d *DevicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 			},
 
 			"items": schema.ListNestedAttribute{
-				MarkdownDescription: `Array of ResponseOrganizationsGetOrganizationDevices`,
+				MarkdownDescription: `Array of ResponseDevicesGetOrganizationDevices`,
 				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -250,7 +265,7 @@ func (d *DevicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 							MarkdownDescription: `Firmware version of the device`,
 							Computed:            true,
 						},
-						"imei": schema.Float64Attribute{
+						"imei": schema.StringAttribute{
 							MarkdownDescription: `IMEI of the device, if applicable`,
 							Computed:            true,
 						},
@@ -322,6 +337,8 @@ func (d *DevicesDataSource) Read(ctx context.Context, req datasource.ReadRequest
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetDevice")
 		vvSerial := devices.Serial.ValueString()
+
+		// has_unknown_response: None
 
 		response1, restyResp1, err := d.client.Devices.GetDevice(vvSerial)
 
@@ -457,13 +474,8 @@ func ResponseDevicesGetOrganizationDevicesItemsToBody(state Devices, response *m
 				return &[]ResponseItemOrganizationsGetOrganizationDevicesDetails{}
 			}(),
 			Firmware: types.StringValue(item.Firmware),
-			Imei: func() types.Float64 {
-				if item.Imei != nil {
-					return types.Float64Value(float64(*item.Imei))
-				}
-				return types.Float64{}
-			}(),
-			LanIP: types.StringValue(item.LanIP),
+			Imei:     types.StringValue(item.Imei),
+			LanIP:    types.StringValue(item.LanIP),
 			Lat: func() types.Float64 {
 				if item.Lat != nil {
 					return types.Float64Value(float64(*item.Lat))
@@ -505,11 +517,10 @@ func ResponseDevicesGetDeviceItemToBody(state Devices, response *merakigosdk.Res
 				}
 				return &result
 			}
-			return &[]ResponseDevicesGetDeviceDetails{}
+			return nil
 		}(),
 		Firmware: types.StringValue(response.Firmware),
-		// Imei:     types.StringValue(response.Imei),
-		LanIP: types.StringValue(response.LanIP),
+		LanIP:    types.StringValue(response.LanIP),
 		Lat: func() types.Float64 {
 			if response.Lat != nil {
 				return types.Float64Value(float64(*response.Lat))
@@ -522,14 +533,14 @@ func ResponseDevicesGetDeviceItemToBody(state Devices, response *merakigosdk.Res
 			}
 			return types.Float64{}
 		}(),
-		Mac:       types.StringValue(response.Mac),
-		Model:     types.StringValue(response.Model),
-		Name:      types.StringValue(response.Name),
-		NetworkID: types.StringValue(response.NetworkID),
-		Notes:     types.StringValue(response.Notes),
-		// ProductType: types.StringValue(response.ProductType),
-		Serial: types.StringValue(response.Serial),
-		Tags:   StringSliceToList(response.Tags),
+		Mac:         types.StringValue(response.Mac),
+		Model:       types.StringValue(response.Model),
+		Name:        types.StringValue(response.Name),
+		NetworkID:   types.StringValue(response.NetworkID),
+		Notes:       types.StringValue(response.Notes),
+		ProductType: types.StringValue(response.ProductType),
+		Serial:      types.StringValue(response.Serial),
+		Tags:        StringSliceToList(response.Tags),
 	}
 	state.Item = &itemState
 	return state

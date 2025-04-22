@@ -9,7 +9,7 @@ terraform {
 }
 
 provider "meraki" {
-  meraki_debug = "true"
+  meraki_debug    = "true"
   meraki_base_url = "http://localhost:3002"
 }
 
@@ -30,7 +30,7 @@ ephemeral "meraki_organizations_camera_roles" "example" {
       permission_scope_id = "2"
     }
   ]
-  
+
 }
 
 # resource "meraki_organizations_camera_roles" "example" {

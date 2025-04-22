@@ -50,6 +50,7 @@ output "meraki_networks_appliance_firewall_l7_firewall_rules_example" {
 Optional:
 
 - `policy` (String) 'Deny' traffic specified by this rule
+                                        Allowed values: [deny]
 - `type` (String) Type of the L7 rule. One of: 'application', 'applicationCategory', 'host', 'port', 'ipRange'
 - `value` (String) The 'value' of what you want to block. Format of 'value' varies depending on type of the rule. The application categories and application ids can be retrieved from the the 'MX L7 application categories' endpoint. The countries follow the two-letter ISO 3166-1 alpha-2 format.
 - `value_list` (Set of String) The 'value_list' of what you want to block. Send a list in request

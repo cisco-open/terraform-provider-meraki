@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -63,15 +63,6 @@ func (r *OrganizationsCellularGatewayEsimsServiceProvidersAccountsResource) Meta
 func (r *OrganizationsCellularGatewayEsimsServiceProvidersAccountsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"last_updated_at": schema.StringAttribute{
-				MarkdownDescription: `last updated at`,
-				Computed:            true,
-				Optional:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-					SuppressDiffString(),
-				},
-			},
 			"account_id": schema.StringAttribute{
 				MarkdownDescription: `Service provider account ID`,
 				Computed:            true,
@@ -85,6 +76,7 @@ func (r *OrganizationsCellularGatewayEsimsServiceProvidersAccountsResource) Sche
 				MarkdownDescription: `Service provider account API key`,
 				Computed:            true,
 				Optional:            true,
+				Sensitive:           true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -161,47 +153,52 @@ func (r *OrganizationsCellularGatewayEsimsServiceProvidersAccountsResource) Crea
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
-	vvUsername := data.Username.ValueString()
-	//Items
-	responseVerifyItem, restyResp1, err := r.client.CellularGateway.GetOrganizationCellularGatewayEsimsServiceProvidersAccounts(vvOrganizationID, nil)
-	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizationCellularGatewayEsimsServiceProvidersAccounts",
-				err.Error(),
-			)
-			return
-		}
-	}
-	//TODO HAS ONLY ITEMS
-	// Create
+	//Only Items
 
-	responseStruct := structToMap(responseVerifyItem.Items)
-	result := getDictResult(responseStruct, "Username", vvUsername, simpleCmp)
-	var responseVerifyItem2 merakigosdk.ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItems
-	if result != nil {
-		err := mapToStruct(result.(map[string]interface{}), &responseVerifyItem2)
-		if err != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing mapToStruct in resource",
-				err.Error(),
-			)
-			return
+	vvUsername := data.Username.ValueString()
+
+	responseVerifyItem, restyResp1, err := r.client.CellularGateway.GetOrganizationCellularGatewayEsimsServiceProvidersAccounts(vvOrganizationID, nil)
+	//Has Post
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetOrganizationCellularGatewayEsimsServiceProvidersAccounts",
+					err.Error(),
+				)
+				return
+			}
 		}
-		r.client.CellularGateway.UpdateOrganizationCellularGatewayEsimsServiceProvidersAccount(vvOrganizationID, responseVerifyItem2.AccountID, data.toSdkApiRequestUpdate(ctx))
-		data = ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItemToBodyRs(data, &responseVerifyItem2, false)
-		diags := resp.State.Set(ctx, &data)
-		resp.Diagnostics.Append(diags...)
-		return
 	}
+
+	var responseVerifyItem2 merakigosdk.ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItems
+	if responseVerifyItem != nil {
+		responseStruct := structToMap(responseVerifyItem.Items)
+		result := getDictResult(responseStruct, "Username", vvUsername, simpleCmp)
+		if result != nil {
+			err := mapToStruct(result.(map[string]interface{}), &responseVerifyItem2)
+			if err != nil {
+				resp.Diagnostics.AddError(
+					"Failure when executing mapToStruct in resource",
+					err.Error(),
+				)
+				return
+			}
+			r.client.CellularGateway.UpdateOrganizationCellularGatewayEsimsServiceProvidersAccount(vvOrganizationID, responseVerifyItem2.AccountID, data.toSdkApiRequestUpdate(ctx))
+			data = ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItemToBodyRs(data, &responseVerifyItem2, false)
+			// Path params update assigned
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			return
+
+		}
+	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.CellularGateway.CreateOrganizationCellularGatewayEsimsServiceProvidersAccount(vvOrganizationID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationCellularGatewayEsimsServiceProvidersAccount",
 				err.Error(),
@@ -214,9 +211,8 @@ func (r *OrganizationsCellularGatewayEsimsServiceProvidersAccountsResource) Crea
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.CellularGateway.GetOrganizationCellularGatewayEsimsServiceProvidersAccounts(vvOrganizationID, nil)
-	// Has only items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -232,8 +228,9 @@ func (r *OrganizationsCellularGatewayEsimsServiceProvidersAccountsResource) Crea
 		)
 		return
 	}
-	responseStruct2 := structToMap(responseGet)
-	result2 := getDictResult(responseStruct2, "Username", vvUsername, simpleCmp)
+
+	responseStruct := structToMap(responseGet.Items)
+	result2 := getDictResult(responseStruct, "Username", vvUsername, simpleCmp)
 	if result2 != nil {
 		err := mapToStruct(result2.(map[string]interface{}), &responseVerifyItem2)
 		if err != nil {
@@ -250,10 +247,11 @@ func (r *OrganizationsCellularGatewayEsimsServiceProvidersAccountsResource) Crea
 	} else {
 		resp.Diagnostics.AddError(
 			"Failure when executing GetOrganizationCellularGatewayEsimsServiceProvidersAccounts Result",
-			"Error",
+			"Not Found",
 		)
 		return
 	}
+
 }
 
 func (r *OrganizationsCellularGatewayEsimsServiceProvidersAccountsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -410,14 +408,13 @@ func (r *OrganizationsCellularGatewayEsimsServiceProvidersAccountsResource) Dele
 
 // TF Structs Schema
 type OrganizationsCellularGatewayEsimsServiceProvidersAccountsRs struct {
-	OrganizationID types.String `tfsdk:"organization_id"`
-	AccountID      types.String `tfsdk:"account_id"`
-	APIKey         types.String `tfsdk:"api_key"`
-	//TIENE ITEMS
+	OrganizationID  types.String                                                                                                  `tfsdk:"organization_id"`
+	AccountID       types.String                                                                                                  `tfsdk:"account_id"`
 	LastUpdatedAt   types.String                                                                                                  `tfsdk:"last_updated_at"`
 	ServiceProvider *ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItemsServiceProviderRs `tfsdk:"service_provider"`
 	Title           types.String                                                                                                  `tfsdk:"title"`
 	Username        types.String                                                                                                  `tfsdk:"username"`
+	APIKey          types.String                                                                                                  `tfsdk:"api_key"`
 }
 
 type ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItemsServiceProviderRs struct {
@@ -445,11 +442,13 @@ func (r *OrganizationsCellularGatewayEsimsServiceProvidersAccountsRs) toSdkApiRe
 		aPIKey = &emptyString
 	}
 	var requestCellularGatewayCreateOrganizationCellularGatewayEsimsServiceProvidersAccountServiceProvider *merakigosdk.RequestCellularGatewayCreateOrganizationCellularGatewayEsimsServiceProvidersAccountServiceProvider
+
 	if r.ServiceProvider != nil {
 		name := r.ServiceProvider.Name.ValueString()
 		requestCellularGatewayCreateOrganizationCellularGatewayEsimsServiceProvidersAccountServiceProvider = &merakigosdk.RequestCellularGatewayCreateOrganizationCellularGatewayEsimsServiceProvidersAccountServiceProvider{
 			Name: name,
 		}
+		//[debug] Is Array: False
 	}
 	title := new(string)
 	if !r.Title.IsUnknown() && !r.Title.IsNull() {
@@ -496,7 +495,6 @@ func (r *OrganizationsCellularGatewayEsimsServiceProvidersAccountsRs) toSdkApiRe
 // From gosdk to TF Structs Schema
 func ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItemToBodyRs(state OrganizationsCellularGatewayEsimsServiceProvidersAccountsRs, response *merakigosdk.ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItems, is_read bool) OrganizationsCellularGatewayEsimsServiceProvidersAccountsRs {
 	itemState := OrganizationsCellularGatewayEsimsServiceProvidersAccountsRs{
-
 		AccountID:     types.StringValue(response.AccountID),
 		LastUpdatedAt: types.StringValue(response.LastUpdatedAt),
 		ServiceProvider: func() *ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItemsServiceProviderRs {

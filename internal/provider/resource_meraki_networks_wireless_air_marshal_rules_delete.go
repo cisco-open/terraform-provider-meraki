@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "dashboard-api-go/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -99,9 +99,7 @@ func (r *NetworksWirelessAirMarshalRulesDeleteResource) Create(ctx context.Conte
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	vvRuleID := data.RuleID.ValueString()
-
 	restyResp1, err := r.client.Wireless.DeleteNetworkWirelessAirMarshalRule(vvNetworkID, vvRuleID)
-
 	if err != nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(

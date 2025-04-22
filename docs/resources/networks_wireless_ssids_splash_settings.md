@@ -36,6 +36,11 @@ resource "meraki_networks_wireless_ssids_splash_settings" "example" {
   network_id   = "string"
   number       = "string"
   redirect_url = "https://example.com"
+  self_registration = {
+
+    authorization_type = "admin"
+    enabled            = true
+  }
   sentry_enrollment = {
 
     enforced_systems = ["iOS"]
@@ -105,6 +110,7 @@ output "meraki_networks_wireless_ssids_splash_settings_example" {
                                   Allowed values: [default,open,restricted]
 - `guest_sponsorship` (Attributes) Details associated with guest sponsored splash (see [below for nested schema](#nestedatt--guest_sponsorship))
 - `redirect_url` (String) The custom redirect URL where the users will go after the splash page.
+- `self_registration` (Attributes) Self-registration for splash with Meraki authentication. (see [below for nested schema](#nestedatt--self_registration))
 - `sentry_enrollment` (Attributes) Systems Manager sentry enrollment splash settings. (see [below for nested schema](#nestedatt--sentry_enrollment))
 - `splash_image` (Attributes) The image used in the splash page. (see [below for nested schema](#nestedatt--splash_image))
 - `splash_logo` (Attributes) The logo used in the splash page. (see [below for nested schema](#nestedatt--splash_logo))
@@ -119,7 +125,6 @@ output "meraki_networks_wireless_ssids_splash_settings_example" {
 
 ### Read-Only
 
-- `self_registration` (Attributes) Self-registration for splash with Meraki authentication. (see [below for nested schema](#nestedatt--self_registration))
 - `splash_page` (String) The type of splash page for this SSID
 - `ssid_number` (Number) SSID number
 
@@ -149,6 +154,16 @@ Optional:
 
 - `duration_in_minutes` (Number) Duration in minutes of sponsored guest authorization.
 - `guest_can_request_timeframe` (Boolean) Whether or not guests can specify how much time they are requesting.
+
+
+<a id="nestedatt--self_registration"></a>
+### Nested Schema for `self_registration`
+
+Optional:
+
+- `authorization_type` (String) How created user accounts should be authorized.
+                                        Allowed values: [admin,auto,self_email]
+- `enabled` (Boolean) Whether or not to allow users to create their own account on the network.
 
 
 <a id="nestedatt--sentry_enrollment"></a>
@@ -227,17 +242,6 @@ Optional:
 - `contents` (String) The file contents (a base 64 encoded string) of your new prepaid front.
 - `format` (String) The format of the encoded contents. Supported formats are 'png', 'gif', and jpg'.
                                               Allowed values: [gif,jpg,png]
-
-
-
-<a id="nestedatt--self_registration"></a>
-### Nested Schema for `self_registration`
-
-Read-Only:
-
-- `authorization_type` (String) How created user accounts should be authorized.
-                                        Allowed values: [admin,auto,self_email]
-- `enabled` (Boolean) Whether or not to allow users to create their own account on the network.
 
 ## Import
 

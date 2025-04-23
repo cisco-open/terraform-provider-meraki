@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -240,13 +240,13 @@ func ResponseWirelessGetNetworkWirelessAirMarshalItemsToBody(state NetworksWirel
 									}
 									return &result
 								}
-								return &[]ResponseItemWirelessGetNetworkWirelessAirMarshalBssidsDetectedBy{}
+								return nil
 							}(),
 						}
 					}
 					return &result
 				}
-				return &[]ResponseItemWirelessGetNetworkWirelessAirMarshalBssids{}
+				return nil
 			}(),
 			Channels: StringSliceToList(item.Channels),
 			FirstSeen: func() types.Int64 {

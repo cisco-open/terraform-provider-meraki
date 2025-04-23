@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -388,8 +388,8 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 				ElementType: types.StringType,
 			},
 			"type": schema.StringAttribute{
-				MarkdownDescription: `The type of the switch port ('trunk', 'access' or 'stack').
-                                  Allowed values: [access,stack,trunk]`,
+				MarkdownDescription: `The type of the switch port ('trunk', 'access', 'stack' or 'routed').
+                                  Allowed values: [access,routed,stack,trunk]`,
 				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
@@ -398,6 +398,7 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 				Validators: []validator.String{
 					stringvalidator.OneOf(
 						"access",
+						"routed",
 						"stack",
 						"trunk",
 					),
@@ -458,31 +459,38 @@ func (r *DevicesSwitchPortsResource) Create(ctx context.Context, req resource.Cr
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvSerial := data.Serial.ValueString()
 	vvPortID := data.PortID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Switch.GetDeviceSwitchPort(vvSerial, vvPortID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesSwitchPorts only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and has items and not post
+
+	if vvSerial != "" && vvPortID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Switch.GetDeviceSwitchPort(vvSerial, vvPortID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesSwitchPorts  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesSwitchPorts only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesSwitchPorts only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateDeviceSwitchPort(vvSerial, vvPortID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceSwitchPort",
 				err.Error(),
@@ -495,28 +503,30 @@ func (r *DevicesSwitchPortsResource) Create(ctx context.Context, req resource.Cr
 		)
 		return
 	}
-	//Item
-	responseGet, restyResp1, err := r.client.Switch.GetDeviceSwitchPort(vvSerial, vvPortID)
-	// Has only items
 
+	//Assign Path Params required
+
+	responseGet, restyResp1, err := r.client.Switch.GetDeviceSwitchPort(vvSerial, vvPortID)
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
-				"Failure when executing GetDeviceSwitchPorts",
+				"Failure when executing GetDeviceSwitchPort",
 				err.Error(),
 			)
 			return
 		}
 		resp.Diagnostics.AddError(
-			"Failure when executing GetDeviceSwitchPorts",
+			"Failure when executing GetDeviceSwitchPort",
 			err.Error(),
 		)
 		return
 	}
+
 	data = ResponseSwitchGetDeviceSwitchPortItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *DevicesSwitchPortsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -731,6 +741,7 @@ func (r *DevicesSwitchPortsRs) toSdkApiRequestUpdate(ctx context.Context) *merak
 		daiTrusted = nil
 	}
 	var requestSwitchUpdateDeviceSwitchPortDot3Az *merakigosdk.RequestSwitchUpdateDeviceSwitchPortDot3Az
+
 	if r.Dot3Az != nil {
 		enabled := func() *bool {
 			if !r.Dot3Az.Enabled.IsUnknown() && !r.Dot3Az.Enabled.IsNull() {
@@ -741,6 +752,7 @@ func (r *DevicesSwitchPortsRs) toSdkApiRequestUpdate(ctx context.Context) *merak
 		requestSwitchUpdateDeviceSwitchPortDot3Az = &merakigosdk.RequestSwitchUpdateDeviceSwitchPortDot3Az{
 			Enabled: enabled,
 		}
+		//[debug] Is Array: False
 	}
 	enabled := new(bool)
 	if !r.Enabled.IsUnknown() && !r.Enabled.IsNull() {
@@ -793,6 +805,7 @@ func (r *DevicesSwitchPortsRs) toSdkApiRequestUpdate(ctx context.Context) *merak
 		portScheduleID = &emptyString
 	}
 	var requestSwitchUpdateDeviceSwitchPortProfile *merakigosdk.RequestSwitchUpdateDeviceSwitchPortProfile
+
 	if r.Profile != nil {
 		enabled := func() *bool {
 			if !r.Profile.Enabled.IsUnknown() && !r.Profile.Enabled.IsNull() {
@@ -800,13 +813,14 @@ func (r *DevicesSwitchPortsRs) toSdkApiRequestUpdate(ctx context.Context) *merak
 			}
 			return nil
 		}()
-		iD := r.Profile.ID.ValueString()
+		id := r.Profile.ID.ValueString()
 		iname := r.Profile.Iname.ValueString()
 		requestSwitchUpdateDeviceSwitchPortProfile = &merakigosdk.RequestSwitchUpdateDeviceSwitchPortProfile{
 			Enabled: enabled,
-			ID:      iD,
+			ID:      id,
 			Iname:   iname,
 		}
+		//[debug] Is Array: False
 	}
 	rstpEnabled := new(bool)
 	if !r.RstpEnabled.IsUnknown() && !r.RstpEnabled.IsNull() {

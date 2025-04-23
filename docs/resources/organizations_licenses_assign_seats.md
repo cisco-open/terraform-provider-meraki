@@ -10,6 +10,8 @@ description: |-
 
 
 
+
+
 ~>Warning: This resource does not represent a real-world entity in Meraki Dashboard, therefore changing or deleting this resource on its own has no immediate effect. Instead, it is a task part of a Meraki Dashboard workflow. It is executed in Meraki without any additional verification. It does not check if it was executed before or if a similar configuration or action 
 already existed previously.
 
@@ -80,7 +82,7 @@ Read-Only:
 - `order_number` (String) Order number
 - `permanently_queued_licenses` (Attributes Set) DEPRECATED List of permanently queued licenses attached to the license. Instead, use /organizations/{organizationId}/licenses?deviceSerial= to retrieved queued licenses for a given device. (see [below for nested schema](#nestedatt--item--resulting_licenses--permanently_queued_licenses))
 - `seat_count` (Number) The number of seats of the license. Only applicable to SM licenses.
-- `state` (String) The state of the license. All queued licenses have a status of *recentlyQueued*.
+- `state` (String) The state of the license. All queued licenses have a status of **recentlyQueued**.
                                                 Allowed values: [active,expired,expiring,recentlyQueued,unused,unusedActive]
 - `total_duration_in_days` (Number) The duration of the license plus all permanently queued licenses associated with it
 

@@ -8,6 +8,10 @@ description: |-
 
 # meraki_administered_licensing_subscription_subscriptions_bind (Resource)
 
+
+
+
+
 ~>Warning: This resource does not represent a real-world entity in Meraki Dashboard, therefore changing or deleting this resource on its own has no immediate effect. Instead, it is a task part of a Meraki Dashboard workflow. It is executed in Meraki without any additional verification. It does not check if it was executed before or if a similar configuration or action 
 already existed previously.
 
@@ -51,7 +55,7 @@ output "meraki_administered_licensing_subscription_subscriptions_bind_example" {
 
 Optional:
 
-- `network_ids` (Set of String) List of network ids to bind to the subscription
+- `network_ids` (List of String) List of network ids to bind to the subscription
 
 
 <a id="nestedatt--item"></a>
@@ -59,7 +63,7 @@ Optional:
 
 Read-Only:
 
-- `errors` (Set of String) Array of errors if failed
+- `errors` (List of String) Array of errors if failed
 - `insufficient_entitlements` (Attributes Set) A list of entitlements required to successfully bind the networks to the subscription (see [below for nested schema](#nestedatt--item--insufficient_entitlements))
 - `networks` (Attributes Set) Unbound networks (see [below for nested schema](#nestedatt--item--networks))
 - `subscription_id` (String) Subscription ID

@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -73,7 +73,7 @@ func (r *NetworksSmDevicesLockResource) Schema(_ context.Context, _ resource.Sch
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"ids": schema.SetAttribute{
+					"ids": schema.ListAttribute{
 						MarkdownDescription: `The Meraki Ids of the set of devices.`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -83,7 +83,7 @@ func (r *NetworksSmDevicesLockResource) Schema(_ context.Context, _ resource.Sch
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"ids": schema.SetAttribute{
+					"ids": schema.ListAttribute{
 						MarkdownDescription: `The ids of the devices to be locked.`,
 						Optional:            true,
 						Computed:            true,
@@ -97,19 +97,19 @@ func (r *NetworksSmDevicesLockResource) Schema(_ context.Context, _ resource.Sch
 							int64planmodifier.RequiresReplace(),
 						},
 					},
-					"scope": schema.SetAttribute{
+					"scope": schema.ListAttribute{
 						MarkdownDescription: `The scope (one of all, none, withAny, withAll, withoutAny, or withoutAll) and a set of tags of the devices to be locked.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `The serials of the devices to be locked.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"wifi_macs": schema.SetAttribute{
+					"wifi_macs": schema.ListAttribute{
 						MarkdownDescription: `The wifiMacs of the devices to be locked.`,
 						Optional:            true,
 						Computed:            true,
@@ -142,7 +142,6 @@ func (r *NetworksSmDevicesLockResource) Create(ctx context.Context, req resource
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Sm.LockNetworkSmDevices(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -159,7 +158,6 @@ func (r *NetworksSmDevicesLockResource) Create(ctx context.Context, req resource
 	}
 	//Item
 	data = ResponseSmLockNetworkSmDevicesItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -185,7 +183,7 @@ type NetworksSmDevicesLock struct {
 }
 
 type ResponseSmLockNetworkSmDevices struct {
-	IDs types.Set `tfsdk:"ids"`
+	IDs types.List `tfsdk:"ids"`
 }
 
 type RequestSmLockNetworkSmDevicesRs struct {
@@ -226,7 +224,7 @@ func (r *NetworksSmDevicesLock) toSdkApiRequestCreate(ctx context.Context) *mera
 // ToBody
 func ResponseSmLockNetworkSmDevicesItemToBody(state NetworksSmDevicesLock, response *merakigosdk.ResponseSmLockNetworkSmDevices) NetworksSmDevicesLock {
 	itemState := ResponseSmLockNetworkSmDevices{
-		IDs: StringSliceToSet(response.IDs),
+		IDs: StringSliceToList(response.IDs),
 	}
 	state.Item = &itemState
 	return state

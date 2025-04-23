@@ -109,7 +109,7 @@ Read-Only:
 Read-Only:
 
 - `source` (String) The step of the auto locate process when the error occurred. Possible values: 'gnss', 'ranging', 'positioning'
-- `type` (String) The type of error that occurred. Possible values: 'failure', 'no neighbors', 'missing anchors', 'wrong anchors', 'calculation failure', 'scheduling failure'
+- `type` (String) The type of error that occurred. Possible values: 'failure', 'no neighbors', 'missing anchors', 'wrong anchors', 'missing ranging data', 'calculation failure', 'scheduling failure'
 
 
 <a id="nestedatt--items--items--jobs--gnss"></a>

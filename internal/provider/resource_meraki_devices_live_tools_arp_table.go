@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -211,13 +211,15 @@ func (r *DevicesLiveToolsArpTableResource) Create(ctx context.Context, req resou
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvSerial := data.Serial.ValueString()
-	vvArpTableID := data.Serial.ValueString()
-	//Item
-	if vvArpTableID != "" {
+	vvArpTableID := data.ArpTableID.ValueString()
+	//Has Item and not has items
+
+	if vvSerial != "" && vvArpTableID != "" {
+		//dentro
 		responseVerifyItem, restyResp1, err := r.client.Devices.GetDeviceLiveToolsArpTable(vvSerial, vvArpTableID)
-		//Have Create
+		//Has Post
 		if err != nil {
 			if restyResp1 != nil {
 				if restyResp1.StatusCode() != 404 {
@@ -231,15 +233,15 @@ func (r *DevicesLiveToolsArpTableResource) Create(ctx context.Context, req resou
 		}
 
 		if responseVerifyItem != nil {
-			data := ResponseDevicesGetDeviceLiveToolsArpTableItemToBodyRs(data, responseVerifyItem, false)
+			data = ResponseDevicesGetDeviceLiveToolsArpTableItemToBodyRs(data, responseVerifyItem, false)
 			//Path params in update assigned
 			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 			return
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Devices.CreateDeviceLiveToolsArpTable(vvSerial, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
@@ -254,9 +256,10 @@ func (r *DevicesLiveToolsArpTableResource) Create(ctx context.Context, req resou
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Devices.GetDeviceLiveToolsArpTable(vvSerial, vvArpTableID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -271,11 +274,12 @@ func (r *DevicesLiveToolsArpTableResource) Create(ctx context.Context, req resou
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseDevicesGetDeviceLiveToolsArpTableItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *DevicesLiveToolsArpTableResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -410,29 +414,35 @@ type RequestDevicesCreateDeviceLiveToolsArpTableCallbackPayloadTemplateRs struct
 // FromBody
 func (r *DevicesLiveToolsArpTableRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestDevicesCreateDeviceLiveToolsArpTable {
 	var requestDevicesCreateDeviceLiveToolsArpTableCallback *merakigosdk.RequestDevicesCreateDeviceLiveToolsArpTableCallback
+
 	if r.Callback != nil {
 		var requestDevicesCreateDeviceLiveToolsArpTableCallbackHTTPServer *merakigosdk.RequestDevicesCreateDeviceLiveToolsArpTableCallbackHTTPServer
+
 		if r.Callback.HTTPServer != nil {
-			iD := r.Callback.HTTPServer.ID.ValueString()
+			id := r.Callback.HTTPServer.ID.ValueString()
 			requestDevicesCreateDeviceLiveToolsArpTableCallbackHTTPServer = &merakigosdk.RequestDevicesCreateDeviceLiveToolsArpTableCallbackHTTPServer{
-				ID: iD,
+				ID: id,
 			}
+			//[debug] Is Array: False
 		}
 		var requestDevicesCreateDeviceLiveToolsArpTableCallbackPayloadTemplate *merakigosdk.RequestDevicesCreateDeviceLiveToolsArpTableCallbackPayloadTemplate
+
 		if r.Callback.PayloadTemplate != nil {
-			iD := r.Callback.PayloadTemplate.ID.ValueString()
+			id := r.Callback.PayloadTemplate.ID.ValueString()
 			requestDevicesCreateDeviceLiveToolsArpTableCallbackPayloadTemplate = &merakigosdk.RequestDevicesCreateDeviceLiveToolsArpTableCallbackPayloadTemplate{
-				ID: iD,
+				ID: id,
 			}
+			//[debug] Is Array: False
 		}
 		sharedSecret := r.Callback.SharedSecret.ValueString()
-		uRL := r.Callback.URL.ValueString()
+		url := r.Callback.URL.ValueString()
 		requestDevicesCreateDeviceLiveToolsArpTableCallback = &merakigosdk.RequestDevicesCreateDeviceLiveToolsArpTableCallback{
 			HTTPServer:      requestDevicesCreateDeviceLiveToolsArpTableCallbackHTTPServer,
 			PayloadTemplate: requestDevicesCreateDeviceLiveToolsArpTableCallbackPayloadTemplate,
 			SharedSecret:    sharedSecret,
-			URL:             uRL,
+			URL:             url,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestDevicesCreateDeviceLiveToolsArpTable{
 		Callback: requestDevicesCreateDeviceLiveToolsArpTableCallback,

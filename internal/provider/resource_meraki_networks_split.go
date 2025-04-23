@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -149,7 +149,6 @@ func (r *NetworksSplitResource) Create(ctx context.Context, req resource.CreateR
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	response, restyResp1, err := r.client.Networks.SplitNetwork(vvNetworkID)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -166,7 +165,6 @@ func (r *NetworksSplitResource) Create(ctx context.Context, req resource.CreateR
 	}
 	//Item
 	data = ResponseNetworksSplitNetworkItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -186,9 +184,8 @@ func (r *NetworksSplitResource) Delete(ctx context.Context, req resource.DeleteR
 
 // TF Structs Schema
 type NetworksSplit struct {
-	NetworkID  types.String                   `tfsdk:"network_id"`
-	Item       *ResponseNetworksSplitNetwork  `tfsdk:"item"`
-	Parameters *RequestNetworksSplitNetworkRs `tfsdk:"parameters"`
+	NetworkID types.String                  `tfsdk:"network_id"`
+	Item      *ResponseNetworksSplitNetwork `tfsdk:"item"`
 }
 
 type ResponseNetworksSplitNetwork struct {

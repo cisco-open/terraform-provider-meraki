@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -177,31 +177,38 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Create(ctx context.Context, req
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	vvNumber := data.Number.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDSchedules(vvNetworkID, vvNumber)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSSIDsSchedules only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" && vvNumber != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDSchedules(vvNetworkID, vvNumber)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessSsidsSchedules  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessSsidsSchedules only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSSIDsSchedules only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDSchedules(vvNetworkID, vvNumber, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDSchedules",
 				err.Error(),
@@ -214,9 +221,10 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Create(ctx context.Context, req
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDSchedules(vvNetworkID, vvNumber)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -231,11 +239,12 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Create(ctx context.Context, req
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseWirelessGetNetworkWirelessSSIDSchedulesItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksWirelessSSIDsSchedulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -375,6 +384,7 @@ func (r *NetworksWirelessSSIDsSchedulesRs) toSdkApiRequestUpdate(ctx context.Con
 		enabled = nil
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDSchedulesRanges []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSchedulesRanges
+
 	if r.Ranges != nil {
 		for _, rItem1 := range *r.Ranges {
 			endDay := rItem1.EndDay.ValueString()
@@ -387,9 +397,11 @@ func (r *NetworksWirelessSSIDsSchedulesRs) toSdkApiRequestUpdate(ctx context.Con
 				StartDay:  startDay,
 				StartTime: startTime,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDSchedulesRangesInSeconds []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSchedulesRangesInSeconds
+
 	if r.RangesInSeconds != nil {
 		for _, rItem1 := range *r.RangesInSeconds {
 			end := func() *int64 {
@@ -408,6 +420,7 @@ func (r *NetworksWirelessSSIDsSchedulesRs) toSdkApiRequestUpdate(ctx context.Con
 				End:   int64ToIntPointer(end),
 				Start: int64ToIntPointer(start),
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSchedules{

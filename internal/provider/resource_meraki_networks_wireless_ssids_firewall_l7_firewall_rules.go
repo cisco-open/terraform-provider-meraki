@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -125,7 +125,7 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Schema(_ context.
 							},
 						},
 						"value_list": schema.SetAttribute{
-							MarkdownDescription: `The 'value_list' of what you want to block. Send a list in request`,
+							MarkdownDescription: `The list of values of what needs to get blocked. Format of the value varies depending on type of the firewall rule selected.`,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Set{
 								setplanmodifier.UseStateForUnknown(),
@@ -133,7 +133,7 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Schema(_ context.
 							ElementType: types.StringType,
 						},
 						"value_obj": schema.SingleNestedAttribute{
-							MarkdownDescription: `The 'value_obj' of what you want to block. Send a dict in request`,
+							MarkdownDescription: `The object of what needs to get blocked. Format of the value varies depending on type of the firewall rule selected.`,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Object{
 								objectplanmodifier.UseStateForUnknown(),
@@ -178,31 +178,38 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Create(ctx contex
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	vvNumber := data.Number.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDFirewallL7FirewallRules(vvNetworkID, vvNumber)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSSIDsFirewallL7FirewallRules only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" && vvNumber != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDFirewallL7FirewallRules(vvNetworkID, vvNumber)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessSsidsFirewallL7FirewallRules  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessSsidsFirewallL7FirewallRules only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSSIDsFirewallL7FirewallRules only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDFirewallL7FirewallRules(vvNetworkID, vvNumber, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDFirewallL7FirewallRules",
 				err.Error(),
@@ -215,9 +222,10 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Create(ctx contex
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDFirewallL7FirewallRules(vvNetworkID, vvNumber)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -232,11 +240,12 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Create(ctx contex
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseWirelessGetNetworkWirelessSSIDFirewallL7FirewallRulesItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -364,6 +373,7 @@ type ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesRs struct
 // FromBody
 func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDFirewallL7FirewallRules {
 	var requestWirelessUpdateNetworkWirelessSSIDFirewallL7FirewallRulesRules []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDFirewallL7FirewallRulesRules
+
 	if r.Rules != nil {
 		for _, rItem1 := range *r.Rules {
 			var valueR interface{}
@@ -395,6 +405,7 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesRs) toSdkApiRequestUpdate(c
 				Type:   typeR,
 				Value:  valueR,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDFirewallL7FirewallRules{
@@ -419,10 +430,10 @@ func ResponseWirelessGetNetworkWirelessSSIDFirewallL7FirewallRulesItemToBodyRs(s
 						Policy: types.StringValue(rules.Policy),
 						Type:   types.StringValue(rules.Type),
 						Value: func() types.String {
-							if rules.Value == nil {
-								return types.StringNull()
+							if rules.Value != nil {
+								return types.StringValue(*rules.Value)
 							}
-							return types.StringValue(*rules.Value)
+							return types.String{}
 						}(),
 						ValueList: func() types.Set {
 							if rules.ValueList == nil {

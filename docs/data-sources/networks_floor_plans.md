@@ -54,6 +54,7 @@ Read-Only:
 - `bottom_right_corner` (Attributes) The longitude and latitude of the bottom right corner of your floor plan. (see [below for nested schema](#nestedatt--item--bottom_right_corner))
 - `center` (Attributes) The longitude and latitude of the center of your floor plan. The 'center' or two adjacent corners (e.g. 'topLeftCorner' and 'bottomLeftCorner') must be specified. If 'center' is specified, the floor plan is placed over that point with no rotation. If two adjacent corners are specified, the floor plan is rotated to line up with the two specified points. The aspect ratio of the floor plan's image is preserved regardless of which corners/center are specified. (This means if that more than two corners are specified, only two corners may be used to preserve the floor plan's aspect ratio.). No two points can have the same latitude, longitude pair. (see [below for nested schema](#nestedatt--item--center))
 - `devices` (Attributes Set) List of devices for the floorplan (see [below for nested schema](#nestedatt--item--devices))
+- `floor_number` (Number) The floor number of the floor within the building.
 - `floor_plan_id` (String) Floor plan ID
 - `height` (Number) The height of your floor plan.
 - `image_extension` (String) The format type of the image.
@@ -151,6 +152,7 @@ Read-Only:
 - `bottom_right_corner` (Attributes) The longitude and latitude of the bottom right corner of your floor plan. (see [below for nested schema](#nestedatt--items--bottom_right_corner))
 - `center` (Attributes) The longitude and latitude of the center of your floor plan. The 'center' or two adjacent corners (e.g. 'topLeftCorner' and 'bottomLeftCorner') must be specified. If 'center' is specified, the floor plan is placed over that point with no rotation. If two adjacent corners are specified, the floor plan is rotated to line up with the two specified points. The aspect ratio of the floor plan's image is preserved regardless of which corners/center are specified. (This means if that more than two corners are specified, only two corners may be used to preserve the floor plan's aspect ratio.). No two points can have the same latitude, longitude pair. (see [below for nested schema](#nestedatt--items--center))
 - `devices` (Attributes Set) List of devices for the floorplan (see [below for nested schema](#nestedatt--items--devices))
+- `floor_number` (Number) The floor number of the floor within the building.
 - `floor_plan_id` (String) Floor plan ID
 - `height` (Number) The height of your floor plan.
 - `image_extension` (String) The format type of the image.

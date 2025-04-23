@@ -10,6 +10,8 @@ description: |-
 
 
 
+
+
 ~>Warning: This resource does not represent a real-world entity in Meraki Dashboard, therefore changing or deleting this resource on its own has no immediate effect. Instead, it is a task part of a Meraki Dashboard workflow. It is executed in Meraki without any additional verification. It does not check if it was executed before or if a similar configuration or action 
 already existed previously.
 
@@ -71,7 +73,7 @@ Read-Only:
 - `notes` (String) Notes for the device, limited to 255 characters
 - `product_type` (String) Product type of the device
 - `serial` (String) Serial number of the device
-- `tags` (Set of String) List of tags assigned to the device
+- `tags` (List of String) List of tags assigned to the device
 
 <a id="nestedatt--item--details"></a>
 ### Nested Schema for `item.details`

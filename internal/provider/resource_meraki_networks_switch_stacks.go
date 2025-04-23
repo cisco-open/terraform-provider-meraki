@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -153,12 +153,14 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchStacks(vvNetworkID)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -170,6 +172,7 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -183,7 +186,6 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 				)
 				return
 			}
-			// r.client..( data.toSdkApiRequestUpdate(ctx))
 			responseVerifyItem2, _, _ := r.client.Switch.GetNetworkSwitchStack(vvNetworkID, vvSwitchStackID)
 			if responseVerifyItem2 != nil {
 				data = ResponseSwitchGetNetworkSwitchStackItemToBodyRs(data, responseVerifyItem2, false)
@@ -193,11 +195,11 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Switch.CreateNetworkSwitchStack(vvNetworkID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchStack",
 				err.Error(),
@@ -210,9 +212,8 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchStacks(vvNetworkID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -228,6 +229,7 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -236,7 +238,7 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter SwitchStackID",
-				"Error",
+				"Fail Parsing SwitchStackID",
 			)
 			return
 		}
@@ -266,6 +268,7 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 		)
 		return
 	}
+
 }
 
 func (r *NetworksSwitchStacksResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {

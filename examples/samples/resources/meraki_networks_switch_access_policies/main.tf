@@ -1,30 +1,30 @@
 terraform {
   required_providers {
     meraki = {
-      version = "1.0.7-beta"
+      version = "1.1.0-beta"
       source  = "hashicorp.com/edu/meraki"
       # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
   }
 }
 provider "meraki" {
-  meraki_debug = "true"
+  meraki_debug    = "true"
   meraki_base_url = "http://localhost:3002"
 }
 
 variable "ise_servers" {
   description = "Lista de servidores ISE con su IP, puerto y secreto compartido"
   type = list(object({
-    server_ip        = string
+    server_ip         = string
     ise_shared_secret = string
   }))
   default = [
     {
-      server_ip        = "192.168.1.10"
+      server_ip         = "192.168.1.10"
       ise_shared_secret = "secreto123"
     },
     {
-      server_ip        = "192.168.1.11"
+      server_ip         = "192.168.1.11"
       ise_shared_secret = "secreto456"
     }
   ]
@@ -32,7 +32,7 @@ variable "ise_servers" {
 
 
 resource "meraki_networks_switch_access_policies" "example" {
-  
+
   network_id         = "string"
   access_policy_type = "Hybrid authentication"
   dot1x = {

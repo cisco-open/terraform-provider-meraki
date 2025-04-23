@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -118,6 +118,7 @@ func (r *NetworksWirelessBillingResource) Schema(_ context.Context, _ resource.S
 						"id": schema.StringAttribute{
 							MarkdownDescription: `The id of the pricing plan to update.`,
 							Computed:            true,
+							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -172,30 +173,37 @@ func (r *NetworksWirelessBillingResource) Create(ctx context.Context, req resour
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessBilling(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessBilling only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessBilling(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessBilling  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessBilling only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessBilling only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessBilling(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessBilling",
 				err.Error(),
@@ -208,9 +216,10 @@ func (r *NetworksWirelessBillingResource) Create(ctx context.Context, req resour
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessBilling(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -225,11 +234,12 @@ func (r *NetworksWirelessBillingResource) Create(ctx context.Context, req resour
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseWirelessGetNetworkWirelessBillingItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksWirelessBillingResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -355,9 +365,11 @@ func (r *NetworksWirelessBillingRs) toSdkApiRequestUpdate(ctx context.Context) *
 		currency = &emptyString
 	}
 	var requestWirelessUpdateNetworkWirelessBillingPlans []merakigosdk.RequestWirelessUpdateNetworkWirelessBillingPlans
+
 	if r.Plans != nil {
 		for _, rItem1 := range *r.Plans {
 			var requestWirelessUpdateNetworkWirelessBillingPlansBandwidthLimits *merakigosdk.RequestWirelessUpdateNetworkWirelessBillingPlansBandwidthLimits
+
 			if rItem1.BandwidthLimits != nil {
 				limitDown := func() *int64 {
 					if !rItem1.BandwidthLimits.LimitDown.IsUnknown() && !rItem1.BandwidthLimits.LimitDown.IsNull() {
@@ -375,8 +387,9 @@ func (r *NetworksWirelessBillingRs) toSdkApiRequestUpdate(ctx context.Context) *
 					LimitDown: int64ToIntPointer(limitDown),
 					LimitUp:   int64ToIntPointer(limitUp),
 				}
+				//[debug] Is Array: False
 			}
-			iD := rItem1.ID.ValueString()
+			id := rItem1.ID.ValueString()
 			price := func() *float64 {
 				if !rItem1.Price.IsUnknown() && !rItem1.Price.IsNull() {
 					return rItem1.Price.ValueFloat64Pointer()
@@ -386,10 +399,11 @@ func (r *NetworksWirelessBillingRs) toSdkApiRequestUpdate(ctx context.Context) *
 			timeLimit := rItem1.TimeLimit.ValueString()
 			requestWirelessUpdateNetworkWirelessBillingPlans = append(requestWirelessUpdateNetworkWirelessBillingPlans, merakigosdk.RequestWirelessUpdateNetworkWirelessBillingPlans{
 				BandwidthLimits: requestWirelessUpdateNetworkWirelessBillingPlansBandwidthLimits,
-				ID:              iD,
+				ID:              id,
 				Price:           price,
 				TimeLimit:       timeLimit,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestWirelessUpdateNetworkWirelessBilling{

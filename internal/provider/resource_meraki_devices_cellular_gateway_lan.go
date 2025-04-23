@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -173,30 +173,37 @@ func (r *DevicesCellularGatewayLanResource) Create(ctx context.Context, req reso
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvSerial := data.Serial.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.CellularGateway.GetDeviceCellularGatewayLan(vvSerial)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesCellularGatewayLan only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesCellularGatewayLan only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	_, restyResp2, err := r.client.CellularGateway.UpdateDeviceCellularGatewayLan(vvSerial, dataRequest)
+	//Has Item and not has items
 
-	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+	if vvSerial != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.CellularGateway.GetDeviceCellularGatewayLan(vvSerial)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesCellularGatewayLan  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesCellularGatewayLan only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+	}
+
+	// UPDATE NO CREATE
+	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	response, restyResp2, err := r.client.CellularGateway.UpdateDeviceCellularGatewayLan(vvSerial, dataRequest)
+	//Update
+	if err != nil || restyResp2 == nil || response == nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCellularGatewayLan",
 				err.Error(),
@@ -209,9 +216,10 @@ func (r *DevicesCellularGatewayLanResource) Create(ctx context.Context, req reso
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.CellularGateway.GetDeviceCellularGatewayLan(vvSerial)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -226,11 +234,12 @@ func (r *DevicesCellularGatewayLanResource) Create(ctx context.Context, req reso
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseCellularGatewayGetDeviceCellularGatewayLanItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *DevicesCellularGatewayLanResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -352,19 +361,22 @@ type ResponseCellularGatewayGetDeviceCellularGatewayLanReservedIpRangesRs struct
 // FromBody
 func (r *DevicesCellularGatewayLanRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestCellularGatewayUpdateDeviceCellularGatewayLan {
 	var requestCellularGatewayUpdateDeviceCellularGatewayLanFixedIPAssignments []merakigosdk.RequestCellularGatewayUpdateDeviceCellularGatewayLanFixedIPAssignments
+
 	if r.FixedIPAssignments != nil {
 		for _, rItem1 := range *r.FixedIPAssignments {
-			iP := rItem1.IP.ValueString()
+			ip := rItem1.IP.ValueString()
 			mac := rItem1.Mac.ValueString()
 			name := rItem1.Name.ValueString()
 			requestCellularGatewayUpdateDeviceCellularGatewayLanFixedIPAssignments = append(requestCellularGatewayUpdateDeviceCellularGatewayLanFixedIPAssignments, merakigosdk.RequestCellularGatewayUpdateDeviceCellularGatewayLanFixedIPAssignments{
-				IP:   iP,
+				IP:   ip,
 				Mac:  mac,
 				Name: name,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var requestCellularGatewayUpdateDeviceCellularGatewayLanReservedIPRanges []merakigosdk.RequestCellularGatewayUpdateDeviceCellularGatewayLanReservedIPRanges
+
 	if r.ReservedIPRanges != nil {
 		for _, rItem1 := range *r.ReservedIPRanges {
 			comment := rItem1.Comment.ValueString()
@@ -375,6 +387,7 @@ func (r *DevicesCellularGatewayLanRs) toSdkApiRequestUpdate(ctx context.Context)
 				End:     end,
 				Start:   start,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestCellularGatewayUpdateDeviceCellularGatewayLan{

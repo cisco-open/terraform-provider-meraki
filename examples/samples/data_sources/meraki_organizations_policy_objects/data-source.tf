@@ -1,14 +1,14 @@
 terraform {
   required_providers {
     meraki = {
-      version = "1.0.7-beta"
+      version = "1.1.0-beta"
       source  = "hashicorp.com/edu/meraki"
     }
   }
 }
 
 provider "meraki" {
-  meraki_debug = "true"
+  meraki_debug    = "true"
   meraki_base_url = "http://localhost:3002"
 }
 

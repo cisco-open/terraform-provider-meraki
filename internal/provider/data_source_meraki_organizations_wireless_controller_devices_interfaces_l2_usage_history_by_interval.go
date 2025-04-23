@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -288,14 +288,14 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 								}
 								return &result
 							}
-							return &[]ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2UsageHistoryByIntervalItemsReadings{}
+							return nil
 						}(),
 						Serial: types.StringValue(items.Serial),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2UsageHistoryByIntervalItems{}
+			return nil
 		}(),
 		Meta: func() *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2UsageHistoryByIntervalMeta {
 			if response.Meta != nil {
@@ -320,15 +320,15 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 											}(),
 										}
 									}
-									return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2UsageHistoryByIntervalMetaCountsItems{}
+									return nil
 								}(),
 							}
 						}
-						return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2UsageHistoryByIntervalMetaCounts{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2UsageHistoryByIntervalMeta{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

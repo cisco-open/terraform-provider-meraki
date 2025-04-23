@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -121,7 +121,7 @@ func (r *NetworksSwitchStacksAddResource) Schema(_ context.Context, _ resource.S
 						MarkdownDescription: `Name of the Switch stack`,
 						Computed:            true,
 					},
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `Serials of the switches in the switch stack`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -167,7 +167,6 @@ func (r *NetworksSwitchStacksAddResource) Create(ctx context.Context, req resour
 	vvSwitchStackID := data.SwitchStackID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Switch.AddNetworkSwitchStack(vvNetworkID, vvSwitchStackID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -184,7 +183,6 @@ func (r *NetworksSwitchStacksAddResource) Create(ctx context.Context, req resour
 	}
 	//Item
 	data = ResponseSwitchAddNetworkSwitchStackItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -215,7 +213,7 @@ type ResponseSwitchAddNetworkSwitchStack struct {
 	IsMonitorOnly types.Bool                                    `tfsdk:"is_monitor_only"`
 	Members       *[]ResponseSwitchAddNetworkSwitchStackMembers `tfsdk:"members"`
 	Name          types.String                                  `tfsdk:"name"`
-	Serials       types.Set                                     `tfsdk:"serials"`
+	Serials       types.List                                    `tfsdk:"serials"`
 }
 
 type ResponseSwitchAddNetworkSwitchStackMembers struct {
@@ -273,7 +271,7 @@ func ResponseSwitchAddNetworkSwitchStackItemToBody(state NetworksSwitchStacksAdd
 			return nil
 		}(),
 		Name:    types.StringValue(response.Name),
-		Serials: StringSliceToSet(response.Serials),
+		Serials: StringSliceToList(response.Serials),
 	}
 	state.Item = &itemState
 	return state

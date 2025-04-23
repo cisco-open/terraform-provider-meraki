@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -72,6 +72,10 @@ func (d *NetworksWirelessElectronicShelfLabelDataSource) Schema(_ context.Contex
 					},
 					"hostname": schema.StringAttribute{
 						MarkdownDescription: `Desired ESL hostname of the network`,
+						Computed:            true,
+					},
+					"mode": schema.StringAttribute{
+						MarkdownDescription: `Electronic shelf label mode of the network. Valid options are 'Bluetooth', 'high frequency'`,
 						Computed:            true,
 					},
 				},
@@ -126,6 +130,7 @@ type NetworksWirelessElectronicShelfLabel struct {
 type ResponseWirelessGetNetworkWirelessElectronicShelfLabel struct {
 	Enabled  types.Bool   `tfsdk:"enabled"`
 	Hostname types.String `tfsdk:"hostname"`
+	Mode     types.String `tfsdk:"mode"`
 }
 
 // ToBody
@@ -138,6 +143,7 @@ func ResponseWirelessGetNetworkWirelessElectronicShelfLabelItemToBody(state Netw
 			return types.Bool{}
 		}(),
 		Hostname: types.StringValue(response.Hostname),
+		Mode:     types.StringValue(response.Mode),
 	}
 	state.Item = &itemState
 	return state

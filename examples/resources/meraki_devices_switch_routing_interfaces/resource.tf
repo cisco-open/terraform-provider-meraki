@@ -5,10 +5,10 @@ resource "meraki_devices_switch_routing_interfaces" "example" {
   interface_ip    = "192.168.1.2"
   ipv6 = {
 
-    address         = "1:2:3:4::1"
+    address         = "2001:db8::1"
     assignment_mode = "static"
-    gateway         = "1:2:3:4::2"
-    prefix          = "1:2:3:4::/48"
+    gateway         = "2001:db8::2"
+    prefix          = "2001:db8::/32"
   }
   multicast_routing = "disabled"
   name              = "L3 interface"

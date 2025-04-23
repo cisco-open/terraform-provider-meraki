@@ -21,8 +21,9 @@ package provider
 import (
 	"context"
 	"log"
+	"strconv"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -138,7 +139,7 @@ func (d *NetworksApplianceVLANsDataSource) Schema(_ context.Context, _ datasourc
 						MarkdownDescription: `The id of the desired group policy to apply to the VLAN`,
 						Computed:            true,
 					},
-					"id": schema.Int64Attribute{
+					"id": schema.StringAttribute{
 						MarkdownDescription: `The VLAN ID of the VLAN`,
 						Computed:            true,
 					},
@@ -323,7 +324,7 @@ func (d *NetworksApplianceVLANsDataSource) Schema(_ context.Context, _ datasourc
 							MarkdownDescription: `The id of the desired group policy to apply to the VLAN`,
 							Computed:            true,
 						},
-						"id": schema.Int64Attribute{
+						"id": schema.StringAttribute{
 							MarkdownDescription: `The VLAN ID of the VLAN`,
 							Computed:            true,
 						},
@@ -527,7 +528,7 @@ type ResponseItemApplianceGetNetworkApplianceVlans struct {
 	DhcpOptions            *[]ResponseItemApplianceGetNetworkApplianceVlansDhcpOptions      `tfsdk:"dhcp_options"`
 	DhcpRelayServerIPs     types.List                                                       `tfsdk:"dhcp_relay_server_ips"`
 	DNSNameservers         types.String                                                     `tfsdk:"dns_nameservers"`
-	FixedIPAssignments     types.String                                                     `tfsdk:"fixed_ip_assignments"`
+	FixedIPAssignments     *ResponseItemApplianceGetNetworkApplianceVlansFixedIpAssignments `tfsdk:"fixed_ip_assignments"`
 	GroupPolicyID          types.String                                                     `tfsdk:"group_policy_id"`
 	ID                     types.Int64                                                      `tfsdk:"id"`
 	InterfaceID            types.String                                                     `tfsdk:"interface_id"`
@@ -547,7 +548,7 @@ type ResponseItemApplianceGetNetworkApplianceVlansDhcpOptions struct {
 	Value types.String `tfsdk:"value"`
 }
 
-// type ResponseItemApplianceGetNetworkApplianceVlansFixedIpAssignments interface{}
+type ResponseItemApplianceGetNetworkApplianceVlansFixedIpAssignments interface{}
 
 type ResponseItemApplianceGetNetworkApplianceVlansIpv6 struct {
 	Enabled           types.Bool                                                            `tfsdk:"enabled"`
@@ -589,7 +590,7 @@ type ResponseApplianceGetNetworkApplianceVlan struct {
 	DNSNameservers         types.String                                                `tfsdk:"dns_nameservers"`
 	FixedIPAssignments     *ResponseApplianceGetNetworkApplianceVlanFixedIpAssignments `tfsdk:"fixed_ip_assignments"`
 	GroupPolicyID          types.String                                                `tfsdk:"group_policy_id"`
-	ID                     types.Int64                                                 `tfsdk:"id"`
+	ID                     types.String                                                `tfsdk:"id"`
 	InterfaceID            types.String                                                `tfsdk:"interface_id"`
 	IPv6                   *ResponseApplianceGetNetworkApplianceVlanIpv6               `tfsdk:"ipv6"`
 	MandatoryDhcp          *ResponseApplianceGetNetworkApplianceVlanMandatoryDhcp      `tfsdk:"mandatory_dhcp"`
@@ -669,7 +670,7 @@ func ResponseApplianceGetNetworkApplianceVLANsItemsToBody(state NetworksApplianc
 			}(),
 			DhcpRelayServerIPs: StringSliceToList(item.DhcpRelayServerIPs),
 			DNSNameservers:     types.StringValue(item.DNSNameservers),
-			// FixedIPAssignments: types.StringValue(fmt.Sprintf("%v", item.FixedIPAssignments)), //TODO POSIBLE interface
+			// FixedIPAssignments: types.StringValue(item.FixedIPAssignments), //TODO POSIBLE interface
 			GroupPolicyID: types.StringValue(item.GroupPolicyID),
 			ID: func() types.Int64 {
 				if item.ID != nil {
@@ -795,13 +796,8 @@ func ResponseApplianceGetNetworkApplianceVLANItemToBody(state NetworksApplianceV
 		DNSNameservers:     types.StringValue(response.DNSNameservers),
 		// FixedIPAssignments: types.StringValue(response.FixedIPAssignments), //TODO POSIBLE interface
 		GroupPolicyID: types.StringValue(response.GroupPolicyID),
-		ID: func() types.Int64 {
-			if response.ID != nil {
-				return types.Int64Value(int64(*response.ID))
-			}
-			return types.Int64{}
-		}(),
-		InterfaceID: types.StringValue(response.InterfaceID),
+		ID:            types.StringValue(strconv.Itoa(int(*response.ID))),
+		InterfaceID:   types.StringValue(response.InterfaceID),
 		IPv6: func() *ResponseApplianceGetNetworkApplianceVlanIpv6 {
 			if response.IPv6 != nil {
 				return &ResponseApplianceGetNetworkApplianceVlanIpv6{

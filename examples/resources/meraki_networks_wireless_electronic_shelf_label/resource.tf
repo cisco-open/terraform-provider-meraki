@@ -2,7 +2,8 @@
 resource "meraki_networks_wireless_electronic_shelf_label" "example" {
 
   enabled    = true
-  hostname   = "N_24329156"
+  hostname   = "example.com"
+  mode       = "high frequency"
   network_id = "string"
 }
 

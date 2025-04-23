@@ -237,8 +237,15 @@ resource "meraki_networks_wireless_ssids" "example" {
   radius_load_balancing_policy        = "Round robin"
   radius_override                     = false
   radius_proxy_enabled                = false
-  radius_server_attempts_limit        = 5
-  radius_server_timeout               = 5
+  radius_radsec = {
+
+    tls_tunnel = {
+
+      timeout = 600
+    }
+  }
+  radius_server_attempts_limit = 5
+  radius_server_timeout        = 5
   radius_servers = [{
 
     ca_certificate              = <<EOT
@@ -308,7 +315,7 @@ output "meraki_networks_wireless_ssids_example" {
 - `adult_content_filtering_enabled` (Boolean) Boolean indicating whether or not adult content will be blocked
 - `ap_tags_and_vlan_ids` (Attributes Set) The list of tags and VLAN IDs used for VLAN tagging. This param is only valid when the ipAssignmentMode is 'Bridge mode' or 'Layer 3 roaming' (see [below for nested schema](#nestedatt--ap_tags_and_vlan_ids))
 - `auth_mode` (String) The association control method for the SSID
-                                  Allowed values: [8021x-entra,8021x-google,8021x-localradius,8021x-meraki,8021x-nac,8021x-radius,ipsk-with-nac,ipsk-with-radius,ipsk-without-radius,open,open-enhanced,open-with-nac,open-with-radius,psk]
+                                  Allowed values: [8021x-entra,8021x-google,8021x-localradius,8021x-meraki,8021x-nac,8021x-radius,ipsk-with-nac,ipsk-with-radius,ipsk-with-radius-easy-psk,ipsk-without-radius,open,open-enhanced,open-with-nac,open-with-radius,psk]
 - `availability_tags` (Set of String) List of tags for this SSID. If availableOnAllAps is false, then the SSID is only broadcast by APs with tags matching any of the tags in this list
 - `available_on_all_aps` (Boolean) Whether all APs broadcast the SSID or if it's restricted to APs matching any availability tags
 - `band_selection` (String) The client-serving radio frequencies of this SSID in the default indoor RF profile
@@ -342,13 +349,14 @@ output "meraki_networks_wireless_ssids_example" {
 - `psk` (String) The passkey for the SSID. This param is only valid if the authMode is 'psk'
 - `radius_accounting_enabled` (Boolean) Whether or not RADIUS accounting is enabled
 - `radius_accounting_interim_interval` (Number) The interval (in seconds) in which accounting information is updated and sent to the RADIUS accounting server.
-- `radius_accounting_servers` (Attributes Set) List of RADIUS accounting 802.1X servers to be used for authentication (see [below for nested schema](#nestedatt--radius_accounting_servers))
+- `radius_accounting_servers` (Attributes List) List of RADIUS accounting 802.1X servers to be used for authentication (see [below for nested schema](#nestedatt--radius_accounting_servers))
 - `radius_attribute_for_group_policies` (String) RADIUS attribute used to look up group policies
                                   Allowed values: [Airespace-ACL-Name,Aruba-User-Role,Filter-Id,Reply-Message]
 - `radius_authentication_nas_id` (String) The template of the NAS identifier to be used for RADIUS authentication (ex. $NODE_MAC$:$VAP_NUM$).
 - `radius_called_station_id` (String) The template of the called station identifier to be used for RADIUS (ex. $NODE_MAC$:$VAP_NUM$).
 - `radius_coa_enabled` (Boolean) If true, Meraki devices will act as a RADIUS Dynamic Authorization Server and will respond to RADIUS Change-of-Authorization and Disconnect messages sent by the RADIUS server.
 - `radius_failover_policy` (String) Policy which determines how authentication requests should be handled in the event that all of the configured RADIUS servers are unreachable
+                                  Allowed values: [Allow access,Deny access]
 - `radius_fallback_enabled` (Boolean) Whether or not higher priority RADIUS servers should be retried after 60 seconds.
 - `radius_guest_vlan_enabled` (Boolean) Whether or not RADIUS Guest VLAN is enabled. This param is only valid if the authMode is 'open-with-radius' and addressing mode is not set to 'isolated' or 'nat' mode
 - `radius_guest_vlan_id` (Number) VLAN ID of the RADIUS Guest VLAN. This param is only valid if the authMode is 'open-with-radius' and addressing mode is not set to 'isolated' or 'nat' mode
@@ -356,9 +364,10 @@ output "meraki_networks_wireless_ssids_example" {
                                   Allowed values: [Round robin,Strict priority order]
 - `radius_override` (Boolean) If true, the RADIUS response can override VLAN tag. This is not valid when ipAssignmentMode is 'NAT mode'.
 - `radius_proxy_enabled` (Boolean) If true, Meraki devices will proxy RADIUS messages through the Meraki cloud to the configured RADIUS auth and accounting servers.
+- `radius_radsec` (Attributes) The current settings for RADIUS RADSec (see [below for nested schema](#nestedatt--radius_radsec))
 - `radius_server_attempts_limit` (Number) The maximum number of transmit attempts after which a RADIUS server is failed over (must be between 1-5).
 - `radius_server_timeout` (Number) The amount of time for which a RADIUS client waits for a reply from the RADIUS server (must be between 1-10 seconds).
-- `radius_servers` (Attributes Set) The RADIUS 802.1X servers to be used for authentication. This param is only valid if the authMode is 'open-with-radius', '8021x-radius' or 'ipsk-with-radius' (see [below for nested schema](#nestedatt--radius_servers))
+- `radius_servers` (Attributes List) The RADIUS 802.1X servers to be used for authentication. This param is only valid if the authMode is 'open-with-radius', '8021x-radius' or 'ipsk-with-radius' (see [below for nested schema](#nestedatt--radius_servers))
 - `radius_testing_enabled` (Boolean) If true, Meraki devices will periodically send Access-Request messages to configured RADIUS servers using identity 'meraki_8021x_test' to ensure that the RADIUS servers are reachable.
 - `secondary_concentrator_network_id` (String) The secondary concentrator to use when the ipAssignmentMode is 'VPN'. If configured, the APs will switch to using this concentrator if the primary concentrator is unreachable. This param is optional. ('disabled' represents no secondary concentrator.)
 - `speed_burst` (Attributes) The SpeedBurst setting for this SSID' (see [below for nested schema](#nestedatt--speed_burst))
@@ -600,6 +609,22 @@ Optional:
 - `port` (Number) Port on the RADIUS server that is listening for accounting messages
 - `radsec_enabled` (Boolean) Use RADSEC (TLS over TCP) to connect to this RADIUS accounting server. Requires radiusProxyEnabled.
 - `secret` (String) Shared key used to authenticate messages between the APs and RADIUS server
+
+
+<a id="nestedatt--radius_radsec"></a>
+### Nested Schema for `radius_radsec`
+
+Optional:
+
+- `tls_tunnel` (Attributes) RADSec TLS tunnel settings (see [below for nested schema](#nestedatt--radius_radsec--tls_tunnel))
+
+<a id="nestedatt--radius_radsec--tls_tunnel"></a>
+### Nested Schema for `radius_radsec.tls_tunnel`
+
+Optional:
+
+- `timeout` (Number) The interval (in seconds) to determines how long a TLS session can remain idle for a RADSec server before it is automatically terminated
+
 
 
 <a id="nestedatt--radius_servers"></a>

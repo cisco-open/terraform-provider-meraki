@@ -35,14 +35,24 @@ output "meraki_organizations_early_access_features_opt_ins_example" {
 ### Optional
 
 - `limit_scope_to_networks` (Set of String) Networks assigned to the Early Access Feature
-- `limit_scope_to_networks_rs` (Set of String) Networks assigned to the Early Access Feature
+- `opt_in_id` (String) optInId path parameter. Opt in ID
 - `short_name` (String) Name of Early Access Feature
 
 ### Read-Only
 
 - `created_at` (String) Time when Early Access Feature was created
 - `id` (String) ID of Early Access Feature
+- `limit_scope_to_networks_rs` (Attributes Set) Networks assigned to the Early Access Feature (see [below for nested schema](#nestedatt--limit_scope_to_networks_rs))
 - `opt_out_eligibility` (Attributes) Descriptions of the early access feature (see [below for nested schema](#nestedatt--opt_out_eligibility))
+
+<a id="nestedatt--limit_scope_to_networks_rs"></a>
+### Nested Schema for `limit_scope_to_networks_rs`
+
+Read-Only:
+
+- `id` (Boolean) id
+- `name` (Boolean) name
+
 
 <a id="nestedatt--opt_out_eligibility"></a>
 ### Nested Schema for `opt_out_eligibility`
@@ -66,5 +76,5 @@ Read-Only:
 Import is supported using the following syntax:
 
 ```shell
-terraform import meraki_organizations_early_access_features_opt_ins.example "organization_id,opt_in_id"
+terraform import meraki_organizations_early_access_features_opt_ins.example "opt_in_id,organization_id"
 ```

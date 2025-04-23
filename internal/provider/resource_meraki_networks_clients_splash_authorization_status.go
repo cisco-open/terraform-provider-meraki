@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -395,31 +395,38 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Create(ctx context.Co
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	vvClientID := data.ClientID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkClientSplashAuthorizationStatus(vvNetworkID, vvClientID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksClientsSplashAuthorizationStatus only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" && vvClientID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkClientSplashAuthorizationStatus(vvNetworkID, vvClientID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksClientsSplashAuthorizationStatus  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksClientsSplashAuthorizationStatus only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksClientsSplashAuthorizationStatus only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Networks.UpdateNetworkClientSplashAuthorizationStatus(vvNetworkID, vvClientID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkClientSplashAuthorizationStatus",
 				err.Error(),
@@ -432,9 +439,10 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Create(ctx context.Co
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Networks.GetNetworkClientSplashAuthorizationStatus(vvNetworkID, vvClientID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -449,11 +457,12 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Create(ctx context.Co
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseNetworksGetNetworkClientSplashAuthorizationStatusItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksClientsSplashAuthorizationStatusResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -653,8 +662,10 @@ type RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSsids9Rs struct 
 // FromBody
 func (r *NetworksClientsSplashAuthorizationStatusRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatus {
 	var requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs *merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs
+
 	if r.SSIDs != nil {
 		var requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs0 *merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs0
+
 		if r.SSIDs.Status0 != nil {
 			isAuthorized := func() *bool {
 				if !r.SSIDs.Status0.IsAuthorized.IsUnknown() && !r.SSIDs.Status0.IsAuthorized.IsNull() {
@@ -665,8 +676,10 @@ func (r *NetworksClientsSplashAuthorizationStatusRs) toSdkApiRequestUpdate(ctx c
 			requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs0 = &merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs0{
 				IsAuthorized: isAuthorized,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs1 *merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs1
+
 		if r.SSIDs.Status1 != nil {
 			isAuthorized := func() *bool {
 				if !r.SSIDs.Status1.IsAuthorized.IsUnknown() && !r.SSIDs.Status1.IsAuthorized.IsNull() {
@@ -677,8 +690,10 @@ func (r *NetworksClientsSplashAuthorizationStatusRs) toSdkApiRequestUpdate(ctx c
 			requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs1 = &merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs1{
 				IsAuthorized: isAuthorized,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs10 *merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs10
+
 		if r.SSIDs.Status10 != nil {
 			isAuthorized := func() *bool {
 				if !r.SSIDs.Status10.IsAuthorized.IsUnknown() && !r.SSIDs.Status10.IsAuthorized.IsNull() {
@@ -689,8 +704,10 @@ func (r *NetworksClientsSplashAuthorizationStatusRs) toSdkApiRequestUpdate(ctx c
 			requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs10 = &merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs10{
 				IsAuthorized: isAuthorized,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs11 *merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs11
+
 		if r.SSIDs.Status11 != nil {
 			isAuthorized := func() *bool {
 				if !r.SSIDs.Status11.IsAuthorized.IsUnknown() && !r.SSIDs.Status11.IsAuthorized.IsNull() {
@@ -701,8 +718,10 @@ func (r *NetworksClientsSplashAuthorizationStatusRs) toSdkApiRequestUpdate(ctx c
 			requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs11 = &merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs11{
 				IsAuthorized: isAuthorized,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs12 *merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs12
+
 		if r.SSIDs.Status12 != nil {
 			isAuthorized := func() *bool {
 				if !r.SSIDs.Status12.IsAuthorized.IsUnknown() && !r.SSIDs.Status12.IsAuthorized.IsNull() {
@@ -713,8 +732,10 @@ func (r *NetworksClientsSplashAuthorizationStatusRs) toSdkApiRequestUpdate(ctx c
 			requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs12 = &merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs12{
 				IsAuthorized: isAuthorized,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs13 *merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs13
+
 		if r.SSIDs.Status13 != nil {
 			isAuthorized := func() *bool {
 				if !r.SSIDs.Status13.IsAuthorized.IsUnknown() && !r.SSIDs.Status13.IsAuthorized.IsNull() {
@@ -725,8 +746,10 @@ func (r *NetworksClientsSplashAuthorizationStatusRs) toSdkApiRequestUpdate(ctx c
 			requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs13 = &merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs13{
 				IsAuthorized: isAuthorized,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs14 *merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs14
+
 		if r.SSIDs.Status14 != nil {
 			isAuthorized := func() *bool {
 				if !r.SSIDs.Status14.IsAuthorized.IsUnknown() && !r.SSIDs.Status14.IsAuthorized.IsNull() {
@@ -737,8 +760,10 @@ func (r *NetworksClientsSplashAuthorizationStatusRs) toSdkApiRequestUpdate(ctx c
 			requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs14 = &merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs14{
 				IsAuthorized: isAuthorized,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs2 *merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs2
+
 		if r.SSIDs.Status2 != nil {
 			isAuthorized := func() *bool {
 				if !r.SSIDs.Status2.IsAuthorized.IsUnknown() && !r.SSIDs.Status2.IsAuthorized.IsNull() {
@@ -749,8 +774,10 @@ func (r *NetworksClientsSplashAuthorizationStatusRs) toSdkApiRequestUpdate(ctx c
 			requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs2 = &merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs2{
 				IsAuthorized: isAuthorized,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs3 *merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs3
+
 		if r.SSIDs.Status3 != nil {
 			isAuthorized := func() *bool {
 				if !r.SSIDs.Status3.IsAuthorized.IsUnknown() && !r.SSIDs.Status3.IsAuthorized.IsNull() {
@@ -761,8 +788,10 @@ func (r *NetworksClientsSplashAuthorizationStatusRs) toSdkApiRequestUpdate(ctx c
 			requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs3 = &merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs3{
 				IsAuthorized: isAuthorized,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs4 *merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs4
+
 		if r.SSIDs.Status4 != nil {
 			isAuthorized := func() *bool {
 				if !r.SSIDs.Status4.IsAuthorized.IsUnknown() && !r.SSIDs.Status4.IsAuthorized.IsNull() {
@@ -773,8 +802,10 @@ func (r *NetworksClientsSplashAuthorizationStatusRs) toSdkApiRequestUpdate(ctx c
 			requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs4 = &merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs4{
 				IsAuthorized: isAuthorized,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs5 *merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs5
+
 		if r.SSIDs.Status5 != nil {
 			isAuthorized := func() *bool {
 				if !r.SSIDs.Status5.IsAuthorized.IsUnknown() && !r.SSIDs.Status5.IsAuthorized.IsNull() {
@@ -785,8 +816,10 @@ func (r *NetworksClientsSplashAuthorizationStatusRs) toSdkApiRequestUpdate(ctx c
 			requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs5 = &merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs5{
 				IsAuthorized: isAuthorized,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs6 *merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs6
+
 		if r.SSIDs.Status6 != nil {
 			isAuthorized := func() *bool {
 				if !r.SSIDs.Status6.IsAuthorized.IsUnknown() && !r.SSIDs.Status6.IsAuthorized.IsNull() {
@@ -797,8 +830,10 @@ func (r *NetworksClientsSplashAuthorizationStatusRs) toSdkApiRequestUpdate(ctx c
 			requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs6 = &merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs6{
 				IsAuthorized: isAuthorized,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs7 *merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs7
+
 		if r.SSIDs.Status7 != nil {
 			isAuthorized := func() *bool {
 				if !r.SSIDs.Status7.IsAuthorized.IsUnknown() && !r.SSIDs.Status7.IsAuthorized.IsNull() {
@@ -809,8 +844,10 @@ func (r *NetworksClientsSplashAuthorizationStatusRs) toSdkApiRequestUpdate(ctx c
 			requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs7 = &merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs7{
 				IsAuthorized: isAuthorized,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs8 *merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs8
+
 		if r.SSIDs.Status8 != nil {
 			isAuthorized := func() *bool {
 				if !r.SSIDs.Status8.IsAuthorized.IsUnknown() && !r.SSIDs.Status8.IsAuthorized.IsNull() {
@@ -821,8 +858,10 @@ func (r *NetworksClientsSplashAuthorizationStatusRs) toSdkApiRequestUpdate(ctx c
 			requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs8 = &merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs8{
 				IsAuthorized: isAuthorized,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs9 *merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs9
+
 		if r.SSIDs.Status9 != nil {
 			isAuthorized := func() *bool {
 				if !r.SSIDs.Status9.IsAuthorized.IsUnknown() && !r.SSIDs.Status9.IsAuthorized.IsNull() {
@@ -833,6 +872,7 @@ func (r *NetworksClientsSplashAuthorizationStatusRs) toSdkApiRequestUpdate(ctx c
 			requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs9 = &merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs9{
 				IsAuthorized: isAuthorized,
 			}
+			//[debug] Is Array: False
 		}
 		requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs = &merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs{
 			Status0:  requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs0,
@@ -851,6 +891,7 @@ func (r *NetworksClientsSplashAuthorizationStatusRs) toSdkApiRequestUpdate(ctx c
 			Status8:  requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs8,
 			Status9:  requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs9,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestNetworksUpdateNetworkClientSplashAuthorizationStatus{
 		SSIDs: requestNetworksUpdateNetworkClientSplashAuthorizationStatusSSIDs,

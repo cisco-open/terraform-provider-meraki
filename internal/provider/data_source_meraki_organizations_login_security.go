@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -114,7 +114,7 @@ func (d *OrganizationsLoginSecurityDataSource) Schema(_ context.Context, _ datas
 						Computed:            true,
 					},
 					"enforce_strong_passwords": schema.BoolAttribute{
-						MarkdownDescription: `Boolean indicating whether users will be forced to choose strong passwords for their accounts. Strong passwords are at least 8 characters that contain 3 of the following: number, uppercase letter, lowercase letter, and symbol`,
+						MarkdownDescription: `Deprecated. This will always be 'true'.`,
 						Computed:            true,
 					},
 					"enforce_two_factor_auth": schema.BoolAttribute{
@@ -129,6 +129,10 @@ func (d *OrganizationsLoginSecurityDataSource) Schema(_ context.Context, _ datas
 						MarkdownDescription: `List of acceptable IP ranges. Entries can be single IP addresses, IP address ranges, and CIDR subnets.`,
 						Computed:            true,
 						ElementType:         types.StringType,
+					},
+					"minimum_password_length": schema.Int64Attribute{
+						MarkdownDescription: `The minimum number of characters required in admins' passwords.`,
+						Computed:            true,
 					},
 					"num_different_passwords": schema.Int64Attribute{
 						MarkdownDescription: `Number of recent passwords that new password must be distinct from.`,
@@ -199,6 +203,7 @@ type ResponseOrganizationsGetOrganizationLoginSecurity struct {
 	EnforceTwoFactorAuth      types.Bool                                                          `tfsdk:"enforce_two_factor_auth"`
 	IDleTimeoutMinutes        types.Int64                                                         `tfsdk:"idle_timeout_minutes"`
 	LoginIPRanges             types.List                                                          `tfsdk:"login_ip_ranges"`
+	MinimumPasswordLength     types.Int64                                                         `tfsdk:"minimum_password_length"`
 	NumDifferentPasswords     types.Int64                                                         `tfsdk:"num_different_passwords"`
 	PasswordExpirationDays    types.Int64                                                         `tfsdk:"password_expiration_days"`
 }
@@ -291,6 +296,12 @@ func ResponseOrganizationsGetOrganizationLoginSecurityItemToBody(state Organizat
 			return types.Int64{}
 		}(),
 		LoginIPRanges: StringSliceToList(response.LoginIPRanges),
+		MinimumPasswordLength: func() types.Int64 {
+			if response.MinimumPasswordLength != nil {
+				return types.Int64Value(int64(*response.MinimumPasswordLength))
+			}
+			return types.Int64{}
+		}(),
 		NumDifferentPasswords: func() types.Int64 {
 			if response.NumDifferentPasswords != nil {
 				return types.Int64Value(int64(*response.NumDifferentPasswords))

@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -64,11 +64,11 @@ func (r *NetworksSwitchLinkAggregationsResource) Schema(_ context.Context, _ res
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				Computed: true,
+				MarkdownDescription: `The ID for the link aggregation.`,
+				Computed:            true,
 			},
 			"link_aggregation_id": schema.StringAttribute{
 				MarkdownDescription: `linkAggregationId path parameter. Link aggregation ID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -160,17 +160,51 @@ func (r *NetworksSwitchLinkAggregationsResource) Create(ctx context.Context, req
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
+	//Only Items
 
-	// Create
-	// Review This One
-	dataRequest := data.toSdkApiRequestCreate(ctx)
-	response, restyResp1, err := r.client.Switch.CreateNetworkSwitchLinkAggregation(vvNetworkID, dataRequest)
+	vvID := data.ID.ValueString()
 
-	if err != nil || response == nil {
+	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchLinkAggregations(vvNetworkID)
+	//Has Post
+	if err != nil {
 		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetNetworkSwitchLinkAggregations",
+					err.Error(),
+				)
+				return
+			}
+		}
+	}
+
+	var responseVerifyItem2 merakigosdk.ResponseItemSwitchGetNetworkSwitchLinkAggregations
+	if responseVerifyItem != nil {
+		responseStruct := structToMap(responseVerifyItem)
+		result := getDictResult(responseStruct, "ID", vvID, simpleCmp)
+		if result != nil {
+			err := mapToStruct(result.(map[string]interface{}), &responseVerifyItem2)
+			if err != nil {
+				resp.Diagnostics.AddError(
+					"Failure when executing mapToStruct in resource",
+					err.Error(),
+				)
+				return
+			}
+			data = ResponseSwitchGetNetworkSwitchLinkAggregationsItemToBodyRs(data, &responseVerifyItem2, false)
+			// Path params update assigned
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			return
+
+		}
+	}
+
+	dataRequest := data.toSdkApiRequestCreate(ctx)
+	response, restyResp2, err := r.client.Switch.CreateNetworkSwitchLinkAggregation(vvNetworkID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchLinkAggregation",
 				err.Error(),
@@ -183,10 +217,8 @@ func (r *NetworksSwitchLinkAggregationsResource) Create(ctx context.Context, req
 		)
 		return
 	}
-	vvID := response.ID
-	//Items
+
 	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchLinkAggregations(vvNetworkID)
-	// Has only items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -202,9 +234,9 @@ func (r *NetworksSwitchLinkAggregationsResource) Create(ctx context.Context, req
 		)
 		return
 	}
-	responseStruct2 := structToMap(responseGet)
-	result2 := getDictResult(responseStruct2, "ID", vvID, simpleCmp)
-	var responseVerifyItem2 merakigosdk.ResponseItemSwitchGetNetworkSwitchLinkAggregations
+
+	responseStruct := structToMap(responseGet)
+	result2 := getDictResult(responseStruct, "ID", vvID, simpleCmp)
 	if result2 != nil {
 		err := mapToStruct(result2.(map[string]interface{}), &responseVerifyItem2)
 		if err != nil {
@@ -225,6 +257,7 @@ func (r *NetworksSwitchLinkAggregationsResource) Create(ctx context.Context, req
 		)
 		return
 	}
+
 }
 
 func (r *NetworksSwitchLinkAggregationsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -249,14 +282,20 @@ func (r *NetworksSwitchLinkAggregationsResource) Read(ctx context.Context, req r
 	// Not has Item
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvID := data.ID.ValueString()
-	// id
 
 	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchLinkAggregations(vvNetworkID)
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
+			if restyResp1.StatusCode() == 404 {
+				resp.Diagnostics.AddWarning(
+					"Resource not found",
+					"Deleting resource",
+				)
+				resp.State.RemoveResource(ctx)
+				return
+			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchLinkAggregations",
 				err.Error(),
@@ -287,11 +326,10 @@ func (r *NetworksSwitchLinkAggregationsResource) Read(ctx context.Context, req r
 		resp.Diagnostics.Append(diags...)
 		return
 	} else {
-		resp.Diagnostics.AddWarning(
-			"Resource not found",
-			"Deleting resource",
+		resp.Diagnostics.AddError(
+			"Failure when executing GetNetworkSwitchLinkAggregations Result",
+			err.Error(),
 		)
-		resp.State.RemoveResource(ctx)
 		return
 	}
 }
@@ -326,8 +364,8 @@ func (r *NetworksSwitchLinkAggregationsResource) Update(ctx context.Context, req
 	// network_id
 	vvLinkAggregationID := data.ID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	_, restyResp2, err := r.client.Switch.UpdateNetworkSwitchLinkAggregation(vvNetworkID, vvLinkAggregationID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchLinkAggregation(vvNetworkID, vvLinkAggregationID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchLinkAggregation",
@@ -399,6 +437,7 @@ type ResponseItemSwitchGetNetworkSwitchLinkAggregationsSwitchProfilePorts struct
 // FromBody
 func (r *NetworksSwitchLinkAggregationsRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestSwitchCreateNetworkSwitchLinkAggregation {
 	var requestSwitchCreateNetworkSwitchLinkAggregationSwitchPorts []merakigosdk.RequestSwitchCreateNetworkSwitchLinkAggregationSwitchPorts
+
 	if r.SwitchPorts != nil {
 		for _, rItem1 := range *r.SwitchPorts {
 			portID := rItem1.PortID.ValueString()
@@ -407,9 +446,11 @@ func (r *NetworksSwitchLinkAggregationsRs) toSdkApiRequestCreate(ctx context.Con
 				PortID: portID,
 				Serial: serial,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var requestSwitchCreateNetworkSwitchLinkAggregationSwitchProfilePorts []merakigosdk.RequestSwitchCreateNetworkSwitchLinkAggregationSwitchProfilePorts
+
 	if r.SwitchProfilePorts != nil {
 		for _, rItem1 := range *r.SwitchProfilePorts {
 			portID := rItem1.PortID.ValueString()
@@ -418,6 +459,7 @@ func (r *NetworksSwitchLinkAggregationsRs) toSdkApiRequestCreate(ctx context.Con
 				PortID:  portID,
 				Profile: profile,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestSwitchCreateNetworkSwitchLinkAggregation{
@@ -438,6 +480,7 @@ func (r *NetworksSwitchLinkAggregationsRs) toSdkApiRequestCreate(ctx context.Con
 }
 func (r *NetworksSwitchLinkAggregationsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestSwitchUpdateNetworkSwitchLinkAggregation {
 	var requestSwitchUpdateNetworkSwitchLinkAggregationSwitchPorts []merakigosdk.RequestSwitchUpdateNetworkSwitchLinkAggregationSwitchPorts
+
 	if r.SwitchPorts != nil {
 		for _, rItem1 := range *r.SwitchPorts {
 			portID := rItem1.PortID.ValueString()
@@ -446,9 +489,11 @@ func (r *NetworksSwitchLinkAggregationsRs) toSdkApiRequestUpdate(ctx context.Con
 				PortID: portID,
 				Serial: serial,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var requestSwitchUpdateNetworkSwitchLinkAggregationSwitchProfilePorts []merakigosdk.RequestSwitchUpdateNetworkSwitchLinkAggregationSwitchProfilePorts
+
 	if r.SwitchProfilePorts != nil {
 		for _, rItem1 := range *r.SwitchProfilePorts {
 			portID := rItem1.PortID.ValueString()
@@ -457,6 +502,7 @@ func (r *NetworksSwitchLinkAggregationsRs) toSdkApiRequestUpdate(ctx context.Con
 				PortID:  portID,
 				Profile: profile,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestSwitchUpdateNetworkSwitchLinkAggregation{
@@ -491,10 +537,9 @@ func ResponseSwitchGetNetworkSwitchLinkAggregationsItemToBodyRs(state NetworksSw
 				}
 				return &result
 			}
-			return &[]ResponseItemSwitchGetNetworkSwitchLinkAggregationsSwitchPortsRs{}
+			return nil
 		}(),
 	}
-	itemState.NetworkID = state.NetworkID
 	state = itemState
 	return state
 }

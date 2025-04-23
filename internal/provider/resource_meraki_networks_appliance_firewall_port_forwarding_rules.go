@@ -19,9 +19,8 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
-	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -177,30 +176,37 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Create(ctx contex
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallPortForwardingRules(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceFirewallPortForwardingRules only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallPortForwardingRules(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceFirewallPortForwardingRules  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceFirewallPortForwardingRules only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceFirewallPortForwardingRules only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallPortForwardingRules(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallPortForwardingRules",
 				err.Error(),
@@ -213,9 +219,10 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Create(ctx contex
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallPortForwardingRules(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -230,11 +237,12 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Create(ctx contex
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseApplianceGetNetworkApplianceFirewallPortForwardingRulesItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksApplianceFirewallPortForwardingRulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -350,10 +358,11 @@ type ResponseApplianceGetNetworkApplianceFirewallPortForwardingRulesRulesRs stru
 // FromBody
 func (r *NetworksApplianceFirewallPortForwardingRulesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallPortForwardingRules {
 	var requestApplianceUpdateNetworkApplianceFirewallPortForwardingRulesRules []merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallPortForwardingRulesRules
+
 	if r.Rules != nil {
 		for _, rItem1 := range *r.Rules {
+
 			var allowedIPs []string = nil
-			//Hoola aqui
 			rItem1.AllowedIPs.ElementsAs(ctx, &allowedIPs, false)
 			lanIP := rItem1.LanIP.ValueString()
 			localPort := rItem1.LocalPort.ValueString()
@@ -370,10 +379,9 @@ func (r *NetworksApplianceFirewallPortForwardingRulesRs) toSdkApiRequestUpdate(c
 				PublicPort: publicPort,
 				Uplink:     uplink,
 			})
+			//[debug] Is Array: True
 		}
 	}
-	log.Printf("[DEBUG] RULES: %v", r.Rules)
-	log.Printf("[DEBUG] RULES: %t", len(requestApplianceUpdateNetworkApplianceFirewallPortForwardingRulesRules) > 0 && r.Rules != nil)
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallPortForwardingRules{
 		Rules: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallPortForwardingRulesRules {
 			if len(requestApplianceUpdateNetworkApplianceFirewallPortForwardingRulesRules) > 0 || r.Rules != nil {

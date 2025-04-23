@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -121,7 +121,7 @@ func (r *NetworksSwitchStacksRemoveResource) Schema(_ context.Context, _ resourc
 						MarkdownDescription: `Name of the Switch stack`,
 						Computed:            true,
 					},
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `Serials of the switches in the switch stack`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -167,7 +167,6 @@ func (r *NetworksSwitchStacksRemoveResource) Create(ctx context.Context, req res
 	vvSwitchStackID := data.SwitchStackID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Switch.RemoveNetworkSwitchStack(vvNetworkID, vvSwitchStackID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -184,7 +183,6 @@ func (r *NetworksSwitchStacksRemoveResource) Create(ctx context.Context, req res
 	}
 	//Item
 	data = ResponseSwitchRemoveNetworkSwitchStackItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -215,7 +213,7 @@ type ResponseSwitchRemoveNetworkSwitchStack struct {
 	IsMonitorOnly types.Bool                                       `tfsdk:"is_monitor_only"`
 	Members       *[]ResponseSwitchRemoveNetworkSwitchStackMembers `tfsdk:"members"`
 	Name          types.String                                     `tfsdk:"name"`
-	Serials       types.Set                                        `tfsdk:"serials"`
+	Serials       types.List                                       `tfsdk:"serials"`
 }
 
 type ResponseSwitchRemoveNetworkSwitchStackMembers struct {
@@ -273,7 +271,7 @@ func ResponseSwitchRemoveNetworkSwitchStackItemToBody(state NetworksSwitchStacks
 			return nil
 		}(),
 		Name:    types.StringValue(response.Name),
-		Serials: StringSliceToSet(response.Serials),
+		Serials: StringSliceToList(response.Serials),
 	}
 	state.Item = &itemState
 	return state

@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -200,7 +200,6 @@ func (r *OrganizationsCloneResource) Create(ctx context.Context, req resource.Cr
 	vvOrganizationID := data.OrganizationID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Organizations.CloneOrganization(vvOrganizationID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -217,7 +216,6 @@ func (r *OrganizationsCloneResource) Create(ctx context.Context, req resource.Cr
 	}
 	//Item
 	data = ResponseOrganizationsCloneOrganizationItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }

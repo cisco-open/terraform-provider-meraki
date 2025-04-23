@@ -10,6 +10,8 @@ description: |-
 
 
 
+
+
 ~>Warning: This resource does not represent a real-world entity in Meraki Dashboard, therefore changing or deleting this resource on its own has no immediate effect. Instead, it is a task part of a Meraki Dashboard workflow. It is executed in Meraki without any additional verification. It does not check if it was executed before or if a similar configuration or action 
 already existed previously.
 
@@ -61,7 +63,7 @@ Optional:
 Optional:
 
 - `floor_plan_id` (String) The ID of the floor plan to run auto locate for
-- `refresh` (Set of String) The types of location data that should be refreshed for this job. The list must either contain both 'gnss' and 'ranging' or be empty, as we currently only support refreshing both 'gnss' and 'ranging', or neither.
+- `refresh` (List of String) The types of location data that should be refreshed for this job. The list must either contain both 'gnss' and 'ranging' or be empty, as we currently only support refreshing both 'gnss' and 'ranging', or neither.
 - `scheduled_at` (String) Timestamp in ISO8601 format which indicates when the auto locate job should be run. If omitted, the auto locate job will start immediately.
 
 
@@ -102,7 +104,7 @@ Read-Only:
 Read-Only:
 
 - `source` (String) The step of the auto locate process when the error occurred. Possible values: 'gnss', 'ranging', 'positioning'
-- `type` (String) The type of error that occurred. Possible values: 'failure', 'no neighbors', 'missing anchors', 'wrong anchors', 'calculation failure', 'scheduling failure'
+- `type` (String) The type of error that occurred. Possible values: 'failure', 'no neighbors', 'missing anchors', 'wrong anchors', 'missing ranging data', 'calculation failure', 'scheduling failure'
 
 
 <a id="nestedatt--item--jobs--gnss"></a>

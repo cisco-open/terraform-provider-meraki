@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -162,12 +162,14 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Create(ctx context.C
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
+	//Has Item and has items and post
+
 	vvPrefix := data.Prefix.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkAppliancePrefixesDelegatedStatics(vvNetworkID)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -179,6 +181,7 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Create(ctx context.C
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Prefix", vvPrefix, simpleCmp)
@@ -193,6 +196,7 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Create(ctx context.C
 				return
 			}
 			r.client.Appliance.UpdateNetworkAppliancePrefixesDelegatedStatic(vvNetworkID, vvStaticDelegatedPrefixID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Appliance.GetNetworkAppliancePrefixesDelegatedStatic(vvNetworkID, vvStaticDelegatedPrefixID)
 			if responseVerifyItem2 != nil {
 				data = ResponseApplianceGetNetworkAppliancePrefixesDelegatedStaticItemToBodyRs(data, responseVerifyItem2, false)
@@ -202,11 +206,11 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Create(ctx context.C
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	restyResp2, err := r.client.Appliance.CreateNetworkAppliancePrefixesDelegatedStatic(vvNetworkID, dataRequest)
-
 	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkAppliancePrefixesDelegatedStatic",
 				err.Error(),
@@ -219,9 +223,8 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Create(ctx context.C
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Appliance.GetNetworkAppliancePrefixesDelegatedStatics(vvNetworkID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -237,15 +240,16 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Create(ctx context.C
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Prefix", vvPrefix, simpleCmp)
 	if result != nil {
 		result2 := result.(map[string]interface{})
-		vvStaticDelegatedPrefixID, ok := result2["Prefix"].(string)
+		vvStaticDelegatedPrefixID, ok := result2["StaticDelegatedPrefixID"].(string)
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter StaticDelegatedPrefixID",
-				"Error",
+				"Fail Parsing StaticDelegatedPrefixID",
 			)
 			return
 		}
@@ -275,6 +279,7 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Create(ctx context.C
 		)
 		return
 	}
+
 }
 
 func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -434,15 +439,17 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsRs) toSdkApiRequestCreate(ctx 
 		description = &emptyString
 	}
 	var requestApplianceCreateNetworkAppliancePrefixesDelegatedStaticOrigin *merakigosdk.RequestApplianceCreateNetworkAppliancePrefixesDelegatedStaticOrigin
+
 	if r.Origin != nil {
+
 		var interfaces []string = nil
-		//Hoola aqui
 		r.Origin.Interfaces.ElementsAs(ctx, &interfaces, false)
 		typeR := r.Origin.Type.ValueString()
 		requestApplianceCreateNetworkAppliancePrefixesDelegatedStaticOrigin = &merakigosdk.RequestApplianceCreateNetworkAppliancePrefixesDelegatedStaticOrigin{
 			Interfaces: interfaces,
 			Type:       typeR,
 		}
+		//[debug] Is Array: False
 	}
 	prefix := new(string)
 	if !r.Prefix.IsUnknown() && !r.Prefix.IsNull() {
@@ -466,15 +473,17 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsRs) toSdkApiRequestUpdate(ctx 
 		description = &emptyString
 	}
 	var requestApplianceUpdateNetworkAppliancePrefixesDelegatedStaticOrigin *merakigosdk.RequestApplianceUpdateNetworkAppliancePrefixesDelegatedStaticOrigin
+
 	if r.Origin != nil {
+
 		var interfaces []string = nil
-		//Hoola aqui
 		r.Origin.Interfaces.ElementsAs(ctx, &interfaces, false)
 		typeR := r.Origin.Type.ValueString()
 		requestApplianceUpdateNetworkAppliancePrefixesDelegatedStaticOrigin = &merakigosdk.RequestApplianceUpdateNetworkAppliancePrefixesDelegatedStaticOrigin{
 			Interfaces: interfaces,
 			Type:       typeR,
 		}
+		//[debug] Is Array: False
 	}
 	prefix := new(string)
 	if !r.Prefix.IsUnknown() && !r.Prefix.IsNull() {

@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -107,30 +107,37 @@ func (r *DevicesSwitchWarmSpareResource) Create(ctx context.Context, req resourc
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvSerial := data.Serial.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Switch.GetDeviceSwitchWarmSpare(vvSerial)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesSwitchWarmSpare only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvSerial != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Switch.GetDeviceSwitchWarmSpare(vvSerial)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesSwitchWarmSpare  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesSwitchWarmSpare only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesSwitchWarmSpare only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateDeviceSwitchWarmSpare(vvSerial, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceSwitchWarmSpare",
 				err.Error(),
@@ -143,9 +150,10 @@ func (r *DevicesSwitchWarmSpareResource) Create(ctx context.Context, req resourc
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Switch.GetDeviceSwitchWarmSpare(vvSerial)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -160,11 +168,12 @@ func (r *DevicesSwitchWarmSpareResource) Create(ctx context.Context, req resourc
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseSwitchGetDeviceSwitchWarmSpareItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *DevicesSwitchWarmSpareResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -218,7 +227,6 @@ func (r *DevicesSwitchWarmSpareResource) Read(ctx context.Context, req resource.
 	//update path params assigned
 	resp.Diagnostics.Append(diags...)
 }
-
 func (r *DevicesSwitchWarmSpareResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("serial"), req.ID)...)
 }

@@ -22,10 +22,22 @@ resource "meraki_networks_appliance_vpn_site_to_site_vpn" "example" {
   }]
   mode       = "spoke"
   network_id = "string"
+  subnet = {
+
+    nat = {
+
+      is_allowed = true
+    }
+  }
   subnets = [{
 
     local_subnet = "192.168.1.0/24"
-    use_vpn      = true
+    nat = {
+
+      enabled       = true
+      remote_subnet = "192.168.2.0/24"
+    }
+    use_vpn = true
   }]
 }
 
@@ -43,9 +55,10 @@ output "meraki_networks_appliance_vpn_site_to_site_vpn_example" {
 
 ### Optional
 
-- `hubs` (Attributes Set) The list of VPN hubs, in order of preference. (see [below for nested schema](#nestedatt--hubs))
+- `hubs` (Attributes List) The list of VPN hubs, in order of preference. (see [below for nested schema](#nestedatt--hubs))
 - `mode` (String) The site-to-site VPN mode.
                                   Allowed values: [hub,none,spoke]
+- `subnet` (Attributes) Configuration of subnet features (see [below for nested schema](#nestedatt--subnet))
 - `subnets` (Attributes Set) The list of subnets and their VPN presence. (see [below for nested schema](#nestedatt--subnets))
 
 <a id="nestedatt--hubs"></a>
@@ -57,13 +70,38 @@ Optional:
 - `use_default_route` (Boolean) Indicates whether default route traffic should be sent to this hub.
 
 
+<a id="nestedatt--subnet"></a>
+### Nested Schema for `subnet`
+
+Optional:
+
+- `nat` (Attributes) Configuration of NAT for subnets (see [below for nested schema](#nestedatt--subnet--nat))
+
+<a id="nestedatt--subnet--nat"></a>
+### Nested Schema for `subnet.nat`
+
+Optional:
+
+- `is_allowed` (Boolean) If enabled, VPN subnet translation can be used to translate any local subnets that are allowed to use the VPN into a new subnet with the same number of addresses.
+
+
+
 <a id="nestedatt--subnets"></a>
 ### Nested Schema for `subnets`
 
 Optional:
 
 - `local_subnet` (String) The CIDR notation subnet used within the VPN
+- `nat` (Attributes) Configuration of NAT for the subnet (see [below for nested schema](#nestedatt--subnets--nat))
 - `use_vpn` (Boolean) Indicates the presence of the subnet in the VPN
+
+<a id="nestedatt--subnets--nat"></a>
+### Nested Schema for `subnets.nat`
+
+Optional:
+
+- `enabled` (Boolean) Whether or not VPN subnet translation is enabled for the subnet
+- `remote_subnet` (String) The translated subnet to be used in the VPN
 
 ## Import
 

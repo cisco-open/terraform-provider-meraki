@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -246,12 +246,14 @@ func (r *OrganizationsCameraRolesResource) Create(ctx context.Context, req resou
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Camera.GetOrganizationCameraRoles(vvOrganizationID)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -263,13 +265,22 @@ func (r *OrganizationsCameraRolesResource) Create(ctx context.Context, req resou
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 		if result != nil {
 			result2 := result.(map[string]interface{})
-			vvRoleID := result2["ID"].(string)
+			vvRoleID, ok := result2["ID"].(string)
+			if !ok {
+				resp.Diagnostics.AddError(
+					"Failure when parsing path parameter RoleID",
+					"Fail Parsing RoleID",
+				)
+				return
+			}
 			r.client.Camera.UpdateOrganizationCameraRole(vvOrganizationID, vvRoleID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Camera.GetOrganizationCameraRole(vvOrganizationID, vvRoleID)
 			if responseVerifyItem2 != nil {
 				data = ResponseCameraGetOrganizationCameraRoleItemToBodyRs(data, responseVerifyItem2, false)
@@ -279,11 +290,11 @@ func (r *OrganizationsCameraRolesResource) Create(ctx context.Context, req resou
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	restyResp2, err := r.client.Camera.CreateOrganizationCameraRole(vvOrganizationID, dataRequest)
-
 	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationCameraRole",
 				err.Error(),
@@ -296,9 +307,8 @@ func (r *OrganizationsCameraRolesResource) Create(ctx context.Context, req resou
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Camera.GetOrganizationCameraRoles(vvOrganizationID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -314,15 +324,23 @@ func (r *OrganizationsCameraRolesResource) Create(ctx context.Context, req resou
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
 		result2 := result.(map[string]interface{})
-		vvRoleID := result2["ID"].(string)
+		vvRoleID, ok := result2["ID"].(string)
+		if !ok {
+			resp.Diagnostics.AddError(
+				"Failure when parsing path parameter RoleID",
+				"Fail Parsing RoleID",
+			)
+			return
+		}
 		responseVerifyItem2, restyRespGet, err := r.client.Camera.GetOrganizationCameraRole(vvOrganizationID, vvRoleID)
 		if responseVerifyItem2 != nil && err == nil {
-			data3 := ResponseCameraGetOrganizationCameraRoleItemToBodyRs(data, responseVerifyItem2, false)
-			resp.Diagnostics.Append(resp.State.Set(ctx, &data3)...)
+			data = ResponseCameraGetOrganizationCameraRoleItemToBodyRs(data, responseVerifyItem2, false)
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 			return
 		} else {
 			if restyRespGet != nil {
@@ -345,6 +363,7 @@ func (r *OrganizationsCameraRolesResource) Create(ctx context.Context, req resou
 		)
 		return
 	}
+
 }
 
 func (r *OrganizationsCameraRolesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -519,42 +538,48 @@ type ResponseCameraGetOrganizationCameraRoleAppliedOrgWideRs struct {
 func (r *OrganizationsCameraRolesRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestCameraCreateOrganizationCameraRole {
 	emptyString := ""
 	var requestCameraCreateOrganizationCameraRoleAppliedOnDevices []merakigosdk.RequestCameraCreateOrganizationCameraRoleAppliedOnDevices
+
 	if r.AppliedOnDevices != nil {
 		for _, rItem1 := range *r.AppliedOnDevices {
-			iD := rItem1.ID.ValueString()
+			id := rItem1.ID.ValueString()
 			inNetworksWithID := rItem1.InNetworksWithID.ValueString()
 			inNetworksWithTag := rItem1.InNetworksWithTag.ValueString()
 			permissionScopeID := rItem1.PermissionScopeID.ValueString()
 			tag := rItem1.Tag.ValueString()
 			requestCameraCreateOrganizationCameraRoleAppliedOnDevices = append(requestCameraCreateOrganizationCameraRoleAppliedOnDevices, merakigosdk.RequestCameraCreateOrganizationCameraRoleAppliedOnDevices{
-				ID:                iD,
+				ID:                id,
 				InNetworksWithID:  inNetworksWithID,
 				InNetworksWithTag: inNetworksWithTag,
 				PermissionScopeID: permissionScopeID,
 				Tag:               tag,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var requestCameraCreateOrganizationCameraRoleAppliedOnNetworks []merakigosdk.RequestCameraCreateOrganizationCameraRoleAppliedOnNetworks
+
 	if r.AppliedOnNetworks != nil {
 		for _, rItem1 := range *r.AppliedOnNetworks {
-			iD := rItem1.ID.ValueString()
+			id := rItem1.ID.ValueString()
 			permissionScopeID := rItem1.PermissionScopeID.ValueString()
 			tag := rItem1.Tag.ValueString()
 			requestCameraCreateOrganizationCameraRoleAppliedOnNetworks = append(requestCameraCreateOrganizationCameraRoleAppliedOnNetworks, merakigosdk.RequestCameraCreateOrganizationCameraRoleAppliedOnNetworks{
-				ID:                iD,
+				ID:                id,
 				PermissionScopeID: permissionScopeID,
 				Tag:               tag,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var requestCameraCreateOrganizationCameraRoleAppliedOrgWide []merakigosdk.RequestCameraCreateOrganizationCameraRoleAppliedOrgWide
+
 	if r.AppliedOrgWide != nil {
 		for _, rItem1 := range *r.AppliedOrgWide {
 			permissionScopeID := rItem1.PermissionScopeID.ValueString()
 			requestCameraCreateOrganizationCameraRoleAppliedOrgWide = append(requestCameraCreateOrganizationCameraRoleAppliedOrgWide, merakigosdk.RequestCameraCreateOrganizationCameraRoleAppliedOrgWide{
 				PermissionScopeID: permissionScopeID,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	name := new(string)
@@ -589,42 +614,48 @@ func (r *OrganizationsCameraRolesRs) toSdkApiRequestCreate(ctx context.Context) 
 func (r *OrganizationsCameraRolesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestCameraUpdateOrganizationCameraRole {
 	emptyString := ""
 	var requestCameraUpdateOrganizationCameraRoleAppliedOnDevices []merakigosdk.RequestCameraUpdateOrganizationCameraRoleAppliedOnDevices
+
 	if r.AppliedOnDevices != nil {
 		for _, rItem1 := range *r.AppliedOnDevices {
-			iD := rItem1.ID.ValueString()
+			id := rItem1.ID.ValueString()
 			inNetworksWithID := rItem1.InNetworksWithID.ValueString()
 			inNetworksWithTag := rItem1.InNetworksWithTag.ValueString()
 			permissionScopeID := rItem1.PermissionScopeID.ValueString()
 			tag := rItem1.Tag.ValueString()
 			requestCameraUpdateOrganizationCameraRoleAppliedOnDevices = append(requestCameraUpdateOrganizationCameraRoleAppliedOnDevices, merakigosdk.RequestCameraUpdateOrganizationCameraRoleAppliedOnDevices{
-				ID:                iD,
+				ID:                id,
 				InNetworksWithID:  inNetworksWithID,
 				InNetworksWithTag: inNetworksWithTag,
 				PermissionScopeID: permissionScopeID,
 				Tag:               tag,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var requestCameraUpdateOrganizationCameraRoleAppliedOnNetworks []merakigosdk.RequestCameraUpdateOrganizationCameraRoleAppliedOnNetworks
+
 	if r.AppliedOnNetworks != nil {
 		for _, rItem1 := range *r.AppliedOnNetworks {
-			iD := rItem1.ID.ValueString()
+			id := rItem1.ID.ValueString()
 			permissionScopeID := rItem1.PermissionScopeID.ValueString()
 			tag := rItem1.Tag.ValueString()
 			requestCameraUpdateOrganizationCameraRoleAppliedOnNetworks = append(requestCameraUpdateOrganizationCameraRoleAppliedOnNetworks, merakigosdk.RequestCameraUpdateOrganizationCameraRoleAppliedOnNetworks{
-				ID:                iD,
+				ID:                id,
 				PermissionScopeID: permissionScopeID,
 				Tag:               tag,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var requestCameraUpdateOrganizationCameraRoleAppliedOrgWide []merakigosdk.RequestCameraUpdateOrganizationCameraRoleAppliedOrgWide
+
 	if r.AppliedOrgWide != nil {
 		for _, rItem1 := range *r.AppliedOrgWide {
 			permissionScopeID := rItem1.PermissionScopeID.ValueString()
 			requestCameraUpdateOrganizationCameraRoleAppliedOrgWide = append(requestCameraUpdateOrganizationCameraRoleAppliedOrgWide, merakigosdk.RequestCameraUpdateOrganizationCameraRoleAppliedOrgWide{
 				PermissionScopeID: permissionScopeID,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	name := new(string)

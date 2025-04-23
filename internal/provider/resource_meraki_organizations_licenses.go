@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -152,7 +152,7 @@ func (r *OrganizationsLicensesResource) Schema(_ context.Context, _ resource.Sch
 				Computed:            true,
 			},
 			"state": schema.StringAttribute{
-				MarkdownDescription: `The state of the license. All queued licenses have a status of *recentlyQueued*.
+				MarkdownDescription: `The state of the license. All queued licenses have a status of **recentlyQueued**.
                                   Allowed values: [active,expired,expiring,recentlyQueued,unused,unusedActive]`,
 				Computed: true,
 			},
@@ -182,31 +182,38 @@ func (r *OrganizationsLicensesResource) Create(ctx context.Context, req resource
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
 	vvLicenseID := data.LicenseID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationLicense(vvOrganizationID, vvLicenseID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource OrganizationsLicenses only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvOrganizationID != "" && vvLicenseID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationLicense(vvOrganizationID, vvLicenseID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource OrganizationsLicenses  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource OrganizationsLicenses only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource OrganizationsLicenses only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationLicense(vvOrganizationID, vvLicenseID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationLicense",
 				err.Error(),
@@ -219,9 +226,10 @@ func (r *OrganizationsLicensesResource) Create(ctx context.Context, req resource
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationLicense(vvOrganizationID, vvLicenseID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -236,11 +244,12 @@ func (r *OrganizationsLicensesResource) Create(ctx context.Context, req resource
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseOrganizationsGetOrganizationLicenseItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *OrganizationsLicensesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {

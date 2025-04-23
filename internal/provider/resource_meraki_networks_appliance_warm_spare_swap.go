@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -144,7 +144,6 @@ func (r *NetworksApplianceWarmSpareSwapResource) Create(ctx context.Context, req
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	response, restyResp1, err := r.client.Appliance.SwapNetworkApplianceWarmSpare(vvNetworkID)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -161,7 +160,6 @@ func (r *NetworksApplianceWarmSpareSwapResource) Create(ctx context.Context, req
 	}
 	//Item
 	data = ResponseApplianceSwapNetworkApplianceWarmSpareItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -181,9 +179,8 @@ func (r *NetworksApplianceWarmSpareSwapResource) Delete(ctx context.Context, req
 
 // TF Structs Schema
 type NetworksApplianceWarmSpareSwap struct {
-	NetworkID  types.String                                     `tfsdk:"network_id"`
-	Item       *ResponseApplianceSwapNetworkApplianceWarmSpare  `tfsdk:"item"`
-	Parameters *RequestApplianceSwapNetworkApplianceWarmSpareRs `tfsdk:"parameters"`
+	NetworkID types.String                                    `tfsdk:"network_id"`
+	Item      *ResponseApplianceSwapNetworkApplianceWarmSpare `tfsdk:"item"`
 }
 
 type ResponseApplianceSwapNetworkApplianceWarmSpare struct {

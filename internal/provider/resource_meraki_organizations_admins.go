@@ -23,7 +23,7 @@ import (
 	"log"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -240,13 +240,14 @@ func (r *OrganizationsAdminsResource) Create(ctx context.Context, req resource.C
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
-	vvName := data.Email.ValueString()
-	//Items
+	//Only Items
+
+	vvEmail := data.Email.ValueString()
+
 	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationAdmins(vvOrganizationID, nil)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -258,44 +259,42 @@ func (r *OrganizationsAdminsResource) Create(ctx context.Context, req resource.C
 			}
 		}
 	}
-	//TODO HAS ONLY ITEMS
-	// Create
 
-	responseStruct := structToMap(*responseVerifyItem)
-	log.Printf("[DEBUG] responseStruct %v", responseStruct)
-	log.Printf("[DEBUG] vvName %v", vvName)
-	result := getDictResult(responseStruct, "Email", vvName, simpleCmp)
-	log.Printf("[DEBUG] result %v", result)
 	var responseVerifyItem2 merakigosdk.ResponseItemOrganizationsGetOrganizationAdmins
-	if result != nil {
-		err := mapToStruct(result.(map[string]interface{}), &responseVerifyItem2)
-		if err != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing mapToStruct in resource",
-				err.Error(),
-			)
+	if responseVerifyItem != nil {
+		responseStruct := structToMap(responseVerifyItem)
+		result := getDictResult(responseStruct, "Email", vvEmail, simpleCmp)
+		if result != nil {
+			err := mapToStruct(result.(map[string]interface{}), &responseVerifyItem2)
+			if err != nil {
+				resp.Diagnostics.AddError(
+					"Failure when executing mapToStruct in resource",
+					err.Error(),
+				)
+				return
+			}
+			r.client.Organizations.UpdateOrganizationAdmin(vvOrganizationID, responseVerifyItem2.ID, data.toSdkApiRequestUpdate(ctx))
+
+			responseVerifyItem2.Email = data.Email.ValueString()
+
+			responseVerifyItem2.AuthenticationMethod = data.AuthenticationMethod.ValueString()
+
+			data = ResponseOrganizationsGetOrganizationAdminsItemToBodyRs(data, &responseVerifyItem2, false)
+			log.Printf("[DEBUG] data2 %v", data)
+
+			// ['authenticationMethod', 'email']
+
+			diags := resp.State.Set(ctx, &data)
+			resp.Diagnostics.Append(diags...)
 			return
+
 		}
-		r.client.Organizations.UpdateOrganizationAdmin(vvOrganizationID, responseVerifyItem2.ID, data.toSdkApiRequestUpdate(ctx))
-
-		responseVerifyItem2.Email = data.Email.ValueString()
-
-		responseVerifyItem2.AuthenticationMethod = data.AuthenticationMethod.ValueString()
-
-		data = ResponseOrganizationsGetOrganizationAdminsItemToBodyRs(data, &responseVerifyItem2, false)
-		log.Printf("[DEBUG] data2 %v", data)
-
-		// ['authenticationMethod', 'email']
-
-		diags := resp.State.Set(ctx, &data)
-		resp.Diagnostics.Append(diags...)
-		return
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Organizations.CreateOrganizationAdmin(vvOrganizationID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationAdmin",
 				err.Error(),
@@ -308,9 +307,8 @@ func (r *OrganizationsAdminsResource) Create(ctx context.Context, req resource.C
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationAdmins(vvOrganizationID, nil)
-	// Has only items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -326,8 +324,9 @@ func (r *OrganizationsAdminsResource) Create(ctx context.Context, req resource.C
 		)
 		return
 	}
-	responseStruct2 := structToMap(responseGet)
-	result2 := getDictResult(responseStruct2, "Email", vvName, simpleCmp)
+
+	responseStruct := structToMap(responseGet)
+	result2 := getDictResult(responseStruct, "Email", vvEmail, simpleCmp)
 	if result2 != nil {
 		err := mapToStruct(result2.(map[string]interface{}), &responseVerifyItem2)
 		if err != nil {
@@ -343,11 +342,12 @@ func (r *OrganizationsAdminsResource) Create(ctx context.Context, req resource.C
 		return
 	} else {
 		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkSwitchLinkAggregations Result",
+			"Failure when executing GetOrganizationAdmins Result",
 			"Not Found",
 		)
 		return
 	}
+
 }
 
 func (r *OrganizationsAdminsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -412,7 +412,7 @@ func (r *OrganizationsAdminsResource) Read(ctx context.Context, req resource.Rea
 	} else {
 		resp.Diagnostics.AddError(
 			"Failure when executing GetOrganizationAdmins Result",
-			"Not found",
+			err.Error(),
 		)
 		return
 	}
@@ -448,7 +448,6 @@ func (r *OrganizationsAdminsResource) Update(ctx context.Context, req resource.U
 	// organization_id
 	vvAdminID := data.ID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationAdmin(vvOrganizationID, vvAdminID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
@@ -549,14 +548,16 @@ func (r *OrganizationsAdminsRs) toSdkApiRequestCreate(ctx context.Context) *mera
 		name = &emptyString
 	}
 	var requestOrganizationsCreateOrganizationAdminNetworks []merakigosdk.RequestOrganizationsCreateOrganizationAdminNetworks
+
 	if r.Networks != nil {
 		for _, rItem1 := range *r.Networks {
 			access := rItem1.Access.ValueString()
-			iD := rItem1.ID.ValueString()
+			id := rItem1.ID.ValueString()
 			requestOrganizationsCreateOrganizationAdminNetworks = append(requestOrganizationsCreateOrganizationAdminNetworks, merakigosdk.RequestOrganizationsCreateOrganizationAdminNetworks{
 				Access: access,
-				ID:     iD,
+				ID:     id,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	orgAccess := new(string)
@@ -566,6 +567,7 @@ func (r *OrganizationsAdminsRs) toSdkApiRequestCreate(ctx context.Context) *mera
 		orgAccess = &emptyString
 	}
 	var requestOrganizationsCreateOrganizationAdminTags []merakigosdk.RequestOrganizationsCreateOrganizationAdminTags
+
 	if r.Tags != nil {
 		for _, rItem1 := range *r.Tags {
 			access := rItem1.Access.ValueString()
@@ -574,6 +576,7 @@ func (r *OrganizationsAdminsRs) toSdkApiRequestCreate(ctx context.Context) *mera
 				Access: access,
 				Tag:    tag,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestOrganizationsCreateOrganizationAdmin{
@@ -605,14 +608,16 @@ func (r *OrganizationsAdminsRs) toSdkApiRequestUpdate(ctx context.Context) *mera
 		name = &emptyString
 	}
 	var requestOrganizationsUpdateOrganizationAdminNetworks []merakigosdk.RequestOrganizationsUpdateOrganizationAdminNetworks
+
 	if r.Networks != nil {
 		for _, rItem1 := range *r.Networks {
 			access := rItem1.Access.ValueString()
-			iD := rItem1.ID.ValueString()
+			id := rItem1.ID.ValueString()
 			requestOrganizationsUpdateOrganizationAdminNetworks = append(requestOrganizationsUpdateOrganizationAdminNetworks, merakigosdk.RequestOrganizationsUpdateOrganizationAdminNetworks{
 				Access: access,
-				ID:     iD,
+				ID:     id,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	orgAccess := new(string)
@@ -622,6 +627,7 @@ func (r *OrganizationsAdminsRs) toSdkApiRequestUpdate(ctx context.Context) *mera
 		orgAccess = &emptyString
 	}
 	var requestOrganizationsUpdateOrganizationAdminTags []merakigosdk.RequestOrganizationsUpdateOrganizationAdminTags
+
 	if r.Tags != nil {
 		for _, rItem1 := range *r.Tags {
 			access := rItem1.Access.ValueString()
@@ -630,6 +636,7 @@ func (r *OrganizationsAdminsRs) toSdkApiRequestUpdate(ctx context.Context) *mera
 				Access: access,
 				Tag:    tag,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestOrganizationsUpdateOrganizationAdmin{

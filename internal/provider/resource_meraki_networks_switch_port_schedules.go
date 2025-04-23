@@ -21,7 +21,7 @@ import (
 	"context"
 	"regexp"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -72,7 +72,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 				},
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: `The name for your port schedule. Required`,
+				MarkdownDescription: `Switch port schedule name`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -80,23 +80,20 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 				},
 			},
 			"network_id": schema.StringAttribute{
-				MarkdownDescription: `networkId path parameter. Network ID`,
+				MarkdownDescription: `Network ID`,
 				Required:            true,
 			},
 			"port_schedule": schema.SingleNestedAttribute{
-				MarkdownDescription: `    The schedule for switch port scheduling. Schedules are applied to days of the week.
-    When it's empty, default schedule with all days of a week are configured.
-    Any unspecified day in the schedule is added as a default schedule configuration of the day.
-`,
-				Computed: true,
-				Optional: true,
+				MarkdownDescription: `Port schedule`,
+				Computed:            true,
+				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
 				Attributes: map[string]schema.Attribute{
 
 					"friday": schema.SingleNestedAttribute{
-						MarkdownDescription: `The schedule object for Friday.`,
+						MarkdownDescription: `Friday schedule`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
@@ -105,7 +102,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 						Attributes: map[string]schema.Attribute{
 
 							"active": schema.BoolAttribute{
-								MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+								MarkdownDescription: `Whether the schedule is active or inactive`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
@@ -113,7 +110,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								},
 							},
 							"from": schema.StringAttribute{
-								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+								MarkdownDescription: `The time, from '00:00' to '24:00'`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
@@ -124,7 +121,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								},
 							},
 							"to": schema.StringAttribute{
-								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+								MarkdownDescription: `The time, from '00:00' to '24:00'`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
@@ -137,7 +134,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 						},
 					},
 					"monday": schema.SingleNestedAttribute{
-						MarkdownDescription: `The schedule object for Monday.`,
+						MarkdownDescription: `Monday schedule`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
@@ -146,7 +143,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 						Attributes: map[string]schema.Attribute{
 
 							"active": schema.BoolAttribute{
-								MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+								MarkdownDescription: `Whether the schedule is active or inactive`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
@@ -154,7 +151,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								},
 							},
 							"from": schema.StringAttribute{
-								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+								MarkdownDescription: `The time, from '00:00' to '24:00'`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
@@ -165,7 +162,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								},
 							},
 							"to": schema.StringAttribute{
-								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+								MarkdownDescription: `The time, from '00:00' to '24:00'`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
@@ -178,7 +175,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 						},
 					},
 					"saturday": schema.SingleNestedAttribute{
-						MarkdownDescription: `The schedule object for Saturday.`,
+						MarkdownDescription: `Saturday schedule`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
@@ -187,7 +184,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 						Attributes: map[string]schema.Attribute{
 
 							"active": schema.BoolAttribute{
-								MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+								MarkdownDescription: `Whether the schedule is active or inactive`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
@@ -195,7 +192,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								},
 							},
 							"from": schema.StringAttribute{
-								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+								MarkdownDescription: `The time, from '00:00' to '24:00'`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
@@ -206,7 +203,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								},
 							},
 							"to": schema.StringAttribute{
-								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+								MarkdownDescription: `The time, from '00:00' to '24:00'`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
@@ -219,7 +216,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 						},
 					},
 					"sunday": schema.SingleNestedAttribute{
-						MarkdownDescription: `The schedule object for Sunday.`,
+						MarkdownDescription: `Sunday schedule`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
@@ -228,7 +225,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 						Attributes: map[string]schema.Attribute{
 
 							"active": schema.BoolAttribute{
-								MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+								MarkdownDescription: `Whether the schedule is active or inactive`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
@@ -236,7 +233,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								},
 							},
 							"from": schema.StringAttribute{
-								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+								MarkdownDescription: `The time, from '00:00' to '24:00'`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
@@ -247,7 +244,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								},
 							},
 							"to": schema.StringAttribute{
-								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+								MarkdownDescription: `The time, from '00:00' to '24:00'`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
@@ -260,7 +257,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 						},
 					},
 					"thursday": schema.SingleNestedAttribute{
-						MarkdownDescription: `The schedule object for Thursday.`,
+						MarkdownDescription: `Thursday schedule`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
@@ -269,7 +266,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 						Attributes: map[string]schema.Attribute{
 
 							"active": schema.BoolAttribute{
-								MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+								MarkdownDescription: `Whether the schedule is active or inactive`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
@@ -277,7 +274,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								},
 							},
 							"from": schema.StringAttribute{
-								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+								MarkdownDescription: `The time, from '00:00' to '24:00'`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
@@ -288,7 +285,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								},
 							},
 							"to": schema.StringAttribute{
-								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+								MarkdownDescription: `The time, from '00:00' to '24:00'`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
@@ -301,7 +298,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 						},
 					},
 					"tuesday": schema.SingleNestedAttribute{
-						MarkdownDescription: `The schedule object for Tuesday.`,
+						MarkdownDescription: `Tuesday schedule`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
@@ -310,7 +307,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 						Attributes: map[string]schema.Attribute{
 
 							"active": schema.BoolAttribute{
-								MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+								MarkdownDescription: `Whether the schedule is active or inactive`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
@@ -318,7 +315,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								},
 							},
 							"from": schema.StringAttribute{
-								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+								MarkdownDescription: `The time, from '00:00' to '24:00'`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
@@ -329,7 +326,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								},
 							},
 							"to": schema.StringAttribute{
-								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+								MarkdownDescription: `The time, from '00:00' to '24:00'`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
@@ -342,7 +339,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 						},
 					},
 					"wednesday": schema.SingleNestedAttribute{
-						MarkdownDescription: `The schedule object for Wednesday.`,
+						MarkdownDescription: `Wednesday schedule`,
 						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
@@ -351,7 +348,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 						Attributes: map[string]schema.Attribute{
 
 							"active": schema.BoolAttribute{
-								MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
+								MarkdownDescription: `Whether the schedule is active or inactive`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
@@ -359,7 +356,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								},
 							},
 							"from": schema.StringAttribute{
-								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
+								MarkdownDescription: `The time, from '00:00' to '24:00'`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
@@ -370,7 +367,7 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 								},
 							},
 							"to": schema.StringAttribute{
-								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
+								MarkdownDescription: `The time, from '00:00' to '24:00'`,
 								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
@@ -386,7 +383,6 @@ func (r *NetworksSwitchPortSchedulesResource) Schema(_ context.Context, _ resour
 			},
 			"port_schedule_id": schema.StringAttribute{
 				MarkdownDescription: `portScheduleId path parameter. Port schedule ID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -565,9 +561,7 @@ func (r *NetworksSwitchPortSchedulesResource) Read(ctx context.Context, req reso
 	// Not has Item
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvName := data.Name.ValueString()
-	// name
 
 	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchPortSchedules(vvNetworkID)
 
@@ -628,11 +622,10 @@ func (r *NetworksSwitchPortSchedulesResource) Update(ctx context.Context, req re
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvPortScheduleID := data.PortScheduleID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	_, restyResp2, err := r.client.Switch.UpdateNetworkSwitchPortSchedule(vvNetworkID, vvPortScheduleID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchPortSchedule(vvNetworkID, vvPortScheduleID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchPortSchedule",
@@ -753,8 +746,10 @@ func (r *NetworksSwitchPortSchedulesRs) toSdkApiRequestCreate(ctx context.Contex
 		name = &emptyString
 	}
 	var requestSwitchCreateNetworkSwitchPortSchedulePortSchedule *merakigosdk.RequestSwitchCreateNetworkSwitchPortSchedulePortSchedule
+
 	if r.PortSchedule != nil {
 		var requestSwitchCreateNetworkSwitchPortSchedulePortScheduleFriday *merakigosdk.RequestSwitchCreateNetworkSwitchPortSchedulePortScheduleFriday
+
 		if r.PortSchedule.Friday != nil {
 			active := func() *bool {
 				if !r.PortSchedule.Friday.Active.IsUnknown() && !r.PortSchedule.Friday.Active.IsNull() {
@@ -769,8 +764,10 @@ func (r *NetworksSwitchPortSchedulesRs) toSdkApiRequestCreate(ctx context.Contex
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestSwitchCreateNetworkSwitchPortSchedulePortScheduleMonday *merakigosdk.RequestSwitchCreateNetworkSwitchPortSchedulePortScheduleMonday
+
 		if r.PortSchedule.Monday != nil {
 			active := func() *bool {
 				if !r.PortSchedule.Monday.Active.IsUnknown() && !r.PortSchedule.Monday.Active.IsNull() {
@@ -785,8 +782,10 @@ func (r *NetworksSwitchPortSchedulesRs) toSdkApiRequestCreate(ctx context.Contex
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestSwitchCreateNetworkSwitchPortSchedulePortScheduleSaturday *merakigosdk.RequestSwitchCreateNetworkSwitchPortSchedulePortScheduleSaturday
+
 		if r.PortSchedule.Saturday != nil {
 			active := func() *bool {
 				if !r.PortSchedule.Saturday.Active.IsUnknown() && !r.PortSchedule.Saturday.Active.IsNull() {
@@ -801,8 +800,10 @@ func (r *NetworksSwitchPortSchedulesRs) toSdkApiRequestCreate(ctx context.Contex
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestSwitchCreateNetworkSwitchPortSchedulePortScheduleSunday *merakigosdk.RequestSwitchCreateNetworkSwitchPortSchedulePortScheduleSunday
+
 		if r.PortSchedule.Sunday != nil {
 			active := func() *bool {
 				if !r.PortSchedule.Sunday.Active.IsUnknown() && !r.PortSchedule.Sunday.Active.IsNull() {
@@ -817,8 +818,10 @@ func (r *NetworksSwitchPortSchedulesRs) toSdkApiRequestCreate(ctx context.Contex
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestSwitchCreateNetworkSwitchPortSchedulePortScheduleThursday *merakigosdk.RequestSwitchCreateNetworkSwitchPortSchedulePortScheduleThursday
+
 		if r.PortSchedule.Thursday != nil {
 			active := func() *bool {
 				if !r.PortSchedule.Thursday.Active.IsUnknown() && !r.PortSchedule.Thursday.Active.IsNull() {
@@ -833,8 +836,10 @@ func (r *NetworksSwitchPortSchedulesRs) toSdkApiRequestCreate(ctx context.Contex
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestSwitchCreateNetworkSwitchPortSchedulePortScheduleTuesday *merakigosdk.RequestSwitchCreateNetworkSwitchPortSchedulePortScheduleTuesday
+
 		if r.PortSchedule.Tuesday != nil {
 			active := func() *bool {
 				if !r.PortSchedule.Tuesday.Active.IsUnknown() && !r.PortSchedule.Tuesday.Active.IsNull() {
@@ -849,8 +854,10 @@ func (r *NetworksSwitchPortSchedulesRs) toSdkApiRequestCreate(ctx context.Contex
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestSwitchCreateNetworkSwitchPortSchedulePortScheduleWednesday *merakigosdk.RequestSwitchCreateNetworkSwitchPortSchedulePortScheduleWednesday
+
 		if r.PortSchedule.Wednesday != nil {
 			active := func() *bool {
 				if !r.PortSchedule.Wednesday.Active.IsUnknown() && !r.PortSchedule.Wednesday.Active.IsNull() {
@@ -865,6 +872,7 @@ func (r *NetworksSwitchPortSchedulesRs) toSdkApiRequestCreate(ctx context.Contex
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		requestSwitchCreateNetworkSwitchPortSchedulePortSchedule = &merakigosdk.RequestSwitchCreateNetworkSwitchPortSchedulePortSchedule{
 			Friday:    requestSwitchCreateNetworkSwitchPortSchedulePortScheduleFriday,
@@ -875,6 +883,7 @@ func (r *NetworksSwitchPortSchedulesRs) toSdkApiRequestCreate(ctx context.Contex
 			Tuesday:   requestSwitchCreateNetworkSwitchPortSchedulePortScheduleTuesday,
 			Wednesday: requestSwitchCreateNetworkSwitchPortSchedulePortScheduleWednesday,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestSwitchCreateNetworkSwitchPortSchedule{
 		Name:         *name,
@@ -891,8 +900,10 @@ func (r *NetworksSwitchPortSchedulesRs) toSdkApiRequestUpdate(ctx context.Contex
 		name = &emptyString
 	}
 	var requestSwitchUpdateNetworkSwitchPortSchedulePortSchedule *merakigosdk.RequestSwitchUpdateNetworkSwitchPortSchedulePortSchedule
+
 	if r.PortSchedule != nil {
 		var requestSwitchUpdateNetworkSwitchPortSchedulePortScheduleFriday *merakigosdk.RequestSwitchUpdateNetworkSwitchPortSchedulePortScheduleFriday
+
 		if r.PortSchedule.Friday != nil {
 			active := func() *bool {
 				if !r.PortSchedule.Friday.Active.IsUnknown() && !r.PortSchedule.Friday.Active.IsNull() {
@@ -907,8 +918,10 @@ func (r *NetworksSwitchPortSchedulesRs) toSdkApiRequestUpdate(ctx context.Contex
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestSwitchUpdateNetworkSwitchPortSchedulePortScheduleMonday *merakigosdk.RequestSwitchUpdateNetworkSwitchPortSchedulePortScheduleMonday
+
 		if r.PortSchedule.Monday != nil {
 			active := func() *bool {
 				if !r.PortSchedule.Monday.Active.IsUnknown() && !r.PortSchedule.Monday.Active.IsNull() {
@@ -923,8 +936,10 @@ func (r *NetworksSwitchPortSchedulesRs) toSdkApiRequestUpdate(ctx context.Contex
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestSwitchUpdateNetworkSwitchPortSchedulePortScheduleSaturday *merakigosdk.RequestSwitchUpdateNetworkSwitchPortSchedulePortScheduleSaturday
+
 		if r.PortSchedule.Saturday != nil {
 			active := func() *bool {
 				if !r.PortSchedule.Saturday.Active.IsUnknown() && !r.PortSchedule.Saturday.Active.IsNull() {
@@ -939,8 +954,10 @@ func (r *NetworksSwitchPortSchedulesRs) toSdkApiRequestUpdate(ctx context.Contex
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestSwitchUpdateNetworkSwitchPortSchedulePortScheduleSunday *merakigosdk.RequestSwitchUpdateNetworkSwitchPortSchedulePortScheduleSunday
+
 		if r.PortSchedule.Sunday != nil {
 			active := func() *bool {
 				if !r.PortSchedule.Sunday.Active.IsUnknown() && !r.PortSchedule.Sunday.Active.IsNull() {
@@ -955,8 +972,10 @@ func (r *NetworksSwitchPortSchedulesRs) toSdkApiRequestUpdate(ctx context.Contex
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestSwitchUpdateNetworkSwitchPortSchedulePortScheduleThursday *merakigosdk.RequestSwitchUpdateNetworkSwitchPortSchedulePortScheduleThursday
+
 		if r.PortSchedule.Thursday != nil {
 			active := func() *bool {
 				if !r.PortSchedule.Thursday.Active.IsUnknown() && !r.PortSchedule.Thursday.Active.IsNull() {
@@ -971,8 +990,10 @@ func (r *NetworksSwitchPortSchedulesRs) toSdkApiRequestUpdate(ctx context.Contex
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestSwitchUpdateNetworkSwitchPortSchedulePortScheduleTuesday *merakigosdk.RequestSwitchUpdateNetworkSwitchPortSchedulePortScheduleTuesday
+
 		if r.PortSchedule.Tuesday != nil {
 			active := func() *bool {
 				if !r.PortSchedule.Tuesday.Active.IsUnknown() && !r.PortSchedule.Tuesday.Active.IsNull() {
@@ -987,8 +1008,10 @@ func (r *NetworksSwitchPortSchedulesRs) toSdkApiRequestUpdate(ctx context.Contex
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestSwitchUpdateNetworkSwitchPortSchedulePortScheduleWednesday *merakigosdk.RequestSwitchUpdateNetworkSwitchPortSchedulePortScheduleWednesday
+
 		if r.PortSchedule.Wednesday != nil {
 			active := func() *bool {
 				if !r.PortSchedule.Wednesday.Active.IsUnknown() && !r.PortSchedule.Wednesday.Active.IsNull() {
@@ -1003,6 +1026,7 @@ func (r *NetworksSwitchPortSchedulesRs) toSdkApiRequestUpdate(ctx context.Contex
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		requestSwitchUpdateNetworkSwitchPortSchedulePortSchedule = &merakigosdk.RequestSwitchUpdateNetworkSwitchPortSchedulePortSchedule{
 			Friday:    requestSwitchUpdateNetworkSwitchPortSchedulePortScheduleFriday,
@@ -1013,6 +1037,7 @@ func (r *NetworksSwitchPortSchedulesRs) toSdkApiRequestUpdate(ctx context.Contex
 			Tuesday:   requestSwitchUpdateNetworkSwitchPortSchedulePortScheduleTuesday,
 			Wednesday: requestSwitchUpdateNetworkSwitchPortSchedulePortScheduleWednesday,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestSwitchUpdateNetworkSwitchPortSchedule{
 		Name:         *name,
@@ -1024,8 +1049,9 @@ func (r *NetworksSwitchPortSchedulesRs) toSdkApiRequestUpdate(ctx context.Contex
 // From gosdk to TF Structs Schema
 func ResponseSwitchGetNetworkSwitchPortSchedulesItemToBodyRs(state NetworksSwitchPortSchedulesRs, response *merakigosdk.ResponseItemSwitchGetNetworkSwitchPortSchedules, is_read bool) NetworksSwitchPortSchedulesRs {
 	itemState := NetworksSwitchPortSchedulesRs{
-		ID:   types.StringValue(response.ID),
-		Name: types.StringValue(response.Name),
+		ID:        types.StringValue(response.ID),
+		Name:      types.StringValue(response.Name),
+		NetworkID: types.StringValue(response.NetworkID),
 		PortSchedule: func() *ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleRs {
 			if response.PortSchedule != nil {
 				return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortScheduleRs{
@@ -1138,7 +1164,6 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemToBodyRs(state NetworksSwitc
 			}
 			return nil
 		}(),
-		NetworkID: state.NetworkID,
 	}
 	state = itemState
 	return state

@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -66,6 +66,10 @@ func (d *NetworksSwitchStacksRoutingInterfacesDataSource) Schema(_ context.Conte
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Optional:            true,
 			},
+			"protocol": schema.StringAttribute{
+				MarkdownDescription: `protocol query parameter. Optional parameter to filter L3 interfaces by protocol.`,
+				Optional:            true,
+			},
 			"switch_stack_id": schema.StringAttribute{
 				MarkdownDescription: `switchStackId path parameter. Switch stack ID`,
 				Optional:            true,
@@ -79,7 +83,7 @@ func (d *NetworksSwitchStacksRoutingInterfacesDataSource) Schema(_ context.Conte
 						Computed:            true,
 					},
 					"interface_id": schema.StringAttribute{
-						MarkdownDescription: `The id`,
+						MarkdownDescription: `The ID`,
 						Computed:            true,
 					},
 					"interface_ip": schema.StringAttribute{
@@ -123,7 +127,7 @@ func (d *NetworksSwitchStacksRoutingInterfacesDataSource) Schema(_ context.Conte
 						Attributes: map[string]schema.Attribute{
 
 							"area": schema.StringAttribute{
-								MarkdownDescription: `Area id`,
+								MarkdownDescription: `Area ID`,
 								Computed:            true,
 							},
 							"cost": schema.Int64Attribute{
@@ -142,7 +146,7 @@ func (d *NetworksSwitchStacksRoutingInterfacesDataSource) Schema(_ context.Conte
 						Attributes: map[string]schema.Attribute{
 
 							"area": schema.StringAttribute{
-								MarkdownDescription: `Area id`,
+								MarkdownDescription: `Area ID`,
 								Computed:            true,
 							},
 							"cost": schema.Int64Attribute{
@@ -160,15 +164,15 @@ func (d *NetworksSwitchStacksRoutingInterfacesDataSource) Schema(_ context.Conte
 						Computed:            true,
 					},
 					"uplink_v4": schema.BoolAttribute{
-						MarkdownDescription: `Whether this is the switch's IPv4 uplink`,
+						MarkdownDescription: `When true, this interface is used as static IPv4 uplink`,
 						Computed:            true,
 					},
 					"uplink_v6": schema.BoolAttribute{
-						MarkdownDescription: `Whether this is the switch's IPv6 uplink`,
+						MarkdownDescription: `When true, this interface is used as static IPv6 uplink`,
 						Computed:            true,
 					},
 					"vlan_id": schema.Int64Attribute{
-						MarkdownDescription: `VLAN id`,
+						MarkdownDescription: `VLAN ID`,
 						Computed:            true,
 					},
 				},
@@ -185,7 +189,7 @@ func (d *NetworksSwitchStacksRoutingInterfacesDataSource) Schema(_ context.Conte
 							Computed:            true,
 						},
 						"interface_id": schema.StringAttribute{
-							MarkdownDescription: `The id`,
+							MarkdownDescription: `The ID`,
 							Computed:            true,
 						},
 						"interface_ip": schema.StringAttribute{
@@ -229,7 +233,7 @@ func (d *NetworksSwitchStacksRoutingInterfacesDataSource) Schema(_ context.Conte
 							Attributes: map[string]schema.Attribute{
 
 								"area": schema.StringAttribute{
-									MarkdownDescription: `Area id`,
+									MarkdownDescription: `Area ID`,
 									Computed:            true,
 								},
 								"cost": schema.Int64Attribute{
@@ -248,7 +252,7 @@ func (d *NetworksSwitchStacksRoutingInterfacesDataSource) Schema(_ context.Conte
 							Attributes: map[string]schema.Attribute{
 
 								"area": schema.StringAttribute{
-									MarkdownDescription: `Area id`,
+									MarkdownDescription: `Area ID`,
 									Computed:            true,
 								},
 								"cost": schema.Int64Attribute{
@@ -266,15 +270,15 @@ func (d *NetworksSwitchStacksRoutingInterfacesDataSource) Schema(_ context.Conte
 							Computed:            true,
 						},
 						"uplink_v4": schema.BoolAttribute{
-							MarkdownDescription: `Whether this is the switch's IPv4 uplink`,
+							MarkdownDescription: `When true, this interface is used as static IPv4 uplink`,
 							Computed:            true,
 						},
 						"uplink_v6": schema.BoolAttribute{
-							MarkdownDescription: `Whether this is the switch's IPv6 uplink`,
+							MarkdownDescription: `When true, this interface is used as static IPv6 uplink`,
 							Computed:            true,
 						},
 						"vlan_id": schema.Int64Attribute{
-							MarkdownDescription: `VLAN id`,
+							MarkdownDescription: `VLAN ID`,
 							Computed:            true,
 						},
 					},
@@ -291,7 +295,7 @@ func (d *NetworksSwitchStacksRoutingInterfacesDataSource) Read(ctx context.Conte
 		return
 	}
 
-	method1 := []bool{!networksSwitchStacksRoutingInterfaces.NetworkID.IsNull(), !networksSwitchStacksRoutingInterfaces.SwitchStackID.IsNull()}
+	method1 := []bool{!networksSwitchStacksRoutingInterfaces.NetworkID.IsNull(), !networksSwitchStacksRoutingInterfaces.SwitchStackID.IsNull(), !networksSwitchStacksRoutingInterfaces.Protocol.IsNull()}
 	log.Printf("[DEBUG] Selecting method. Method 1 %v", method1)
 	method2 := []bool{!networksSwitchStacksRoutingInterfaces.NetworkID.IsNull(), !networksSwitchStacksRoutingInterfaces.SwitchStackID.IsNull(), !networksSwitchStacksRoutingInterfaces.InterfaceID.IsNull()}
 	log.Printf("[DEBUG] Selecting method. Method 2 %v", method2)
@@ -301,10 +305,13 @@ func (d *NetworksSwitchStacksRoutingInterfacesDataSource) Read(ctx context.Conte
 		log.Printf("[DEBUG] Selected method: GetNetworkSwitchStackRoutingInterfaces")
 		vvNetworkID := networksSwitchStacksRoutingInterfaces.NetworkID.ValueString()
 		vvSwitchStackID := networksSwitchStacksRoutingInterfaces.SwitchStackID.ValueString()
+		queryParams1 := merakigosdk.GetNetworkSwitchStackRoutingInterfacesQueryParams{}
+
+		queryParams1.Protocol = networksSwitchStacksRoutingInterfaces.Protocol.ValueString()
 
 		// has_unknown_response: None
 
-		response1, restyResp1, err := d.client.Switch.GetNetworkSwitchStackRoutingInterfaces(vvNetworkID, vvSwitchStackID)
+		response1, restyResp1, err := d.client.Switch.GetNetworkSwitchStackRoutingInterfaces(vvNetworkID, vvSwitchStackID, &queryParams1)
 
 		if err != nil || response1 == nil {
 			if restyResp1 != nil {
@@ -360,6 +367,7 @@ func (d *NetworksSwitchStacksRoutingInterfacesDataSource) Read(ctx context.Conte
 type NetworksSwitchStacksRoutingInterfaces struct {
 	NetworkID     types.String                                                `tfsdk:"network_id"`
 	SwitchStackID types.String                                                `tfsdk:"switch_stack_id"`
+	Protocol      types.String                                                `tfsdk:"protocol"`
 	InterfaceID   types.String                                                `tfsdk:"interface_id"`
 	Items         *[]ResponseItemSwitchGetNetworkSwitchStackRoutingInterfaces `tfsdk:"items"`
 	Item          *ResponseSwitchGetNetworkSwitchStackRoutingInterface        `tfsdk:"item"`

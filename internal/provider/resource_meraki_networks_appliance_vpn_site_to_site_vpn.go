@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -28,6 +28,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -114,6 +115,36 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Schema(_ context.Context, _ 
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
+			"subnet": schema.SingleNestedAttribute{
+				MarkdownDescription: `Configuration of subnet features`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
+				Attributes: map[string]schema.Attribute{
+
+					"nat": schema.SingleNestedAttribute{
+						MarkdownDescription: `Configuration of NAT for subnets`,
+						Computed:            true,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseStateForUnknown(),
+						},
+						Attributes: map[string]schema.Attribute{
+
+							"is_allowed": schema.BoolAttribute{
+								MarkdownDescription: `If enabled, VPN subnet translation can be used to translate any local subnets that are allowed to use the VPN into a new subnet with the same number of addresses.`,
+								Computed:            true,
+								Optional:            true,
+								PlanModifiers: []planmodifier.Bool{
+									boolplanmodifier.UseStateForUnknown(),
+								},
+							},
+						},
+					},
+				},
+			},
 			"subnets": schema.SetNestedAttribute{
 				MarkdownDescription: `The list of subnets and their VPN presence.`,
 				Computed:            true,
@@ -130,6 +161,33 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Schema(_ context.Context, _ 
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
+							},
+						},
+						"nat": schema.SingleNestedAttribute{
+							MarkdownDescription: `Configuration of NAT for the subnet`,
+							Computed:            true,
+							Optional:            true,
+							PlanModifiers: []planmodifier.Object{
+								objectplanmodifier.UseStateForUnknown(),
+							},
+							Attributes: map[string]schema.Attribute{
+
+								"enabled": schema.BoolAttribute{
+									MarkdownDescription: `Whether or not VPN subnet translation is enabled for the subnet`,
+									Computed:            true,
+									Optional:            true,
+									PlanModifiers: []planmodifier.Bool{
+										boolplanmodifier.UseStateForUnknown(),
+									},
+								},
+								"remote_subnet": schema.StringAttribute{
+									MarkdownDescription: `The translated subnet to be used in the VPN`,
+									Computed:            true,
+									Optional:            true,
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.UseStateForUnknown(),
+									},
+								},
 							},
 						},
 						"use_vpn": schema.BoolAttribute{
@@ -165,30 +223,37 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Create(ctx context.Context, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceVpnSiteToSiteVpn(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceVpnSiteToSiteVpn only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceVpnSiteToSiteVpn(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceVpnSiteToSiteVpn  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceVpnSiteToSiteVpn only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceVpnSiteToSiteVpn only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceVpnSiteToSiteVpn(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceVpnSiteToSiteVpn",
 				err.Error(),
@@ -201,9 +266,10 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Create(ctx context.Context, 
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceVpnSiteToSiteVpn(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -218,11 +284,12 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Create(ctx context.Context, 
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksApplianceVpnSiteToSiteVpnResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -324,6 +391,7 @@ type NetworksApplianceVpnSiteToSiteVpnRs struct {
 	NetworkID types.String                                                     `tfsdk:"network_id"`
 	Hubs      *[]ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnHubsRs    `tfsdk:"hubs"`
 	Mode      types.String                                                     `tfsdk:"mode"`
+	Subnet    *ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetRs    `tfsdk:"subnet"`
 	Subnets   *[]ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetsRs `tfsdk:"subnets"`
 }
 
@@ -332,15 +400,30 @@ type ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnHubsRs struct {
 	UseDefaultRoute types.Bool   `tfsdk:"use_default_route"`
 }
 
+type ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetRs struct {
+	Nat *ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetNatRs `tfsdk:"nat"`
+}
+
+type ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetNatRs struct {
+	IsAllowed types.Bool `tfsdk:"is_allowed"`
+}
+
 type ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetsRs struct {
-	LocalSubnet types.String `tfsdk:"local_subnet"`
-	UseVpn      types.Bool   `tfsdk:"use_vpn"`
+	LocalSubnet types.String                                                      `tfsdk:"local_subnet"`
+	Nat         *ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetsNatRs `tfsdk:"nat"`
+	UseVpn      types.Bool                                                        `tfsdk:"use_vpn"`
+}
+
+type ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetsNatRs struct {
+	Enabled      types.Bool   `tfsdk:"enabled"`
+	RemoteSubnet types.String `tfsdk:"remote_subnet"`
 }
 
 // FromBody
 func (r *NetworksApplianceVpnSiteToSiteVpnRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateNetworkApplianceVpnSiteToSiteVpn {
 	emptyString := ""
 	var requestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnHubs []merakigosdk.RequestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnHubs
+
 	if r.Hubs != nil {
 		for _, rItem1 := range *r.Hubs {
 			hubID := rItem1.HubID.ValueString()
@@ -354,6 +437,7 @@ func (r *NetworksApplianceVpnSiteToSiteVpnRs) toSdkApiRequestUpdate(ctx context.
 				HubID:           hubID,
 				UseDefaultRoute: useDefaultRoute,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	mode := new(string)
@@ -362,10 +446,49 @@ func (r *NetworksApplianceVpnSiteToSiteVpnRs) toSdkApiRequestUpdate(ctx context.
 	} else {
 		mode = &emptyString
 	}
+	var requestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnet *merakigosdk.RequestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnet
+
+	if r.Subnet != nil {
+		var requestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnetNat *merakigosdk.RequestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnetNat
+
+		if r.Subnet.Nat != nil {
+			isAllowed := func() *bool {
+				if !r.Subnet.Nat.IsAllowed.IsUnknown() && !r.Subnet.Nat.IsAllowed.IsNull() {
+					return r.Subnet.Nat.IsAllowed.ValueBoolPointer()
+				}
+				return nil
+			}()
+			requestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnetNat = &merakigosdk.RequestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnetNat{
+				IsAllowed: isAllowed,
+			}
+			//[debug] Is Array: False
+		}
+		requestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnet = &merakigosdk.RequestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnet{
+			Nat: requestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnetNat,
+		}
+		//[debug] Is Array: False
+	}
 	var requestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnets []merakigosdk.RequestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnets
+
 	if r.Subnets != nil {
 		for _, rItem1 := range *r.Subnets {
 			localSubnet := rItem1.LocalSubnet.ValueString()
+			var requestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnetsNat *merakigosdk.RequestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnetsNat
+
+			if rItem1.Nat != nil {
+				enabled := func() *bool {
+					if !rItem1.Nat.Enabled.IsUnknown() && !rItem1.Nat.Enabled.IsNull() {
+						return rItem1.Nat.Enabled.ValueBoolPointer()
+					}
+					return nil
+				}()
+				remoteSubnet := rItem1.Nat.RemoteSubnet.ValueString()
+				requestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnetsNat = &merakigosdk.RequestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnetsNat{
+					Enabled:      enabled,
+					RemoteSubnet: remoteSubnet,
+				}
+				//[debug] Is Array: False
+			}
 			useVpn := func() *bool {
 				if !rItem1.UseVpn.IsUnknown() && !rItem1.UseVpn.IsNull() {
 					return rItem1.UseVpn.ValueBoolPointer()
@@ -374,8 +497,10 @@ func (r *NetworksApplianceVpnSiteToSiteVpnRs) toSdkApiRequestUpdate(ctx context.
 			}()
 			requestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnets = append(requestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnets, merakigosdk.RequestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnets{
 				LocalSubnet: localSubnet,
+				Nat:         requestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnetsNat,
 				UseVpn:      useVpn,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceVpnSiteToSiteVpn{
@@ -385,7 +510,8 @@ func (r *NetworksApplianceVpnSiteToSiteVpnRs) toSdkApiRequestUpdate(ctx context.
 			}
 			return nil
 		}(),
-		Mode: *mode,
+		Mode:   *mode,
+		Subnet: requestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnet,
 		Subnets: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnets {
 			if len(requestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnets) > 0 {
 				return &requestApplianceUpdateNetworkApplianceVpnSiteToSiteVpnSubnets
@@ -418,12 +544,46 @@ func ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnItemToBodyRs(state Netw
 			return nil
 		}(),
 		Mode: types.StringValue(response.Mode),
+		Subnet: func() *ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetRs {
+			if response.Subnet != nil {
+				return &ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetRs{
+					Nat: func() *ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetNatRs {
+						if response.Subnet.Nat != nil {
+							return &ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetNatRs{
+								IsAllowed: func() types.Bool {
+									if response.Subnet.Nat.IsAllowed != nil {
+										return types.BoolValue(*response.Subnet.Nat.IsAllowed)
+									}
+									return types.Bool{}
+								}(),
+							}
+						}
+						return nil
+					}(),
+				}
+			}
+			return nil
+		}(),
 		Subnets: func() *[]ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetsRs {
 			if response.Subnets != nil {
 				result := make([]ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetsRs, len(*response.Subnets))
 				for i, subnets := range *response.Subnets {
 					result[i] = ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetsRs{
 						LocalSubnet: types.StringValue(subnets.LocalSubnet),
+						Nat: func() *ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetsNatRs {
+							if subnets.Nat != nil {
+								return &ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetsNatRs{
+									Enabled: func() types.Bool {
+										if subnets.Nat.Enabled != nil {
+											return types.BoolValue(*subnets.Nat.Enabled)
+										}
+										return types.Bool{}
+									}(),
+									RemoteSubnet: types.StringValue(subnets.Nat.RemoteSubnet),
+								}
+							}
+							return nil
+						}(),
 						UseVpn: func() types.Bool {
 							if subnets.UseVpn != nil {
 								return types.BoolValue(*subnets.UseVpn)

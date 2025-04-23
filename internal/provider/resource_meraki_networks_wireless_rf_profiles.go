@@ -22,7 +22,9 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	"log"
+
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -1576,7 +1578,7 @@ func (r *NetworksWirelessRfProfilesResource) Create(ctx context.Context, req res
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter RfProfileID",
-					"Fail Parsing RfProfileID",
+					"Error",
 				)
 				return
 			}
@@ -1713,7 +1715,7 @@ func (r *NetworksWirelessRfProfilesResource) Read(ctx context.Context, req resou
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessRfProfileItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -2070,6 +2072,7 @@ type RequestWirelessUpdateNetworkWirelessRfProfileFlexRadiosByModelRs struct {
 func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfile {
 	emptyString := ""
 	var requestWirelessCreateNetworkWirelessRfProfileApBandSettings *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfileApBandSettings
+
 	if r.ApBandSettings != nil {
 		bandOperationMode := r.ApBandSettings.BandOperationMode.ValueString()
 		bandSteeringEnabled := func() *bool {
@@ -2079,19 +2082,22 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 			return nil
 		}()
 		var requestWirelessCreateNetworkWirelessRfProfileApBandSettingsBands *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfileApBandSettingsBands
+
 		if r.ApBandSettings.Bands != nil {
+
 			var enabled []string = nil
-			//Hoola aqui
 			r.ApBandSettings.Bands.Enabled.ElementsAs(ctx, &enabled, false)
 			requestWirelessCreateNetworkWirelessRfProfileApBandSettingsBands = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfileApBandSettingsBands{
 				Enabled: enabled,
 			}
+			//[debug] Is Array: False
 		}
 		requestWirelessCreateNetworkWirelessRfProfileApBandSettings = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfileApBandSettings{
 			BandOperationMode:   bandOperationMode,
 			BandSteeringEnabled: bandSteeringEnabled,
 			Bands:               requestWirelessCreateNetworkWirelessRfProfileApBandSettingsBands,
 		}
+		//[debug] Is Array: False
 	}
 	bandSelectionType := new(string)
 	if !r.BandSelectionType.IsUnknown() && !r.BandSelectionType.IsNull() {
@@ -2106,6 +2112,7 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 		clientBalancingEnabled = nil
 	}
 	var requestWirelessCreateNetworkWirelessRfProfileFiveGhzSettings *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfileFiveGhzSettings
+
 	if r.FiveGhzSettings != nil {
 		channelWidth := r.FiveGhzSettings.ChannelWidth.ValueString()
 		maxPower := func() *int64 {
@@ -2132,8 +2139,8 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 			}
 			return nil
 		}()
-		var validAutoChannels *[]int = nil
-		//Hoola aqui
+
+		var validAutoChannels []int = nil
 		r.FiveGhzSettings.ValidAutoChannels.ElementsAs(ctx, &validAutoChannels, false)
 		requestWirelessCreateNetworkWirelessRfProfileFiveGhzSettings = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfileFiveGhzSettings{
 			ChannelWidth:      channelWidth,
@@ -2141,22 +2148,28 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 			MinBitrate:        int64ToIntPointer(minBitrate),
 			MinPower:          int64ToIntPointer(minPower),
 			Rxsop:             int64ToIntPointer(rxsop),
-			ValidAutoChannels: validAutoChannels,
+			ValidAutoChannels: &validAutoChannels,
 		}
+		//[debug] Is Array: False
 	}
 	var requestWirelessCreateNetworkWirelessRfProfileFlexRadios *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfileFlexRadios
+
 	if r.FlexRadios != nil {
+
+		log.Printf("[DEBUG] #TODO []RequestWirelessCreateNetworkWirelessRfProfileFlexRadiosByModel")
 		var requestWirelessCreateNetworkWirelessRfProfileFlexRadiosByModel []merakigosdk.RequestWirelessCreateNetworkWirelessRfProfileFlexRadiosByModel
+
 		if r.FlexRadios.ByModel != nil {
-			for _, rItem1 := range *r.FlexRadios.ByModel { //FlexRadios.ByModel// name: byModel
+			for _, rItem1 := range *r.FlexRadios.ByModel {
+
 				var bands []string = nil
-				//Hoola aqui
 				rItem1.Bands.ElementsAs(ctx, &bands, false)
 				model := rItem1.Model.ValueString()
 				requestWirelessCreateNetworkWirelessRfProfileFlexRadiosByModel = append(requestWirelessCreateNetworkWirelessRfProfileFlexRadiosByModel, merakigosdk.RequestWirelessCreateNetworkWirelessRfProfileFlexRadiosByModel{
 					Bands: bands,
 					Model: model,
 				})
+				//[debug] Is Array: True
 			}
 		}
 		requestWirelessCreateNetworkWirelessRfProfileFlexRadios = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfileFlexRadios{
@@ -2167,6 +2180,7 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 				return nil
 			}(),
 		}
+		//[debug] Is Array: False
 	}
 	minBitrateType := new(string)
 	if !r.MinBitrateType.IsUnknown() && !r.MinBitrateType.IsNull() {
@@ -2181,8 +2195,10 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 		name = &emptyString
 	}
 	var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings
+
 	if r.PerSSIDSettings != nil {
 		var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings0 *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings0
+
 		if r.PerSSIDSettings.Status0 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status0.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -2192,23 +2208,32 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 				return nil
 			}()
 			var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings0Bands *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings0Bands
+
 			if r.PerSSIDSettings.Status0.Bands != nil {
+
 				var enabled []string = nil
-				//Hoola aqui
 				r.PerSSIDSettings.Status0.Bands.Enabled.ElementsAs(ctx, &enabled, false)
 				requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings0Bands = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings0Bands{
 					Enabled: enabled,
 				}
+				//[debug] Is Array: False
 			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status0.MinBitrate.ValueInt64Pointer())
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status0.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status0.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status0.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
 			requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings0 = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings0{
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 				Bands:               requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings0Bands,
 				MinBitrate:          minBitrate,
 			}
+			//[debug] Is Array: False
 		}
 		var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings1 *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings1
+
 		if r.PerSSIDSettings.Status1 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status1.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -2218,23 +2243,32 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 				return nil
 			}()
 			var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings1Bands *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings1Bands
+
 			if r.PerSSIDSettings.Status1.Bands != nil {
+
 				var enabled []string = nil
-				//Hoola aqui
 				r.PerSSIDSettings.Status1.Bands.Enabled.ElementsAs(ctx, &enabled, false)
 				requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings1Bands = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings1Bands{
 					Enabled: enabled,
 				}
+				//[debug] Is Array: False
 			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status1.MinBitrate.ValueInt64Pointer())
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status1.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status1.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status1.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
 			requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings1 = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings1{
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 				Bands:               requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings1Bands,
 				MinBitrate:          minBitrate,
 			}
+			//[debug] Is Array: False
 		}
 		var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings10 *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings10
+
 		if r.PerSSIDSettings.Status10 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status10.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -2244,23 +2278,32 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 				return nil
 			}()
 			var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings10Bands *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings10Bands
+
 			if r.PerSSIDSettings.Status10.Bands != nil {
+
 				var enabled []string = nil
-				//Hoola aqui
 				r.PerSSIDSettings.Status10.Bands.Enabled.ElementsAs(ctx, &enabled, false)
 				requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings10Bands = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings10Bands{
 					Enabled: enabled,
 				}
+				//[debug] Is Array: False
 			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status10.MinBitrate.ValueInt64Pointer())
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status10.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status10.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status10.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
 			requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings10 = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings10{
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 				Bands:               requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings10Bands,
 				MinBitrate:          minBitrate,
 			}
+			//[debug] Is Array: False
 		}
 		var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings11 *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings11
+
 		if r.PerSSIDSettings.Status11 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status11.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -2270,23 +2313,32 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 				return nil
 			}()
 			var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings11Bands *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings11Bands
+
 			if r.PerSSIDSettings.Status11.Bands != nil {
+
 				var enabled []string = nil
-				//Hoola aqui
 				r.PerSSIDSettings.Status11.Bands.Enabled.ElementsAs(ctx, &enabled, false)
 				requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings11Bands = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings11Bands{
 					Enabled: enabled,
 				}
+				//[debug] Is Array: False
 			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status11.MinBitrate.ValueInt64Pointer())
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status11.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status11.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status11.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
 			requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings11 = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings11{
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 				Bands:               requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings11Bands,
 				MinBitrate:          minBitrate,
 			}
+			//[debug] Is Array: False
 		}
 		var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings12 *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings12
+
 		if r.PerSSIDSettings.Status12 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status12.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -2296,23 +2348,32 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 				return nil
 			}()
 			var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings12Bands *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings12Bands
+
 			if r.PerSSIDSettings.Status12.Bands != nil {
+
 				var enabled []string = nil
-				//Hoola aqui
 				r.PerSSIDSettings.Status12.Bands.Enabled.ElementsAs(ctx, &enabled, false)
 				requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings12Bands = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings12Bands{
 					Enabled: enabled,
 				}
+				//[debug] Is Array: False
 			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status12.MinBitrate.ValueInt64Pointer())
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status12.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status12.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status12.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
 			requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings12 = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings12{
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 				Bands:               requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings12Bands,
 				MinBitrate:          minBitrate,
 			}
+			//[debug] Is Array: False
 		}
 		var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings13 *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings13
+
 		if r.PerSSIDSettings.Status13 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status13.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -2322,23 +2383,32 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 				return nil
 			}()
 			var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings13Bands *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings13Bands
+
 			if r.PerSSIDSettings.Status13.Bands != nil {
+
 				var enabled []string = nil
-				//Hoola aqui
 				r.PerSSIDSettings.Status13.Bands.Enabled.ElementsAs(ctx, &enabled, false)
 				requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings13Bands = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings13Bands{
 					Enabled: enabled,
 				}
+				//[debug] Is Array: False
 			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status13.MinBitrate.ValueInt64Pointer())
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status13.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status13.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status13.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
 			requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings13 = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings13{
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 				Bands:               requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings13Bands,
 				MinBitrate:          minBitrate,
 			}
+			//[debug] Is Array: False
 		}
 		var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings14 *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings14
+
 		if r.PerSSIDSettings.Status14 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status14.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -2348,23 +2418,32 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 				return nil
 			}()
 			var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings14Bands *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings14Bands
+
 			if r.PerSSIDSettings.Status14.Bands != nil {
+
 				var enabled []string = nil
-				//Hoola aqui
 				r.PerSSIDSettings.Status14.Bands.Enabled.ElementsAs(ctx, &enabled, false)
 				requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings14Bands = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings14Bands{
 					Enabled: enabled,
 				}
+				//[debug] Is Array: False
 			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status14.MinBitrate.ValueInt64Pointer())
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status14.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status14.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status14.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
 			requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings14 = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings14{
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 				Bands:               requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings14Bands,
 				MinBitrate:          minBitrate,
 			}
+			//[debug] Is Array: False
 		}
 		var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings2 *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings2
+
 		if r.PerSSIDSettings.Status2 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status2.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -2374,23 +2453,32 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 				return nil
 			}()
 			var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings2Bands *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings2Bands
+
 			if r.PerSSIDSettings.Status2.Bands != nil {
+
 				var enabled []string = nil
-				//Hoola aqui
 				r.PerSSIDSettings.Status2.Bands.Enabled.ElementsAs(ctx, &enabled, false)
 				requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings2Bands = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings2Bands{
 					Enabled: enabled,
 				}
+				//[debug] Is Array: False
 			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status2.MinBitrate.ValueInt64Pointer())
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status2.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status2.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status2.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
 			requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings2 = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings2{
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 				Bands:               requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings2Bands,
 				MinBitrate:          minBitrate,
 			}
+			//[debug] Is Array: False
 		}
 		var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings3 *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings3
+
 		if r.PerSSIDSettings.Status3 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status3.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -2400,23 +2488,32 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 				return nil
 			}()
 			var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings3Bands *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings3Bands
+
 			if r.PerSSIDSettings.Status3.Bands != nil {
+
 				var enabled []string = nil
-				//Hoola aqui
 				r.PerSSIDSettings.Status3.Bands.Enabled.ElementsAs(ctx, &enabled, false)
 				requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings3Bands = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings3Bands{
 					Enabled: enabled,
 				}
+				//[debug] Is Array: False
 			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status3.MinBitrate.ValueInt64Pointer())
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status3.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status3.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status3.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
 			requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings3 = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings3{
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 				Bands:               requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings3Bands,
 				MinBitrate:          minBitrate,
 			}
+			//[debug] Is Array: False
 		}
 		var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings4 *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings4
+
 		if r.PerSSIDSettings.Status4 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status4.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -2426,23 +2523,32 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 				return nil
 			}()
 			var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings4Bands *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings4Bands
+
 			if r.PerSSIDSettings.Status4.Bands != nil {
+
 				var enabled []string = nil
-				//Hoola aqui
 				r.PerSSIDSettings.Status4.Bands.Enabled.ElementsAs(ctx, &enabled, false)
 				requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings4Bands = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings4Bands{
 					Enabled: enabled,
 				}
+				//[debug] Is Array: False
 			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status4.MinBitrate.ValueInt64Pointer())
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status4.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status4.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status4.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
 			requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings4 = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings4{
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 				Bands:               requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings4Bands,
 				MinBitrate:          minBitrate,
 			}
+			//[debug] Is Array: False
 		}
 		var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings5 *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings5
+
 		if r.PerSSIDSettings.Status5 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status5.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -2452,23 +2558,32 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 				return nil
 			}()
 			var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings5Bands *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings5Bands
+
 			if r.PerSSIDSettings.Status5.Bands != nil {
+
 				var enabled []string = nil
-				//Hoola aqui
 				r.PerSSIDSettings.Status5.Bands.Enabled.ElementsAs(ctx, &enabled, false)
 				requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings5Bands = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings5Bands{
 					Enabled: enabled,
 				}
+				//[debug] Is Array: False
 			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status5.MinBitrate.ValueInt64Pointer())
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status5.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status5.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status5.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
 			requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings5 = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings5{
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 				Bands:               requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings5Bands,
 				MinBitrate:          minBitrate,
 			}
+			//[debug] Is Array: False
 		}
 		var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings6 *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings6
+
 		if r.PerSSIDSettings.Status6 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status6.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -2478,23 +2593,32 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 				return nil
 			}()
 			var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings6Bands *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings6Bands
+
 			if r.PerSSIDSettings.Status6.Bands != nil {
+
 				var enabled []string = nil
-				//Hoola aqui
 				r.PerSSIDSettings.Status6.Bands.Enabled.ElementsAs(ctx, &enabled, false)
 				requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings6Bands = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings6Bands{
 					Enabled: enabled,
 				}
+				//[debug] Is Array: False
 			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status6.MinBitrate.ValueInt64Pointer())
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status6.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status6.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status6.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
 			requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings6 = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings6{
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 				Bands:               requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings6Bands,
 				MinBitrate:          minBitrate,
 			}
+			//[debug] Is Array: False
 		}
 		var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings7 *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings7
+
 		if r.PerSSIDSettings.Status7 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status7.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -2504,23 +2628,32 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 				return nil
 			}()
 			var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings7Bands *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings7Bands
+
 			if r.PerSSIDSettings.Status7.Bands != nil {
+
 				var enabled []string = nil
-				//Hoola aqui
 				r.PerSSIDSettings.Status7.Bands.Enabled.ElementsAs(ctx, &enabled, false)
 				requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings7Bands = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings7Bands{
 					Enabled: enabled,
 				}
+				//[debug] Is Array: False
 			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status7.MinBitrate.ValueInt64Pointer())
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status7.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status7.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status7.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
 			requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings7 = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings7{
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 				Bands:               requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings7Bands,
 				MinBitrate:          minBitrate,
 			}
+			//[debug] Is Array: False
 		}
 		var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings8 *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings8
+
 		if r.PerSSIDSettings.Status8 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status8.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -2530,23 +2663,32 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 				return nil
 			}()
 			var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings8Bands *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings8Bands
+
 			if r.PerSSIDSettings.Status8.Bands != nil {
+
 				var enabled []string = nil
-				//Hoola aqui
 				r.PerSSIDSettings.Status8.Bands.Enabled.ElementsAs(ctx, &enabled, false)
 				requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings8Bands = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings8Bands{
 					Enabled: enabled,
 				}
+				//[debug] Is Array: False
 			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status8.MinBitrate.ValueInt64Pointer())
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status8.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status8.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status8.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
 			requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings8 = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings8{
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 				Bands:               requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings8Bands,
 				MinBitrate:          minBitrate,
 			}
+			//[debug] Is Array: False
 		}
 		var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings9 *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings9
+
 		if r.PerSSIDSettings.Status9 != nil {
 			bandOperationMode := r.PerSSIDSettings.Status9.BandOperationMode.ValueString()
 			bandSteeringEnabled := func() *bool {
@@ -2556,21 +2698,29 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 				return nil
 			}()
 			var requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings9Bands *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings9Bands
+
 			if r.PerSSIDSettings.Status9.Bands != nil {
+
 				var enabled []string = nil
-				//Hoola aqui
 				r.PerSSIDSettings.Status9.Bands.Enabled.ElementsAs(ctx, &enabled, false)
 				requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings9Bands = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings9Bands{
 					Enabled: enabled,
 				}
+				//[debug] Is Array: False
 			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status9.MinBitrate.ValueInt64Pointer())
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status9.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status9.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status9.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
 			requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings9 = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings9{
 				BandOperationMode:   bandOperationMode,
 				BandSteeringEnabled: bandSteeringEnabled,
 				Bands:               requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings9Bands,
 				MinBitrate:          minBitrate,
 			}
+			//[debug] Is Array: False
 		}
 		requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings{
 			Status0:  requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings0,
@@ -2589,8 +2739,10 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 			Status8:  requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings8,
 			Status9:  requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings9,
 		}
+		//[debug] Is Array: False
 	}
 	var requestWirelessCreateNetworkWirelessRfProfileSixGhzSettings *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfileSixGhzSettings
+
 	if r.SixGhzSettings != nil {
 		channelWidth := r.SixGhzSettings.ChannelWidth.ValueString()
 		maxPower := func() *int64 {
@@ -2617,8 +2769,8 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 			}
 			return nil
 		}()
-		var validAutoChannels *[]int = nil
-		//Hoola aqui
+
+		var validAutoChannels []int = nil
 		r.SixGhzSettings.ValidAutoChannels.ElementsAs(ctx, &validAutoChannels, false)
 		requestWirelessCreateNetworkWirelessRfProfileSixGhzSettings = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfileSixGhzSettings{
 			ChannelWidth:      channelWidth,
@@ -2626,10 +2778,12 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 			MinBitrate:        int64ToIntPointer(minBitrate),
 			MinPower:          int64ToIntPointer(minPower),
 			Rxsop:             int64ToIntPointer(rxsop),
-			ValidAutoChannels: validAutoChannels,
+			ValidAutoChannels: &validAutoChannels,
 		}
+		//[debug] Is Array: False
 	}
 	var requestWirelessCreateNetworkWirelessRfProfileTransmission *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfileTransmission
+
 	if r.Transmission != nil {
 		enabled := func() *bool {
 			if !r.Transmission.Enabled.IsUnknown() && !r.Transmission.Enabled.IsNull() {
@@ -2640,648 +2794,10 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestCreate(ctx context.Context
 		requestWirelessCreateNetworkWirelessRfProfileTransmission = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfileTransmission{
 			Enabled: enabled,
 		}
+		//[debug] Is Array: False
 	}
 	var requestWirelessCreateNetworkWirelessRfProfileTwoFourGhzSettings *merakigosdk.RequestWirelessCreateNetworkWirelessRfProfileTwoFourGhzSettings
-	if r.TwoFourGhzSettings != nil {
-		axEnabled := func() *bool {
-			if !r.TwoFourGhzSettings.AxEnabled.IsUnknown() && !r.TwoFourGhzSettings.AxEnabled.IsNull() {
-				return r.TwoFourGhzSettings.AxEnabled.ValueBoolPointer()
-			}
-			return nil
-		}()
-		maxPower := func() *int64 {
-			if !r.TwoFourGhzSettings.MaxPower.IsUnknown() && !r.TwoFourGhzSettings.MaxPower.IsNull() {
-				return r.TwoFourGhzSettings.MaxPower.ValueInt64Pointer()
-			}
-			return nil
-		}()
-		minBitrate := r.TwoFourGhzSettings.MinBitrate.ValueFloat64Pointer()
-		minPower := func() *int64 {
-			if !r.TwoFourGhzSettings.MinPower.IsUnknown() && !r.TwoFourGhzSettings.MinPower.IsNull() {
-				return r.TwoFourGhzSettings.MinPower.ValueInt64Pointer()
-			}
-			return nil
-		}()
-		rxsop := func() *int64 {
-			if !r.TwoFourGhzSettings.Rxsop.IsUnknown() && !r.TwoFourGhzSettings.Rxsop.IsNull() {
-				return r.TwoFourGhzSettings.Rxsop.ValueInt64Pointer()
-			}
-			return nil
-		}()
-		var validAutoChannels *[]int = nil
-		//Hoola aqui
-		r.TwoFourGhzSettings.ValidAutoChannels.ElementsAs(ctx, &validAutoChannels, false)
-		requestWirelessCreateNetworkWirelessRfProfileTwoFourGhzSettings = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfileTwoFourGhzSettings{
-			AxEnabled:         axEnabled,
-			MaxPower:          int64ToIntPointer(maxPower),
-			MinBitrate:        minBitrate,
-			MinPower:          int64ToIntPointer(minPower),
-			Rxsop:             int64ToIntPointer(rxsop),
-			ValidAutoChannels: validAutoChannels,
-		}
-	}
-	out := merakigosdk.RequestWirelessCreateNetworkWirelessRfProfile{
-		ApBandSettings:         requestWirelessCreateNetworkWirelessRfProfileApBandSettings,
-		BandSelectionType:      *bandSelectionType,
-		ClientBalancingEnabled: clientBalancingEnabled,
-		FiveGhzSettings:        requestWirelessCreateNetworkWirelessRfProfileFiveGhzSettings,
-		FlexRadios:             requestWirelessCreateNetworkWirelessRfProfileFlexRadios,
-		MinBitrateType:         *minBitrateType,
-		Name:                   *name,
-		PerSSIDSettings:        requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings,
-		SixGhzSettings:         requestWirelessCreateNetworkWirelessRfProfileSixGhzSettings,
-		Transmission:           requestWirelessCreateNetworkWirelessRfProfileTransmission,
-		TwoFourGhzSettings:     requestWirelessCreateNetworkWirelessRfProfileTwoFourGhzSettings,
-	}
-	return &out
-}
-func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfile {
-	emptyString := ""
-	var requestWirelessUpdateNetworkWirelessRfProfileApBandSettings *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileApBandSettings
-	if r.ApBandSettings != nil {
-		bandOperationMode := r.ApBandSettings.BandOperationMode.ValueString()
-		bandSteeringEnabled := func() *bool {
-			if !r.ApBandSettings.BandSteeringEnabled.IsUnknown() && !r.ApBandSettings.BandSteeringEnabled.IsNull() {
-				return r.ApBandSettings.BandSteeringEnabled.ValueBoolPointer()
-			}
-			return nil
-		}()
-		var requestWirelessUpdateNetworkWirelessRfProfileApBandSettingsBands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileApBandSettingsBands
-		if r.ApBandSettings.Bands != nil {
-			var enabled []string = nil
-			//Hoola aqui
-			r.ApBandSettings.Bands.Enabled.ElementsAs(ctx, &enabled, false)
-			requestWirelessUpdateNetworkWirelessRfProfileApBandSettingsBands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileApBandSettingsBands{
-				Enabled: enabled,
-			}
-		}
-		requestWirelessUpdateNetworkWirelessRfProfileApBandSettings = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileApBandSettings{
-			BandOperationMode:   bandOperationMode,
-			BandSteeringEnabled: bandSteeringEnabled,
-			Bands:               requestWirelessUpdateNetworkWirelessRfProfileApBandSettingsBands,
-		}
-	}
-	bandSelectionType := new(string)
-	if !r.BandSelectionType.IsUnknown() && !r.BandSelectionType.IsNull() {
-		*bandSelectionType = r.BandSelectionType.ValueString()
-	} else {
-		bandSelectionType = &emptyString
-	}
-	clientBalancingEnabled := new(bool)
-	if !r.ClientBalancingEnabled.IsUnknown() && !r.ClientBalancingEnabled.IsNull() {
-		*clientBalancingEnabled = r.ClientBalancingEnabled.ValueBool()
-	} else {
-		clientBalancingEnabled = nil
-	}
-	var requestWirelessUpdateNetworkWirelessRfProfileFiveGhzSettings *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileFiveGhzSettings
-	if r.FiveGhzSettings != nil {
-		channelWidth := r.FiveGhzSettings.ChannelWidth.ValueString()
-		maxPower := func() *int64 {
-			if !r.FiveGhzSettings.MaxPower.IsUnknown() && !r.FiveGhzSettings.MaxPower.IsNull() {
-				return r.FiveGhzSettings.MaxPower.ValueInt64Pointer()
-			}
-			return nil
-		}()
-		minBitrate := func() *int64 {
-			if !r.FiveGhzSettings.MinBitrate.IsUnknown() && !r.FiveGhzSettings.MinBitrate.IsNull() {
-				return r.FiveGhzSettings.MinBitrate.ValueInt64Pointer()
-			}
-			return nil
-		}()
-		minPower := func() *int64 {
-			if !r.FiveGhzSettings.MinPower.IsUnknown() && !r.FiveGhzSettings.MinPower.IsNull() {
-				return r.FiveGhzSettings.MinPower.ValueInt64Pointer()
-			}
-			return nil
-		}()
-		rxsop := func() *int64 {
-			if !r.FiveGhzSettings.Rxsop.IsUnknown() && !r.FiveGhzSettings.Rxsop.IsNull() {
-				return r.FiveGhzSettings.Rxsop.ValueInt64Pointer()
-			}
-			return nil
-		}()
-		var validAutoChannels *[]int = nil
-		//Hoola aqui
-		r.FiveGhzSettings.ValidAutoChannels.ElementsAs(ctx, &validAutoChannels, false)
-		requestWirelessUpdateNetworkWirelessRfProfileFiveGhzSettings = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileFiveGhzSettings{
-			ChannelWidth:      channelWidth,
-			MaxPower:          int64ToIntPointer(maxPower),
-			MinBitrate:        int64ToIntPointer(minBitrate),
-			MinPower:          int64ToIntPointer(minPower),
-			Rxsop:             int64ToIntPointer(rxsop),
-			ValidAutoChannels: validAutoChannels,
-		}
-	}
-	var requestWirelessUpdateNetworkWirelessRfProfileFlexRadios *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileFlexRadios
-	if r.FlexRadios != nil {
-		var requestWirelessUpdateNetworkWirelessRfProfileFlexRadiosByModel []merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileFlexRadiosByModel
-		if r.FlexRadios.ByModel != nil {
-			for _, rItem1 := range *r.FlexRadios.ByModel { //FlexRadios.ByModel// name: byModel
-				var bands []string = nil
-				//Hoola aqui
-				rItem1.Bands.ElementsAs(ctx, &bands, false)
-				model := rItem1.Model.ValueString()
-				requestWirelessUpdateNetworkWirelessRfProfileFlexRadiosByModel = append(requestWirelessUpdateNetworkWirelessRfProfileFlexRadiosByModel, merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileFlexRadiosByModel{
-					Bands: bands,
-					Model: model,
-				})
-			}
-		}
-		requestWirelessUpdateNetworkWirelessRfProfileFlexRadios = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileFlexRadios{
-			ByModel: func() *[]merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileFlexRadiosByModel {
-				if len(requestWirelessUpdateNetworkWirelessRfProfileFlexRadiosByModel) > 0 {
-					return &requestWirelessUpdateNetworkWirelessRfProfileFlexRadiosByModel
-				}
-				return nil
-			}(),
-		}
-	}
-	isIndoorDefault := new(bool)
-	if !r.IsIndoorDefault.IsUnknown() && !r.IsIndoorDefault.IsNull() {
-		*isIndoorDefault = r.IsIndoorDefault.ValueBool()
-	} else {
-		isIndoorDefault = nil
-	}
-	isOutdoorDefault := new(bool)
-	if !r.IsOutdoorDefault.IsUnknown() && !r.IsOutdoorDefault.IsNull() {
-		*isOutdoorDefault = r.IsOutdoorDefault.ValueBool()
-	} else {
-		isOutdoorDefault = nil
-	}
-	minBitrateType := new(string)
-	if !r.MinBitrateType.IsUnknown() && !r.MinBitrateType.IsNull() {
-		*minBitrateType = r.MinBitrateType.ValueString()
-	} else {
-		minBitrateType = &emptyString
-	}
-	name := new(string)
-	if !r.Name.IsUnknown() && !r.Name.IsNull() {
-		*name = r.Name.ValueString()
-	} else {
-		name = &emptyString
-	}
-	var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings
-	if r.PerSSIDSettings != nil {
-		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0
-		if r.PerSSIDSettings.Status0 != nil {
-			bandOperationMode := r.PerSSIDSettings.Status0.BandOperationMode.ValueString()
-			bandSteeringEnabled := func() *bool {
-				if !r.PerSSIDSettings.Status0.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status0.BandSteeringEnabled.IsNull() {
-					return r.PerSSIDSettings.Status0.BandSteeringEnabled.ValueBoolPointer()
-				}
-				return nil
-			}()
-			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0Bands
-			if r.PerSSIDSettings.Status0.Bands != nil {
-				var enabled []string = nil
-				//Hoola aqui
-				r.PerSSIDSettings.Status0.Bands.Enabled.ElementsAs(ctx, &enabled, false)
-				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0Bands{
-					Enabled: enabled,
-				}
-			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status0.MinBitrate.ValueInt64Pointer())
-			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0{
-				BandOperationMode:   bandOperationMode,
-				BandSteeringEnabled: bandSteeringEnabled,
-				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0Bands,
-				MinBitrate:          minBitrate,
-			}
-		}
-		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1
-		if r.PerSSIDSettings.Status1 != nil {
-			bandOperationMode := r.PerSSIDSettings.Status1.BandOperationMode.ValueString()
-			bandSteeringEnabled := func() *bool {
-				if !r.PerSSIDSettings.Status1.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status1.BandSteeringEnabled.IsNull() {
-					return r.PerSSIDSettings.Status1.BandSteeringEnabled.ValueBoolPointer()
-				}
-				return nil
-			}()
-			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1Bands
-			if r.PerSSIDSettings.Status1.Bands != nil {
-				var enabled []string = nil
-				//Hoola aqui
-				r.PerSSIDSettings.Status1.Bands.Enabled.ElementsAs(ctx, &enabled, false)
-				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1Bands{
-					Enabled: enabled,
-				}
-			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status1.MinBitrate.ValueInt64Pointer())
-			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1{
-				BandOperationMode:   bandOperationMode,
-				BandSteeringEnabled: bandSteeringEnabled,
-				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1Bands,
-				MinBitrate:          minBitrate,
-			}
-		}
-		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10
-		if r.PerSSIDSettings.Status10 != nil {
-			bandOperationMode := r.PerSSIDSettings.Status10.BandOperationMode.ValueString()
-			bandSteeringEnabled := func() *bool {
-				if !r.PerSSIDSettings.Status10.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status10.BandSteeringEnabled.IsNull() {
-					return r.PerSSIDSettings.Status10.BandSteeringEnabled.ValueBoolPointer()
-				}
-				return nil
-			}()
-			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10Bands
-			if r.PerSSIDSettings.Status10.Bands != nil {
-				var enabled []string = nil
-				//Hoola aqui
-				r.PerSSIDSettings.Status10.Bands.Enabled.ElementsAs(ctx, &enabled, false)
-				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10Bands{
-					Enabled: enabled,
-				}
-			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status10.MinBitrate.ValueInt64Pointer())
-			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10{
-				BandOperationMode:   bandOperationMode,
-				BandSteeringEnabled: bandSteeringEnabled,
-				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10Bands,
-				MinBitrate:          minBitrate,
-			}
-		}
-		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11
-		if r.PerSSIDSettings.Status11 != nil {
-			bandOperationMode := r.PerSSIDSettings.Status11.BandOperationMode.ValueString()
-			bandSteeringEnabled := func() *bool {
-				if !r.PerSSIDSettings.Status11.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status11.BandSteeringEnabled.IsNull() {
-					return r.PerSSIDSettings.Status11.BandSteeringEnabled.ValueBoolPointer()
-				}
-				return nil
-			}()
-			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11Bands
-			if r.PerSSIDSettings.Status11.Bands != nil {
-				var enabled []string = nil
-				//Hoola aqui
-				r.PerSSIDSettings.Status11.Bands.Enabled.ElementsAs(ctx, &enabled, false)
-				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11Bands{
-					Enabled: enabled,
-				}
-			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status11.MinBitrate.ValueInt64Pointer())
-			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11{
-				BandOperationMode:   bandOperationMode,
-				BandSteeringEnabled: bandSteeringEnabled,
-				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11Bands,
-				MinBitrate:          minBitrate,
-			}
-		}
-		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12
-		if r.PerSSIDSettings.Status12 != nil {
-			bandOperationMode := r.PerSSIDSettings.Status12.BandOperationMode.ValueString()
-			bandSteeringEnabled := func() *bool {
-				if !r.PerSSIDSettings.Status12.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status12.BandSteeringEnabled.IsNull() {
-					return r.PerSSIDSettings.Status12.BandSteeringEnabled.ValueBoolPointer()
-				}
-				return nil
-			}()
-			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12Bands
-			if r.PerSSIDSettings.Status12.Bands != nil {
-				var enabled []string = nil
-				//Hoola aqui
-				r.PerSSIDSettings.Status12.Bands.Enabled.ElementsAs(ctx, &enabled, false)
-				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12Bands{
-					Enabled: enabled,
-				}
-			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status12.MinBitrate.ValueInt64Pointer())
-			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12{
-				BandOperationMode:   bandOperationMode,
-				BandSteeringEnabled: bandSteeringEnabled,
-				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12Bands,
-				MinBitrate:          minBitrate,
-			}
-		}
-		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13
-		if r.PerSSIDSettings.Status13 != nil {
-			bandOperationMode := r.PerSSIDSettings.Status13.BandOperationMode.ValueString()
-			bandSteeringEnabled := func() *bool {
-				if !r.PerSSIDSettings.Status13.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status13.BandSteeringEnabled.IsNull() {
-					return r.PerSSIDSettings.Status13.BandSteeringEnabled.ValueBoolPointer()
-				}
-				return nil
-			}()
-			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13Bands
-			if r.PerSSIDSettings.Status13.Bands != nil {
-				var enabled []string = nil
-				//Hoola aqui
-				r.PerSSIDSettings.Status13.Bands.Enabled.ElementsAs(ctx, &enabled, false)
-				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13Bands{
-					Enabled: enabled,
-				}
-			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status13.MinBitrate.ValueInt64Pointer())
-			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13{
-				BandOperationMode:   bandOperationMode,
-				BandSteeringEnabled: bandSteeringEnabled,
-				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13Bands,
-				MinBitrate:          minBitrate,
-			}
-		}
-		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14
-		if r.PerSSIDSettings.Status14 != nil {
-			bandOperationMode := r.PerSSIDSettings.Status14.BandOperationMode.ValueString()
-			bandSteeringEnabled := func() *bool {
-				if !r.PerSSIDSettings.Status14.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status14.BandSteeringEnabled.IsNull() {
-					return r.PerSSIDSettings.Status14.BandSteeringEnabled.ValueBoolPointer()
-				}
-				return nil
-			}()
-			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14Bands
-			if r.PerSSIDSettings.Status14.Bands != nil {
-				var enabled []string = nil
-				//Hoola aqui
-				r.PerSSIDSettings.Status14.Bands.Enabled.ElementsAs(ctx, &enabled, false)
-				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14Bands{
-					Enabled: enabled,
-				}
-			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status14.MinBitrate.ValueInt64Pointer())
-			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14{
-				BandOperationMode:   bandOperationMode,
-				BandSteeringEnabled: bandSteeringEnabled,
-				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14Bands,
-				MinBitrate:          minBitrate,
-			}
-		}
-		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2
-		if r.PerSSIDSettings.Status2 != nil {
-			bandOperationMode := r.PerSSIDSettings.Status2.BandOperationMode.ValueString()
-			bandSteeringEnabled := func() *bool {
-				if !r.PerSSIDSettings.Status2.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status2.BandSteeringEnabled.IsNull() {
-					return r.PerSSIDSettings.Status2.BandSteeringEnabled.ValueBoolPointer()
-				}
-				return nil
-			}()
-			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2Bands
-			if r.PerSSIDSettings.Status2.Bands != nil {
-				var enabled []string = nil
-				//Hoola aqui
-				r.PerSSIDSettings.Status2.Bands.Enabled.ElementsAs(ctx, &enabled, false)
-				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2Bands{
-					Enabled: enabled,
-				}
-			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status2.MinBitrate.ValueInt64Pointer())
-			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2{
-				BandOperationMode:   bandOperationMode,
-				BandSteeringEnabled: bandSteeringEnabled,
-				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2Bands,
-				MinBitrate:          minBitrate,
-			}
-		}
-		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3
-		if r.PerSSIDSettings.Status3 != nil {
-			bandOperationMode := r.PerSSIDSettings.Status3.BandOperationMode.ValueString()
-			bandSteeringEnabled := func() *bool {
-				if !r.PerSSIDSettings.Status3.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status3.BandSteeringEnabled.IsNull() {
-					return r.PerSSIDSettings.Status3.BandSteeringEnabled.ValueBoolPointer()
-				}
-				return nil
-			}()
-			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3Bands
-			if r.PerSSIDSettings.Status3.Bands != nil {
-				var enabled []string = nil
-				//Hoola aqui
-				r.PerSSIDSettings.Status3.Bands.Enabled.ElementsAs(ctx, &enabled, false)
-				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3Bands{
-					Enabled: enabled,
-				}
-			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status3.MinBitrate.ValueInt64Pointer())
-			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3{
-				BandOperationMode:   bandOperationMode,
-				BandSteeringEnabled: bandSteeringEnabled,
-				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3Bands,
-				MinBitrate:          minBitrate,
-			}
-		}
-		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4
-		if r.PerSSIDSettings.Status4 != nil {
-			bandOperationMode := r.PerSSIDSettings.Status4.BandOperationMode.ValueString()
-			bandSteeringEnabled := func() *bool {
-				if !r.PerSSIDSettings.Status4.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status4.BandSteeringEnabled.IsNull() {
-					return r.PerSSIDSettings.Status4.BandSteeringEnabled.ValueBoolPointer()
-				}
-				return nil
-			}()
-			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4Bands
-			if r.PerSSIDSettings.Status4.Bands != nil {
-				var enabled []string = nil
-				//Hoola aqui
-				r.PerSSIDSettings.Status4.Bands.Enabled.ElementsAs(ctx, &enabled, false)
-				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4Bands{
-					Enabled: enabled,
-				}
-			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status4.MinBitrate.ValueInt64Pointer())
-			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4{
-				BandOperationMode:   bandOperationMode,
-				BandSteeringEnabled: bandSteeringEnabled,
-				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4Bands,
-				MinBitrate:          minBitrate,
-			}
-		}
-		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5
-		if r.PerSSIDSettings.Status5 != nil {
-			bandOperationMode := r.PerSSIDSettings.Status5.BandOperationMode.ValueString()
-			bandSteeringEnabled := func() *bool {
-				if !r.PerSSIDSettings.Status5.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status5.BandSteeringEnabled.IsNull() {
-					return r.PerSSIDSettings.Status5.BandSteeringEnabled.ValueBoolPointer()
-				}
-				return nil
-			}()
-			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5Bands
-			if r.PerSSIDSettings.Status5.Bands != nil {
-				var enabled []string = nil
-				//Hoola aqui
-				r.PerSSIDSettings.Status5.Bands.Enabled.ElementsAs(ctx, &enabled, false)
-				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5Bands{
-					Enabled: enabled,
-				}
-			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status5.MinBitrate.ValueInt64Pointer())
-			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5{
-				BandOperationMode:   bandOperationMode,
-				BandSteeringEnabled: bandSteeringEnabled,
-				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5Bands,
-				MinBitrate:          minBitrate,
-			}
-		}
-		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6
-		if r.PerSSIDSettings.Status6 != nil {
-			bandOperationMode := r.PerSSIDSettings.Status6.BandOperationMode.ValueString()
-			bandSteeringEnabled := func() *bool {
-				if !r.PerSSIDSettings.Status6.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status6.BandSteeringEnabled.IsNull() {
-					return r.PerSSIDSettings.Status6.BandSteeringEnabled.ValueBoolPointer()
-				}
-				return nil
-			}()
-			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6Bands
-			if r.PerSSIDSettings.Status6.Bands != nil {
-				var enabled []string = nil
-				//Hoola aqui
-				r.PerSSIDSettings.Status6.Bands.Enabled.ElementsAs(ctx, &enabled, false)
-				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6Bands{
-					Enabled: enabled,
-				}
-			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status6.MinBitrate.ValueInt64Pointer())
-			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6{
-				BandOperationMode:   bandOperationMode,
-				BandSteeringEnabled: bandSteeringEnabled,
-				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6Bands,
-				MinBitrate:          minBitrate,
-			}
-		}
-		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7
-		if r.PerSSIDSettings.Status7 != nil {
-			bandOperationMode := r.PerSSIDSettings.Status7.BandOperationMode.ValueString()
-			bandSteeringEnabled := func() *bool {
-				if !r.PerSSIDSettings.Status7.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status7.BandSteeringEnabled.IsNull() {
-					return r.PerSSIDSettings.Status7.BandSteeringEnabled.ValueBoolPointer()
-				}
-				return nil
-			}()
-			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7Bands
-			if r.PerSSIDSettings.Status7.Bands != nil {
-				var enabled []string = nil
-				//Hoola aqui
-				r.PerSSIDSettings.Status7.Bands.Enabled.ElementsAs(ctx, &enabled, false)
-				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7Bands{
-					Enabled: enabled,
-				}
-			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status7.MinBitrate.ValueInt64Pointer())
-			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7{
-				BandOperationMode:   bandOperationMode,
-				BandSteeringEnabled: bandSteeringEnabled,
-				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7Bands,
-				MinBitrate:          minBitrate,
-			}
-		}
-		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8
-		if r.PerSSIDSettings.Status8 != nil {
-			bandOperationMode := r.PerSSIDSettings.Status8.BandOperationMode.ValueString()
-			bandSteeringEnabled := func() *bool {
-				if !r.PerSSIDSettings.Status8.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status8.BandSteeringEnabled.IsNull() {
-					return r.PerSSIDSettings.Status8.BandSteeringEnabled.ValueBoolPointer()
-				}
-				return nil
-			}()
-			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8Bands
-			if r.PerSSIDSettings.Status8.Bands != nil {
-				var enabled []string = nil
-				//Hoola aqui
-				r.PerSSIDSettings.Status8.Bands.Enabled.ElementsAs(ctx, &enabled, false)
-				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8Bands{
-					Enabled: enabled,
-				}
-			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status8.MinBitrate.ValueInt64Pointer())
-			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8{
-				BandOperationMode:   bandOperationMode,
-				BandSteeringEnabled: bandSteeringEnabled,
-				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8Bands,
-				MinBitrate:          minBitrate,
-			}
-		}
-		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9
-		if r.PerSSIDSettings.Status9 != nil {
-			bandOperationMode := r.PerSSIDSettings.Status9.BandOperationMode.ValueString()
-			bandSteeringEnabled := func() *bool {
-				if !r.PerSSIDSettings.Status9.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status9.BandSteeringEnabled.IsNull() {
-					return r.PerSSIDSettings.Status9.BandSteeringEnabled.ValueBoolPointer()
-				}
-				return nil
-			}()
-			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9Bands
-			if r.PerSSIDSettings.Status9.Bands != nil {
-				var enabled []string = nil
-				//Hoola aqui
-				r.PerSSIDSettings.Status9.Bands.Enabled.ElementsAs(ctx, &enabled, false)
-				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9Bands{
-					Enabled: enabled,
-				}
-			}
-			minBitrate := int64ToFloat(r.PerSSIDSettings.Status9.MinBitrate.ValueInt64Pointer())
-			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9{
-				BandOperationMode:   bandOperationMode,
-				BandSteeringEnabled: bandSteeringEnabled,
-				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9Bands,
-				MinBitrate:          minBitrate,
-			}
-		}
-		requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings{
-			Status0:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0,
-			Status1:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1,
-			Status10: requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10,
-			Status11: requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11,
-			Status12: requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12,
-			Status13: requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13,
-			Status14: requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14,
-			Status2:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2,
-			Status3:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3,
-			Status4:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4,
-			Status5:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5,
-			Status6:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6,
-			Status7:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7,
-			Status8:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8,
-			Status9:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9,
-		}
-	}
-	var requestWirelessUpdateNetworkWirelessRfProfileSixGhzSettings *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileSixGhzSettings
-	if r.SixGhzSettings != nil {
-		channelWidth := r.SixGhzSettings.ChannelWidth.ValueString()
-		maxPower := func() *int64 {
-			if !r.SixGhzSettings.MaxPower.IsUnknown() && !r.SixGhzSettings.MaxPower.IsNull() {
-				return r.SixGhzSettings.MaxPower.ValueInt64Pointer()
-			}
-			return nil
-		}()
-		minBitrate := func() *int64 {
-			if !r.SixGhzSettings.MinBitrate.IsUnknown() && !r.SixGhzSettings.MinBitrate.IsNull() {
-				return r.SixGhzSettings.MinBitrate.ValueInt64Pointer()
-			}
-			return nil
-		}()
-		minPower := func() *int64 {
-			if !r.SixGhzSettings.MinPower.IsUnknown() && !r.SixGhzSettings.MinPower.IsNull() {
-				return r.SixGhzSettings.MinPower.ValueInt64Pointer()
-			}
-			return nil
-		}()
-		rxsop := func() *int64 {
-			if !r.SixGhzSettings.Rxsop.IsUnknown() && !r.SixGhzSettings.Rxsop.IsNull() {
-				return r.SixGhzSettings.Rxsop.ValueInt64Pointer()
-			}
-			return nil
-		}()
-		var validAutoChannels *[]int = nil
-		//Hoola aqui
-		r.SixGhzSettings.ValidAutoChannels.ElementsAs(ctx, &validAutoChannels, false)
-		requestWirelessUpdateNetworkWirelessRfProfileSixGhzSettings = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileSixGhzSettings{
-			ChannelWidth:      channelWidth,
-			MaxPower:          int64ToIntPointer(maxPower),
-			MinBitrate:        int64ToIntPointer(minBitrate),
-			MinPower:          int64ToIntPointer(minPower),
-			Rxsop:             int64ToIntPointer(rxsop),
-			ValidAutoChannels: validAutoChannels,
-		}
-	}
-	var requestWirelessUpdateNetworkWirelessRfProfileTransmission *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileTransmission
-	if r.Transmission != nil {
-		enabled := func() *bool {
-			if !r.Transmission.Enabled.IsUnknown() && !r.Transmission.Enabled.IsNull() {
-				return r.Transmission.Enabled.ValueBoolPointer()
-			}
-			return nil
-		}()
-		requestWirelessUpdateNetworkWirelessRfProfileTransmission = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileTransmission{
-			Enabled: enabled,
-		}
-	}
-	var requestWirelessUpdateNetworkWirelessRfProfileTwoFourGhzSettings *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileTwoFourGhzSettings
+
 	if r.TwoFourGhzSettings != nil {
 		axEnabled := func() *bool {
 			if !r.TwoFourGhzSettings.AxEnabled.IsUnknown() && !r.TwoFourGhzSettings.AxEnabled.IsNull() {
@@ -3313,8 +2829,808 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestUpdate(ctx context.Context
 			}
 			return nil
 		}()
-		var validAutoChannels *[]int = nil
-		//Hoola aqui
+
+		var validAutoChannels []int = nil
+		r.TwoFourGhzSettings.ValidAutoChannels.ElementsAs(ctx, &validAutoChannels, false)
+		requestWirelessCreateNetworkWirelessRfProfileTwoFourGhzSettings = &merakigosdk.RequestWirelessCreateNetworkWirelessRfProfileTwoFourGhzSettings{
+			AxEnabled:         axEnabled,
+			MaxPower:          int64ToIntPointer(maxPower),
+			MinBitrate:        minBitrate,
+			MinPower:          int64ToIntPointer(minPower),
+			Rxsop:             int64ToIntPointer(rxsop),
+			ValidAutoChannels: &validAutoChannels,
+		}
+		//[debug] Is Array: False
+	}
+	out := merakigosdk.RequestWirelessCreateNetworkWirelessRfProfile{
+		ApBandSettings:         requestWirelessCreateNetworkWirelessRfProfileApBandSettings,
+		BandSelectionType:      *bandSelectionType,
+		ClientBalancingEnabled: clientBalancingEnabled,
+		FiveGhzSettings:        requestWirelessCreateNetworkWirelessRfProfileFiveGhzSettings,
+		FlexRadios:             requestWirelessCreateNetworkWirelessRfProfileFlexRadios,
+		MinBitrateType:         *minBitrateType,
+		Name:                   *name,
+		PerSSIDSettings:        requestWirelessCreateNetworkWirelessRfProfilePerSSIDSettings,
+		SixGhzSettings:         requestWirelessCreateNetworkWirelessRfProfileSixGhzSettings,
+		Transmission:           requestWirelessCreateNetworkWirelessRfProfileTransmission,
+		TwoFourGhzSettings:     requestWirelessCreateNetworkWirelessRfProfileTwoFourGhzSettings,
+	}
+	return &out
+}
+func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfile {
+	emptyString := ""
+	var requestWirelessUpdateNetworkWirelessRfProfileApBandSettings *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileApBandSettings
+
+	if r.ApBandSettings != nil {
+		bandOperationMode := r.ApBandSettings.BandOperationMode.ValueString()
+		bandSteeringEnabled := func() *bool {
+			if !r.ApBandSettings.BandSteeringEnabled.IsUnknown() && !r.ApBandSettings.BandSteeringEnabled.IsNull() {
+				return r.ApBandSettings.BandSteeringEnabled.ValueBoolPointer()
+			}
+			return nil
+		}()
+		var requestWirelessUpdateNetworkWirelessRfProfileApBandSettingsBands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileApBandSettingsBands
+
+		if r.ApBandSettings.Bands != nil {
+
+			var enabled []string = nil
+			r.ApBandSettings.Bands.Enabled.ElementsAs(ctx, &enabled, false)
+			requestWirelessUpdateNetworkWirelessRfProfileApBandSettingsBands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileApBandSettingsBands{
+				Enabled: enabled,
+			}
+			//[debug] Is Array: False
+		}
+		requestWirelessUpdateNetworkWirelessRfProfileApBandSettings = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileApBandSettings{
+			BandOperationMode:   bandOperationMode,
+			BandSteeringEnabled: bandSteeringEnabled,
+			Bands:               requestWirelessUpdateNetworkWirelessRfProfileApBandSettingsBands,
+		}
+		//[debug] Is Array: False
+	}
+	bandSelectionType := new(string)
+	if !r.BandSelectionType.IsUnknown() && !r.BandSelectionType.IsNull() {
+		*bandSelectionType = r.BandSelectionType.ValueString()
+	} else {
+		bandSelectionType = &emptyString
+	}
+	clientBalancingEnabled := new(bool)
+	if !r.ClientBalancingEnabled.IsUnknown() && !r.ClientBalancingEnabled.IsNull() {
+		*clientBalancingEnabled = r.ClientBalancingEnabled.ValueBool()
+	} else {
+		clientBalancingEnabled = nil
+	}
+	var requestWirelessUpdateNetworkWirelessRfProfileFiveGhzSettings *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileFiveGhzSettings
+
+	if r.FiveGhzSettings != nil {
+		channelWidth := r.FiveGhzSettings.ChannelWidth.ValueString()
+		maxPower := func() *int64 {
+			if !r.FiveGhzSettings.MaxPower.IsUnknown() && !r.FiveGhzSettings.MaxPower.IsNull() {
+				return r.FiveGhzSettings.MaxPower.ValueInt64Pointer()
+			}
+			return nil
+		}()
+		minBitrate := func() *int64 {
+			if !r.FiveGhzSettings.MinBitrate.IsUnknown() && !r.FiveGhzSettings.MinBitrate.IsNull() {
+				return r.FiveGhzSettings.MinBitrate.ValueInt64Pointer()
+			}
+			return nil
+		}()
+		minPower := func() *int64 {
+			if !r.FiveGhzSettings.MinPower.IsUnknown() && !r.FiveGhzSettings.MinPower.IsNull() {
+				return r.FiveGhzSettings.MinPower.ValueInt64Pointer()
+			}
+			return nil
+		}()
+		rxsop := func() *int64 {
+			if !r.FiveGhzSettings.Rxsop.IsUnknown() && !r.FiveGhzSettings.Rxsop.IsNull() {
+				return r.FiveGhzSettings.Rxsop.ValueInt64Pointer()
+			}
+			return nil
+		}()
+
+		var validAutoChannels []int = nil
+		r.FiveGhzSettings.ValidAutoChannels.ElementsAs(ctx, &validAutoChannels, false)
+		requestWirelessUpdateNetworkWirelessRfProfileFiveGhzSettings = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileFiveGhzSettings{
+			ChannelWidth:      channelWidth,
+			MaxPower:          int64ToIntPointer(maxPower),
+			MinBitrate:        int64ToIntPointer(minBitrate),
+			MinPower:          int64ToIntPointer(minPower),
+			Rxsop:             int64ToIntPointer(rxsop),
+			ValidAutoChannels: &validAutoChannels,
+		}
+		//[debug] Is Array: False
+	}
+	var requestWirelessUpdateNetworkWirelessRfProfileFlexRadios *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileFlexRadios
+
+	if r.FlexRadios != nil {
+
+		log.Printf("[DEBUG] #TODO []RequestWirelessUpdateNetworkWirelessRfProfileFlexRadiosByModel")
+		var requestWirelessUpdateNetworkWirelessRfProfileFlexRadiosByModel []merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileFlexRadiosByModel
+
+		if r.FlexRadios.ByModel != nil {
+			for _, rItem1 := range *r.FlexRadios.ByModel {
+
+				var bands []string = nil
+				rItem1.Bands.ElementsAs(ctx, &bands, false)
+				model := rItem1.Model.ValueString()
+				requestWirelessUpdateNetworkWirelessRfProfileFlexRadiosByModel = append(requestWirelessUpdateNetworkWirelessRfProfileFlexRadiosByModel, merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileFlexRadiosByModel{
+					Bands: bands,
+					Model: model,
+				})
+				//[debug] Is Array: True
+			}
+		}
+		requestWirelessUpdateNetworkWirelessRfProfileFlexRadios = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileFlexRadios{
+			ByModel: func() *[]merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileFlexRadiosByModel {
+				if len(requestWirelessUpdateNetworkWirelessRfProfileFlexRadiosByModel) > 0 {
+					return &requestWirelessUpdateNetworkWirelessRfProfileFlexRadiosByModel
+				}
+				return nil
+			}(),
+		}
+		//[debug] Is Array: False
+	}
+	isIndoorDefault := new(bool)
+	if !r.IsIndoorDefault.IsUnknown() && !r.IsIndoorDefault.IsNull() {
+		*isIndoorDefault = r.IsIndoorDefault.ValueBool()
+	} else {
+		isIndoorDefault = nil
+	}
+	isOutdoorDefault := new(bool)
+	if !r.IsOutdoorDefault.IsUnknown() && !r.IsOutdoorDefault.IsNull() {
+		*isOutdoorDefault = r.IsOutdoorDefault.ValueBool()
+	} else {
+		isOutdoorDefault = nil
+	}
+	minBitrateType := new(string)
+	if !r.MinBitrateType.IsUnknown() && !r.MinBitrateType.IsNull() {
+		*minBitrateType = r.MinBitrateType.ValueString()
+	} else {
+		minBitrateType = &emptyString
+	}
+	name := new(string)
+	if !r.Name.IsUnknown() && !r.Name.IsNull() {
+		*name = r.Name.ValueString()
+	} else {
+		name = &emptyString
+	}
+	var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings
+
+	if r.PerSSIDSettings != nil {
+		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0
+
+		if r.PerSSIDSettings.Status0 != nil {
+			bandOperationMode := r.PerSSIDSettings.Status0.BandOperationMode.ValueString()
+			bandSteeringEnabled := func() *bool {
+				if !r.PerSSIDSettings.Status0.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status0.BandSteeringEnabled.IsNull() {
+					return r.PerSSIDSettings.Status0.BandSteeringEnabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0Bands
+
+			if r.PerSSIDSettings.Status0.Bands != nil {
+
+				var enabled []string = nil
+				r.PerSSIDSettings.Status0.Bands.Enabled.ElementsAs(ctx, &enabled, false)
+				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0Bands{
+					Enabled: enabled,
+				}
+				//[debug] Is Array: False
+			}
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status0.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status0.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status0.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
+			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0{
+				BandOperationMode:   bandOperationMode,
+				BandSteeringEnabled: bandSteeringEnabled,
+				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0Bands,
+				MinBitrate:          minBitrate,
+			}
+			//[debug] Is Array: False
+		}
+		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1
+
+		if r.PerSSIDSettings.Status1 != nil {
+			bandOperationMode := r.PerSSIDSettings.Status1.BandOperationMode.ValueString()
+			bandSteeringEnabled := func() *bool {
+				if !r.PerSSIDSettings.Status1.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status1.BandSteeringEnabled.IsNull() {
+					return r.PerSSIDSettings.Status1.BandSteeringEnabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1Bands
+
+			if r.PerSSIDSettings.Status1.Bands != nil {
+
+				var enabled []string = nil
+				r.PerSSIDSettings.Status1.Bands.Enabled.ElementsAs(ctx, &enabled, false)
+				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1Bands{
+					Enabled: enabled,
+				}
+				//[debug] Is Array: False
+			}
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status1.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status1.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status1.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
+			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1{
+				BandOperationMode:   bandOperationMode,
+				BandSteeringEnabled: bandSteeringEnabled,
+				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1Bands,
+				MinBitrate:          minBitrate,
+			}
+			//[debug] Is Array: False
+		}
+		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10
+
+		if r.PerSSIDSettings.Status10 != nil {
+			bandOperationMode := r.PerSSIDSettings.Status10.BandOperationMode.ValueString()
+			bandSteeringEnabled := func() *bool {
+				if !r.PerSSIDSettings.Status10.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status10.BandSteeringEnabled.IsNull() {
+					return r.PerSSIDSettings.Status10.BandSteeringEnabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10Bands
+
+			if r.PerSSIDSettings.Status10.Bands != nil {
+
+				var enabled []string = nil
+				r.PerSSIDSettings.Status10.Bands.Enabled.ElementsAs(ctx, &enabled, false)
+				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10Bands{
+					Enabled: enabled,
+				}
+				//[debug] Is Array: False
+			}
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status10.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status10.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status10.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
+			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10{
+				BandOperationMode:   bandOperationMode,
+				BandSteeringEnabled: bandSteeringEnabled,
+				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10Bands,
+				MinBitrate:          minBitrate,
+			}
+			//[debug] Is Array: False
+		}
+		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11
+
+		if r.PerSSIDSettings.Status11 != nil {
+			bandOperationMode := r.PerSSIDSettings.Status11.BandOperationMode.ValueString()
+			bandSteeringEnabled := func() *bool {
+				if !r.PerSSIDSettings.Status11.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status11.BandSteeringEnabled.IsNull() {
+					return r.PerSSIDSettings.Status11.BandSteeringEnabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11Bands
+
+			if r.PerSSIDSettings.Status11.Bands != nil {
+
+				var enabled []string = nil
+				r.PerSSIDSettings.Status11.Bands.Enabled.ElementsAs(ctx, &enabled, false)
+				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11Bands{
+					Enabled: enabled,
+				}
+				//[debug] Is Array: False
+			}
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status11.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status11.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status11.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
+			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11{
+				BandOperationMode:   bandOperationMode,
+				BandSteeringEnabled: bandSteeringEnabled,
+				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11Bands,
+				MinBitrate:          minBitrate,
+			}
+			//[debug] Is Array: False
+		}
+		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12
+
+		if r.PerSSIDSettings.Status12 != nil {
+			bandOperationMode := r.PerSSIDSettings.Status12.BandOperationMode.ValueString()
+			bandSteeringEnabled := func() *bool {
+				if !r.PerSSIDSettings.Status12.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status12.BandSteeringEnabled.IsNull() {
+					return r.PerSSIDSettings.Status12.BandSteeringEnabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12Bands
+
+			if r.PerSSIDSettings.Status12.Bands != nil {
+
+				var enabled []string = nil
+				r.PerSSIDSettings.Status12.Bands.Enabled.ElementsAs(ctx, &enabled, false)
+				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12Bands{
+					Enabled: enabled,
+				}
+				//[debug] Is Array: False
+			}
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status12.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status12.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status12.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
+			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12{
+				BandOperationMode:   bandOperationMode,
+				BandSteeringEnabled: bandSteeringEnabled,
+				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12Bands,
+				MinBitrate:          minBitrate,
+			}
+			//[debug] Is Array: False
+		}
+		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13
+
+		if r.PerSSIDSettings.Status13 != nil {
+			bandOperationMode := r.PerSSIDSettings.Status13.BandOperationMode.ValueString()
+			bandSteeringEnabled := func() *bool {
+				if !r.PerSSIDSettings.Status13.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status13.BandSteeringEnabled.IsNull() {
+					return r.PerSSIDSettings.Status13.BandSteeringEnabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13Bands
+
+			if r.PerSSIDSettings.Status13.Bands != nil {
+
+				var enabled []string = nil
+				r.PerSSIDSettings.Status13.Bands.Enabled.ElementsAs(ctx, &enabled, false)
+				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13Bands{
+					Enabled: enabled,
+				}
+				//[debug] Is Array: False
+			}
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status13.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status13.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status13.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
+			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13{
+				BandOperationMode:   bandOperationMode,
+				BandSteeringEnabled: bandSteeringEnabled,
+				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13Bands,
+				MinBitrate:          minBitrate,
+			}
+			//[debug] Is Array: False
+		}
+		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14
+
+		if r.PerSSIDSettings.Status14 != nil {
+			bandOperationMode := r.PerSSIDSettings.Status14.BandOperationMode.ValueString()
+			bandSteeringEnabled := func() *bool {
+				if !r.PerSSIDSettings.Status14.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status14.BandSteeringEnabled.IsNull() {
+					return r.PerSSIDSettings.Status14.BandSteeringEnabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14Bands
+
+			if r.PerSSIDSettings.Status14.Bands != nil {
+
+				var enabled []string = nil
+				r.PerSSIDSettings.Status14.Bands.Enabled.ElementsAs(ctx, &enabled, false)
+				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14Bands{
+					Enabled: enabled,
+				}
+				//[debug] Is Array: False
+			}
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status14.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status14.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status14.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
+			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14{
+				BandOperationMode:   bandOperationMode,
+				BandSteeringEnabled: bandSteeringEnabled,
+				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14Bands,
+				MinBitrate:          minBitrate,
+			}
+			//[debug] Is Array: False
+		}
+		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2
+
+		if r.PerSSIDSettings.Status2 != nil {
+			bandOperationMode := r.PerSSIDSettings.Status2.BandOperationMode.ValueString()
+			bandSteeringEnabled := func() *bool {
+				if !r.PerSSIDSettings.Status2.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status2.BandSteeringEnabled.IsNull() {
+					return r.PerSSIDSettings.Status2.BandSteeringEnabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2Bands
+
+			if r.PerSSIDSettings.Status2.Bands != nil {
+
+				var enabled []string = nil
+				r.PerSSIDSettings.Status2.Bands.Enabled.ElementsAs(ctx, &enabled, false)
+				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2Bands{
+					Enabled: enabled,
+				}
+				//[debug] Is Array: False
+			}
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status2.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status2.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status2.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
+			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2{
+				BandOperationMode:   bandOperationMode,
+				BandSteeringEnabled: bandSteeringEnabled,
+				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2Bands,
+				MinBitrate:          minBitrate,
+			}
+			//[debug] Is Array: False
+		}
+		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3
+
+		if r.PerSSIDSettings.Status3 != nil {
+			bandOperationMode := r.PerSSIDSettings.Status3.BandOperationMode.ValueString()
+			bandSteeringEnabled := func() *bool {
+				if !r.PerSSIDSettings.Status3.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status3.BandSteeringEnabled.IsNull() {
+					return r.PerSSIDSettings.Status3.BandSteeringEnabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3Bands
+
+			if r.PerSSIDSettings.Status3.Bands != nil {
+
+				var enabled []string = nil
+				r.PerSSIDSettings.Status3.Bands.Enabled.ElementsAs(ctx, &enabled, false)
+				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3Bands{
+					Enabled: enabled,
+				}
+				//[debug] Is Array: False
+			}
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status3.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status3.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status3.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
+			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3{
+				BandOperationMode:   bandOperationMode,
+				BandSteeringEnabled: bandSteeringEnabled,
+				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3Bands,
+				MinBitrate:          minBitrate,
+			}
+			//[debug] Is Array: False
+		}
+		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4
+
+		if r.PerSSIDSettings.Status4 != nil {
+			bandOperationMode := r.PerSSIDSettings.Status4.BandOperationMode.ValueString()
+			bandSteeringEnabled := func() *bool {
+				if !r.PerSSIDSettings.Status4.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status4.BandSteeringEnabled.IsNull() {
+					return r.PerSSIDSettings.Status4.BandSteeringEnabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4Bands
+
+			if r.PerSSIDSettings.Status4.Bands != nil {
+
+				var enabled []string = nil
+				r.PerSSIDSettings.Status4.Bands.Enabled.ElementsAs(ctx, &enabled, false)
+				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4Bands{
+					Enabled: enabled,
+				}
+				//[debug] Is Array: False
+			}
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status4.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status4.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status4.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
+			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4{
+				BandOperationMode:   bandOperationMode,
+				BandSteeringEnabled: bandSteeringEnabled,
+				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4Bands,
+				MinBitrate:          minBitrate,
+			}
+			//[debug] Is Array: False
+		}
+		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5
+
+		if r.PerSSIDSettings.Status5 != nil {
+			bandOperationMode := r.PerSSIDSettings.Status5.BandOperationMode.ValueString()
+			bandSteeringEnabled := func() *bool {
+				if !r.PerSSIDSettings.Status5.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status5.BandSteeringEnabled.IsNull() {
+					return r.PerSSIDSettings.Status5.BandSteeringEnabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5Bands
+
+			if r.PerSSIDSettings.Status5.Bands != nil {
+
+				var enabled []string = nil
+				r.PerSSIDSettings.Status5.Bands.Enabled.ElementsAs(ctx, &enabled, false)
+				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5Bands{
+					Enabled: enabled,
+				}
+				//[debug] Is Array: False
+			}
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status5.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status5.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status5.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
+			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5{
+				BandOperationMode:   bandOperationMode,
+				BandSteeringEnabled: bandSteeringEnabled,
+				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5Bands,
+				MinBitrate:          minBitrate,
+			}
+			//[debug] Is Array: False
+		}
+		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6
+
+		if r.PerSSIDSettings.Status6 != nil {
+			bandOperationMode := r.PerSSIDSettings.Status6.BandOperationMode.ValueString()
+			bandSteeringEnabled := func() *bool {
+				if !r.PerSSIDSettings.Status6.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status6.BandSteeringEnabled.IsNull() {
+					return r.PerSSIDSettings.Status6.BandSteeringEnabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6Bands
+
+			if r.PerSSIDSettings.Status6.Bands != nil {
+
+				var enabled []string = nil
+				r.PerSSIDSettings.Status6.Bands.Enabled.ElementsAs(ctx, &enabled, false)
+				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6Bands{
+					Enabled: enabled,
+				}
+				//[debug] Is Array: False
+			}
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status6.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status6.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status6.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
+			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6{
+				BandOperationMode:   bandOperationMode,
+				BandSteeringEnabled: bandSteeringEnabled,
+				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6Bands,
+				MinBitrate:          minBitrate,
+			}
+			//[debug] Is Array: False
+		}
+		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7
+
+		if r.PerSSIDSettings.Status7 != nil {
+			bandOperationMode := r.PerSSIDSettings.Status7.BandOperationMode.ValueString()
+			bandSteeringEnabled := func() *bool {
+				if !r.PerSSIDSettings.Status7.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status7.BandSteeringEnabled.IsNull() {
+					return r.PerSSIDSettings.Status7.BandSteeringEnabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7Bands
+
+			if r.PerSSIDSettings.Status7.Bands != nil {
+
+				var enabled []string = nil
+				r.PerSSIDSettings.Status7.Bands.Enabled.ElementsAs(ctx, &enabled, false)
+				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7Bands{
+					Enabled: enabled,
+				}
+				//[debug] Is Array: False
+			}
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status7.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status7.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status7.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
+			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7{
+				BandOperationMode:   bandOperationMode,
+				BandSteeringEnabled: bandSteeringEnabled,
+				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7Bands,
+				MinBitrate:          minBitrate,
+			}
+			//[debug] Is Array: False
+		}
+		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8
+
+		if r.PerSSIDSettings.Status8 != nil {
+			bandOperationMode := r.PerSSIDSettings.Status8.BandOperationMode.ValueString()
+			bandSteeringEnabled := func() *bool {
+				if !r.PerSSIDSettings.Status8.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status8.BandSteeringEnabled.IsNull() {
+					return r.PerSSIDSettings.Status8.BandSteeringEnabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8Bands
+
+			if r.PerSSIDSettings.Status8.Bands != nil {
+
+				var enabled []string = nil
+				r.PerSSIDSettings.Status8.Bands.Enabled.ElementsAs(ctx, &enabled, false)
+				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8Bands{
+					Enabled: enabled,
+				}
+				//[debug] Is Array: False
+			}
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status8.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status8.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status8.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
+			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8{
+				BandOperationMode:   bandOperationMode,
+				BandSteeringEnabled: bandSteeringEnabled,
+				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8Bands,
+				MinBitrate:          minBitrate,
+			}
+			//[debug] Is Array: False
+		}
+		var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9 *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9
+
+		if r.PerSSIDSettings.Status9 != nil {
+			bandOperationMode := r.PerSSIDSettings.Status9.BandOperationMode.ValueString()
+			bandSteeringEnabled := func() *bool {
+				if !r.PerSSIDSettings.Status9.BandSteeringEnabled.IsUnknown() && !r.PerSSIDSettings.Status9.BandSteeringEnabled.IsNull() {
+					return r.PerSSIDSettings.Status9.BandSteeringEnabled.ValueBoolPointer()
+				}
+				return nil
+			}()
+			var requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9Bands *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9Bands
+
+			if r.PerSSIDSettings.Status9.Bands != nil {
+
+				var enabled []string = nil
+				r.PerSSIDSettings.Status9.Bands.Enabled.ElementsAs(ctx, &enabled, false)
+				requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9Bands = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9Bands{
+					Enabled: enabled,
+				}
+				//[debug] Is Array: False
+			}
+			minBitrate := func() *float64 {
+				if !r.PerSSIDSettings.Status9.MinBitrate.IsUnknown() && !r.PerSSIDSettings.Status9.MinBitrate.IsNull() {
+					return int64ToFloat(r.PerSSIDSettings.Status9.MinBitrate.ValueInt64Pointer())
+				}
+				return nil
+			}()
+			requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9 = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9{
+				BandOperationMode:   bandOperationMode,
+				BandSteeringEnabled: bandSteeringEnabled,
+				Bands:               requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9Bands,
+				MinBitrate:          minBitrate,
+			}
+			//[debug] Is Array: False
+		}
+		requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings{
+			Status0:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings0,
+			Status1:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings1,
+			Status10: requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings10,
+			Status11: requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings11,
+			Status12: requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings12,
+			Status13: requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings13,
+			Status14: requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings14,
+			Status2:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings2,
+			Status3:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings3,
+			Status4:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings4,
+			Status5:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings5,
+			Status6:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings6,
+			Status7:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings7,
+			Status8:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings8,
+			Status9:  requestWirelessUpdateNetworkWirelessRfProfilePerSSIDSettings9,
+		}
+		//[debug] Is Array: False
+	}
+	var requestWirelessUpdateNetworkWirelessRfProfileSixGhzSettings *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileSixGhzSettings
+
+	if r.SixGhzSettings != nil {
+		channelWidth := r.SixGhzSettings.ChannelWidth.ValueString()
+		maxPower := func() *int64 {
+			if !r.SixGhzSettings.MaxPower.IsUnknown() && !r.SixGhzSettings.MaxPower.IsNull() {
+				return r.SixGhzSettings.MaxPower.ValueInt64Pointer()
+			}
+			return nil
+		}()
+		minBitrate := func() *int64 {
+			if !r.SixGhzSettings.MinBitrate.IsUnknown() && !r.SixGhzSettings.MinBitrate.IsNull() {
+				return r.SixGhzSettings.MinBitrate.ValueInt64Pointer()
+			}
+			return nil
+		}()
+		minPower := func() *int64 {
+			if !r.SixGhzSettings.MinPower.IsUnknown() && !r.SixGhzSettings.MinPower.IsNull() {
+				return r.SixGhzSettings.MinPower.ValueInt64Pointer()
+			}
+			return nil
+		}()
+		rxsop := func() *int64 {
+			if !r.SixGhzSettings.Rxsop.IsUnknown() && !r.SixGhzSettings.Rxsop.IsNull() {
+				return r.SixGhzSettings.Rxsop.ValueInt64Pointer()
+			}
+			return nil
+		}()
+
+		var validAutoChannels []int = nil
+		r.SixGhzSettings.ValidAutoChannels.ElementsAs(ctx, &validAutoChannels, false)
+		requestWirelessUpdateNetworkWirelessRfProfileSixGhzSettings = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileSixGhzSettings{
+			ChannelWidth:      channelWidth,
+			MaxPower:          int64ToIntPointer(maxPower),
+			MinBitrate:        int64ToIntPointer(minBitrate),
+			MinPower:          int64ToIntPointer(minPower),
+			Rxsop:             int64ToIntPointer(rxsop),
+			ValidAutoChannels: &validAutoChannels,
+		}
+		//[debug] Is Array: False
+	}
+	var requestWirelessUpdateNetworkWirelessRfProfileTransmission *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileTransmission
+
+	if r.Transmission != nil {
+		enabled := func() *bool {
+			if !r.Transmission.Enabled.IsUnknown() && !r.Transmission.Enabled.IsNull() {
+				return r.Transmission.Enabled.ValueBoolPointer()
+			}
+			return nil
+		}()
+		requestWirelessUpdateNetworkWirelessRfProfileTransmission = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileTransmission{
+			Enabled: enabled,
+		}
+		//[debug] Is Array: False
+	}
+	var requestWirelessUpdateNetworkWirelessRfProfileTwoFourGhzSettings *merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileTwoFourGhzSettings
+
+	if r.TwoFourGhzSettings != nil {
+		axEnabled := func() *bool {
+			if !r.TwoFourGhzSettings.AxEnabled.IsUnknown() && !r.TwoFourGhzSettings.AxEnabled.IsNull() {
+				return r.TwoFourGhzSettings.AxEnabled.ValueBoolPointer()
+			}
+			return nil
+		}()
+		maxPower := func() *int64 {
+			if !r.TwoFourGhzSettings.MaxPower.IsUnknown() && !r.TwoFourGhzSettings.MaxPower.IsNull() {
+				return r.TwoFourGhzSettings.MaxPower.ValueInt64Pointer()
+			}
+			return nil
+		}()
+		minBitrate := func() *float64 {
+			if !r.TwoFourGhzSettings.MinBitrate.IsUnknown() && !r.TwoFourGhzSettings.MinBitrate.IsNull() {
+				return r.TwoFourGhzSettings.MinBitrate.ValueFloat64Pointer()
+			}
+			return nil
+		}()
+		minPower := func() *int64 {
+			if !r.TwoFourGhzSettings.MinPower.IsUnknown() && !r.TwoFourGhzSettings.MinPower.IsNull() {
+				return r.TwoFourGhzSettings.MinPower.ValueInt64Pointer()
+			}
+			return nil
+		}()
+		rxsop := func() *int64 {
+			if !r.TwoFourGhzSettings.Rxsop.IsUnknown() && !r.TwoFourGhzSettings.Rxsop.IsNull() {
+				return r.TwoFourGhzSettings.Rxsop.ValueInt64Pointer()
+			}
+			return nil
+		}()
+
+		var validAutoChannels []int = nil
 		r.TwoFourGhzSettings.ValidAutoChannels.ElementsAs(ctx, &validAutoChannels, false)
 		requestWirelessUpdateNetworkWirelessRfProfileTwoFourGhzSettings = &merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfileTwoFourGhzSettings{
 			AxEnabled:         axEnabled,
@@ -3322,8 +3638,9 @@ func (r *NetworksWirelessRfProfilesRs) toSdkApiRequestUpdate(ctx context.Context
 			MinBitrate:        minBitrate,
 			MinPower:          int64ToIntPointer(minPower),
 			Rxsop:             int64ToIntPointer(rxsop),
-			ValidAutoChannels: validAutoChannels,
+			ValidAutoChannels: &validAutoChannels,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestWirelessUpdateNetworkWirelessRfProfile{
 		ApBandSettings:         requestWirelessUpdateNetworkWirelessRfProfileApBandSettings,

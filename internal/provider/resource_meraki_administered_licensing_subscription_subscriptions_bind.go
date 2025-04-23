@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -80,7 +80,7 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsBindResource) Schema(_ co
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"errors": schema.SetAttribute{
+					"errors": schema.ListAttribute{
 						MarkdownDescription: `Array of errors if failed`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -128,7 +128,7 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsBindResource) Schema(_ co
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"network_ids": schema.SetAttribute{
+					"network_ids": schema.ListAttribute{
 						MarkdownDescription: `List of network ids to bind to the subscription`,
 						Optional:            true,
 						Computed:            true,
@@ -161,7 +161,6 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsBindResource) Create(ctx 
 	vvSubscriptionID := data.SubscriptionID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Licensing.BindAdministeredLicensingSubscriptionSubscription(vvSubscriptionID, dataRequest, nil)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -178,7 +177,6 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsBindResource) Create(ctx 
 	}
 	//Item
 	data = ResponseLicensingBindAdministeredLicensingSubscriptionSubscriptionItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -204,7 +202,7 @@ type AdministeredLicensingSubscriptionSubscriptionsBind struct {
 }
 
 type ResponseLicensingBindAdministeredLicensingSubscriptionSubscription struct {
-	Errors                   types.Set                                                                                     `tfsdk:"errors"`
+	Errors                   types.List                                                                                    `tfsdk:"errors"`
 	InsufficientEntitlements *[]ResponseLicensingBindAdministeredLicensingSubscriptionSubscriptionInsufficientEntitlements `tfsdk:"insufficient_entitlements"`
 	Networks                 *[]ResponseLicensingBindAdministeredLicensingSubscriptionSubscriptionNetworks                 `tfsdk:"networks"`
 	SubscriptionID           types.String                                                                                  `tfsdk:"subscription_id"`
@@ -238,7 +236,7 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsBind) toSdkApiRequestCrea
 // ToBody
 func ResponseLicensingBindAdministeredLicensingSubscriptionSubscriptionItemToBody(state AdministeredLicensingSubscriptionSubscriptionsBind, response *merakigosdk.ResponseLicensingBindAdministeredLicensingSubscriptionSubscription) AdministeredLicensingSubscriptionSubscriptionsBind {
 	itemState := ResponseLicensingBindAdministeredLicensingSubscriptionSubscription{
-		Errors: StringSliceToSet(response.Errors),
+		Errors: StringSliceToList(response.Errors),
 		InsufficientEntitlements: func() *[]ResponseLicensingBindAdministeredLicensingSubscriptionSubscriptionInsufficientEntitlements {
 			if response.InsufficientEntitlements != nil {
 				result := make([]ResponseLicensingBindAdministeredLicensingSubscriptionSubscriptionInsufficientEntitlements, len(*response.InsufficientEntitlements))

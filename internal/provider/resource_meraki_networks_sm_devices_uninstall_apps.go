@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -78,7 +78,7 @@ func (r *NetworksSmDevicesUninstallAppsResource) Schema(_ context.Context, _ res
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"app_ids": schema.SetAttribute{
+					"app_ids": schema.ListAttribute{
 						MarkdownDescription: `ids of applications to be uninstalled`,
 						Optional:            true,
 						Computed:            true,
@@ -112,7 +112,6 @@ func (r *NetworksSmDevicesUninstallAppsResource) Create(ctx context.Context, req
 	vvDeviceID := data.DeviceID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	restyResp1, err := r.client.Sm.UninstallNetworkSmDeviceApps(vvNetworkID, vvDeviceID, dataRequest)
-
 	if err != nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(

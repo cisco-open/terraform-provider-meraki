@@ -1,6 +1,22 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
 
+// Copyright © 2023 Cisco Systems, Inc. and its affiliates.
+// All rights reserved.
+//
+// Licensed under the Mozilla Public License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//	https://mozilla.org/MPL/2.0/
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: MPL-2.0
 package provider
 
 import (
@@ -10,7 +26,7 @@ import (
 	"os"
 	"regexp"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -23,7 +39,7 @@ import (
 )
 
 const (
-	CUSTOM_USER_AGENT  = "MerakiTerraform/1.0.7-beta Cisco"
+	CUSTOM_USER_AGENT  = "MerakiTerraform/1.1.0-beta Cisco"
 	DEFAULT_USER_AGENT = "Meraki"
 )
 
@@ -354,6 +370,9 @@ func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewNetworksWirelessElectronicShelfLabelResource,
 		NewOrganizationsCellularGatewayEsimsServiceProvidersAccountsResource,
 		NewOrganizationsSplashThemesResource,
+		NewOrganizationsApplianceDNSLocalProfilesResource,
+		NewOrganizationsApplianceDNSLocalRecordsResource,
+		NewOrganizationsApplianceDNSSplitProfilesResource,
 		NewDevicesApplianceVmxAuthenticationTokenResource,
 		NewDevicesBlinkLedsResource,
 		NewDevicesCameraGenerateSnapshotResource,
@@ -415,13 +434,14 @@ func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewAdministeredIDentitiesMeAPIKeysGenerateResource,
 		NewAdministeredIDentitiesMeAPIKeysRevokeResource,
 		NewDevicesLiveToolsLedsBlinkResource,
+		NewDevicesSensorCommandsCreateResource,
 		NewNetworksApplianceSdwanInternetPoliciesResource,
 		NewNetworksFloorPlansAutoLocateJobsBatchResource,
 		NewNetworksCancelResource,
 		NewNetworksPublishResource,
 		NewNetworksRecalculateResource,
 		NewNetworksFloorPlansDevicesBatchUpdateResource,
-		NewNetworksWirelessAirMarshalRulesResource,
+		NewNetworksWirelessAirMarshalRulesCreateResource,
 		NewNetworksWirelessAirMarshalRulesUpdateResource,
 		NewNetworksWirelessAirMarshalRulesDeleteResource,
 		NewNetworksWirelessAirMarshalSettingsResource,
@@ -431,6 +451,17 @@ func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewOrganizationsDevicesDetailsBulkUpdateResource,
 		NewOrganizationsAssetsResource,
 		NewOrganizationsWirelessRadioAutoRfChannelsRecalculateResource,
+		NewNetworksApplianceFirewallMulticastForwardingResource,
+		NewApplianceApplianceDNSLocalProfilesAssignmentsBulkCreateResource,
+		NewApplianceApplianceDNSLocalProfilesAssignmentsBulkDeleteResource,
+		NewApplianceApplianceDNSSplitProfilesAssignmentsBulkCreateResource,
+		NewApplianceApplianceDNSSplitProfilesAssignmentsBulkDeleteResource,
+		NewOrganizationsDevicesControllerMigrationsCreateResource,
+		NewOrganizationsIntegrationsXdrNetworksDisableResource,
+		NewOrganizationsIntegrationsXdrNetworksEnableResource,
+		NewWirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource,
+		NewWirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource,
+		NewWirelessWirelessSSIDsFirewallIsolationAllowlistEntriesUpdateResource,
 	}
 }
 
@@ -713,7 +744,9 @@ func (p *MerakiProvider) DataSources(ctx context.Context) []func() datasource.Da
 		NewOrganizationsWirelessDevicesPacketLossByDeviceDataSource,
 		NewOrganizationsWirelessDevicesPacketLossByNetworkDataSource,
 		NewAdministeredIDentitiesMeAPIKeysDataSource,
+		NewDevicesSensorCommandsDataSource,
 		NewDevicesWirelessElectronicShelfLabelDataSource,
+		NewNetworksWirelessAirMarshalRulesDataSource,
 		NewNetworksWirelessElectronicShelfLabelDataSource,
 		NewNetworksWirelessElectronicShelfLabelConfiguredDevicesDataSource,
 		NewOrganizationsAssuranceAlertsDataSource,
@@ -757,5 +790,18 @@ func (p *MerakiProvider) DataSources(ctx context.Context) []func() datasource.Da
 		NewOrganizationsWirelessControllerDevicesRedundancyStatusesDataSource,
 		NewOrganizationsWirelessControllerDevicesSystemUtilizationHistoryByIntervalDataSource,
 		NewOrganizationsWirelessControllerOverviewByDeviceDataSource,
+		NewOrganizationsApplianceDNSLocalProfilesDataSource,
+		NewOrganizationsApplianceDNSLocalProfilesAssignmentsDataSource,
+		NewOrganizationsApplianceDNSLocalRecordsDataSource,
+		NewOrganizationsApplianceDNSSplitProfilesDataSource,
+		NewOrganizationsApplianceDNSSplitProfilesAssignmentsDataSource,
+		NewOrganizationsApplianceFirewallMulticastForwardingByNetworkDataSource,
+		NewOrganizationsDevicesControllerMigrationsDataSource,
+		NewOrganizationsDevicesSystemMemoryUsageHistoryByIntervalDataSource,
+		NewOrganizationsIntegrationsXdrNetworksDataSource,
+		NewOrganizationsSwitchPortsUsageHistoryByDeviceByIntervalDataSource,
+		NewOrganizationsWirelessDevicesPowerModeHistoryDataSource,
+		NewOrganizationsWirelessDevicesSystemCPULoadHistoryDataSource,
+		NewOrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesDataSource,
 	}
 }

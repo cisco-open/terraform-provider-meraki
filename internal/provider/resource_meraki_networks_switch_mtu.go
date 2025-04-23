@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -137,30 +137,37 @@ func (r *NetworksSwitchMtuResource) Create(ctx context.Context, req resource.Cre
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchMtu(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchMtu only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchMtu(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchMtu  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchMtu only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchMtu only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchMtu(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchMtu",
 				err.Error(),
@@ -173,9 +180,10 @@ func (r *NetworksSwitchMtuResource) Create(ctx context.Context, req resource.Cre
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchMtu(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -190,11 +198,12 @@ func (r *NetworksSwitchMtuResource) Create(ctx context.Context, req resource.Cre
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseSwitchGetNetworkSwitchMtuItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksSwitchMtuResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -313,6 +322,7 @@ func (r *NetworksSwitchMtuRs) toSdkApiRequestUpdate(ctx context.Context) *meraki
 		defaultMtuSize = nil
 	}
 	var requestSwitchUpdateNetworkSwitchMtuOverrides []merakigosdk.RequestSwitchUpdateNetworkSwitchMtuOverrides
+
 	if r.Overrides != nil {
 		for _, rItem1 := range *r.Overrides {
 			mtuSize := func() *int64 {
@@ -321,17 +331,18 @@ func (r *NetworksSwitchMtuRs) toSdkApiRequestUpdate(ctx context.Context) *meraki
 				}
 				return nil
 			}()
+
 			var switchProfiles []string = nil
-			//Hoola aqui
 			rItem1.SwitchProfiles.ElementsAs(ctx, &switchProfiles, false)
+
 			var switches []string = nil
-			//Hoola aqui
 			rItem1.Switches.ElementsAs(ctx, &switches, false)
 			requestSwitchUpdateNetworkSwitchMtuOverrides = append(requestSwitchUpdateNetworkSwitchMtuOverrides, merakigosdk.RequestSwitchUpdateNetworkSwitchMtuOverrides{
 				MtuSize:        int64ToIntPointer(mtuSize),
 				SwitchProfiles: switchProfiles,
 				Switches:       switches,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestSwitchUpdateNetworkSwitchMtu{

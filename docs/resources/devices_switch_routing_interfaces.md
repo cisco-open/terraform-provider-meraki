@@ -19,10 +19,10 @@ resource "meraki_devices_switch_routing_interfaces" "example" {
   interface_ip    = "192.168.1.2"
   ipv6 = {
 
-    address         = "1:2:3:4::1"
+    address         = "2001:db8::1"
     assignment_mode = "static"
-    gateway         = "1:2:3:4::2"
-    prefix          = "1:2:3:4::/48"
+    gateway         = "2001:db8::2"
+    prefix          = "2001:db8::/32"
   }
   multicast_routing = "disabled"
   name              = "L3 interface"
@@ -52,7 +52,7 @@ output "meraki_devices_switch_routing_interfaces_example" {
 ### Optional
 
 - `default_gateway` (String) IPv4 default gateway
-- `interface_id` (String) The id
+- `interface_id` (String) The ID
 - `interface_ip` (String) IPv4 address
 - `ipv6` (Attributes) IPv6 addressing (see [below for nested schema](#nestedatt--ipv6))
 - `multicast_routing` (String) Multicast routing status
@@ -61,12 +61,12 @@ output "meraki_devices_switch_routing_interfaces_example" {
 - `ospf_settings` (Attributes) IPv4 OSPF Settings (see [below for nested schema](#nestedatt--ospf_settings))
 - `ospf_v3` (Attributes) IPv6 OSPF Settings (see [below for nested schema](#nestedatt--ospf_v3))
 - `subnet` (String) IPv4 subnet
-- `vlan_id` (Number) VLAN id
+- `vlan_id` (Number) VLAN ID
 
 ### Read-Only
 
-- `uplink_v4` (Boolean) Whether this is the switch's IPv4 uplink
-- `uplink_v6` (Boolean) Whether this is the switch's IPv6 uplink
+- `uplink_v4` (Boolean) When true, this interface is used as static IPv4 uplink
+- `uplink_v6` (Boolean) When true, this interface is used as static IPv6 uplink
 
 <a id="nestedatt--ipv6"></a>
 ### Nested Schema for `ipv6`
@@ -84,7 +84,7 @@ Optional:
 
 Optional:
 
-- `area` (String) Area id
+- `area` (String) Area ID
 - `cost` (Number) OSPF Cost
 - `is_passive_enabled` (Boolean) Disable sending Hello packets on this interface's IPv4 area
 
@@ -94,7 +94,7 @@ Optional:
 
 Optional:
 
-- `area` (String) Area id
+- `area` (String) Area ID
 - `cost` (Number) OSPF Cost
 - `is_passive_enabled` (Boolean) Disable sending Hello packets on this interface's IPv6 area
 
@@ -103,5 +103,5 @@ Optional:
 Import is supported using the following syntax:
 
 ```shell
-terraform import meraki_devices_switch_routing_interfaces.example "serial,interface_id"
+terraform import meraki_devices_switch_routing_interfaces.example "interface_id,serial"
 ```

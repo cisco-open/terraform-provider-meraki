@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -166,15 +166,22 @@ func (r *DevicesSensorRelationshipsResource) Create(ctx context.Context, req res
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvSerial := data.Serial.ValueString()
-	// serial
-	//Reviw This  Has Item Not response
-	//Esta bien
+	//Has Item and not has items
 
 	//Items
 	responseVerifyItem, restyResp1, err := r.client.Sensor.GetDeviceSensorRelationships(vvSerial)
+	// No Post
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+		resp.Diagnostics.AddError(
+			"Resource DevicesSensorRelationships  only have update context, not create.",
+			err.Error(),
+		)
+		return
+	}
+
+	if responseVerifyItem == nil {
 		resp.Diagnostics.AddError(
 			"Resource DevicesSensorRelationships only have update context, not create.",
 			err.Error(),
@@ -199,9 +206,10 @@ func (r *DevicesSensorRelationshipsResource) Create(ctx context.Context, req res
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Sensor.GetDeviceSensorRelationships(vvSerial)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -220,19 +228,20 @@ func (r *DevicesSensorRelationshipsResource) Create(ctx context.Context, req res
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *DevicesSensorRelationshipsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data DevicesSensorRelationshipsRs
 
-	var response types.Object
+	var item types.Object
 
-	resp.Diagnostics.Append(req.State.Get(ctx, &response)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(response.As(ctx, &data, basetypes.ObjectAsOptions{
+	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
 		UnhandledNullAsEmpty:    true,
 		UnhandledUnknownAsEmpty: true,
 	})...)
@@ -244,10 +253,17 @@ func (r *DevicesSensorRelationshipsResource) Read(ctx context.Context, req resou
 	// Has Item2
 
 	vvSerial := data.Serial.ValueString()
-	// serial
-	responseGet, restyResp1, err := r.client.Sensor.GetDeviceSensorRelationships(vvSerial)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
+	responseGet, restyRespGet, err := r.client.Sensor.GetDeviceSensorRelationships(vvSerial)
+	if err != nil || restyRespGet == nil {
+		if restyRespGet != nil {
+			if restyRespGet.StatusCode() == 404 {
+				resp.Diagnostics.AddWarning(
+					"Resource not found",
+					"Deleting resource",
+				)
+				resp.State.RemoveResource(ctx)
+				return
+			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceSensorRelationships",
 				err.Error(),

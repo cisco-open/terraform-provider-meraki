@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -157,7 +157,6 @@ func (r *NetworksApplianceTrafficShapingCustomPerformanceClassesResource) Create
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Appliance.CreateNetworkApplianceTrafficShapingCustomPerformanceClass(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -174,7 +173,6 @@ func (r *NetworksApplianceTrafficShapingCustomPerformanceClassesResource) Create
 	}
 	//Item
 	data = ResponseApplianceCreateNetworkApplianceTrafficShapingCustomPerformanceClassItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }

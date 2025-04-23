@@ -20,7 +20,9 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	"log"
+
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -643,30 +645,37 @@ func (r *NetworksAlertsSettingsResource) Create(ctx context.Context, req resourc
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkAlertsSettings(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksAlertsSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkAlertsSettings(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksAlertsSettings  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksAlertsSettings only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksAlertsSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkAlertsSettings(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkAlertsSettings",
 				err.Error(),
@@ -679,9 +688,10 @@ func (r *NetworksAlertsSettingsResource) Create(ctx context.Context, req resourc
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Networks.GetNetworkAlertsSettings(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -696,11 +706,12 @@ func (r *NetworksAlertsSettingsResource) Create(ctx context.Context, req resourc
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseNetworksGetNetworkAlertsSettingsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksAlertsSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -864,11 +875,12 @@ type ResponseNetworksGetNetworkAlertsSettingsMutingByPortSchedulesRs struct {
 // FromBody
 func (r *NetworksAlertsSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestNetworksUpdateNetworkAlertsSettings {
 	var requestNetworksUpdateNetworkAlertsSettingsAlerts []merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsAlerts
+
 	if r.Alerts != nil {
 		for _, rItem1 := range *r.Alerts {
 			var requestNetworksUpdateNetworkAlertsSettingsAlertsAlertDestinations *merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsAlertsAlertDestinations
+
 			if rItem1.AlertDestinations != nil {
-				// Inicialización de variables a partir de las propiedades
 				allAdmins := func() *bool {
 					if !rItem1.AlertDestinations.AllAdmins.IsUnknown() && !rItem1.AlertDestinations.AllAdmins.IsNull() {
 						return rItem1.AlertDestinations.AllAdmins.ValueBoolPointer()
@@ -876,43 +888,42 @@ func (r *NetworksAlertsSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 					return nil
 				}()
 
-				// Corrección del manejo de emails, httpServerIDs y smsNumbers
-				var emails []string
+				var emails []string = nil
 				rItem1.AlertDestinations.Emails.ElementsAs(ctx, &emails, false)
 
-				var httpServerIDs []string
+				var httpServerIDs []string = nil
 				rItem1.AlertDestinations.HTTPServerIDs.ElementsAs(ctx, &httpServerIDs, false)
 
-				var smsNumbers []string
+				var smsNumbers []string = nil
 				rItem1.AlertDestinations.SmsNumbers.ElementsAs(ctx, &smsNumbers, false)
-
-				sNMP := func() *bool {
+				snmp := func() *bool {
 					if !rItem1.AlertDestinations.SNMP.IsUnknown() && !rItem1.AlertDestinations.SNMP.IsNull() {
 						return rItem1.AlertDestinations.SNMP.ValueBoolPointer()
 					}
 					return nil
 				}()
-
-				// Creación de la estructura de alertas de destino
 				requestNetworksUpdateNetworkAlertsSettingsAlertsAlertDestinations = &merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsAlertsAlertDestinations{
 					AllAdmins:     allAdmins,
 					Emails:        emails,
 					HTTPServerIDs: httpServerIDs,
 					SmsNumbers:    smsNumbers,
-					SNMP:          sNMP,
+					SNMP:          snmp,
 				}
+				//[debug] Is Array: False
 			}
-
 			enabled := func() *bool {
 				if !rItem1.Enabled.IsUnknown() && !rItem1.Enabled.IsNull() {
 					return rItem1.Enabled.ValueBoolPointer()
 				}
 				return nil
 			}()
-
 			var requestNetworksUpdateNetworkAlertsSettingsAlertsFilters *merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsAlertsFilters
-			var requestNetworksUpdateNetworkAlertsSettingsAlertsFiltersConditions []merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsAlertsFiltersConditions
+
 			if rItem1.Filters != nil {
+
+				log.Printf("[DEBUG] #TODO []RequestNetworksUpdateNetworkAlertsSettingsAlertsFiltersConditions")
+				var requestNetworksUpdateNetworkAlertsSettingsAlertsFiltersConditions []merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsAlertsFiltersConditions
+
 				if rItem1.Filters.Conditions != nil {
 					for _, rItem2 := range *rItem1.Filters.Conditions {
 						direction := rItem2.Direction.ValueString()
@@ -922,18 +933,14 @@ func (r *NetworksAlertsSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 							}
 							return nil
 						}()
-
 						threshold := func() *float64 {
 							if !rItem2.Threshold.IsUnknown() && !rItem2.Threshold.IsNull() {
 								return rItem2.Threshold.ValueFloat64Pointer()
 							}
 							return nil
 						}()
-
 						typeR := rItem2.Type.ValueString()
 						unit := rItem2.Unit.ValueString()
-
-						// Agregamos las condiciones al arreglo
 						requestNetworksUpdateNetworkAlertsSettingsAlertsFiltersConditions = append(requestNetworksUpdateNetworkAlertsSettingsAlertsFiltersConditions, merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsAlertsFiltersConditions{
 							Direction: direction,
 							Duration:  int64ToIntPointer(duration),
@@ -941,9 +948,9 @@ func (r *NetworksAlertsSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 							Type:      typeR,
 							Unit:      unit,
 						})
+						//[debug] Is Array: True
 					}
 				}
-
 				failureType := rItem1.Filters.FailureType.ValueString()
 				lookbackWindow := func() *int64 {
 					if !rItem1.Filters.LookbackWindow.IsUnknown() && !rItem1.Filters.LookbackWindow.IsNull() {
@@ -951,14 +958,12 @@ func (r *NetworksAlertsSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 					}
 					return nil
 				}()
-
 				minDuration := func() *int64 {
 					if !rItem1.Filters.MinDuration.IsUnknown() && !rItem1.Filters.MinDuration.IsNull() {
 						return rItem1.Filters.MinDuration.ValueInt64Pointer()
 					}
 					return nil
 				}()
-
 				name := rItem1.Filters.Name.ValueString()
 				period := func() *int64 {
 					if !rItem1.Filters.Period.IsUnknown() && !rItem1.Filters.Period.IsNull() {
@@ -966,22 +971,18 @@ func (r *NetworksAlertsSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 					}
 					return nil
 				}()
-
 				priority := rItem1.Filters.Priority.ValueString()
 				regex := rItem1.Filters.Regex.ValueString()
 				selector := rItem1.Filters.Selector.ValueString()
 
-				// Inicialización de serials
-				var serials []string
+				var serials []string = nil
 				rItem1.Filters.Serials.ElementsAs(ctx, &serials, false)
-
-				sSIDNum := func() *int64 {
+				ssidNum := func() *int64 {
 					if !rItem1.Filters.SSIDNum.IsUnknown() && !rItem1.Filters.SSIDNum.IsNull() {
 						return rItem1.Filters.SSIDNum.ValueInt64Pointer()
 					}
 					return nil
 				}()
-
 				tag := rItem1.Filters.Tag.ValueString()
 				threshold := func() *int64 {
 					if !rItem1.Filters.Threshold.IsUnknown() && !rItem1.Filters.Threshold.IsNull() {
@@ -989,15 +990,12 @@ func (r *NetworksAlertsSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 					}
 					return nil
 				}()
-
 				timeout := func() *int64 {
 					if !rItem1.Filters.Timeout.IsUnknown() && !rItem1.Filters.Timeout.IsNull() {
 						return rItem1.Filters.Timeout.ValueInt64Pointer()
 					}
 					return nil
 				}()
-
-				// Construcción de filtros de alerta
 				requestNetworksUpdateNetworkAlertsSettingsAlertsFilters = &merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsAlertsFilters{
 					Conditions: func() *[]merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsAlertsFiltersConditions {
 						if len(requestNetworksUpdateNetworkAlertsSettingsAlertsFiltersConditions) > 0 {
@@ -1014,25 +1012,25 @@ func (r *NetworksAlertsSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 					Regex:          regex,
 					Selector:       selector,
 					Serials:        serials,
-					SSIDNum:        int64ToIntPointer(sSIDNum),
+					SSIDNum:        int64ToIntPointer(ssidNum),
 					Tag:            tag,
 					Threshold:      int64ToIntPointer(threshold),
 					Timeout:        int64ToIntPointer(timeout),
 				}
-
-				// Añadir el alert configuration a la lista de alertas
-				typeR := rItem1.Type.ValueString()
-				requestNetworksUpdateNetworkAlertsSettingsAlerts = append(requestNetworksUpdateNetworkAlertsSettingsAlerts, merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsAlerts{
-					AlertDestinations: requestNetworksUpdateNetworkAlertsSettingsAlertsAlertDestinations,
-					Enabled:           enabled,
-					Filters:           requestNetworksUpdateNetworkAlertsSettingsAlertsFilters,
-					Type:              typeR,
-				})
+				//[debug] Is Array: False
 			}
+			typeR := rItem1.Type.ValueString()
+			requestNetworksUpdateNetworkAlertsSettingsAlerts = append(requestNetworksUpdateNetworkAlertsSettingsAlerts, merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsAlerts{
+				AlertDestinations: requestNetworksUpdateNetworkAlertsSettingsAlertsAlertDestinations,
+				Enabled:           enabled,
+				Filters:           requestNetworksUpdateNetworkAlertsSettingsAlertsFilters,
+				Type:              typeR,
+			})
+			//[debug] Is Array: True
 		}
 	}
-
 	var requestNetworksUpdateNetworkAlertsSettingsDefaultDestinations *merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsDefaultDestinations
+
 	if r.DefaultDestinations != nil {
 		allAdmins := func() *bool {
 			if !r.DefaultDestinations.AllAdmins.IsUnknown() && !r.DefaultDestinations.AllAdmins.IsNull() {
@@ -1041,31 +1039,30 @@ func (r *NetworksAlertsSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 			return nil
 		}()
 
-		var emails []string
+		var emails []string = nil
 		r.DefaultDestinations.Emails.ElementsAs(ctx, &emails, false)
 
-		var httpServerIDs []string
+		var httpServerIDs []string = nil
 		r.DefaultDestinations.HTTPServerIDs.ElementsAs(ctx, &httpServerIDs, false)
-
-		sNMP := func() *bool {
+		snmp := func() *bool {
 			if !r.DefaultDestinations.SNMP.IsUnknown() && !r.DefaultDestinations.SNMP.IsNull() {
 				return r.DefaultDestinations.SNMP.ValueBoolPointer()
 			}
 			return nil
 		}()
-
-		// Creación de la estructura de destinos por defecto
 		requestNetworksUpdateNetworkAlertsSettingsDefaultDestinations = &merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsDefaultDestinations{
 			AllAdmins:     allAdmins,
 			Emails:        emails,
 			HTTPServerIDs: httpServerIDs,
-			SNMP:          sNMP,
+			SNMP:          snmp,
 		}
+		//[debug] Is Array: False
 	}
-
 	var requestNetworksUpdateNetworkAlertsSettingsMuting *merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsMuting
+
 	if r.Muting != nil {
 		var requestNetworksUpdateNetworkAlertsSettingsMutingByPortSchedules *merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsMutingByPortSchedules
+
 		if r.Muting.ByPortSchedules != nil {
 			enabled := func() *bool {
 				if !r.Muting.ByPortSchedules.Enabled.IsUnknown() && !r.Muting.ByPortSchedules.Enabled.IsNull() {
@@ -1073,18 +1070,16 @@ func (r *NetworksAlertsSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 				}
 				return nil
 			}()
-			// Creación de la estructura de schedules de muteo por puerto
 			requestNetworksUpdateNetworkAlertsSettingsMutingByPortSchedules = &merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsMutingByPortSchedules{
 				Enabled: enabled,
 			}
+			//[debug] Is Array: False
 		}
-
 		requestNetworksUpdateNetworkAlertsSettingsMuting = &merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsMuting{
 			ByPortSchedules: requestNetworksUpdateNetworkAlertsSettingsMutingByPortSchedules,
 		}
+		//[debug] Is Array: False
 	}
-
-	// Creación final de la estructura de configuración de alertas
 	out := merakigosdk.RequestNetworksUpdateNetworkAlertsSettings{
 		Alerts: func() *[]merakigosdk.RequestNetworksUpdateNetworkAlertsSettingsAlerts {
 			if len(requestNetworksUpdateNetworkAlertsSettingsAlerts) > 0 {

@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -317,7 +317,7 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerClientsOverviewH
 									ID: types.StringValue(items.Network.ID),
 								}
 							}
-							return &ResponseWirelessControllerGetOrganizationWirelessControllerClientsOverviewHistoryByDeviceByIntervalItemsNetwork{}
+							return nil
 						}(),
 						Readings: func() *[]ResponseWirelessControllerGetOrganizationWirelessControllerClientsOverviewHistoryByDeviceByIntervalItemsReadings {
 							if items.Readings != nil {
@@ -338,11 +338,11 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerClientsOverviewH
 																}(),
 															}
 														}
-														return &ResponseWirelessControllerGetOrganizationWirelessControllerClientsOverviewHistoryByDeviceByIntervalItemsReadingsCountsByStatus{}
+														return nil
 													}(),
 												}
 											}
-											return &ResponseWirelessControllerGetOrganizationWirelessControllerClientsOverviewHistoryByDeviceByIntervalItemsReadingsCounts{}
+											return nil
 										}(),
 										EndTs:   types.StringValue(readings.EndTs),
 										StartTs: types.StringValue(readings.StartTs),
@@ -350,14 +350,14 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerClientsOverviewH
 								}
 								return &result
 							}
-							return &[]ResponseWirelessControllerGetOrganizationWirelessControllerClientsOverviewHistoryByDeviceByIntervalItemsReadings{}
+							return nil
 						}(),
 						Serial: types.StringValue(items.Serial),
 					}
 				}
 				return &result
 			}
-			return &[]ResponseWirelessControllerGetOrganizationWirelessControllerClientsOverviewHistoryByDeviceByIntervalItems{}
+			return nil
 		}(),
 		Meta: func() *ResponseWirelessControllerGetOrganizationWirelessControllerClientsOverviewHistoryByDeviceByIntervalMeta {
 			if response.Meta != nil {
@@ -382,15 +382,15 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerClientsOverviewH
 											}(),
 										}
 									}
-									return &ResponseWirelessControllerGetOrganizationWirelessControllerClientsOverviewHistoryByDeviceByIntervalMetaCountsItems{}
+									return nil
 								}(),
 							}
 						}
-						return &ResponseWirelessControllerGetOrganizationWirelessControllerClientsOverviewHistoryByDeviceByIntervalMetaCounts{}
+						return nil
 					}(),
 				}
 			}
-			return &ResponseWirelessControllerGetOrganizationWirelessControllerClientsOverviewHistoryByDeviceByIntervalMeta{}
+			return nil
 		}(),
 	}
 	state.Item = &itemState

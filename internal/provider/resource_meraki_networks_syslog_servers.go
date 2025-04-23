@@ -21,7 +21,7 @@ import (
 	"context"
 	"strconv"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -78,7 +78,7 @@ func (r *NetworksSyslogServersResource) Schema(_ context.Context, _ resource.Sch
 					Attributes: map[string]schema.Attribute{
 
 						"host": schema.StringAttribute{
-							MarkdownDescription: `The IP address of the syslog server`,
+							MarkdownDescription: `The IP address or FQDN of the syslog server`,
 							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
@@ -128,30 +128,37 @@ func (r *NetworksSyslogServersResource) Create(ctx context.Context, req resource
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkSyslogServers(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSyslogServers only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkSyslogServers(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSyslogServers  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSyslogServers only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSyslogServers only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkSyslogServers(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSyslogServers",
 				err.Error(),
@@ -164,9 +171,10 @@ func (r *NetworksSyslogServersResource) Create(ctx context.Context, req resource
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Networks.GetNetworkSyslogServers(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -181,11 +189,12 @@ func (r *NetworksSyslogServersResource) Create(ctx context.Context, req resource
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseNetworksGetNetworkSyslogServersItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksSyslogServersResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -297,6 +306,7 @@ type ResponseNetworksGetNetworkSyslogServersServersRs struct {
 // FromBody
 func (r *NetworksSyslogServersRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestNetworksUpdateNetworkSyslogServers {
 	var requestNetworksUpdateNetworkSyslogServersServers []merakigosdk.RequestNetworksUpdateNetworkSyslogServersServers
+
 	if r.Servers != nil {
 		for _, rItem1 := range *r.Servers {
 			host := rItem1.Host.ValueString()
@@ -306,14 +316,15 @@ func (r *NetworksSyslogServersRs) toSdkApiRequestUpdate(ctx context.Context) *me
 				}
 				return nil
 			}()
+
 			var roles []string = nil
-			//Hoola aqui
 			rItem1.Roles.ElementsAs(ctx, &roles, false)
 			requestNetworksUpdateNetworkSyslogServersServers = append(requestNetworksUpdateNetworkSyslogServersServers, merakigosdk.RequestNetworksUpdateNetworkSyslogServersServers{
 				Host:  host,
 				Port:  int64ToIntPointer(port),
 				Roles: roles,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestNetworksUpdateNetworkSyslogServers{

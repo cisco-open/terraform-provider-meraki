@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -63,7 +63,7 @@ func (d *OrganizationsSensorReadingsHistoryDataSource) Schema(_ context.Context,
 				Optional:            true,
 			},
 			"metrics": schema.ListAttribute{
-				MarkdownDescription: `metrics query parameter. Types of sensor readings to retrieve. If no metrics are supplied, all available types of readings will be retrieved. Allowed values are apparentPower, battery, button, co2, current, door, downstreamPower, frequency, humidity, indoorAirQuality, noise, pm25, powerFactor, realPower, remoteLockoutSwitch, temperature, tvoc, voltage, and water.`,
+				MarkdownDescription: `metrics query parameter. Types of sensor readings to retrieve. If no metrics are supplied, all available types of readings will be retrieved.`,
 				Optional:            true,
 				ElementType:         types.StringType,
 			},

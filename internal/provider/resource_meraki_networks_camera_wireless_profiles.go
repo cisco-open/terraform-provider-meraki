@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -194,12 +194,14 @@ func (r *NetworksCameraWirelessProfilesResource) Create(ctx context.Context, req
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Camera.GetNetworkCameraWirelessProfiles(vvNetworkID)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -211,6 +213,7 @@ func (r *NetworksCameraWirelessProfilesResource) Create(ctx context.Context, req
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -225,6 +228,7 @@ func (r *NetworksCameraWirelessProfilesResource) Create(ctx context.Context, req
 				return
 			}
 			r.client.Camera.UpdateNetworkCameraWirelessProfile(vvNetworkID, vvWirelessProfileID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Camera.GetNetworkCameraWirelessProfile(vvNetworkID, vvWirelessProfileID)
 			if responseVerifyItem2 != nil {
 				data = ResponseCameraGetNetworkCameraWirelessProfileItemToBodyRs(data, responseVerifyItem2, false)
@@ -234,11 +238,11 @@ func (r *NetworksCameraWirelessProfilesResource) Create(ctx context.Context, req
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Camera.CreateNetworkCameraWirelessProfile(vvNetworkID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkCameraWirelessProfile",
 				err.Error(),
@@ -251,9 +255,8 @@ func (r *NetworksCameraWirelessProfilesResource) Create(ctx context.Context, req
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Camera.GetNetworkCameraWirelessProfiles(vvNetworkID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -269,6 +272,7 @@ func (r *NetworksCameraWirelessProfilesResource) Create(ctx context.Context, req
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -277,7 +281,7 @@ func (r *NetworksCameraWirelessProfilesResource) Create(ctx context.Context, req
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter WirelessProfileID",
-				"Error",
+				"Fail Parsing WirelessProfileID",
 			)
 			return
 		}
@@ -307,6 +311,7 @@ func (r *NetworksCameraWirelessProfilesResource) Create(ctx context.Context, req
 		)
 		return
 	}
+
 }
 
 func (r *NetworksCameraWirelessProfilesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -467,6 +472,7 @@ type ResponseCameraGetNetworkCameraWirelessProfileSsidRs struct {
 func (r *NetworksCameraWirelessProfilesRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestCameraCreateNetworkCameraWirelessProfile {
 	emptyString := ""
 	var requestCameraCreateNetworkCameraWirelessProfileIDentity *merakigosdk.RequestCameraCreateNetworkCameraWirelessProfileIDentity
+
 	if r.IDentity != nil {
 		password := r.IDentity.Password.ValueString()
 		username := r.IDentity.Username.ValueString()
@@ -474,6 +480,7 @@ func (r *NetworksCameraWirelessProfilesRs) toSdkApiRequestCreate(ctx context.Con
 			Password: password,
 			Username: username,
 		}
+		//[debug] Is Array: False
 	}
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
@@ -482,6 +489,7 @@ func (r *NetworksCameraWirelessProfilesRs) toSdkApiRequestCreate(ctx context.Con
 		name = &emptyString
 	}
 	var requestCameraCreateNetworkCameraWirelessProfileSSID *merakigosdk.RequestCameraCreateNetworkCameraWirelessProfileSSID
+
 	if r.SSID != nil {
 		authMode := r.SSID.AuthMode.ValueString()
 		encryptionMode := r.SSID.EncryptionMode.ValueString()
@@ -493,6 +501,7 @@ func (r *NetworksCameraWirelessProfilesRs) toSdkApiRequestCreate(ctx context.Con
 			Name:           name,
 			Psk:            psk,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestCameraCreateNetworkCameraWirelessProfile{
 		IDentity: requestCameraCreateNetworkCameraWirelessProfileIDentity,
@@ -504,6 +513,7 @@ func (r *NetworksCameraWirelessProfilesRs) toSdkApiRequestCreate(ctx context.Con
 func (r *NetworksCameraWirelessProfilesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestCameraUpdateNetworkCameraWirelessProfile {
 	emptyString := ""
 	var requestCameraUpdateNetworkCameraWirelessProfileIDentity *merakigosdk.RequestCameraUpdateNetworkCameraWirelessProfileIDentity
+
 	if r.IDentity != nil {
 		password := r.IDentity.Password.ValueString()
 		username := r.IDentity.Username.ValueString()
@@ -511,6 +521,7 @@ func (r *NetworksCameraWirelessProfilesRs) toSdkApiRequestUpdate(ctx context.Con
 			Password: password,
 			Username: username,
 		}
+		//[debug] Is Array: False
 	}
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
@@ -519,6 +530,7 @@ func (r *NetworksCameraWirelessProfilesRs) toSdkApiRequestUpdate(ctx context.Con
 		name = &emptyString
 	}
 	var requestCameraUpdateNetworkCameraWirelessProfileSSID *merakigosdk.RequestCameraUpdateNetworkCameraWirelessProfileSSID
+
 	if r.SSID != nil {
 		authMode := r.SSID.AuthMode.ValueString()
 		encryptionMode := r.SSID.EncryptionMode.ValueString()
@@ -530,6 +542,7 @@ func (r *NetworksCameraWirelessProfilesRs) toSdkApiRequestUpdate(ctx context.Con
 			Name:           name,
 			Psk:            psk,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestCameraUpdateNetworkCameraWirelessProfile{
 		IDentity: requestCameraUpdateNetworkCameraWirelessProfileIDentity,

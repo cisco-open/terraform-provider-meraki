@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -97,12 +97,12 @@ func (r *NetworksUnbindResource) Schema(_ context.Context, _ resource.SchemaRequ
 						MarkdownDescription: `Organization ID`,
 						Computed:            true,
 					},
-					"product_types": schema.SetAttribute{
+					"product_types": schema.ListAttribute{
 						MarkdownDescription: `List of the product types that the network supports`,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"tags": schema.SetAttribute{
+					"tags": schema.ListAttribute{
 						MarkdownDescription: `Network tags`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -155,7 +155,6 @@ func (r *NetworksUnbindResource) Create(ctx context.Context, req resource.Create
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Networks.UnbindNetwork(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -172,7 +171,6 @@ func (r *NetworksUnbindResource) Create(ctx context.Context, req resource.Create
 	}
 	//Item
 	data = ResponseNetworksUnbindNetworkItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -204,8 +202,8 @@ type ResponseNetworksUnbindNetwork struct {
 	Name                    types.String `tfsdk:"name"`
 	Notes                   types.String `tfsdk:"notes"`
 	OrganizationID          types.String `tfsdk:"organization_id"`
-	ProductTypes            types.Set    `tfsdk:"product_types"`
-	Tags                    types.Set    `tfsdk:"tags"`
+	ProductTypes            types.List   `tfsdk:"product_types"`
+	Tags                    types.List   `tfsdk:"tags"`
 	TimeZone                types.String `tfsdk:"time_zone"`
 	URL                     types.String `tfsdk:"url"`
 }
@@ -243,8 +241,8 @@ func ResponseNetworksUnbindNetworkItemToBody(state NetworksUnbind, response *mer
 		Name:           types.StringValue(response.Name),
 		Notes:          types.StringValue(response.Notes),
 		OrganizationID: types.StringValue(response.OrganizationID),
-		ProductTypes:   StringSliceToSet(response.ProductTypes),
-		Tags:           StringSliceToSet(response.Tags),
+		ProductTypes:   StringSliceToList(response.ProductTypes),
+		Tags:           StringSliceToList(response.Tags),
 		TimeZone:       types.StringValue(response.TimeZone),
 		URL:            types.StringValue(response.URL),
 	}

@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -459,7 +459,6 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringPrepareResource) Create(
 	vvOrganizationID := data.OrganizationID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Organizations.CreateOrganizationInventoryOnboardingCloudMonitoringPrepare(vvOrganizationID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -475,9 +474,7 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringPrepareResource) Create(
 		return
 	}
 	//Item
-	// //entro aqui 2
-	// data2 := ResponseOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepare(data, response)
-
+	data = ResponseOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareItemsToBody(data, response)
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -608,10 +605,12 @@ type RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPre
 func (r *OrganizationsInventoryOnboardingCloudMonitoringPrepare) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepare {
 	re := *r.Parameters
 	var requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevices []merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevices
+
 	if re.Devices != nil {
 		for _, rItem1 := range *re.Devices {
 			sudi := rItem1.Sudi.ValueString()
 			var requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesTunnel *merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesTunnel
+
 			if rItem1.Tunnel != nil {
 				certificateName := rItem1.Tunnel.CertificateName.ValueString()
 				localInterface := func() *int64 {
@@ -633,62 +632,80 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringPrepare) toSdkApiRequest
 					LoopbackNumber:  int64ToIntPointer(loopbackNumber),
 					Name:            name,
 				}
+				//[debug] Is Array: False
 			}
 			var requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesUser *merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesUser
+
 			if rItem1.User != nil {
 				username := rItem1.User.Username.ValueString()
 				requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesUser = &merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesUser{
 					Username: username,
 				}
+				//[debug] Is Array: False
 			}
 			var requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVty *merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVty
+
 			if rItem1.Vty != nil {
 				var requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAccessList *merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAccessList
+
 				if rItem1.Vty.AccessList != nil {
 					var requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAccessListVtyIn *merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAccessListVtyIn
+
 					if rItem1.Vty.AccessList.VtyIn != nil {
 						name := rItem1.Vty.AccessList.VtyIn.Name.ValueString()
 						requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAccessListVtyIn = &merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAccessListVtyIn{
 							Name: name,
 						}
+						//[debug] Is Array: False
 					}
 					var requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAccessListVtyOut *merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAccessListVtyOut
+
 					if rItem1.Vty.AccessList.VtyOut != nil {
 						name := rItem1.Vty.AccessList.VtyOut.Name.ValueString()
 						requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAccessListVtyOut = &merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAccessListVtyOut{
 							Name: name,
 						}
+						//[debug] Is Array: False
 					}
 					requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAccessList = &merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAccessList{
 						VtyIn:  requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAccessListVtyIn,
 						VtyOut: requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAccessListVtyOut,
 					}
+					//[debug] Is Array: False
 				}
 				var requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAuthentication *merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAuthentication
+
 				if rItem1.Vty.Authentication != nil {
 					var requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAuthenticationGroup *merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAuthenticationGroup
+
 					if rItem1.Vty.Authentication.Group != nil {
 						name := rItem1.Vty.Authentication.Group.Name.ValueString()
 						requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAuthenticationGroup = &merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAuthenticationGroup{
 							Name: name,
 						}
+						//[debug] Is Array: False
 					}
 					requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAuthentication = &merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAuthentication{
 						Group: requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAuthenticationGroup,
 					}
+					//[debug] Is Array: False
 				}
 				var requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAuthorization *merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAuthorization
+
 				if rItem1.Vty.Authorization != nil {
 					var requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAuthorizationGroup *merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAuthorizationGroup
+
 					if rItem1.Vty.Authorization.Group != nil {
 						name := rItem1.Vty.Authorization.Group.Name.ValueString()
 						requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAuthorizationGroup = &merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAuthorizationGroup{
 							Name: name,
 						}
+						//[debug] Is Array: False
 					}
 					requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAuthorization = &merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAuthorization{
 						Group: requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVtyAuthorizationGroup,
 					}
+					//[debug] Is Array: False
 				}
 				endLineNumber := func() *int64 {
 					if !rItem1.Vty.EndLineNumber.IsUnknown() && !rItem1.Vty.EndLineNumber.IsNull() {
@@ -716,6 +733,7 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringPrepare) toSdkApiRequest
 					RotaryNumber:    int64ToIntPointer(rotaryNumber),
 					StartLineNumber: int64ToIntPointer(startLineNumber),
 				}
+				//[debug] Is Array: False
 			}
 			requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevices = append(requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevices, merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevices{
 				Sudi:   sudi,
@@ -723,9 +741,11 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringPrepare) toSdkApiRequest
 				User:   requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesUser,
 				Vty:    requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevicesVty,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareOptions *merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareOptions
+
 	if re.Options != nil {
 		skipCommit := func() *bool {
 			if !re.Options.SkipCommit.IsUnknown() && !re.Options.SkipCommit.IsNull() {
@@ -736,6 +756,7 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringPrepare) toSdkApiRequest
 		requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareOptions = &merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareOptions{
 			SkipCommit: skipCommit,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepare{
 		Devices: func() *[]merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevices {

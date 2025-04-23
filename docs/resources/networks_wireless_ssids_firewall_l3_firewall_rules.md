@@ -65,7 +65,7 @@ Optional:
 <a id="nestedatt--rules_response"></a>
 ### Nested Schema for `rules_response`
 
-Optional:
+Read-Only:
 
 - `comment` (String) Description of the rule (optional)
 - `dest_cidr` (String) Comma-separated list of destination IP address(es) (in IP or CIDR notation), fully-qualified domain names (FQDN) or 'any'

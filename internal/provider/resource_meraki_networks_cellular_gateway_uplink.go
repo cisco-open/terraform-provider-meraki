@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -114,30 +114,37 @@ func (r *NetworksCellularGatewayUplinkResource) Create(ctx context.Context, req 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.CellularGateway.GetNetworkCellularGatewayUplink(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksCellularGatewayUplink only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksCellularGatewayUplink only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	_, restyResp2, err := r.client.CellularGateway.UpdateNetworkCellularGatewayUplink(vvNetworkID, dataRequest)
+	//Has Item and not has items
 
-	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.CellularGateway.GetNetworkCellularGatewayUplink(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksCellularGatewayUplink  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksCellularGatewayUplink only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+	}
+
+	// UPDATE NO CREATE
+	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	response, restyResp2, err := r.client.CellularGateway.UpdateNetworkCellularGatewayUplink(vvNetworkID, dataRequest)
+	//Update
+	if err != nil || restyResp2 == nil || response == nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCellularGatewayUplink",
 				err.Error(),
@@ -150,9 +157,10 @@ func (r *NetworksCellularGatewayUplinkResource) Create(ctx context.Context, req 
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.CellularGateway.GetNetworkCellularGatewayUplink(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -167,11 +175,12 @@ func (r *NetworksCellularGatewayUplinkResource) Create(ctx context.Context, req 
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseCellularGatewayGetNetworkCellularGatewayUplinkItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksCellularGatewayUplinkResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -242,8 +251,8 @@ func (r *NetworksCellularGatewayUplinkResource) Update(ctx context.Context, req 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	_, restyResp2, err := r.client.CellularGateway.UpdateNetworkCellularGatewayUplink(vvNetworkID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.CellularGateway.UpdateNetworkCellularGatewayUplink(vvNetworkID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCellularGatewayUplink",
@@ -282,6 +291,7 @@ type ResponseCellularGatewayGetNetworkCellularGatewayUplinkBandwidthLimitsRs str
 // FromBody
 func (r *NetworksCellularGatewayUplinkRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestCellularGatewayUpdateNetworkCellularGatewayUplink {
 	var requestCellularGatewayUpdateNetworkCellularGatewayUplinkBandwidthLimits *merakigosdk.RequestCellularGatewayUpdateNetworkCellularGatewayUplinkBandwidthLimits
+
 	if r.BandwidthLimits != nil {
 		limitDown := func() *int64 {
 			if !r.BandwidthLimits.LimitDown.IsUnknown() && !r.BandwidthLimits.LimitDown.IsNull() {
@@ -299,6 +309,7 @@ func (r *NetworksCellularGatewayUplinkRs) toSdkApiRequestUpdate(ctx context.Cont
 			LimitDown: int64ToIntPointer(limitDown),
 			LimitUp:   int64ToIntPointer(limitUp),
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestCellularGatewayUpdateNetworkCellularGatewayUplink{
 		BandwidthLimits: requestCellularGatewayUpdateNetworkCellularGatewayUplinkBandwidthLimits,

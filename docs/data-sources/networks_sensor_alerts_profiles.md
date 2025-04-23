@@ -51,6 +51,8 @@ output "meraki_networks_sensor_alerts_profiles_example" {
 Read-Only:
 
 - `conditions` (Attributes Set) List of conditions that will cause the profile to send an alert. (see [below for nested schema](#nestedatt--item--conditions))
+- `includesensor_url` (Boolean) Include dashboard link to sensor in messages (default: true).
+- `message` (String) A custom message that will appear in email and text message alerts.
 - `name` (String) Name of the sensor alert profile.
 - `profile_id` (String) ID of the sensor alert profile.
 - `recipients` (Attributes) List of recipients that will receive the alert. (see [below for nested schema](#nestedatt--item--recipients))
@@ -261,6 +263,8 @@ Read-Only:
 Read-Only:
 
 - `conditions` (Attributes Set) List of conditions that will cause the profile to send an alert. (see [below for nested schema](#nestedatt--items--conditions))
+- `includesensor_url` (Boolean) Include dashboard link to sensor in messages (default: true).
+- `message` (String) A custom message that will appear in email and text message alerts.
 - `name` (String) Name of the sensor alert profile.
 - `profile_id` (String) ID of the sensor alert profile.
 - `recipients` (Attributes) List of recipients that will receive the alert. (see [below for nested schema](#nestedatt--items--recipients))

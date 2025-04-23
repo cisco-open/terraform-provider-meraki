@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -76,7 +76,7 @@ func (r *OrganizationsSwitchDevicesCloneResource) Schema(_ context.Context, _ re
 						MarkdownDescription: `Serial number of the source switch (must be on a network not bound to a template)`,
 						Computed:            true,
 					},
-					"target_serials": schema.SetAttribute{
+					"target_serials": schema.ListAttribute{
 						MarkdownDescription: `Array of serial numbers of one or more target switches (must be on a network not bound to a template)`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -94,7 +94,7 @@ func (r *OrganizationsSwitchDevicesCloneResource) Schema(_ context.Context, _ re
 							stringplanmodifier.RequiresReplace(),
 						},
 					},
-					"target_serials": schema.SetAttribute{
+					"target_serials": schema.ListAttribute{
 						MarkdownDescription: `Array of serial numbers of one or more target switches (must be on a network not bound to a template)`,
 						Optional:            true,
 						Computed:            true,
@@ -127,8 +127,7 @@ func (r *OrganizationsSwitchDevicesCloneResource) Create(ctx context.Context, re
 	vvOrganizationID := data.OrganizationID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Switch.CloneOrganizationSwitchDevices(vvOrganizationID, dataRequest)
-
-	if err != nil {
+	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CloneOrganizationSwitchDevices",
@@ -143,9 +142,7 @@ func (r *OrganizationsSwitchDevicesCloneResource) Create(ctx context.Context, re
 		return
 	}
 	//Item
-	// //entro aqui 2
 	data = ResponseSwitchCloneOrganizationSwitchDevicesItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -172,7 +169,7 @@ type OrganizationsSwitchDevicesClone struct {
 
 type ResponseSwitchCloneOrganizationSwitchDevices struct {
 	SourceSerial  types.String `tfsdk:"source_serial"`
-	TargetSerials types.Set    `tfsdk:"target_serials"`
+	TargetSerials types.List   `tfsdk:"target_serials"`
 }
 
 type RequestSwitchCloneOrganizationSwitchDevicesRs struct {
@@ -203,7 +200,7 @@ func (r *OrganizationsSwitchDevicesClone) toSdkApiRequestCreate(ctx context.Cont
 func ResponseSwitchCloneOrganizationSwitchDevicesItemToBody(state OrganizationsSwitchDevicesClone, response *merakigosdk.ResponseSwitchCloneOrganizationSwitchDevices) OrganizationsSwitchDevicesClone {
 	itemState := ResponseSwitchCloneOrganizationSwitchDevices{
 		SourceSerial:  types.StringValue(response.SourceSerial),
-		TargetSerials: StringSliceToSet(response.TargetSerials),
+		TargetSerials: StringSliceToList(response.TargetSerials),
 	}
 	state.Item = &itemState
 	return state

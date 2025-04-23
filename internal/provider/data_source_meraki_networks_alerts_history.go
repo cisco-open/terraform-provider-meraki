@@ -20,9 +20,10 @@ package provider
 // DATA SOURCE NORMAL
 import (
 	"context"
+	"fmt"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -220,7 +221,7 @@ type NetworksAlertsHistory struct {
 }
 
 type ResponseItemNetworksGetNetworkAlertsHistory struct {
-	AlertData    *ResponseItemNetworksGetNetworkAlertsHistoryAlertData    `tfsdk:"alert_data"`
+	AlertData    types.String                                             `tfsdk:"alert_data"`
 	AlertType    types.String                                             `tfsdk:"alert_type"`
 	AlertTypeID  types.String                                             `tfsdk:"alert_type_id"`
 	Destinations *ResponseItemNetworksGetNetworkAlertsHistoryDestinations `tfsdk:"destinations"`
@@ -228,7 +229,7 @@ type ResponseItemNetworksGetNetworkAlertsHistory struct {
 	OccurredAt   types.String                                             `tfsdk:"occurred_at"`
 }
 
-type ResponseItemNetworksGetNetworkAlertsHistoryAlertData interface{}
+// type ResponseItemNetworksGetNetworkAlertsHistoryAlertData interface{}
 
 type ResponseItemNetworksGetNetworkAlertsHistoryDestinations struct {
 	Email   *ResponseItemNetworksGetNetworkAlertsHistoryDestinationsEmail   `tfsdk:"email"`
@@ -262,7 +263,7 @@ func ResponseNetworksGetNetworkAlertsHistoryItemsToBody(state NetworksAlertsHist
 	var items []ResponseItemNetworksGetNetworkAlertsHistory
 	for _, item := range *response {
 		itemState := ResponseItemNetworksGetNetworkAlertsHistory{
-			// AlertData:   types.StringValue(item.AlertData), //TODO POSIBLE interface
+			AlertData:   types.StringValue(fmt.Sprintf("%v", item.AlertData)), //TODO POSIBLE interface
 			AlertType:   types.StringValue(item.AlertType),
 			AlertTypeID: types.StringValue(item.AlertTypeID),
 			Destinations: func() *ResponseItemNetworksGetNetworkAlertsHistoryDestinations {

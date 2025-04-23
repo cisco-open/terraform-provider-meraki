@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -249,7 +249,7 @@ func ResponseDevicesGetDeviceLldpCdpItemToBody(state DevicesLldpCdp, response *m
 											SourcePort: types.StringValue(response.Ports.Status12.Cdp.SourcePort),
 										}
 									}
-									return nil
+									return &ResponseDevicesGetDeviceLldpCdpPorts12Cdp{}
 								}(),
 								Lldp: func() *ResponseDevicesGetDeviceLldpCdpPorts12Lldp {
 									if response.Ports.Status12.Lldp != nil {
@@ -260,11 +260,11 @@ func ResponseDevicesGetDeviceLldpCdpItemToBody(state DevicesLldpCdp, response *m
 											SystemName:        types.StringValue(response.Ports.Status12.Lldp.SystemName),
 										}
 									}
-									return nil
+									return &ResponseDevicesGetDeviceLldpCdpPorts12Lldp{}
 								}(),
 							}
 						}
-						return nil
+						return &ResponseDevicesGetDeviceLldpCdpPorts12{}
 					}(),
 					Status8: func() *ResponseDevicesGetDeviceLldpCdpPorts8 {
 						if response.Ports.Status8 != nil {
@@ -278,15 +278,15 @@ func ResponseDevicesGetDeviceLldpCdpItemToBody(state DevicesLldpCdp, response *m
 											SourcePort: types.StringValue(response.Ports.Status8.Cdp.SourcePort),
 										}
 									}
-									return nil
+									return &ResponseDevicesGetDeviceLldpCdpPorts8Cdp{}
 								}(),
 							}
 						}
-						return nil
+						return &ResponseDevicesGetDeviceLldpCdpPorts8{}
 					}(),
 				}
 			}
-			return nil
+			return &ResponseDevicesGetDeviceLldpCdpPorts{}
 		}(),
 		SourceMac: types.StringValue(response.SourceMac),
 	}

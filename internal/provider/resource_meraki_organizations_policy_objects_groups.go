@@ -20,9 +20,10 @@ package provider
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -107,7 +108,7 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Schema(_ context.Context, _ r
 					setplanmodifier.UseStateForUnknown(),
 				},
 
-				ElementType: types.Int64Type,
+				ElementType: types.StringType,
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
@@ -154,17 +155,18 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Create(ctx context.Context, r
 	// organization_id
 	vvName := data.Name.ValueString()
 	//Items
-	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationPolicyObjectsGroups(vvOrganizationID, nil)
+	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationPolicyObjectsGroups(vvOrganizationID, &merakigosdk.GetOrganizationPolicyObjectsGroupsQueryParams{
+		PerPage: -1,
+	})
+	log.Println("responseVerifyItem", responseVerifyItem)
 	//Have Create
-	if err != nil {
-		if restyResp1 != nil {
-			if restyResp1.StatusCode() != 404 {
-				resp.Diagnostics.AddError(
-					"Failure when executing GetOrganizationPolicyObjectsGroups",
-					err.Error(),
-				)
-				return
-			}
+	if err != nil || restyResp1 == nil {
+		if restyResp1.StatusCode() != 404 {
+			resp.Diagnostics.AddError(
+				"Failure when executing GetOrganizationPolicyObjectsGroups",
+				err.Error(),
+			)
+			return
 		}
 	}
 	if responseVerifyItem != nil {
@@ -176,7 +178,7 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Create(ctx context.Context, r
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter PolicyObjectGroupID",
-					"Fail Parsing PolicyObjectGroupID",
+					"Error",
 				)
 				return
 			}
@@ -208,7 +210,9 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Create(ctx context.Context, r
 		return
 	}
 	//Items
-	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationPolicyObjectsGroups(vvOrganizationID, nil)
+	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationPolicyObjectsGroups(vvOrganizationID, &merakigosdk.GetOrganizationPolicyObjectsGroupsQueryParams{
+		PerPage: -1,
+	})
 	// Has item and has items
 
 	if err != nil || responseGet == nil {
@@ -232,7 +236,8 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Create(ctx context.Context, r
 		vvPolicyObjectGroupID, ok := result2["ID"].(string)
 		if !ok {
 			resp.Diagnostics.AddError(
-				"Failure when parsing path parameter PolicyObjectGroupID", "Error",
+				"Failure when parsing path parameter PolicyObjectGroupID",
+				"Error",
 			)
 			return
 		}
@@ -301,13 +306,13 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Read(ctx context.Context, req
 				return
 			}
 			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizationPolicyObjectsGroup",
+				"Failure when executing GetOrganizationPolicyObjectsGroups",
 				err.Error(),
 			)
 			return
 		}
 		resp.Diagnostics.AddError(
-			"Failure when executing GetOrganizationPolicyObjectsGroup",
+			"Failure when executing GetOrganizationPolicyObjectsGroups",
 			err.Error(),
 		)
 		return
@@ -345,11 +350,10 @@ func (r *OrganizationsPolicyObjectsGroupsResource) Update(ctx context.Context, r
 
 	//Path Params
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
 	vvPolicyObjectGroupID := data.PolicyObjectGroupID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	_, restyResp2, err := r.client.Organizations.UpdateOrganizationPolicyObjectsGroup(vvOrganizationID, vvPolicyObjectGroupID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Organizations.UpdateOrganizationPolicyObjectsGroup(vvOrganizationID, vvPolicyObjectGroupID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationPolicyObjectsGroup",
@@ -460,8 +464,13 @@ func ResponseOrganizationsGetOrganizationPolicyObjectsGroupItemToBodyRs(state Or
 		ID:         types.StringValue(response.ID),
 		Name:       types.StringValue(response.Name),
 		NetworkIDs: StringSliceToSet(response.NetworkIDs),
-		ObjectIDs:  StringSliceToSetInt(response.ObjectIDs),
-		UpdatedAt:  types.StringValue(response.UpdatedAt),
+		ObjectIDs: func() types.Set {
+			if response.ObjectIDs == nil {
+				return types.SetNull(types.StringType)
+			}
+			return StringSliceToSet(*response.ObjectIDs)
+		}(),
+		UpdatedAt: types.StringValue(response.UpdatedAt),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsPolicyObjectsGroupsRs)

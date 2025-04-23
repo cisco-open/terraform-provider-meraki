@@ -20,7 +20,7 @@ data "meraki_organizations_cellular_gateway_esims_inventory" "example" {
 }
 
 output "meraki_organizations_cellular_gateway_esims_inventory_example" {
-  value = data.meraki_organizations_cellular_gateway_esims_inventory.example.items
+  value = data.meraki_organizations_cellular_gateway_esims_inventory.example.item
 }
 ```
 
@@ -37,30 +37,30 @@ output "meraki_organizations_cellular_gateway_esims_inventory_example" {
 
 ### Read-Only
 
-- `items` (Attributes List) Array of ResponseCellularGatewayGetOrganizationCellularGatewayEsimsInventory (see [below for nested schema](#nestedatt--items))
+- `item` (Attributes) (see [below for nested schema](#nestedatt--item))
 
-<a id="nestedatt--items"></a>
-### Nested Schema for `items`
+<a id="nestedatt--item"></a>
+### Nested Schema for `item`
 
 Read-Only:
 
-- `items` (Attributes List) List of eSIM Devices (see [below for nested schema](#nestedatt--items--items))
-- `meta` (Attributes) Meta details about the result (see [below for nested schema](#nestedatt--items--meta))
+- `items` (Attributes List) List of eSIM Devices (see [below for nested schema](#nestedatt--item--items))
+- `meta` (Attributes) Meta details about the result (see [below for nested schema](#nestedatt--item--meta))
 
-<a id="nestedatt--items--items"></a>
-### Nested Schema for `items.items`
+<a id="nestedatt--item--items"></a>
+### Nested Schema for `item.items`
 
 Read-Only:
 
 - `active` (Boolean) Whether eSIM is currently active SIM on Device
-- `device` (Attributes) Meraki Device properties (see [below for nested schema](#nestedatt--items--items--device))
+- `device` (Attributes) Meraki Device properties (see [below for nested schema](#nestedatt--item--items--device))
 - `eid` (String) eSIM EID
 - `last_updated_at` (String) Last update of eSIM
-- `network` (Attributes) Meraki Network properties (see [below for nested schema](#nestedatt--items--items--network))
-- `profiles` (Attributes Set) eSIM Profile Information (see [below for nested schema](#nestedatt--items--items--profiles))
+- `network` (Attributes) Meraki Network properties (see [below for nested schema](#nestedatt--item--items--network))
+- `profiles` (Attributes Set) eSIM Profile Information (see [below for nested schema](#nestedatt--item--items--profiles))
 
-<a id="nestedatt--items--items--device"></a>
-### Nested Schema for `items.items.device`
+<a id="nestedatt--item--items--device"></a>
+### Nested Schema for `item.items.device`
 
 Read-Only:
 
@@ -71,34 +71,34 @@ Read-Only:
 - `url` (String) Device URL
 
 
-<a id="nestedatt--items--items--network"></a>
-### Nested Schema for `items.items.network`
+<a id="nestedatt--item--items--network"></a>
+### Nested Schema for `item.items.network`
 
 Read-Only:
 
 - `id` (String) Network ID for this eSIM
 
 
-<a id="nestedatt--items--items--profiles"></a>
-### Nested Schema for `items.items.profiles`
+<a id="nestedatt--item--items--profiles"></a>
+### Nested Schema for `item.items.profiles`
 
 Read-Only:
 
 - `custom_apns` (List of String) Available custom APNs for the profile
 - `iccid` (String) eSIM profile ID
-- `service_provider` (Attributes) Service Provider information (see [below for nested schema](#nestedatt--items--items--profiles--service_provider))
+- `service_provider` (Attributes) Service Provider information (see [below for nested schema](#nestedatt--item--items--profiles--service_provider))
 - `status` (String) eSIM profile status
 
-<a id="nestedatt--items--items--profiles--service_provider"></a>
-### Nested Schema for `items.items.profiles.service_provider`
+<a id="nestedatt--item--items--profiles--service_provider"></a>
+### Nested Schema for `item.items.profiles.service_provider`
 
 Read-Only:
 
 - `name` (String) Service Provider name
-- `plans` (Attributes Set) Plans currently active on the eSIM (see [below for nested schema](#nestedatt--items--items--profiles--service_provider--plans))
+- `plans` (Attributes Set) Plans currently active on the eSIM (see [below for nested schema](#nestedatt--item--items--profiles--service_provider--plans))
 
-<a id="nestedatt--items--items--profiles--service_provider--plans"></a>
-### Nested Schema for `items.items.profiles.service_provider.plans`
+<a id="nestedatt--item--items--profiles--service_provider--plans"></a>
+### Nested Schema for `item.items.profiles.service_provider.plans`
 
 Read-Only:
 
@@ -109,22 +109,22 @@ Read-Only:
 
 
 
-<a id="nestedatt--items--meta"></a>
-### Nested Schema for `items.meta`
+<a id="nestedatt--item--meta"></a>
+### Nested Schema for `item.meta`
 
 Read-Only:
 
-- `counts` (Attributes) Counts of involved entities (see [below for nested schema](#nestedatt--items--meta--counts))
+- `counts` (Attributes) Counts of involved entities (see [below for nested schema](#nestedatt--item--meta--counts))
 
-<a id="nestedatt--items--meta--counts"></a>
-### Nested Schema for `items.meta.counts`
+<a id="nestedatt--item--meta--counts"></a>
+### Nested Schema for `item.meta.counts`
 
 Read-Only:
 
-- `items` (Attributes) Count of eSIM Devices available (see [below for nested schema](#nestedatt--items--meta--counts--items))
+- `items` (Attributes) Count of eSIM Devices available (see [below for nested schema](#nestedatt--item--meta--counts--items))
 
-<a id="nestedatt--items--meta--counts--items"></a>
-### Nested Schema for `items.meta.counts.items`
+<a id="nestedatt--item--meta--counts--items"></a>
+### Nested Schema for `item.meta.counts.items`
 
 Read-Only:
 

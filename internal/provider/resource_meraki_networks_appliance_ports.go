@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -148,31 +148,38 @@ func (r *NetworksAppliancePortsResource) Create(ctx context.Context, req resourc
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	vvPortID := data.PortID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkAppliancePort(vvNetworkID, vvPortID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksAppliancePorts only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and has items and not post
+
+	if vvNetworkID != "" && vvPortID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkAppliancePort(vvNetworkID, vvPortID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksAppliancePorts  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksAppliancePorts only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksAppliancePorts only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkAppliancePort(vvNetworkID, vvPortID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkAppliancePort",
 				err.Error(),
@@ -185,28 +192,30 @@ func (r *NetworksAppliancePortsResource) Create(ctx context.Context, req resourc
 		)
 		return
 	}
-	//Item
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkAppliancePort(vvNetworkID, vvPortID)
-	// Has only items
 
+	//Assign Path Params required
+
+	responseGet, restyResp1, err := r.client.Appliance.GetNetworkAppliancePort(vvNetworkID, vvPortID)
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkAppliancePorts",
+				"Failure when executing GetNetworkAppliancePort",
 				err.Error(),
 			)
 			return
 		}
 		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkAppliancePorts",
+			"Failure when executing GetNetworkAppliancePort",
 			err.Error(),
 		)
 		return
 	}
+
 	data = ResponseApplianceGetNetworkAppliancePortItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksAppliancePortsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {

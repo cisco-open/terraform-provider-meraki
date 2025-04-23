@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -197,6 +197,10 @@ func (d *NetworksFloorPlansDataSource) Schema(_ context.Context, _ datasource.Sc
 								},
 							},
 						},
+					},
+					"floor_number": schema.Float64Attribute{
+						MarkdownDescription: `The floor number of the floor within the building.`,
+						Computed:            true,
 					},
 					"floor_plan_id": schema.StringAttribute{
 						MarkdownDescription: `Floor plan ID`,
@@ -397,6 +401,10 @@ func (d *NetworksFloorPlansDataSource) Schema(_ context.Context, _ datasource.Sc
 								},
 							},
 						},
+						"floor_number": schema.Float64Attribute{
+							MarkdownDescription: `The floor number of the floor within the building.`,
+							Computed:            true,
+						},
 						"floor_plan_id": schema.StringAttribute{
 							MarkdownDescription: `Floor plan ID`,
 							Computed:            true,
@@ -549,6 +557,7 @@ type ResponseItemNetworksGetNetworkFloorPlans struct {
 	BottomRightCorner *ResponseItemNetworksGetNetworkFloorPlansBottomRightCorner `tfsdk:"bottom_right_corner"`
 	Center            *ResponseItemNetworksGetNetworkFloorPlansCenter            `tfsdk:"center"`
 	Devices           *[]ResponseItemNetworksGetNetworkFloorPlansDevices         `tfsdk:"devices"`
+	FloorNumber       types.Float64                                              `tfsdk:"floor_number"`
 	FloorPlanID       types.String                                               `tfsdk:"floor_plan_id"`
 	Height            types.Float64                                              `tfsdk:"height"`
 	ImageExtension    types.String                                               `tfsdk:"image_extension"`
@@ -614,6 +623,7 @@ type ResponseNetworksGetNetworkFloorPlan struct {
 	BottomRightCorner *ResponseNetworksGetNetworkFloorPlanBottomRightCorner `tfsdk:"bottom_right_corner"`
 	Center            *ResponseNetworksGetNetworkFloorPlanCenter            `tfsdk:"center"`
 	Devices           *[]ResponseNetworksGetNetworkFloorPlanDevices         `tfsdk:"devices"`
+	FloorNumber       types.Float64                                         `tfsdk:"floor_number"`
 	FloorPlanID       types.String                                          `tfsdk:"floor_plan_id"`
 	Height            types.Float64                                         `tfsdk:"height"`
 	ImageExtension    types.String                                          `tfsdk:"image_extension"`
@@ -784,6 +794,12 @@ func ResponseNetworksGetNetworkFloorPlansItemsToBody(state NetworksFloorPlans, r
 				}
 				return nil
 			}(),
+			FloorNumber: func() types.Float64 {
+				if item.FloorNumber != nil {
+					return types.Float64Value(float64(*item.FloorNumber))
+				}
+				return types.Float64{}
+			}(),
 			FloorPlanID: types.StringValue(item.FloorPlanID),
 			Height: func() types.Float64 {
 				if item.Height != nil {
@@ -953,6 +969,12 @@ func ResponseNetworksGetNetworkFloorPlanItemToBody(state NetworksFloorPlans, res
 				return &result
 			}
 			return nil
+		}(),
+		FloorNumber: func() types.Float64 {
+			if response.FloorNumber != nil {
+				return types.Float64Value(float64(*response.FloorNumber))
+			}
+			return types.Float64{}
 		}(),
 		FloorPlanID: types.StringValue(response.FloorPlanID),
 		Height: func() types.Float64 {

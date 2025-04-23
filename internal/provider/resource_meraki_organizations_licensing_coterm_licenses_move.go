@@ -21,7 +21,9 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	"log"
+
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -334,7 +336,6 @@ func (r *OrganizationsLicensingCotermLicensesMoveResource) Create(ctx context.Co
 	vvOrganizationID := data.OrganizationID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Licensing.MoveOrganizationLicensingCotermLicenses(vvOrganizationID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -351,7 +352,6 @@ func (r *OrganizationsLicensingCotermLicensesMoveResource) Create(ctx context.Co
 	}
 	//Item
 	data = ResponseLicensingMoveOrganizationLicensingCotermLicensesItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -453,20 +453,26 @@ type RequestLicensingMoveOrganizationLicensingCotermLicensesLicensesCountsRs str
 func (r *OrganizationsLicensingCotermLicensesMove) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestLicensingMoveOrganizationLicensingCotermLicenses {
 	re := *r.Parameters
 	var requestLicensingMoveOrganizationLicensingCotermLicensesDestination *merakigosdk.RequestLicensingMoveOrganizationLicensingCotermLicensesDestination
+
 	if re.Destination != nil {
 		mode := re.Destination.Mode.ValueString()
-		organizationID := r.OrganizationID.ValueString()
+		organizationID := re.Destination.OrganizationID.ValueString()
 		requestLicensingMoveOrganizationLicensingCotermLicensesDestination = &merakigosdk.RequestLicensingMoveOrganizationLicensingCotermLicensesDestination{
 			Mode:           mode,
 			OrganizationID: organizationID,
 		}
+		//[debug] Is Array: False
 	}
 	var requestLicensingMoveOrganizationLicensingCotermLicensesLicenses []merakigosdk.RequestLicensingMoveOrganizationLicensingCotermLicensesLicenses
+
 	if re.Licenses != nil {
 		for _, rItem1 := range *re.Licenses {
+
+			log.Printf("[DEBUG] #TODO []RequestLicensingMoveOrganizationLicensingCotermLicensesLicensesCounts")
 			var requestLicensingMoveOrganizationLicensingCotermLicensesLicensesCounts []merakigosdk.RequestLicensingMoveOrganizationLicensingCotermLicensesLicensesCounts
+
 			if rItem1.Counts != nil {
-				for _, rItem2 := range *rItem1.Counts { //Counts// name: counts
+				for _, rItem2 := range *rItem1.Counts {
 					count := func() *int64 {
 						if !rItem2.Count.IsUnknown() && !rItem2.Count.IsNull() {
 							return rItem2.Count.ValueInt64Pointer()
@@ -478,6 +484,7 @@ func (r *OrganizationsLicensingCotermLicensesMove) toSdkApiRequestCreate(ctx con
 						Count: int64ToIntPointer(count),
 						Model: model,
 					})
+					//[debug] Is Array: True
 				}
 			}
 			key := rItem1.Key.ValueString()
@@ -490,6 +497,7 @@ func (r *OrganizationsLicensingCotermLicensesMove) toSdkApiRequestCreate(ctx con
 				}(),
 				Key: key,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestLicensingMoveOrganizationLicensingCotermLicenses{

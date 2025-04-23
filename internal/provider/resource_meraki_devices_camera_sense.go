@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -135,30 +135,37 @@ func (r *DevicesCameraSenseResource) Create(ctx context.Context, req resource.Cr
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvSerial := data.Serial.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Camera.GetDeviceCameraSense(vvSerial)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesCameraSense only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvSerial != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Camera.GetDeviceCameraSense(vvSerial)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesCameraSense  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesCameraSense only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesCameraSense only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Camera.UpdateDeviceCameraSense(vvSerial, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCameraSense",
 				err.Error(),
@@ -171,9 +178,10 @@ func (r *DevicesCameraSenseResource) Create(ctx context.Context, req resource.Cr
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Camera.GetDeviceCameraSense(vvSerial)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -188,11 +196,12 @@ func (r *DevicesCameraSenseResource) Create(ctx context.Context, req resource.Cr
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseCameraGetDeviceCameraSenseItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *DevicesCameraSenseResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -307,6 +316,7 @@ type ResponseCameraGetDeviceCameraSenseAudioDetectionRs struct {
 func (r *DevicesCameraSenseRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestCameraUpdateDeviceCameraSense {
 	emptyString := ""
 	var requestCameraUpdateDeviceCameraSenseAudioDetection *merakigosdk.RequestCameraUpdateDeviceCameraSenseAudioDetection
+
 	if r.AudioDetection != nil {
 		enabled := func() *bool {
 			if !r.AudioDetection.Enabled.IsUnknown() && !r.AudioDetection.Enabled.IsNull() {
@@ -317,6 +327,7 @@ func (r *DevicesCameraSenseRs) toSdkApiRequestUpdate(ctx context.Context) *merak
 		requestCameraUpdateDeviceCameraSenseAudioDetection = &merakigosdk.RequestCameraUpdateDeviceCameraSenseAudioDetection{
 			Enabled: enabled,
 		}
+		//[debug] Is Array: False
 	}
 	detectionModelID := new(string)
 	if !r.DetectionModelID.IsUnknown() && !r.DetectionModelID.IsNull() {

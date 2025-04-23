@@ -20,7 +20,9 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	"log"
+
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -140,9 +142,10 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Schema(_ context.Context,
 										},
 									},
 									"value_list": schema.SetAttribute{
-										MarkdownDescription: `The 'value_list' of what you want to block. Send a list in request`,
-										Computed:            true,
-										Optional:            true,
+										MarkdownDescription: `    A list of objects describing the definitions of your traffic shaping rule. At least one definition is required.
+`,
+										Computed: true,
+										Optional: true,
 										PlanModifiers: []planmodifier.Set{
 											setplanmodifier.UseStateForUnknown(),
 										},
@@ -158,6 +161,8 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Schema(_ context.Context,
 										},
 										Attributes: map[string]schema.Attribute{
 											"id": schema.StringAttribute{
+												MarkdownDescription: `    The ID of the object.
+`,
 												Computed: true,
 												Optional: true,
 												PlanModifiers: []planmodifier.String{
@@ -165,6 +170,8 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Schema(_ context.Context,
 												},
 											},
 											"name": schema.StringAttribute{
+												MarkdownDescription: `    The name of the object.
+`,
 												Computed: true,
 												Optional: true,
 												PlanModifiers: []planmodifier.String{
@@ -268,30 +275,37 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Create(ctx context.Contex
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceTrafficShapingRules(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceTrafficShapingRules only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceTrafficShapingRules(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceTrafficShapingRules  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceTrafficShapingRules only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceTrafficShapingRules only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceTrafficShapingRules(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceTrafficShapingRules",
 				err.Error(),
@@ -304,9 +318,10 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Create(ctx context.Contex
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceTrafficShapingRules(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -321,11 +336,12 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Create(ctx context.Contex
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseApplianceGetNetworkApplianceTrafficShapingRulesItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksApplianceTrafficShapingRulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -462,9 +478,13 @@ func (r *NetworksApplianceTrafficShapingRulesRs) toSdkApiRequestUpdate(ctx conte
 		defaultRulesEnabled = nil
 	}
 	var requestApplianceUpdateNetworkApplianceTrafficShapingRulesRules []merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingRulesRules
+
 	if r.Rules != nil {
 		for _, rItem1 := range *r.Rules {
+
+			log.Printf("[DEBUG] #TODO []RequestApplianceUpdateNetworkApplianceTrafficShapingRulesRulesDefinitions")
 			var requestApplianceUpdateNetworkApplianceTrafficShapingRulesRulesDefinitions []merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingRulesRulesDefinitions
+
 			if rItem1.Definitions != nil {
 				for _, rItem2 := range *rItem1.Definitions { //Definitions// name: definitions
 					var valueR interface{}
@@ -494,6 +514,7 @@ func (r *NetworksApplianceTrafficShapingRulesRs) toSdkApiRequestUpdate(ctx conte
 						Type:  typeR,
 						Value: valueR,
 					})
+					//[debug] Is Array: True
 				}
 			}
 			dscpTagValue := func() *int64 {
@@ -503,8 +524,10 @@ func (r *NetworksApplianceTrafficShapingRulesRs) toSdkApiRequestUpdate(ctx conte
 				return nil
 			}()
 			var requestApplianceUpdateNetworkApplianceTrafficShapingRulesRulesPerClientBandwidthLimits *merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingRulesRulesPerClientBandwidthLimits
+
 			if rItem1.PerClientBandwidthLimits != nil {
 				var requestApplianceUpdateNetworkApplianceTrafficShapingRulesRulesPerClientBandwidthLimitsBandwidthLimits *merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingRulesRulesPerClientBandwidthLimitsBandwidthLimits
+
 				if rItem1.PerClientBandwidthLimits.BandwidthLimits != nil {
 					limitDown := func() *int64 {
 						if !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitDown.IsUnknown() && !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitDown.IsNull() {
@@ -522,12 +545,14 @@ func (r *NetworksApplianceTrafficShapingRulesRs) toSdkApiRequestUpdate(ctx conte
 						LimitDown: int64ToIntPointer(limitDown),
 						LimitUp:   int64ToIntPointer(limitUp),
 					}
+					//[debug] Is Array: False
 				}
 				settings := rItem1.PerClientBandwidthLimits.Settings.ValueString()
 				requestApplianceUpdateNetworkApplianceTrafficShapingRulesRulesPerClientBandwidthLimits = &merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingRulesRulesPerClientBandwidthLimits{
 					BandwidthLimits: requestApplianceUpdateNetworkApplianceTrafficShapingRulesRulesPerClientBandwidthLimitsBandwidthLimits,
 					Settings:        settings,
 				}
+				//[debug] Is Array: False
 			}
 			priority := rItem1.Priority.ValueString()
 			requestApplianceUpdateNetworkApplianceTrafficShapingRulesRules = append(requestApplianceUpdateNetworkApplianceTrafficShapingRulesRules, merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingRulesRules{
@@ -541,6 +566,7 @@ func (r *NetworksApplianceTrafficShapingRulesRs) toSdkApiRequestUpdate(ctx conte
 				PerClientBandwidthLimits: requestApplianceUpdateNetworkApplianceTrafficShapingRulesRulesPerClientBandwidthLimits,
 				Priority:                 priority,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingRules{

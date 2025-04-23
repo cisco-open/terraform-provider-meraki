@@ -10,6 +10,8 @@ description: |-
 
 
 
+
+
 ~>Warning: This resource does not represent a real-world entity in Meraki Dashboard, therefore changing or deleting this resource on its own has no immediate effect. Instead, it is a task part of a Meraki Dashboard workflow. It is executed in Meraki without any additional verification. It does not check if it was executed before or if a similar configuration or action 
 already existed previously.
 
@@ -50,7 +52,7 @@ output "meraki_organizations_switch_devices_clone_example" {
 Optional:
 
 - `source_serial` (String) Serial number of the source switch (must be on a network not bound to a template)
-- `target_serials` (Set of String) Array of serial numbers of one or more target switches (must be on a network not bound to a template)
+- `target_serials` (List of String) Array of serial numbers of one or more target switches (must be on a network not bound to a template)
 
 
 <a id="nestedatt--item"></a>
@@ -59,4 +61,4 @@ Optional:
 Read-Only:
 
 - `source_serial` (String) Serial number of the source switch (must be on a network not bound to a template)
-- `target_serials` (Set of String) Array of serial numbers of one or more target switches (must be on a network not bound to a template)
+- `target_serials` (List of String) Array of serial numbers of one or more target switches (must be on a network not bound to a template)

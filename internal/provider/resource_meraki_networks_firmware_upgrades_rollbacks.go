@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -227,7 +227,6 @@ func (r *NetworksFirmwareUpgradesRollbacksResource) Create(ctx context.Context, 
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Networks.CreateNetworkFirmwareUpgradesRollback(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -244,7 +243,6 @@ func (r *NetworksFirmwareUpgradesRollbacksResource) Create(ctx context.Context, 
 	}
 	//Item
 	data = ResponseNetworksCreateNetworkFirmwareUpgradesRollbackItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -318,6 +316,7 @@ func (r *NetworksFirmwareUpgradesRollbacks) toSdkApiRequestCreate(ctx context.Co
 		product = &emptyString
 	}
 	var requestNetworksCreateNetworkFirmwareUpgradesRollbackReasons []merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesRollbackReasons
+
 	if re.Reasons != nil {
 		for _, rItem1 := range *re.Reasons {
 			category := rItem1.Category.ValueString()
@@ -326,6 +325,7 @@ func (r *NetworksFirmwareUpgradesRollbacks) toSdkApiRequestCreate(ctx context.Co
 				Category: category,
 				Comment:  comment,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	time := new(string)
@@ -335,20 +335,17 @@ func (r *NetworksFirmwareUpgradesRollbacks) toSdkApiRequestCreate(ctx context.Co
 		time = &emptyString
 	}
 	var requestNetworksCreateNetworkFirmwareUpgradesRollbackToVersion *merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesRollbackToVersion
+
 	if re.ToVersion != nil {
-		iD := re.ToVersion.ID.ValueString()
+		id := re.ToVersion.ID.ValueString()
 		requestNetworksCreateNetworkFirmwareUpgradesRollbackToVersion = &merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesRollbackToVersion{
-			ID: iD,
+			ID: id,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesRollback{
-		Product: *product,
-		Reasons: func() *[]merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesRollbackReasons {
-			if len(requestNetworksCreateNetworkFirmwareUpgradesRollbackReasons) > 0 {
-				return &requestNetworksCreateNetworkFirmwareUpgradesRollbackReasons
-			}
-			return nil
-		}(),
+		Product:   *product,
+		Reasons:   &requestNetworksCreateNetworkFirmwareUpgradesRollbackReasons,
 		Time:      *time,
 		ToVersion: requestNetworksCreateNetworkFirmwareUpgradesRollbackToVersion,
 	}

@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -76,7 +76,7 @@ func (r *NetworksWirelessEthernetPortsProfilesAssignResource) Schema(_ context.C
 						MarkdownDescription: `AP profile ID`,
 						Computed:            true,
 					},
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `List of updated AP serials`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -94,7 +94,7 @@ func (r *NetworksWirelessEthernetPortsProfilesAssignResource) Schema(_ context.C
 							stringplanmodifier.RequiresReplace(),
 						},
 					},
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `List of AP serials`,
 						Optional:            true,
 						Computed:            true,
@@ -127,7 +127,6 @@ func (r *NetworksWirelessEthernetPortsProfilesAssignResource) Create(ctx context
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Wireless.AssignNetworkWirelessEthernetPortsProfiles(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -144,7 +143,6 @@ func (r *NetworksWirelessEthernetPortsProfilesAssignResource) Create(ctx context
 	}
 	//Item
 	data = ResponseWirelessAssignNetworkWirelessEthernetPortsProfilesItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -171,7 +169,7 @@ type NetworksWirelessEthernetPortsProfilesAssign struct {
 
 type ResponseWirelessAssignNetworkWirelessEthernetPortsProfiles struct {
 	ProfileID types.String `tfsdk:"profile_id"`
-	Serials   types.Set    `tfsdk:"serials"`
+	Serials   types.List   `tfsdk:"serials"`
 }
 
 type RequestWirelessAssignNetworkWirelessEthernetPortsProfilesRs struct {
@@ -202,7 +200,7 @@ func (r *NetworksWirelessEthernetPortsProfilesAssign) toSdkApiRequestCreate(ctx 
 func ResponseWirelessAssignNetworkWirelessEthernetPortsProfilesItemToBody(state NetworksWirelessEthernetPortsProfilesAssign, response *merakigosdk.ResponseWirelessAssignNetworkWirelessEthernetPortsProfiles) NetworksWirelessEthernetPortsProfilesAssign {
 	itemState := ResponseWirelessAssignNetworkWirelessEthernetPortsProfiles{
 		ProfileID: types.StringValue(response.ProfileID),
-		Serials:   StringSliceToSet(response.Serials),
+		Serials:   StringSliceToList(response.Serials),
 	}
 	state.Item = &itemState
 	return state

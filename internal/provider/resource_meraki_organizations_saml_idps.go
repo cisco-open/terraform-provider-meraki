@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -146,28 +146,26 @@ func (r *OrganizationsSamlIDpsResource) Create(ctx context.Context, req resource
 			return
 		}
 	}
-
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Organizations.CreateOrganizationSamlIDp(vvOrganizationID, dataRequest)
 
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
-				"Failure when executing ",
+				"Failure when executing CreateOrganizationSamlIDp",
 				err.Error(),
 			)
 			return
 		}
 		resp.Diagnostics.AddError(
-			"Failure when executing ",
+			"Failure when executing CreateOrganizationSamlIDp",
 			err.Error(),
 		)
 		return
 	}
 	//Items
 	res := *response
-	res2 := res
-	vvIDpID = res2.IDpID
+	vvIDpID = res.IDpID
 	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationSamlIDp(vvOrganizationID, vvIDpID)
 	// Has item and has items
 

@@ -10,6 +10,8 @@ description: |-
 
 
 
+
+
 ~>Warning: This resource does not represent a real-world entity in Meraki Dashboard, therefore changing or deleting this resource on its own has no immediate effect. Instead, it is a task part of a Meraki Dashboard workflow. It is executed in Meraki without any additional verification. It does not check if it was executed before or if a similar configuration or action 
 already existed previously.
 
@@ -114,4 +116,4 @@ Read-Only:
 - `scope` (String) The scope of the Sentry Policy
                                                       Allowed values: [all,none,withAll,withAny,withoutAll,withoutAny]
 - `sm_network_id` (String) The Id of the Systems Manager Network the Sentry Policy is assigned to
-- `tags` (Set of String) The tags of the Sentry Policy
+- `tags` (List of String) The tags of the Sentry Policy

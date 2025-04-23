@@ -10,6 +10,8 @@ description: |-
 
 
 
+
+
 ~>Warning: This resource does not represent a real-world entity in Meraki Dashboard, therefore changing or deleting this resource on its own has no immediate effect. Instead, it is a task part of a Meraki Dashboard workflow. It is executed in Meraki without any additional verification. It does not check if it was executed before or if a similar configuration or action 
 already existed previously.
 
@@ -53,7 +55,7 @@ output "meraki_networks_devices_claim_example" {
 
 Optional:
 
-- `serials` (Set of String) A list of serials of devices to claim
+- `serials` (List of String) A list of serials of devices to claim
 
 
 <a id="nestedatt--item"></a>
@@ -62,7 +64,7 @@ Optional:
 Read-Only:
 
 - `errors` (Attributes Set) Errors for devices that were not added (see [below for nested schema](#nestedatt--item--errors))
-- `serials` (Set of String) The serials of the devices
+- `serials` (List of String) The serials of the devices
 
 <a id="nestedatt--item--errors"></a>
 ### Nested Schema for `item.errors`

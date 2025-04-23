@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -74,23 +74,11 @@ func (d *NetworksApplianceStaticRoutesDataSource) Schema(_ context.Context, _ da
 						MarkdownDescription: `Whether the route is enabled or not`,
 						Computed:            true,
 					},
-					"fixed_ip_assignments": schema.SingleNestedAttribute{
-						Computed: true,
-						Attributes: map[string]schema.Attribute{
-
-							"attribute_22_33_44_55_66_77": schema.SingleNestedAttribute{
-								Computed: true,
-								Attributes: map[string]schema.Attribute{
-
-									"ip": schema.StringAttribute{
-										Computed: true,
-									},
-									"name": schema.StringAttribute{
-										Computed: true,
-									},
-								},
-							},
-						},
+					"fixed_ip_assignments": schema.StringAttribute{
+						//Entro en string ds
+						//TODO interface
+						MarkdownDescription: `Fixed DHCP IP assignments on the route`,
+						Computed:            true,
 					},
 					"gateway_ip": schema.StringAttribute{
 						MarkdownDescription: `Gateway IP address (next hop)`,
@@ -154,23 +142,11 @@ func (d *NetworksApplianceStaticRoutesDataSource) Schema(_ context.Context, _ da
 							MarkdownDescription: `Whether the route is enabled or not`,
 							Computed:            true,
 						},
-						"fixed_ip_assignments": schema.SingleNestedAttribute{
-							Computed: true,
-							Attributes: map[string]schema.Attribute{
-
-								"attribute_22_33_44_55_66_77": schema.SingleNestedAttribute{
-									Computed: true,
-									Attributes: map[string]schema.Attribute{
-
-										"ip": schema.StringAttribute{
-											Computed: true,
-										},
-										"name": schema.StringAttribute{
-											Computed: true,
-										},
-									},
-								},
-							},
+						"fixed_ip_assignments": schema.StringAttribute{
+							//Entro en string ds
+							//TODO interface
+							MarkdownDescription: `Fixed DHCP IP assignments on the route`,
+							Computed:            true,
 						},
 						"gateway_ip": schema.StringAttribute{
 							MarkdownDescription: `Gateway IP address (next hop)`,
@@ -319,14 +295,7 @@ type ResponseItemApplianceGetNetworkApplianceStaticRoutes struct {
 	Subnet             types.String                                                            `tfsdk:"subnet"`
 }
 
-type ResponseItemApplianceGetNetworkApplianceStaticRoutesFixedIpAssignments struct {
-	Status223344556677 *ResponseItemApplianceGetNetworkApplianceStaticRoutesFixedIpAssignments223344556677 `tfsdk:"attribute_22_33_44_55_66_77"`
-}
-
-type ResponseItemApplianceGetNetworkApplianceStaticRoutesFixedIpAssignments223344556677 struct {
-	IP   types.String `tfsdk:"ip"`
-	Name types.String `tfsdk:"name"`
-}
+type ResponseItemApplianceGetNetworkApplianceStaticRoutesFixedIpAssignments interface{}
 
 type ResponseItemApplianceGetNetworkApplianceStaticRoutesReservedIpRanges struct {
 	Comment types.String `tfsdk:"comment"`
@@ -347,14 +316,7 @@ type ResponseApplianceGetNetworkApplianceStaticRoute struct {
 	Subnet             types.String                                                       `tfsdk:"subnet"`
 }
 
-type ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignments struct {
-	Status223344556677 *ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignments223344556677 `tfsdk:"attribute_22_33_44_55_66_77"`
-}
-
-type ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignments223344556677 struct {
-	IP   types.String `tfsdk:"ip"`
-	Name types.String `tfsdk:"name"`
-}
+type ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignments interface{}
 
 type ResponseApplianceGetNetworkApplianceStaticRouteReservedIpRanges struct {
 	Comment types.String `tfsdk:"comment"`
@@ -373,22 +335,7 @@ func ResponseApplianceGetNetworkApplianceStaticRoutesItemsToBody(state NetworksA
 				}
 				return types.Bool{}
 			}(),
-			FixedIPAssignments: func() *ResponseItemApplianceGetNetworkApplianceStaticRoutesFixedIpAssignments {
-				if item.FixedIPAssignments != nil {
-					return &ResponseItemApplianceGetNetworkApplianceStaticRoutesFixedIpAssignments{
-						Status223344556677: func() *ResponseItemApplianceGetNetworkApplianceStaticRoutesFixedIpAssignments223344556677 {
-							if item.FixedIPAssignments.Status223344556677 != nil {
-								return &ResponseItemApplianceGetNetworkApplianceStaticRoutesFixedIpAssignments223344556677{
-									IP:   types.StringValue(item.FixedIPAssignments.Status223344556677.IP),
-									Name: types.StringValue(item.FixedIPAssignments.Status223344556677.Name),
-								}
-							}
-							return nil
-						}(),
-					}
-				}
-				return nil
-			}(),
+			// FixedIPAssignments: types.StringValue(item.FixedIPAssignments), //TODO POSIBLE interface
 			GatewayIP: types.StringValue(item.GatewayIP),
 			GatewayVLANID: func() types.Int64 {
 				if item.GatewayVLANID != nil {
@@ -435,22 +382,7 @@ func ResponseApplianceGetNetworkApplianceStaticRouteItemToBody(state NetworksApp
 			}
 			return types.Bool{}
 		}(),
-		FixedIPAssignments: func() *ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignments {
-			if response.FixedIPAssignments != nil {
-				return &ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignments{
-					Status223344556677: func() *ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignments223344556677 {
-						if response.FixedIPAssignments.Status223344556677 != nil {
-							return &ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignments223344556677{
-								IP:   types.StringValue(response.FixedIPAssignments.Status223344556677.IP),
-								Name: types.StringValue(response.FixedIPAssignments.Status223344556677.Name),
-							}
-						}
-						return nil
-					}(),
-				}
-			}
-			return nil
-		}(),
+		// FixedIPAssignments: types.StringValue(response.FixedIPAssignments), //TODO POSIBLE interface
 		GatewayIP: types.StringValue(response.GatewayIP),
 		GatewayVLANID: func() types.Int64 {
 			if response.GatewayVLANID != nil {

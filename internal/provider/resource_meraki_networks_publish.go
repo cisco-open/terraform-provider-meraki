@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -168,7 +168,6 @@ func (r *NetworksPublishResource) Create(ctx context.Context, req resource.Creat
 	vvJobID := data.JobID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Networks.PublishNetworkFloorPlansAutoLocateJob(vvNetworkID, vvJobID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -185,7 +184,6 @@ func (r *NetworksPublishResource) Create(ctx context.Context, req resource.Creat
 	}
 	//Item
 	data = ResponseNetworksPublishNetworkFloorPlansAutoLocateJobItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -234,9 +232,11 @@ type RequestNetworksPublishNetworkFloorPlansAutoLocateJobDevicesAutoLocateRs str
 func (r *NetworksPublish) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestNetworksPublishNetworkFloorPlansAutoLocateJob {
 	re := *r.Parameters
 	var requestNetworksPublishNetworkFloorPlansAutoLocateJobDevices []merakigosdk.RequestNetworksPublishNetworkFloorPlansAutoLocateJobDevices
+
 	if re.Devices != nil {
 		for _, rItem1 := range *re.Devices {
 			var requestNetworksPublishNetworkFloorPlansAutoLocateJobDevicesAutoLocate *merakigosdk.RequestNetworksPublishNetworkFloorPlansAutoLocateJobDevicesAutoLocate
+
 			if rItem1.AutoLocate != nil {
 				isAnchor := func() *bool {
 					if !rItem1.AutoLocate.IsAnchor.IsUnknown() && !rItem1.AutoLocate.IsAnchor.IsNull() {
@@ -247,6 +247,7 @@ func (r *NetworksPublish) toSdkApiRequestCreate(ctx context.Context) *merakigosd
 				requestNetworksPublishNetworkFloorPlansAutoLocateJobDevicesAutoLocate = &merakigosdk.RequestNetworksPublishNetworkFloorPlansAutoLocateJobDevicesAutoLocate{
 					IsAnchor: isAnchor,
 				}
+				//[debug] Is Array: False
 			}
 			lat := func() *float64 {
 				if !rItem1.Lat.IsUnknown() && !rItem1.Lat.IsNull() {
@@ -267,15 +268,11 @@ func (r *NetworksPublish) toSdkApiRequestCreate(ctx context.Context) *merakigosd
 				Lng:        lng,
 				Serial:     serial,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestNetworksPublishNetworkFloorPlansAutoLocateJob{
-		Devices: func() *[]merakigosdk.RequestNetworksPublishNetworkFloorPlansAutoLocateJobDevices {
-			if len(requestNetworksPublishNetworkFloorPlansAutoLocateJobDevices) > 0 {
-				return &requestNetworksPublishNetworkFloorPlansAutoLocateJobDevices
-			}
-			return nil
-		}(),
+		Devices: &requestNetworksPublishNetworkFloorPlansAutoLocateJobDevices,
 	}
 	return &out
 }

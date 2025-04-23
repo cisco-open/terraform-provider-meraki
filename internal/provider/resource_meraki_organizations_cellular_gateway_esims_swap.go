@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -167,7 +167,6 @@ func (r *OrganizationsCellularGatewayEsimsSwapResource) Create(ctx context.Conte
 	vvOrganizationID := data.OrganizationID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.CellularGateway.CreateOrganizationCellularGatewayEsimsSwap(vvOrganizationID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -184,7 +183,6 @@ func (r *OrganizationsCellularGatewayEsimsSwapResource) Create(ctx context.Conte
 	}
 	//Item
 	data = ResponseCellularGatewayCreateOrganizationCellularGatewayEsimsSwapItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -234,10 +232,12 @@ type RequestCellularGatewayCreateOrganizationCellularGatewayEsimsSwapSwapsTarget
 func (r *OrganizationsCellularGatewayEsimsSwap) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestCellularGatewayCreateOrganizationCellularGatewayEsimsSwap {
 	re := *r.Parameters
 	var requestCellularGatewayCreateOrganizationCellularGatewayEsimsSwapSwaps []merakigosdk.RequestCellularGatewayCreateOrganizationCellularGatewayEsimsSwapSwaps
+
 	if re.Swaps != nil {
 		for _, rItem1 := range *re.Swaps {
 			eid := rItem1.Eid.ValueString()
 			var requestCellularGatewayCreateOrganizationCellularGatewayEsimsSwapSwapsTarget *merakigosdk.RequestCellularGatewayCreateOrganizationCellularGatewayEsimsSwapSwapsTarget
+
 			if rItem1.Target != nil {
 				accountID := rItem1.Target.AccountID.ValueString()
 				communicationPlan := rItem1.Target.CommunicationPlan.ValueString()
@@ -247,11 +247,13 @@ func (r *OrganizationsCellularGatewayEsimsSwap) toSdkApiRequestCreate(ctx contex
 					CommunicationPlan: communicationPlan,
 					RatePlan:          ratePlan,
 				}
+				//[debug] Is Array: False
 			}
 			requestCellularGatewayCreateOrganizationCellularGatewayEsimsSwapSwaps = append(requestCellularGatewayCreateOrganizationCellularGatewayEsimsSwapSwaps, merakigosdk.RequestCellularGatewayCreateOrganizationCellularGatewayEsimsSwapSwaps{
 				Eid:    eid,
 				Target: requestCellularGatewayCreateOrganizationCellularGatewayEsimsSwapSwapsTarget,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestCellularGatewayCreateOrganizationCellularGatewayEsimsSwap{

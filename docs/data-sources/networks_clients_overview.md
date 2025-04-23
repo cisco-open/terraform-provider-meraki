@@ -67,5 +67,5 @@ Read-Only:
 
 Read-Only:
 
-- `average` (Number) The average usage of all clients on a network
-- `with_heavy_usage_average` (Number) The average usage of all clients with heavy usage on a network
+- `average` (Number) The average usage of all clients on a network in kilobytes
+- `with_heavy_usage_average` (Number) The average usage of all clients with heavy usage on a network in kilobytes

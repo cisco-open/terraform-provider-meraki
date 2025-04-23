@@ -6,5 +6,5 @@ data "meraki_organizations_cellular_gateway_esims_inventory" "example" {
 }
 
 output "meraki_organizations_cellular_gateway_esims_inventory_example" {
-  value = data.meraki_organizations_cellular_gateway_esims_inventory.example.items
+  value = data.meraki_organizations_cellular_gateway_esims_inventory.example.item
 }

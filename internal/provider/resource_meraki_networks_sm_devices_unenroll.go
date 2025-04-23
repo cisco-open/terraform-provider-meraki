@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -110,7 +110,6 @@ func (r *NetworksSmDevicesUnenrollResource) Create(ctx context.Context, req reso
 	vvNetworkID := data.NetworkID.ValueString()
 	vvDeviceID := data.DeviceID.ValueString()
 	response, restyResp1, err := r.client.Sm.UnenrollNetworkSmDevice(vvNetworkID, vvDeviceID)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -127,7 +126,6 @@ func (r *NetworksSmDevicesUnenrollResource) Create(ctx context.Context, req reso
 	}
 	//Item
 	data = ResponseSmUnenrollNetworkSmDeviceItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -147,10 +145,9 @@ func (r *NetworksSmDevicesUnenrollResource) Delete(ctx context.Context, req reso
 
 // TF Structs Schema
 type NetworksSmDevicesUnenroll struct {
-	NetworkID  types.String                        `tfsdk:"network_id"`
-	DeviceID   types.String                        `tfsdk:"device_id"`
-	Item       *ResponseSmUnenrollNetworkSmDevice  `tfsdk:"item"`
-	Parameters *RequestSmUnenrollNetworkSmDeviceRs `tfsdk:"parameters"`
+	NetworkID types.String                       `tfsdk:"network_id"`
+	DeviceID  types.String                       `tfsdk:"device_id"`
+	Item      *ResponseSmUnenrollNetworkSmDevice `tfsdk:"item"`
 }
 
 type ResponseSmUnenrollNetworkSmDevice struct {

@@ -107,7 +107,7 @@ Read-Only:
 
 - `applications` (List of String) Applications affected by the alert
 - `devices` (Attributes Set) Description of affected devices (see [below for nested schema](#nestedatt--items--scope--devices))
-- `peers` (Attributes Set) Peers related to the alert (see [below for nested schema](#nestedatt--items--scope--peers))
+- `peers` (List of String) Peers affected by the alert
 
 <a id="nestedatt--items--scope--devices"></a>
 ### Nested Schema for `items.scope.devices`
@@ -129,21 +129,3 @@ Read-Only:
 Read-Only:
 
 - `port` (String) Port of affect device
-
-
-
-<a id="nestedatt--items--scope--peers"></a>
-### Nested Schema for `items.scope.peers`
-
-Read-Only:
-
-- `network` (Attributes) Network of the peer (see [below for nested schema](#nestedatt--items--scope--peers--network))
-- `url` (String) URL to the peer
-
-<a id="nestedatt--items--scope--peers--network"></a>
-### Nested Schema for `items.scope.peers.network`
-
-Read-Only:
-
-- `id` (String) Id of the network
-- `name` (String) Name of the network

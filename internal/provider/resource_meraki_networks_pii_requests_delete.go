@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -100,7 +100,6 @@ func (r *NetworksPiiRequestsDeleteResource) Create(ctx context.Context, req reso
 	vvNetworkID := data.NetworkID.ValueString()
 	vvRequestID := data.RequestID.ValueString()
 	restyResp1, err := r.client.Networks.DeleteNetworkPiiRequest(vvNetworkID, vvRequestID)
-
 	if err != nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(

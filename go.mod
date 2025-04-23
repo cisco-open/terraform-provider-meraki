@@ -8,7 +8,7 @@ require (
 	github.com/hashicorp/terraform-plugin-docs v0.21.0
 	github.com/hashicorp/terraform-plugin-framework v1.14.0
 	github.com/hashicorp/terraform-plugin-framework-validators v0.17.0
-	github.com/meraki/dashboard-api-go/v4 v4.0.6
+	github.com/meraki/dashboard-api-go/v5 v5.0.0
 )
 
 require (
@@ -20,7 +20,6 @@ require (
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
 	github.com/fatih/color v1.16.0 // indirect
-	github.com/go-resty/resty/v2 v2.16.4
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -68,6 +67,7 @@ require (
 	github.com/Kunde21/markdownfmt/v3 v3.1.0 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.8.1 // indirect
+	github.com/go-resty/resty/v2 v2.16.5 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/cli v1.1.7 // indirect
 	github.com/hashicorp/go-retryablehttp v0.7.7 // indirect

@@ -22,7 +22,9 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	"log"
+
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -246,31 +248,38 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Create(ctx context.Co
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	vvNumber := data.Number.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDTrafficShapingRules(vvNetworkID, vvNumber)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSSIDsTrafficShapingRules only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" && vvNumber != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDTrafficShapingRules(vvNetworkID, vvNumber)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessSsidsTrafficShapingRules  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessSsidsTrafficShapingRules only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSSIDsTrafficShapingRules only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDTrafficShapingRules(vvNetworkID, vvNumber, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDTrafficShapingRules",
 				err.Error(),
@@ -283,9 +292,10 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Create(ctx context.Co
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDTrafficShapingRules(vvNetworkID, vvNumber)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -300,11 +310,12 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Create(ctx context.Co
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseWirelessGetNetworkWirelessSSIDTrafficShapingRulesItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -454,17 +465,22 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesRs) toSdkApiRequestUpdate(ctx c
 		defaultRulesEnabled = nil
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRules []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRules
+
 	if r.Rules != nil {
 		for _, rItem1 := range *r.Rules {
+
+			log.Printf("[DEBUG] #TODO []RequestWirelessUpdateNetworkWirelessSsidTrafficShapingRulesRulesDefinitions")
 			var requestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRulesDefinitions []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRulesDefinitions
+
 			if rItem1.Definitions != nil {
-				for _, rItem2 := range *rItem1.Definitions { //Definitions// name: definitions
+				for _, rItem2 := range *rItem1.Definitions {
 					typeR := rItem2.Type.ValueString()
 					value := rItem2.Value.ValueString()
 					requestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRulesDefinitions = append(requestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRulesDefinitions, merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRulesDefinitions{
 						Type:  typeR,
 						Value: value,
 					})
+					//[debug] Is Array: True
 				}
 			}
 			dscpTagValue := func() *int64 {
@@ -480,8 +496,10 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesRs) toSdkApiRequestUpdate(ctx c
 				return nil
 			}()
 			var requestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRulesPerClientBandwidthLimits *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRulesPerClientBandwidthLimits
+
 			if rItem1.PerClientBandwidthLimits != nil {
 				var requestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRulesPerClientBandwidthLimitsBandwidthLimits *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRulesPerClientBandwidthLimitsBandwidthLimits
+
 				if rItem1.PerClientBandwidthLimits.BandwidthLimits != nil {
 					limitDown := func() *int64 {
 						if !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitDown.IsUnknown() && !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitDown.IsNull() {
@@ -499,12 +517,14 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesRs) toSdkApiRequestUpdate(ctx c
 						LimitDown: int64ToIntPointer(limitDown),
 						LimitUp:   int64ToIntPointer(limitUp),
 					}
+					//[debug] Is Array: False
 				}
 				settings := rItem1.PerClientBandwidthLimits.Settings.ValueString()
 				requestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRulesPerClientBandwidthLimits = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRulesPerClientBandwidthLimits{
 					BandwidthLimits: requestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRulesPerClientBandwidthLimitsBandwidthLimits,
 					Settings:        settings,
 				}
+				//[debug] Is Array: False
 			}
 			requestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRules = append(requestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRules, merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRules{
 				Definitions: func() *[]merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRulesDefinitions {
@@ -517,6 +537,7 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesRs) toSdkApiRequestUpdate(ctx c
 				PcpTagValue:              int64ToIntPointer(pcpTagValue),
 				PerClientBandwidthLimits: requestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRulesPerClientBandwidthLimits,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	trafficShapingEnabled := new(bool)

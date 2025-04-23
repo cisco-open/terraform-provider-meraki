@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -144,37 +144,47 @@ func (r *NetworksFirmwareUpgradesStagedStagesResource) Create(ctx context.Contex
 	//Reviw This  Has Item Not item
 	//Esta bien
 
-	//Items
+	//dentro
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkFirmwareUpgradesStagedStages(vvNetworkID)
+	// No Post
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+		resp.Diagnostics.AddError(
+			"Resource NetworksFirmwareUpgradesStagedStages  only have update context, not create.",
+			err.Error(),
+		)
+		return
+	}
+
+	if responseVerifyItem == nil {
 		resp.Diagnostics.AddError(
 			"Resource NetworksFirmwareUpgradesStagedStages only have update context, not create.",
 			err.Error(),
 		)
 		return
 	}
-	//TODO HAS ONLY ITEMS UPDATE
 
-	response, restyResp2, err := r.client.Networks.UpdateNetworkFirmwareUpgradesStagedStages(vvNetworkID, data.toSdkApiRequestUpdate(ctx))
-
-	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+	// UPDATE NO CREATE
+	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	_, restyResp2, err := r.client.Networks.UpdateNetworkFirmwareUpgradesStagedStages(vvNetworkID, dataRequest)
+	//Update
+	if err != nil || restyResp2 == nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
-				"Failure when executing ",
+				"Failure when executing UpdateNetworkFirmwareUpgradesStagedStages",
 				err.Error(),
 			)
 			return
 		}
 		resp.Diagnostics.AddError(
-			"Failure when executing ",
+			"Failure when executing UpdateNetworkFirmwareUpgradesStagedStages",
 			err.Error(),
 		)
 		return
 	}
-	//Items
-	responseGet, restyResp1, err := r.client.Networks.GetNetworkFirmwareUpgradesStagedStages(vvNetworkID)
-	// Has only items
 
+	//Assign Path Params required
+
+	responseGet, restyResp1, err := r.client.Networks.GetNetworkFirmwareUpgradesStagedStages(vvNetworkID)
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -189,11 +199,12 @@ func (r *NetworksFirmwareUpgradesStagedStagesResource) Create(ctx context.Contex
 		)
 		return
 	}
-	//entro aqui
+
 	data = ResponseNetworksGetNetworkFirmwareUpgradesStagedStagesItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksFirmwareUpgradesStagedStagesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -224,6 +235,14 @@ func (r *NetworksFirmwareUpgradesStagedStagesResource) Read(ctx context.Context,
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
+			if restyResp1.StatusCode() == 404 {
+				resp.Diagnostics.AddWarning(
+					"Resource not found",
+					"Deleting resource",
+				)
+				resp.State.RemoveResource(ctx)
+				return
+			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkFirmwareUpgradesStagedStages",
 				err.Error(),
@@ -310,18 +329,22 @@ type RequestNetworksUpdateNetworkFirmwareUpgradesStagedStagesJsonGroupRs struct 
 // FromBody
 func (r *NetworksFirmwareUpgradesStagedStagesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedStages {
 	var requestNetworksUpdateNetworkFirmwareUpgradesStagedStagesJSON []merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedStagesJSON
+
 	if r.JSON != nil {
 		for _, rItem1 := range *r.JSON {
 			var requestNetworksUpdateNetworkFirmwareUpgradesStagedStagesJSONGroup *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedStagesJSONGroup
+
 			if rItem1.Group != nil {
-				iD := rItem1.Group.ID.ValueString()
+				id := rItem1.Group.ID.ValueString()
 				requestNetworksUpdateNetworkFirmwareUpgradesStagedStagesJSONGroup = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedStagesJSONGroup{
-					ID: iD,
+					ID: id,
 				}
+				//[debug] Is Array: False
 			}
 			requestNetworksUpdateNetworkFirmwareUpgradesStagedStagesJSON = append(requestNetworksUpdateNetworkFirmwareUpgradesStagedStagesJSON, merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedStagesJSON{
 				Group: requestNetworksUpdateNetworkFirmwareUpgradesStagedStagesJSONGroup,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedStages{

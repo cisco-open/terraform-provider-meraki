@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -103,11 +103,11 @@ func (d *NetworksClientsOverviewDataSource) Schema(_ context.Context, _ datasour
 						Attributes: map[string]schema.Attribute{
 
 							"average": schema.Int64Attribute{
-								MarkdownDescription: `The average usage of all clients on a network`,
+								MarkdownDescription: `The average usage of all clients on a network in kilobytes`,
 								Computed:            true,
 							},
 							"with_heavy_usage_average": schema.Int64Attribute{
-								MarkdownDescription: `The average usage of all clients with heavy usage on a network`,
+								MarkdownDescription: `The average usage of all clients with heavy usage on a network in kilobytes`,
 								Computed:            true,
 							},
 						},

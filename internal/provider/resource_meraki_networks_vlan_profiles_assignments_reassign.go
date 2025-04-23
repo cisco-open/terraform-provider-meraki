@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -72,12 +72,12 @@ func (r *NetworksVLANProfilesAssignmentsReassignResource) Schema(_ context.Conte
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `Array of Device Serials`,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"stack_ids": schema.SetAttribute{
+					"stack_ids": schema.ListAttribute{
 						MarkdownDescription: `Array of Switch Stack IDs`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -102,13 +102,13 @@ func (r *NetworksVLANProfilesAssignmentsReassignResource) Schema(_ context.Conte
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `Array of Device Serials`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"stack_ids": schema.SetAttribute{
+					"stack_ids": schema.ListAttribute{
 						MarkdownDescription: `Array of Switch Stack IDs`,
 						Optional:            true,
 						Computed:            true,
@@ -157,7 +157,6 @@ func (r *NetworksVLANProfilesAssignmentsReassignResource) Create(ctx context.Con
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Networks.ReassignNetworkVLANProfilesAssignments(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -174,7 +173,6 @@ func (r *NetworksVLANProfilesAssignmentsReassignResource) Create(ctx context.Con
 	}
 	//Item
 	data = ResponseNetworksReassignNetworkVLANProfilesAssignmentsItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -200,8 +198,8 @@ type NetworksVLANProfilesAssignmentsReassign struct {
 }
 
 type ResponseNetworksReassignNetworkVlanProfilesAssignments struct {
-	Serials     types.Set                                                          `tfsdk:"serials"`
-	StackIDs    types.Set                                                          `tfsdk:"stack_ids"`
+	Serials     types.List                                                         `tfsdk:"serials"`
+	StackIDs    types.List                                                         `tfsdk:"stack_ids"`
 	VLANProfile *ResponseNetworksReassignNetworkVlanProfilesAssignmentsVlanProfile `tfsdk:"vlan_profile"`
 }
 
@@ -228,11 +226,13 @@ func (r *NetworksVLANProfilesAssignmentsReassign) toSdkApiRequestCreate(ctx cont
 	var stackIDs []string = nil
 	re.StackIDs.ElementsAs(ctx, &stackIDs, false)
 	var requestNetworksReassignNetworkVLANProfilesAssignmentsVLANProfile *merakigosdk.RequestNetworksReassignNetworkVLANProfilesAssignmentsVLANProfile
+
 	if re.VLANProfile != nil {
 		iname := re.VLANProfile.Iname.ValueString()
 		requestNetworksReassignNetworkVLANProfilesAssignmentsVLANProfile = &merakigosdk.RequestNetworksReassignNetworkVLANProfilesAssignmentsVLANProfile{
 			Iname: iname,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestNetworksReassignNetworkVLANProfilesAssignments{
 		Serials:     serials,
@@ -245,8 +245,8 @@ func (r *NetworksVLANProfilesAssignmentsReassign) toSdkApiRequestCreate(ctx cont
 // ToBody
 func ResponseNetworksReassignNetworkVLANProfilesAssignmentsItemToBody(state NetworksVLANProfilesAssignmentsReassign, response *merakigosdk.ResponseNetworksReassignNetworkVLANProfilesAssignments) NetworksVLANProfilesAssignmentsReassign {
 	itemState := ResponseNetworksReassignNetworkVlanProfilesAssignments{
-		Serials:  StringSliceToSet(response.Serials),
-		StackIDs: StringSliceToSet(response.StackIDs),
+		Serials:  StringSliceToList(response.Serials),
+		StackIDs: StringSliceToList(response.StackIDs),
 		VLANProfile: func() *ResponseNetworksReassignNetworkVlanProfilesAssignmentsVlanProfile {
 			if response.VLANProfile != nil {
 				return &ResponseNetworksReassignNetworkVlanProfilesAssignmentsVlanProfile{

@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -102,69 +102,74 @@ func (r *NetworksSensorMqttBrokersResource) Create(ctx context.Context, req reso
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvMqttBrokerID := data.MqttBrokerID.ValueString()
-	//Reviw This  Has Item and item
-	//Revisar
+	//Has Item and has items and not post
 
-	// vvMqttBrokerID := data.MqttBrokerID.ValueString()
-	if vvMqttBrokerID != "" {
-		responseVerifyItem, _, err := r.client.Sensor.GetNetworkSensorMqttBroker(vvNetworkID, vvMqttBrokerID)
-		if err != nil || responseVerifyItem == nil {
+	if vvNetworkID != "" && vvMqttBrokerID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Sensor.GetNetworkSensorMqttBroker(vvNetworkID, vvMqttBrokerID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSensorMqttBrokers  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
 			resp.Diagnostics.AddError(
 				"Resource NetworksSensorMqttBrokers only have update context, not create.",
 				err.Error(),
 			)
 			return
 		}
-	} else {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSensorMqttBrokers only have update context, not create.",
-			"Path parameter MqttBrokerID expected",
-		)
-		return
 	}
 
-	response, restyResp1, err := r.client.Sensor.UpdateNetworkSensorMqttBroker(vvNetworkID, vvMqttBrokerID, data.toSdkApiRequestUpdate(ctx))
-
-	if err != nil || restyResp1 == nil || response == nil {
-		if restyResp1 != nil {
+	// UPDATE NO CREATE
+	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	response, restyResp2, err := r.client.Sensor.UpdateNetworkSensorMqttBroker(vvNetworkID, vvMqttBrokerID, dataRequest)
+	//Update
+	if err != nil || restyResp2 == nil || response == nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
-				"Failure when executing ",
+				"Failure when executing UpdateNetworkSensorMqttBroker",
 				err.Error(),
 			)
 			return
 		}
 		resp.Diagnostics.AddError(
-			"Failure when executing ",
+			"Failure when executing UpdateNetworkSensorMqttBroker",
 			err.Error(),
 		)
 		return
 	}
-	//Item
-	responseGet, restyResp1, err := r.client.Sensor.GetNetworkSensorMqttBroker(vvNetworkID, vvMqttBrokerID)
-	// Has only items
 
+	//Assign Path Params required
+
+	responseGet, restyResp1, err := r.client.Sensor.GetNetworkSensorMqttBroker(vvNetworkID, vvMqttBrokerID)
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkSensorMqttBrokers",
+				"Failure when executing GetNetworkSensorMqttBroker",
 				err.Error(),
 			)
 			return
 		}
 		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkSensorMqttBrokers",
+			"Failure when executing GetNetworkSensorMqttBroker",
 			err.Error(),
 		)
 		return
 	}
+
 	data = ResponseSensorGetNetworkSensorMqttBrokerItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksSensorMqttBrokersResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -189,9 +194,7 @@ func (r *NetworksSensorMqttBrokersResource) Read(ctx context.Context, req resour
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvMqttBrokerID := data.MqttBrokerID.ValueString()
-	// mqtt_broker_id
 	responseGet, restyRespGet, err := r.client.Sensor.GetNetworkSensorMqttBroker(vvNetworkID, vvMqttBrokerID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -215,7 +218,7 @@ func (r *NetworksSensorMqttBrokersResource) Read(ctx context.Context, req resour
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseSensorGetNetworkSensorMqttBrokerItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -248,7 +251,6 @@ func (r *NetworksSensorMqttBrokersResource) Update(ctx context.Context, req reso
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvMqttBrokerID := data.MqttBrokerID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Sensor.UpdateNetworkSensorMqttBroker(vvNetworkID, vvMqttBrokerID, dataRequest)
@@ -273,7 +275,7 @@ func (r *NetworksSensorMqttBrokersResource) Update(ctx context.Context, req reso
 
 func (r *NetworksSensorMqttBrokersResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	//missing delete
-	resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
+	resp.Diagnostics.AddWarning("Error deleting NetworksSensorMqttBrokers", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 

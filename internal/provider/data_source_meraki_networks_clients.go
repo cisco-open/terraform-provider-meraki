@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -147,6 +147,14 @@ func (d *NetworksClientsDataSource) Schema(_ context.Context, _ datasource.Schem
 						MarkdownDescription: `The MAC address of the node that the device was last connected to`,
 						Computed:            true,
 					},
+					"recent_device_name": schema.StringAttribute{
+						MarkdownDescription: `The name of the node that the device was last connected to`,
+						Computed:            true,
+					},
+					"recent_device_serial": schema.StringAttribute{
+						MarkdownDescription: `The serial of the node that the device was last connected to`,
+						Computed:            true,
+					},
 					"sm_installed": schema.BoolAttribute{
 						MarkdownDescription: `Status of SM for the client`,
 						Computed:            true,
@@ -242,6 +250,8 @@ type ResponseNetworksGetNetworkClient struct {
 	Os                     types.String                                            `tfsdk:"os"`
 	RecentDeviceConnection types.String                                            `tfsdk:"recent_device_connection"`
 	RecentDeviceMac        types.String                                            `tfsdk:"recent_device_mac"`
+	RecentDeviceName       types.String                                            `tfsdk:"recent_device_name"`
+	RecentDeviceSerial     types.String                                            `tfsdk:"recent_device_serial"`
 	SmInstalled            types.Bool                                              `tfsdk:"sm_installed"`
 	SSID                   types.String                                            `tfsdk:"ssid"`
 	Status                 types.String                                            `tfsdk:"status"`
@@ -308,6 +318,8 @@ func ResponseNetworksGetNetworkClientItemToBody(state NetworksClients, response 
 		Os:                     types.StringValue(response.Os),
 		RecentDeviceConnection: types.StringValue(response.RecentDeviceConnection),
 		RecentDeviceMac:        types.StringValue(response.RecentDeviceMac),
+		RecentDeviceName:       types.StringValue(response.RecentDeviceName),
+		RecentDeviceSerial:     types.StringValue(response.RecentDeviceSerial),
 		SmInstalled: func() types.Bool {
 			if response.SmInstalled != nil {
 				return types.BoolValue(*response.SmInstalled)

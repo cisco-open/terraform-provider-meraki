@@ -84,7 +84,7 @@ Optional:
     with the structure { "id": "meraki:layer7/..." }, where "id" is the application category or
     application ID (for a list of IDs for your network, use the trafficShaping/applicationCategories
     endpoint).
-- `value_list` (Set of String) The 'value_list' of what you want to block. Send a list in request
+- `value_list` (Set of String) A list of objects describing the definitions of your traffic shaping rule. At least one definition is required.
 - `value_obj` (Attributes) The 'value_obj' of what you want to block. Send a dict in request (see [below for nested schema](#nestedatt--rules--definitions--value_obj))
 
 <a id="nestedatt--rules--definitions--value_obj"></a>
@@ -92,8 +92,8 @@ Optional:
 
 Optional:
 
-- `id` (String)
-- `name` (String)
+- `id` (String) The ID of the object.
+- `name` (String) The name of the object.
 
 
 

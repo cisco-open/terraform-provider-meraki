@@ -19,13 +19,11 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
-	"fmt"
-	"net/url"
-	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	"log"
 
-	"github.com/go-resty/resty/v2"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
+
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -216,12 +214,14 @@ func (r *OrganizationsResource) Create(ctx context.Context, req resource.CreateR
 		return
 	}
 	//Has Paths
-	// vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
-	responseVerifyItem, restyResp1, err := getAllItemsOrganizations(*r.client)
-	//Have Create
+
+	responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizations(&merakigosdk.GetOrganizationsQueryParams{
+		PerPage: -1,
+	})
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -233,6 +233,7 @@ func (r *OrganizationsResource) Create(ctx context.Context, req resource.CreateR
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -247,6 +248,7 @@ func (r *OrganizationsResource) Create(ctx context.Context, req resource.CreateR
 				return
 			}
 			r.client.Organizations.UpdateOrganization(vvOrganizationID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Organizations.GetOrganization(vvOrganizationID)
 			if responseVerifyItem2 != nil {
 				data = ResponseOrganizationsGetOrganizationItemToBodyRs(data, responseVerifyItem2, false)
@@ -256,11 +258,11 @@ func (r *OrganizationsResource) Create(ctx context.Context, req resource.CreateR
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Organizations.CreateOrganization(dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganization",
 				err.Error(),
@@ -273,9 +275,9 @@ func (r *OrganizationsResource) Create(ctx context.Context, req resource.CreateR
 		)
 		return
 	}
-	//Items
-	responseGet, restyResp1, err := getAllItemsOrganizations(*r.client)
-	// Has item and has items
+
+	responseGet, restyResp1, err := r.client.Organizations.GetOrganizations(&merakigosdk.GetOrganizationsQueryParams{
+		PerPage: -1})
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -291,6 +293,7 @@ func (r *OrganizationsResource) Create(ctx context.Context, req resource.CreateR
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -299,7 +302,7 @@ func (r *OrganizationsResource) Create(ctx context.Context, req resource.CreateR
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter OrganizationID",
-				"Error",
+				"Fail Parsing OrganizationID",
 			)
 			return
 		}
@@ -329,6 +332,7 @@ func (r *OrganizationsResource) Create(ctx context.Context, req resource.CreateR
 		)
 		return
 	}
+
 }
 
 func (r *OrganizationsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -494,16 +498,21 @@ type ResponseOrganizationsGetOrganizationManagementDetailsRs struct {
 func (r *OrganizationsRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestOrganizationsCreateOrganization {
 	emptyString := ""
 	var requestOrganizationsCreateOrganizationManagement *merakigosdk.RequestOrganizationsCreateOrganizationManagement
+
 	if r.Management != nil {
+
+		log.Printf("[DEBUG] #TODO []RequestOrganizationsCreateOrganizationManagementDetails")
 		var requestOrganizationsCreateOrganizationManagementDetails []merakigosdk.RequestOrganizationsCreateOrganizationManagementDetails
+
 		if r.Management.Details != nil {
-			for _, rItem1 := range *r.Management.Details { //Management.Details// name: details
+			for _, rItem1 := range *r.Management.Details {
 				name := rItem1.Name.ValueString()
 				value := rItem1.Value.ValueString()
 				requestOrganizationsCreateOrganizationManagementDetails = append(requestOrganizationsCreateOrganizationManagementDetails, merakigosdk.RequestOrganizationsCreateOrganizationManagementDetails{
 					Name:  name,
 					Value: value,
 				})
+				//[debug] Is Array: True
 			}
 		}
 		requestOrganizationsCreateOrganizationManagement = &merakigosdk.RequestOrganizationsCreateOrganizationManagement{
@@ -514,6 +523,7 @@ func (r *OrganizationsRs) toSdkApiRequestCreate(ctx context.Context) *merakigosd
 				return nil
 			}(),
 		}
+		//[debug] Is Array: False
 	}
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
@@ -530,6 +540,7 @@ func (r *OrganizationsRs) toSdkApiRequestCreate(ctx context.Context) *merakigosd
 func (r *OrganizationsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestOrganizationsUpdateOrganization {
 	emptyString := ""
 	var requestOrganizationsUpdateOrganizationAPI *merakigosdk.RequestOrganizationsUpdateOrganizationAPI
+
 	if r.API != nil {
 		enabled := func() *bool {
 			if !r.API.Enabled.IsUnknown() && !r.API.Enabled.IsNull() {
@@ -540,18 +551,24 @@ func (r *OrganizationsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosd
 		requestOrganizationsUpdateOrganizationAPI = &merakigosdk.RequestOrganizationsUpdateOrganizationAPI{
 			Enabled: enabled,
 		}
+		//[debug] Is Array: False
 	}
 	var requestOrganizationsUpdateOrganizationManagement *merakigosdk.RequestOrganizationsUpdateOrganizationManagement
+
 	if r.Management != nil {
+
+		log.Printf("[DEBUG] #TODO []RequestOrganizationsUpdateOrganizationManagementDetails")
 		var requestOrganizationsUpdateOrganizationManagementDetails []merakigosdk.RequestOrganizationsUpdateOrganizationManagementDetails
+
 		if r.Management.Details != nil {
-			for _, rItem1 := range *r.Management.Details { //Management.Details// name: details
+			for _, rItem1 := range *r.Management.Details {
 				name := rItem1.Name.ValueString()
 				value := rItem1.Value.ValueString()
 				requestOrganizationsUpdateOrganizationManagementDetails = append(requestOrganizationsUpdateOrganizationManagementDetails, merakigosdk.RequestOrganizationsUpdateOrganizationManagementDetails{
 					Name:  name,
 					Value: value,
 				})
+				//[debug] Is Array: True
 			}
 		}
 		requestOrganizationsUpdateOrganizationManagement = &merakigosdk.RequestOrganizationsUpdateOrganizationManagement{
@@ -562,6 +579,7 @@ func (r *OrganizationsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosd
 				return nil
 			}(),
 		}
+		//[debug] Is Array: False
 	}
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
@@ -652,37 +670,4 @@ func ResponseOrganizationsGetOrganizationItemToBodyRs(state OrganizationsRs, res
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsRs)
 	}
 	return mergeInterfaces(state, itemState, true).(OrganizationsRs)
-}
-
-func getAllItemsOrganizations(client merakigosdk.Client) (merakigosdk.ResponseOrganizationsGetOrganizations, *resty.Response, error) {
-	var all_response merakigosdk.ResponseOrganizationsGetOrganizations
-	response, r2, er := client.Organizations.GetOrganizations(&merakigosdk.GetOrganizationsQueryParams{
-		PerPage: 1000,
-	})
-	count := 0
-	all_response = append(all_response, *response...)
-	for len(*response) >= 1000 {
-		count += 1
-		fmt.Println(count)
-		links := strings.Split(r2.Header().Get("Link"), ",")
-		var link string
-		if count > 1 {
-			link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[2], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
-		} else {
-			link = strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.Split(links[1], ";")[0], ">", ""), "<", ""), client.RestyClient().BaseURL, "")
-		}
-		myUrl, _ := url.Parse(link)
-		params, _ := url.ParseQuery(myUrl.RawQuery)
-		if params["endingBefore"] != nil {
-			response, r2, er = client.Organizations.GetOrganizations(&merakigosdk.GetOrganizationsQueryParams{
-				PerPage:      1000,
-				EndingBefore: params["endingBefore"][0],
-			})
-			all_response = append(all_response, *response...)
-		} else {
-			break
-		}
-	}
-
-	return all_response, r2, er
 }

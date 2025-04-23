@@ -10,6 +10,8 @@ description: |-
 
 
 
+
+
 ~>Warning: This resource does not represent a real-world entity in Meraki Dashboard, therefore changing or deleting this resource on its own has no immediate effect. Instead, it is a task part of a Meraki Dashboard workflow. It is executed in Meraki without any additional verification. It does not check if it was executed before or if a similar configuration or action 
 already existed previously.
 
@@ -50,7 +52,7 @@ output "meraki_networks_wireless_ethernet_ports_profiles_assign_example" {
 Optional:
 
 - `profile_id` (String) AP profile ID
-- `serials` (Set of String) List of AP serials
+- `serials` (List of String) List of AP serials
 
 
 <a id="nestedatt--item"></a>
@@ -59,4 +61,4 @@ Optional:
 Read-Only:
 
 - `profile_id` (String) AP profile ID
-- `serials` (Set of String) List of updated AP serials
+- `serials` (List of String) List of updated AP serials

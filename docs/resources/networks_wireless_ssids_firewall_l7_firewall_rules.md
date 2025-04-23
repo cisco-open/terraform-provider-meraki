@@ -52,8 +52,8 @@ Optional:
 - `type` (String) Type of the L7 firewall rule. One of: 'application', 'applicationCategory', 'host', 'port', 'ipRange'
                                         Allowed values: [application,applicationCategory,host,ipRange,port]
 - `value` (String) The value of what needs to get blocked. Format of the value varies depending on type of the firewall rule selected.
-- `value_list` (Set of String) The 'value_list' of what you want to block. Send a list in request
-- `value_obj` (Attributes) The 'value_obj' of what you want to block. Send a dict in request (see [below for nested schema](#nestedatt--rules--value_obj))
+- `value_list` (Set of String) The list of values of what needs to get blocked. Format of the value varies depending on type of the firewall rule selected.
+- `value_obj` (Attributes) The object of what needs to get blocked. Format of the value varies depending on type of the firewall rule selected. (see [below for nested schema](#nestedatt--rules--value_obj))
 
 <a id="nestedatt--rules--value_obj"></a>
 ### Nested Schema for `rules.value_obj`

@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -152,30 +152,37 @@ func (r *NetworksApplianceSettingsResource) Create(ctx context.Context, req reso
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceSettings(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceSettings(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceSettings  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceSettings only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceSettings(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceSettings",
 				err.Error(),
@@ -188,9 +195,10 @@ func (r *NetworksApplianceSettingsResource) Create(ctx context.Context, req reso
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceSettings(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -205,11 +213,12 @@ func (r *NetworksApplianceSettingsResource) Create(ctx context.Context, req reso
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseApplianceGetNetworkApplianceSettingsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksApplianceSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -336,6 +345,7 @@ func (r *NetworksApplianceSettingsRs) toSdkApiRequestUpdate(ctx context.Context)
 		deploymentMode = &emptyString
 	}
 	var requestApplianceUpdateNetworkApplianceSettingsDynamicDNS *merakigosdk.RequestApplianceUpdateNetworkApplianceSettingsDynamicDNS
+
 	if r.DynamicDNS != nil {
 		enabled := func() *bool {
 			if !r.DynamicDNS.Enabled.IsUnknown() && !r.DynamicDNS.Enabled.IsNull() {
@@ -348,6 +358,7 @@ func (r *NetworksApplianceSettingsRs) toSdkApiRequestUpdate(ctx context.Context)
 			Enabled: enabled,
 			Prefix:  prefix,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceSettings{
 		ClientTrackingMethod: *clientTrackingMethod,

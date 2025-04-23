@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -213,7 +213,7 @@ type ResponseOrganizationsGetOrganizationOpenapiSpecInfo struct {
 }
 
 type ResponseOrganizationsGetOrganizationOpenapiSpecPaths struct {
-	Organizations *ResponseOrganizationsGetOrganizationOpenapiSpecPathsOrganizations `tfsdk:"/organizations"`
+	Organizations *ResponseOrganizationsGetOrganizationOpenapiSpecPathsOrganizations `tfsdk:"_organizations"`
 }
 
 type ResponseOrganizationsGetOrganizationOpenapiSpecPathsOrganizations struct {
@@ -236,7 +236,7 @@ type ResponseOrganizationsGetOrganizationOpenapiSpecPathsOrganizationsGetRespons
 }
 
 type ResponseOrganizationsGetOrganizationOpenapiSpecPathsOrganizationsGetResponses200Examples struct {
-	ApplicationJSON *[]ResponseOrganizationsGetOrganizationOpenapiSpecPathsOrganizationsGetResponses200ExamplesApplicationJson `tfsdk:"application/json"`
+	ApplicationJSON *[]ResponseOrganizationsGetOrganizationOpenapiSpecPathsOrganizationsGetResponses200ExamplesApplicationJson `tfsdk:"application_json"`
 }
 
 type ResponseOrganizationsGetOrganizationOpenapiSpecPathsOrganizationsGetResponses200ExamplesApplicationJson struct {

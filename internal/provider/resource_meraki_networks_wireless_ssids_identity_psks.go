@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -146,13 +146,15 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	vvNumber := data.Number.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDIDentityPsks(vvNetworkID, vvNumber)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -164,6 +166,7 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -173,12 +176,13 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter IDentityPskID",
-					"Failed",
+					"Fail Parsing IDentityPskID",
 				)
 				return
 			}
 			data.IDentityPskID = types.StringValue(vvIDentityPskID)
 			r.client.Wireless.UpdateNetworkWirelessSSIDIDentityPsk(vvNetworkID, vvNumber, vvIDentityPskID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Wireless.GetNetworkWirelessSSIDIDentityPsk(vvNetworkID, vvNumber, vvIDentityPskID)
 			if responseVerifyItem2 != nil {
 				data = ResponseWirelessGetNetworkWirelessSSIDIDentityPskItemToBodyRs(data, responseVerifyItem2, false)
@@ -188,11 +192,11 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Wireless.CreateNetworkWirelessSSIDIDentityPsk(vvNetworkID, vvNumber, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkWirelessSSIDIDentityPsk",
 				err.Error(),
@@ -205,9 +209,8 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDIDentityPsks(vvNetworkID, vvNumber)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -223,6 +226,7 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -231,7 +235,7 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter IDentityPskID",
-				"Error",
+				"Fail Parsing IDentityPskID",
 			)
 			return
 		}
@@ -262,6 +266,7 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 		)
 		return
 	}
+
 }
 
 func (r *NetworksWirelessSSIDsIDentityPsksResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {

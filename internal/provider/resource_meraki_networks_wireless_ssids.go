@@ -20,11 +20,12 @@ package provider
 import (
 	"context"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	"log"
+
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -184,7 +185,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"auth_mode": schema.StringAttribute{
 				MarkdownDescription: `The association control method for the SSID
-                                  Allowed values: [8021x-entra,8021x-google,8021x-localradius,8021x-meraki,8021x-nac,8021x-radius,ipsk-with-nac,ipsk-with-radius,ipsk-without-radius,open,open-enhanced,open-with-nac,open-with-radius,psk]`,
+                                  Allowed values: [8021x-entra,8021x-google,8021x-localradius,8021x-meraki,8021x-nac,8021x-radius,ipsk-with-nac,ipsk-with-radius,ipsk-with-radius-easy-psk,ipsk-without-radius,open,open-enhanced,open-with-nac,open-with-radius,psk]`,
 				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
@@ -200,6 +201,7 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 						"8021x-radius",
 						"ipsk-with-nac",
 						"ipsk-with-radius",
+						"ipsk-with-radius-easy-psk",
 						"ipsk-without-radius",
 						"open",
 						"open-enhanced",
@@ -1005,9 +1007,10 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			// 	},
 			// },
 			"radius_failover_policy": schema.StringAttribute{
-				MarkdownDescription: `Policy which determines how authentication requests should be handled in the event that all of the configured RADIUS servers are unreachable`,
-				Computed:            true,
-				Optional:            true,
+				MarkdownDescription: `Policy which determines how authentication requests should be handled in the event that all of the configured RADIUS servers are unreachable
+                                  Allowed values: [Allow access,Deny access]`,
+				Computed: true,
+				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -1063,9 +1066,37 @@ func (r *NetworksWirelessSSIDsResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"radius_proxy_enabled": schema.BoolAttribute{
 				MarkdownDescription: `If true, Meraki devices will proxy RADIUS messages through the Meraki cloud to the configured RADIUS auth and accounting servers.`,
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"radius_radsec": schema.SingleNestedAttribute{
+				MarkdownDescription: `The current settings for RADIUS RADSec`,
+				Optional:            true,
+				PlanModifiers: []planmodifier.Object{
+					objectplanmodifier.UseStateForUnknown(),
+				},
+				Attributes: map[string]schema.Attribute{
+
+					"tls_tunnel": schema.SingleNestedAttribute{
+						MarkdownDescription: `RADSec TLS tunnel settings`,
+						Optional:            true,
+						PlanModifiers: []planmodifier.Object{
+							objectplanmodifier.UseStateForUnknown(),
+						},
+						Attributes: map[string]schema.Attribute{
+
+							"timeout": schema.Int64Attribute{
+								MarkdownDescription: `The interval (in seconds) to determines how long a TLS session can remain idle for a RADSec server before it is automatically terminated`,
+								Optional:            true,
+								PlanModifiers: []planmodifier.Int64{
+									int64planmodifier.UseStateForUnknown(),
+								},
+							},
+						},
+					},
 				},
 			},
 			"radius_server_attempts_limit": schema.Int64Attribute{
@@ -1355,33 +1386,34 @@ func (r *NetworksWirelessSSIDsResource) Create(ctx context.Context, req resource
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	// network_id
 	a := int(data.Number.ValueInt64())
 	vvNumber := strconv.Itoa(a)
 	//Item
 	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSID(vvNetworkID, vvNumber)
+	// No Post
 	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
 		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSSIDs only have update context, not create.",
+			"Resource NetworksWirelessSsids  only have update context, not create.",
 			err.Error(),
 		)
 		return
 	}
-	//Only Item
+
 	if responseVerifyItem == nil {
 		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSSIDs only have update context, not create.",
+			"Resource NetworksWirelessSsids only have update context, not create.",
 			err.Error(),
 		)
 		return
 	}
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSID(vvNetworkID, vvNumber, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSID",
 				err.Error(),
@@ -1394,28 +1426,30 @@ func (r *NetworksWirelessSSIDsResource) Create(ctx context.Context, req resource
 		)
 		return
 	}
-	//Item
-	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSID(vvNetworkID, vvNumber)
-	// Has only items
 
+	//Assign Path Params required
+
+	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSID(vvNetworkID, vvNumber)
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkWirelessSSIDs",
+				"Failure when executing GetNetworkWirelessSSID",
 				err.Error(),
 			)
 			return
 		}
 		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkWirelessSSIDs",
+			"Failure when executing GetNetworkWirelessSSID",
 			err.Error(),
 		)
 		return
 	}
+
 	data = ResponseWirelessGetNetworkWirelessSSIDItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksWirelessSSIDsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -1599,6 +1633,7 @@ type NetworksWirelessSSIDsRs struct {
 	RadiusGuestVLANID                types.Int64                                                   `tfsdk:"radius_guest_vlan_id"`
 	RadiusOverride                   types.Bool                                                    `tfsdk:"radius_override"`
 	RadiusProxyEnabled               types.Bool                                                    `tfsdk:"radius_proxy_enabled"`
+	RadiusRadsec                     *RequestWirelessUpdateNetworkWirelessSsidRadiusRadsecRs       `tfsdk:"radius_radsec"`
 	RadiusServerAttemptsLimit        types.Int64                                                   `tfsdk:"radius_server_attempts_limit"`
 	RadiusServerTimeout              types.Int64                                                   `tfsdk:"radius_server_timeout"`
 	RadiusTestingEnabled             types.Bool                                                    `tfsdk:"radius_testing_enabled"`
@@ -1743,6 +1778,14 @@ type RequestWirelessUpdateNetworkWirelessSsidOauthRs struct {
 	AllowedDomains types.Set `tfsdk:"allowed_domains"`
 }
 
+type RequestWirelessUpdateNetworkWirelessSsidRadiusRadsecRs struct {
+	TlsTunnel *RequestWirelessUpdateNetworkWirelessSsidRadiusRadsecTlsTunnelRs `tfsdk:"tls_tunnel"`
+}
+
+type RequestWirelessUpdateNetworkWirelessSsidRadiusRadsecTlsTunnelRs struct {
+	Timeout types.Int64 `tfsdk:"timeout"`
+}
+
 type RequestWirelessUpdateNetworkWirelessSsidSpeedBurstRs struct {
 	Enabled types.Bool `tfsdk:"enabled"`
 }
@@ -1751,8 +1794,10 @@ type RequestWirelessUpdateNetworkWirelessSsidSpeedBurstRs struct {
 func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestWirelessUpdateNetworkWirelessSSID {
 	emptyString := ""
 	var requestWirelessUpdateNetworkWirelessSSIDActiveDirectory *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDActiveDirectory
+
 	if r.ActiveDirectory != nil {
 		var requestWirelessUpdateNetworkWirelessSSIDActiveDirectoryCredentials *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDActiveDirectoryCredentials
+
 		if r.ActiveDirectory.Credentials != nil {
 			logonName := r.ActiveDirectory.Credentials.LogonName.ValueString()
 			password := r.ActiveDirectory.Credentials.Password.ValueString()
@@ -1760,10 +1805,14 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 				LogonName: logonName,
 				Password:  password,
 			}
+			//[debug] Is Array: False
 		}
+
+		log.Printf("[DEBUG] #TODO []RequestWirelessUpdateNetworkWirelessSsidActiveDirectoryServers")
 		var requestWirelessUpdateNetworkWirelessSSIDActiveDirectoryServers []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDActiveDirectoryServers
+
 		if r.ActiveDirectory.Servers != nil {
-			for _, rItem1 := range *r.ActiveDirectory.Servers { //ActiveDirectory.Servers// name: servers
+			for _, rItem1 := range *r.ActiveDirectory.Servers {
 				host := rItem1.Host.ValueString()
 				port := func() *int64 {
 					if !rItem1.Port.IsUnknown() && !rItem1.Port.IsNull() {
@@ -1775,6 +1824,7 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 					Host: host,
 					Port: int64ToIntPointer(port),
 				})
+				//[debug] Is Array: True
 			}
 		}
 		requestWirelessUpdateNetworkWirelessSSIDActiveDirectory = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDActiveDirectory{
@@ -1786,6 +1836,7 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 				return nil
 			}(),
 		}
+		//[debug] Is Array: False
 	}
 	adultContentFilteringEnabled := new(bool)
 	if !r.AdultContentFilteringEnabled.IsUnknown() && !r.AdultContentFilteringEnabled.IsNull() {
@@ -1794,12 +1845,13 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 		adultContentFilteringEnabled = nil
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDApTagsAndVLANIDs []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDApTagsAndVLANIDs
+
 	if r.ApTagsAndVLANIDs != nil {
 		for _, rItem1 := range *r.ApTagsAndVLANIDs {
+
 			var tags []string = nil
-			//Hoola aqui
 			rItem1.Tags.ElementsAs(ctx, &tags, false)
-			vLANID := func() *int64 {
+			vlanID := func() *int64 {
 				if !rItem1.VLANID.IsUnknown() && !rItem1.VLANID.IsNull() {
 					return rItem1.VLANID.ValueInt64Pointer()
 				}
@@ -1807,8 +1859,9 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 			}()
 			requestWirelessUpdateNetworkWirelessSSIDApTagsAndVLANIDs = append(requestWirelessUpdateNetworkWirelessSSIDApTagsAndVLANIDs, merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDApTagsAndVLANIDs{
 				Tags:   tags,
-				VLANID: int64ToIntPointer(vLANID),
+				VLANID: int64ToIntPointer(vlanID),
 			})
+			//[debug] Is Array: True
 		}
 	}
 	authMode := new(string)
@@ -1850,9 +1903,10 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 		disassociateClientsOnVpnFailover = nil
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDDNSRewrite *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDDNSRewrite
+
 	if r.DNSRewrite != nil {
+
 		var dnsCustomNameservers []string = nil
-		//Hoola aqui
 		r.DNSRewrite.DNSCustomNameservers.ElementsAs(ctx, &dnsCustomNameservers, false)
 		enabled := func() *bool {
 			if !r.DNSRewrite.Enabled.IsUnknown() && !r.DNSRewrite.Enabled.IsNull() {
@@ -1864,8 +1918,10 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 			DNSCustomNameservers: dnsCustomNameservers,
 			Enabled:              enabled,
 		}
+		//[debug] Is Array: False
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDDot11R *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDDot11R
+
 	if r.Dot11R != nil {
 		adaptive := func() *bool {
 			if !r.Dot11R.Adaptive.IsUnknown() && !r.Dot11R.Adaptive.IsNull() {
@@ -1883,8 +1939,10 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 			Adaptive: adaptive,
 			Enabled:  enabled,
 		}
+		//[debug] Is Array: False
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDDot11W *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDDot11W
+
 	if r.Dot11W != nil {
 		enabled := func() *bool {
 			if !r.Dot11W.Enabled.IsUnknown() && !r.Dot11W.Enabled.IsNull() {
@@ -1902,6 +1960,7 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 			Enabled:  enabled,
 			Required: required,
 		}
+		//[debug] Is Array: False
 	}
 	enabled := new(bool)
 	if !r.Enabled.IsUnknown() && !r.Enabled.IsNull() {
@@ -1928,13 +1987,16 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 		enterpriseAdminAccess = &emptyString
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDGre *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDGre
+
 	if r.Gre != nil {
 		var requestWirelessUpdateNetworkWirelessSSIDGreConcentrator *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDGreConcentrator
+
 		if r.Gre.Concentrator != nil {
 			host := r.Gre.Concentrator.Host.ValueString()
 			requestWirelessUpdateNetworkWirelessSSIDGreConcentrator = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDGreConcentrator{
 				Host: host,
 			}
+			//[debug] Is Array: False
 		}
 		key := func() *int64 {
 			if !r.Gre.Key.IsUnknown() && !r.Gre.Key.IsNull() {
@@ -1946,6 +2008,7 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 			Concentrator: requestWirelessUpdateNetworkWirelessSSIDGreConcentrator,
 			Key:          int64ToIntPointer(key),
 		}
+		//[debug] Is Array: False
 	}
 	iPAssignmentMode := new(string)
 	if !r.IPAssignmentMode.IsUnknown() && !r.IPAssignmentMode.IsNull() {
@@ -1960,9 +2023,11 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 		lanIsolationEnabled = nil
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDLdap *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDLdap
+
 	if r.Ldap != nil {
 		baseDistinguishedName := r.Ldap.BaseDistinguishedName.ValueString()
 		var requestWirelessUpdateNetworkWirelessSSIDLdapCredentials *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDLdapCredentials
+
 		if r.Ldap.Credentials != nil {
 			distinguishedName := r.Ldap.Credentials.DistinguishedName.ValueString()
 			password := r.Ldap.Credentials.Password.ValueString()
@@ -1970,17 +2035,23 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 				DistinguishedName: distinguishedName,
 				Password:          password,
 			}
+			//[debug] Is Array: False
 		}
 		var requestWirelessUpdateNetworkWirelessSSIDLdapServerCaCertificate *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDLdapServerCaCertificate
+
 		if r.Ldap.ServerCaCertificate != nil {
 			contents := r.Ldap.ServerCaCertificate.Contents.ValueString()
 			requestWirelessUpdateNetworkWirelessSSIDLdapServerCaCertificate = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDLdapServerCaCertificate{
 				Contents: contents,
 			}
+			//[debug] Is Array: False
 		}
+
+		log.Printf("[DEBUG] #TODO []RequestWirelessUpdateNetworkWirelessSsidLdapServers")
 		var requestWirelessUpdateNetworkWirelessSSIDLdapServers []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDLdapServers
+
 		if r.Ldap.Servers != nil {
-			for _, rItem1 := range *r.Ldap.Servers { //Ldap.Servers// name: servers
+			for _, rItem1 := range *r.Ldap.Servers {
 				host := rItem1.Host.ValueString()
 				port := func() *int64 {
 					if !rItem1.Port.IsUnknown() && !rItem1.Port.IsNull() {
@@ -1992,6 +2063,7 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 					Host: host,
 					Port: int64ToIntPointer(port),
 				})
+				//[debug] Is Array: True
 			}
 		}
 		requestWirelessUpdateNetworkWirelessSSIDLdap = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDLdap{
@@ -2005,8 +2077,10 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 				return nil
 			}(),
 		}
+		//[debug] Is Array: False
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDLocalRadius *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDLocalRadius
+
 	if r.LocalRadius != nil {
 		cacheTimeout := func() *int64 {
 			if !r.LocalRadius.CacheTimeout.IsUnknown() && !r.LocalRadius.CacheTimeout.IsNull() {
@@ -2015,13 +2089,16 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 			return nil
 		}()
 		var requestWirelessUpdateNetworkWirelessSSIDLocalRadiusCertificateAuthentication *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDLocalRadiusCertificateAuthentication
+
 		if r.LocalRadius.CertificateAuthentication != nil {
 			var requestWirelessUpdateNetworkWirelessSSIDLocalRadiusCertificateAuthenticationClientRootCaCertificate *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDLocalRadiusCertificateAuthenticationClientRootCaCertificate
+
 			if r.LocalRadius.CertificateAuthentication.ClientRootCaCertificate != nil {
 				contents := r.LocalRadius.CertificateAuthentication.ClientRootCaCertificate.Contents.ValueString()
 				requestWirelessUpdateNetworkWirelessSSIDLocalRadiusCertificateAuthenticationClientRootCaCertificate = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDLocalRadiusCertificateAuthenticationClientRootCaCertificate{
 					Contents: contents,
 				}
+				//[debug] Is Array: False
 			}
 			enabled := func() *bool {
 				if !r.LocalRadius.CertificateAuthentication.Enabled.IsUnknown() && !r.LocalRadius.CertificateAuthentication.Enabled.IsNull() {
@@ -2049,8 +2126,10 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 				UseLdap:                 useLdap,
 				UseOcsp:                 useOcsp,
 			}
+			//[debug] Is Array: False
 		}
 		var requestWirelessUpdateNetworkWirelessSSIDLocalRadiusPasswordAuthentication *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDLocalRadiusPasswordAuthentication
+
 		if r.LocalRadius.PasswordAuthentication != nil {
 			enabled := func() *bool {
 				if !r.LocalRadius.PasswordAuthentication.Enabled.IsUnknown() && !r.LocalRadius.PasswordAuthentication.Enabled.IsNull() {
@@ -2061,12 +2140,14 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 			requestWirelessUpdateNetworkWirelessSSIDLocalRadiusPasswordAuthentication = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDLocalRadiusPasswordAuthentication{
 				Enabled: enabled,
 			}
+			//[debug] Is Array: False
 		}
 		requestWirelessUpdateNetworkWirelessSSIDLocalRadius = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDLocalRadius{
 			CacheTimeout:              int64ToIntPointer(cacheTimeout),
 			CertificateAuthentication: requestWirelessUpdateNetworkWirelessSSIDLocalRadiusCertificateAuthentication,
 			PasswordAuthentication:    requestWirelessUpdateNetworkWirelessSSIDLocalRadiusPasswordAuthentication,
 		}
+		//[debug] Is Array: False
 	}
 	mandatoryDhcpEnabled := new(bool)
 	if !r.MandatoryDhcpEnabled.IsUnknown() && !r.MandatoryDhcpEnabled.IsNull() {
@@ -2074,12 +2155,12 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 	} else {
 		mandatoryDhcpEnabled = nil
 	}
-	// minBitrate := new(float64)
-	// if !r.MinBitrate.IsUnknown() && !r.MinBitrate.IsNull() {
-	// 	*minBitrate = float64(r.MinBitrate.ValueInt64())
-	// } else {
-	// 	minBitrate = nil
-	// }
+	minBitrate := new(float64)
+	if !r.MinBitrate.IsUnknown() && !r.MinBitrate.IsNull() {
+		*minBitrate = *int64ToFloat(r.MinBitrate.ValueInt64Pointer())
+	} else {
+		minBitrate = nil
+	}
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
 		*name = r.Name.ValueString()
@@ -2087,10 +2168,13 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 		name = &emptyString
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDNamedVLANs *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDNamedVLANs
+
 	if r.NamedVLANs != nil {
 		var requestWirelessUpdateNetworkWirelessSSIDNamedVLANsRadius *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDNamedVLANsRadius
+
 		if r.NamedVLANs.Radius != nil {
 			var requestWirelessUpdateNetworkWirelessSSIDNamedVLANsRadiusGuestVLAN *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDNamedVLANsRadiusGuestVLAN
+
 			if r.NamedVLANs.Radius.GuestVLAN != nil {
 				enabled := func() *bool {
 					if !r.NamedVLANs.Radius.GuestVLAN.Enabled.IsUnknown() && !r.NamedVLANs.Radius.GuestVLAN.Enabled.IsNull() {
@@ -2103,27 +2187,34 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 					Enabled: enabled,
 					Name:    name,
 				}
+				//[debug] Is Array: False
 			}
 			requestWirelessUpdateNetworkWirelessSSIDNamedVLANsRadius = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDNamedVLANsRadius{
 				GuestVLAN: requestWirelessUpdateNetworkWirelessSSIDNamedVLANsRadiusGuestVLAN,
 			}
+			//[debug] Is Array: False
 		}
 		var requestWirelessUpdateNetworkWirelessSSIDNamedVLANsTagging *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDNamedVLANsTagging
+
 		if r.NamedVLANs.Tagging != nil {
+
+			log.Printf("[DEBUG] #TODO []RequestWirelessUpdateNetworkWirelessSsidNamedVlansTaggingByApTags")
 			var requestWirelessUpdateNetworkWirelessSSIDNamedVLANsTaggingByApTags []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDNamedVLANsTaggingByApTags
+
 			if r.NamedVLANs.Tagging.ByApTags != nil {
-				for _, rItem1 := range *r.NamedVLANs.Tagging.ByApTags { //NamedVLANs.Tagging.ByApTags// name: byApTags
+				for _, rItem1 := range *r.NamedVLANs.Tagging.ByApTags {
+
 					var tags []string = nil
-					//Hoola aqui
 					rItem1.Tags.ElementsAs(ctx, &tags, false)
-					vLANName := rItem1.VLANName.ValueString()
+					vlanName := rItem1.VLANName.ValueString()
 					requestWirelessUpdateNetworkWirelessSSIDNamedVLANsTaggingByApTags = append(requestWirelessUpdateNetworkWirelessSSIDNamedVLANsTaggingByApTags, merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDNamedVLANsTaggingByApTags{
 						Tags:     tags,
-						VLANName: vLANName,
+						VLANName: vlanName,
 					})
+					//[debug] Is Array: True
 				}
 			}
-			defaultVLANName := r.NamedVLANs.Tagging.DefaultVLANName.ValueString()
+			defaultRVLANName := r.NamedVLANs.Tagging.DefaultVLANName.ValueString()
 			enabled := func() *bool {
 				if !r.NamedVLANs.Tagging.Enabled.IsUnknown() && !r.NamedVLANs.Tagging.Enabled.IsNull() {
 					return r.NamedVLANs.Tagging.Enabled.ValueBoolPointer()
@@ -2137,23 +2228,27 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 					}
 					return nil
 				}(),
-				DefaultVLANName: defaultVLANName,
+				DefaultVLANName: defaultRVLANName,
 				Enabled:         enabled,
 			}
+			//[debug] Is Array: False
 		}
 		requestWirelessUpdateNetworkWirelessSSIDNamedVLANs = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDNamedVLANs{
 			Radius:  requestWirelessUpdateNetworkWirelessSSIDNamedVLANsRadius,
 			Tagging: requestWirelessUpdateNetworkWirelessSSIDNamedVLANsTagging,
 		}
+		//[debug] Is Array: False
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDOauth *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDOauth
+
 	if r.Oauth != nil {
+
 		var allowedDomains []string = nil
-		//Hoola aqui
 		r.Oauth.AllowedDomains.ElementsAs(ctx, &allowedDomains, false)
 		requestWirelessUpdateNetworkWirelessSSIDOauth = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDOauth{
 			AllowedDomains: allowedDomains,
 		}
+		//[debug] Is Array: False
 	}
 	perClientBandwidthLimitDown := new(int64)
 	if !r.PerClientBandwidthLimitDown.IsUnknown() && !r.PerClientBandwidthLimitDown.IsNull() {
@@ -2198,6 +2293,7 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 		radiusAccountingInterimInterval = nil
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDRadiusAccountingServers []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDRadiusAccountingServers
+
 	if r.RadiusAccountingServers != nil {
 		for _, rItem1 := range *r.RadiusAccountingServers {
 			caCertificate := rItem1.CaCertificate.ValueString()
@@ -2222,6 +2318,7 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 				RadsecEnabled: radsecEnabled,
 				Secret:        secret,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	radiusAttributeForGroupPolicies := new(string)
@@ -2290,6 +2387,28 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 	} else {
 		radiusProxyEnabled = nil
 	}
+	var requestWirelessUpdateNetworkWirelessSSIDRadiusRadsec *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDRadiusRadsec
+
+	if r.RadiusRadsec != nil {
+		var requestWirelessUpdateNetworkWirelessSSIDRadiusRadsecTlsTunnel *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDRadiusRadsecTlsTunnel
+
+		if r.RadiusRadsec.TlsTunnel != nil {
+			timeout := func() *int64 {
+				if !r.RadiusRadsec.TlsTunnel.Timeout.IsUnknown() && !r.RadiusRadsec.TlsTunnel.Timeout.IsNull() {
+					return r.RadiusRadsec.TlsTunnel.Timeout.ValueInt64Pointer()
+				}
+				return nil
+			}()
+			requestWirelessUpdateNetworkWirelessSSIDRadiusRadsecTlsTunnel = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDRadiusRadsecTlsTunnel{
+				Timeout: int64ToIntPointer(timeout),
+			}
+			//[debug] Is Array: False
+		}
+		requestWirelessUpdateNetworkWirelessSSIDRadiusRadsec = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDRadiusRadsec{
+			TlsTunnel: requestWirelessUpdateNetworkWirelessSSIDRadiusRadsecTlsTunnel,
+		}
+		//[debug] Is Array: False
+	}
 	radiusServerAttemptsLimit := new(int64)
 	if !r.RadiusServerAttemptsLimit.IsUnknown() && !r.RadiusServerAttemptsLimit.IsNull() {
 		*radiusServerAttemptsLimit = r.RadiusServerAttemptsLimit.ValueInt64()
@@ -2303,6 +2422,7 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 		radiusServerTimeout = nil
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDRadiusServers []merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDRadiusServers
+
 	if r.RadiusServers != nil {
 		for _, rItem1 := range *r.RadiusServers {
 			caCertificate := rItem1.CaCertificate.ValueString()
@@ -2334,6 +2454,7 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 				RadsecEnabled:            radsecEnabled,
 				Secret:                   secret,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	radiusTestingEnabled := new(bool)
@@ -2349,6 +2470,7 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 		secondaryConcentratorNetworkID = &emptyString
 	}
 	var requestWirelessUpdateNetworkWirelessSSIDSpeedBurst *merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSpeedBurst
+
 	if r.SpeedBurst != nil {
 		enabled := func() *bool {
 			if !r.SpeedBurst.Enabled.IsUnknown() && !r.SpeedBurst.Enabled.IsNull() {
@@ -2359,6 +2481,7 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 		requestWirelessUpdateNetworkWirelessSSIDSpeedBurst = &merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDSpeedBurst{
 			Enabled: enabled,
 		}
+		//[debug] Is Array: False
 	}
 	var splashGuestSponsorDomains []string = nil
 	r.SplashGuestSponsorDomains.ElementsAs(ctx, &splashGuestSponsorDomains, false)
@@ -2456,6 +2579,7 @@ func (r *NetworksWirelessSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 		RadiusLoadBalancingPolicy:       *radiusLoadBalancingPolicy,
 		RadiusOverride:                  radiusOverride,
 		RadiusProxyEnabled:              radiusProxyEnabled,
+		RadiusRadsec:                    requestWirelessUpdateNetworkWirelessSSIDRadiusRadsec,
 		RadiusServerAttemptsLimit:       int64ToIntPointer(radiusServerAttemptsLimit),
 		RadiusServerTimeout:             int64ToIntPointer(radiusServerTimeout),
 		RadiusServers: func() *[]merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDRadiusServers {

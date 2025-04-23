@@ -51,5 +51,5 @@ Read-Only:
 - `id` (String) Policy object ID
 - `name` (String) Name of the Policy object group.
 - `network_ids` (List of String) Network ID's associated with the policy objects.
-- `object_ids` (List of Number) Policy objects associated with Network Object Group or Port Object Group
+- `object_ids` (Set of String) Policy objects associated with Network Object Group or Port Object Group
 - `updated_at` (String) Time Stamp of policy object updation.

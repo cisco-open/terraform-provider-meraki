@@ -7,10 +7,12 @@ resource "meraki_organizations_adaptive_policy_acls" "example" {
   organization_id = "string"
   rules = [{
 
-    dst_port = "22-30"
-    policy   = "deny"
-    protocol = "tcp"
-    src_port = "1,33"
+    dst_port        = "22-30"
+    log             = true
+    policy          = "deny"
+    protocol        = "tcp"
+    src_port        = "1,33"
+    tcp_established = true
   }]
 }
 

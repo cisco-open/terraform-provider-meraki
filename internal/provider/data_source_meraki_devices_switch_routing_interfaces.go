@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -62,6 +62,10 @@ func (d *DevicesSwitchRoutingInterfacesDataSource) Schema(_ context.Context, _ d
 				MarkdownDescription: `interfaceId path parameter. Interface ID`,
 				Optional:            true,
 			},
+			"protocol": schema.StringAttribute{
+				MarkdownDescription: `protocol query parameter. Optional parameter to filter L3 interfaces by protocol.`,
+				Optional:            true,
+			},
 			"serial": schema.StringAttribute{
 				MarkdownDescription: `serial path parameter.`,
 				Optional:            true,
@@ -75,7 +79,7 @@ func (d *DevicesSwitchRoutingInterfacesDataSource) Schema(_ context.Context, _ d
 						Computed:            true,
 					},
 					"interface_id": schema.StringAttribute{
-						MarkdownDescription: `The id`,
+						MarkdownDescription: `The ID`,
 						Computed:            true,
 					},
 					"interface_ip": schema.StringAttribute{
@@ -119,7 +123,7 @@ func (d *DevicesSwitchRoutingInterfacesDataSource) Schema(_ context.Context, _ d
 						Attributes: map[string]schema.Attribute{
 
 							"area": schema.StringAttribute{
-								MarkdownDescription: `Area id`,
+								MarkdownDescription: `Area ID`,
 								Computed:            true,
 							},
 							"cost": schema.Int64Attribute{
@@ -138,7 +142,7 @@ func (d *DevicesSwitchRoutingInterfacesDataSource) Schema(_ context.Context, _ d
 						Attributes: map[string]schema.Attribute{
 
 							"area": schema.StringAttribute{
-								MarkdownDescription: `Area id`,
+								MarkdownDescription: `Area ID`,
 								Computed:            true,
 							},
 							"cost": schema.Int64Attribute{
@@ -156,15 +160,15 @@ func (d *DevicesSwitchRoutingInterfacesDataSource) Schema(_ context.Context, _ d
 						Computed:            true,
 					},
 					"uplink_v4": schema.BoolAttribute{
-						MarkdownDescription: `Whether this is the switch's IPv4 uplink`,
+						MarkdownDescription: `When true, this interface is used as static IPv4 uplink`,
 						Computed:            true,
 					},
 					"uplink_v6": schema.BoolAttribute{
-						MarkdownDescription: `Whether this is the switch's IPv6 uplink`,
+						MarkdownDescription: `When true, this interface is used as static IPv6 uplink`,
 						Computed:            true,
 					},
 					"vlan_id": schema.Int64Attribute{
-						MarkdownDescription: `VLAN id`,
+						MarkdownDescription: `VLAN ID`,
 						Computed:            true,
 					},
 				},
@@ -181,7 +185,7 @@ func (d *DevicesSwitchRoutingInterfacesDataSource) Schema(_ context.Context, _ d
 							Computed:            true,
 						},
 						"interface_id": schema.StringAttribute{
-							MarkdownDescription: `The id`,
+							MarkdownDescription: `The ID`,
 							Computed:            true,
 						},
 						"interface_ip": schema.StringAttribute{
@@ -225,7 +229,7 @@ func (d *DevicesSwitchRoutingInterfacesDataSource) Schema(_ context.Context, _ d
 							Attributes: map[string]schema.Attribute{
 
 								"area": schema.StringAttribute{
-									MarkdownDescription: `Area id`,
+									MarkdownDescription: `Area ID`,
 									Computed:            true,
 								},
 								"cost": schema.Int64Attribute{
@@ -244,7 +248,7 @@ func (d *DevicesSwitchRoutingInterfacesDataSource) Schema(_ context.Context, _ d
 							Attributes: map[string]schema.Attribute{
 
 								"area": schema.StringAttribute{
-									MarkdownDescription: `Area id`,
+									MarkdownDescription: `Area ID`,
 									Computed:            true,
 								},
 								"cost": schema.Int64Attribute{
@@ -262,15 +266,15 @@ func (d *DevicesSwitchRoutingInterfacesDataSource) Schema(_ context.Context, _ d
 							Computed:            true,
 						},
 						"uplink_v4": schema.BoolAttribute{
-							MarkdownDescription: `Whether this is the switch's IPv4 uplink`,
+							MarkdownDescription: `When true, this interface is used as static IPv4 uplink`,
 							Computed:            true,
 						},
 						"uplink_v6": schema.BoolAttribute{
-							MarkdownDescription: `Whether this is the switch's IPv6 uplink`,
+							MarkdownDescription: `When true, this interface is used as static IPv6 uplink`,
 							Computed:            true,
 						},
 						"vlan_id": schema.Int64Attribute{
-							MarkdownDescription: `VLAN id`,
+							MarkdownDescription: `VLAN ID`,
 							Computed:            true,
 						},
 					},
@@ -287,7 +291,7 @@ func (d *DevicesSwitchRoutingInterfacesDataSource) Read(ctx context.Context, req
 		return
 	}
 
-	method1 := []bool{!devicesSwitchRoutingInterfaces.Serial.IsNull()}
+	method1 := []bool{!devicesSwitchRoutingInterfaces.Serial.IsNull(), !devicesSwitchRoutingInterfaces.Protocol.IsNull()}
 	log.Printf("[DEBUG] Selecting method. Method 1 %v", method1)
 	method2 := []bool{!devicesSwitchRoutingInterfaces.Serial.IsNull(), !devicesSwitchRoutingInterfaces.InterfaceID.IsNull()}
 	log.Printf("[DEBUG] Selecting method. Method 2 %v", method2)
@@ -296,10 +300,13 @@ func (d *DevicesSwitchRoutingInterfacesDataSource) Read(ctx context.Context, req
 	if selectedMethod == 1 {
 		log.Printf("[DEBUG] Selected method: GetDeviceSwitchRoutingInterfaces")
 		vvSerial := devicesSwitchRoutingInterfaces.Serial.ValueString()
+		queryParams1 := merakigosdk.GetDeviceSwitchRoutingInterfacesQueryParams{}
+
+		queryParams1.Protocol = devicesSwitchRoutingInterfaces.Protocol.ValueString()
 
 		// has_unknown_response: None
 
-		response1, restyResp1, err := d.client.Switch.GetDeviceSwitchRoutingInterfaces(vvSerial)
+		response1, restyResp1, err := d.client.Switch.GetDeviceSwitchRoutingInterfaces(vvSerial, &queryParams1)
 
 		if err != nil || response1 == nil {
 			if restyResp1 != nil {
@@ -353,6 +360,7 @@ func (d *DevicesSwitchRoutingInterfacesDataSource) Read(ctx context.Context, req
 // structs
 type DevicesSwitchRoutingInterfaces struct {
 	Serial      types.String                                          `tfsdk:"serial"`
+	Protocol    types.String                                          `tfsdk:"protocol"`
 	InterfaceID types.String                                          `tfsdk:"interface_id"`
 	Items       *[]ResponseItemSwitchGetDeviceSwitchRoutingInterfaces `tfsdk:"items"`
 	Item        *ResponseSwitchGetDeviceSwitchRoutingInterface        `tfsdk:"item"`

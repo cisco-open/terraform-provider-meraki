@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -262,7 +262,6 @@ func (r *NetworksSwitchQosRulesOrderResource) Read(ctx context.Context, req reso
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvQosRuleID := data.QosRuleID.ValueString()
 	responseGet, restyRespGet, err := r.client.Switch.GetNetworkSwitchQosRule(vvNetworkID, vvQosRuleID)
 	if err != nil || restyRespGet == nil {
@@ -287,7 +286,7 @@ func (r *NetworksSwitchQosRulesOrderResource) Read(ctx context.Context, req reso
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchQosRuleItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -321,12 +320,10 @@ func (r *NetworksSwitchQosRulesOrderResource) Update(ctx context.Context, req re
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvQosRuleID := data.QosRuleID.ValueString()
-	// qos_rules_id
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
-	_, restyResp2, err := r.client.Switch.UpdateNetworkSwitchQosRule(vvNetworkID, vvQosRuleID, dataRequest)
-	if err != nil || restyResp2 == nil {
+	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchQosRule(vvNetworkID, vvQosRuleID, dataRequest)
+	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchQosRule",

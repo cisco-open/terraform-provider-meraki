@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -160,12 +160,14 @@ func (r *NetworksWebhooksHTTPServersResource) Create(ctx context.Context, req re
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkWebhooksHTTPServers(vvNetworkID)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -177,6 +179,7 @@ func (r *NetworksWebhooksHTTPServersResource) Create(ctx context.Context, req re
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -191,6 +194,7 @@ func (r *NetworksWebhooksHTTPServersResource) Create(ctx context.Context, req re
 				return
 			}
 			r.client.Networks.UpdateNetworkWebhooksHTTPServer(vvNetworkID, vvHTTPServerID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Networks.GetNetworkWebhooksHTTPServer(vvNetworkID, vvHTTPServerID)
 			if responseVerifyItem2 != nil {
 				data = ResponseNetworksGetNetworkWebhooksHTTPServerItemToBodyRs(data, responseVerifyItem2, false)
@@ -200,11 +204,11 @@ func (r *NetworksWebhooksHTTPServersResource) Create(ctx context.Context, req re
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Networks.CreateNetworkWebhooksHTTPServer(vvNetworkID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkWebhooksHTTPServer",
 				err.Error(),
@@ -217,9 +221,8 @@ func (r *NetworksWebhooksHTTPServersResource) Create(ctx context.Context, req re
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Networks.GetNetworkWebhooksHTTPServers(vvNetworkID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -235,6 +238,7 @@ func (r *NetworksWebhooksHTTPServersResource) Create(ctx context.Context, req re
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -243,7 +247,7 @@ func (r *NetworksWebhooksHTTPServersResource) Create(ctx context.Context, req re
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter HTTPServerID",
-				"Error",
+				"Fail Parsing HTTPServerID",
 			)
 			return
 		}
@@ -273,6 +277,7 @@ func (r *NetworksWebhooksHTTPServersResource) Create(ctx context.Context, req re
 		)
 		return
 	}
+
 }
 
 func (r *NetworksWebhooksHTTPServersResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -432,6 +437,7 @@ func (r *NetworksWebhooksHTTPServersRs) toSdkApiRequestCreate(ctx context.Contex
 		name = &emptyString
 	}
 	var requestNetworksCreateNetworkWebhooksHTTPServerPayloadTemplate *merakigosdk.RequestNetworksCreateNetworkWebhooksHTTPServerPayloadTemplate
+
 	if r.PayloadTemplate != nil {
 		name := r.PayloadTemplate.Name.ValueString()
 		payloadTemplateID := r.PayloadTemplate.PayloadTemplateID.ValueString()
@@ -439,6 +445,7 @@ func (r *NetworksWebhooksHTTPServersRs) toSdkApiRequestCreate(ctx context.Contex
 			Name:              name,
 			PayloadTemplateID: payloadTemplateID,
 		}
+		//[debug] Is Array: False
 	}
 	sharedSecret := new(string)
 	if !r.SharedSecret.IsUnknown() && !r.SharedSecret.IsNull() {
@@ -469,11 +476,13 @@ func (r *NetworksWebhooksHTTPServersRs) toSdkApiRequestUpdate(ctx context.Contex
 		name = &emptyString
 	}
 	var requestNetworksUpdateNetworkWebhooksHTTPServerPayloadTemplate *merakigosdk.RequestNetworksUpdateNetworkWebhooksHTTPServerPayloadTemplate
+
 	if r.PayloadTemplate != nil {
 		payloadTemplateID := r.PayloadTemplate.PayloadTemplateID.ValueString()
 		requestNetworksUpdateNetworkWebhooksHTTPServerPayloadTemplate = &merakigosdk.RequestNetworksUpdateNetworkWebhooksHTTPServerPayloadTemplate{
 			PayloadTemplateID: payloadTemplateID,
 		}
+		//[debug] Is Array: False
 	}
 	sharedSecret := new(string)
 	if !r.SharedSecret.IsUnknown() && !r.SharedSecret.IsNull() {

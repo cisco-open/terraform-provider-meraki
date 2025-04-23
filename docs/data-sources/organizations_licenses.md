@@ -54,7 +54,7 @@ Read-Only:
 - `order_number` (String) Order number
 - `permanently_queued_licenses` (Attributes Set) DEPRECATED List of permanently queued licenses attached to the license. Instead, use /organizations/{organizationId}/licenses?deviceSerial= to retrieved queued licenses for a given device. (see [below for nested schema](#nestedatt--item--permanently_queued_licenses))
 - `seat_count` (Number) The number of seats of the license. Only applicable to SM licenses.
-- `state` (String) The state of the license. All queued licenses have a status of *recentlyQueued*.
+- `state` (String) The state of the license. All queued licenses have a status of **recentlyQueued**.
 - `total_duration_in_days` (Number) The duration of the license plus all permanently queued licenses associated with it
 
 <a id="nestedatt--item--permanently_queued_licenses"></a>

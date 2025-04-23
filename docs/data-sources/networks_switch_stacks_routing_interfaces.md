@@ -16,6 +16,7 @@ description: |-
 data "meraki_networks_switch_stacks_routing_interfaces" "example" {
 
   network_id      = "string"
+  protocol        = "string"
   switch_stack_id = "string"
 }
 
@@ -26,6 +27,7 @@ output "meraki_networks_switch_stacks_routing_interfaces_example" {
 data "meraki_networks_switch_stacks_routing_interfaces" "example" {
 
   network_id      = "string"
+  protocol        = "string"
   switch_stack_id = "string"
 }
 
@@ -41,6 +43,7 @@ output "meraki_networks_switch_stacks_routing_interfaces_example" {
 
 - `interface_id` (String) interfaceId path parameter. Interface ID
 - `network_id` (String) networkId path parameter. Network ID
+- `protocol` (String) protocol query parameter. Optional parameter to filter L3 interfaces by protocol.
 - `switch_stack_id` (String) switchStackId path parameter. Switch stack ID
 
 ### Read-Only
@@ -54,7 +57,7 @@ output "meraki_networks_switch_stacks_routing_interfaces_example" {
 Read-Only:
 
 - `default_gateway` (String) IPv4 default gateway
-- `interface_id` (String) The id
+- `interface_id` (String) The ID
 - `interface_ip` (String) IPv4 address
 - `ipv6` (Attributes) IPv6 addressing (see [below for nested schema](#nestedatt--item--ipv6))
 - `multicast_routing` (String) Multicast routing status
@@ -62,9 +65,9 @@ Read-Only:
 - `ospf_settings` (Attributes) IPv4 OSPF Settings (see [below for nested schema](#nestedatt--item--ospf_settings))
 - `ospf_v3` (Attributes) IPv6 OSPF Settings (see [below for nested schema](#nestedatt--item--ospf_v3))
 - `subnet` (String) IPv4 subnet
-- `uplink_v4` (Boolean) Whether this is the switch's IPv4 uplink
-- `uplink_v6` (Boolean) Whether this is the switch's IPv6 uplink
-- `vlan_id` (Number) VLAN id
+- `uplink_v4` (Boolean) When true, this interface is used as static IPv4 uplink
+- `uplink_v6` (Boolean) When true, this interface is used as static IPv6 uplink
+- `vlan_id` (Number) VLAN ID
 
 <a id="nestedatt--item--ipv6"></a>
 ### Nested Schema for `item.ipv6`
@@ -82,7 +85,7 @@ Read-Only:
 
 Read-Only:
 
-- `area` (String) Area id
+- `area` (String) Area ID
 - `cost` (Number) OSPF Cost
 - `is_passive_enabled` (Boolean) Disable sending Hello packets on this interface's IPv4 area
 
@@ -92,7 +95,7 @@ Read-Only:
 
 Read-Only:
 
-- `area` (String) Area id
+- `area` (String) Area ID
 - `cost` (Number) OSPF Cost
 - `is_passive_enabled` (Boolean) Disable sending Hello packets on this interface's IPv6 area
 
@@ -104,7 +107,7 @@ Read-Only:
 Read-Only:
 
 - `default_gateway` (String) IPv4 default gateway
-- `interface_id` (String) The id
+- `interface_id` (String) The ID
 - `interface_ip` (String) IPv4 address
 - `ipv6` (Attributes) IPv6 addressing (see [below for nested schema](#nestedatt--items--ipv6))
 - `multicast_routing` (String) Multicast routing status
@@ -112,9 +115,9 @@ Read-Only:
 - `ospf_settings` (Attributes) IPv4 OSPF Settings (see [below for nested schema](#nestedatt--items--ospf_settings))
 - `ospf_v3` (Attributes) IPv6 OSPF Settings (see [below for nested schema](#nestedatt--items--ospf_v3))
 - `subnet` (String) IPv4 subnet
-- `uplink_v4` (Boolean) Whether this is the switch's IPv4 uplink
-- `uplink_v6` (Boolean) Whether this is the switch's IPv6 uplink
-- `vlan_id` (Number) VLAN id
+- `uplink_v4` (Boolean) When true, this interface is used as static IPv4 uplink
+- `uplink_v6` (Boolean) When true, this interface is used as static IPv6 uplink
+- `vlan_id` (Number) VLAN ID
 
 <a id="nestedatt--items--ipv6"></a>
 ### Nested Schema for `items.ipv6`
@@ -132,7 +135,7 @@ Read-Only:
 
 Read-Only:
 
-- `area` (String) Area id
+- `area` (String) Area ID
 - `cost` (Number) OSPF Cost
 - `is_passive_enabled` (Boolean) Disable sending Hello packets on this interface's IPv4 area
 
@@ -142,6 +145,6 @@ Read-Only:
 
 Read-Only:
 
-- `area` (String) Area id
+- `area` (String) Area ID
 - `cost` (Number) OSPF Cost
 - `is_passive_enabled` (Boolean) Disable sending Hello packets on this interface's IPv6 area

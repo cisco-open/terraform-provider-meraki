@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -92,7 +92,6 @@ func (r *AdministeredIDentitiesMeAPIKeysGenerateResource) Create(ctx context.Con
 	}
 	//Has Paths
 	response, restyResp1, err := r.client.Administered.GenerateAdministeredIDentitiesMeAPIKeys()
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -109,7 +108,6 @@ func (r *AdministeredIDentitiesMeAPIKeysGenerateResource) Create(ctx context.Con
 	}
 	//Item
 	data = ResponseAdministeredGenerateAdministeredIDentitiesMeAPIKeysItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -129,8 +127,7 @@ func (r *AdministeredIDentitiesMeAPIKeysGenerateResource) Delete(ctx context.Con
 
 // TF Structs Schema
 type AdministeredIDentitiesMeAPIKeysGenerate struct {
-	Item       *ResponseAdministeredGenerateAdministeredIdentitiesMeApiKeys  `tfsdk:"item"`
-	Parameters *RequestAdministeredGenerateAdministeredIdentitiesMeApiKeysRs `tfsdk:"parameters"`
+	Item *ResponseAdministeredGenerateAdministeredIdentitiesMeApiKeys `tfsdk:"item"`
 }
 
 type ResponseAdministeredGenerateAdministeredIdentitiesMeApiKeys struct {

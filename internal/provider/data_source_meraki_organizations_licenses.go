@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -148,7 +148,7 @@ func (d *OrganizationsLicensesDataSource) Schema(_ context.Context, _ datasource
 						Computed:            true,
 					},
 					"state": schema.StringAttribute{
-						MarkdownDescription: `The state of the license. All queued licenses have a status of *recentlyQueued*.`,
+						MarkdownDescription: `The state of the license. All queued licenses have a status of **recentlyQueued**.`,
 						Computed:            true,
 					},
 					"total_duration_in_days": schema.Int64Attribute{

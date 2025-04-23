@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -72,7 +72,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Schema(_ context.Context, _ r
 				},
 			},
 			"body_file": schema.StringAttribute{
-				MarkdownDescription: `A Base64 encoded file containing liquid template used for the body of the webhook message. Either *body* or *bodyFile* must be specified.`,
+				MarkdownDescription: `A Base64 encoded file containing liquid template used for the body of the webhook message. Either **body** or **bodyFile** must be specified.`,
 				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
@@ -182,12 +182,14 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Create(ctx context.Context, r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkWebhooksPayloadTemplates(vvNetworkID)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -199,6 +201,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Create(ctx context.Context, r
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -213,6 +216,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Create(ctx context.Context, r
 				return
 			}
 			r.client.Networks.UpdateNetworkWebhooksPayloadTemplate(vvNetworkID, vvPayloadTemplateID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Networks.GetNetworkWebhooksPayloadTemplate(vvNetworkID, vvPayloadTemplateID)
 			if responseVerifyItem2 != nil {
 				data = ResponseNetworksGetNetworkWebhooksPayloadTemplateItemToBodyRs(data, responseVerifyItem2, false)
@@ -222,11 +226,11 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Create(ctx context.Context, r
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Networks.CreateNetworkWebhooksPayloadTemplate(vvNetworkID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkWebhooksPayloadTemplate",
 				err.Error(),
@@ -239,9 +243,8 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Create(ctx context.Context, r
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Networks.GetNetworkWebhooksPayloadTemplates(vvNetworkID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -257,6 +260,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Create(ctx context.Context, r
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -265,7 +269,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Create(ctx context.Context, r
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter PayloadTemplateID",
-				"Error",
+				"Fail Parsing PayloadTemplateID",
 			)
 			return
 		}
@@ -295,6 +299,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Create(ctx context.Context, r
 		)
 		return
 	}
+
 }
 
 func (r *NetworksWebhooksPayloadTemplatesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -470,6 +475,7 @@ func (r *NetworksWebhooksPayloadTemplatesRs) toSdkApiRequestCreate(ctx context.C
 		bodyFile = &emptyString
 	}
 	var requestNetworksCreateNetworkWebhooksPayloadTemplateHeaders []merakigosdk.RequestNetworksCreateNetworkWebhooksPayloadTemplateHeaders
+
 	if r.Headers != nil {
 		for _, rItem1 := range *r.Headers {
 			name := rItem1.Name.ValueString()
@@ -478,6 +484,7 @@ func (r *NetworksWebhooksPayloadTemplatesRs) toSdkApiRequestCreate(ctx context.C
 				Name:     name,
 				Template: template,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	headersFile := new(string)
@@ -521,6 +528,7 @@ func (r *NetworksWebhooksPayloadTemplatesRs) toSdkApiRequestUpdate(ctx context.C
 		bodyFile = &emptyString
 	}
 	var requestNetworksUpdateNetworkWebhooksPayloadTemplateHeaders []merakigosdk.RequestNetworksUpdateNetworkWebhooksPayloadTemplateHeaders
+
 	if r.Headers != nil {
 		for _, rItem1 := range *r.Headers {
 			name := rItem1.Name.ValueString()
@@ -529,6 +537,7 @@ func (r *NetworksWebhooksPayloadTemplatesRs) toSdkApiRequestUpdate(ctx context.C
 				Name:     name,
 				Template: template,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	headersFile := new(string)

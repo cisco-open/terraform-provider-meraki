@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -90,8 +90,8 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Schema(_ context.Contex
 			},
 			"limit_scope_to_networks": schema.SetAttribute{
 				MarkdownDescription: `Networks assigned to the Early Access Feature`,
-				Optional:            true,
 				Computed:            true,
+				Optional:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
@@ -174,21 +174,21 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Create(ctx context.Cont
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
-	// organization_id
-	//Reviw This  Has Item and item
-	//HAS CREATE
 
 	vvOptInID := data.OptInID.ValueString()
-	if vvOptInID != "" {
-		responseVerifyItem, restyRespGet, err := r.client.Organizations.GetOrganizationEarlyAccessFeaturesOptIn(vvOrganizationID, vvOptInID)
-		if err != nil || responseVerifyItem == nil {
-			if restyRespGet != nil {
-				if restyRespGet.StatusCode() != 404 {
+	//Has Item and not has items
 
+	if vvOrganizationID != "" && vvOptInID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationEarlyAccessFeaturesOptIn(vvOrganizationID, vvOptInID)
+		//Has Post
+		if err != nil {
+			if restyResp1 != nil {
+				if restyResp1.StatusCode() != 404 {
 					resp.Diagnostics.AddError(
-						"Failure when executing GetOrganizationEarlyAccessFeaturesOptIns",
+						"Failure when executing GetOrganizationEarlyAccessFeaturesOptIn",
 						err.Error(),
 					)
 					return
@@ -198,14 +198,14 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Create(ctx context.Cont
 
 		if responseVerifyItem != nil {
 			data = ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInItemToBodyRs(data, responseVerifyItem, false)
-			diags := resp.State.Set(ctx, &data)
-			resp.Diagnostics.Append(diags...)
+			//Path params in update assigned
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 			return
 		}
 	}
 
-	response, restyResp2, err := r.client.Organizations.CreateOrganizationEarlyAccessFeaturesOptIn(vvOrganizationID, data.toSdkApiRequestCreate(ctx))
-
+	dataRequest := data.toSdkApiRequestCreate(ctx)
+	response, restyResp2, err := r.client.Organizations.CreateOrganizationEarlyAccessFeaturesOptIn(vvOrganizationID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
@@ -220,30 +220,30 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Create(ctx context.Cont
 		)
 		return
 	}
-	//Items
-	vvOptInID = response.ID
-	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationEarlyAccessFeaturesOptIn(vvOrganizationID, vvOptInID)
-	// Has item and has items
 
+	//Assign Path Params required
+
+	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationEarlyAccessFeaturesOptIn(vvOrganizationID, vvOptInID)
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizationEarlyAccessFeaturesOptIns",
+				"Failure when executing GetOrganizationEarlyAccessFeaturesOptIn",
 				err.Error(),
 			)
 			return
 		}
 		resp.Diagnostics.AddError(
-			"Failure when executing GetOrganizationEarlyAccessFeaturesOptIns",
+			"Failure when executing GetOrganizationEarlyAccessFeaturesOptIn",
 			err.Error(),
 		)
 		return
-	} else {
-		data = ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInItemToBodyRs(data, responseGet, false)
-		diags := resp.State.Set(ctx, &data)
-		resp.Diagnostics.Append(diags...)
-		return
 	}
+
+	data = ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInItemToBodyRs(data, responseGet, false)
+
+	diags := resp.State.Set(ctx, &data)
+	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -293,7 +293,7 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Read(ctx context.Contex
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned

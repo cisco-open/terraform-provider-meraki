@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -183,30 +183,37 @@ func (r *NetworksSwitchSettingsResource) Create(ctx context.Context, req resourc
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchSettings(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchSettings(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchSettings  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchSettings only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchSettings(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchSettings",
 				err.Error(),
@@ -219,9 +226,10 @@ func (r *NetworksSwitchSettingsResource) Create(ctx context.Context, req resourc
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchSettings(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -236,11 +244,12 @@ func (r *NetworksSwitchSettingsResource) Create(ctx context.Context, req resourc
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseSwitchGetNetworkSwitchSettingsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksSwitchSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -363,6 +372,7 @@ type ResponseSwitchGetNetworkSwitchSettingsUplinkClientSamplingRs struct {
 // FromBody
 func (r *NetworksSwitchSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestSwitchUpdateNetworkSwitchSettings {
 	var requestSwitchUpdateNetworkSwitchSettingsMacBlocklist *merakigosdk.RequestSwitchUpdateNetworkSwitchSettingsMacBlocklist
+
 	if r.MacBlocklist != nil {
 		enabled := func() *bool {
 			if !r.MacBlocklist.Enabled.IsUnknown() && !r.MacBlocklist.Enabled.IsNull() {
@@ -373,8 +383,10 @@ func (r *NetworksSwitchSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 		requestSwitchUpdateNetworkSwitchSettingsMacBlocklist = &merakigosdk.RequestSwitchUpdateNetworkSwitchSettingsMacBlocklist{
 			Enabled: enabled,
 		}
+		//[debug] Is Array: False
 	}
 	var requestSwitchUpdateNetworkSwitchSettingsPowerExceptions []merakigosdk.RequestSwitchUpdateNetworkSwitchSettingsPowerExceptions
+
 	if r.PowerExceptions != nil {
 		for _, rItem1 := range *r.PowerExceptions {
 			powerType := rItem1.PowerType.ValueString()
@@ -383,9 +395,11 @@ func (r *NetworksSwitchSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 				PowerType: powerType,
 				Serial:    serial,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var requestSwitchUpdateNetworkSwitchSettingsUplinkClientSampling *merakigosdk.RequestSwitchUpdateNetworkSwitchSettingsUplinkClientSampling
+
 	if r.UplinkClientSampling != nil {
 		enabled := func() *bool {
 			if !r.UplinkClientSampling.Enabled.IsUnknown() && !r.UplinkClientSampling.Enabled.IsNull() {
@@ -396,6 +410,7 @@ func (r *NetworksSwitchSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 		requestSwitchUpdateNetworkSwitchSettingsUplinkClientSampling = &merakigosdk.RequestSwitchUpdateNetworkSwitchSettingsUplinkClientSampling{
 			Enabled: enabled,
 		}
+		//[debug] Is Array: False
 	}
 	useCombinedPower := new(bool)
 	if !r.UseCombinedPower.IsUnknown() && !r.UseCombinedPower.IsNull() {

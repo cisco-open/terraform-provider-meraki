@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -213,7 +213,6 @@ func (r *DevicesWirelessAlternateManagementInterfaceIPv6Resource) Create(ctx con
 	vvSerial := data.Serial.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp1, err := r.client.Wireless.UpdateDeviceWirelessAlternateManagementInterfaceIPv6(vvSerial, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -230,7 +229,6 @@ func (r *DevicesWirelessAlternateManagementInterfaceIPv6Resource) Create(ctx con
 	}
 	//Item
 	data = ResponseWirelessUpdateDeviceWirelessAlternateManagementInterfaceIPv6ItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -293,19 +291,22 @@ type RequestWirelessUpdateDeviceWirelessAlternateManagementInterfaceIpv6Addresse
 func (r *DevicesWirelessAlternateManagementInterfaceIPv6) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestWirelessUpdateDeviceWirelessAlternateManagementInterfaceIPv6 {
 	re := *r.Parameters
 	var requestWirelessUpdateDeviceWirelessAlternateManagementInterfaceIPv6Addresses []merakigosdk.RequestWirelessUpdateDeviceWirelessAlternateManagementInterfaceIPv6Addresses
+
 	if re.Addresses != nil {
 		for _, rItem1 := range *re.Addresses {
 			address := rItem1.Address.ValueString()
 			assignmentMode := rItem1.AssignmentMode.ValueString()
 			gateway := rItem1.Gateway.ValueString()
 			var requestWirelessUpdateDeviceWirelessAlternateManagementInterfaceIPv6AddressesNameservers *merakigosdk.RequestWirelessUpdateDeviceWirelessAlternateManagementInterfaceIPv6AddressesNameservers
+
 			if rItem1.Nameservers != nil {
+
 				var addresses []string = nil
-				//Hoola aqui
 				rItem1.Nameservers.Addresses.ElementsAs(ctx, &addresses, false)
 				requestWirelessUpdateDeviceWirelessAlternateManagementInterfaceIPv6AddressesNameservers = &merakigosdk.RequestWirelessUpdateDeviceWirelessAlternateManagementInterfaceIPv6AddressesNameservers{
 					Addresses: addresses,
 				}
+				//[debug] Is Array: False
 			}
 			prefix := rItem1.Prefix.ValueString()
 			protocol := rItem1.Protocol.ValueString()
@@ -317,6 +318,7 @@ func (r *DevicesWirelessAlternateManagementInterfaceIPv6) toSdkApiRequestUpdate(
 				Prefix:         prefix,
 				Protocol:       protocol,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestWirelessUpdateDeviceWirelessAlternateManagementInterfaceIPv6{

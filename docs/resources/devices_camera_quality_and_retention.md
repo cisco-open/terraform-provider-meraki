@@ -44,8 +44,8 @@ output "meraki_devices_camera_quality_and_retention_example" {
 - `motion_detector_version` (Number) The version of the motion detector that will be used by the camera. Only applies to Gen 2 cameras. Defaults to v2.
                                   Allowed values: [1,2]
 - `profile_id` (String) The ID of a quality and retention profile to assign to the camera. The profile's settings will override all of the per-camera quality and retention settings. If the value of this parameter is null, any existing profile will be unassigned from the camera.
-- `quality` (String) Quality of the camera. Can be one of 'Standard', 'High' or 'Enhanced'. Not all qualities are supported by every camera model.
-                                  Allowed values: [Enhanced,High,Standard]
+- `quality` (String) Quality of the camera. Can be one of 'Standard', 'High', 'Enhanced' or 'Ultra'. Not all qualities are supported by every camera model.
+                                  Allowed values: [Enhanced,High,Standard,Ultra]
 - `resolution` (String) Resolution of the camera. Can be one of '1280x720', '1920x1080', '1080x1080', '2112x2112', '2880x2880', '2688x1512' or '3840x2160'.Not all resolutions are supported by every camera model.
                                   Allowed values: [1080x1080,1280x720,1920x1080,2112x2112,2688x1512,2880x2880,3840x2160]
 - `restricted_bandwidth_mode_enabled` (Boolean) Boolean indicating if restricted bandwidth is enabled(true) or disabled(false) on the camera. This setting does not apply to MV2 cameras.

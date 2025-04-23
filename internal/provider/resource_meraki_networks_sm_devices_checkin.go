@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -72,7 +72,7 @@ func (r *NetworksSmDevicesCheckinResource) Schema(_ context.Context, _ resource.
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"ids": schema.SetAttribute{
+					"ids": schema.ListAttribute{
 						MarkdownDescription: `The Meraki Ids of the set of devices.`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -82,25 +82,25 @@ func (r *NetworksSmDevicesCheckinResource) Schema(_ context.Context, _ resource.
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"ids": schema.SetAttribute{
+					"ids": schema.ListAttribute{
 						MarkdownDescription: `The ids of the devices to be checked-in.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"scope": schema.SetAttribute{
+					"scope": schema.ListAttribute{
 						MarkdownDescription: `The scope (one of all, none, withAny, withAll, withoutAny, or withoutAll) and a set of tags of the devices to be checked-in.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `The serials of the devices to be checked-in.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"wifi_macs": schema.SetAttribute{
+					"wifi_macs": schema.ListAttribute{
 						MarkdownDescription: `The wifiMacs of the devices to be checked-in.`,
 						Optional:            true,
 						Computed:            true,
@@ -133,7 +133,6 @@ func (r *NetworksSmDevicesCheckinResource) Create(ctx context.Context, req resou
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Sm.CheckinNetworkSmDevices(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -150,7 +149,6 @@ func (r *NetworksSmDevicesCheckinResource) Create(ctx context.Context, req resou
 	}
 	//Item
 	data = ResponseSmCheckinNetworkSmDevicesItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -176,7 +174,7 @@ type NetworksSmDevicesCheckin struct {
 }
 
 type ResponseSmCheckinNetworkSmDevices struct {
-	IDs types.Set `tfsdk:"ids"`
+	IDs types.List `tfsdk:"ids"`
 }
 
 type RequestSmCheckinNetworkSmDevicesRs struct {
@@ -209,7 +207,7 @@ func (r *NetworksSmDevicesCheckin) toSdkApiRequestCreate(ctx context.Context) *m
 // ToBody
 func ResponseSmCheckinNetworkSmDevicesItemToBody(state NetworksSmDevicesCheckin, response *merakigosdk.ResponseSmCheckinNetworkSmDevices) NetworksSmDevicesCheckin {
 	itemState := ResponseSmCheckinNetworkSmDevices{
-		IDs: StringSliceToSet(response.IDs),
+		IDs: StringSliceToList(response.IDs),
 	}
 	state.Item = &itemState
 	return state

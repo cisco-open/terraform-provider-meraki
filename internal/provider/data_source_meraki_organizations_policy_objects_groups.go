@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -103,10 +103,11 @@ func (d *OrganizationsPolicyObjectsGroupsDataSource) Schema(_ context.Context, _
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"object_ids": schema.ListAttribute{
+					"object_ids": schema.SetAttribute{
 						MarkdownDescription: `Policy objects associated with Network Object Group or Port Object Group`,
 						Computed:            true,
-						ElementType:         types.Int64Type, //TODO FINAL ELSE param_schema.Elem.Type para revisar
+						ElementType:         types.StringType, //TODO FINAL ELSE param_schema.Elem.Type para revisar
+
 					},
 					"updated_at": schema.StringAttribute{
 						MarkdownDescription: `Time Stamp of policy object updation.`,
@@ -214,7 +215,7 @@ func ResponseOrganizationsGetOrganizationPolicyObjectsGroupItemToBody(state Orga
 		ID:         types.StringValue(response.ID),
 		Name:       types.StringValue(response.Name),
 		NetworkIDs: StringSliceToList(response.NetworkIDs),
-		ObjectIDs:  StringSliceToListInt(response.ObjectIDs),
+		ObjectIDs:  StringSliceToList(*response.ObjectIDs),
 		UpdatedAt:  types.StringValue(response.UpdatedAt),
 	}
 	state.Item = &itemState

@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -81,7 +81,7 @@ func (r *OrganizationsWirelessRadioAutoRfChannelsRecalculateResource) Schema(_ c
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"network_ids": schema.SetAttribute{
+					"network_ids": schema.ListAttribute{
 						MarkdownDescription: `A list of network ids (limit: 15).`,
 						Optional:            true,
 						Computed:            true,
@@ -114,7 +114,6 @@ func (r *OrganizationsWirelessRadioAutoRfChannelsRecalculateResource) Create(ctx
 	vvOrganizationID := data.OrganizationID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Wireless.RecalculateOrganizationWirelessRadioAutoRfChannels(vvOrganizationID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -131,7 +130,6 @@ func (r *OrganizationsWirelessRadioAutoRfChannelsRecalculateResource) Create(ctx
 	}
 	//Item
 	data = ResponseWirelessRecalculateOrganizationWirelessRadioAutoRfChannelsItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }

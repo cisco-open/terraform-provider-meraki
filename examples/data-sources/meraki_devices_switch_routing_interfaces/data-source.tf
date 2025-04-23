@@ -1,7 +1,8 @@
 
 data "meraki_devices_switch_routing_interfaces" "example" {
 
-  serial = "string"
+  protocol = "string"
+  serial   = "string"
 }
 
 output "meraki_devices_switch_routing_interfaces_example" {
@@ -10,7 +11,8 @@ output "meraki_devices_switch_routing_interfaces_example" {
 
 data "meraki_devices_switch_routing_interfaces" "example" {
 
-  serial = "string"
+  protocol = "string"
+  serial   = "string"
 }
 
 output "meraki_devices_switch_routing_interfaces_example" {

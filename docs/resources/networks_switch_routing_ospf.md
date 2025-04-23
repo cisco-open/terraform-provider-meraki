@@ -72,7 +72,7 @@ output "meraki_networks_switch_routing_ospf_example" {
 
 Optional:
 
-- `area_id` (String) OSPF area ID
+- `area_id` (Number) OSPF area ID
 - `area_name` (String) Name of the OSPF area
 - `area_type` (String) Area types in OSPF. Must be one of: ["normal", "stub", "nssa"]
                                         Allowed values: [normal,nssa,stub]

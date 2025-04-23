@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -230,7 +230,7 @@ func (d *DevicesSwitchPortsStatusesDataSource) Schema(_ context.Context, _ datas
 											Computed:            true,
 										},
 										"type": schema.StringAttribute{
-											MarkdownDescription: `The type of the  ('trunk', 'access' or 'stack').`,
+											MarkdownDescription: `The type of the  ('trunk', 'access', 'stack' or 'routed').`,
 											Computed:            true,
 										},
 										"vlan": schema.Int64Attribute{

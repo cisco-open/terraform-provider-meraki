@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -126,30 +126,37 @@ func (r *NetworksApplianceFirewallSettingsResource) Create(ctx context.Context, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallSettings(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceFirewallSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallSettings(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceFirewallSettings  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceFirewallSettings only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceFirewallSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallSettings(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallSettings",
 				err.Error(),
@@ -162,9 +169,10 @@ func (r *NetworksApplianceFirewallSettingsResource) Create(ctx context.Context, 
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallSettings(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -179,11 +187,12 @@ func (r *NetworksApplianceFirewallSettingsResource) Create(ctx context.Context, 
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseApplianceGetNetworkApplianceFirewallSettingsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksApplianceFirewallSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -297,17 +306,21 @@ type ResponseApplianceGetNetworkApplianceFirewallSettingsSpoofingProtectionIpSou
 // FromBody
 func (r *NetworksApplianceFirewallSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallSettings {
 	var requestApplianceUpdateNetworkApplianceFirewallSettingsSpoofingProtection *merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallSettingsSpoofingProtection
+
 	if r.SpoofingProtection != nil {
 		var requestApplianceUpdateNetworkApplianceFirewallSettingsSpoofingProtectionIPSourceGuard *merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallSettingsSpoofingProtectionIPSourceGuard
+
 		if r.SpoofingProtection.IPSourceGuard != nil {
 			mode := r.SpoofingProtection.IPSourceGuard.Mode.ValueString()
 			requestApplianceUpdateNetworkApplianceFirewallSettingsSpoofingProtectionIPSourceGuard = &merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallSettingsSpoofingProtectionIPSourceGuard{
 				Mode: mode,
 			}
+			//[debug] Is Array: False
 		}
 		requestApplianceUpdateNetworkApplianceFirewallSettingsSpoofingProtection = &merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallSettingsSpoofingProtection{
 			IPSourceGuard: requestApplianceUpdateNetworkApplianceFirewallSettingsSpoofingProtectionIPSourceGuard,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallSettings{
 		SpoofingProtection: requestApplianceUpdateNetworkApplianceFirewallSettingsSpoofingProtection,

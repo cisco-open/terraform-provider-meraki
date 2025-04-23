@@ -10,6 +10,8 @@ description: |-
 
 
 
+
+
 ~>Warning: This resource does not represent a real-world entity in Meraki Dashboard, therefore changing or deleting this resource on its own has no immediate effect. Instead, it is a task part of a Meraki Dashboard workflow. It is executed in Meraki without any additional verification. It does not check if it was executed before or if a similar configuration or action 
 already existed previously.
 
@@ -50,7 +52,7 @@ output "meraki_organizations_licenses_move_example" {
 Optional:
 
 - `dest_organization_id` (String) The ID of the organization to move the licenses to
-- `license_ids` (Set of String) A list of IDs of licenses to move to the new organization
+- `license_ids` (List of String) A list of IDs of licenses to move to the new organization
 
 
 <a id="nestedatt--item"></a>
@@ -59,4 +61,4 @@ Optional:
 Read-Only:
 
 - `dest_organization_id` (String) The ID of the organization to move the licenses to
-- `license_ids` (Set of String) A list of IDs of licenses to move to the new organization
+- `license_ids` (List of String) A list of IDs of licenses to move to the new organization

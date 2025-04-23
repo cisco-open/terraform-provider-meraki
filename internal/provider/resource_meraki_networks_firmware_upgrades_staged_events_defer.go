@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -207,7 +207,6 @@ func (r *NetworksFirmwareUpgradesStagedEventsDeferResource) Create(ctx context.C
 	//Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	response, restyResp1, err := r.client.Networks.DeferNetworkFirmwareUpgradesStagedEvents(vvNetworkID)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -224,7 +223,6 @@ func (r *NetworksFirmwareUpgradesStagedEventsDeferResource) Create(ctx context.C
 	}
 	//Item
 	data = ResponseNetworksDeferNetworkFirmwareUpgradesStagedEventsItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -244,9 +242,8 @@ func (r *NetworksFirmwareUpgradesStagedEventsDeferResource) Delete(ctx context.C
 
 // TF Structs Schema
 type NetworksFirmwareUpgradesStagedEventsDefer struct {
-	NetworkID  types.String                                               `tfsdk:"network_id"`
-	Item       *ResponseNetworksDeferNetworkFirmwareUpgradesStagedEvents  `tfsdk:"item"`
-	Parameters *RequestNetworksDeferNetworkFirmwareUpgradesStagedEventsRs `tfsdk:"parameters"`
+	NetworkID types.String                                              `tfsdk:"network_id"`
+	Item      *ResponseNetworksDeferNetworkFirmwareUpgradesStagedEvents `tfsdk:"item"`
 }
 
 type ResponseNetworksDeferNetworkFirmwareUpgradesStagedEvents struct {

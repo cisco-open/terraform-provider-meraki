@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -248,7 +248,6 @@ func (r *NetworksMqttBrokersResource) Create(ctx context.Context, req resource.C
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Networks.CreateNetworkMqttBroker(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -265,7 +264,6 @@ func (r *NetworksMqttBrokersResource) Create(ctx context.Context, req resource.C
 	}
 	//Item
 	data = ResponseNetworksCreateNetworkMqttBrokerItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -341,6 +339,7 @@ func (r *NetworksMqttBrokers) toSdkApiRequestCreate(ctx context.Context) *meraki
 	emptyString := ""
 	re := *r.Parameters
 	var requestNetworksCreateNetworkMqttBrokerAuthentication *merakigosdk.RequestNetworksCreateNetworkMqttBrokerAuthentication
+
 	if re.Authentication != nil {
 		password := re.Authentication.Password.ValueString()
 		username := re.Authentication.Username.ValueString()
@@ -348,6 +347,7 @@ func (r *NetworksMqttBrokers) toSdkApiRequestCreate(ctx context.Context) *meraki
 			Password: password,
 			Username: username,
 		}
+		//[debug] Is Array: False
 	}
 	host := new(string)
 	if !re.Host.IsUnknown() && !re.Host.IsNull() {
@@ -368,9 +368,11 @@ func (r *NetworksMqttBrokers) toSdkApiRequestCreate(ctx context.Context) *meraki
 		port = nil
 	}
 	var requestNetworksCreateNetworkMqttBrokerSecurity *merakigosdk.RequestNetworksCreateNetworkMqttBrokerSecurity
+
 	if re.Security != nil {
 		mode := re.Security.Mode.ValueString()
 		var requestNetworksCreateNetworkMqttBrokerSecurityTls *merakigosdk.RequestNetworksCreateNetworkMqttBrokerSecurityTls
+
 		if re.Security.Tls != nil {
 			caCertificate := re.Security.Tls.CaCertificate.ValueString()
 			verifyHostnames := func() *bool {
@@ -383,11 +385,13 @@ func (r *NetworksMqttBrokers) toSdkApiRequestCreate(ctx context.Context) *meraki
 				CaCertificate:   caCertificate,
 				VerifyHostnames: verifyHostnames,
 			}
+			//[debug] Is Array: False
 		}
 		requestNetworksCreateNetworkMqttBrokerSecurity = &merakigosdk.RequestNetworksCreateNetworkMqttBrokerSecurity{
 			Mode: mode,
 			Tls:  requestNetworksCreateNetworkMqttBrokerSecurityTls,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestNetworksCreateNetworkMqttBroker{
 		Authentication: requestNetworksCreateNetworkMqttBrokerAuthentication,

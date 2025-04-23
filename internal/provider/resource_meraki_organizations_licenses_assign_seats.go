@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -157,7 +157,7 @@ func (r *OrganizationsLicensesAssignSeatsResource) Schema(_ context.Context, _ r
 									Computed:            true,
 								},
 								"state": schema.StringAttribute{
-									MarkdownDescription: `The state of the license. All queued licenses have a status of *recentlyQueued*.
+									MarkdownDescription: `The state of the license. All queued licenses have a status of **recentlyQueued**.
                                                 Allowed values: [active,expired,expiring,recentlyQueued,unused,unusedActive]`,
 									Computed: true,
 								},
@@ -224,7 +224,6 @@ func (r *OrganizationsLicensesAssignSeatsResource) Create(ctx context.Context, r
 	vvOrganizationID := data.OrganizationID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Organizations.AssignOrganizationLicensesSeats(vvOrganizationID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -241,7 +240,6 @@ func (r *OrganizationsLicensesAssignSeatsResource) Create(ctx context.Context, r
 	}
 	//Item
 	data = ResponseOrganizationsAssignOrganizationLicensesSeatsItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }

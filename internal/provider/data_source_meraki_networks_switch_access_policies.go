@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -206,7 +206,7 @@ func (d *NetworksSwitchAccessPoliciesDataSource) Schema(_ context.Context, _ dat
 						Computed:            true,
 					},
 					"radius_group_attribute": schema.StringAttribute{
-						MarkdownDescription: `Acceptable values are *""* for None, or *"11"* for Group Policies ACL`,
+						MarkdownDescription: `Acceptable values are **""** for None, or **"11"** for Group Policies ACL`,
 						Computed:            true,
 					},
 					"radius_servers": schema.SetNestedAttribute{
@@ -396,7 +396,7 @@ func (d *NetworksSwitchAccessPoliciesDataSource) Schema(_ context.Context, _ dat
 							Computed:            true,
 						},
 						"radius_group_attribute": schema.StringAttribute{
-							MarkdownDescription: `Acceptable values are *""* for None, or *"11"* for Group Policies ACL`,
+							MarkdownDescription: `Acceptable values are **""** for None, or **"11"** for Group Policies ACL`,
 							Computed:            true,
 						},
 						"radius_servers": schema.SetNestedAttribute{

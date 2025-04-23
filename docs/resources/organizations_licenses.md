@@ -51,7 +51,7 @@ output "meraki_organizations_licenses_example" {
 - `order_number` (String) Order number
 - `permanently_queued_licenses` (Attributes Set) DEPRECATED List of permanently queued licenses attached to the license. Instead, use /organizations/{organizationId}/licenses?deviceSerial= to retrieved queued licenses for a given device. (see [below for nested schema](#nestedatt--permanently_queued_licenses))
 - `seat_count` (Number) The number of seats of the license. Only applicable to SM licenses.
-- `state` (String) The state of the license. All queued licenses have a status of *recentlyQueued*.
+- `state` (String) The state of the license. All queued licenses have a status of **recentlyQueued**.
                                   Allowed values: [active,expired,expiring,recentlyQueued,unused,unusedActive]
 - `total_duration_in_days` (Number) The duration of the license plus all permanently queued licenses associated with it
 
@@ -71,5 +71,5 @@ Read-Only:
 Import is supported using the following syntax:
 
 ```shell
-terraform import meraki_organizations_licenses.example "organization_id,license_id"
+terraform import meraki_organizations_licenses.example "license_id,organization_id"
 ```

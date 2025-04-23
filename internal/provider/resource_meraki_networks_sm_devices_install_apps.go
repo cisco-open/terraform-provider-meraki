@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -79,7 +79,7 @@ func (r *NetworksSmDevicesInstallAppsResource) Schema(_ context.Context, _ resou
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"app_ids": schema.SetAttribute{
+					"app_ids": schema.ListAttribute{
 						MarkdownDescription: `ids of applications to be installed`,
 						Optional:            true,
 						Computed:            true,
@@ -121,7 +121,6 @@ func (r *NetworksSmDevicesInstallAppsResource) Create(ctx context.Context, req r
 	vvDeviceID := data.DeviceID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	restyResp1, err := r.client.Sm.InstallNetworkSmDeviceApps(vvNetworkID, vvDeviceID, dataRequest)
-
 	if err != nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(

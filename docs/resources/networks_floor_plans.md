@@ -30,6 +30,7 @@ resource "meraki_networks_floor_plans" "example" {
     lat = 37.770040510499996
     lng = -122.38714009525
   }
+  floor_number   = 5.0
   image_contents = "2a9edd3f4ffd80130c647d13eacb59f3"
   name           = "HQ Floor Plan"
   network_id     = "string"
@@ -62,6 +63,7 @@ output "meraki_networks_floor_plans_example" {
 - `bottom_left_corner` (Attributes) The longitude and latitude of the bottom left corner of your floor plan. (see [below for nested schema](#nestedatt--bottom_left_corner))
 - `bottom_right_corner` (Attributes) The longitude and latitude of the bottom right corner of your floor plan. (see [below for nested schema](#nestedatt--bottom_right_corner))
 - `center` (Attributes) The longitude and latitude of the center of your floor plan. The 'center' or two adjacent corners (e.g. 'topLeftCorner' and 'bottomLeftCorner') must be specified. If 'center' is specified, the floor plan is placed over that point with no rotation. If two adjacent corners are specified, the floor plan is rotated to line up with the two specified points. The aspect ratio of the floor plan's image is preserved regardless of which corners/center are specified. (This means if that more than two corners are specified, only two corners may be used to preserve the floor plan's aspect ratio.). No two points can have the same latitude, longitude pair. (see [below for nested schema](#nestedatt--center))
+- `floor_number` (Number) The floor number of the floor within the building.
 - `floor_plan_id` (String) Floor plan ID
 - `image_contents` (String) The file contents (a base 64 encoded string) of your image. Supported formats are PNG, GIF, and JPG. Note that all images are saved as PNG files, regardless of the format they are uploaded in.
 - `name` (String) The name of your floor plan.

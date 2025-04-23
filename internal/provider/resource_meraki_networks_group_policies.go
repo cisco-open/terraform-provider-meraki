@@ -24,7 +24,7 @@ import (
 
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -947,16 +947,17 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkGroupPolicies(vvNetworkID)
-	// Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
-			if restyResp1.StatusCode() != 404 && restyResp1.StatusCode() != 400 {
+			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkGroupPolicies",
 					err.Error(),
@@ -965,9 +966,9 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
-		log.Printf("[DEBUG] resp: %v", responseStruct)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 		if result != nil {
 			result2 := result.(map[string]interface{})
@@ -980,6 +981,7 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 				return
 			}
 			r.client.Networks.UpdateNetworkGroupPolicy(vvNetworkID, vvGroupPolicyID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Networks.GetNetworkGroupPolicy(vvNetworkID, vvGroupPolicyID)
 			if responseVerifyItem2 != nil {
 				data = ResponseNetworksGetNetworkGroupPolicyItemToBodyRs(data, responseVerifyItem2, false)
@@ -989,9 +991,9 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Networks.CreateNetworkGroupPolicy(vvNetworkID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
@@ -1006,9 +1008,8 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Networks.GetNetworkGroupPolicies(vvNetworkID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -1024,6 +1025,7 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -1032,7 +1034,7 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter GroupPolicyID",
-				"Error",
+				"Fail Parsing GroupPolicyID",
 			)
 			return
 		}
@@ -1062,6 +1064,7 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 		)
 		return
 	}
+
 }
 
 func (r *NetworksGroupPoliciesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -1086,9 +1089,7 @@ func (r *NetworksGroupPoliciesResource) Read(ctx context.Context, req resource.R
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvGroupPolicyID := data.GroupPolicyID.ValueString()
-	// group_policy_id
 	responseGet, restyRespGet, err := r.client.Networks.GetNetworkGroupPolicy(vvNetworkID, vvGroupPolicyID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -1112,7 +1113,7 @@ func (r *NetworksGroupPoliciesResource) Read(ctx context.Context, req resource.R
 		)
 		return
 	}
-
+	//entro aqui 2
 	data = ResponseNetworksGetNetworkGroupPolicyItemToBodyRs(data, responseGet, true)
 	diags := resp.State.Set(ctx, &data)
 	//update path params assigned
@@ -1145,7 +1146,6 @@ func (r *NetworksGroupPoliciesResource) Update(ctx context.Context, req resource
 
 	//Path Params
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
 	vvGroupPolicyID := data.GroupPolicyID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkGroupPolicy(vvNetworkID, vvGroupPolicyID, dataRequest)
@@ -1360,8 +1360,10 @@ type ResponseNetworksGetNetworkGroupPolicyVlanTaggingRs struct {
 func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestNetworksCreateNetworkGroupPolicy {
 	emptyString := ""
 	var requestNetworksCreateNetworkGroupPolicyBandwidth *merakigosdk.RequestNetworksCreateNetworkGroupPolicyBandwidth
+
 	if r.Bandwidth != nil {
 		var requestNetworksCreateNetworkGroupPolicyBandwidthBandwidthLimits *merakigosdk.RequestNetworksCreateNetworkGroupPolicyBandwidthBandwidthLimits
+
 		if r.Bandwidth.BandwidthLimits != nil {
 			limitDown := func() *int64 {
 				if !r.Bandwidth.BandwidthLimits.LimitDown.IsUnknown() && !r.Bandwidth.BandwidthLimits.LimitDown.IsNull() {
@@ -1379,27 +1381,35 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *me
 				LimitDown: int64ToIntPointer(limitDown),
 				LimitUp:   int64ToIntPointer(limitUp),
 			}
+			//[debug] Is Array: False
 		}
 		settings := r.Bandwidth.Settings.ValueString()
 		requestNetworksCreateNetworkGroupPolicyBandwidth = &merakigosdk.RequestNetworksCreateNetworkGroupPolicyBandwidth{
 			BandwidthLimits: requestNetworksCreateNetworkGroupPolicyBandwidthBandwidthLimits,
 			Settings:        settings,
 		}
+		//[debug] Is Array: False
 	}
 	var requestNetworksCreateNetworkGroupPolicyBonjourForwarding *merakigosdk.RequestNetworksCreateNetworkGroupPolicyBonjourForwarding
+
 	if r.BonjourForwarding != nil {
+
+		log.Printf("[DEBUG] #TODO []RequestNetworksCreateNetworkGroupPolicyBonjourForwardingRules")
 		var requestNetworksCreateNetworkGroupPolicyBonjourForwardingRules []merakigosdk.RequestNetworksCreateNetworkGroupPolicyBonjourForwardingRules
+
 		if r.BonjourForwarding.Rules != nil {
-			for _, rItem1 := range *r.BonjourForwarding.Rules { //BonjourForwarding.Rules// name: rules
+			for _, rItem1 := range *r.BonjourForwarding.Rules {
 				description := rItem1.Description.ValueString()
-				var services []string
+
+				var services []string = nil
 				rItem1.Services.ElementsAs(ctx, &services, false)
-				vLANID := rItem1.VLANID.ValueString()
+				vlanID := rItem1.VLANID.ValueString()
 				requestNetworksCreateNetworkGroupPolicyBonjourForwardingRules = append(requestNetworksCreateNetworkGroupPolicyBonjourForwardingRules, merakigosdk.RequestNetworksCreateNetworkGroupPolicyBonjourForwardingRules{
 					Description: description,
 					Services:    services,
-					VLANID:      vLANID,
+					VLANID:      vlanID,
 				})
+				//[debug] Is Array: True
 			}
 		}
 		settings := r.BonjourForwarding.Settings.ValueString()
@@ -1412,50 +1422,66 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *me
 			}(),
 			Settings: settings,
 		}
+		//[debug] Is Array: False
 	}
 	var requestNetworksCreateNetworkGroupPolicyContentFiltering *merakigosdk.RequestNetworksCreateNetworkGroupPolicyContentFiltering
+
 	if r.ContentFiltering != nil {
 		var requestNetworksCreateNetworkGroupPolicyContentFilteringAllowedURLPatterns *merakigosdk.RequestNetworksCreateNetworkGroupPolicyContentFilteringAllowedURLPatterns
+
 		if r.ContentFiltering.AllowedURLPatterns != nil {
-			var patterns []string
+
+			var patterns []string = nil
 			r.ContentFiltering.AllowedURLPatterns.Patterns.ElementsAs(ctx, &patterns, false)
 			settings := r.ContentFiltering.AllowedURLPatterns.Settings.ValueString()
 			requestNetworksCreateNetworkGroupPolicyContentFilteringAllowedURLPatterns = &merakigosdk.RequestNetworksCreateNetworkGroupPolicyContentFilteringAllowedURLPatterns{
 				Patterns: patterns,
 				Settings: settings,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksCreateNetworkGroupPolicyContentFilteringBlockedURLCategories *merakigosdk.RequestNetworksCreateNetworkGroupPolicyContentFilteringBlockedURLCategories
+
 		if r.ContentFiltering.BlockedURLCategories != nil {
-			var categories []string
+
+			var categories []string = nil
 			r.ContentFiltering.BlockedURLCategories.Categories.ElementsAs(ctx, &categories, false)
 			settings := r.ContentFiltering.BlockedURLCategories.Settings.ValueString()
 			requestNetworksCreateNetworkGroupPolicyContentFilteringBlockedURLCategories = &merakigosdk.RequestNetworksCreateNetworkGroupPolicyContentFilteringBlockedURLCategories{
 				Categories: categories,
 				Settings:   settings,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksCreateNetworkGroupPolicyContentFilteringBlockedURLPatterns *merakigosdk.RequestNetworksCreateNetworkGroupPolicyContentFilteringBlockedURLPatterns
+
 		if r.ContentFiltering.BlockedURLPatterns != nil {
-			var patterns []string
+
+			var patterns []string = nil
 			r.ContentFiltering.BlockedURLPatterns.Patterns.ElementsAs(ctx, &patterns, false)
 			settings := r.ContentFiltering.BlockedURLPatterns.Settings.ValueString()
 			requestNetworksCreateNetworkGroupPolicyContentFilteringBlockedURLPatterns = &merakigosdk.RequestNetworksCreateNetworkGroupPolicyContentFilteringBlockedURLPatterns{
 				Patterns: patterns,
 				Settings: settings,
 			}
+			//[debug] Is Array: False
 		}
 		requestNetworksCreateNetworkGroupPolicyContentFiltering = &merakigosdk.RequestNetworksCreateNetworkGroupPolicyContentFiltering{
 			AllowedURLPatterns:   requestNetworksCreateNetworkGroupPolicyContentFilteringAllowedURLPatterns,
 			BlockedURLCategories: requestNetworksCreateNetworkGroupPolicyContentFilteringBlockedURLCategories,
 			BlockedURLPatterns:   requestNetworksCreateNetworkGroupPolicyContentFilteringBlockedURLPatterns,
 		}
+		//[debug] Is Array: False
 	}
 	var requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShaping *merakigosdk.RequestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShaping
+
 	if r.FirewallAndTrafficShaping != nil {
+
+		log.Printf("[DEBUG] #TODO []RequestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingL3FirewallRules")
 		var requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingL3FirewallRules []merakigosdk.RequestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingL3FirewallRules
+
 		if r.FirewallAndTrafficShaping.L3FirewallRules != nil {
-			for _, rItem1 := range *r.FirewallAndTrafficShaping.L3FirewallRules { //FirewallAndTrafficShaping.L3FirewallRules// name: l3FirewallRules
+			for _, rItem1 := range *r.FirewallAndTrafficShaping.L3FirewallRules {
 				comment := rItem1.Comment.ValueString()
 				destCidr := rItem1.DestCidr.ValueString()
 				destPort := rItem1.DestPort.ValueString()
@@ -1468,11 +1494,15 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *me
 					Policy:   policy,
 					Protocol: protocol,
 				})
+				//[debug] Is Array: True
 			}
 		}
+
+		log.Printf("[DEBUG] #TODO []RequestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingL7FirewallRules")
 		var requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingL7FirewallRules []merakigosdk.RequestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingL7FirewallRules
+
 		if r.FirewallAndTrafficShaping.L7FirewallRules != nil {
-			for _, rItem1 := range *r.FirewallAndTrafficShaping.L7FirewallRules { //FirewallAndTrafficShaping.L7FirewallRules// name: l7FirewallRules
+			for _, rItem1 := range *r.FirewallAndTrafficShaping.L7FirewallRules {
 				policy := rItem1.Policy.ValueString()
 				typeR := rItem1.Type.ValueString()
 				value := rItem1.Value.ValueString()
@@ -1481,21 +1511,29 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *me
 					Type:   typeR,
 					Value:  value,
 				})
+				//[debug] Is Array: True
 			}
 		}
 		settings := r.FirewallAndTrafficShaping.Settings.ValueString()
+
+		log.Printf("[DEBUG] #TODO []RequestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRules")
 		var requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRules []merakigosdk.RequestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRules
+
 		if r.FirewallAndTrafficShaping.TrafficShapingRules != nil {
-			for _, rItem1 := range *r.FirewallAndTrafficShaping.TrafficShapingRules { //FirewallAndTrafficShaping.TrafficShapingRules// name: trafficShapingRules
+			for _, rItem1 := range *r.FirewallAndTrafficShaping.TrafficShapingRules {
+
+				log.Printf("[DEBUG] #TODO []RequestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesDefinitions")
 				var requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesDefinitions []merakigosdk.RequestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesDefinitions
+
 				if rItem1.Definitions != nil {
-					for _, rItem2 := range *rItem1.Definitions { //FirewallAndTrafficShaping.TrafficShapingRules.Definitions// name: definitions
+					for _, rItem2 := range *rItem1.Definitions {
 						typeR := rItem2.Type.ValueString()
 						value := rItem2.Value.ValueString()
 						requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesDefinitions = append(requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesDefinitions, merakigosdk.RequestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesDefinitions{
 							Type:  typeR,
 							Value: value,
 						})
+						//[debug] Is Array: True
 					}
 				}
 				dscpTagValue := func() *int64 {
@@ -1511,29 +1549,35 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *me
 					return nil
 				}()
 				var requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits *merakigosdk.RequestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits
-				var requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimitsBandwidthLimits *merakigosdk.RequestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimitsBandwidthLimits
-				if rItem1.PerClientBandwidthLimits.BandwidthLimits != nil {
-					limitDown := func() *int64 {
-						if !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitDown.IsUnknown() && !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitDown.IsNull() {
-							return rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitDown.ValueInt64Pointer()
+
+				if rItem1.PerClientBandwidthLimits != nil {
+					var requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimitsBandwidthLimits *merakigosdk.RequestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimitsBandwidthLimits
+
+					if rItem1.PerClientBandwidthLimits.BandwidthLimits != nil {
+						limitDown := func() *int64 {
+							if !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitDown.IsUnknown() && !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitDown.IsNull() {
+								return rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitDown.ValueInt64Pointer()
+							}
+							return nil
+						}()
+						limitUp := func() *int64 {
+							if !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitUp.IsUnknown() && !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitUp.IsNull() {
+								return rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitUp.ValueInt64Pointer()
+							}
+							return nil
+						}()
+						requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimitsBandwidthLimits = &merakigosdk.RequestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimitsBandwidthLimits{
+							LimitDown: int64ToIntPointer(limitDown),
+							LimitUp:   int64ToIntPointer(limitUp),
 						}
-						return nil
-					}()
-					limitUp := func() *int64 {
-						if !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitUp.IsUnknown() && !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitUp.IsNull() {
-							return rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitUp.ValueInt64Pointer()
-						}
-						return nil
-					}()
-					requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimitsBandwidthLimits = &merakigosdk.RequestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimitsBandwidthLimits{
-						LimitDown: int64ToIntPointer(limitDown),
-						LimitUp:   int64ToIntPointer(limitUp),
+						//[debug] Is Array: False
 					}
-				}
-				settings := rItem1.PerClientBandwidthLimits.Settings.ValueString()
-				requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits = &merakigosdk.RequestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits{
-					BandwidthLimits: requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimitsBandwidthLimits,
-					Settings:        settings,
+					settings := rItem1.PerClientBandwidthLimits.Settings.ValueString()
+					requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits = &merakigosdk.RequestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits{
+						BandwidthLimits: requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimitsBandwidthLimits,
+						Settings:        settings,
+					}
+					//[debug] Is Array: False
 				}
 				priority := rItem1.Priority.ValueString()
 				requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRules = append(requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRules, merakigosdk.RequestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRules{
@@ -1548,6 +1592,7 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *me
 					PerClientBandwidthLimits: requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits,
 					Priority:                 priority,
 				})
+				//[debug] Is Array: True
 			}
 		}
 		requestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShaping = &merakigosdk.RequestNetworksCreateNetworkGroupPolicyFirewallAndTrafficShaping{
@@ -1571,6 +1616,7 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *me
 				return nil
 			}(),
 		}
+		//[debug] Is Array: False
 	}
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
@@ -1579,6 +1625,7 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *me
 		name = &emptyString
 	}
 	var requestNetworksCreateNetworkGroupPolicyScheduling *merakigosdk.RequestNetworksCreateNetworkGroupPolicyScheduling
+
 	if r.Scheduling != nil {
 		enabled := func() *bool {
 			if !r.Scheduling.Enabled.IsUnknown() && !r.Scheduling.Enabled.IsNull() {
@@ -1587,6 +1634,7 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *me
 			return nil
 		}()
 		var requestNetworksCreateNetworkGroupPolicySchedulingFriday *merakigosdk.RequestNetworksCreateNetworkGroupPolicySchedulingFriday
+
 		if r.Scheduling.Friday != nil {
 			active := func() *bool {
 				if !r.Scheduling.Friday.Active.IsUnknown() && !r.Scheduling.Friday.Active.IsNull() {
@@ -1601,8 +1649,10 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *me
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksCreateNetworkGroupPolicySchedulingMonday *merakigosdk.RequestNetworksCreateNetworkGroupPolicySchedulingMonday
+
 		if r.Scheduling.Monday != nil {
 			active := func() *bool {
 				if !r.Scheduling.Monday.Active.IsUnknown() && !r.Scheduling.Monday.Active.IsNull() {
@@ -1617,8 +1667,10 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *me
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksCreateNetworkGroupPolicySchedulingSaturday *merakigosdk.RequestNetworksCreateNetworkGroupPolicySchedulingSaturday
+
 		if r.Scheduling.Saturday != nil {
 			active := func() *bool {
 				if !r.Scheduling.Saturday.Active.IsUnknown() && !r.Scheduling.Saturday.Active.IsNull() {
@@ -1633,8 +1685,10 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *me
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksCreateNetworkGroupPolicySchedulingSunday *merakigosdk.RequestNetworksCreateNetworkGroupPolicySchedulingSunday
+
 		if r.Scheduling.Sunday != nil {
 			active := func() *bool {
 				if !r.Scheduling.Sunday.Active.IsUnknown() && !r.Scheduling.Sunday.Active.IsNull() {
@@ -1649,8 +1703,10 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *me
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksCreateNetworkGroupPolicySchedulingThursday *merakigosdk.RequestNetworksCreateNetworkGroupPolicySchedulingThursday
+
 		if r.Scheduling.Thursday != nil {
 			active := func() *bool {
 				if !r.Scheduling.Thursday.Active.IsUnknown() && !r.Scheduling.Thursday.Active.IsNull() {
@@ -1665,8 +1721,10 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *me
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksCreateNetworkGroupPolicySchedulingTuesday *merakigosdk.RequestNetworksCreateNetworkGroupPolicySchedulingTuesday
+
 		if r.Scheduling.Tuesday != nil {
 			active := func() *bool {
 				if !r.Scheduling.Tuesday.Active.IsUnknown() && !r.Scheduling.Tuesday.Active.IsNull() {
@@ -1681,8 +1739,10 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *me
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksCreateNetworkGroupPolicySchedulingWednesday *merakigosdk.RequestNetworksCreateNetworkGroupPolicySchedulingWednesday
+
 		if r.Scheduling.Wednesday != nil {
 			active := func() *bool {
 				if !r.Scheduling.Wednesday.Active.IsUnknown() && !r.Scheduling.Wednesday.Active.IsNull() {
@@ -1697,6 +1757,7 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *me
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		requestNetworksCreateNetworkGroupPolicyScheduling = &merakigosdk.RequestNetworksCreateNetworkGroupPolicyScheduling{
 			Enabled:   enabled,
@@ -1708,6 +1769,7 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *me
 			Tuesday:   requestNetworksCreateNetworkGroupPolicySchedulingTuesday,
 			Wednesday: requestNetworksCreateNetworkGroupPolicySchedulingWednesday,
 		}
+		//[debug] Is Array: False
 	}
 	splashAuthSettings := new(string)
 	if !r.SplashAuthSettings.IsUnknown() && !r.SplashAuthSettings.IsNull() {
@@ -1716,13 +1778,15 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *me
 		splashAuthSettings = &emptyString
 	}
 	var requestNetworksCreateNetworkGroupPolicyVLANTagging *merakigosdk.RequestNetworksCreateNetworkGroupPolicyVLANTagging
+
 	if r.VLANTagging != nil {
 		settings := r.VLANTagging.Settings.ValueString()
-		vLANID := r.VLANTagging.VLANID.ValueString()
+		vlanID := r.VLANTagging.VLANID.ValueString()
 		requestNetworksCreateNetworkGroupPolicyVLANTagging = &merakigosdk.RequestNetworksCreateNetworkGroupPolicyVLANTagging{
 			Settings: settings,
-			VLANID:   vLANID,
+			VLANID:   vlanID,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestNetworksCreateNetworkGroupPolicy{
 		Bandwidth:                 requestNetworksCreateNetworkGroupPolicyBandwidth,
@@ -1736,12 +1800,13 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestCreate(ctx context.Context) *me
 	}
 	return &out
 }
-
 func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestNetworksUpdateNetworkGroupPolicy {
 	emptyString := ""
 	var requestNetworksUpdateNetworkGroupPolicyBandwidth *merakigosdk.RequestNetworksUpdateNetworkGroupPolicyBandwidth
+
 	if r.Bandwidth != nil {
 		var requestNetworksUpdateNetworkGroupPolicyBandwidthBandwidthLimits *merakigosdk.RequestNetworksUpdateNetworkGroupPolicyBandwidthBandwidthLimits
+
 		if r.Bandwidth.BandwidthLimits != nil {
 			limitDown := func() *int64 {
 				if !r.Bandwidth.BandwidthLimits.LimitDown.IsUnknown() && !r.Bandwidth.BandwidthLimits.LimitDown.IsNull() {
@@ -1759,27 +1824,35 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 				LimitDown: int64ToIntPointer(limitDown),
 				LimitUp:   int64ToIntPointer(limitUp),
 			}
+			//[debug] Is Array: False
 		}
 		settings := r.Bandwidth.Settings.ValueString()
 		requestNetworksUpdateNetworkGroupPolicyBandwidth = &merakigosdk.RequestNetworksUpdateNetworkGroupPolicyBandwidth{
 			BandwidthLimits: requestNetworksUpdateNetworkGroupPolicyBandwidthBandwidthLimits,
 			Settings:        settings,
 		}
+		//[debug] Is Array: False
 	}
 	var requestNetworksUpdateNetworkGroupPolicyBonjourForwarding *merakigosdk.RequestNetworksUpdateNetworkGroupPolicyBonjourForwarding
+
 	if r.BonjourForwarding != nil {
+
+		log.Printf("[DEBUG] #TODO []RequestNetworksUpdateNetworkGroupPolicyBonjourForwardingRules")
 		var requestNetworksUpdateNetworkGroupPolicyBonjourForwardingRules []merakigosdk.RequestNetworksUpdateNetworkGroupPolicyBonjourForwardingRules
+
 		if r.BonjourForwarding.Rules != nil {
 			for _, rItem1 := range *r.BonjourForwarding.Rules {
 				description := rItem1.Description.ValueString()
-				var services []string
+
+				var services []string = nil
 				rItem1.Services.ElementsAs(ctx, &services, false)
-				vLANID := rItem1.VLANID.ValueString()
+				vlanID := rItem1.VLANID.ValueString()
 				requestNetworksUpdateNetworkGroupPolicyBonjourForwardingRules = append(requestNetworksUpdateNetworkGroupPolicyBonjourForwardingRules, merakigosdk.RequestNetworksUpdateNetworkGroupPolicyBonjourForwardingRules{
 					Description: description,
 					Services:    services,
-					VLANID:      vLANID,
+					VLANID:      vlanID,
 				})
+				//[debug] Is Array: True
 			}
 		}
 		settings := r.BonjourForwarding.Settings.ValueString()
@@ -1792,48 +1865,64 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 			}(),
 			Settings: settings,
 		}
+		//[debug] Is Array: False
 	}
 	var requestNetworksUpdateNetworkGroupPolicyContentFiltering *merakigosdk.RequestNetworksUpdateNetworkGroupPolicyContentFiltering
+
 	if r.ContentFiltering != nil {
 		var requestNetworksUpdateNetworkGroupPolicyContentFilteringAllowedURLPatterns *merakigosdk.RequestNetworksUpdateNetworkGroupPolicyContentFilteringAllowedURLPatterns
+
 		if r.ContentFiltering.AllowedURLPatterns != nil {
-			var patterns []string
+
+			var patterns []string = nil
 			r.ContentFiltering.AllowedURLPatterns.Patterns.ElementsAs(ctx, &patterns, false)
 			settings := r.ContentFiltering.AllowedURLPatterns.Settings.ValueString()
 			requestNetworksUpdateNetworkGroupPolicyContentFilteringAllowedURLPatterns = &merakigosdk.RequestNetworksUpdateNetworkGroupPolicyContentFilteringAllowedURLPatterns{
 				Patterns: patterns,
 				Settings: settings,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkGroupPolicyContentFilteringBlockedURLCategories *merakigosdk.RequestNetworksUpdateNetworkGroupPolicyContentFilteringBlockedURLCategories
+
 		if r.ContentFiltering.BlockedURLCategories != nil {
-			var categories []string
+
+			var categories []string = nil
 			r.ContentFiltering.BlockedURLCategories.Categories.ElementsAs(ctx, &categories, false)
 			settings := r.ContentFiltering.BlockedURLCategories.Settings.ValueString()
 			requestNetworksUpdateNetworkGroupPolicyContentFilteringBlockedURLCategories = &merakigosdk.RequestNetworksUpdateNetworkGroupPolicyContentFilteringBlockedURLCategories{
 				Categories: categories,
 				Settings:   settings,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkGroupPolicyContentFilteringBlockedURLPatterns *merakigosdk.RequestNetworksUpdateNetworkGroupPolicyContentFilteringBlockedURLPatterns
+
 		if r.ContentFiltering.BlockedURLPatterns != nil {
-			var patterns []string
+
+			var patterns []string = nil
 			r.ContentFiltering.BlockedURLPatterns.Patterns.ElementsAs(ctx, &patterns, false)
 			settings := r.ContentFiltering.BlockedURLPatterns.Settings.ValueString()
 			requestNetworksUpdateNetworkGroupPolicyContentFilteringBlockedURLPatterns = &merakigosdk.RequestNetworksUpdateNetworkGroupPolicyContentFilteringBlockedURLPatterns{
 				Patterns: patterns,
 				Settings: settings,
 			}
+			//[debug] Is Array: False
 		}
 		requestNetworksUpdateNetworkGroupPolicyContentFiltering = &merakigosdk.RequestNetworksUpdateNetworkGroupPolicyContentFiltering{
 			AllowedURLPatterns:   requestNetworksUpdateNetworkGroupPolicyContentFilteringAllowedURLPatterns,
 			BlockedURLCategories: requestNetworksUpdateNetworkGroupPolicyContentFilteringBlockedURLCategories,
 			BlockedURLPatterns:   requestNetworksUpdateNetworkGroupPolicyContentFilteringBlockedURLPatterns,
 		}
+		//[debug] Is Array: False
 	}
 	var requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShaping *merakigosdk.RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShaping
+
 	if r.FirewallAndTrafficShaping != nil {
+
+		log.Printf("[DEBUG] #TODO []RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingL3FirewallRules")
 		var requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingL3FirewallRules []merakigosdk.RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingL3FirewallRules
+
 		if r.FirewallAndTrafficShaping.L3FirewallRules != nil {
 			for _, rItem1 := range *r.FirewallAndTrafficShaping.L3FirewallRules {
 				comment := rItem1.Comment.ValueString()
@@ -1848,9 +1937,13 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 					Policy:   policy,
 					Protocol: protocol,
 				})
+				//[debug] Is Array: True
 			}
 		}
+
+		log.Printf("[DEBUG] #TODO []RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingL7FirewallRules")
 		var requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingL7FirewallRules []merakigosdk.RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingL7FirewallRules
+
 		if r.FirewallAndTrafficShaping.L7FirewallRules != nil {
 			for _, rItem1 := range *r.FirewallAndTrafficShaping.L7FirewallRules {
 				policy := rItem1.Policy.ValueString()
@@ -1861,14 +1954,20 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 					Type:   typeR,
 					Value:  value,
 				})
+				//[debug] Is Array: True
 			}
 		}
-
 		settings := r.FirewallAndTrafficShaping.Settings.ValueString()
+
+		log.Printf("[DEBUG] #TODO []RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRules")
 		var requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRules []merakigosdk.RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRules
+
 		if r.FirewallAndTrafficShaping.TrafficShapingRules != nil {
 			for _, rItem1 := range *r.FirewallAndTrafficShaping.TrafficShapingRules {
+
+				log.Printf("[DEBUG] #TODO []RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesDefinitions")
 				var requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesDefinitions []merakigosdk.RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesDefinitions
+
 				if rItem1.Definitions != nil {
 					for _, rItem2 := range *rItem1.Definitions {
 						typeR := rItem2.Type.ValueString()
@@ -1877,6 +1976,7 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 							Type:  typeR,
 							Value: value,
 						})
+						//[debug] Is Array: True
 					}
 				}
 				dscpTagValue := func() *int64 {
@@ -1892,26 +1992,35 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 					return nil
 				}()
 				var requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits *merakigosdk.RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits
-				if rItem1.PerClientBandwidthLimits.BandwidthLimits != nil {
-					limitDown := func() *int64 {
-						if !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitDown.IsUnknown() && !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitDown.IsNull() {
-							return rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitDown.ValueInt64Pointer()
-						}
-						return nil
-					}()
-					limitUp := func() *int64 {
-						if !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitUp.IsUnknown() && !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitUp.IsNull() {
-							return rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitUp.ValueInt64Pointer()
-						}
-						return nil
-					}()
-					requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits = &merakigosdk.RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits{
-						BandwidthLimits: &merakigosdk.RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimitsBandwidthLimits{
+
+				if rItem1.PerClientBandwidthLimits != nil {
+					var requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimitsBandwidthLimits *merakigosdk.RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimitsBandwidthLimits
+
+					if rItem1.PerClientBandwidthLimits.BandwidthLimits != nil {
+						limitDown := func() *int64 {
+							if !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitDown.IsUnknown() && !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitDown.IsNull() {
+								return rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitDown.ValueInt64Pointer()
+							}
+							return nil
+						}()
+						limitUp := func() *int64 {
+							if !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitUp.IsUnknown() && !rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitUp.IsNull() {
+								return rItem1.PerClientBandwidthLimits.BandwidthLimits.LimitUp.ValueInt64Pointer()
+							}
+							return nil
+						}()
+						requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimitsBandwidthLimits = &merakigosdk.RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimitsBandwidthLimits{
 							LimitDown: int64ToIntPointer(limitDown),
 							LimitUp:   int64ToIntPointer(limitUp),
-						},
-						Settings: rItem1.PerClientBandwidthLimits.Settings.ValueString(),
+						}
+						//[debug] Is Array: False
 					}
+					settings := rItem1.PerClientBandwidthLimits.Settings.ValueString()
+					requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits = &merakigosdk.RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits{
+						BandwidthLimits: requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimitsBandwidthLimits,
+						Settings:        settings,
+					}
+					//[debug] Is Array: False
 				}
 				priority := rItem1.Priority.ValueString()
 				requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRules = append(requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRules, merakigosdk.RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRules{
@@ -1926,6 +2035,7 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 					PerClientBandwidthLimits: requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShapingTrafficShapingRulesPerClientBandwidthLimits,
 					Priority:                 priority,
 				})
+				//[debug] Is Array: True
 			}
 		}
 		requestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShaping = &merakigosdk.RequestNetworksUpdateNetworkGroupPolicyFirewallAndTrafficShaping{
@@ -1949,6 +2059,7 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 				return nil
 			}(),
 		}
+		//[debug] Is Array: False
 	}
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
@@ -1957,6 +2068,7 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 		name = &emptyString
 	}
 	var requestNetworksUpdateNetworkGroupPolicyScheduling *merakigosdk.RequestNetworksUpdateNetworkGroupPolicyScheduling
+
 	if r.Scheduling != nil {
 		enabled := func() *bool {
 			if !r.Scheduling.Enabled.IsUnknown() && !r.Scheduling.Enabled.IsNull() {
@@ -1965,6 +2077,7 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 			return nil
 		}()
 		var requestNetworksUpdateNetworkGroupPolicySchedulingFriday *merakigosdk.RequestNetworksUpdateNetworkGroupPolicySchedulingFriday
+
 		if r.Scheduling.Friday != nil {
 			active := func() *bool {
 				if !r.Scheduling.Friday.Active.IsUnknown() && !r.Scheduling.Friday.Active.IsNull() {
@@ -1979,8 +2092,10 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkGroupPolicySchedulingMonday *merakigosdk.RequestNetworksUpdateNetworkGroupPolicySchedulingMonday
+
 		if r.Scheduling.Monday != nil {
 			active := func() *bool {
 				if !r.Scheduling.Monday.Active.IsUnknown() && !r.Scheduling.Monday.Active.IsNull() {
@@ -1995,8 +2110,10 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkGroupPolicySchedulingSaturday *merakigosdk.RequestNetworksUpdateNetworkGroupPolicySchedulingSaturday
+
 		if r.Scheduling.Saturday != nil {
 			active := func() *bool {
 				if !r.Scheduling.Saturday.Active.IsUnknown() && !r.Scheduling.Saturday.Active.IsNull() {
@@ -2011,8 +2128,10 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkGroupPolicySchedulingSunday *merakigosdk.RequestNetworksUpdateNetworkGroupPolicySchedulingSunday
+
 		if r.Scheduling.Sunday != nil {
 			active := func() *bool {
 				if !r.Scheduling.Sunday.Active.IsUnknown() && !r.Scheduling.Sunday.Active.IsNull() {
@@ -2027,8 +2146,10 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkGroupPolicySchedulingThursday *merakigosdk.RequestNetworksUpdateNetworkGroupPolicySchedulingThursday
+
 		if r.Scheduling.Thursday != nil {
 			active := func() *bool {
 				if !r.Scheduling.Thursday.Active.IsUnknown() && !r.Scheduling.Thursday.Active.IsNull() {
@@ -2043,8 +2164,10 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkGroupPolicySchedulingTuesday *merakigosdk.RequestNetworksUpdateNetworkGroupPolicySchedulingTuesday
+
 		if r.Scheduling.Tuesday != nil {
 			active := func() *bool {
 				if !r.Scheduling.Tuesday.Active.IsUnknown() && !r.Scheduling.Tuesday.Active.IsNull() {
@@ -2059,8 +2182,10 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		var requestNetworksUpdateNetworkGroupPolicySchedulingWednesday *merakigosdk.RequestNetworksUpdateNetworkGroupPolicySchedulingWednesday
+
 		if r.Scheduling.Wednesday != nil {
 			active := func() *bool {
 				if !r.Scheduling.Wednesday.Active.IsUnknown() && !r.Scheduling.Wednesday.Active.IsNull() {
@@ -2075,6 +2200,7 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 				From:   from,
 				To:     to,
 			}
+			//[debug] Is Array: False
 		}
 		requestNetworksUpdateNetworkGroupPolicyScheduling = &merakigosdk.RequestNetworksUpdateNetworkGroupPolicyScheduling{
 			Enabled:   enabled,
@@ -2086,6 +2212,7 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 			Tuesday:   requestNetworksUpdateNetworkGroupPolicySchedulingTuesday,
 			Wednesday: requestNetworksUpdateNetworkGroupPolicySchedulingWednesday,
 		}
+		//[debug] Is Array: False
 	}
 	splashAuthSettings := new(string)
 	if !r.SplashAuthSettings.IsUnknown() && !r.SplashAuthSettings.IsNull() {
@@ -2094,13 +2221,15 @@ func (r *NetworksGroupPoliciesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 		splashAuthSettings = &emptyString
 	}
 	var requestNetworksUpdateNetworkGroupPolicyVLANTagging *merakigosdk.RequestNetworksUpdateNetworkGroupPolicyVLANTagging
+
 	if r.VLANTagging != nil {
 		settings := r.VLANTagging.Settings.ValueString()
-		vLANID := r.VLANTagging.VLANID.ValueString()
+		vlanID := r.VLANTagging.VLANID.ValueString()
 		requestNetworksUpdateNetworkGroupPolicyVLANTagging = &merakigosdk.RequestNetworksUpdateNetworkGroupPolicyVLANTagging{
 			Settings: settings,
-			VLANID:   vLANID,
+			VLANID:   vlanID,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestNetworksUpdateNetworkGroupPolicy{
 		Bandwidth:                 requestNetworksUpdateNetworkGroupPolicyBandwidth,

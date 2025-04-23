@@ -35,9 +35,12 @@ output "meraki_devices_wireless_bluetooth_settings_example" {
 
 ### Optional
 
-- `major` (Number) Desired major value of the beacon. If the value is set to null it will reset to Dashboard's automatically generated value.
-- `minor` (Number) Desired minor value of the beacon. If the value is set to null it will reset to Dashboard's automatically generated value.
-- `uuid` (String) Desired UUID of the beacon. If the value is set to null it will reset to Dashboard's automatically generated value.
+- `major` (Number) Desired major value of the beacon. If the value is set to null it will reset to
+          Dashboard's automatically generated value.
+- `minor` (Number) Desired minor value of the beacon. If the value is set to null it will reset to
+          Dashboard's automatically generated value.
+- `uuid` (String) Desired UUID of the beacon. If the value is set to null it will reset to Dashboard's
+          automatically generated value.
 
 ## Import
 

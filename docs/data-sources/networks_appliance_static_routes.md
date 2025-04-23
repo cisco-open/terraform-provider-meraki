@@ -51,7 +51,7 @@ output "meraki_networks_appliance_static_routes_example" {
 Read-Only:
 
 - `enabled` (Boolean) Whether the route is enabled or not
-- `fixed_ip_assignments` (Attributes) (see [below for nested schema](#nestedatt--item--fixed_ip_assignments))
+- `fixed_ip_assignments` (String) Fixed DHCP IP assignments on the route
 - `gateway_ip` (String) Gateway IP address (next hop)
 - `gateway_vlan_id` (Number) Gateway VLAN ID
 - `id` (String) Route ID
@@ -60,23 +60,6 @@ Read-Only:
 - `network_id` (String) Network ID
 - `reserved_ip_ranges` (Attributes Set) DHCP reserved IP ranges (see [below for nested schema](#nestedatt--item--reserved_ip_ranges))
 - `subnet` (String) Subnet of the route
-
-<a id="nestedatt--item--fixed_ip_assignments"></a>
-### Nested Schema for `item.fixed_ip_assignments`
-
-Read-Only:
-
-- `attribute_22_33_44_55_66_77` (Attributes) (see [below for nested schema](#nestedatt--item--fixed_ip_assignments--attribute_22_33_44_55_66_77))
-
-<a id="nestedatt--item--fixed_ip_assignments--attribute_22_33_44_55_66_77"></a>
-### Nested Schema for `item.fixed_ip_assignments.attribute_22_33_44_55_66_77`
-
-Read-Only:
-
-- `ip` (String)
-- `name` (String)
-
-
 
 <a id="nestedatt--item--reserved_ip_ranges"></a>
 ### Nested Schema for `item.reserved_ip_ranges`
@@ -95,7 +78,7 @@ Read-Only:
 Read-Only:
 
 - `enabled` (Boolean) Whether the route is enabled or not
-- `fixed_ip_assignments` (Attributes) (see [below for nested schema](#nestedatt--items--fixed_ip_assignments))
+- `fixed_ip_assignments` (String) Fixed DHCP IP assignments on the route
 - `gateway_ip` (String) Gateway IP address (next hop)
 - `gateway_vlan_id` (Number) Gateway VLAN ID
 - `id` (String) Route ID
@@ -104,23 +87,6 @@ Read-Only:
 - `network_id` (String) Network ID
 - `reserved_ip_ranges` (Attributes Set) DHCP reserved IP ranges (see [below for nested schema](#nestedatt--items--reserved_ip_ranges))
 - `subnet` (String) Subnet of the route
-
-<a id="nestedatt--items--fixed_ip_assignments"></a>
-### Nested Schema for `items.fixed_ip_assignments`
-
-Read-Only:
-
-- `attribute_22_33_44_55_66_77` (Attributes) (see [below for nested schema](#nestedatt--items--fixed_ip_assignments--attribute_22_33_44_55_66_77))
-
-<a id="nestedatt--items--fixed_ip_assignments--attribute_22_33_44_55_66_77"></a>
-### Nested Schema for `items.fixed_ip_assignments.attribute_22_33_44_55_66_77`
-
-Read-Only:
-
-- `ip` (String)
-- `name` (String)
-
-
 
 <a id="nestedatt--items--reserved_ip_ranges"></a>
 ### Nested Schema for `items.reserved_ip_ranges`

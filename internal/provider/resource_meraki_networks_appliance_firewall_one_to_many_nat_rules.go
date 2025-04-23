@@ -20,7 +20,9 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	"log"
+
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -195,30 +197,37 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Create(ctx context.
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallOneToManyNatRules(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceFirewallOneToManyNatRules only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallOneToManyNatRules(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceFirewallOneToManyNatRules  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceFirewallOneToManyNatRules only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceFirewallOneToManyNatRules only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallOneToManyNatRules(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallOneToManyNatRules",
 				err.Error(),
@@ -231,9 +240,10 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Create(ctx context.
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallOneToManyNatRules(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -248,11 +258,12 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Create(ctx context.
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseApplianceGetNetworkApplianceFirewallOneToManyNatRulesItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -373,11 +384,16 @@ type ResponseApplianceGetNetworkApplianceFirewallOneToManyNatRulesRulesPortRules
 // FromBody
 func (r *NetworksApplianceFirewallOneToManyNatRulesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallOneToManyNatRules {
 	var requestApplianceUpdateNetworkApplianceFirewallOneToManyNatRulesRules []merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallOneToManyNatRulesRules
+
 	if r.Rules != nil {
 		for _, rItem1 := range *r.Rules {
+
+			log.Printf("[DEBUG] #TODO []RequestApplianceUpdateNetworkApplianceFirewallOneToManyNatRulesRulesPortRules")
 			var requestApplianceUpdateNetworkApplianceFirewallOneToManyNatRulesRulesPortRules []merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallOneToManyNatRulesRulesPortRules
+
 			if rItem1.PortRules != nil {
-				for _, rItem2 := range *rItem1.PortRules { //PortRules// name: portRules
+				for _, rItem2 := range *rItem1.PortRules {
+
 					var allowedIPs []string = nil
 					rItem2.AllowedIPs.ElementsAs(ctx, &allowedIPs, false)
 					localIP := rItem2.LocalIP.ValueString()
@@ -393,6 +409,7 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesRs) toSdkApiRequestUpdate(ctx
 						Protocol:   protocol,
 						PublicPort: publicPort,
 					})
+					//[debug] Is Array: True
 				}
 			}
 			publicIP := rItem1.PublicIP.ValueString()
@@ -407,6 +424,7 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesRs) toSdkApiRequestUpdate(ctx
 				PublicIP: publicIP,
 				Uplink:   uplink,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallOneToManyNatRules{

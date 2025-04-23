@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -142,6 +142,10 @@ func (d *OrganizationsCellularGatewayUplinkStatusesDataSource) Schema(_ context.
 										MarkdownDescription: `Integrated Circuit Card Identification Number`,
 										Computed:            true,
 									},
+									"imsi": schema.StringAttribute{
+										MarkdownDescription: `International Mobile Subscriber Identity`,
+										Computed:            true,
+									},
 									"interface": schema.StringAttribute{
 										MarkdownDescription: `Uplink interface`,
 										Computed:            true,
@@ -150,8 +154,24 @@ func (d *OrganizationsCellularGatewayUplinkStatusesDataSource) Schema(_ context.
 										MarkdownDescription: `Uplink IP`,
 										Computed:            true,
 									},
+									"mcc": schema.StringAttribute{
+										MarkdownDescription: `Mobile Country Code`,
+										Computed:            true,
+									},
+									"mnc": schema.StringAttribute{
+										MarkdownDescription: `Mobile Network Code`,
+										Computed:            true,
+									},
 									"model": schema.StringAttribute{
 										MarkdownDescription: `Uplink model`,
+										Computed:            true,
+									},
+									"msisdn": schema.StringAttribute{
+										MarkdownDescription: `Mobile Station Integrated Services Digital Network`,
+										Computed:            true,
+									},
+									"mtu": schema.Int64Attribute{
+										MarkdownDescription: `Maximum Transmission Unit`,
 										Computed:            true,
 									},
 									"provider_r": schema.StringAttribute{
@@ -161,6 +181,17 @@ func (d *OrganizationsCellularGatewayUplinkStatusesDataSource) Schema(_ context.
 									"public_ip": schema.StringAttribute{
 										MarkdownDescription: `Public IP`,
 										Computed:            true,
+									},
+									"roaming": schema.SingleNestedAttribute{
+										MarkdownDescription: `Roaming Status`,
+										Computed:            true,
+										Attributes: map[string]schema.Attribute{
+
+											"status": schema.StringAttribute{
+												MarkdownDescription: `Roaming Status`,
+												Computed:            true,
+											},
+										},
 									},
 									"signal_stat": schema.SingleNestedAttribute{
 										MarkdownDescription: `Tower Signal Status`,
@@ -267,14 +298,24 @@ type ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUpli
 	DNS2           types.String                                                                              `tfsdk:"dns2"`
 	Gateway        types.String                                                                              `tfsdk:"gateway"`
 	Iccid          types.String                                                                              `tfsdk:"iccid"`
+	Imsi           types.String                                                                              `tfsdk:"imsi"`
 	Interface      types.String                                                                              `tfsdk:"interface"`
 	IP             types.String                                                                              `tfsdk:"ip"`
+	Mcc            types.String                                                                              `tfsdk:"mcc"`
+	Mnc            types.String                                                                              `tfsdk:"mnc"`
 	Model          types.String                                                                              `tfsdk:"model"`
+	Msisdn         types.String                                                                              `tfsdk:"msisdn"`
+	Mtu            types.Int64                                                                               `tfsdk:"mtu"`
 	Provider       types.String                                                                              `tfsdk:"provider_r"`
 	PublicIP       types.String                                                                              `tfsdk:"public_ip"`
+	Roaming        *ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUplinksRoaming    `tfsdk:"roaming"`
 	SignalStat     *ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUplinksSignalStat `tfsdk:"signal_stat"`
 	SignalType     types.String                                                                              `tfsdk:"signal_type"`
 	Status         types.String                                                                              `tfsdk:"status"`
+}
+
+type ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUplinksRoaming struct {
+	Status types.String `tfsdk:"status"`
 }
 
 type ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUplinksSignalStat struct {
@@ -302,11 +343,29 @@ func ResponseCellularGatewayGetOrganizationCellularGatewayUplinkStatusesItemsToB
 							DNS2:           types.StringValue(uplinks.DNS2),
 							Gateway:        types.StringValue(uplinks.Gateway),
 							Iccid:          types.StringValue(uplinks.Iccid),
+							Imsi:           types.StringValue(uplinks.Imsi),
 							Interface:      types.StringValue(uplinks.Interface),
 							IP:             types.StringValue(uplinks.IP),
+							Mcc:            types.StringValue(uplinks.Mcc),
+							Mnc:            types.StringValue(uplinks.Mnc),
 							Model:          types.StringValue(uplinks.Model),
-							Provider:       types.StringValue(uplinks.Provider),
-							PublicIP:       types.StringValue(uplinks.PublicIP),
+							Msisdn:         types.StringValue(uplinks.Msisdn),
+							Mtu: func() types.Int64 {
+								if uplinks.Mtu != nil {
+									return types.Int64Value(int64(*uplinks.Mtu))
+								}
+								return types.Int64{}
+							}(),
+							Provider: types.StringValue(uplinks.Provider),
+							PublicIP: types.StringValue(uplinks.PublicIP),
+							Roaming: func() *ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUplinksRoaming {
+								if uplinks.Roaming != nil {
+									return &ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUplinksRoaming{
+										Status: types.StringValue(uplinks.Roaming.Status),
+									}
+								}
+								return nil
+							}(),
 							SignalStat: func() *ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUplinksSignalStat {
 								if uplinks.SignalStat != nil {
 									return &ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUplinksSignalStat{

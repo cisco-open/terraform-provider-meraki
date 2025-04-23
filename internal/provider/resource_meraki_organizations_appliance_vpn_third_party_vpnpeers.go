@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -429,30 +429,37 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Create(ctx context
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Appliance.GetOrganizationApplianceVpnThirdPartyVpnpeers(vvOrganizationID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource OrganizationsApplianceVpnThirdPartyVpnpeers only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvOrganizationID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Appliance.GetOrganizationApplianceVpnThirdPartyVpnpeers(vvOrganizationID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource OrganizationsApplianceVpnThirdPartyVpnpeers  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource OrganizationsApplianceVpnThirdPartyVpnpeers only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource OrganizationsApplianceVpnThirdPartyVpnpeers only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateOrganizationApplianceVpnThirdPartyVpnpeers(vvOrganizationID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationApplianceVpnThirdPartyVpnpeers",
 				err.Error(),
@@ -465,9 +472,10 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Create(ctx context
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Appliance.GetOrganizationApplianceVpnThirdPartyVpnpeers(vvOrganizationID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -482,11 +490,12 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Create(ctx context
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -619,16 +628,18 @@ type ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersPeersIpsecPol
 // FromBody
 func (r *OrganizationsApplianceVpnThirdPartyVpnpeersRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeers {
 	var requestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeersPeers []merakigosdk.RequestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeersPeers
+
 	if r.Peers != nil {
 		for _, rItem1 := range *r.Peers {
 			ikeVersion := rItem1.IkeVersion.ValueString()
 			var requestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeersPeersIPsecPolicies *merakigosdk.RequestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeersPeersIPsecPolicies
+
 			if rItem1.IPsecPolicies != nil {
+
 				var childAuthAlgo []string = nil
-				//Hoola aqui
 				rItem1.IPsecPolicies.ChildAuthAlgo.ElementsAs(ctx, &childAuthAlgo, false)
+
 				var childCipherAlgo []string = nil
-				//Hoola aqui
 				rItem1.IPsecPolicies.ChildCipherAlgo.ElementsAs(ctx, &childCipherAlgo, false)
 				childLifetime := func() *int64 {
 					if !rItem1.IPsecPolicies.ChildLifetime.IsUnknown() && !rItem1.IPsecPolicies.ChildLifetime.IsNull() {
@@ -636,17 +647,17 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersRs) toSdkApiRequestUpdate(ct
 					}
 					return nil
 				}()
+
 				var childPfsGroup []string = nil
-				//Hoola aqui
 				rItem1.IPsecPolicies.ChildPfsGroup.ElementsAs(ctx, &childPfsGroup, false)
+
 				var ikeAuthAlgo []string = nil
-				//Hoola aqui
 				rItem1.IPsecPolicies.IkeAuthAlgo.ElementsAs(ctx, &ikeAuthAlgo, false)
+
 				var ikeCipherAlgo []string = nil
-				//Hoola aqui
 				rItem1.IPsecPolicies.IkeCipherAlgo.ElementsAs(ctx, &ikeCipherAlgo, false)
+
 				var ikeDiffieHellmanGroup []string = nil
-				//Hoola aqui
 				rItem1.IPsecPolicies.IkeDiffieHellmanGroup.ElementsAs(ctx, &ikeDiffieHellmanGroup, false)
 				ikeLifetime := func() *int64 {
 					if !rItem1.IPsecPolicies.IkeLifetime.IsUnknown() && !rItem1.IPsecPolicies.IkeLifetime.IsNull() {
@@ -654,8 +665,8 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersRs) toSdkApiRequestUpdate(ct
 					}
 					return nil
 				}()
+
 				var ikePrfAlgo []string = nil
-				//Hoola aqui
 				rItem1.IPsecPolicies.IkePrfAlgo.ElementsAs(ctx, &ikePrfAlgo, false)
 				requestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeersPeersIPsecPolicies = &merakigosdk.RequestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeersPeersIPsecPolicies{
 					ChildAuthAlgo:         childAuthAlgo,
@@ -668,15 +679,16 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersRs) toSdkApiRequestUpdate(ct
 					IkeLifetime:           int64ToIntPointer(ikeLifetime),
 					IkePrfAlgo:            ikePrfAlgo,
 				}
+				//[debug] Is Array: False
 			}
-			iPsecPoliciesPreset := rItem1.IPsecPoliciesPreset.ValueString()
+			ipsecPoliciesPreset := rItem1.IPsecPoliciesPreset.ValueString()
 			localID := rItem1.LocalID.ValueString()
 			name := rItem1.Name.ValueString()
+
 			var networkTags []string = nil
-			//Hoola aqui
 			rItem1.NetworkTags.ElementsAs(ctx, &networkTags, false)
+
 			var privateSubnets []string = nil
-			//Hoola aqui
 			rItem1.PrivateSubnets.ElementsAs(ctx, &privateSubnets, false)
 			publicHostname := rItem1.PublicHostname.ValueString()
 			publicIP := rItem1.PublicIP.ValueString()
@@ -685,7 +697,7 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersRs) toSdkApiRequestUpdate(ct
 			requestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeersPeers = append(requestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeersPeers, merakigosdk.RequestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeersPeers{
 				IkeVersion:          ikeVersion,
 				IPsecPolicies:       requestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeersPeersIPsecPolicies,
-				IPsecPoliciesPreset: iPsecPoliciesPreset,
+				IPsecPoliciesPreset: ipsecPoliciesPreset,
 				LocalID:             localID,
 				Name:                name,
 				NetworkTags:         networkTags,
@@ -695,6 +707,7 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersRs) toSdkApiRequestUpdate(ct
 				RemoteID:            remoteID,
 				Secret:              secret,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestApplianceUpdateOrganizationApplianceVpnThirdPartyVpnpeers{

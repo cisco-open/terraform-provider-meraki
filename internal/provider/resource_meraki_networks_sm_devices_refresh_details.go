@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -100,7 +100,6 @@ func (r *NetworksSmDevicesRefreshDetailsResource) Create(ctx context.Context, re
 	vvNetworkID := data.NetworkID.ValueString()
 	vvDeviceID := data.DeviceID.ValueString()
 	restyResp1, err := r.client.Sm.RefreshNetworkSmDeviceDetails(vvNetworkID, vvDeviceID)
-
 	if err != nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -140,7 +139,6 @@ func (r *NetworksSmDevicesRefreshDetailsResource) Delete(ctx context.Context, re
 type NetworksSmDevicesRefreshDetails struct {
 	NetworkID types.String `tfsdk:"network_id"`
 	DeviceID  types.String `tfsdk:"device_id"`
-	// Parameters *RequestSmRefreshNetworkSmDeviceDetailsRs `tfsdk:"parameters"`
 }
 
 type RequestSmRefreshNetworkSmDeviceDetailsRs interface{}

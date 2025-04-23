@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -81,7 +81,7 @@ func (r *DevicesWirelessRadioSettingsResource) Schema(_ context.Context, _ resou
 						},
 					},
 					"channel_width": schema.Int64Attribute{
-						MarkdownDescription: `Sets a manual channel for 5 GHz. Can be '0', '20', '40', '80' or '160' or null for using auto channel width.
+						MarkdownDescription: `Sets a manual channel width for 5 GHz. Can be '0', '20', '40', '80' or '160' or null for using auto channel width.
                                         Allowed values: [0,20,40,80,160]`,
 						Computed: true,
 						Optional: true,
@@ -161,30 +161,37 @@ func (r *DevicesWirelessRadioSettingsResource) Create(ctx context.Context, req r
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvSerial := data.Serial.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Wireless.GetDeviceWirelessRadioSettings(vvSerial)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesWirelessRadioSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvSerial != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Wireless.GetDeviceWirelessRadioSettings(vvSerial)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesWirelessRadioSettings  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource DevicesWirelessRadioSettings only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource DevicesWirelessRadioSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Wireless.UpdateDeviceWirelessRadioSettings(vvSerial, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceWirelessRadioSettings",
 				err.Error(),
@@ -197,9 +204,10 @@ func (r *DevicesWirelessRadioSettingsResource) Create(ctx context.Context, req r
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Wireless.GetDeviceWirelessRadioSettings(vvSerial)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -214,11 +222,12 @@ func (r *DevicesWirelessRadioSettingsResource) Create(ctx context.Context, req r
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseWirelessGetDeviceWirelessRadioSettingsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *DevicesWirelessRadioSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -338,6 +347,7 @@ type ResponseWirelessGetDeviceWirelessRadioSettingsTwoFourGhzSettingsRs struct {
 func (r *DevicesWirelessRadioSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestWirelessUpdateDeviceWirelessRadioSettings {
 	emptyString := ""
 	var requestWirelessUpdateDeviceWirelessRadioSettingsFiveGhzSettings *merakigosdk.RequestWirelessUpdateDeviceWirelessRadioSettingsFiveGhzSettings
+
 	if r.FiveGhzSettings != nil {
 		channel := func() *int64 {
 			if !r.FiveGhzSettings.Channel.IsUnknown() && !r.FiveGhzSettings.Channel.IsNull() {
@@ -362,6 +372,7 @@ func (r *DevicesWirelessRadioSettingsRs) toSdkApiRequestUpdate(ctx context.Conte
 			ChannelWidth: int64ToIntPointer(channelWidth),
 			TargetPower:  int64ToIntPointer(targetPower),
 		}
+		//[debug] Is Array: False
 	}
 	rfProfileID := new(string)
 	if !r.RfProfileID.IsUnknown() && !r.RfProfileID.IsNull() {
@@ -370,6 +381,7 @@ func (r *DevicesWirelessRadioSettingsRs) toSdkApiRequestUpdate(ctx context.Conte
 		rfProfileID = &emptyString
 	}
 	var requestWirelessUpdateDeviceWirelessRadioSettingsTwoFourGhzSettings *merakigosdk.RequestWirelessUpdateDeviceWirelessRadioSettingsTwoFourGhzSettings
+
 	if r.TwoFourGhzSettings != nil {
 		channel := func() *int64 {
 			if !r.TwoFourGhzSettings.Channel.IsUnknown() && !r.TwoFourGhzSettings.Channel.IsNull() {
@@ -387,6 +399,7 @@ func (r *DevicesWirelessRadioSettingsRs) toSdkApiRequestUpdate(ctx context.Conte
 			Channel:     int64ToIntPointer(channel),
 			TargetPower: int64ToIntPointer(targetPower),
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestWirelessUpdateDeviceWirelessRadioSettings{
 		FiveGhzSettings:    requestWirelessUpdateDeviceWirelessRadioSettingsFiveGhzSettings,

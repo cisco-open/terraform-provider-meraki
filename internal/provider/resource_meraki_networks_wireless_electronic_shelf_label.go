@@ -20,14 +20,16 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -77,6 +79,21 @@ func (r *NetworksWirelessElectronicShelfLabelResource) Schema(_ context.Context,
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"mode": schema.StringAttribute{
+				MarkdownDescription: `Electronic shelf label mode of the network. Valid options are 'Bluetooth', 'high frequency'
+                                  Allowed values: [Bluetooth,high frequency]`,
+				Computed: true,
+				Optional: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+				Validators: []validator.String{
+					stringvalidator.OneOf(
+						"Bluetooth",
+						"high frequency",
+					),
+				},
+			},
 			"network_id": schema.StringAttribute{
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
@@ -103,30 +120,37 @@ func (r *NetworksWirelessElectronicShelfLabelResource) Create(ctx context.Contex
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessElectronicShelfLabel(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessElectronicShelfLabel only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessElectronicShelfLabel(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessElectronicShelfLabel  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessElectronicShelfLabel only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessElectronicShelfLabel only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessElectronicShelfLabel(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessElectronicShelfLabel",
 				err.Error(),
@@ -139,9 +163,10 @@ func (r *NetworksWirelessElectronicShelfLabelResource) Create(ctx context.Contex
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessElectronicShelfLabel(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -156,11 +181,12 @@ func (r *NetworksWirelessElectronicShelfLabelResource) Create(ctx context.Contex
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseWirelessGetNetworkWirelessElectronicShelfLabelItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksWirelessElectronicShelfLabelResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -262,6 +288,7 @@ type NetworksWirelessElectronicShelfLabelRs struct {
 	NetworkID types.String `tfsdk:"network_id"`
 	Enabled   types.Bool   `tfsdk:"enabled"`
 	Hostname  types.String `tfsdk:"hostname"`
+	Mode      types.String `tfsdk:"mode"`
 }
 
 // FromBody
@@ -279,9 +306,16 @@ func (r *NetworksWirelessElectronicShelfLabelRs) toSdkApiRequestUpdate(ctx conte
 	} else {
 		hostname = &emptyString
 	}
+	mode := new(string)
+	if !r.Mode.IsUnknown() && !r.Mode.IsNull() {
+		*mode = r.Mode.ValueString()
+	} else {
+		mode = &emptyString
+	}
 	out := merakigosdk.RequestWirelessUpdateNetworkWirelessElectronicShelfLabel{
 		Enabled:  enabled,
 		Hostname: *hostname,
+		Mode:     *mode,
 	}
 	return &out
 }
@@ -296,6 +330,7 @@ func ResponseWirelessGetNetworkWirelessElectronicShelfLabelItemToBodyRs(state Ne
 			return types.Bool{}
 		}(),
 		Hostname: types.StringValue(response.Hostname),
+		Mode:     types.StringValue(response.Mode),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksWirelessElectronicShelfLabelRs)

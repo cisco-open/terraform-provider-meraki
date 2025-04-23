@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -125,30 +125,37 @@ func (r *NetworksApplianceConnectivityMonitoringDestinationsResource) Create(ctx
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceConnectivityMonitoringDestinations(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceConnectivityMonitoringDestinations only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceConnectivityMonitoringDestinations(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceConnectivityMonitoringDestinations  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceConnectivityMonitoringDestinations only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceConnectivityMonitoringDestinations only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceConnectivityMonitoringDestinations(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceConnectivityMonitoringDestinations",
 				err.Error(),
@@ -161,9 +168,10 @@ func (r *NetworksApplianceConnectivityMonitoringDestinationsResource) Create(ctx
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceConnectivityMonitoringDestinations(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -178,11 +186,12 @@ func (r *NetworksApplianceConnectivityMonitoringDestinationsResource) Create(ctx
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseApplianceGetNetworkApplianceConnectivityMonitoringDestinationsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksApplianceConnectivityMonitoringDestinationsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -294,6 +303,7 @@ type ResponseApplianceGetNetworkApplianceConnectivityMonitoringDestinationsDesti
 // FromBody
 func (r *NetworksApplianceConnectivityMonitoringDestinationsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateNetworkApplianceConnectivityMonitoringDestinations {
 	var requestApplianceUpdateNetworkApplianceConnectivityMonitoringDestinationsDestinations []merakigosdk.RequestApplianceUpdateNetworkApplianceConnectivityMonitoringDestinationsDestinations
+
 	if r.Destinations != nil {
 		for _, rItem1 := range *r.Destinations {
 			defaultR := func() *bool {
@@ -303,12 +313,13 @@ func (r *NetworksApplianceConnectivityMonitoringDestinationsRs) toSdkApiRequestU
 				return nil
 			}()
 			description := rItem1.Description.ValueString()
-			iP := rItem1.IP.ValueString()
+			ip := rItem1.IP.ValueString()
 			requestApplianceUpdateNetworkApplianceConnectivityMonitoringDestinationsDestinations = append(requestApplianceUpdateNetworkApplianceConnectivityMonitoringDestinationsDestinations, merakigosdk.RequestApplianceUpdateNetworkApplianceConnectivityMonitoringDestinationsDestinations{
 				Default:     defaultR,
 				Description: description,
-				IP:          iP,
+				IP:          ip,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceConnectivityMonitoringDestinations{

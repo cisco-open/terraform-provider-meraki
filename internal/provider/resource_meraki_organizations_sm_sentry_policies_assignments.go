@@ -21,7 +21,9 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	"log"
+
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -125,7 +127,7 @@ func (r *OrganizationsSmSentryPoliciesAssignmentsResource) Schema(_ context.Cont
 												MarkdownDescription: `The Id of the Systems Manager Network the Sentry Policy is assigned to`,
 												Computed:            true,
 											},
-											"tags": schema.SetAttribute{
+											"tags": schema.ListAttribute{
 												MarkdownDescription: `The tags of the Sentry Policy`,
 												Computed:            true,
 												ElementType:         types.StringType,
@@ -235,7 +237,6 @@ func (r *OrganizationsSmSentryPoliciesAssignmentsResource) Create(ctx context.Co
 	vvOrganizationID := data.OrganizationID.ValueString()
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp1, err := r.client.Sm.UpdateOrganizationSmSentryPoliciesAssignments(vvOrganizationID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -252,7 +253,6 @@ func (r *OrganizationsSmSentryPoliciesAssignmentsResource) Create(ctx context.Co
 	}
 	//Item
 	data = ResponseSmUpdateOrganizationSmSentryPoliciesAssignmentsItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -313,25 +313,29 @@ type RequestSmUpdateOrganizationSmSentryPoliciesAssignmentsItemsPoliciesRs struc
 	PolicyID      types.String `tfsdk:"policy_id"`
 	Scope         types.String `tfsdk:"scope"`
 	SmNetworkID   types.String `tfsdk:"sm_network_id"`
-	Tags          types.List   `tfsdk:"tags"`
+	Tags          types.Set    `tfsdk:"tags"`
 }
 
 // FromBody
 func (r *OrganizationsSmSentryPoliciesAssignments) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestSmUpdateOrganizationSmSentryPoliciesAssignments {
 	re := *r.Parameters
 	var requestSmUpdateOrganizationSmSentryPoliciesAssignmentsItems []merakigosdk.RequestSmUpdateOrganizationSmSentryPoliciesAssignmentsItems
+
 	if re.Items != nil {
 		for _, rItem1 := range *re.Items {
 			networkID := rItem1.NetworkID.ValueString()
+
+			log.Printf("[DEBUG] #TODO []RequestSmUpdateOrganizationSmSentryPoliciesAssignmentsItemsPolicies")
 			var requestSmUpdateOrganizationSmSentryPoliciesAssignmentsItemsPolicies []merakigosdk.RequestSmUpdateOrganizationSmSentryPoliciesAssignmentsItemsPolicies
+
 			if rItem1.Policies != nil {
-				for _, rItem2 := range *rItem1.Policies { //Policies// name: policies
+				for _, rItem2 := range *rItem1.Policies {
 					groupPolicyID := rItem2.GroupPolicyID.ValueString()
 					policyID := rItem2.PolicyID.ValueString()
 					scope := rItem2.Scope.ValueString()
 					smNetworkID := rItem2.SmNetworkID.ValueString()
+
 					var tags []string = nil
-					//Hoola aqui
 					rItem2.Tags.ElementsAs(ctx, &tags, false)
 					requestSmUpdateOrganizationSmSentryPoliciesAssignmentsItemsPolicies = append(requestSmUpdateOrganizationSmSentryPoliciesAssignmentsItemsPolicies, merakigosdk.RequestSmUpdateOrganizationSmSentryPoliciesAssignmentsItemsPolicies{
 						GroupPolicyID: groupPolicyID,
@@ -340,6 +344,7 @@ func (r *OrganizationsSmSentryPoliciesAssignments) toSdkApiRequestUpdate(ctx con
 						SmNetworkID:   smNetworkID,
 						Tags:          tags,
 					})
+					//[debug] Is Array: True
 				}
 			}
 			requestSmUpdateOrganizationSmSentryPoliciesAssignmentsItems = append(requestSmUpdateOrganizationSmSentryPoliciesAssignmentsItems, merakigosdk.RequestSmUpdateOrganizationSmSentryPoliciesAssignmentsItems{
@@ -351,6 +356,7 @@ func (r *OrganizationsSmSentryPoliciesAssignments) toSdkApiRequestUpdate(ctx con
 					return nil
 				}(),
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestSmUpdateOrganizationSmSentryPoliciesAssignments{

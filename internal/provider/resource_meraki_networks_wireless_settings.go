@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -158,7 +158,7 @@ func (r *NetworksWirelessSettingsResource) Schema(_ context.Context, _ resource.
 					},
 				},
 			},
-			"upgradestrategy": schema.StringAttribute{
+			"upgrade_strategy": schema.StringAttribute{
 				MarkdownDescription: `The default strategy that network devices will use to perform an upgrade. Requires firmware version MR 26.8 or higher.
                                   Allowed values: [minimizeClientDowntime,minimizeUpgradeTime]`,
 				Computed: true,
@@ -195,30 +195,37 @@ func (r *NetworksWirelessSettingsResource) Create(ctx context.Context, req resou
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSettings(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSettings(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessSettings  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessSettings only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessSettings only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSettings(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSettings",
 				err.Error(),
@@ -231,9 +238,10 @@ func (r *NetworksWirelessSettingsResource) Create(ctx context.Context, req resou
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSettings(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -248,11 +256,12 @@ func (r *NetworksWirelessSettingsResource) Create(ctx context.Context, req resou
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseWirelessGetNetworkWirelessSettingsItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksWirelessSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -358,7 +367,7 @@ type NetworksWirelessSettingsRs struct {
 	MeshingEnabled           types.Bool                                                    `tfsdk:"meshing_enabled"`
 	NamedVLANs               *ResponseWirelessGetNetworkWirelessSettingsNamedVlansRs       `tfsdk:"named_vlans"`
 	RegulatoryDomain         *ResponseWirelessGetNetworkWirelessSettingsRegulatoryDomainRs `tfsdk:"regulatory_domain"`
-	Upgradestrategy          types.String                                                  `tfsdk:"upgradestrategy"`
+	Upgradestrategy          types.String                                                  `tfsdk:"upgrade_strategy"`
 }
 
 type ResponseWirelessGetNetworkWirelessSettingsNamedVlansRs struct {
@@ -404,8 +413,10 @@ func (r *NetworksWirelessSettingsRs) toSdkApiRequestUpdate(ctx context.Context) 
 		meshingEnabled = nil
 	}
 	var requestWirelessUpdateNetworkWirelessSettingsNamedVLANs *merakigosdk.RequestWirelessUpdateNetworkWirelessSettingsNamedVLANs
+
 	if r.NamedVLANs != nil {
 		var requestWirelessUpdateNetworkWirelessSettingsNamedVLANsPoolDhcpMonitoring *merakigosdk.RequestWirelessUpdateNetworkWirelessSettingsNamedVLANsPoolDhcpMonitoring
+
 		if r.NamedVLANs.PoolDhcpMonitoring != nil {
 			duration := func() *int64 {
 				if !r.NamedVLANs.PoolDhcpMonitoring.Duration.IsUnknown() && !r.NamedVLANs.PoolDhcpMonitoring.Duration.IsNull() {
@@ -423,10 +434,12 @@ func (r *NetworksWirelessSettingsRs) toSdkApiRequestUpdate(ctx context.Context) 
 				Duration: int64ToIntPointer(duration),
 				Enabled:  enabled,
 			}
+			//[debug] Is Array: False
 		}
 		requestWirelessUpdateNetworkWirelessSettingsNamedVLANs = &merakigosdk.RequestWirelessUpdateNetworkWirelessSettingsNamedVLANs{
 			PoolDhcpMonitoring: requestWirelessUpdateNetworkWirelessSettingsNamedVLANsPoolDhcpMonitoring,
 		}
+		//[debug] Is Array: False
 	}
 	upgradestrategy := new(string)
 	if !r.Upgradestrategy.IsUnknown() && !r.Upgradestrategy.IsNull() {

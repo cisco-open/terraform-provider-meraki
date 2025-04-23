@@ -79,7 +79,7 @@ Read-Only:
 - `address` (String) Physical address of the device
 - `details` (Attributes Set) Additional device information (see [below for nested schema](#nestedatt--items--details))
 - `firmware` (String) Firmware version of the device
-- `imei` (Number) IMEI of the device, if applicable
+- `imei` (String) IMEI of the device, if applicable
 - `lan_ip` (String) LAN IP address of the device
 - `lat` (Number) Latitude of the device
 - `lng` (Number) Longitude of the device

@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -101,12 +101,12 @@ func (r *NetworksBindResource) Schema(_ context.Context, _ resource.SchemaReques
 						MarkdownDescription: `Organization ID`,
 						Computed:            true,
 					},
-					"product_types": schema.SetAttribute{
+					"product_types": schema.ListAttribute{
 						MarkdownDescription: `List of the product types that the network supports`,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"tags": schema.SetAttribute{
+					"tags": schema.ListAttribute{
 						MarkdownDescription: `Network tags`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -167,7 +167,6 @@ func (r *NetworksBindResource) Create(ctx context.Context, req resource.CreateRe
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Networks.BindNetwork(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -184,7 +183,6 @@ func (r *NetworksBindResource) Create(ctx context.Context, req resource.CreateRe
 	}
 	//Item
 	data = ResponseNetworksBindNetworkItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -217,8 +215,8 @@ type ResponseNetworksBindNetwork struct {
 	Name                    types.String `tfsdk:"name"`
 	Notes                   types.String `tfsdk:"notes"`
 	OrganizationID          types.String `tfsdk:"organization_id"`
-	ProductTypes            types.Set    `tfsdk:"product_types"`
-	Tags                    types.Set    `tfsdk:"tags"`
+	ProductTypes            types.List   `tfsdk:"product_types"`
+	Tags                    types.List   `tfsdk:"tags"`
 	TimeZone                types.String `tfsdk:"time_zone"`
 	URL                     types.String `tfsdk:"url"`
 }
@@ -266,8 +264,8 @@ func ResponseNetworksBindNetworkItemToBody(state NetworksBind, response *merakig
 		Name:           types.StringValue(response.Name),
 		Notes:          types.StringValue(response.Notes),
 		OrganizationID: types.StringValue(response.OrganizationID),
-		ProductTypes:   StringSliceToSet(response.ProductTypes),
-		Tags:           StringSliceToSet(response.Tags),
+		ProductTypes:   StringSliceToList(response.ProductTypes),
+		Tags:           StringSliceToList(response.Tags),
 		TimeZone:       types.StringValue(response.TimeZone),
 		URL:            types.StringValue(response.URL),
 	}

@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -282,7 +282,6 @@ func (r *NetworksFirmwareUpgradesStagedEventsRollbacksResource) Create(ctx conte
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Networks.RollbacksNetworkFirmwareUpgradesStagedEvents(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -299,7 +298,6 @@ func (r *NetworksFirmwareUpgradesStagedEventsRollbacksResource) Create(ctx conte
 	}
 	//Item
 	data = ResponseNetworksRollbacksNetworkFirmwareUpgradesStagedEventsItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -398,6 +396,7 @@ type RequestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStagesMilestones
 func (r *NetworksFirmwareUpgradesStagedEventsRollbacks) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestNetworksRollbacksNetworkFirmwareUpgradesStagedEvents {
 	re := *r.Parameters
 	var requestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsReasons []merakigosdk.RequestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsReasons
+
 	if re.Reasons != nil {
 		for _, rItem1 := range *re.Reasons {
 			category := rItem1.Category.ValueString()
@@ -406,44 +405,41 @@ func (r *NetworksFirmwareUpgradesStagedEventsRollbacks) toSdkApiRequestCreate(ct
 				Category: category,
 				Comment:  comment,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var requestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStages []merakigosdk.RequestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStages
+
 	if re.Stages != nil {
 		for _, rItem1 := range *re.Stages {
 			var requestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStagesGroup *merakigosdk.RequestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStagesGroup
+
 			if rItem1.Group != nil {
-				iD := rItem1.Group.ID.ValueString()
+				id := rItem1.Group.ID.ValueString()
 				requestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStagesGroup = &merakigosdk.RequestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStagesGroup{
-					ID: iD,
+					ID: id,
 				}
+				//[debug] Is Array: False
 			}
 			var requestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStagesMilestones *merakigosdk.RequestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStagesMilestones
+
 			if rItem1.Milestones != nil {
 				scheduledFor := rItem1.Milestones.ScheduledFor.ValueString()
 				requestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStagesMilestones = &merakigosdk.RequestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStagesMilestones{
 					ScheduledFor: scheduledFor,
 				}
+				//[debug] Is Array: False
 			}
 			requestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStages = append(requestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStages, merakigosdk.RequestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStages{
 				Group:      requestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStagesGroup,
 				Milestones: requestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStagesMilestones,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestNetworksRollbacksNetworkFirmwareUpgradesStagedEvents{
-		Reasons: func() *[]merakigosdk.RequestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsReasons {
-			if len(requestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsReasons) > 0 {
-				return &requestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsReasons
-			}
-			return nil
-		}(),
-		Stages: func() *[]merakigosdk.RequestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStages {
-			if len(requestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStages) > 0 {
-				return &requestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStages
-			}
-			return nil
-		}(),
+		Reasons: &requestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsReasons,
+		Stages:  &requestNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStages,
 	}
 	return &out
 }

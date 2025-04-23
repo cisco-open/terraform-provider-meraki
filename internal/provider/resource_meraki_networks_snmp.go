@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -142,30 +142,37 @@ func (r *NetworksSNMPResource) Create(ctx context.Context, req resource.CreateRe
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkSNMP(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSNMP only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkSNMP(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSnmp  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSnmp only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSNMP only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkSNMP(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSNMP",
 				err.Error(),
@@ -178,9 +185,10 @@ func (r *NetworksSNMPResource) Create(ctx context.Context, req resource.CreateRe
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Networks.GetNetworkSNMP(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -195,11 +203,12 @@ func (r *NetworksSNMPResource) Create(ctx context.Context, req resource.CreateRe
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseNetworksGetNetworkSNMPItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksSNMPResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -325,6 +334,7 @@ func (r *NetworksSNMPRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk
 		communityString = &emptyString
 	}
 	var requestNetworksUpdateNetworkSNMPUsers []merakigosdk.RequestNetworksUpdateNetworkSNMPUsers
+
 	if r.Users != nil {
 		for _, rItem1 := range *r.Users {
 			passphrase := rItem1.Passphrase.ValueString()
@@ -333,6 +343,7 @@ func (r *NetworksSNMPRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk
 				Passphrase: passphrase,
 				Username:   username,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestNetworksUpdateNetworkSNMP{

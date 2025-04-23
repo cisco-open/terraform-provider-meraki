@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -193,31 +193,38 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Create(ctx context.Conte
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	vvProfileID := data.ProfileID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessEthernetPortsProfile(vvNetworkID, vvProfileID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessEthernetPortsProfiles only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" && vvProfileID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessEthernetPortsProfile(vvNetworkID, vvProfileID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessEthernetPortsProfiles  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksWirelessEthernetPortsProfiles only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksWirelessEthernetPortsProfiles only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessEthernetPortsProfile(vvNetworkID, vvProfileID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessEthernetPortsProfile",
 				err.Error(),
@@ -230,9 +237,10 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Create(ctx context.Conte
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessEthernetPortsProfile(vvNetworkID, vvProfileID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -247,11 +255,12 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Create(ctx context.Conte
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseWirelessGetNetworkWirelessEthernetPortsProfileItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksWirelessEthernetPortsProfilesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -420,6 +429,7 @@ func (r *NetworksWirelessEthernetPortsProfilesRs) toSdkApiRequestUpdate(ctx cont
 		name = &emptyString
 	}
 	var requestWirelessUpdateNetworkWirelessEthernetPortsProfilePorts []merakigosdk.RequestWirelessUpdateNetworkWirelessEthernetPortsProfilePorts
+
 	if r.Ports != nil {
 		for _, rItem1 := range *r.Ports {
 			enabled := func() *bool {
@@ -430,7 +440,7 @@ func (r *NetworksWirelessEthernetPortsProfilesRs) toSdkApiRequestUpdate(ctx cont
 			}()
 			name := rItem1.Name.ValueString()
 			pskGroupID := rItem1.PskGroupID.ValueString()
-			sSID := func() *int64 {
+			ssid := func() *int64 {
 				if !rItem1.SSID.IsUnknown() && !rItem1.SSID.IsNull() {
 					return rItem1.SSID.ValueInt64Pointer()
 				}
@@ -440,11 +450,13 @@ func (r *NetworksWirelessEthernetPortsProfilesRs) toSdkApiRequestUpdate(ctx cont
 				Enabled:    enabled,
 				Name:       name,
 				PskGroupID: pskGroupID,
-				SSID:       int64ToIntPointer(sSID),
+				SSID:       int64ToIntPointer(ssid),
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var requestWirelessUpdateNetworkWirelessEthernetPortsProfileUsbPorts []merakigosdk.RequestWirelessUpdateNetworkWirelessEthernetPortsProfileUsbPorts
+
 	if r.UsbPorts != nil {
 		for _, rItem1 := range *r.UsbPorts {
 			enabled := func() *bool {
@@ -454,7 +466,7 @@ func (r *NetworksWirelessEthernetPortsProfilesRs) toSdkApiRequestUpdate(ctx cont
 				return nil
 			}()
 			name := rItem1.Name.ValueString()
-			sSID := func() *int64 {
+			ssid := func() *int64 {
 				if !rItem1.SSID.IsUnknown() && !rItem1.SSID.IsNull() {
 					return rItem1.SSID.ValueInt64Pointer()
 				}
@@ -463,8 +475,9 @@ func (r *NetworksWirelessEthernetPortsProfilesRs) toSdkApiRequestUpdate(ctx cont
 			requestWirelessUpdateNetworkWirelessEthernetPortsProfileUsbPorts = append(requestWirelessUpdateNetworkWirelessEthernetPortsProfileUsbPorts, merakigosdk.RequestWirelessUpdateNetworkWirelessEthernetPortsProfileUsbPorts{
 				Enabled: enabled,
 				Name:    name,
-				SSID:    int64ToIntPointer(sSID),
+				SSID:    int64ToIntPointer(ssid),
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestWirelessUpdateNetworkWirelessEthernetPortsProfile{

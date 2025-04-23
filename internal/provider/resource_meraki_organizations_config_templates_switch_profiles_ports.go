@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -365,8 +365,8 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 				ElementType: types.StringType,
 			},
 			"type": schema.StringAttribute{
-				MarkdownDescription: `The type of the switch template port ('trunk', 'access' or 'stack').
-                                  Allowed values: [access,stack,trunk]`,
+				MarkdownDescription: `The type of the switch template port ('trunk', 'access', 'stack' or 'routed').
+                                  Allowed values: [access,routed,stack,trunk]`,
 				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
@@ -375,6 +375,7 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 				Validators: []validator.String{
 					stringvalidator.OneOf(
 						"access",
+						"routed",
 						"stack",
 						"trunk",
 					),
@@ -435,33 +436,40 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Create(ctx con
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvOrganizationID := data.OrganizationID.ValueString()
 	vvConfigTemplateID := data.ConfigTemplateID.ValueString()
 	vvProfileID := data.ProfileID.ValueString()
 	vvPortID := data.PortID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Switch.GetOrganizationConfigTemplateSwitchProfilePort(vvOrganizationID, vvConfigTemplateID, vvProfileID, vvPortID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource OrganizationsConfigTemplatesSwitchProfilesPorts only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and has items and not post
+
+	if vvOrganizationID != "" && vvConfigTemplateID != "" && vvProfileID != "" && vvPortID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Switch.GetOrganizationConfigTemplateSwitchProfilePort(vvOrganizationID, vvConfigTemplateID, vvProfileID, vvPortID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource OrganizationsConfigTemplatesSwitchProfilesPorts  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource OrganizationsConfigTemplatesSwitchProfilesPorts only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource OrganizationsConfigTemplatesSwitchProfilesPorts only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateOrganizationConfigTemplateSwitchProfilePort(vvOrganizationID, vvConfigTemplateID, vvProfileID, vvPortID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationConfigTemplateSwitchProfilePort",
 				err.Error(),
@@ -474,28 +482,30 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Create(ctx con
 		)
 		return
 	}
-	//Item
-	responseGet, restyResp1, err := r.client.Switch.GetOrganizationConfigTemplateSwitchProfilePort(vvOrganizationID, vvConfigTemplateID, vvProfileID, vvPortID)
-	// Has only items
 
+	//Assign Path Params required
+
+	responseGet, restyResp1, err := r.client.Switch.GetOrganizationConfigTemplateSwitchProfilePort(vvOrganizationID, vvConfigTemplateID, vvProfileID, vvPortID)
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizationConfigTemplateSwitchProfilePorts",
+				"Failure when executing GetOrganizationConfigTemplateSwitchProfilePort",
 				err.Error(),
 			)
 			return
 		}
 		resp.Diagnostics.AddError(
-			"Failure when executing GetOrganizationConfigTemplateSwitchProfilePorts",
+			"Failure when executing GetOrganizationConfigTemplateSwitchProfilePort",
 			err.Error(),
 		)
 		return
 	}
+
 	data = ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -705,6 +715,7 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsRs) toSdkApiRequestUpdat
 		daiTrusted = nil
 	}
 	var requestSwitchUpdateOrganizationConfigTemplateSwitchProfilePortDot3Az *merakigosdk.RequestSwitchUpdateOrganizationConfigTemplateSwitchProfilePortDot3Az
+
 	if r.Dot3Az != nil {
 		enabled := func() *bool {
 			if !r.Dot3Az.Enabled.IsUnknown() && !r.Dot3Az.Enabled.IsNull() {
@@ -715,6 +726,7 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsRs) toSdkApiRequestUpdat
 		requestSwitchUpdateOrganizationConfigTemplateSwitchProfilePortDot3Az = &merakigosdk.RequestSwitchUpdateOrganizationConfigTemplateSwitchProfilePortDot3Az{
 			Enabled: enabled,
 		}
+		//[debug] Is Array: False
 	}
 	enabled := new(bool)
 	if !r.Enabled.IsUnknown() && !r.Enabled.IsNull() {
@@ -761,6 +773,7 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsRs) toSdkApiRequestUpdat
 		portScheduleID = &emptyString
 	}
 	var requestSwitchUpdateOrganizationConfigTemplateSwitchProfilePortProfile *merakigosdk.RequestSwitchUpdateOrganizationConfigTemplateSwitchProfilePortProfile
+
 	if r.Profile != nil {
 		enabled := func() *bool {
 			if !r.Profile.Enabled.IsUnknown() && !r.Profile.Enabled.IsNull() {
@@ -768,13 +781,14 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsRs) toSdkApiRequestUpdat
 			}
 			return nil
 		}()
-		iD := r.Profile.ID.ValueString()
+		id := r.Profile.ID.ValueString()
 		iname := r.Profile.Iname.ValueString()
 		requestSwitchUpdateOrganizationConfigTemplateSwitchProfilePortProfile = &merakigosdk.RequestSwitchUpdateOrganizationConfigTemplateSwitchProfilePortProfile{
 			Enabled: enabled,
-			ID:      iD,
+			ID:      id,
 			Iname:   iname,
 		}
+		//[debug] Is Array: False
 	}
 	rstpEnabled := new(bool)
 	if !r.RstpEnabled.IsUnknown() && !r.RstpEnabled.IsNull() {

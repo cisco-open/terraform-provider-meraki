@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -140,7 +140,6 @@ func (r *OrganizationsAssetsResource) Create(ctx context.Context, req resource.C
 	vvThemeIDentifier := data.ThemeIDentifier.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Organizations.CreateOrganizationSplashThemeAsset(vvOrganizationID, vvThemeIDentifier, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -157,7 +156,6 @@ func (r *OrganizationsAssetsResource) Create(ctx context.Context, req resource.C
 	}
 	//Item
 	data = ResponseOrganizationsCreateOrganizationSplashThemeAssetItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }

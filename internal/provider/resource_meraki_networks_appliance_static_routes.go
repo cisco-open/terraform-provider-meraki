@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -219,28 +219,41 @@ func (r *NetworksApplianceStaticRoutesResource) Create(ctx context.Context, req 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceStaticRoutes(vvNetworkID)
-	//Have Create
-	if err != nil || restyResp1 == nil {
-		if restyResp1.StatusCode() != 404 {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceStaticRoutes",
-				err.Error(),
-			)
-			return
+	//Has Post
+	if err != nil {
+		if restyResp1 != nil {
+			if restyResp1.StatusCode() != 404 {
+				resp.Diagnostics.AddError(
+					"Failure when executing GetNetworkApplianceStaticRoutes",
+					err.Error(),
+				)
+				return
+			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 		if result != nil {
 			result2 := result.(map[string]interface{})
-			vvStaticRouteID := result2["ID"].(string)
+			vvStaticRouteID, ok := result2["ID"].(string)
+			if !ok {
+				resp.Diagnostics.AddError(
+					"Failure when parsing path parameter StaticRouteID",
+					"Fail Parsing StaticRouteID",
+				)
+				return
+			}
 			r.client.Appliance.UpdateNetworkApplianceStaticRoute(vvNetworkID, vvStaticRouteID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Appliance.GetNetworkApplianceStaticRoute(vvNetworkID, vvStaticRouteID)
 			if responseVerifyItem2 != nil {
 				data = ResponseApplianceGetNetworkApplianceStaticRouteItemToBodyRs(data, responseVerifyItem2, false)
@@ -250,11 +263,11 @@ func (r *NetworksApplianceStaticRoutesResource) Create(ctx context.Context, req 
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Appliance.CreateNetworkApplianceStaticRoute(vvNetworkID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkApplianceStaticRoute",
 				err.Error(),
@@ -267,9 +280,8 @@ func (r *NetworksApplianceStaticRoutesResource) Create(ctx context.Context, req 
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceStaticRoutes(vvNetworkID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -285,15 +297,23 @@ func (r *NetworksApplianceStaticRoutesResource) Create(ctx context.Context, req 
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
 		result2 := result.(map[string]interface{})
-		vvStaticRouteID := result2["ID"].(string)
+		vvStaticRouteID, ok := result2["ID"].(string)
+		if !ok {
+			resp.Diagnostics.AddError(
+				"Failure when parsing path parameter StaticRouteID",
+				"Fail Parsing StaticRouteID",
+			)
+			return
+		}
 		responseVerifyItem2, restyRespGet, err := r.client.Appliance.GetNetworkApplianceStaticRoute(vvNetworkID, vvStaticRouteID)
 		if responseVerifyItem2 != nil && err == nil {
-			data3 := ResponseApplianceGetNetworkApplianceStaticRouteItemToBodyRs(data, responseVerifyItem2, false)
-			resp.Diagnostics.Append(resp.State.Set(ctx, &data3)...)
+			data = ResponseApplianceGetNetworkApplianceStaticRouteItemToBodyRs(data, responseVerifyItem2, false)
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 			return
 		} else {
 			if restyRespGet != nil {
@@ -316,6 +336,7 @@ func (r *NetworksApplianceStaticRoutesResource) Create(ctx context.Context, req 
 		)
 		return
 	}
+
 }
 
 func (r *NetworksApplianceStaticRoutesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -524,8 +545,10 @@ func (r *NetworksApplianceStaticRoutesRs) toSdkApiRequestUpdate(ctx context.Cont
 		enabled = nil
 	}
 	// var requestApplianceUpdateNetworkApplianceStaticRouteFixedIPAssignments *merakigosdk.RequestApplianceUpdateNetworkApplianceStaticRouteFixedIPAssignments
+
 	// if r.FixedIPAssignments != nil {
 	// 	requestApplianceUpdateNetworkApplianceStaticRouteFixedIPAssignments = &merakigosdk.RequestApplianceUpdateNetworkApplianceStaticRouteFixedIPAssignments{}
+	// 	//[debug] Is Array: False
 	// }
 	gatewayIP := new(string)
 	if !r.GatewayIP.IsUnknown() && !r.GatewayIP.IsNull() {
@@ -546,6 +569,7 @@ func (r *NetworksApplianceStaticRoutesRs) toSdkApiRequestUpdate(ctx context.Cont
 		name = &emptyString
 	}
 	var requestApplianceUpdateNetworkApplianceStaticRouteReservedIPRanges []merakigosdk.RequestApplianceUpdateNetworkApplianceStaticRouteReservedIPRanges
+
 	if r.ReservedIPRanges != nil {
 		for _, rItem1 := range *r.ReservedIPRanges {
 			comment := rItem1.Comment.ValueString()
@@ -556,6 +580,7 @@ func (r *NetworksApplianceStaticRoutesRs) toSdkApiRequestUpdate(ctx context.Cont
 				End:     end,
 				Start:   start,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	subnet := new(string)

@@ -1,5 +1,40 @@
 ## Unreleased (- -, -)
 
+## 1.1.0-beta (April 22, 2025)
+FEATURES:
+* Provider supports v1.57.0 of Meraki Dashboard API.
+* **New Data Source** `data_source_meraki_devices_sensor_commands.go`
+* **New Data Source** `data_source_meraki_organizations_appliance_dns_local_profiles.go`
+* **New Data Source** `data_source_meraki_organizations_appliance_dns_local_profiles_assignments.go`
+* **New Data Source** `data_source_meraki_organizations_appliance_dns_local_records.go`
+* **New Data Source** `data_source_meraki_organizations_appliance_dns_split_profiles.go`
+* **New Data Source** `data_source_meraki_organizations_appliance_dns_split_profiles_assignments.go`
+* **New Data Source** `data_source_meraki_organizations_appliance_firewall_multicast_forwarding_by_network.go`
+* **New Data Source** `data_source_meraki_organizations_devices_controller_migrations.go`
+* **New Data Source** `data_source_meraki_organizations_devices_system_memory_usage_history_by_interval.go`
+* **New Data Source** `data_source_meraki_organizations_integrations_xdr_networks.go`
+* **New Data Source** `data_source_meraki_organizations_switch_ports_usage_history_by_device_by_interval.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_devices_power_mode_history.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_devices_system_cpu_load_history.go`
+* **New Data Source** `data_source_meraki_organizations_wireless_ssids_firewall_isolation_allowlist_entries.go`
+* **New Resource** `resource_meraki_devices_live_tools_throughput_test.go`
+* **New Resource** `resource_meraki_devices_sensor_commands_create.go`
+* **New Resource** `resource_meraki_networks_appliance_firewall_multicast_forwarding.go`
+* **New Resource** `resource_meraki_organizations_appliance_dns_local_profiles.go`
+* **New Resource** `resource_meraki_organizations_appliance_dns_local_profiles_assignments_bulk_create.go`
+* **New Resource** `resource_meraki_organizations_appliance_dns_local_profiles_assignments_bulk_delete.go`
+* **New Resource** `resource_meraki_organizations_appliance_dns_local_records.go`
+* **New Resource** `resource_meraki_organizations_appliance_dns_split_profiles.go`
+* **New Resource** `resource_meraki_organizations_appliance_dns_split_profiles_assignments_bulk_create.go`
+* **New Resource** `resource_meraki_organizations_appliance_dns_split_profiles_assignments_bulk_delete.go`
+* **New Resource** `resource_meraki_organizations_devices_controller_migrations_create.go`
+* **New Resource** `resource_meraki_organizations_integrations_xdr_networks_disable.go`
+* **New Resource** `resource_meraki_organizations_integrations_xdr_networks_enable.go`
+* **New Resource** `resource_meraki_organizations_licenses_renew_seats.go`
+* **New Resource** `resource_meraki_organizations_wireless_ssids_firewall_isolation_allowlist_entries_create.go`
+* **New Resource** `resource_meraki_organizations_wireless_ssids_firewall_isolation_allowlist_entries_delete.go`
+* **New Resource** `resource_meraki_organizations_wireless_ssids_firewall_isolation_allowlist_entries_update.go`
+
 ## 1.0.7-beta (March 31, 2025)
 BUGFIXES:
 * meraki_organizations_policy_objects data source cannot unmarshal issue. [Fixed] #232

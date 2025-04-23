@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -267,39 +267,37 @@ func (r *DevicesManagementInterfaceResource) Create(ctx context.Context, req res
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvSerial := data.Serial.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Devices.GetDeviceManagementInterface(vvSerial)
-	//Have Create
-	if err != nil {
-		if restyResp1 != nil {
-			if restyResp1 == nil {
-				resp.Diagnostics.AddError(
-					"Failure when executing Get",
-					err.Error(),
-				)
-				return
+	//Has Item and not has items
+
+	if vvSerial != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Devices.GetDeviceManagementInterface(vvSerial)
+		//Has Post
+		if err != nil {
+			if restyResp1 != nil {
+				if restyResp1.StatusCode() != 404 {
+					resp.Diagnostics.AddError(
+						"Failure when executing GetDeviceManagementInterface",
+						err.Error(),
+					)
+					return
+				}
 			}
-			if restyResp1.StatusCode() != 404 {
-			}
-			resp.Diagnostics.AddError(
-				"Failure when executing GetDeviceManagementInterface",
-				err.Error(),
-			)
+		}
+
+		if responseVerifyItem != nil {
+			data = ResponseDevicesGetDeviceManagementInterfaceItemToBodyRs(data, responseVerifyItem, false)
+			//Path params in update assigned
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 			return
 		}
 	}
-	if responseVerifyItem != nil {
-		data = ResponseDevicesGetDeviceManagementInterfaceItemToBodyRs(data, responseVerifyItem, false)
-		//Path params in update assigned
-		resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-		return
-	}
-	response, restyResp2, err := r.client.Devices.RebootDevice(vvSerial)
 
+	response, restyResp2, err := r.client.Devices.RebootDevice(vvSerial)
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing RebootDevice",
 				err.Error(),
@@ -312,9 +310,10 @@ func (r *DevicesManagementInterfaceResource) Create(ctx context.Context, req res
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Devices.GetDeviceManagementInterface(vvSerial)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -329,11 +328,12 @@ func (r *DevicesManagementInterfaceResource) Create(ctx context.Context, req res
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseDevicesGetDeviceManagementInterfaceItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *DevicesManagementInterfaceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -467,9 +467,10 @@ type ResponseDevicesGetDeviceManagementInterfaceWan2Rs struct {
 // FromBody
 func (r *DevicesManagementInterfaceRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestDevicesUpdateDeviceManagementInterface {
 	var requestDevicesUpdateDeviceManagementInterfaceWan1 *merakigosdk.RequestDevicesUpdateDeviceManagementInterfaceWan1
+
 	if r.Wan1 != nil {
+
 		var staticDNS []string = nil
-		//Hoola aqui
 		r.Wan1.StaticDNS.ElementsAs(ctx, &staticDNS, false)
 		staticGatewayIP := r.Wan1.StaticGatewayIP.ValueString()
 		staticIP := r.Wan1.StaticIP.ValueString()
@@ -480,7 +481,7 @@ func (r *DevicesManagementInterfaceRs) toSdkApiRequestUpdate(ctx context.Context
 			}
 			return nil
 		}()
-		vLAN := func() *int64 {
+		vlan := func() *int64 {
 			if !r.Wan1.VLAN.IsUnknown() && !r.Wan1.VLAN.IsNull() {
 				return r.Wan1.VLAN.ValueInt64Pointer()
 			}
@@ -493,14 +494,16 @@ func (r *DevicesManagementInterfaceRs) toSdkApiRequestUpdate(ctx context.Context
 			StaticIP:         staticIP,
 			StaticSubnetMask: staticSubnetMask,
 			UsingStaticIP:    usingStaticIP,
-			VLAN:             int64ToIntPointer(vLAN),
+			VLAN:             int64ToIntPointer(vlan),
 			WanEnabled:       wanEnabled,
 		}
+		//[debug] Is Array: False
 	}
 	var requestDevicesUpdateDeviceManagementInterfaceWan2 *merakigosdk.RequestDevicesUpdateDeviceManagementInterfaceWan2
+
 	if r.Wan2 != nil {
+
 		var staticDNS []string = nil
-		//Hoola aqui
 		r.Wan2.StaticDNS.ElementsAs(ctx, &staticDNS, false)
 		staticGatewayIP := r.Wan2.StaticGatewayIP.ValueString()
 		staticIP := r.Wan2.StaticIP.ValueString()
@@ -511,7 +514,7 @@ func (r *DevicesManagementInterfaceRs) toSdkApiRequestUpdate(ctx context.Context
 			}
 			return nil
 		}()
-		vLAN := func() *int64 {
+		vlan := func() *int64 {
 			if !r.Wan2.VLAN.IsUnknown() && !r.Wan2.VLAN.IsNull() {
 				return r.Wan2.VLAN.ValueInt64Pointer()
 			}
@@ -524,9 +527,10 @@ func (r *DevicesManagementInterfaceRs) toSdkApiRequestUpdate(ctx context.Context
 			StaticIP:         staticIP,
 			StaticSubnetMask: staticSubnetMask,
 			UsingStaticIP:    usingStaticIP,
-			VLAN:             int64ToIntPointer(vLAN),
+			VLAN:             int64ToIntPointer(vlan),
 			WanEnabled:       wanEnabled,
 		}
+		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestDevicesUpdateDeviceManagementInterface{
 		Wan1: requestDevicesUpdateDeviceManagementInterfaceWan1,

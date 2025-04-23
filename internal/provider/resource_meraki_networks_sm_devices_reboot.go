@@ -21,7 +21,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -73,7 +73,7 @@ func (r *NetworksSmDevicesRebootResource) Schema(_ context.Context, _ resource.S
 				Computed: true,
 				Attributes: map[string]schema.Attribute{
 
-					"ids": schema.SetAttribute{
+					"ids": schema.ListAttribute{
 						MarkdownDescription: `The Meraki Ids of the set of endpoints.`,
 						Computed:            true,
 						ElementType:         types.StringType,
@@ -83,13 +83,13 @@ func (r *NetworksSmDevicesRebootResource) Schema(_ context.Context, _ resource.S
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"ids": schema.SetAttribute{
+					"ids": schema.ListAttribute{
 						MarkdownDescription: `The ids of the endpoints to be rebooted.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"kext_paths": schema.SetAttribute{
+					"kext_paths": schema.ListAttribute{
 						MarkdownDescription: `The KextPaths of the endpoints to be rebooted. Available for macOS 11+`,
 						Optional:            true,
 						Computed:            true,
@@ -119,19 +119,19 @@ func (r *NetworksSmDevicesRebootResource) Schema(_ context.Context, _ resource.S
 							boolplanmodifier.RequiresReplace(),
 						},
 					},
-					"scope": schema.SetAttribute{
+					"scope": schema.ListAttribute{
 						MarkdownDescription: `The scope (one of all, none, withAny, withAll, withoutAny, or withoutAll) and a set of tags of the endpoints to be rebooted.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"serials": schema.SetAttribute{
+					"serials": schema.ListAttribute{
 						MarkdownDescription: `The serials of the endpoints to be rebooted.`,
 						Optional:            true,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
-					"wifi_macs": schema.SetAttribute{
+					"wifi_macs": schema.ListAttribute{
 						MarkdownDescription: `The wifiMacs of the endpoints to be rebooted.`,
 						Optional:            true,
 						Computed:            true,
@@ -164,7 +164,6 @@ func (r *NetworksSmDevicesRebootResource) Create(ctx context.Context, req resour
 	vvNetworkID := data.NetworkID.ValueString()
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp1, err := r.client.Sm.RebootNetworkSmDevices(vvNetworkID, dataRequest)
-
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -181,7 +180,6 @@ func (r *NetworksSmDevicesRebootResource) Create(ctx context.Context, req resour
 	}
 	//Item
 	data = ResponseSmRebootNetworkSmDevicesItemToBody(data, response)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -207,7 +205,7 @@ type NetworksSmDevicesReboot struct {
 }
 
 type ResponseSmRebootNetworkSmDevices struct {
-	IDs types.Set `tfsdk:"ids"`
+	IDs types.List `tfsdk:"ids"`
 }
 
 type RequestSmRebootNetworkSmDevicesRs struct {
@@ -268,7 +266,7 @@ func (r *NetworksSmDevicesReboot) toSdkApiRequestCreate(ctx context.Context) *me
 // ToBody
 func ResponseSmRebootNetworkSmDevicesItemToBody(state NetworksSmDevicesReboot, response *merakigosdk.ResponseSmRebootNetworkSmDevices) NetworksSmDevicesReboot {
 	itemState := ResponseSmRebootNetworkSmDevices{
-		IDs: StringSliceToSet(response.IDs),
+		IDs: StringSliceToList(response.IDs),
 	}
 	state.Item = &itemState
 	return state

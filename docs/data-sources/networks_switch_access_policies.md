@@ -62,7 +62,7 @@ Read-Only:
 - `radius_accounting_enabled` (Boolean) Enable to send start, interim-update and stop messages to a configured RADIUS accounting server for tracking connected clients
 - `radius_accounting_servers` (Attributes Set) List of RADIUS accounting servers to require connecting devices to authenticate against before granting network access (see [below for nested schema](#nestedatt--item--radius_accounting_servers))
 - `radius_coa_support_enabled` (Boolean) Change of authentication for RADIUS re-authentication and disconnection
-- `radius_group_attribute` (String) Acceptable values are *""* for None, or *"11"* for Group Policies ACL
+- `radius_group_attribute` (String) Acceptable values are **""** for None, or **"11"** for Group Policies ACL
 - `radius_servers` (Attributes Set) List of RADIUS servers to require connecting devices to authenticate against before granting network access (see [below for nested schema](#nestedatt--item--radius_servers))
 - `radius_testing_enabled` (Boolean) If enabled, Meraki devices will periodically send access-request messages to these RADIUS servers
 - `url_redirect_walled_garden_enabled` (Boolean) Enable to restrict access for clients to a response_objectific set of IP addresses or hostnames prior to authentication
@@ -163,7 +163,7 @@ Read-Only:
 - `radius_accounting_enabled` (Boolean) Enable to send start, interim-update and stop messages to a configured RADIUS accounting server for tracking connected clients
 - `radius_accounting_servers` (Attributes Set) List of RADIUS accounting servers to require connecting devices to authenticate against before granting network access (see [below for nested schema](#nestedatt--items--radius_accounting_servers))
 - `radius_coa_support_enabled` (Boolean) Change of authentication for RADIUS re-authentication and disconnection
-- `radius_group_attribute` (String) Acceptable values are *""* for None, or *"11"* for Group Policies ACL
+- `radius_group_attribute` (String) Acceptable values are **""** for None, or **"11"** for Group Policies ACL
 - `radius_servers` (Attributes Set) List of RADIUS servers to require connecting devices to authenticate against before granting network access (see [below for nested schema](#nestedatt--items--radius_servers))
 - `radius_testing_enabled` (Boolean) If enabled, Meraki devices will periodically send access-request messages to these RADIUS servers
 - `url_redirect_walled_garden_enabled` (Boolean) Enable to restrict access for clients to a response_objectific set of IP addresses or hostnames prior to authentication

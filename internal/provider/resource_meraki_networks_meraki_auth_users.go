@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -212,12 +212,14 @@ func (r *NetworksMerakiAuthUsersResource) Create(ctx context.Context, req resour
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkMerakiAuthUsers(vvNetworkID)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -229,6 +231,7 @@ func (r *NetworksMerakiAuthUsersResource) Create(ctx context.Context, req resour
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -243,6 +246,7 @@ func (r *NetworksMerakiAuthUsersResource) Create(ctx context.Context, req resour
 				return
 			}
 			r.client.Networks.UpdateNetworkMerakiAuthUser(vvNetworkID, vvMerakiAuthUserID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Networks.GetNetworkMerakiAuthUser(vvNetworkID, vvMerakiAuthUserID)
 			if responseVerifyItem2 != nil {
 				data = ResponseNetworksGetNetworkMerakiAuthUserItemToBodyRs(data, responseVerifyItem2, false)
@@ -252,11 +256,11 @@ func (r *NetworksMerakiAuthUsersResource) Create(ctx context.Context, req resour
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Networks.CreateNetworkMerakiAuthUser(vvNetworkID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkMerakiAuthUser",
 				err.Error(),
@@ -269,9 +273,8 @@ func (r *NetworksMerakiAuthUsersResource) Create(ctx context.Context, req resour
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Networks.GetNetworkMerakiAuthUsers(vvNetworkID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -287,6 +290,7 @@ func (r *NetworksMerakiAuthUsersResource) Create(ctx context.Context, req resour
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -295,7 +299,7 @@ func (r *NetworksMerakiAuthUsersResource) Create(ctx context.Context, req resour
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter MerakiAuthUserID",
-				"Error",
+				"Fail Parsing MerakiAuthUserID",
 			)
 			return
 		}
@@ -325,6 +329,7 @@ func (r *NetworksMerakiAuthUsersResource) Create(ctx context.Context, req resour
 		)
 		return
 	}
+
 }
 
 func (r *NetworksMerakiAuthUsersResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -491,10 +496,11 @@ func (r *NetworksMerakiAuthUsersRs) toSdkApiRequestCreate(ctx context.Context) *
 		accountType = &emptyString
 	}
 	var requestNetworksCreateNetworkMerakiAuthUserAuthorizations []merakigosdk.RequestNetworksCreateNetworkMerakiAuthUserAuthorizations
+
 	if r.Authorizations != nil {
 		for _, rItem1 := range *r.Authorizations {
 			expiresAt := rItem1.ExpiresAt.ValueString()
-			sSIDNumber := func() *int64 {
+			ssidNumber := func() *int64 {
 				if !rItem1.SSIDNumber.IsUnknown() && !rItem1.SSIDNumber.IsNull() {
 					return rItem1.SSIDNumber.ValueInt64Pointer()
 				}
@@ -502,8 +508,9 @@ func (r *NetworksMerakiAuthUsersRs) toSdkApiRequestCreate(ctx context.Context) *
 			}()
 			requestNetworksCreateNetworkMerakiAuthUserAuthorizations = append(requestNetworksCreateNetworkMerakiAuthUserAuthorizations, merakigosdk.RequestNetworksCreateNetworkMerakiAuthUserAuthorizations{
 				ExpiresAt:  expiresAt,
-				SSIDNumber: int64ToIntPointer(sSIDNumber),
+				SSIDNumber: int64ToIntPointer(ssidNumber),
 			})
+			//[debug] Is Array: True
 		}
 	}
 	email := new(string)
@@ -555,10 +562,11 @@ func (r *NetworksMerakiAuthUsersRs) toSdkApiRequestCreate(ctx context.Context) *
 func (r *NetworksMerakiAuthUsersRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestNetworksUpdateNetworkMerakiAuthUser {
 	emptyString := ""
 	var requestNetworksUpdateNetworkMerakiAuthUserAuthorizations []merakigosdk.RequestNetworksUpdateNetworkMerakiAuthUserAuthorizations
+
 	if r.Authorizations != nil {
 		for _, rItem1 := range *r.Authorizations {
 			expiresAt := rItem1.ExpiresAt.ValueString()
-			sSIDNumber := func() *int64 {
+			ssidNumber := func() *int64 {
 				if !rItem1.SSIDNumber.IsUnknown() && !rItem1.SSIDNumber.IsNull() {
 					return rItem1.SSIDNumber.ValueInt64Pointer()
 				}
@@ -566,8 +574,9 @@ func (r *NetworksMerakiAuthUsersRs) toSdkApiRequestUpdate(ctx context.Context) *
 			}()
 			requestNetworksUpdateNetworkMerakiAuthUserAuthorizations = append(requestNetworksUpdateNetworkMerakiAuthUserAuthorizations, merakigosdk.RequestNetworksUpdateNetworkMerakiAuthUserAuthorizations{
 				ExpiresAt:  expiresAt,
-				SSIDNumber: int64ToIntPointer(sSIDNumber),
+				SSIDNumber: int64ToIntPointer(ssidNumber),
 			})
+			//[debug] Is Array: True
 		}
 	}
 	emailPasswordToUser := new(bool)

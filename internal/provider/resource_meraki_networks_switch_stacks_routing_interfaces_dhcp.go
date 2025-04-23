@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -315,32 +315,39 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpResource) Create(ctx context.C
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	vvSwitchStackID := data.SwitchStackID.ValueString()
 	vvInterfaceID := data.InterfaceID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchStackRoutingInterfaceDhcp(vvNetworkID, vvSwitchStackID, vvInterfaceID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchStacksRoutingInterfacesDhcp only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" && vvSwitchStackID != "" && vvInterfaceID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchStackRoutingInterfaceDhcp(vvNetworkID, vvSwitchStackID, vvInterfaceID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchStacksRoutingInterfacesDhcp  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksSwitchStacksRoutingInterfacesDhcp only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchStacksRoutingInterfacesDhcp only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchStackRoutingInterfaceDhcp(vvNetworkID, vvSwitchStackID, vvInterfaceID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStackRoutingInterfaceDhcp",
 				err.Error(),
@@ -353,9 +360,10 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpResource) Create(ctx context.C
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchStackRoutingInterfaceDhcp(vvNetworkID, vvSwitchStackID, vvInterfaceID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -370,11 +378,12 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpResource) Create(ctx context.C
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseSwitchGetNetworkSwitchStackRoutingInterfaceDhcpItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksSwitchStacksRoutingInterfacesDhcpResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -558,6 +567,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpRs) toSdkApiRequestUpdate(ctx 
 		dhcpMode = &emptyString
 	}
 	var requestSwitchUpdateNetworkSwitchStackRoutingInterfaceDhcpDhcpOptions []merakigosdk.RequestSwitchUpdateNetworkSwitchStackRoutingInterfaceDhcpDhcpOptions
+
 	if r.DhcpOptions != nil {
 		for _, rItem1 := range *r.DhcpOptions {
 			code := rItem1.Code.ValueString()
@@ -568,6 +578,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpRs) toSdkApiRequestUpdate(ctx 
 				Type:  typeR,
 				Value: value,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var dhcpRelayServerIPs []string = nil
@@ -581,19 +592,22 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpRs) toSdkApiRequestUpdate(ctx 
 		dNSNameserversOption = &emptyString
 	}
 	var requestSwitchUpdateNetworkSwitchStackRoutingInterfaceDhcpFixedIPAssignments []merakigosdk.RequestSwitchUpdateNetworkSwitchStackRoutingInterfaceDhcpFixedIPAssignments
+
 	if r.FixedIPAssignments != nil {
 		for _, rItem1 := range *r.FixedIPAssignments {
-			iP := rItem1.IP.ValueString()
+			ip := rItem1.IP.ValueString()
 			mac := rItem1.Mac.ValueString()
 			name := rItem1.Name.ValueString()
 			requestSwitchUpdateNetworkSwitchStackRoutingInterfaceDhcpFixedIPAssignments = append(requestSwitchUpdateNetworkSwitchStackRoutingInterfaceDhcpFixedIPAssignments, merakigosdk.RequestSwitchUpdateNetworkSwitchStackRoutingInterfaceDhcpFixedIPAssignments{
-				IP:   iP,
+				IP:   ip,
 				Mac:  mac,
 				Name: name,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	var requestSwitchUpdateNetworkSwitchStackRoutingInterfaceDhcpReservedIPRanges []merakigosdk.RequestSwitchUpdateNetworkSwitchStackRoutingInterfaceDhcpReservedIPRanges
+
 	if r.ReservedIPRanges != nil {
 		for _, rItem1 := range *r.ReservedIPRanges {
 			comment := rItem1.Comment.ValueString()
@@ -604,6 +618,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpRs) toSdkApiRequestUpdate(ctx 
 				End:     end,
 				Start:   start,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestSwitchUpdateNetworkSwitchStackRoutingInterfaceDhcp{

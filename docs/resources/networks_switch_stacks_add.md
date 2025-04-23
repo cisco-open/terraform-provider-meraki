@@ -10,6 +10,8 @@ description: |-
 
 
 
+
+
 ~>Warning: This resource does not represent a real-world entity in Meraki Dashboard, therefore changing or deleting this resource on its own has no immediate effect. Instead, it is a task part of a Meraki Dashboard workflow. It is executed in Meraki without any additional verification. It does not check if it was executed before or if a similar configuration or action 
 already existed previously.
 
@@ -62,7 +64,7 @@ Read-Only:
 - `is_monitor_only` (Boolean) Tells if stack is Monitored Stack.
 - `members` (Attributes Set) Members of the Stack (see [below for nested schema](#nestedatt--item--members))
 - `name` (String) Name of the Switch stack
-- `serials` (Set of String) Serials of the switches in the switch stack
+- `serials` (List of String) Serials of the switches in the switch stack
 
 <a id="nestedatt--item--members"></a>
 ### Nested Schema for `item.members`

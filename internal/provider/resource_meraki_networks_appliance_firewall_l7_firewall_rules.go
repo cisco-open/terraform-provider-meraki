@@ -20,7 +20,7 @@ package provider
 import (
 	"context"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -80,8 +80,9 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Schema(_ context.Cont
 					Attributes: map[string]schema.Attribute{
 
 						"policy": schema.StringAttribute{
-							MarkdownDescription: `'Deny' traffic specified by this rule`,
-							Optional:            true,
+							MarkdownDescription: `'Deny' traffic specified by this rule
+                                        Allowed values: [deny]`,
+							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -245,30 +246,37 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Create(ctx context.Co
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallL7FirewallRules(vvNetworkID)
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceFirewallL7FirewallRules only have update context, not create.",
-			err.Error(),
-		)
-		return
+	//Has Item and not has items
+
+	if vvNetworkID != "" {
+		//dentro
+		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallL7FirewallRules(vvNetworkID)
+		// No Post
+		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceFirewallL7FirewallRules  only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
+
+		if responseVerifyItem == nil {
+			resp.Diagnostics.AddError(
+				"Resource NetworksApplianceFirewallL7FirewallRules only have update context, not create.",
+				err.Error(),
+			)
+			return
+		}
 	}
-	//Only Item
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceFirewallL7FirewallRules only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+
+	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallL7FirewallRules(vvNetworkID, dataRequest)
-
+	//Update
 	if err != nil || restyResp2 == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallL7FirewallRules",
 				err.Error(),
@@ -281,9 +289,10 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Create(ctx context.Co
 		)
 		return
 	}
-	//Item
+
+	//Assign Path Params required
+
 	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallL7FirewallRules(vvNetworkID)
-	// Has item and not has items
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -298,11 +307,12 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Create(ctx context.Co
 		)
 		return
 	}
-	//entro aqui 2
+
 	data = ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesItemToBodyRs(data, responseGet, false)
 
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
+
 }
 
 func (r *NetworksApplianceFirewallL7FirewallRulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -414,9 +424,15 @@ type ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesRs struct {
 	ValueObj  *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj `tfsdk:"value_obj"`
 }
 
+type ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj struct {
+	ID   types.String `tfsdk:"id"`
+	Name types.String `tfsdk:"name"`
+}
+
 // FromBody
 func (r *NetworksApplianceFirewallL7FirewallRulesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL7FirewallRules {
 	var requestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRules []merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRules
+
 	if r.Rules != nil {
 		for _, rItem1 := range *r.Rules {
 			var valueR interface{}
@@ -448,6 +464,7 @@ func (r *NetworksApplianceFirewallL7FirewallRulesRs) toSdkApiRequestUpdate(ctx c
 				Type:   typeR,
 				Value:  valueR,
 			})
+			//[debug] Is Array: True
 		}
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL7FirewallRules{

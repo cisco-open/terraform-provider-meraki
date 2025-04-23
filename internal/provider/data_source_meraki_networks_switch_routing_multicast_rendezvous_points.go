@@ -22,7 +22,7 @@ import (
 	"context"
 	"log"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -71,7 +71,7 @@ func (d *NetworksSwitchRoutingMulticastRendezvousPointsDataSource) Schema(_ cont
 				Attributes: map[string]schema.Attribute{
 
 					"interface_ip": schema.StringAttribute{
-						MarkdownDescription: `The IP address of the interface to use.`,
+						MarkdownDescription: `The IP address of the interface to use.`,
 						Computed:            true,
 					},
 					"interface_name": schema.StringAttribute{
@@ -100,7 +100,7 @@ func (d *NetworksSwitchRoutingMulticastRendezvousPointsDataSource) Schema(_ cont
 					Attributes: map[string]schema.Attribute{
 
 						"interface_ip": schema.StringAttribute{
-							MarkdownDescription: `The IP address of the interface to use.`,
+							MarkdownDescription: `The IP address of the interface to use.`,
 							Computed:            true,
 						},
 						"interface_name": schema.StringAttribute{

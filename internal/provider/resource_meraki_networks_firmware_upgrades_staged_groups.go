@@ -22,7 +22,9 @@ import (
 	"fmt"
 	"strings"
 
-	merakigosdk "github.com/meraki/dashboard-api-go/v4/sdk"
+	"log"
+
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -194,12 +196,14 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Create(ctx context.Contex
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
+	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
+	//Has Item and has items and post
+
 	vvName := data.Name.ValueString()
-	//Items
+
 	responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkFirmwareUpgradesStagedGroups(vvNetworkID)
-	//Have Create
+	//Has Post
 	if err != nil {
 		if restyResp1 != nil {
 			if restyResp1.StatusCode() != 404 {
@@ -211,6 +215,7 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Create(ctx context.Contex
 			}
 		}
 	}
+
 	if responseVerifyItem != nil {
 		responseStruct := structToMap(responseVerifyItem)
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
@@ -225,6 +230,7 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Create(ctx context.Contex
 				return
 			}
 			r.client.Networks.UpdateNetworkFirmwareUpgradesStagedGroup(vvNetworkID, vvGroupID, data.toSdkApiRequestUpdate(ctx))
+
 			responseVerifyItem2, _, _ := r.client.Networks.GetNetworkFirmwareUpgradesStagedGroup(vvNetworkID, vvGroupID)
 			if responseVerifyItem2 != nil {
 				data = ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupItemToBodyRs(data, responseVerifyItem2, false)
@@ -234,11 +240,11 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Create(ctx context.Contex
 			}
 		}
 	}
+
 	dataRequest := data.toSdkApiRequestCreate(ctx)
 	response, restyResp2, err := r.client.Networks.CreateNetworkFirmwareUpgradesStagedGroup(vvNetworkID, dataRequest)
-
 	if err != nil || restyResp2 == nil || response == nil {
-		if restyResp1 != nil {
+		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkFirmwareUpgradesStagedGroup",
 				err.Error(),
@@ -251,9 +257,8 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Create(ctx context.Contex
 		)
 		return
 	}
-	//Items
+
 	responseGet, restyResp1, err := r.client.Networks.GetNetworkFirmwareUpgradesStagedGroups(vvNetworkID)
-	// Has item and has items
 
 	if err != nil || responseGet == nil {
 		if restyResp1 != nil {
@@ -269,6 +274,7 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Create(ctx context.Contex
 		)
 		return
 	}
+
 	responseStruct := structToMap(responseGet)
 	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 	if result != nil {
@@ -277,7 +283,7 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Create(ctx context.Contex
 		if !ok {
 			resp.Diagnostics.AddError(
 				"Failure when parsing path parameter GroupID",
-				"Error",
+				"Fail Parsing GroupID",
 			)
 			return
 		}
@@ -307,6 +313,7 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Create(ctx context.Contex
 		)
 		return
 	}
+
 }
 
 func (r *NetworksFirmwareUpgradesStagedGroupsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -469,8 +476,12 @@ type ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupAssignedDevicesSwitchS
 func (r *NetworksFirmwareUpgradesStagedGroupsRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedGroup {
 	emptyString := ""
 	var requestNetworksCreateNetworkFirmwareUpgradesStagedGroupAssignedDevices *merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedGroupAssignedDevices
+
 	if r.AssignedDevices != nil {
+
+		log.Printf("[DEBUG] #TODO []RequestNetworksCreateNetworkFirmwareUpgradesStagedGroupAssignedDevicesDevices")
 		var requestNetworksCreateNetworkFirmwareUpgradesStagedGroupAssignedDevicesDevices []merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedGroupAssignedDevicesDevices
+
 		if r.AssignedDevices.Devices != nil {
 			for _, rItem1 := range *r.AssignedDevices.Devices {
 				name := rItem1.Name.ValueString()
@@ -479,17 +490,22 @@ func (r *NetworksFirmwareUpgradesStagedGroupsRs) toSdkApiRequestCreate(ctx conte
 					Name:   name,
 					Serial: serial,
 				})
+				//[debug] Is Array: True
 			}
 		}
+
+		log.Printf("[DEBUG] #TODO []RequestNetworksCreateNetworkFirmwareUpgradesStagedGroupAssignedDevicesSwitchStacks")
 		var requestNetworksCreateNetworkFirmwareUpgradesStagedGroupAssignedDevicesSwitchStacks []merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedGroupAssignedDevicesSwitchStacks
+
 		if r.AssignedDevices.SwitchStacks != nil {
 			for _, rItem1 := range *r.AssignedDevices.SwitchStacks {
-				iD := rItem1.ID.ValueString()
+				id := rItem1.ID.ValueString()
 				name := rItem1.Name.ValueString()
 				requestNetworksCreateNetworkFirmwareUpgradesStagedGroupAssignedDevicesSwitchStacks = append(requestNetworksCreateNetworkFirmwareUpgradesStagedGroupAssignedDevicesSwitchStacks, merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedGroupAssignedDevicesSwitchStacks{
-					ID:   iD,
+					ID:   id,
 					Name: name,
 				})
+				//[debug] Is Array: True
 			}
 		}
 		requestNetworksCreateNetworkFirmwareUpgradesStagedGroupAssignedDevices = &merakigosdk.RequestNetworksCreateNetworkFirmwareUpgradesStagedGroupAssignedDevices{
@@ -506,6 +522,7 @@ func (r *NetworksFirmwareUpgradesStagedGroupsRs) toSdkApiRequestCreate(ctx conte
 				return nil
 			}(),
 		}
+		//[debug] Is Array: False
 	}
 	description := new(string)
 	if !r.Description.IsUnknown() && !r.Description.IsNull() {
@@ -536,27 +553,36 @@ func (r *NetworksFirmwareUpgradesStagedGroupsRs) toSdkApiRequestCreate(ctx conte
 func (r *NetworksFirmwareUpgradesStagedGroupsRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedGroup {
 	emptyString := ""
 	var requestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevices *merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevices
+
 	if r.AssignedDevices != nil {
+
+		log.Printf("[DEBUG] #TODO []RequestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevicesDevices")
 		var requestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevicesDevices []merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevicesDevices
+
 		if r.AssignedDevices.Devices != nil {
-			for _, rItem1 := range *r.AssignedDevices.Devices { //AssignedDevices.Devices// name: devices
+			for _, rItem1 := range *r.AssignedDevices.Devices {
 				name := rItem1.Name.ValueString()
 				serial := rItem1.Serial.ValueString()
 				requestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevicesDevices = append(requestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevicesDevices, merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevicesDevices{
 					Name:   name,
 					Serial: serial,
 				})
+				//[debug] Is Array: True
 			}
 		}
+
+		log.Printf("[DEBUG] #TODO []RequestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevicesSwitchStacks")
 		var requestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevicesSwitchStacks []merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevicesSwitchStacks
+
 		if r.AssignedDevices.SwitchStacks != nil {
 			for _, rItem1 := range *r.AssignedDevices.SwitchStacks {
-				iD := rItem1.ID.ValueString()
+				id := rItem1.ID.ValueString()
 				name := rItem1.Name.ValueString()
 				requestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevicesSwitchStacks = append(requestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevicesSwitchStacks, merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevicesSwitchStacks{
-					ID:   iD,
+					ID:   id,
 					Name: name,
 				})
+				//[debug] Is Array: True
 			}
 		}
 		requestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevices = &merakigosdk.RequestNetworksUpdateNetworkFirmwareUpgradesStagedGroupAssignedDevices{
@@ -573,6 +599,7 @@ func (r *NetworksFirmwareUpgradesStagedGroupsRs) toSdkApiRequestUpdate(ctx conte
 				return nil
 			}(),
 		}
+		//[debug] Is Array: False
 	}
 	description := new(string)
 	if !r.Description.IsUnknown() && !r.Description.IsNull() {

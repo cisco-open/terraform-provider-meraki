@@ -21,7 +21,7 @@ import (
 	"context"
 	"strconv"
 
-	merakigosdk "dashboard-api-go/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"

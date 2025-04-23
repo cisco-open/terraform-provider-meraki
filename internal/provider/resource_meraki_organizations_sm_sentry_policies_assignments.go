@@ -23,7 +23,7 @@ import (
 
 	"log"
 
-	merakigosdk "dashboard-api-go/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"

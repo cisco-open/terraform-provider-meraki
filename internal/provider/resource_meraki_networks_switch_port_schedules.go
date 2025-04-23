@@ -21,7 +21,7 @@ import (
 	"context"
 	"regexp"
 
-	merakigosdk "dashboard-api-go/sdk"
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"

@@ -294,7 +294,9 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsClaimResource) Create(ctx
 	}
 	//Has Paths
 	dataRequest := data.toSdkApiRequestCreate(ctx)
-	response, restyResp1, err := r.client.Licensing.ClaimAdministeredLicensingSubscriptionSubscriptions(dataRequest, nil)
+	queryParams := &merakigosdk.ClaimAdministeredLicensingSubscriptionSubscriptionsQueryParams{}
+	queryParams.Validate = data.Validate.ValueBool()
+	response, restyResp1, err := r.client.Licensing.ClaimAdministeredLicensingSubscriptionSubscriptions(dataRequest, queryParams)
 	if err != nil || response == nil {
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
@@ -332,6 +334,7 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsClaimResource) Delete(ctx
 type AdministeredLicensingSubscriptionSubscriptionsClaim struct {
 	Item       *ResponseLicensingClaimAdministeredLicensingSubscriptionSubscriptions  `tfsdk:"item"`
 	Parameters *RequestLicensingClaimAdministeredLicensingSubscriptionSubscriptionsRs `tfsdk:"parameters"`
+	Validate   types.Bool                                                             `tfsdk:"validate"`
 }
 
 type ResponseLicensingClaimAdministeredLicensingSubscriptionSubscriptions struct {

@@ -431,14 +431,14 @@ func (r *NetworksApplianceVLANsResource) Schema(_ context.Context, _ resource.Sc
 					),
 				},
 			},
-			"vlan_id": schema.StringAttribute{
-				MarkdownDescription: `vlanId path parameter. Vlan ID`,
-				Optional:            true,
-				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
+			// "vlan_id": schema.StringAttribute{
+			// 	MarkdownDescription: `vlanId path parameter. Vlan ID`,
+			// 	Optional:            true,
+			// 	Computed:            true,
+			// 	PlanModifiers: []planmodifier.String{
+			// 		stringplanmodifier.UseStateForUnknown(),
+			// 	},
+			// },
 			"vpn_nat_subnet": schema.StringAttribute{
 				MarkdownDescription: `The translated VPN subnet if VPN and VPN subnet translation are enabled on the VLAN`,
 				Computed:            true,

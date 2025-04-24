@@ -1,4 +1,7 @@
 ## Unreleased (- -, -)
+## 1.1.1-beta (April 24, 2025)
+BUGFIXES:
+* remove `vlan_id` attribute in `resource_meraki_networks_appliance_vlans.go`
 
 ## 1.1.0-beta (April 22, 2025)
 FEATURES:

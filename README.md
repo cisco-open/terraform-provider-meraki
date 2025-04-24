@@ -30,7 +30,7 @@ terraform {
   required_providers {
     meraki = {
       source = "cisco-open/meraki"
-      version = "1.1.0-beta"
+      version = "1.1.1-beta"
     }
   }
 }
@@ -68,7 +68,7 @@ terraform {
   required_providers {
     meraki = {
       source = "hashicorp.com/edu/meraki"
-      version = "1.1.0-beta"
+      version = "1.1.1-beta"
     }
   }
 }
@@ -120,7 +120,7 @@ The following table shows the supported versions.
 |-----------------------|-------------------------------------|------------------------------|
 | 1.33.0                | 0.1.0-alpha                         | 2.0.9                        |
 | 1.44.1                | 0.2.0-alpha                         | 3.0.0                        |
-| 1.53.0                | 1.1.0-beta                          | 4.0.0                        |
+| 1.53.0                | 1.1.1-beta                          | 4.0.0                        |
 
 If your SDK, Terraform provider is older please consider updating it first.
 

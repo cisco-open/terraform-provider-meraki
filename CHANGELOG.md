@@ -1,4 +1,8 @@
 ## Unreleased (- -, -)
+## 1.1.2-beta (April 25, 2025)
+BUGFIXES:
+* Changed the type of the VLAN ID attribute from String to Int64 for better data integrity.
+
 ## 1.1.1-beta (April 24, 2025)
 BUGFIXES:
 * remove `vlan_id` attribute in `resource_meraki_networks_appliance_vlans.go`

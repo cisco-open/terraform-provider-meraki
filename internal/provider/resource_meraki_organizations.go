@@ -227,7 +227,7 @@ func (r *OrganizationsResource) Create(ctx context.Context, req resource.CreateR
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganizations",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -265,7 +265,7 @@ func (r *OrganizationsResource) Create(ctx context.Context, req resource.CreateR
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganization",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -283,7 +283,7 @@ func (r *OrganizationsResource) Create(ctx context.Context, req resource.CreateR
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizations",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -315,7 +315,7 @@ func (r *OrganizationsResource) Create(ctx context.Context, req resource.CreateR
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganization",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -370,7 +370,7 @@ func (r *OrganizationsResource) Read(ctx context.Context, req resource.ReadReque
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganization",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -408,7 +408,7 @@ func (r *OrganizationsResource) Update(ctx context.Context, req resource.UpdateR
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganization",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

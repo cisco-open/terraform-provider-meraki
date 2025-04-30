@@ -136,7 +136,7 @@ func (r *NetworksSensorMqttBrokersResource) Create(ctx context.Context, req reso
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSensorMqttBroker",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -154,7 +154,7 @@ func (r *NetworksSensorMqttBrokersResource) Create(ctx context.Context, req reso
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSensorMqttBroker",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -208,7 +208,7 @@ func (r *NetworksSensorMqttBrokersResource) Read(ctx context.Context, req resour
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSensorMqttBroker",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -258,7 +258,7 @@ func (r *NetworksSensorMqttBrokersResource) Update(ctx context.Context, req reso
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSensorMqttBroker",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

@@ -165,7 +165,7 @@ func (r *NetworksCellularGatewaySubnetPoolResource) Create(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCellularGatewaySubnetPool",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -183,7 +183,7 @@ func (r *NetworksCellularGatewaySubnetPoolResource) Create(ctx context.Context, 
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkCellularGatewaySubnetPool",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -236,7 +236,7 @@ func (r *NetworksCellularGatewaySubnetPoolResource) Read(ctx context.Context, re
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkCellularGatewaySubnetPool",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -274,7 +274,7 @@ func (r *NetworksCellularGatewaySubnetPoolResource) Update(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCellularGatewaySubnetPool",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

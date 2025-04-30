@@ -104,7 +104,7 @@ func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource) C
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing DeleteOrganizationWirelessSSIDsFirewallIsolationAllowlistEntry",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

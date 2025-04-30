@@ -225,7 +225,7 @@ func (r *NetworksMerakiAuthUsersResource) Create(ctx context.Context, req resour
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkMerakiAuthUsers",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -263,7 +263,7 @@ func (r *NetworksMerakiAuthUsersResource) Create(ctx context.Context, req resour
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkMerakiAuthUser",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -280,7 +280,7 @@ func (r *NetworksMerakiAuthUsersResource) Create(ctx context.Context, req resour
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkMerakiAuthUsers",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -312,7 +312,7 @@ func (r *NetworksMerakiAuthUsersResource) Create(ctx context.Context, req resour
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkMerakiAuthUser",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -368,7 +368,7 @@ func (r *NetworksMerakiAuthUsersResource) Read(ctx context.Context, req resource
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkMerakiAuthUser",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -418,7 +418,7 @@ func (r *NetworksMerakiAuthUsersResource) Update(ctx context.Context, req resour
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkMerakiAuthUser",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

@@ -197,7 +197,7 @@ func (r *NetworksWirelessSSIDsEapOverrideResource) Create(ctx context.Context, r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDEapOverride",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -215,7 +215,7 @@ func (r *NetworksWirelessSSIDsEapOverrideResource) Create(ctx context.Context, r
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessSSIDEapOverride",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -269,7 +269,7 @@ func (r *NetworksWirelessSSIDsEapOverrideResource) Read(ctx context.Context, req
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessSSIDEapOverride",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -319,7 +319,7 @@ func (r *NetworksWirelessSSIDsEapOverrideResource) Update(ctx context.Context, r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDEapOverride",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

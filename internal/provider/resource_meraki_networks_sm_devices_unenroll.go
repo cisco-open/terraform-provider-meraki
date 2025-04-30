@@ -114,7 +114,7 @@ func (r *NetworksSmDevicesUnenrollResource) Create(ctx context.Context, req reso
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UnenrollNetworkSmDevice",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

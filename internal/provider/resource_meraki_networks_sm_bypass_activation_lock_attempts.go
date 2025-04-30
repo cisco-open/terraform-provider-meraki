@@ -175,7 +175,7 @@ func (r *NetworksSmBypassActivationLockAttemptsResource) Create(ctx context.Cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSmBypassActivationLockAttempt",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -193,7 +193,7 @@ func (r *NetworksSmBypassActivationLockAttemptsResource) Create(ctx context.Cont
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSmBypassActivationLockAttempt",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -247,7 +247,7 @@ func (r *NetworksSmBypassActivationLockAttemptsResource) Read(ctx context.Contex
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSmBypassActivationLockAttempt",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}

@@ -165,7 +165,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Create(ctx context.Con
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkSwitchStackRoutingStaticRoutes",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -203,7 +203,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Create(ctx context.Con
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchStackRoutingStaticRoute",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -220,7 +220,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Create(ctx context.Con
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchStackRoutingStaticRoutes",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -252,7 +252,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Create(ctx context.Con
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkSwitchStackRoutingStaticRoute",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -309,7 +309,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Read(ctx context.Conte
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchStackRoutingStaticRoute",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -362,7 +362,7 @@ func (r *NetworksSwitchStacksRoutingStaticRoutesResource) Update(ctx context.Con
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStackRoutingStaticRoute",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

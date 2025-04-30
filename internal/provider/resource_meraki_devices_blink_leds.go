@@ -145,7 +145,7 @@ func (r *DevicesBlinkLedsResource) Create(ctx context.Context, req resource.Crea
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing BlinkDeviceLeds",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

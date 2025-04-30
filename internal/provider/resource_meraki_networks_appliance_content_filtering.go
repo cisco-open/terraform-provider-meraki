@@ -192,7 +192,7 @@ func (r *NetworksApplianceContentFilteringResource) Create(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceContentFiltering",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -210,7 +210,7 @@ func (r *NetworksApplianceContentFilteringResource) Create(ctx context.Context, 
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceContentFiltering",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -263,7 +263,7 @@ func (r *NetworksApplianceContentFilteringResource) Read(ctx context.Context, re
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceContentFiltering",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -301,7 +301,7 @@ func (r *NetworksApplianceContentFilteringResource) Update(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceContentFiltering",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

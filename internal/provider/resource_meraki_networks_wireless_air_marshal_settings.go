@@ -125,7 +125,7 @@ func (r *NetworksWirelessAirMarshalSettingsResource) Create(ctx context.Context,
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessAirMarshalSettings",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

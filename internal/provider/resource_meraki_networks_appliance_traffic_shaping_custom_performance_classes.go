@@ -161,7 +161,7 @@ func (r *NetworksApplianceTrafficShapingCustomPerformanceClassesResource) Create
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkApplianceTrafficShapingCustomPerformanceClass",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

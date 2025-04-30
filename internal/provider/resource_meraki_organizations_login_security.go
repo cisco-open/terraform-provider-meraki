@@ -268,7 +268,7 @@ func (r *OrganizationsLoginSecurityResource) Create(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationLoginSecurity",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -286,7 +286,7 @@ func (r *OrganizationsLoginSecurityResource) Create(ctx context.Context, req res
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationLoginSecurity",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -339,7 +339,7 @@ func (r *OrganizationsLoginSecurityResource) Read(ctx context.Context, req resou
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationLoginSecurity",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -377,7 +377,7 @@ func (r *OrganizationsLoginSecurityResource) Update(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationLoginSecurity",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

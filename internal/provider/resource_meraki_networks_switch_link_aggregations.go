@@ -173,7 +173,7 @@ func (r *NetworksSwitchLinkAggregationsResource) Create(ctx context.Context, req
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkSwitchLinkAggregations",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -207,7 +207,7 @@ func (r *NetworksSwitchLinkAggregationsResource) Create(ctx context.Context, req
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchLinkAggregation",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -224,7 +224,7 @@ func (r *NetworksSwitchLinkAggregationsResource) Create(ctx context.Context, req
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchLinkAggregations",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -369,7 +369,7 @@ func (r *NetworksSwitchLinkAggregationsResource) Update(ctx context.Context, req
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchLinkAggregation",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

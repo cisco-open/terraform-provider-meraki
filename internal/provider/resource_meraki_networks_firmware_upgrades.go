@@ -1826,7 +1826,7 @@ func (r *NetworksFirmwareUpgradesResource) Create(ctx context.Context, req resou
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkFirmwareUpgrades",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -1844,7 +1844,7 @@ func (r *NetworksFirmwareUpgradesResource) Create(ctx context.Context, req resou
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkFirmwareUpgrades",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -1897,7 +1897,7 @@ func (r *NetworksFirmwareUpgradesResource) Read(ctx context.Context, req resourc
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkFirmwareUpgrades",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -1935,7 +1935,7 @@ func (r *NetworksFirmwareUpgradesResource) Update(ctx context.Context, req resou
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkFirmwareUpgrades",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

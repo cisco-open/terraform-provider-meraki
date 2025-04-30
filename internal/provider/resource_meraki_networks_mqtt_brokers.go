@@ -252,7 +252,7 @@ func (r *NetworksMqttBrokersResource) Create(ctx context.Context, req resource.C
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkMqttBroker",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

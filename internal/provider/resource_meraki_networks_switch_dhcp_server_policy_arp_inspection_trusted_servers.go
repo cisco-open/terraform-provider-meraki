@@ -148,7 +148,7 @@ func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersResource) Crea
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServers",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -182,7 +182,7 @@ func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersResource) Crea
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchDhcpServerPolicyArpInspectionTrustedServer",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -199,7 +199,7 @@ func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersResource) Crea
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServers",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -334,7 +334,7 @@ func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersResource) Upda
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchDhcpServerPolicyArpInspectionTrustedServer",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

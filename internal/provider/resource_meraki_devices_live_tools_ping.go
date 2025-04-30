@@ -231,7 +231,7 @@ func (r *DevicesLiveToolsPingResource) Create(ctx context.Context, req resource.
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateDeviceLiveToolsPing",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

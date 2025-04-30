@@ -131,7 +131,7 @@ func (r *NetworksWirelessEthernetPortsProfilesAssignResource) Create(ctx context
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing AssignNetworkWirelessEthernetPortsProfiles",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

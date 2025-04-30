@@ -289,7 +289,7 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Create(ctx contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDFirewallL3FirewallRules",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -307,7 +307,7 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Create(ctx contex
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessSSIDFirewallL3FirewallRules",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -361,7 +361,7 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Read(ctx context.
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessSSIDFirewallL3FirewallRules",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -411,7 +411,7 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Update(ctx contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDFirewallL3FirewallRules",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

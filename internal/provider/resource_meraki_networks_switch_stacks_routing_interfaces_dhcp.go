@@ -350,7 +350,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpResource) Create(ctx context.C
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStackRoutingInterfaceDhcp",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -368,7 +368,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpResource) Create(ctx context.C
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchStackRoutingInterfaceDhcp",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -423,7 +423,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpResource) Read(ctx context.Con
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchStackRoutingInterfaceDhcp",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -476,7 +476,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesDhcpResource) Update(ctx context.C
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStackRoutingInterfaceDhcp",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

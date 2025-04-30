@@ -303,7 +303,7 @@ func (r *OrganizationsAlertsProfilesResource) Create(ctx context.Context, req re
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing ",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -443,7 +443,7 @@ func (r *OrganizationsAlertsProfilesResource) Update(ctx context.Context, req re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationAlertsProfile",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

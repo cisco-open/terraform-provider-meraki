@@ -110,7 +110,7 @@ func (r *NetworksDevicesRemoveResource) Create(ctx context.Context, req resource
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing RemoveNetworkDevices",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

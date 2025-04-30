@@ -104,7 +104,7 @@ func (r *NetworksWirelessAirMarshalRulesDeleteResource) Create(ctx context.Conte
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing DeleteNetworkWirelessAirMarshalRule",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

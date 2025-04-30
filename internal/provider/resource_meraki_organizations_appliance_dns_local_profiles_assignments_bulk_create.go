@@ -185,7 +185,7 @@ func (r *ApplianceApplianceDNSLocalProfilesAssignmentsBulkCreateResource) Create
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing BulkOrganizationApplianceDNSLocalProfilesAssignmentsCreate",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

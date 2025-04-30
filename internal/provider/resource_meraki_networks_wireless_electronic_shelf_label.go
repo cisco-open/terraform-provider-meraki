@@ -153,7 +153,7 @@ func (r *NetworksWirelessElectronicShelfLabelResource) Create(ctx context.Contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessElectronicShelfLabel",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -171,7 +171,7 @@ func (r *NetworksWirelessElectronicShelfLabelResource) Create(ctx context.Contex
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessElectronicShelfLabel",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -224,7 +224,7 @@ func (r *NetworksWirelessElectronicShelfLabelResource) Read(ctx context.Context,
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessElectronicShelfLabel",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -262,7 +262,7 @@ func (r *NetworksWirelessElectronicShelfLabelResource) Update(ctx context.Contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessElectronicShelfLabel",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

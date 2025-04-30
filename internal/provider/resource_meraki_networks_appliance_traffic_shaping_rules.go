@@ -308,7 +308,7 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Create(ctx context.Contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceTrafficShapingRules",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -326,7 +326,7 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Create(ctx context.Contex
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceTrafficShapingRules",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -379,7 +379,7 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Read(ctx context.Context,
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceTrafficShapingRules",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -417,7 +417,7 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Update(ctx context.Contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceTrafficShapingRules",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

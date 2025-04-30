@@ -158,7 +158,7 @@ func (r *NetworksSwitchRoutingMulticastRendezvousPointsResource) Create(ctx cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing ",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -177,7 +177,7 @@ func (r *NetworksSwitchRoutingMulticastRendezvousPointsResource) Create(ctx cont
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchRoutingMulticastRendezvousPoints",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -229,7 +229,7 @@ func (r *NetworksSwitchRoutingMulticastRendezvousPointsResource) Read(ctx contex
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchRoutingMulticastRendezvousPoint",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -279,7 +279,7 @@ func (r *NetworksSwitchRoutingMulticastRendezvousPointsResource) Update(ctx cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchRoutingMulticastRendezvousPoint",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

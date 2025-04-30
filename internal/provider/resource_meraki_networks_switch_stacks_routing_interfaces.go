@@ -286,7 +286,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Create(ctx context.Conte
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkSwitchStackRoutingInterfaces",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -324,7 +324,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Create(ctx context.Conte
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchStackRoutingInterface",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -341,7 +341,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Create(ctx context.Conte
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchStackRoutingInterfaces",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -373,7 +373,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Create(ctx context.Conte
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkSwitchStackRoutingInterface",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -430,7 +430,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Read(ctx context.Context
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchStackRoutingInterface",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -483,7 +483,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Update(ctx context.Conte
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStackRoutingInterface",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

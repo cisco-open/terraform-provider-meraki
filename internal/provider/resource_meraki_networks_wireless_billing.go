@@ -206,7 +206,7 @@ func (r *NetworksWirelessBillingResource) Create(ctx context.Context, req resour
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessBilling",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -224,7 +224,7 @@ func (r *NetworksWirelessBillingResource) Create(ctx context.Context, req resour
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessBilling",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -277,7 +277,7 @@ func (r *NetworksWirelessBillingResource) Read(ctx context.Context, req resource
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessBilling",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -315,7 +315,7 @@ func (r *NetworksWirelessBillingResource) Update(ctx context.Context, req resour
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessBilling",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

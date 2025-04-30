@@ -159,7 +159,7 @@ func (r *NetworksUnbindResource) Create(ctx context.Context, req resource.Create
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UnbindNetwork",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

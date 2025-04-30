@@ -231,7 +231,7 @@ func (r *NetworksFirmwareUpgradesRollbacksResource) Create(ctx context.Context, 
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkFirmwareUpgradesRollback",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

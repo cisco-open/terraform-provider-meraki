@@ -241,7 +241,7 @@ func (r *NetworksFloorPlansAutoLocateJobsBatchResource) Create(ctx context.Conte
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing BatchNetworkFloorPlansAutoLocateJobs",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

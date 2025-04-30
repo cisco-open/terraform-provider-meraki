@@ -135,7 +135,7 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringExportEventsResource) Cr
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationInventoryOnboardingCloudMonitoringExportEvent",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

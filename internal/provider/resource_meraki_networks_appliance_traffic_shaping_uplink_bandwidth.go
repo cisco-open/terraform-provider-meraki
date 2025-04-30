@@ -212,7 +212,7 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Create(ctx cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceTrafficShapingUplinkBandwidth",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -230,7 +230,7 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Create(ctx cont
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceTrafficShapingUplinkBandwidth",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -283,7 +283,7 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Read(ctx contex
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceTrafficShapingUplinkBandwidth",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -321,7 +321,7 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Update(ctx cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceTrafficShapingUplinkBandwidth",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

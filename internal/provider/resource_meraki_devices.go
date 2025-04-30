@@ -239,7 +239,7 @@ func (r *DevicesResource) Create(ctx context.Context, req resource.CreateRequest
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDevice",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -257,7 +257,7 @@ func (r *DevicesResource) Create(ctx context.Context, req resource.CreateRequest
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDevice",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -310,7 +310,7 @@ func (r *DevicesResource) Read(ctx context.Context, req resource.ReadRequest, re
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDevice",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -348,7 +348,7 @@ func (r *DevicesResource) Update(ctx context.Context, req resource.UpdateRequest
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDevice",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

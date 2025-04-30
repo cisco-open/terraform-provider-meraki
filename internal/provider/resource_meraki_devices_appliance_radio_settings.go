@@ -194,7 +194,7 @@ func (r *DevicesApplianceRadioSettingsResource) Create(ctx context.Context, req 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceApplianceRadioSettings",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -212,7 +212,7 @@ func (r *DevicesApplianceRadioSettingsResource) Create(ctx context.Context, req 
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceApplianceRadioSettings",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -265,7 +265,7 @@ func (r *DevicesApplianceRadioSettingsResource) Read(ctx context.Context, req re
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceApplianceRadioSettings",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -303,7 +303,7 @@ func (r *DevicesApplianceRadioSettingsResource) Update(ctx context.Context, req 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceApplianceRadioSettings",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

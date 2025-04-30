@@ -282,7 +282,7 @@ func (r *DevicesCellularSimsResource) Create(ctx context.Context, req resource.C
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCellularSims",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -300,7 +300,7 @@ func (r *DevicesCellularSimsResource) Create(ctx context.Context, req resource.C
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceCellularSims",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -353,7 +353,7 @@ func (r *DevicesCellularSimsResource) Read(ctx context.Context, req resource.Rea
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceCellularSims",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -391,7 +391,7 @@ func (r *DevicesCellularSimsResource) Update(ctx context.Context, req resource.U
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCellularSims",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

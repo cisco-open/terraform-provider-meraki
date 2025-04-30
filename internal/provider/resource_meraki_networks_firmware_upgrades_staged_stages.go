@@ -171,7 +171,7 @@ func (r *NetworksFirmwareUpgradesStagedStagesResource) Create(ctx context.Contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkFirmwareUpgradesStagedStages",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -189,7 +189,7 @@ func (r *NetworksFirmwareUpgradesStagedStagesResource) Create(ctx context.Contex
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkFirmwareUpgradesStagedStages",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -283,7 +283,7 @@ func (r *NetworksFirmwareUpgradesStagedStagesResource) Update(ctx context.Contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkFirmwareUpgradesStagedStages",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

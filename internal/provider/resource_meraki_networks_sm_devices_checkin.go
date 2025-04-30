@@ -137,7 +137,7 @@ func (r *NetworksSmDevicesCheckinResource) Create(ctx context.Context, req resou
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CheckinNetworkSmDevices",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

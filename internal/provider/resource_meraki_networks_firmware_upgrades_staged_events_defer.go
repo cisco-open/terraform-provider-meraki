@@ -211,7 +211,7 @@ func (r *NetworksFirmwareUpgradesStagedEventsDeferResource) Create(ctx context.C
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing DeferNetworkFirmwareUpgradesStagedEvents",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

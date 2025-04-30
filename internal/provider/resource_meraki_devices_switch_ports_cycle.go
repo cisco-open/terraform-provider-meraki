@@ -119,7 +119,7 @@ func (r *DevicesSwitchPortsCycleResource) Create(ctx context.Context, req resour
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CycleDeviceSwitchPorts",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

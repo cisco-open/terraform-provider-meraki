@@ -140,7 +140,7 @@ func (r *DevicesSwitchWarmSpareResource) Create(ctx context.Context, req resourc
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceSwitchWarmSpare",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -158,7 +158,7 @@ func (r *DevicesSwitchWarmSpareResource) Create(ctx context.Context, req resourc
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceSwitchWarmSpare",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -211,7 +211,7 @@ func (r *DevicesSwitchWarmSpareResource) Read(ctx context.Context, req resource.
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceSwitchWarmSpare",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -249,7 +249,7 @@ func (r *DevicesSwitchWarmSpareResource) Update(ctx context.Context, req resourc
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceSwitchWarmSpare",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

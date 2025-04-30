@@ -237,7 +237,7 @@ func (r *NetworksSwitchStpResource) Create(ctx context.Context, req resource.Cre
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStp",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -255,7 +255,7 @@ func (r *NetworksSwitchStpResource) Create(ctx context.Context, req resource.Cre
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchStp",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -316,7 +316,7 @@ func (r *NetworksSwitchStpResource) Read(ctx context.Context, req resource.ReadR
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchStp",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -354,7 +354,7 @@ func (r *NetworksSwitchStpResource) Update(ctx context.Context, req resource.Upd
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStp",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

@@ -232,7 +232,7 @@ func (r *NetworksApplianceStaticRoutesResource) Create(ctx context.Context, req 
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkApplianceStaticRoutes",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -270,7 +270,7 @@ func (r *NetworksApplianceStaticRoutesResource) Create(ctx context.Context, req 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkApplianceStaticRoute",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -287,7 +287,7 @@ func (r *NetworksApplianceStaticRoutesResource) Create(ctx context.Context, req 
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceStaticRoutes",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -319,7 +319,7 @@ func (r *NetworksApplianceStaticRoutesResource) Create(ctx context.Context, req 
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkApplianceStaticRoute",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -375,7 +375,7 @@ func (r *NetworksApplianceStaticRoutesResource) Read(ctx context.Context, req re
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceStaticRoute",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -425,7 +425,7 @@ func (r *NetworksApplianceStaticRoutesResource) Update(ctx context.Context, req 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceStaticRoute",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

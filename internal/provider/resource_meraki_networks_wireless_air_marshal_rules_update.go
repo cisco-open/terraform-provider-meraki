@@ -196,7 +196,7 @@ func (r *NetworksWirelessAirMarshalRulesUpdateResource) Create(ctx context.Conte
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessAirMarshalRule",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

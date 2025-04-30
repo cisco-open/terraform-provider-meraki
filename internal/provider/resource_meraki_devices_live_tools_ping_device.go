@@ -219,7 +219,7 @@ func (r *DevicesLiveToolsPingDeviceResource) Create(ctx context.Context, req res
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateDeviceLiveToolsPingDevice",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

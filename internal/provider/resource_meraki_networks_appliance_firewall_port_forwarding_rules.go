@@ -209,7 +209,7 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Create(ctx contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallPortForwardingRules",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -227,7 +227,7 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Create(ctx contex
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceFirewallPortForwardingRules",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -280,7 +280,7 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Read(ctx context.
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceFirewallPortForwardingRules",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -318,7 +318,7 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Update(ctx contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallPortForwardingRules",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

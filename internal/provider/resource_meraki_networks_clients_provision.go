@@ -584,7 +584,7 @@ func (r *NetworksClientsProvisionResource) Create(ctx context.Context, req resou
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing ProvisionNetworkClients",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

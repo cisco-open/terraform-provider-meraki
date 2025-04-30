@@ -196,7 +196,7 @@ func (r *NetworksApplianceSecurityIntrusionResource) Create(ctx context.Context,
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceSecurityIntrusion",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -214,7 +214,7 @@ func (r *NetworksApplianceSecurityIntrusionResource) Create(ctx context.Context,
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceSecurityIntrusion",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -267,7 +267,7 @@ func (r *NetworksApplianceSecurityIntrusionResource) Read(ctx context.Context, r
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceSecurityIntrusion",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -305,7 +305,7 @@ func (r *NetworksApplianceSecurityIntrusionResource) Update(ctx context.Context,
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceSecurityIntrusion",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

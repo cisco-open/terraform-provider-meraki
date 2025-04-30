@@ -131,7 +131,7 @@ func (r *OrganizationsSwitchDevicesCloneResource) Create(ctx context.Context, re
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CloneOrganizationSwitchDevices",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

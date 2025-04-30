@@ -156,7 +156,7 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Create(ctx context.Context, r
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetDeviceSwitchRoutingStaticRoutes",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -194,7 +194,7 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Create(ctx context.Context, r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateDeviceSwitchRoutingStaticRoute",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -211,7 +211,7 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Create(ctx context.Context, r
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceSwitchRoutingStaticRoutes",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -243,7 +243,7 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Create(ctx context.Context, r
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetDeviceSwitchRoutingStaticRoute",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -299,7 +299,7 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Read(ctx context.Context, req
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceSwitchRoutingStaticRoute",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -349,7 +349,7 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Update(ctx context.Context, r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceSwitchRoutingStaticRoute",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

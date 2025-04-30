@@ -180,7 +180,7 @@ func (r *OrganizationsSmAdminsRolesResource) Create(ctx context.Context, req res
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationSmAdminsRole",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -197,7 +197,7 @@ func (r *OrganizationsSmAdminsRolesResource) Create(ctx context.Context, req res
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationSmAdminsRoles",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -228,7 +228,7 @@ func (r *OrganizationsSmAdminsRolesResource) Create(ctx context.Context, req res
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganizationSmAdminsRole",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -298,7 +298,7 @@ func (r *OrganizationsSmAdminsRolesResource) Read(ctx context.Context, req resou
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationSmAdminsRoles",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -334,7 +334,7 @@ func (r *OrganizationsSmAdminsRolesResource) Update(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationSmAdminsRole",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

@@ -227,7 +227,7 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Create(ctx context.Conte
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessEthernetPortsProfile",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -245,7 +245,7 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Create(ctx context.Conte
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessEthernetPortsProfile",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -299,7 +299,7 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Read(ctx context.Context
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessEthernetPortsProfile",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -350,7 +350,7 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Update(ctx context.Conte
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessEthernetPortsProfile",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

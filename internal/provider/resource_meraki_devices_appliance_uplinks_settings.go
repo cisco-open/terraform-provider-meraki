@@ -618,7 +618,7 @@ func (r *DevicesApplianceUplinksSettingsResource) Create(ctx context.Context, re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceApplianceUplinksSettings",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -636,7 +636,7 @@ func (r *DevicesApplianceUplinksSettingsResource) Create(ctx context.Context, re
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceApplianceUplinksSettings",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -689,7 +689,7 @@ func (r *DevicesApplianceUplinksSettingsResource) Read(ctx context.Context, req 
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceApplianceUplinksSettings",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -727,7 +727,7 @@ func (r *DevicesApplianceUplinksSettingsResource) Update(ctx context.Context, re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceApplianceUplinksSettings",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

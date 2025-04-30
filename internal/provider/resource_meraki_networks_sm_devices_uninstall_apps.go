@@ -116,7 +116,7 @@ func (r *NetworksSmDevicesUninstallAppsResource) Create(ctx context.Context, req
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UninstallNetworkSmDeviceApps",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

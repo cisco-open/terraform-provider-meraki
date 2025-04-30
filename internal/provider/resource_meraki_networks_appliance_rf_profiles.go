@@ -373,7 +373,7 @@ func (r *NetworksApplianceRfProfilesResource) Create(ctx context.Context, req re
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkApplianceRfProfile",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -407,7 +407,7 @@ func (r *NetworksApplianceRfProfilesResource) Create(ctx context.Context, req re
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkApplianceRfProfile",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -462,7 +462,7 @@ func (r *NetworksApplianceRfProfilesResource) Read(ctx context.Context, req reso
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceRfProfiles",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -512,7 +512,7 @@ func (r *NetworksApplianceRfProfilesResource) Update(ctx context.Context, req re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceRfProfile",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

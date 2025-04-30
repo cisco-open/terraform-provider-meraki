@@ -171,7 +171,7 @@ func (r *OrganizationsCellularGatewayEsimsSwapResource) Create(ctx context.Conte
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationCellularGatewayEsimsSwap",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

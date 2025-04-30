@@ -172,7 +172,7 @@ func (r *NetworksPublishResource) Create(ctx context.Context, req resource.Creat
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing PublishNetworkFloorPlansAutoLocateJob",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

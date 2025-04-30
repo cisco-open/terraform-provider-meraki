@@ -147,7 +147,7 @@ func (r *DevicesWirelessBluetoothSettingsResource) Create(ctx context.Context, r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceWirelessBluetoothSettings",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -165,7 +165,7 @@ func (r *DevicesWirelessBluetoothSettingsResource) Create(ctx context.Context, r
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceWirelessBluetoothSettings",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -218,7 +218,7 @@ func (r *DevicesWirelessBluetoothSettingsResource) Read(ctx context.Context, req
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceWirelessBluetoothSettings",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -256,7 +256,7 @@ func (r *DevicesWirelessBluetoothSettingsResource) Update(ctx context.Context, r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceWirelessBluetoothSettings",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

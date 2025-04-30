@@ -308,7 +308,7 @@ func (r *OrganizationsActionBatchesResource) Create(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing ",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -327,7 +327,7 @@ func (r *OrganizationsActionBatchesResource) Create(ctx context.Context, req res
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationActionBatches",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -380,7 +380,7 @@ func (r *OrganizationsActionBatchesResource) Read(ctx context.Context, req resou
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationActionBatch",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -430,7 +430,7 @@ func (r *OrganizationsActionBatchesResource) Update(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationActionBatch",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

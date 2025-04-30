@@ -216,7 +216,7 @@ func (r *NetworksSwitchSettingsResource) Create(ctx context.Context, req resourc
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchSettings",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -234,7 +234,7 @@ func (r *NetworksSwitchSettingsResource) Create(ctx context.Context, req resourc
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchSettings",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -287,7 +287,7 @@ func (r *NetworksSwitchSettingsResource) Read(ctx context.Context, req resource.
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchSettings",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -325,7 +325,7 @@ func (r *NetworksSwitchSettingsResource) Update(ctx context.Context, req resourc
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchSettings",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

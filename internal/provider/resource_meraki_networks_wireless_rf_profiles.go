@@ -1563,7 +1563,7 @@ func (r *NetworksWirelessRfProfilesResource) Create(ctx context.Context, req res
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkWirelessRfProfiles",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -1599,7 +1599,7 @@ func (r *NetworksWirelessRfProfilesResource) Create(ctx context.Context, req res
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkWirelessRfProfile",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -1617,7 +1617,7 @@ func (r *NetworksWirelessRfProfilesResource) Create(ctx context.Context, req res
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessRfProfiles",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -1648,7 +1648,7 @@ func (r *NetworksWirelessRfProfilesResource) Create(ctx context.Context, req res
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkWirelessRfProfile",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -1705,7 +1705,7 @@ func (r *NetworksWirelessRfProfilesResource) Read(ctx context.Context, req resou
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessRfProfiles",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -1755,7 +1755,7 @@ func (r *NetworksWirelessRfProfilesResource) Update(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessRfProfile",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

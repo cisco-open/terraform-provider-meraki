@@ -174,7 +174,7 @@ func (r *OrganizationsClaimResource) Create(ctx context.Context, req resource.Cr
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing ClaimIntoOrganization",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

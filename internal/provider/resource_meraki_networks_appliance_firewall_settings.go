@@ -159,7 +159,7 @@ func (r *NetworksApplianceFirewallSettingsResource) Create(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallSettings",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -177,7 +177,7 @@ func (r *NetworksApplianceFirewallSettingsResource) Create(ctx context.Context, 
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceFirewallSettings",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -230,7 +230,7 @@ func (r *NetworksApplianceFirewallSettingsResource) Read(ctx context.Context, re
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceFirewallSettings",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -268,7 +268,7 @@ func (r *NetworksApplianceFirewallSettingsResource) Update(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallSettings",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

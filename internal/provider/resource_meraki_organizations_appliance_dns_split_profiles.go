@@ -146,7 +146,7 @@ func (r *OrganizationsApplianceDNSSplitProfilesResource) Create(ctx context.Cont
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganizationApplianceDNSSplitProfiles",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -180,7 +180,7 @@ func (r *OrganizationsApplianceDNSSplitProfilesResource) Create(ctx context.Cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationApplianceDNSSplitProfile",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -197,7 +197,7 @@ func (r *OrganizationsApplianceDNSSplitProfilesResource) Create(ctx context.Cont
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationApplianceDNSSplitProfiles",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

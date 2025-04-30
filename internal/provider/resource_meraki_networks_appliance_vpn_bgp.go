@@ -282,7 +282,7 @@ func (r *NetworksApplianceVpnBgpResource) Create(ctx context.Context, req resour
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceVpnBgp",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -300,7 +300,7 @@ func (r *NetworksApplianceVpnBgpResource) Create(ctx context.Context, req resour
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceVpnBgp",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -353,7 +353,7 @@ func (r *NetworksApplianceVpnBgpResource) Read(ctx context.Context, req resource
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceVpnBgp",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -391,7 +391,7 @@ func (r *NetworksApplianceVpnBgpResource) Update(ctx context.Context, req resour
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceVpnBgp",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

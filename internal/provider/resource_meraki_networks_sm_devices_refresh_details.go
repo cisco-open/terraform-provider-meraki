@@ -104,7 +104,7 @@ func (r *NetworksSmDevicesRefreshDetailsResource) Create(ctx context.Context, re
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing RefreshNetworkSmDeviceDetails",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

@@ -462,7 +462,7 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Create(ctx context
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationApplianceVpnThirdPartyVpnpeers",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -480,7 +480,7 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Create(ctx context
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationApplianceVpnThirdPartyVpnpeers",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -533,7 +533,7 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Read(ctx context.C
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationApplianceVpnThirdPartyVpnpeers",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -571,7 +571,7 @@ func (r *OrganizationsApplianceVpnThirdPartyVpnpeersResource) Update(ctx context
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationApplianceVpnThirdPartyVpnpeers",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

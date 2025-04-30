@@ -153,7 +153,7 @@ func (r *NetworksSplitResource) Create(ctx context.Context, req resource.CreateR
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing SplitNetwork",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

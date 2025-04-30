@@ -266,7 +266,7 @@ func (r *OrganizationsAdaptivePolicyPoliciesResource) Create(ctx context.Context
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing ",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -285,7 +285,7 @@ func (r *OrganizationsAdaptivePolicyPoliciesResource) Create(ctx context.Context
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationAdaptivePolicyPolicies",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -337,7 +337,7 @@ func (r *OrganizationsAdaptivePolicyPoliciesResource) Read(ctx context.Context, 
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationAdaptivePolicyPolicy",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -387,7 +387,7 @@ func (r *OrganizationsAdaptivePolicyPoliciesResource) Update(ctx context.Context
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationAdaptivePolicyPolicy",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

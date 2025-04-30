@@ -327,14 +327,6 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Create(ctx context.Context,
 			)
 			return
 		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesSwitchRoutingInterfacesDhcp only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
 	}
 
 	// UPDATE NO CREATE
@@ -345,7 +337,7 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Create(ctx context.Context,
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceSwitchRoutingInterfaceDhcp",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -363,7 +355,7 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Create(ctx context.Context,
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceSwitchRoutingInterfaceDhcp",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -417,7 +409,7 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Read(ctx context.Context, r
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceSwitchRoutingInterfaceDhcp",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -467,7 +459,7 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Update(ctx context.Context,
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceSwitchRoutingInterfaceDhcp",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

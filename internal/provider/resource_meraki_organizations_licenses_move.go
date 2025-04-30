@@ -131,7 +131,7 @@ func (r *OrganizationsLicensesMoveResource) Create(ctx context.Context, req reso
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing MoveOrganizationLicenses",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

@@ -218,7 +218,7 @@ func (r *NetworksApplianceTrafficShapingVpnExclusionsResource) Create(ctx contex
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceTrafficShapingVpnExclusions",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

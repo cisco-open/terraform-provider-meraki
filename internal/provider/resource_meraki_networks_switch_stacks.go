@@ -166,7 +166,7 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkSwitchStacks",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -202,7 +202,7 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchStack",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -219,7 +219,7 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchStacks",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -251,7 +251,7 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkSwitchStack",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -307,7 +307,7 @@ func (r *NetworksSwitchStacksResource) Read(ctx context.Context, req resource.Re
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchStack",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}

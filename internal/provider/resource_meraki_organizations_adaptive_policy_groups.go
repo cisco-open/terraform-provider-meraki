@@ -191,7 +191,7 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Create(ctx context.Context, 
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganizationAdaptivePolicyGroups",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -229,7 +229,7 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Create(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationAdaptivePolicyGroup",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -246,7 +246,7 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Create(ctx context.Context, 
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationAdaptivePolicyGroups",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -278,7 +278,7 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Create(ctx context.Context, 
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganizationAdaptivePolicyGroup",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -336,7 +336,7 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Read(ctx context.Context, re
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationAdaptivePolicyGroup",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -387,7 +387,7 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Update(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationAdaptivePolicyGroup",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

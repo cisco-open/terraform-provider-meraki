@@ -246,7 +246,7 @@ func (r *DevicesLiveToolsArpTableResource) Create(ctx context.Context, req resou
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateDeviceLiveToolsArpTable",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -264,7 +264,7 @@ func (r *DevicesLiveToolsArpTableResource) Create(ctx context.Context, req resou
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceLiveToolsArpTable",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -318,7 +318,7 @@ func (r *DevicesLiveToolsArpTableResource) Read(ctx context.Context, req resourc
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceLiveToolsArpTable",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}

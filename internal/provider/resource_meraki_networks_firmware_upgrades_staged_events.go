@@ -315,7 +315,7 @@ func (r *NetworksFirmwareUpgradesStagedEventsResource) Create(ctx context.Contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkFirmwareUpgradesStagedEvent",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -333,7 +333,7 @@ func (r *NetworksFirmwareUpgradesStagedEventsResource) Create(ctx context.Contex
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkFirmwareUpgradesStagedEvents",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -386,7 +386,7 @@ func (r *NetworksFirmwareUpgradesStagedEventsResource) Read(ctx context.Context,
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkFirmwareUpgradesStagedEvents",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -424,7 +424,7 @@ func (r *NetworksFirmwareUpgradesStagedEventsResource) Update(ctx context.Contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkFirmwareUpgradesStagedEvents",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

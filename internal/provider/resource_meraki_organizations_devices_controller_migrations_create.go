@@ -163,7 +163,7 @@ func (r *OrganizationsDevicesControllerMigrationsCreateResource) Create(ctx cont
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationDevicesControllerMigration",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

@@ -209,7 +209,7 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Create(ctx contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessAlternateManagementInterface",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -227,7 +227,7 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Create(ctx contex
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessAlternateManagementInterface",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -280,7 +280,7 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Read(ctx context.
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessAlternateManagementInterface",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -318,7 +318,7 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Update(ctx contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessAlternateManagementInterface",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

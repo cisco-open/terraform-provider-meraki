@@ -472,7 +472,7 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Create(ctx con
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationConfigTemplateSwitchProfilePort",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -490,7 +490,7 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Create(ctx con
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationConfigTemplateSwitchProfilePort",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -546,7 +546,7 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Read(ctx conte
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationConfigTemplateSwitchProfilePort",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -601,7 +601,7 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Update(ctx con
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationConfigTemplateSwitchProfilePort",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

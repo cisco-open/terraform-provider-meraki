@@ -177,7 +177,7 @@ func (r *NetworksApplianceFirewallMulticastForwardingResource) Create(ctx contex
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallMulticastForwarding",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

@@ -429,7 +429,7 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Create(ctx context.Co
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkClientSplashAuthorizationStatus",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -447,7 +447,7 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Create(ctx context.Co
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkClientSplashAuthorizationStatus",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -501,7 +501,7 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Read(ctx context.Cont
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkClientSplashAuthorizationStatus",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -551,7 +551,7 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Update(ctx context.Co
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkClientSplashAuthorizationStatus",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

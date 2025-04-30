@@ -960,7 +960,7 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkGroupPolicies",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -998,7 +998,7 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkGroupPolicy",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -1015,7 +1015,7 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkGroupPolicies",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -1047,7 +1047,7 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkGroupPolicy",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -1153,7 +1153,7 @@ func (r *NetworksGroupPoliciesResource) Update(ctx context.Context, req resource
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkGroupPolicy",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

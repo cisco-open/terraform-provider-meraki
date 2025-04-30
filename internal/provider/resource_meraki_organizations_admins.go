@@ -253,7 +253,7 @@ func (r *OrganizationsAdminsResource) Create(ctx context.Context, req resource.C
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganizationAdmins",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -297,7 +297,7 @@ func (r *OrganizationsAdminsResource) Create(ctx context.Context, req resource.C
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationAdmin",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -314,7 +314,7 @@ func (r *OrganizationsAdminsResource) Create(ctx context.Context, req resource.C
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationAdmins",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -382,7 +382,7 @@ func (r *OrganizationsAdminsResource) Read(ctx context.Context, req resource.Rea
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationAdmins",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -453,7 +453,7 @@ func (r *OrganizationsAdminsResource) Update(ctx context.Context, req resource.U
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationAdmin",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

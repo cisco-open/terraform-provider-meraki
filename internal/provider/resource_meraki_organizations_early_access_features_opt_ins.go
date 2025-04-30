@@ -210,7 +210,7 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Create(ctx context.Cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationEarlyAccessFeaturesOptIn",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -228,7 +228,7 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Create(ctx context.Cont
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationEarlyAccessFeaturesOptIn",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -283,7 +283,7 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Read(ctx context.Contex
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationEarlyAccessFeaturesOptIns",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -334,7 +334,7 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Update(ctx context.Cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationEarlyAccessFeaturesOptIn",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

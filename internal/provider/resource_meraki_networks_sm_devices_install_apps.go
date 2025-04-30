@@ -125,7 +125,7 @@ func (r *NetworksSmDevicesInstallAppsResource) Create(ctx context.Context, req r
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing InstallNetworkSmDeviceApps",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

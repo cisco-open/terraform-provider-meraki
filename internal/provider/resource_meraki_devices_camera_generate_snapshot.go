@@ -133,7 +133,7 @@ func (r *DevicesCameraGenerateSnapshotResource) Create(ctx context.Context, req 
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GenerateDeviceCameraSnapshot",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

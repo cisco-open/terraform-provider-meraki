@@ -200,7 +200,7 @@ func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Create(ctx contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDDeviceTypeGroupPolicies",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -218,7 +218,7 @@ func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Create(ctx contex
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessSSIDDeviceTypeGroupPolicies",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -272,7 +272,7 @@ func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Read(ctx context.
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessSSIDDeviceTypeGroupPolicies",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -322,7 +322,7 @@ func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Update(ctx contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDDeviceTypeGroupPolicies",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

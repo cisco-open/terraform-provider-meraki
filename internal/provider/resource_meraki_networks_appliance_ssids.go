@@ -339,7 +339,7 @@ func (r *NetworksApplianceSSIDsResource) Create(ctx context.Context, req resourc
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceSSID",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -357,7 +357,7 @@ func (r *NetworksApplianceSSIDsResource) Create(ctx context.Context, req resourc
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceSSID",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -413,7 +413,7 @@ func (r *NetworksApplianceSSIDsResource) Read(ctx context.Context, req resource.
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceSSID",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -465,7 +465,7 @@ func (r *NetworksApplianceSSIDsResource) Update(ctx context.Context, req resourc
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceSSID",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

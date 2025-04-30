@@ -601,7 +601,7 @@ func (r *NetworksApplianceVLANsResource) Read(ctx context.Context, req resource.
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceVLAN",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -652,7 +652,7 @@ func (r *NetworksApplianceVLANsResource) Update(ctx context.Context, req resourc
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceVLAN",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

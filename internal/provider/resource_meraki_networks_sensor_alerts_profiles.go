@@ -1181,7 +1181,7 @@ func (r *NetworksSensorAlertsProfilesResource) Create(ctx context.Context, req r
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkSensorAlertsProfiles",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -1219,7 +1219,7 @@ func (r *NetworksSensorAlertsProfilesResource) Create(ctx context.Context, req r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSensorAlertsProfile",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -1236,7 +1236,7 @@ func (r *NetworksSensorAlertsProfilesResource) Create(ctx context.Context, req r
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSensorAlertsProfiles",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -1268,7 +1268,7 @@ func (r *NetworksSensorAlertsProfilesResource) Create(ctx context.Context, req r
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkSensorAlertsProfile",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -1324,7 +1324,7 @@ func (r *NetworksSensorAlertsProfilesResource) Read(ctx context.Context, req res
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSensorAlertsProfile",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -1374,7 +1374,7 @@ func (r *NetworksSensorAlertsProfilesResource) Update(ctx context.Context, req r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSensorAlertsProfile",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

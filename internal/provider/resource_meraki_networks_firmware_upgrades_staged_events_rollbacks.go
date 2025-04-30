@@ -286,7 +286,7 @@ func (r *NetworksFirmwareUpgradesStagedEventsRollbacksResource) Create(ctx conte
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing RollbacksNetworkFirmwareUpgradesStagedEvents",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

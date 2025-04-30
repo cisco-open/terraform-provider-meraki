@@ -191,7 +191,7 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Create(ctx context.C
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCellularGatewayPortForwardingRules",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -209,7 +209,7 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Create(ctx context.C
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceCellularGatewayPortForwardingRules",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -262,7 +262,7 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Read(ctx context.Con
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceCellularGatewayPortForwardingRules",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -300,7 +300,7 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Update(ctx context.C
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCellularGatewayPortForwardingRules",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

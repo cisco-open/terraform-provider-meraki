@@ -632,7 +632,7 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Create(ctx cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceTrafficShapingUplinkSelection",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -650,7 +650,7 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Create(ctx cont
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceTrafficShapingUplinkSelection",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -703,7 +703,7 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Read(ctx contex
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceTrafficShapingUplinkSelection",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -741,7 +741,7 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Update(ctx cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceTrafficShapingUplinkSelection",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

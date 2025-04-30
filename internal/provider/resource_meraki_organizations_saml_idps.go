@@ -153,7 +153,7 @@ func (r *OrganizationsSamlIDpsResource) Create(ctx context.Context, req resource
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationSamlIDp",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -173,7 +173,7 @@ func (r *OrganizationsSamlIDpsResource) Create(ctx context.Context, req resource
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationSamlIDps",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -226,7 +226,7 @@ func (r *OrganizationsSamlIDpsResource) Read(ctx context.Context, req resource.R
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationSamlIDp",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -277,7 +277,7 @@ func (r *OrganizationsSamlIDpsResource) Update(ctx context.Context, req resource
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationSamlIDp",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

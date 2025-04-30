@@ -171,7 +171,7 @@ func (r *NetworksBindResource) Create(ctx context.Context, req resource.CreateRe
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing BindNetwork",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

@@ -108,7 +108,7 @@ func (r *OrganizationsAssuranceAlertsDismissResource) Create(ctx context.Context
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing DismissOrganizationAssuranceAlerts",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

@@ -188,7 +188,7 @@ func (r *NetworksWirelessAirMarshalRulesCreateResource) Create(ctx context.Conte
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkWirelessAirMarshalRule",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

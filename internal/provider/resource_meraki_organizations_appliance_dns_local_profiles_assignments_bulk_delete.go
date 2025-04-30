@@ -161,7 +161,7 @@ func (r *ApplianceApplianceDNSLocalProfilesAssignmentsBulkDeleteResource) Create
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationApplianceDNSLocalProfilesAssignmentsBulkDelete",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

@@ -4,7 +4,7 @@
 BUGFIXES:
 * Refactored device response handling in data source files to convert Imei from pointer to string format, ensuring better compatibility with the API response.
 
-## 1.1.2-beta (April 25, 2025)
+## 1.1.3-beta (April 25, 2025)
 BUGFIXES:
 * Changed the type of the VLAN ID attribute from String to Int64 for better data integrity.
 

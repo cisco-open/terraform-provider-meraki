@@ -216,7 +216,7 @@ func (r *OrganizationsLicensesResource) Create(ctx context.Context, req resource
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationLicense",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -234,7 +234,7 @@ func (r *OrganizationsLicensesResource) Create(ctx context.Context, req resource
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationLicense",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -288,7 +288,7 @@ func (r *OrganizationsLicensesResource) Read(ctx context.Context, req resource.R
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationLicense",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -338,7 +338,7 @@ func (r *OrganizationsLicensesResource) Update(ctx context.Context, req resource
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationLicense",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

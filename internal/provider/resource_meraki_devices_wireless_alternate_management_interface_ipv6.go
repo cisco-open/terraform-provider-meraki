@@ -217,7 +217,7 @@ func (r *DevicesWirelessAlternateManagementInterfaceIPv6Resource) Create(ctx con
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceWirelessAlternateManagementInterfaceIPv6",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

@@ -191,7 +191,7 @@ func (r *NetworksDevicesClaimVmxResource) Create(ctx context.Context, req resour
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing VmxNetworkDevicesClaim",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

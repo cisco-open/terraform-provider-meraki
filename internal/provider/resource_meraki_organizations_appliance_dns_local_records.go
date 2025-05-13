@@ -141,7 +141,7 @@ func (r *OrganizationsApplianceDNSLocalRecordsResource) Create(ctx context.Conte
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganizationApplianceDNSLocalRecords",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -175,7 +175,7 @@ func (r *OrganizationsApplianceDNSLocalRecordsResource) Create(ctx context.Conte
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationApplianceDNSLocalRecord",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -192,7 +192,7 @@ func (r *OrganizationsApplianceDNSLocalRecordsResource) Create(ctx context.Conte
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationApplianceDNSLocalRecords",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

@@ -147,7 +147,7 @@ func (r *NetworksCellularGatewayUplinkResource) Create(ctx context.Context, req 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCellularGatewayUplink",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -165,7 +165,7 @@ func (r *NetworksCellularGatewayUplinkResource) Create(ctx context.Context, req 
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkCellularGatewayUplink",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -218,7 +218,7 @@ func (r *NetworksCellularGatewayUplinkResource) Read(ctx context.Context, req re
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkCellularGatewayUplink",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -256,7 +256,7 @@ func (r *NetworksCellularGatewayUplinkResource) Update(ctx context.Context, req 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCellularGatewayUplink",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

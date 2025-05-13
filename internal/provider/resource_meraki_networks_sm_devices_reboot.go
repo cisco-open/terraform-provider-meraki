@@ -168,7 +168,7 @@ func (r *NetworksSmDevicesRebootResource) Create(ctx context.Context, req resour
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing RebootNetworkSmDevices",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

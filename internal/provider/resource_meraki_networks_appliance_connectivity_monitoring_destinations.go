@@ -158,7 +158,7 @@ func (r *NetworksApplianceConnectivityMonitoringDestinationsResource) Create(ctx
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceConnectivityMonitoringDestinations",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -176,7 +176,7 @@ func (r *NetworksApplianceConnectivityMonitoringDestinationsResource) Create(ctx
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceConnectivityMonitoringDestinations",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -229,7 +229,7 @@ func (r *NetworksApplianceConnectivityMonitoringDestinationsResource) Read(ctx c
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceConnectivityMonitoringDestinations",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -267,7 +267,7 @@ func (r *NetworksApplianceConnectivityMonitoringDestinationsResource) Update(ctx
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceConnectivityMonitoringDestinations",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

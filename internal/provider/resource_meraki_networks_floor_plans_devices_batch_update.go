@@ -146,7 +146,7 @@ func (r *NetworksFloorPlansDevicesBatchUpdateResource) Create(ctx context.Contex
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing BatchNetworkFloorPlansDevicesUpdate",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

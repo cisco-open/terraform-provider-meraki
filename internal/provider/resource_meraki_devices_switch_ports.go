@@ -493,7 +493,7 @@ func (r *DevicesSwitchPortsResource) Create(ctx context.Context, req resource.Cr
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceSwitchPort",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -511,7 +511,7 @@ func (r *DevicesSwitchPortsResource) Create(ctx context.Context, req resource.Cr
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceSwitchPort",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -565,7 +565,7 @@ func (r *DevicesSwitchPortsResource) Read(ctx context.Context, req resource.Read
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceSwitchPort",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -615,7 +615,7 @@ func (r *DevicesSwitchPortsResource) Update(ctx context.Context, req resource.Up
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceSwitchPort",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

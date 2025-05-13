@@ -575,7 +575,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Create(ctx context.Context, req r
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkSwitchAccessPolicies",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -613,7 +613,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Create(ctx context.Context, req r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchAccessPolicy",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -630,7 +630,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Create(ctx context.Context, req r
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchAccessPolicies",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -662,7 +662,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Create(ctx context.Context, req r
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkSwitchAccessPolicy",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -718,7 +718,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Read(ctx context.Context, req res
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchAccessPolicy",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -768,7 +768,7 @@ func (r *NetworksSwitchAccessPoliciesResource) Update(ctx context.Context, req r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchAccessPolicy",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

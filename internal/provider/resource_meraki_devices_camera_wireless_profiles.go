@@ -155,7 +155,7 @@ func (r *DevicesCameraWirelessProfilesResource) Create(ctx context.Context, req 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCameraWirelessProfiles",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -173,7 +173,7 @@ func (r *DevicesCameraWirelessProfilesResource) Create(ctx context.Context, req 
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceCameraWirelessProfiles",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -226,7 +226,7 @@ func (r *DevicesCameraWirelessProfilesResource) Read(ctx context.Context, req re
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceCameraWirelessProfiles",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -264,7 +264,7 @@ func (r *DevicesCameraWirelessProfilesResource) Update(ctx context.Context, req 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCameraWirelessProfiles",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

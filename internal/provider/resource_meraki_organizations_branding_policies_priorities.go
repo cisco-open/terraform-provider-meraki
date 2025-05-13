@@ -130,7 +130,7 @@ func (r *OrganizationsBrandingPoliciesPrioritiesResource) Create(ctx context.Con
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationBrandingPoliciesPriorities",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -148,7 +148,7 @@ func (r *OrganizationsBrandingPoliciesPrioritiesResource) Create(ctx context.Con
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationBrandingPoliciesPriorities",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -201,7 +201,7 @@ func (r *OrganizationsBrandingPoliciesPrioritiesResource) Read(ctx context.Conte
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationBrandingPoliciesPriorities",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -239,7 +239,7 @@ func (r *OrganizationsBrandingPoliciesPrioritiesResource) Update(ctx context.Con
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationBrandingPoliciesPriorities",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

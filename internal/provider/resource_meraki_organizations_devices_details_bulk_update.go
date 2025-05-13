@@ -145,7 +145,7 @@ func (r *OrganizationsDevicesDetailsBulkUpdateResource) Create(ctx context.Conte
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing BulkUpdateOrganizationDevicesDetails",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

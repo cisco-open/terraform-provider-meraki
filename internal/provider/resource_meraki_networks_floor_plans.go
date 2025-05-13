@@ -379,7 +379,7 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkFloorPlans",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -417,7 +417,7 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkFloorPlan",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -434,7 +434,7 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkFloorPlans",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -466,7 +466,7 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkFloorPlan",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -522,7 +522,7 @@ func (r *NetworksFloorPlansResource) Read(ctx context.Context, req resource.Read
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkFloorPlan",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -572,7 +572,7 @@ func (r *NetworksFloorPlansResource) Update(ctx context.Context, req resource.Up
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkFloorPlan",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

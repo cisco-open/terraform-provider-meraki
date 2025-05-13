@@ -170,7 +170,7 @@ func (r *NetworksSwitchMtuResource) Create(ctx context.Context, req resource.Cre
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchMtu",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -188,7 +188,7 @@ func (r *NetworksSwitchMtuResource) Create(ctx context.Context, req resource.Cre
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchMtu",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -241,7 +241,7 @@ func (r *NetworksSwitchMtuResource) Read(ctx context.Context, req resource.ReadR
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchMtu",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -279,7 +279,7 @@ func (r *NetworksSwitchMtuResource) Update(ctx context.Context, req resource.Upd
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchMtu",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

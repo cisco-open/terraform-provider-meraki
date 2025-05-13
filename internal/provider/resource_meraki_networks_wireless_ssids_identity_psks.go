@@ -160,7 +160,7 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkWirelessSSIDIDentityPsks",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -199,7 +199,7 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkWirelessSSIDIDentityPsk",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -216,7 +216,7 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessSSIDIDentityPsks",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -249,7 +249,7 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkWirelessSSIDIDentityPsk",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -308,7 +308,7 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Read(ctx context.Context, re
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessSSIDIDentityPsk",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -361,7 +361,7 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Update(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDIDentityPsk",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

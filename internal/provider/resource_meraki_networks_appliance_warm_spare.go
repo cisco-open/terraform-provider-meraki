@@ -194,7 +194,7 @@ func (r *NetworksApplianceWarmSpareResource) Create(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceWarmSpare",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -212,7 +212,7 @@ func (r *NetworksApplianceWarmSpareResource) Create(ctx context.Context, req res
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceWarmSpare",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -265,7 +265,7 @@ func (r *NetworksApplianceWarmSpareResource) Read(ctx context.Context, req resou
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceWarmSpare",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -303,7 +303,7 @@ func (r *NetworksApplianceWarmSpareResource) Update(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceWarmSpare",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

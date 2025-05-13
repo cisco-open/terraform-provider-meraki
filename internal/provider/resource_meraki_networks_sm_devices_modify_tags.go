@@ -183,7 +183,7 @@ func (r *NetworksSmDevicesModifyTagsResource) Create(ctx context.Context, req re
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing ModifyNetworkSmDevicesTags",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

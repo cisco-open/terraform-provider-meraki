@@ -166,7 +166,7 @@ func (r *OrganizationsCellularGatewayEsimsServiceProvidersAccountsResource) Crea
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganizationCellularGatewayEsimsServiceProvidersAccounts",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -201,7 +201,7 @@ func (r *OrganizationsCellularGatewayEsimsServiceProvidersAccountsResource) Crea
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationCellularGatewayEsimsServiceProvidersAccount",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -218,7 +218,7 @@ func (r *OrganizationsCellularGatewayEsimsServiceProvidersAccountsResource) Crea
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationCellularGatewayEsimsServiceProvidersAccounts",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -361,7 +361,7 @@ func (r *OrganizationsCellularGatewayEsimsServiceProvidersAccountsResource) Upda
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationCellularGatewayEsimsServiceProvidersAccount",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

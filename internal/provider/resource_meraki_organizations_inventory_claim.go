@@ -177,7 +177,7 @@ func (r *OrganizationsInventoryClaimResource) Create(ctx context.Context, req re
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing ClaimIntoOrganizationInventory",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

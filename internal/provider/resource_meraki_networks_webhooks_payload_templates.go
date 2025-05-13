@@ -195,7 +195,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Create(ctx context.Context, r
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkWebhooksPayloadTemplates",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -233,7 +233,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Create(ctx context.Context, r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkWebhooksPayloadTemplate",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -250,7 +250,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Create(ctx context.Context, r
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWebhooksPayloadTemplates",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -282,7 +282,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Create(ctx context.Context, r
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkWebhooksPayloadTemplate",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -338,7 +338,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Read(ctx context.Context, req
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWebhooksPayloadTemplate",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -388,7 +388,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Update(ctx context.Context, r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWebhooksPayloadTemplate",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

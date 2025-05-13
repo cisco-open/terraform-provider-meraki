@@ -149,7 +149,7 @@ func (r *OrganizationsApplianceSecurityIntrusionResource) Create(ctx context.Con
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationApplianceSecurityIntrusion",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -167,7 +167,7 @@ func (r *OrganizationsApplianceSecurityIntrusionResource) Create(ctx context.Con
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationApplianceSecurityIntrusion",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -220,7 +220,7 @@ func (r *OrganizationsApplianceSecurityIntrusionResource) Read(ctx context.Conte
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationApplianceSecurityIntrusion",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -258,7 +258,7 @@ func (r *OrganizationsApplianceSecurityIntrusionResource) Update(ctx context.Con
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationApplianceSecurityIntrusion",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

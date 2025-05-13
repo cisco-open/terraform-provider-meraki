@@ -232,7 +232,7 @@ func (r *NetworksSettingsResource) Create(ctx context.Context, req resource.Crea
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSettings",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -250,7 +250,7 @@ func (r *NetworksSettingsResource) Create(ctx context.Context, req resource.Crea
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSettings",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -303,7 +303,7 @@ func (r *NetworksSettingsResource) Read(ctx context.Context, req resource.ReadRe
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSettings",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -341,7 +341,7 @@ func (r *NetworksSettingsResource) Update(ctx context.Context, req resource.Upda
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSettings",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

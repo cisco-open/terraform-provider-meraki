@@ -139,7 +139,7 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Create(ctx context.C
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganizationInsightMonitoredMediaServers",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -177,7 +177,7 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Create(ctx context.C
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationInsightMonitoredMediaServer",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -194,7 +194,7 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Create(ctx context.C
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationInsightMonitoredMediaServers",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -226,7 +226,7 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Create(ctx context.C
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganizationInsightMonitoredMediaServer",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -282,7 +282,7 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Read(ctx context.Con
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationInsightMonitoredMediaServer",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -332,7 +332,7 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Update(ctx context.C
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationInsightMonitoredMediaServer",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

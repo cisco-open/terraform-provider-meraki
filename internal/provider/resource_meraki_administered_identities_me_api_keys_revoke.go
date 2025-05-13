@@ -96,7 +96,7 @@ func (r *AdministeredIDentitiesMeAPIKeysRevokeResource) Create(ctx context.Conte
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing RevokeAdministeredIDentitiesMeAPIKeys",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

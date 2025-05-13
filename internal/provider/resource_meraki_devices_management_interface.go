@@ -300,7 +300,7 @@ func (r *DevicesManagementInterfaceResource) Create(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing RebootDevice",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -318,7 +318,7 @@ func (r *DevicesManagementInterfaceResource) Create(ctx context.Context, req res
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceManagementInterface",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -371,7 +371,7 @@ func (r *DevicesManagementInterfaceResource) Read(ctx context.Context, req resou
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceManagementInterface",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -409,7 +409,7 @@ func (r *DevicesManagementInterfaceResource) Update(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceManagementInterface",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

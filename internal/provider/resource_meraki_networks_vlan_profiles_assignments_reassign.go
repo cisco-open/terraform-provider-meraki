@@ -161,7 +161,7 @@ func (r *NetworksVLANProfilesAssignmentsReassignResource) Create(ctx context.Con
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing ReassignNetworkVLANProfilesAssignments",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

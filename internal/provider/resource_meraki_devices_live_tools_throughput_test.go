@@ -239,7 +239,7 @@ func (r *DevicesLiveToolsThroughputTestResource) Create(ctx context.Context, req
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateDeviceLiveToolsThroughputTest",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -257,7 +257,7 @@ func (r *DevicesLiveToolsThroughputTestResource) Create(ctx context.Context, req
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceLiveToolsThroughputTest",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -311,7 +311,7 @@ func (r *DevicesLiveToolsThroughputTestResource) Read(ctx context.Context, req r
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceLiveToolsThroughputTest",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}

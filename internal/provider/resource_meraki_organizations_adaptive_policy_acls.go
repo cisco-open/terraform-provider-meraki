@@ -234,7 +234,7 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Create(ctx context.Context, re
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganizationAdaptivePolicyACLs",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -272,7 +272,7 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Create(ctx context.Context, re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationAdaptivePolicyACL",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -289,7 +289,7 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Create(ctx context.Context, re
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationAdaptivePolicyACLs",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -321,7 +321,7 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Create(ctx context.Context, re
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganizationAdaptivePolicyACL",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -377,7 +377,7 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Read(ctx context.Context, req 
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationAdaptivePolicyACL",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -427,7 +427,7 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Update(ctx context.Context, re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationAdaptivePolicyACL",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

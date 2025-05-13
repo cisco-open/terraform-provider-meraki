@@ -209,7 +209,7 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Create(ctx context.Contex
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkFirmwareUpgradesStagedGroups",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -247,7 +247,7 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Create(ctx context.Contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkFirmwareUpgradesStagedGroup",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -264,7 +264,7 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Create(ctx context.Contex
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkFirmwareUpgradesStagedGroups",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -296,7 +296,7 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Create(ctx context.Contex
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkFirmwareUpgradesStagedGroup",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -352,7 +352,7 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Read(ctx context.Context,
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkFirmwareUpgradesStagedGroup",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -402,7 +402,7 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Update(ctx context.Contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkFirmwareUpgradesStagedGroup",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

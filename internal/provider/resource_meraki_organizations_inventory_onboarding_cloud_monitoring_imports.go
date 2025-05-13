@@ -174,7 +174,7 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringImportsResource) Create(
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationInventoryOnboardingCloudMonitoringImport",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

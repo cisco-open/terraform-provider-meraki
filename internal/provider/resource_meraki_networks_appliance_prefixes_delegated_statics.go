@@ -175,7 +175,7 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Create(ctx context.C
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkAppliancePrefixesDelegatedStatics",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -213,7 +213,7 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Create(ctx context.C
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkAppliancePrefixesDelegatedStatic",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -230,7 +230,7 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Create(ctx context.C
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkAppliancePrefixesDelegatedStatics",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -262,7 +262,7 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Create(ctx context.C
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkAppliancePrefixesDelegatedStatic",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -318,7 +318,7 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Read(ctx context.Con
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkAppliancePrefixesDelegatedStatic",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -368,7 +368,7 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Update(ctx context.C
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkAppliancePrefixesDelegatedStatic",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

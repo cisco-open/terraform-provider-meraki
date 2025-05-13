@@ -144,7 +144,7 @@ func (r *OrganizationsAssetsResource) Create(ctx context.Context, req resource.C
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationSplashThemeAsset",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

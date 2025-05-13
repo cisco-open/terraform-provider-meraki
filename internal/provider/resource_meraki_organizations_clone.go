@@ -204,7 +204,7 @@ func (r *OrganizationsCloneResource) Create(ctx context.Context, req resource.Cr
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CloneOrganization",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

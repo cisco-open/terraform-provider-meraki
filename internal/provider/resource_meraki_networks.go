@@ -183,7 +183,7 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganizationNetworks",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -221,7 +221,7 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationNetwork",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -240,7 +240,7 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationNetworks",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -273,7 +273,7 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetwork",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -328,7 +328,7 @@ func (r *NetworksResource) Read(ctx context.Context, req resource.ReadRequest, r
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetwork",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -367,7 +367,7 @@ func (r *NetworksResource) Update(ctx context.Context, req resource.UpdateReques
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetwork",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

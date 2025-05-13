@@ -205,7 +205,7 @@ func (r *NetworksSwitchQosRulesOrderResource) Create(ctx context.Context, req re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing ",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -224,7 +224,7 @@ func (r *NetworksSwitchQosRulesOrderResource) Create(ctx context.Context, req re
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchQosRules",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -276,7 +276,7 @@ func (r *NetworksSwitchQosRulesOrderResource) Read(ctx context.Context, req reso
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchQosRule",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -327,7 +327,7 @@ func (r *NetworksSwitchQosRulesOrderResource) Update(ctx context.Context, req re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchQosRule",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

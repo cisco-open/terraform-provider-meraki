@@ -158,7 +158,7 @@ func (r *NetworksSwitchDscpToCosMappingsResource) Create(ctx context.Context, re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchDscpToCosMappings",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -176,7 +176,7 @@ func (r *NetworksSwitchDscpToCosMappingsResource) Create(ctx context.Context, re
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchDscpToCosMappings",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -229,7 +229,7 @@ func (r *NetworksSwitchDscpToCosMappingsResource) Read(ctx context.Context, req 
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchDscpToCosMappings",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -267,7 +267,7 @@ func (r *NetworksSwitchDscpToCosMappingsResource) Update(ctx context.Context, re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchDscpToCosMappings",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

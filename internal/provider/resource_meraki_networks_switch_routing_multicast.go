@@ -209,7 +209,7 @@ func (r *NetworksSwitchRoutingMulticastResource) Create(ctx context.Context, req
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchRoutingMulticast",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -227,7 +227,7 @@ func (r *NetworksSwitchRoutingMulticastResource) Create(ctx context.Context, req
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchRoutingMulticast",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -280,7 +280,7 @@ func (r *NetworksSwitchRoutingMulticastResource) Read(ctx context.Context, req r
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchRoutingMulticast",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -318,7 +318,7 @@ func (r *NetworksSwitchRoutingMulticastResource) Update(ctx context.Context, req
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchRoutingMulticast",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

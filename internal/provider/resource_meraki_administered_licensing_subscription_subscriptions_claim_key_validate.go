@@ -267,7 +267,7 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsClaimKeyValidateResource)
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing ValidateAdministeredLicensingSubscriptionSubscriptionsClaimKey",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

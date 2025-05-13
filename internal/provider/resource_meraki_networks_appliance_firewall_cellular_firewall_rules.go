@@ -217,7 +217,7 @@ func (r *NetworksApplianceFirewallCellularFirewallRulesResource) Create(ctx cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallCellularFirewallRules",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -235,7 +235,7 @@ func (r *NetworksApplianceFirewallCellularFirewallRulesResource) Create(ctx cont
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceFirewallCellularFirewallRules",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -288,7 +288,7 @@ func (r *NetworksApplianceFirewallCellularFirewallRulesResource) Read(ctx contex
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceFirewallCellularFirewallRules",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -326,7 +326,7 @@ func (r *NetworksApplianceFirewallCellularFirewallRulesResource) Update(ctx cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallCellularFirewallRules",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

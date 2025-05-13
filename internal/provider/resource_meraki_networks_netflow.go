@@ -161,7 +161,7 @@ func (r *NetworksNetflowResource) Create(ctx context.Context, req resource.Creat
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkNetflow",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -179,7 +179,7 @@ func (r *NetworksNetflowResource) Create(ctx context.Context, req resource.Creat
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkNetflow",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -232,7 +232,7 @@ func (r *NetworksNetflowResource) Read(ctx context.Context, req resource.ReadReq
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkNetflow",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -271,7 +271,7 @@ func (r *NetworksNetflowResource) Update(ctx context.Context, req resource.Updat
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkNetflow",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

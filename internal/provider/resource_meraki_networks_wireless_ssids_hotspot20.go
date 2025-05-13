@@ -415,7 +415,7 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Create(ctx context.Context, req
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDHotspot20",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -433,7 +433,7 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Create(ctx context.Context, req
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessSSIDHotspot20",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -487,7 +487,7 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Read(ctx context.Context, req r
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessSSIDHotspot20",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -537,7 +537,7 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Update(ctx context.Context, req
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDHotspot20",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

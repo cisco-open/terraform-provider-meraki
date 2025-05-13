@@ -225,7 +225,7 @@ func (r *OrganizationsSNMPResource) Create(ctx context.Context, req resource.Cre
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationSNMP",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -243,7 +243,7 @@ func (r *OrganizationsSNMPResource) Create(ctx context.Context, req resource.Cre
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationSNMP",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -296,7 +296,7 @@ func (r *OrganizationsSNMPResource) Read(ctx context.Context, req resource.ReadR
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationSNMP",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -334,7 +334,7 @@ func (r *OrganizationsSNMPResource) Update(ctx context.Context, req resource.Upd
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationSNMP",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

@@ -179,7 +179,7 @@ func (r *OrganizationsNetworksCombineResource) Create(ctx context.Context, req r
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CombineOrganizationNetworks",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

@@ -173,7 +173,7 @@ func (r *NetworksWebhooksHTTPServersResource) Create(ctx context.Context, req re
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkWebhooksHTTPServers",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -211,7 +211,7 @@ func (r *NetworksWebhooksHTTPServersResource) Create(ctx context.Context, req re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkWebhooksHTTPServer",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -228,7 +228,7 @@ func (r *NetworksWebhooksHTTPServersResource) Create(ctx context.Context, req re
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWebhooksHTTPServers",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -260,7 +260,7 @@ func (r *NetworksWebhooksHTTPServersResource) Create(ctx context.Context, req re
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkWebhooksHTTPServer",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -316,7 +316,7 @@ func (r *NetworksWebhooksHTTPServersResource) Read(ctx context.Context, req reso
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWebhooksHTTPServer",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -366,7 +366,7 @@ func (r *NetworksWebhooksHTTPServersResource) Update(ctx context.Context, req re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWebhooksHTTPServer",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

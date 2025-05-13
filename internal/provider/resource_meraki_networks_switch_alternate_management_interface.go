@@ -193,7 +193,7 @@ func (r *NetworksSwitchAlternateManagementInterfaceResource) Create(ctx context.
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchAlternateManagementInterface",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -211,7 +211,7 @@ func (r *NetworksSwitchAlternateManagementInterfaceResource) Create(ctx context.
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchAlternateManagementInterface",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -264,7 +264,7 @@ func (r *NetworksSwitchAlternateManagementInterfaceResource) Read(ctx context.Co
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchAlternateManagementInterface",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -302,7 +302,7 @@ func (r *NetworksSwitchAlternateManagementInterfaceResource) Update(ctx context.
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchAlternateManagementInterface",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

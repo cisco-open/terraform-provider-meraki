@@ -163,7 +163,7 @@ func (r *DevicesSensorCommandsCreateResource) Create(ctx context.Context, req re
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateDeviceSensorCommand",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

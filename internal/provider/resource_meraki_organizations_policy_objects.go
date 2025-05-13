@@ -231,7 +231,7 @@ func (r *OrganizationsPolicyObjectsResource) Create(ctx context.Context, req res
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationPolicyObject",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -251,7 +251,7 @@ func (r *OrganizationsPolicyObjectsResource) Create(ctx context.Context, req res
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationPolicyObjects",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -282,7 +282,7 @@ func (r *OrganizationsPolicyObjectsResource) Create(ctx context.Context, req res
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganizationPolicyObject",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -339,7 +339,7 @@ func (r *OrganizationsPolicyObjectsResource) Read(ctx context.Context, req resou
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationPolicyObjects",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -389,7 +389,7 @@ func (r *OrganizationsPolicyObjectsResource) Update(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationPolicyObject",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

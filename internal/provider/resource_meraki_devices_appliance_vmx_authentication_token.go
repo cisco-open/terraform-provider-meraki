@@ -110,7 +110,7 @@ func (r *DevicesApplianceVmxAuthenticationTokenResource) Create(ctx context.Cont
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateDeviceApplianceVmxAuthenticationToken",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

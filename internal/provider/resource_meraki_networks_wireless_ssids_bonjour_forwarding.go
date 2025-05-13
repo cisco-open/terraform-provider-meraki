@@ -195,7 +195,7 @@ func (r *NetworksWirelessSSIDsBonjourForwardingResource) Create(ctx context.Cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDBonjourForwarding",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -213,7 +213,7 @@ func (r *NetworksWirelessSSIDsBonjourForwardingResource) Create(ctx context.Cont
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessSSIDBonjourForwarding",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -267,7 +267,7 @@ func (r *NetworksWirelessSSIDsBonjourForwardingResource) Read(ctx context.Contex
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessSSIDBonjourForwarding",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -317,7 +317,7 @@ func (r *NetworksWirelessSSIDsBonjourForwardingResource) Update(ctx context.Cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDBonjourForwarding",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

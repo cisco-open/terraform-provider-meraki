@@ -104,7 +104,7 @@ func (r *NetworksSmUserAccessDevicesDeleteResource) Create(ctx context.Context, 
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing DeleteNetworkSmUserAccessDevice",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

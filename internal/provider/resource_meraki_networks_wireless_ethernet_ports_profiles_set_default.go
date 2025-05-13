@@ -120,7 +120,7 @@ func (r *NetworksWirelessEthernetPortsProfilesSetDefaultResource) Create(ctx con
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing SetNetworkWirelessEthernetPortsProfilesDefault",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

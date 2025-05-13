@@ -211,7 +211,7 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Create(ctx context.Context, req
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDSchedules",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -229,7 +229,7 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Create(ctx context.Context, req
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessSSIDSchedules",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -283,7 +283,7 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Read(ctx context.Context, req r
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessSSIDSchedules",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -333,7 +333,7 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Update(ctx context.Context, req
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDSchedules",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

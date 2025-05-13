@@ -311,7 +311,7 @@ func (r *NetworksSwitchRoutingOspfResource) Create(ctx context.Context, req reso
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchRoutingOspf",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -329,7 +329,7 @@ func (r *NetworksSwitchRoutingOspfResource) Create(ctx context.Context, req reso
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchRoutingOspf",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -382,7 +382,7 @@ func (r *NetworksSwitchRoutingOspfResource) Read(ctx context.Context, req resour
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchRoutingOspf",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -420,7 +420,7 @@ func (r *NetworksSwitchRoutingOspfResource) Update(ctx context.Context, req reso
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchRoutingOspf",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

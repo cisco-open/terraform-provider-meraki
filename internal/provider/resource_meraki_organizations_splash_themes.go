@@ -136,7 +136,7 @@ func (r *OrganizationsSplashThemesResource) Create(ctx context.Context, req reso
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganizationSplashThemes",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -170,7 +170,7 @@ func (r *OrganizationsSplashThemesResource) Create(ctx context.Context, req reso
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationSplashTheme",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -187,7 +187,7 @@ func (r *OrganizationsSplashThemesResource) Create(ctx context.Context, req reso
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationSplashThemes",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

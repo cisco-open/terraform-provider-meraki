@@ -162,7 +162,7 @@ func (r *OrganizationsIntegrationsXdrNetworksEnableResource) Create(ctx context.
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing EnableOrganizationIntegrationsXdrNetworks",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

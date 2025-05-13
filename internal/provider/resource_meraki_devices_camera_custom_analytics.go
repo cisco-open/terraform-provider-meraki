@@ -169,7 +169,7 @@ func (r *DevicesCameraCustomAnalyticsResource) Create(ctx context.Context, req r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCameraCustomAnalytics",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -187,7 +187,7 @@ func (r *DevicesCameraCustomAnalyticsResource) Create(ctx context.Context, req r
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceCameraCustomAnalytics",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -240,7 +240,7 @@ func (r *DevicesCameraCustomAnalyticsResource) Read(ctx context.Context, req res
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceCameraCustomAnalytics",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -278,7 +278,7 @@ func (r *DevicesCameraCustomAnalyticsResource) Update(ctx context.Context, req r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCameraCustomAnalytics",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

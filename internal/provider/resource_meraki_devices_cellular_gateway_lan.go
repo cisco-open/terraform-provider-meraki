@@ -206,7 +206,7 @@ func (r *DevicesCellularGatewayLanResource) Create(ctx context.Context, req reso
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCellularGatewayLan",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -224,7 +224,7 @@ func (r *DevicesCellularGatewayLanResource) Create(ctx context.Context, req reso
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceCellularGatewayLan",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -277,7 +277,7 @@ func (r *DevicesCellularGatewayLanResource) Read(ctx context.Context, req resour
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceCellularGatewayLan",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -315,7 +315,7 @@ func (r *DevicesCellularGatewayLanResource) Update(ctx context.Context, req reso
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCellularGatewayLan",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

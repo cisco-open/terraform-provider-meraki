@@ -226,7 +226,7 @@ func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource) C
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationWirelessSSIDsFirewallIsolationAllowlistEntry",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

@@ -168,7 +168,7 @@ func (r *DevicesCameraSenseResource) Create(ctx context.Context, req resource.Cr
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCameraSense",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -186,7 +186,7 @@ func (r *DevicesCameraSenseResource) Create(ctx context.Context, req resource.Cr
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceCameraSense",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -239,7 +239,7 @@ func (r *DevicesCameraSenseResource) Read(ctx context.Context, req resource.Read
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceCameraSense",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -277,7 +277,7 @@ func (r *DevicesCameraSenseResource) Update(ctx context.Context, req resource.Up
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCameraSense",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

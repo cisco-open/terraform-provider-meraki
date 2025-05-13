@@ -104,7 +104,7 @@ func (r *NetworksCancelResource) Create(ctx context.Context, req resource.Create
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CancelNetworkFloorPlansAutoLocateJob",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

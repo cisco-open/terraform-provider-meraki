@@ -301,7 +301,7 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsClaimResource) Create(ctx
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing ClaimAdministeredLicensingSubscriptionSubscriptions",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

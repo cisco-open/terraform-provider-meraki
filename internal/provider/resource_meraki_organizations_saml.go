@@ -127,7 +127,7 @@ func (r *OrganizationsSamlResource) Create(ctx context.Context, req resource.Cre
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationSaml",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -145,7 +145,7 @@ func (r *OrganizationsSamlResource) Create(ctx context.Context, req resource.Cre
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationSaml",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -198,7 +198,7 @@ func (r *OrganizationsSamlResource) Read(ctx context.Context, req resource.ReadR
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationSaml",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -236,7 +236,7 @@ func (r *OrganizationsSamlResource) Update(ctx context.Context, req resource.Upd
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationSaml",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

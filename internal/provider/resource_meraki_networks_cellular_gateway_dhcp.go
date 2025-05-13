@@ -168,7 +168,7 @@ func (r *NetworksCellularGatewayDhcpResource) Create(ctx context.Context, req re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCellularGatewayDhcp",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -186,7 +186,7 @@ func (r *NetworksCellularGatewayDhcpResource) Create(ctx context.Context, req re
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkCellularGatewayDhcp",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -239,7 +239,7 @@ func (r *NetworksCellularGatewayDhcpResource) Read(ctx context.Context, req reso
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkCellularGatewayDhcp",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -277,7 +277,7 @@ func (r *NetworksCellularGatewayDhcpResource) Update(ctx context.Context, req re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCellularGatewayDhcp",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

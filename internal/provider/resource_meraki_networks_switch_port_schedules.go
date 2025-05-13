@@ -487,7 +487,7 @@ func (r *NetworksSwitchPortSchedulesResource) Create(ctx context.Context, req re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchPortSchedule",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -505,7 +505,7 @@ func (r *NetworksSwitchPortSchedulesResource) Create(ctx context.Context, req re
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchPortSchedules",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -569,7 +569,7 @@ func (r *NetworksSwitchPortSchedulesResource) Read(ctx context.Context, req reso
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkSwitchPortSchedules",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -629,7 +629,7 @@ func (r *NetworksSwitchPortSchedulesResource) Update(ctx context.Context, req re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchPortSchedule",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

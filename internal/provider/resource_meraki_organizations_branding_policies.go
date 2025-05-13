@@ -503,7 +503,7 @@ func (r *OrganizationsBrandingPoliciesResource) Create(ctx context.Context, req 
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganizationBrandingPolicies",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -541,7 +541,7 @@ func (r *OrganizationsBrandingPoliciesResource) Create(ctx context.Context, req 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationBrandingPolicy",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -558,7 +558,7 @@ func (r *OrganizationsBrandingPoliciesResource) Create(ctx context.Context, req 
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationBrandingPolicies",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -590,7 +590,7 @@ func (r *OrganizationsBrandingPoliciesResource) Create(ctx context.Context, req 
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganizationBrandingPolicy",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -646,7 +646,7 @@ func (r *OrganizationsBrandingPoliciesResource) Read(ctx context.Context, req re
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationBrandingPolicy",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -696,7 +696,7 @@ func (r *OrganizationsBrandingPoliciesResource) Update(ctx context.Context, req 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationBrandingPolicy",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

@@ -158,7 +158,7 @@ func (r *NetworksCellularGatewayConnectivityMonitoringDestinationsResource) Crea
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCellularGatewayConnectivityMonitoringDestinations",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -176,7 +176,7 @@ func (r *NetworksCellularGatewayConnectivityMonitoringDestinationsResource) Crea
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkCellularGatewayConnectivityMonitoringDestinations",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -229,7 +229,7 @@ func (r *NetworksCellularGatewayConnectivityMonitoringDestinationsResource) Read
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkCellularGatewayConnectivityMonitoringDestinations",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -267,7 +267,7 @@ func (r *NetworksCellularGatewayConnectivityMonitoringDestinationsResource) Upda
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCellularGatewayConnectivityMonitoringDestinations",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

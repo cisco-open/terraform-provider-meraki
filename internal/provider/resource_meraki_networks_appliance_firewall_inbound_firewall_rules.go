@@ -287,7 +287,7 @@ func (r *NetworksApplianceFirewallInboundFirewallRulesResource) Create(ctx conte
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallInboundFirewallRules",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -305,7 +305,7 @@ func (r *NetworksApplianceFirewallInboundFirewallRulesResource) Create(ctx conte
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceFirewallInboundFirewallRules",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -358,7 +358,7 @@ func (r *NetworksApplianceFirewallInboundFirewallRulesResource) Read(ctx context
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceFirewallInboundFirewallRules",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -396,7 +396,7 @@ func (r *NetworksApplianceFirewallInboundFirewallRulesResource) Update(ctx conte
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallInboundFirewallRules",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

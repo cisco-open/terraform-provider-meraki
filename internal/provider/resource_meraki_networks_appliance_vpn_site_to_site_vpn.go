@@ -256,7 +256,7 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Create(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceVpnSiteToSiteVpn",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -274,7 +274,7 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Create(ctx context.Context, 
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceVpnSiteToSiteVpn",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -327,7 +327,7 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Read(ctx context.Context, re
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceVpnSiteToSiteVpn",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -365,7 +365,7 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Update(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceVpnSiteToSiteVpn",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

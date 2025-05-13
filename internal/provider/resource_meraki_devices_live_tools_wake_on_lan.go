@@ -246,7 +246,7 @@ func (r *DevicesLiveToolsWakeOnLanResource) Create(ctx context.Context, req reso
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateDeviceLiveToolsWakeOnLan",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -264,7 +264,7 @@ func (r *DevicesLiveToolsWakeOnLanResource) Create(ctx context.Context, req reso
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceLiveToolsWakeOnLan",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -318,7 +318,7 @@ func (r *DevicesLiveToolsWakeOnLanResource) Read(ctx context.Context, req resour
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceLiveToolsWakeOnLan",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}

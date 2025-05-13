@@ -230,7 +230,7 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Create(ctx context.
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallOneToManyNatRules",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -248,7 +248,7 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Create(ctx context.
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceFirewallOneToManyNatRules",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -301,7 +301,7 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Read(ctx context.Co
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceFirewallOneToManyNatRules",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -339,7 +339,7 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Update(ctx context.
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallOneToManyNatRules",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

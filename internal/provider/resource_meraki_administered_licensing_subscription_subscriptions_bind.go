@@ -165,7 +165,7 @@ func (r *AdministeredLicensingSubscriptionSubscriptionsBindResource) Create(ctx 
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing BindAdministeredLicensingSubscriptionSubscription",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

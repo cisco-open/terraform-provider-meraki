@@ -587,7 +587,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Create(ctx context.Context
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDSplashSettings",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -605,7 +605,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Create(ctx context.Context
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessSSIDSplashSettings",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -659,7 +659,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Read(ctx context.Context, 
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessSSIDSplashSettings",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -709,7 +709,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Update(ctx context.Context
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDSplashSettings",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

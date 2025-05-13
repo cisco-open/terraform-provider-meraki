@@ -132,7 +132,7 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Create(ctx context
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganizationCameraCustomAnalyticsArtifacts",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -168,7 +168,7 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Create(ctx context
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationCameraCustomAnalyticsArtifact",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -185,7 +185,7 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Create(ctx context
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationCameraCustomAnalyticsArtifacts",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -217,7 +217,7 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Create(ctx context
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetOrganizationCameraCustomAnalyticsArtifact",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -273,7 +273,7 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Read(ctx context.C
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetOrganizationCameraCustomAnalyticsArtifact",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}

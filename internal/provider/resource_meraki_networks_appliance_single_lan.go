@@ -253,7 +253,7 @@ func (r *NetworksApplianceSingleLanResource) Create(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceSingleLan",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -271,7 +271,7 @@ func (r *NetworksApplianceSingleLanResource) Create(ctx context.Context, req res
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceSingleLan",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -324,7 +324,7 @@ func (r *NetworksApplianceSingleLanResource) Read(ctx context.Context, req resou
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkApplianceSingleLan",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -362,7 +362,7 @@ func (r *NetworksApplianceSingleLanResource) Update(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceSingleLan",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

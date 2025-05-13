@@ -131,7 +131,7 @@ func (r *DevicesCameraVideoSettingsResource) Create(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCameraVideoSettings",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -149,7 +149,7 @@ func (r *DevicesCameraVideoSettingsResource) Create(ctx context.Context, req res
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceCameraVideoSettings",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -202,7 +202,7 @@ func (r *DevicesCameraVideoSettingsResource) Read(ctx context.Context, req resou
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetDeviceCameraVideoSettings",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -240,7 +240,7 @@ func (r *DevicesCameraVideoSettingsResource) Update(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCameraVideoSettings",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

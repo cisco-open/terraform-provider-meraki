@@ -282,7 +282,7 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Create(ctx context.Co
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDTrafficShapingRules",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -300,7 +300,7 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Create(ctx context.Co
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessSSIDTrafficShapingRules",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -354,7 +354,7 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Read(ctx context.Cont
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkWirelessSSIDTrafficShapingRules",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -404,7 +404,7 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Update(ctx context.Co
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDTrafficShapingRules",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

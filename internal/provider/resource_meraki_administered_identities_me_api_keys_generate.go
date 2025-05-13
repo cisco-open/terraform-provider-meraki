@@ -96,7 +96,7 @@ func (r *AdministeredIDentitiesMeAPIKeysGenerateResource) Create(ctx context.Con
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GenerateAdministeredIDentitiesMeAPIKeys",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

@@ -171,7 +171,7 @@ func (r *NetworksSwitchStacksRemoveResource) Create(ctx context.Context, req res
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing RemoveNetworkSwitchStack",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

@@ -340,7 +340,7 @@ func (r *OrganizationsLicensingCotermLicensesMoveResource) Create(ctx context.Co
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing MoveOrganizationLicensingCotermLicenses",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

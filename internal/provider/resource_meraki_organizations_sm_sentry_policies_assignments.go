@@ -241,7 +241,7 @@ func (r *OrganizationsSmSentryPoliciesAssignmentsResource) Create(ctx context.Co
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationSmSentryPoliciesAssignments",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

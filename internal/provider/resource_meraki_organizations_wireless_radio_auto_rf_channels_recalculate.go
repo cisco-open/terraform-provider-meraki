@@ -118,7 +118,7 @@ func (r *OrganizationsWirelessRadioAutoRfChannelsRecalculateResource) Create(ctx
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing RecalculateOrganizationWirelessRadioAutoRfChannels",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

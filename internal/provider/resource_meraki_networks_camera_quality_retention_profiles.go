@@ -1239,7 +1239,7 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Create(ctx context.Cont
 			if restyResp1.StatusCode() != 404 {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkCameraQualityRetentionProfiles",
-					err.Error(),
+					restyResp1.String(),
 				)
 				return
 			}
@@ -1277,7 +1277,7 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Create(ctx context.Cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkCameraQualityRetentionProfile",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}
@@ -1294,7 +1294,7 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Create(ctx context.Cont
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkCameraQualityRetentionProfiles",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}
@@ -1326,7 +1326,7 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Create(ctx context.Cont
 			if restyRespGet != nil {
 				resp.Diagnostics.AddError(
 					"Failure when executing GetNetworkCameraQualityRetentionProfile",
-					err.Error(),
+					restyRespGet.String(),
 				)
 				return
 			}
@@ -1382,7 +1382,7 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Read(ctx context.Contex
 			}
 			resp.Diagnostics.AddError(
 				"Failure when executing GetNetworkCameraQualityRetentionProfile",
-				err.Error(),
+				restyRespGet.String(),
 			)
 			return
 		}
@@ -1432,7 +1432,7 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Update(ctx context.Cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCameraQualityRetentionProfile",
-				err.Error(),
+				restyResp2.String(),
 			)
 			return
 		}

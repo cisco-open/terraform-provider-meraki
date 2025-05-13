@@ -219,7 +219,7 @@ func (r *OrganizationsLicensesRenewSeatsResource) Create(ctx context.Context, re
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing RenewOrganizationLicensesSeats",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

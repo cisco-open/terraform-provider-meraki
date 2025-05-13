@@ -149,7 +149,7 @@ func (r *NetworksSmDevicesMoveResource) Create(ctx context.Context, req resource
 		if restyResp1 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing MoveNetworkSmDevices",
-				err.Error(),
+				restyResp1.String(),
 			)
 			return
 		}

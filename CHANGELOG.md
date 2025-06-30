@@ -1,6 +1,20 @@
 ## Unreleased (- -, -)
 
-## 1.1.3-beta (May 13, 2025)
+## 1.1.5-beta (June 30, 2025)
+FEATURES:
+* Added improved error handling and retry functionality with exponential backoff and jitter for API requests
+  * Better error messages and status code handling
+  * Configurable retry behavior via environment variables:
+    * `MERAKI_RETRIES` - Maximum number of retries (default: 3)
+    * `MERAKI_RETRY_DELAY` - Base delay between retries in ms (default: 1000)
+    * `MERAKI_RETRY_JITTER` - Maximum random jitter in ms (default: 3000)
+    * `MERAKI_USE_RETRY_HEADER` - Whether to respect Retry-After header (default: false)
+  * Detailed error logging for debugging
+  * Graceful handling of rate limits and temporary failures
+  
+  
+
+## 1.1.4-beta (May 13, 2025)
 BUGFIXES:
 * Refactored device response handling in data source files to convert Imei from pointer to string format, ensuring better compatibility with the API response.
 

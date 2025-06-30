@@ -559,15 +559,16 @@ func (r *OrganizationsPolicyObjectsRs) toSdkApiRequestUpdate(ctx context.Context
 // From gosdk to TF Structs Schema
 func ResponseOrganizationsGetOrganizationPolicyObjectItemToBodyRs(state OrganizationsPolicyObjectsRs, response *merakigosdk.ResponseOrganizationsGetOrganizationPolicyObject, is_read bool) OrganizationsPolicyObjectsRs {
 	itemState := OrganizationsPolicyObjectsRs{
-		Category:   types.StringValue(response.Category),
-		Cidr:       types.StringValue(response.Cidr),
-		CreatedAt:  types.StringValue(response.CreatedAt),
-		GroupIDs:   StringSliceToSet(response.GroupIDs),
-		ID:         types.StringValue(response.ID),
-		Name:       types.StringValue(response.Name),
-		NetworkIDs: StringSliceToSet(response.NetworkIDs),
-		Type:       types.StringValue(response.Type),
-		UpdatedAt:  types.StringValue(response.UpdatedAt),
+		Category:       types.StringValue(response.Category),
+		Cidr:           types.StringValue(response.Cidr),
+		CreatedAt:      types.StringValue(response.CreatedAt),
+		GroupIDs:       StringSliceToSet(response.GroupIDs),
+		ID:             types.StringValue(response.ID),
+		Name:           types.StringValue(response.Name),
+		NetworkIDs:     StringSliceToSet(response.NetworkIDs),
+		Type:           types.StringValue(response.Type),
+		UpdatedAt:      types.StringValue(response.UpdatedAt),
+		PolicyObjectID: types.StringValue(response.ID),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsPolicyObjectsRs)

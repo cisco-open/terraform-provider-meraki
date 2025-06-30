@@ -21,6 +21,7 @@ package provider
 import (
 	"context"
 	"log"
+	"time"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -325,12 +326,12 @@ func (d *OrganizationsSwitchPortsUsageHistoryByDeviceByIntervalDataSource) Read(
 		queryParams1.PerPage = int(organizationsSwitchPortsUsageHistoryByDeviceByInterval.PerPage.ValueInt64())
 		queryParams1.StartingAfter = organizationsSwitchPortsUsageHistoryByDeviceByInterval.StartingAfter.ValueString()
 		queryParams1.EndingBefore = organizationsSwitchPortsUsageHistoryByDeviceByInterval.EndingBefore.ValueString()
-		queryParams1.ConfigurationUpdatedAfter = organizationsSwitchPortsUsageHistoryByDeviceByInterval.ConfigurationUpdatedAfter.ValueString()
+		queryParams1.ConfigurationUpdateAfter = organizationsSwitchPortsUsageHistoryByDeviceByInterval.ConfigurationUpdatedAfter.ValueString()
 		queryParams1.Mac = organizationsSwitchPortsUsageHistoryByDeviceByInterval.Mac.ValueString()
 		queryParams1.Macs = elementsToStrings(ctx, organizationsSwitchPortsUsageHistoryByDeviceByInterval.Macs)
 		queryParams1.Name = organizationsSwitchPortsUsageHistoryByDeviceByInterval.Name.ValueString()
-		queryParams1.NetworkIDs = elementsToStrings(ctx, organizationsSwitchPortsUsageHistoryByDeviceByInterval.NetworkIDs)
-		queryParams1.PortProfileIDs = elementsToStrings(ctx, organizationsSwitchPortsUsageHistoryByDeviceByInterval.PortProfileIDs)
+		queryParams1.NetworkIds = elementsToStrings(ctx, organizationsSwitchPortsUsageHistoryByDeviceByInterval.NetworkIDs)
+		queryParams1.PortProfileIds = elementsToStrings(ctx, organizationsSwitchPortsUsageHistoryByDeviceByInterval.PortProfileIDs)
 		queryParams1.Serial = organizationsSwitchPortsUsageHistoryByDeviceByInterval.Serial.ValueString()
 		queryParams1.Serials = elementsToStrings(ctx, organizationsSwitchPortsUsageHistoryByDeviceByInterval.Serials)
 
@@ -484,7 +485,7 @@ func ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemT
 												for i, intervals := range *ports.Intervals {
 													result[i] = ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemsPortsIntervals{
 														Bandwidth: func() *ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemsPortsIntervalsBandwidth {
-															if intervals.Bandwidth != nil {
+															if intervals.Bandwidth.Usage != nil {
 																return &ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemsPortsIntervalsBandwidth{
 																	Usage: func() *ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemsPortsIntervalsBandwidthUsage {
 																		if intervals.Bandwidth.Usage != nil {
@@ -516,7 +517,7 @@ func ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemT
 															return nil
 														}(),
 														Data: func() *ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemsPortsIntervalsData {
-															if intervals.Data != nil {
+															if intervals.Data.Usage != nil {
 																return &ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemsPortsIntervalsData{
 																	Usage: func() *ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemsPortsIntervalsDataUsage {
 																		if intervals.Data.Usage != nil {
@@ -547,9 +548,9 @@ func ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemT
 															}
 															return nil
 														}(),
-														EndTs: types.StringValue(intervals.EndTs),
+														EndTs: types.StringValue(intervals.EndTs.Format(time.RFC3339)),
 														Energy: func() *ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemsPortsIntervalsEnergy {
-															if intervals.Energy != nil {
+															if intervals.Energy.Usage != nil {
 																return &ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemsPortsIntervalsEnergy{
 																	Usage: func() *ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemsPortsIntervalsEnergyUsage {
 																		if intervals.Energy.Usage != nil {
@@ -568,7 +569,7 @@ func ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemT
 															}
 															return nil
 														}(),
-														StartTs: types.StringValue(intervals.StartTs),
+														StartTs: types.StringValue(intervals.StartTs.Format(time.RFC3339)),
 													}
 												}
 												return &result

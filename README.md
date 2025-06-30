@@ -30,7 +30,7 @@ terraform {
   required_providers {
     meraki = {
       source = "cisco-open/meraki"
-      version = "1.1.3-beta"
+      version = "1.1.5-beta"
     }
   }
 }
@@ -68,7 +68,7 @@ terraform {
   required_providers {
     meraki = {
       source = "hashicorp.com/edu/meraki"
-      version = "1.1.3-beta"
+      version = "1.1.5-beta"
     }
   }
 }
@@ -120,7 +120,7 @@ The following table shows the supported versions.
 |-----------------------|-------------------------------------|------------------------------|
 | 1.33.0                | 0.1.0-alpha                         | 2.0.9                        |
 | 1.44.1                | 0.2.0-alpha                         | 3.0.0                        |
-| 1.53.0                | 1.1.3-beta                          | 4.0.0                        |
+| 1.53.0                | 1.1.5-beta                          | 4.0.0                        |
 
 If your SDK, Terraform provider is older please consider updating it first.
 
@@ -133,6 +133,23 @@ If your SDK, Terraform provider is older please consider updating it first.
 
 - When `per_page` is set to `-1`, the server will return **all available items** for that endpoint, bypassing the pagination logic.
 - If a positive integer is passed for `per_page`, the endpoint will continue using traditional pagination and return only the number of items specified by `per_page`.
+
+## Environment Variables for Configuration
+
+The provider supports several environment variables to customize behavior:
+
+### Retry Configuration
+
+| Environment Variable      | Description                                 | Default Value |
+|---------------------------|---------------------------------------------| --------------|
+| `MERAKI_RETRIES`          | Maximum number of retries                   | 3             |
+| `MERAKI_RETRY_DELAY`      | Base wait time between retries in ms        | 1000          |
+| `MERAKI_RETRY_JITTER`     | Maximum random jitter in ms                 | 3000          |
+| `MERAKI_USE_RETRY_HEADER` | Whether to respect Retry-After header       | false         |
+
+
+
+### Example Usage
 
 # Contributing
 

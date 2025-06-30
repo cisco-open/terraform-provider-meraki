@@ -39,8 +39,8 @@ import (
 )
 
 const (
-	CUSTOM_USER_AGENT  = "MerakiTerraform/1.1.3-beta Cisco"
-	DEFAULT_USER_AGENT = "Meraki"
+	CUSTOM_USER_AGENT  = "MerakiTerraform/1.1.5-beta Cisco"
+	DEFAULT_USER_AGENT = ""
 )
 
 // terraform-provider-meraki

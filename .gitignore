@@ -1,7 +1,7 @@
 .DS_Store
 
 run_rmt.sh
-run_terraform_tests.sh
+run_all_samples.sh
 
 
 # Local .terraform directories

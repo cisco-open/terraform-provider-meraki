@@ -21,7 +21,6 @@ package provider
 import (
 	"context"
 	"log"
-	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -156,14 +155,8 @@ func ResponseNetworksGetNetworkSyslogServersItemToBody(state NetworksSyslogServe
 				result := make([]ResponseNetworksGetNetworkSyslogServersServers, len(*response.Servers))
 				for i, servers := range *response.Servers {
 					result[i] = ResponseNetworksGetNetworkSyslogServersServers{
-						Host: types.StringValue(servers.Host),
-						Port: func() types.Int64 {
-							if servers.Port != "" {
-								serverPort, _ := strconv.Atoi(servers.Port)
-								return types.Int64Value(int64(serverPort))
-							}
-							return types.Int64{}
-						}(),
+						Host:  types.StringValue(servers.Host),
+						Port:  types.Int64Value(int64(*servers.Port)),
 						Roles: StringSliceToList(servers.Roles),
 					}
 				}

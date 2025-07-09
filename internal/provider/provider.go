@@ -25,6 +25,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"time"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -39,8 +40,12 @@ import (
 )
 
 const (
-	CUSTOM_USER_AGENT  = "MerakiTerraform/1.1.5-beta Cisco"
-	DEFAULT_USER_AGENT = ""
+	CUSTOM_USER_AGENT        = "MerakiTerraform/1.1.6-beta Cisco"
+	DEFAULT_USER_AGENT       = ""
+	DEFAULT_MAX_RETRIES      = 3
+	DEFAULT_MAX_RETRY_DELAY  = 1000
+	DEFAULT_MAX_RETRY_JITTER = 3000
+	DEFAULT_USE_RETRY_HEADER = false
 )
 
 // terraform-provider-meraki
@@ -62,6 +67,10 @@ type MerakiProviderModel struct {
 	Debug                 types.String `tfsdk:"meraki_debug"`
 	RequestPerSecond      types.Int64  `tfsdk:"meraki_requests_per_second"`
 	UserAgent             types.String `tfsdk:"meraki_user_agent"`
+	Retries               types.Int64  `tfsdk:"meraki_retries"`
+	RetriesDelay          types.Int64  `tfsdk:"meraki_retries_delay"`
+	RetriesJitter         types.Int64  `tfsdk:"meraki_retries_jitter"`
+	UseRetryHeader        types.Bool   `tfsdk:"meraki_use_retry_header"`
 }
 
 type MerakiProviderData struct {
@@ -102,6 +111,22 @@ func (p *MerakiProvider) Schema(ctx context.Context, req provider.SchemaRequest,
 						"must not contain white spaces",
 					),
 				},
+			},
+			"meraki_retries": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum number of retries after receiving a 429 (Too Many Requests) error response. Default is 3.",
+			},
+			"meraki_retries_delay": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum delay between retries after receiving a 429 (Too Many Requests) error response. Default is 3000 milliseconds.",
+			},
+			"meraki_retries_jitter": schema.Int64Attribute{
+				Optional:            true,
+				MarkdownDescription: "Maximum jitter between retries after receiving a 429 (Too Many Requests) error response. Default is 3000 milliseconds.",
+			},
+			"meraki_use_retry_header": schema.BoolAttribute{
+				Optional:            true,
+				MarkdownDescription: "Flag for Cisco Meraki to enable the use of the Retry-After header in the response. Default is `false`.",
 			},
 		},
 	}
@@ -194,6 +219,8 @@ func (p *MerakiProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	client, err := merakigosdk.NewClientWithOptionsAndRequests(baseURL,
 		merakiDashboardApiKey, debug, userAgent, requestPerSecond,
 	)
+	maxRetries, maxRetryDelay, maxRetryJitter, useRetryHeader := GetBackoffValues(data)
+
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Uneable to Create Meraki API Client",
@@ -201,6 +228,8 @@ func (p *MerakiProvider) Configure(ctx context.Context, req provider.ConfigureRe
 		)
 		return
 	}
+	client.SetBackoff(&maxRetries, &maxRetryDelay, &maxRetryJitter, &useRetryHeader)
+
 	// client.RestyClient().SetLogger(createLogger())
 	// client.SetUserAgent(customUserAgent)
 	dataClient := MerakiProviderData{Client: client}
@@ -208,6 +237,38 @@ func (p *MerakiProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	resp.DataSourceData = dataClient
 	resp.ResourceData = dataClient
 
+}
+
+func GetBackoffValues(data MerakiProviderModel) (maxRetries int, maxRetryDelay time.Duration, maxRetryJitter time.Duration, useRetryHeader bool) {
+
+	if data.Retries.IsUnknown() || data.Retries.IsNull() {
+		maxRetries = DEFAULT_MAX_RETRIES
+	} else {
+		maxRetries = int(data.Retries.ValueInt64())
+	}
+
+	if data.RetriesDelay.IsUnknown() || data.RetriesDelay.IsNull() {
+		maxRetryDelay = time.Duration(DEFAULT_MAX_RETRY_DELAY) * time.Millisecond
+	} else {
+		maxRetryDelay = time.Duration(data.RetriesDelay.ValueInt64()) * time.Millisecond
+	}
+
+	if data.RetriesJitter.IsUnknown() || data.RetriesJitter.IsNull() {
+		maxRetryJitter = time.Duration(DEFAULT_MAX_RETRY_JITTER) * time.Millisecond
+	} else {
+		maxRetryJitter = time.Duration(data.RetriesJitter.ValueInt64()) * time.Millisecond
+	}
+
+	if data.UseRetryHeader.IsUnknown() || data.UseRetryHeader.IsNull() {
+		useRetryHeader = DEFAULT_USE_RETRY_HEADER
+	} else {
+		useRetryHeader = data.UseRetryHeader.ValueBool()
+	}
+	log.Printf("[DEBUG] Meraki maxRetries: %d", maxRetries)
+	log.Printf("[DEBUG] Meraki maxRetryDelay: %d", maxRetryDelay)
+	log.Printf("[DEBUG] Meraki maxRetryJitter: %d", maxRetryJitter)
+	log.Printf("[DEBUG] Meraki useRetryHeader: %t", useRetryHeader)
+	return maxRetries, maxRetryDelay, maxRetryJitter, useRetryHeader
 }
 
 func New(version string) func() provider.Provider {

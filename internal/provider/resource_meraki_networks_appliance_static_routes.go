@@ -183,6 +183,7 @@ func (r *NetworksApplianceStaticRoutesResource) Schema(_ context.Context, _ reso
 			"static_route_id": schema.StringAttribute{
 				MarkdownDescription: `staticRouteId path parameter. Static route ID`,
 				Optional:            true,
+				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},

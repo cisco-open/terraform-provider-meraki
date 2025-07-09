@@ -61,15 +61,14 @@ func (r *NetworksResource) Metadata(_ context.Context, req resource.MetadataRequ
 func (r *NetworksResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			// "copy_from_network_id": schema.StringAttribute{
-			// 	MarkdownDescription: `The ID of the network to copy configuration from. Other provided parameters will override the copied configuration, except type which must match this network's type exactly.`,
-			// 	Computed:            true,
-			// 	Optional:            true,
-			// 	PlanModifiers: []planmodifier.String{
-			// 		stringplanmodifier.UseStateForUnknown(),
-			// 		SuppressDiffString(),
-			// 	},
-			// },
+			"copy_from_network_id": schema.StringAttribute{
+				MarkdownDescription: `The ID of the network to copy configuration from. Other provided parameters will override the copied configuration, except type which must match this network's type exactly.`,
+				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
 			"enrollment_string": schema.StringAttribute{
 				MarkdownDescription: `Enrollment string for the network`,
 				Computed:            true,
@@ -413,6 +412,7 @@ func (r *NetworksResource) Delete(ctx context.Context, req resource.DeleteReques
 
 // TF Structs Schema
 type NetworksRs struct {
+	CopyFromNetworkID       types.String `tfsdk:"copy_from_network_id"`
 	NetworkID               types.String `tfsdk:"network_id"`
 	OrganizationID          types.String `tfsdk:"organization_id"`
 	EnrollmentString        types.String `tfsdk:"enrollment_string"`
@@ -429,12 +429,12 @@ type NetworksRs struct {
 // FromBody
 func (r *NetworksRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestOrganizationsCreateOrganizationNetwork {
 	emptyString := ""
-	// copyFromNetworkID := new(string)
-	// if !r.CopyFromNetworkID.IsUnknown() && !r.CopyFromNetworkID.IsNull() {
-	// 	*copyFromNetworkID = r.CopyFromNetworkID.ValueString()
-	// } else {
-	// 	copyFromNetworkID = &emptyString
-	// }
+	copyFromNetworkID := new(string)
+	if !r.CopyFromNetworkID.IsUnknown() && !r.CopyFromNetworkID.IsNull() {
+		*copyFromNetworkID = r.CopyFromNetworkID.ValueString()
+	} else {
+		copyFromNetworkID = &emptyString
+	}
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
 		*name = r.Name.ValueString()
@@ -458,12 +458,12 @@ func (r *NetworksRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.Req
 		timeZone = &emptyString
 	}
 	out := merakigosdk.RequestOrganizationsCreateOrganizationNetwork{
-		// CopyFromNetworkID: *copyFromNetworkID,
-		Name:         *name,
-		Notes:        *notes,
-		ProductTypes: productTypes,
-		Tags:         tags,
-		TimeZone:     *timeZone,
+		CopyFromNetworkID: *copyFromNetworkID,
+		Name:              *name,
+		Notes:             *notes,
+		ProductTypes:      productTypes,
+		Tags:              tags,
+		TimeZone:          *timeZone,
 	}
 	return &out
 }
@@ -516,13 +516,14 @@ func ResponseNetworksGetNetworkItemToBodyRs(state NetworksRs, response *merakigo
 			}
 			return types.Bool{}
 		}(),
-		Name:           types.StringValue(response.Name),
-		Notes:          types.StringValue(response.Notes),
-		OrganizationID: types.StringValue(response.OrganizationID),
-		ProductTypes:   StringSliceToSet(response.ProductTypes),
-		Tags:           StringSliceToSet(response.Tags),
-		TimeZone:       types.StringValue(response.TimeZone),
-		URL:            types.StringValue(response.URL),
+		Name:              types.StringValue(response.Name),
+		Notes:             types.StringValue(response.Notes),
+		OrganizationID:    types.StringValue(response.OrganizationID),
+		ProductTypes:      StringSliceToSet(response.ProductTypes),
+		Tags:              StringSliceToSet(response.Tags),
+		TimeZone:          types.StringValue(response.TimeZone),
+		URL:               types.StringValue(response.URL),
+		CopyFromNetworkID: state.CopyFromNetworkID,
 	}
 	itemState.NetworkID = types.StringValue(response.ID)
 	if is_read {

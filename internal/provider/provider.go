@@ -22,11 +22,12 @@ package provider
 import (
 	"context"
 	"fmt"
-	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 	"log"
 	"os"
 	"regexp"
 	"time"
+
+	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -39,7 +40,7 @@ import (
 )
 
 const (
-	CUSTOM_USER_AGENT        = "MerakiTerraform/1.1.5-beta Cisco"
+	CUSTOM_USER_AGENT        = "MerakiTerraform/1.1.6-beta Cisco"
 	DEFAULT_USER_AGENT       = ""
 	DEFAULT_MAX_RETRIES      = 3
 	DEFAULT_MAX_RETRY_DELAY  = 1000

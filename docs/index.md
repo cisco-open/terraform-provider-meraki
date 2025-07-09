@@ -24,3 +24,9 @@ description: |-
 - `meraki_debug` (String) Flag for Cisco Meraki to enable debugging. If not set, it uses the MERAKI_DEBUG environment variable defaults to `false`.
 - `meraki_requests_per_second` (Int) Setting requests per second, default is 10.
 - `meraki_user_agent`(String) Define an identifier or User-Agent for API requests to Meraki. Default is (Meraki).
+
+#### Retry Configuration Block
+- `max_retries` (Int) Maximum number of retries. Default is 3.
+- `retry_delay` (Int) Base delay between retries in milliseconds. Default is 1000.
+- `retry_jitter` (Int) Maximum random jitter in milliseconds. Default is 3000.
+- `use_retry_header` (Bool) Whether to respect the Retry-After header. Default is false.

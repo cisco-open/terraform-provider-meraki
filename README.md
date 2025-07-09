@@ -134,22 +134,48 @@ If your SDK, Terraform provider is older please consider updating it first.
 - When `per_page` is set to `-1`, the server will return **all available items** for that endpoint, bypassing the pagination logic.
 - If a positive integer is passed for `per_page`, the endpoint will continue using traditional pagination and return only the number of items specified by `per_page`.
 
-## Environment Variables for Configuration
+## Provider Configuration for Retry Options
 
-The provider supports several environment variables to customize behavior:
+> **Note:** Configuration via environment variables (`MERAKI_RETRIES`, `MERAKI_RETRY_DELAY`, etc.) is now deprecated. All configuration must be set directly in the `provider` block of your `.tf` file.
 
-### Retry Configuration
+You can customize retry options as follows:
 
-| Environment Variable      | Description                                 | Default Value |
-|---------------------------|---------------------------------------------| --------------|
-| `MERAKI_RETRIES`          | Maximum number of retries                   | 3             |
-| `MERAKI_RETRY_DELAY`      | Base wait time between retries in ms        | 1000          |
-| `MERAKI_RETRY_JITTER`     | Maximum random jitter in ms                 | 3000          |
-| `MERAKI_USE_RETRY_HEADER` | Whether to respect Retry-After header       | false         |
+```hcl
+provider "meraki" {
+  retry {
+    max_retries      = 3      # Maximum number of retries
+    retry_delay      = 1000   # Base wait time between retries in ms
+    retry_jitter     = 3000   # Maximum random jitter in ms
+    use_retry_header = false  # Whether to respect the Retry-After header
+  }
+  # ...other configuration parameters...
+}
+```
 
+## Documentation
 
+In the docs directory, you can find the documentation.
 
-### Example Usage
+## Compatibility matrix
+The following table shows the supported versions.
+
+| Dashboard Api version | Terraform "meraki" provider version | Go "dashboard-api-go" version|
+|-----------------------|-------------------------------------|------------------------------|
+| 1.33.0                | 0.1.0-alpha                         | 2.0.9                        |
+| 1.44.1                | 0.2.0-alpha                         | 3.0.0                        |
+| 1.53.0                | 1.1.5-beta                          | 4.0.0                        |
+
+If your SDK, Terraform provider is older please consider updating it first.
+
+## Fetch All Items of an Endpoint with Pagination
+
+- **Support for fetching all items with `per_page=-1`**  
+  A new feature has been introduced to the API endpoints, enabling clients to fetch all available items in a single request by setting the `per_page` parameter to `-1`. This enhancement allows you to retrieve the full dataset without needing to make multiple paginated requests.
+
+### Behavior
+
+- When `per_page` is set to `-1`, the server will return **all available items** for that endpoint, bypassing the pagination logic.
+- If a positive integer is passed for `per_page`, the endpoint will continue using traditional pagination and return only the number of items specified by `per_page`.
 
 # Contributing
 

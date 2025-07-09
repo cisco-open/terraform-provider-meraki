@@ -9,6 +9,7 @@ terraform {
 }
 provider "meraki" {
   meraki_user_agent = "Testing_aaa"
+  meraki_base_url = "http://localhost:3006/api/v1"
   # meraki_requests_per_second = 10
 }
 data "meraki_administered_identities_me" "example" {

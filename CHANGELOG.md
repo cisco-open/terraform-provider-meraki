@@ -1,5 +1,15 @@
 ## Unreleased (- -, -)
 
+
+## 1.1.6-beta (July 09, 2025)
+FEATURES:
+* Deprecated configuration of retry options via environment variables (`MERAKI_RETRIES`, `MERAKI_RETRY_DELAY`, `MERAKI_RETRY_JITTER`, `MERAKI_USE_RETRY_HEADER`).
+* Retry options must now be configured directly in the `provider` block of your Terraform configuration file using the `retry` block. See the README for updated usage instructions.
+* Enabling copy_from_network_id attribute in meraki_networks resource schema.
+* Create static routes fixed.
+* `meraki_organizations_policy_objects` creation produces an error because of `policy_object_id`.
+
+
 ## 1.1.5-beta (June 30, 2025)
 FEATURES:
 * Added improved error handling and retry functionality with exponential backoff and jitter for API requests

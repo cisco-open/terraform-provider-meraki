@@ -142,6 +142,7 @@ func (r *OrganizationsPolicyObjectsResource) Schema(_ context.Context, _ resourc
 			"policy_object_id": schema.StringAttribute{
 				MarkdownDescription: `policyObjectId path parameter. Policy object ID`,
 				Optional:            true,
+				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},

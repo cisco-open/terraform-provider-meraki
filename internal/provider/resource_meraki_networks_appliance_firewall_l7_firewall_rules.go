@@ -105,6 +105,8 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Schema(_ context.Cont
 									"host",
 									"ipRange",
 									"port",
+									"blockedCountries",
+									"allowedCountries",
 								),
 							},
 						},

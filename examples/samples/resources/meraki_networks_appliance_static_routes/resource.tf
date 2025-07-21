@@ -2,7 +2,7 @@ terraform {
   required_providers {
     meraki = {
       source  = "hashicorp.com/edu/meraki"
-      version = "1.1.6-beta"
+      version = "1.1.7-beta"
     }
   }
 
@@ -12,7 +12,7 @@ resource "meraki_networks_appliance_static_routes" "example" {
   provider   = meraki
   gateway_ip = "1.2.3.5"
   name       = "My route"
-  network_id = "L_828099381482771185"
+  network_id = "meraki_networks"
   subnet     = "192.168.1.0/24"
 }
 

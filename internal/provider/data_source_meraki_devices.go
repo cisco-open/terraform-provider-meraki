@@ -21,7 +21,6 @@ package provider
 import (
 	"context"
 	"log"
-	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -232,6 +231,14 @@ func (d *DevicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
+					"product_type": schema.StringAttribute{
+						MarkdownDescription: `Product type of the device`,
+						Computed:            true,
+					},
+					"imei": schema.StringAttribute{
+						MarkdownDescription: `IMEI of the device, if applicable`,
+						Computed:            true,
+					},
 				},
 			},
 
@@ -433,21 +440,29 @@ type Devices struct {
 }
 
 type ResponseDevicesGetDevice struct {
-	Address     types.String                       `tfsdk:"address"`
-	Details     *[]ResponseDevicesGetDeviceDetails `tfsdk:"details"`
-	Firmware    types.String                       `tfsdk:"firmware"`
-	Imei        types.String                       `tfsdk:"imei"`
-	LanIP       types.String                       `tfsdk:"lan_ip"`
-	Lat         types.Float64                      `tfsdk:"lat"`
-	Lng         types.Float64                      `tfsdk:"lng"`
-	Mac         types.String                       `tfsdk:"mac"`
-	Model       types.String                       `tfsdk:"model"`
-	Name        types.String                       `tfsdk:"name"`
-	NetworkID   types.String                       `tfsdk:"network_id"`
-	Notes       types.String                       `tfsdk:"notes"`
-	ProductType types.String                       `tfsdk:"product_type"`
-	Serial      types.String                       `tfsdk:"serial"`
-	Tags        types.List                         `tfsdk:"tags"`
+	Address        types.String                            `tfsdk:"address"`
+	Details        *[]ResponseDevicesGetDeviceDetails      `tfsdk:"details"`
+	Firmware       types.String                            `tfsdk:"firmware"`
+	Imei           types.String                            `tfsdk:"imei"`
+	LanIP          types.String                            `tfsdk:"lan_ip"`
+	Lat            types.Float64                           `tfsdk:"lat"`
+	Lng            types.Float64                           `tfsdk:"lng"`
+	Mac            types.String                            `tfsdk:"mac"`
+	Model          types.String                            `tfsdk:"model"`
+	Name           types.String                            `tfsdk:"name"`
+	NetworkID      types.String                            `tfsdk:"network_id"`
+	Notes          types.String                            `tfsdk:"notes"`
+	ProductType    types.String                            `tfsdk:"product_type"`
+	Serial         types.String                            `tfsdk:"serial"`
+	Tags           types.List                              `tfsdk:"tags"`
+	FloorPlanID    types.String                            `tfsdk:"floor_plan_id"`
+	BeaconIDParams *ResponseDevicesGetDeviceBeaconIDParams `tfsdk:"beacon_id_params"`
+}
+
+type ResponseDevicesGetDeviceBeaconIDParams struct {
+	Major types.Int64  `tfsdk:"major"`
+	Minor types.Int64  `tfsdk:"minor"`
+	UUID  types.String `tfsdk:"uuid"`
 }
 
 type ResponseDevicesGetDeviceDetails struct {
@@ -475,13 +490,8 @@ func ResponseDevicesGetOrganizationDevicesItemsToBody(state Devices, response *m
 				return &[]ResponseItemOrganizationsGetOrganizationDevicesDetails{}
 			}(),
 			Firmware: types.StringValue(item.Firmware),
-			Imei: types.StringValue(func() string {
-				if item.Imei != nil {
-					return strconv.FormatFloat(float64(*item.Imei), 'f', -1, 64)
-				}
-				return ""
-			}()),
-			LanIP: types.StringValue(item.LanIP),
+			Imei:     types.StringValue(item.Imei),
+			LanIP:    types.StringValue(item.LanIP),
 			Lat: func() types.Float64 {
 				if item.Lat != nil {
 					return types.Float64Value(float64(*item.Lat))

@@ -1034,6 +1034,7 @@ func (r *NetworksSensorAlertsProfilesResource) Schema(_ context.Context, _ resou
 			"id": schema.StringAttribute{
 				MarkdownDescription: `id path parameter.`,
 				Optional:            true,
+				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},

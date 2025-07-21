@@ -26,7 +26,7 @@ description: |-
 - `meraki_user_agent`(String) Define an identifier or User-Agent for API requests to Meraki. Default is (Meraki).
 
 #### Retry Configuration Block
-- `max_retries` (Int) Maximum number of retries. Default is 3.
-- `retry_delay` (Int) Base delay between retries in milliseconds. Default is 1000.
-- `retry_jitter` (Int) Maximum random jitter in milliseconds. Default is 3000.
-- `use_retry_header` (Bool) Whether to respect the Retry-After header. Default is false.
+- `meraki_max_retries` (Int) Maximum number of retries. Default is 3.
+- `meraki_retry_delay` (Int) Base delay between retries in milliseconds. Default is 1000.
+- `meraki_retry_jitter` (Int) Maximum random jitter in milliseconds. Default is 3000.
+- `meraki_use_retry_header` (Bool) Whether to respect the Retry-After header. Default is false.

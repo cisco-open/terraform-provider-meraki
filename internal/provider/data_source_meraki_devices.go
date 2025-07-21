@@ -232,6 +232,14 @@ func (d *DevicesDataSource) Schema(_ context.Context, _ datasource.SchemaRequest
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
+					"product_type": schema.StringAttribute{
+						MarkdownDescription: `Product type of the device`,
+						Computed:            true,
+					},
+					"imei": schema.StringAttribute{
+						MarkdownDescription: `IMEI of the device, if applicable`,
+						Computed:            true,
+					},
 				},
 			},
 
@@ -433,21 +441,29 @@ type Devices struct {
 }
 
 type ResponseDevicesGetDevice struct {
-	Address     types.String                       `tfsdk:"address"`
-	Details     *[]ResponseDevicesGetDeviceDetails `tfsdk:"details"`
-	Firmware    types.String                       `tfsdk:"firmware"`
-	Imei        types.String                       `tfsdk:"imei"`
-	LanIP       types.String                       `tfsdk:"lan_ip"`
-	Lat         types.Float64                      `tfsdk:"lat"`
-	Lng         types.Float64                      `tfsdk:"lng"`
-	Mac         types.String                       `tfsdk:"mac"`
-	Model       types.String                       `tfsdk:"model"`
-	Name        types.String                       `tfsdk:"name"`
-	NetworkID   types.String                       `tfsdk:"network_id"`
-	Notes       types.String                       `tfsdk:"notes"`
-	ProductType types.String                       `tfsdk:"product_type"`
-	Serial      types.String                       `tfsdk:"serial"`
-	Tags        types.List                         `tfsdk:"tags"`
+	Address        types.String                            `tfsdk:"address"`
+	Details        *[]ResponseDevicesGetDeviceDetails      `tfsdk:"details"`
+	Firmware       types.String                            `tfsdk:"firmware"`
+	Imei           types.String                            `tfsdk:"imei"`
+	LanIP          types.String                            `tfsdk:"lan_ip"`
+	Lat            types.Float64                           `tfsdk:"lat"`
+	Lng            types.Float64                           `tfsdk:"lng"`
+	Mac            types.String                            `tfsdk:"mac"`
+	Model          types.String                            `tfsdk:"model"`
+	Name           types.String                            `tfsdk:"name"`
+	NetworkID      types.String                            `tfsdk:"network_id"`
+	Notes          types.String                            `tfsdk:"notes"`
+	ProductType    types.String                            `tfsdk:"product_type"`
+	Serial         types.String                            `tfsdk:"serial"`
+	Tags           types.List                              `tfsdk:"tags"`
+	FloorPlanID    types.String                            `tfsdk:"floor_plan_id"`
+	BeaconIDParams *ResponseDevicesGetDeviceBeaconIDParams `tfsdk:"beacon_id_params"`
+}
+
+type ResponseDevicesGetDeviceBeaconIDParams struct {
+	Major types.Int64  `tfsdk:"major"`
+	Minor types.Int64  `tfsdk:"minor"`
+	UUID  types.String `tfsdk:"uuid"`
 }
 
 type ResponseDevicesGetDeviceDetails struct {

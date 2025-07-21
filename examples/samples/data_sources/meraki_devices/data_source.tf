@@ -14,9 +14,9 @@ data "meraki_devices" "example" {
 
   #   organization_id = "828099381482762766"
   organization_id = "828099381482762270"
-  # serial = "QBSB-AX45-LY9A"
+  serial = "QBSB-AX45-LY9A"
   # network_ids = []
-  per_page = -1
+  # per_page = -1
   #   /api/v1/organizations/828099381482762270/devices?
   #   networkIds=%221HOLA1%22&networkIds=%224HOLA4%22
 }

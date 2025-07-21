@@ -1,5 +1,14 @@
 ## Unreleased (- -, -)
 
+### 1.1.7-beta (July 21, 2025)
+FEATURES:
+* Fix import command in import.sh to correct parameter order for meraki_networks_webhooks_http_servers example #271.
+* meraki_networks_appliance_firewall_l7_firewall_rules (Resource) add rule type "blockedCountries" and "allowedCountries" #270.
+* Fix retry doc #272.
+* Update import command and network_id in example configurations
+    - Modified the import command in import.sh to only include "network_id".
+    - Updated the network_id in resource.tf to use "meraki_networks" for consistency in example configurations.
+* Fixes in `meraki_organizations_devices`and `meraki_devices`.
 
 ## 1.1.6-beta (July 09, 2025)
 FEATURES:

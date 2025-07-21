@@ -21,7 +21,6 @@ package provider
 import (
 	"context"
 	"log"
-	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -491,13 +490,8 @@ func ResponseDevicesGetOrganizationDevicesItemsToBody(state Devices, response *m
 				return &[]ResponseItemOrganizationsGetOrganizationDevicesDetails{}
 			}(),
 			Firmware: types.StringValue(item.Firmware),
-			Imei: types.StringValue(func() string {
-				if item.Imei != nil {
-					return strconv.FormatFloat(float64(*item.Imei), 'f', -1, 64)
-				}
-				return ""
-			}()),
-			LanIP: types.StringValue(item.LanIP),
+			Imei:     types.StringValue(item.Imei),
+			LanIP:    types.StringValue(item.LanIP),
 			Lat: func() types.Float64 {
 				if item.Lat != nil {
 					return types.Float64Value(float64(*item.Lat))

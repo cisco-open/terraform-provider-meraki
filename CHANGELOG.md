@@ -1,6 +1,6 @@
 ## Unreleased (- -, -)
 
-### 1.1.8-beta (Unreleased)
+### 1.1.8-beta (July 29, 2025)
 FEATURES:
 * Added support for configuring retry options directly in provider block
 * Added new retry configuration parameters:

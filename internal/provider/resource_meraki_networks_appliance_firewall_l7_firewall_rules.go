@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"slices"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -434,7 +435,6 @@ type ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj st
 // FromBody
 func (r *NetworksApplianceFirewallL7FirewallRulesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL7FirewallRules {
 	var requestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRules []merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRules
-
 	if r.Rules != nil {
 		for _, rItem1 := range *r.Rules {
 			var valueR interface{}
@@ -452,10 +452,10 @@ func (r *NetworksApplianceFirewallL7FirewallRulesRs) toSdkApiRequestUpdate(ctx c
 					Name: name,
 				}
 			}
-			if !rItem1.Value.IsNull() && !rItem1.Value.IsUnknown() && rItem1.Type.ValueString() != "blockedCountries" && rItem1.Type.ValueString() != "applicationCategory" {
+			if !rItem1.Value.IsNull() && !rItem1.Value.IsUnknown() && rItem1.Type.ValueString() != "blockedCountries" && rItem1.Type.ValueString() != "applicationCategory" && rItem1.Type.ValueString() != "allowedCountries" {
 				valueR = value
 			} else {
-				if !rItem1.ValueList.IsNull() && !rItem1.ValueList.IsUnknown() && rItem1.Type.ValueString() == "blockedCountries" {
+				if !rItem1.ValueList.IsNull() && !rItem1.ValueList.IsUnknown() && slices.Contains([]string{"blockedCountries", "allowedCountries"}, rItem1.Type.ValueString()) {
 					valueR = valueList
 				} else {
 					valueR = requestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRulesValue

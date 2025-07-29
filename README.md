@@ -30,7 +30,7 @@ terraform {
   required_providers {
     meraki = {
       source = "cisco-open/meraki"
-      version = "1.1.7-beta"
+      version = "1.1.8-beta"
     }
   }
 }
@@ -68,7 +68,7 @@ terraform {
   required_providers {
     meraki = {
       source = "hashicorp.com/edu/meraki"
-      version = "1.1.7-beta"
+      version = "1.1.8-beta"
     }
   }
 }
@@ -120,7 +120,7 @@ The following table shows the supported versions.
 |-----------------------|-------------------------------------|------------------------------|
 | 1.33.0                | 0.1.0-alpha                         | 2.0.9                        |
 | 1.44.1                | 0.2.0-alpha                         | 3.0.0                        |
-| 1.53.0                | 1.1.7-beta                          | 4.0.0                        |
+| 1.53.0                | 1.1.8-beta                          | 4.0.0                        |
 
 If your SDK, Terraform provider is older please consider updating it first.
 
@@ -142,9 +142,9 @@ You can customize retry options as follows:
 
 ```hcl
 provider "meraki" {
-  meraki_max_retries      = 3      # Maximum number of retries
-  meraki_retry_delay      = 1000   # Base wait time between retries in ms
-  meraki_retry_jitter     = 3000   # Maximum random jitter in ms
+  meraki_retries      = 3      # Maximum number of retries
+  meraki_retries_delay      = 1000   # Base wait time between retries in ms
+  meraki_retries_jitter     = 3000   # Maximum random jitter in ms
   meraki_use_retry_header = false  # Whether to respect the Retry-After header
   # ...other configuration parameters...
 }
@@ -161,7 +161,7 @@ The following table shows the supported versions.
 |-----------------------|-------------------------------------|------------------------------|
 | 1.33.0                | 0.1.0-alpha                         | 2.0.9                        |
 | 1.44.1                | 0.2.0-alpha                         | 3.0.0                        |
-| 1.53.0                | 1.1.7-beta                          | 4.0.0                        |
+| 1.53.0                | 1.1.8-beta                          | 4.0.0                        |
 
 If your SDK, Terraform provider is older please consider updating it first.
 

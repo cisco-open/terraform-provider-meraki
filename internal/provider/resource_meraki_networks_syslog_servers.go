@@ -19,13 +19,13 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -84,12 +84,12 @@ func (r *NetworksSyslogServersResource) Schema(_ context.Context, _ resource.Sch
 								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
-						"port": schema.Int64Attribute{
+						"port": schema.StringAttribute{
 							MarkdownDescription: `The port of the syslog server`,
 							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.Int64{
-								int64planmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
 						"roles": schema.SetAttribute{
@@ -143,13 +143,6 @@ func (r *NetworksSyslogServersResource) Create(ctx context.Context, req resource
 			return
 		}
 
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSyslogServers only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
 	}
 
 	// UPDATE NO CREATE
@@ -190,7 +183,6 @@ func (r *NetworksSyslogServersResource) Create(ctx context.Context, req resource
 	}
 
 	data = ResponseNetworksGetNetworkSyslogServersItemToBodyRs(data, responseGet, false)
-
 	diags := resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 
@@ -298,7 +290,7 @@ type NetworksSyslogServersRs struct {
 
 type ResponseNetworksGetNetworkSyslogServersServersRs struct {
 	Host  types.String `tfsdk:"host"`
-	Port  types.Int64  `tfsdk:"port"`
+	Port  types.String `tfsdk:"port"`
 	Roles types.Set    `tfsdk:"roles"`
 }
 
@@ -309,18 +301,16 @@ func (r *NetworksSyslogServersRs) toSdkApiRequestUpdate(ctx context.Context) *me
 	if r.Servers != nil {
 		for _, rItem1 := range *r.Servers {
 			host := rItem1.Host.ValueString()
-			port := func() *int64 {
-				if !rItem1.Port.IsUnknown() && !rItem1.Port.IsNull() {
-					return rItem1.Port.ValueInt64Pointer()
-				}
-				return nil
-			}()
-
+			port := rItem1.Port.ValueString()
+			portInt, err := strconv.Atoi(port)
+			if err != nil {
+				portInt = 443
+			}
 			var roles []string = nil
 			rItem1.Roles.ElementsAs(ctx, &roles, false)
 			requestNetworksUpdateNetworkSyslogServersServers = append(requestNetworksUpdateNetworkSyslogServersServers, merakigosdk.RequestNetworksUpdateNetworkSyslogServersServers{
 				Host:  host,
-				Port:  int64ToIntPointer(port),
+				Port:  &portInt,
 				Roles: roles,
 			})
 			//[debug] Is Array: True
@@ -346,7 +336,7 @@ func ResponseNetworksGetNetworkSyslogServersItemToBodyRs(state NetworksSyslogSer
 				for i, servers := range *response.Servers {
 					result[i] = ResponseNetworksGetNetworkSyslogServersServersRs{
 						Host:  types.StringValue(servers.Host),
-						Port:  types.Int64Value(int64(*servers.Port)),
+						Port:  types.StringValue(servers.Port),
 						Roles: StringSliceToSet(servers.Roles),
 					}
 				}

@@ -1,5 +1,18 @@
 ## Unreleased (- -, -)
 
+### 1.1.8-beta (July 29, 2025)
+FEATURES:
+* Added support for configuring retry options directly in provider block
+* Added new retry configuration parameters:
+  - `meraki_retries` - Maximum number of retries (default: 3)
+  - `meraki_retries_delay` - Base delay between retries in ms (default: 1000) 
+  - `meraki_retries_jitter` - Maximum random jitter in ms (default: 3000)
+  - `meraki_use_retry_header` - Whether to respect Retry-After header (default: false)
+* Updated documentation with new retry configuration examples
+* meraki_networks_syslog_servers resource always changes during terraform apply #279. Fixed.
+* Issue with L7 rules for allowedCountries and blockedCountries. Ref issue 270 #278. Fixed.
+
+
 ### 1.1.7-beta (July 21, 2025)
 BUGFIXES:
 * Fix import command in import.sh to correct parameter order for meraki_networks_webhooks_http_servers example #271.

@@ -142,9 +142,9 @@ You can customize retry options as follows:
 
 ```hcl
 provider "meraki" {
-  meraki_max_retries      = 3      # Maximum number of retries
-  meraki_retry_delay      = 1000   # Base wait time between retries in ms
-  meraki_retry_jitter     = 3000   # Maximum random jitter in ms
+  meraki_retries      = 3      # Maximum number of retries
+  meraki_retries_delay      = 1000   # Base wait time between retries in ms
+  meraki_retries_jitter     = 3000   # Maximum random jitter in ms
   meraki_use_retry_header = false  # Whether to respect the Retry-After header
   # ...other configuration parameters...
 }

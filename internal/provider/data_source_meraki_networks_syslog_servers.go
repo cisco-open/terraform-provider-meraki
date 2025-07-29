@@ -76,7 +76,7 @@ func (d *NetworksSyslogServersDataSource) Schema(_ context.Context, _ datasource
 									MarkdownDescription: `The IP address or FQDN of the syslog server`,
 									Computed:            true,
 								},
-								"port": schema.Int64Attribute{
+								"port": schema.StringAttribute{
 									MarkdownDescription: `The port of the syslog server`,
 									Computed:            true,
 								},
@@ -143,7 +143,7 @@ type ResponseNetworksGetNetworkSyslogServers struct {
 
 type ResponseNetworksGetNetworkSyslogServersServers struct {
 	Host  types.String `tfsdk:"host"`
-	Port  types.Int64  `tfsdk:"port"`
+	Port  types.String `tfsdk:"port"`
 	Roles types.List   `tfsdk:"roles"`
 }
 
@@ -156,7 +156,7 @@ func ResponseNetworksGetNetworkSyslogServersItemToBody(state NetworksSyslogServe
 				for i, servers := range *response.Servers {
 					result[i] = ResponseNetworksGetNetworkSyslogServersServers{
 						Host:  types.StringValue(servers.Host),
-						Port:  types.Int64Value(int64(*servers.Port)),
+						Port:  types.StringValue(servers.Port),
 						Roles: StringSliceToList(servers.Roles),
 					}
 				}

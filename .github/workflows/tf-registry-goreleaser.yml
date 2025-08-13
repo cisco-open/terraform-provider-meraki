@@ -1,0 +1,100 @@
+# Optimized for minimal build targets (darwin/arm64 and linux/arm64 only)
+# Reduced from 11 to 2 targets for faster and more reliable builds
+name: Provider Release with goreleaser
+
+permissions:
+  contents: write
+  packages: read
+  statuses: write
+
+on:
+  workflow_call:
+    inputs:
+      goreleaser-release-args:
+        description: 'goreleaser release Arguments (e.g. --skip-validate)'
+        required: false
+        type: string
+      release-notes:
+        description: 'Enable release notes handling (must have previously uploaded artifact named "release-notes" with file "release-notes.txt")'
+        required: false
+        type: boolean
+      setup-go-version:
+        description: 'setup-go Go Version'
+        required: false
+        type: string
+      setup-go-version-file:
+        description: 'setup-go File From Which To Read Go Version'
+        required: false
+        type: string
+      git-ref:
+        description: 'branch, tag or SHA to checkout'
+        required: false
+        type: string
+    secrets:
+      gpg-private-key:
+        description: 'GPG Private Key'
+        required: true
+      gpg-private-key-passphrase:
+        description: 'GPG Private Key Passphrase'
+        required: false
+
+jobs:
+  Release:
+    runs-on: ubuntu-latest  # Standard runner - large runners require GitHub Teams/Enterprise
+    timeout-minutes: 60  # Standard runner limit to prevent shutdowns
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ inputs.git-ref || github.ref }}
+          fetch-depth: 0
+      
+      - name: Free Disk Space
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: false  # Keep Docker for GoReleaser
+          swap-storage: true
+      
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        with:
+          go-version: ${{ inputs.setup-go-version }}
+          go-version-file: ${{ inputs.setup-go-version-file }}
+          cache: false  # Disable caching to avoid post-cleanup issues
+      - name: Clean Go Caches
+        run: |
+          go clean -cache
+          go clean -modcache
+      
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec # v6.3.0
+        with:
+          gpg_private_key: ${{ secrets.gpg-private-key }}
+          passphrase: ${{ secrets.gpg-private-key-passphrase }}
+      - if: inputs.release-notes != true
+        name: goreleaser release (without release notes)
+        uses: goreleaser/goreleaser-action@9c156ee8a17a598857849441385a2041ef570552 # v6.3.0
+        with:
+          args: release --clean --parallelism 1 ${{ inputs.goreleaser-release-args }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
+      - if: inputs.release-notes
+        id: release-notes-download
+        name: Release Notes Download
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: release-notes
+          path: /tmp
+      - if: inputs.release-notes
+        name: goreleaser release (with release notes)
+        uses: goreleaser/goreleaser-action@9c156ee8a17a598857849441385a2041ef570552 # v6.3.0
+        with:
+          args: release --release-notes ${{ steps.release-notes-download.outputs.download-path }}/release-notes.txt --clean --parallelism 1 ${{ inputs.goreleaser-release-args }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}

@@ -1,0 +1,48 @@
+name: Unit Tests
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    paths:
+      - '**/*.go'
+      - 'go.mod'
+      - 'go.sum'
+
+jobs:
+  test:
+    name: '🧪 Run Go Unit Tests'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@6c439dc8bdf85cadbbce9ed30d1c7b959517bc49 # v2.12.2
+        with:
+          egress-policy: audit
+          
+      - name: Check Out  
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+          cache-dependency-path: 'go.sum'
+          go-version: stable
+        env:
+          GOOS: linux
+          GOARCH: arm64
+
+      - name: Install dependencies
+        timeout-minutes: 5
+        run: go mod download
+
+      - name: Run tests
+        timeout-minutes: 40
+        run: go test -timeout 35m -v -race -coverprofile=coverage.txt -covermode=atomic -p 4 ./...
+        env:
+          CGO_ENABLED: 1  # Race detector requires CGO
+          GOMAXPROCS: 4   # Utilize all cores for test execution
+          CI: true        # Skip network-dependent tests in CI
+          SKIP_PARALLEL_NETWORK_TESTS: true  # Skip flaky network tests in parallel runs

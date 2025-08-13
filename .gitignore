@@ -3,6 +3,7 @@
 run_rmt.sh
 run_all_samples.sh
 
+terraform-provider-meraki_*
 
 # Local .terraform directories
 **/.terraform/*

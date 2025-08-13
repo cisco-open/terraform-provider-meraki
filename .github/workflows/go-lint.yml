@@ -1,0 +1,85 @@
+name: 'Linter'
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - '.github/workflows/go-lint.yml'
+      - '.golangci.yml'
+      - '**/*.go'
+
+permissions:
+  contents: read
+  pull-requests: read  # Needed for "only-new-issues"
+  issues: write  # Needed for commenting on PR
+
+jobs:
+  golint:
+    name: '✨ Run golangci-lint'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@6c439dc8bdf85cadbbce9ed30d1c7b959517bc49 # v2.12.2
+        with:
+          egress-policy: audit
+
+      - name: Check Out  
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      
+      - name: Setup Go 
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        with:
+          go-version-file: .go-version
+          cache: true
+          cache-dependency-path: 'go.sum'
+        env:
+          GOOS: linux
+          GOARCH: arm64
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@4afd733a84b1f43292c63897423277bb7f4313a9 # v8.0.0
+        with:
+          version: v2.1.5
+          args: --timeout=20m --verbose --config=./.golangci.yml --issues-exit-code=0
+          only-new-issues: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          skip-cache: false              # restore and save cache
+          skip-save-cache: false         # allow saving any new cache
+          cache-invalidation-interval: 7 # auto-invalidate (refresh) once per week
+      
+      # Save artifacts on failure
+      - name: Save artifacts
+        if: failure()
+        run: |
+          mkdir -p wr_actions
+          echo ${{ github.repository_owner }} > wr_actions/ghowner.txt
+          echo ${{ github.event.repository.name }} > wr_actions/ghrepo.txt
+          echo ${{ github.event.pull_request.number }} > wr_actions/prnumber.txt
+      
+      - name: Upload artifacts
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: artifact
+          path: wr_actions
+      
+      # Comment on failure
+      - name: Get run url
+        if: failure()
+        run: |
+          echo "gha_url=https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}" >> $GITHUB_ENV
+          
+      - name: Send build failure comment
+        if: failure()
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          result-encoding: string
+          script: |
+            github.rest.issues.createComment({
+              issue_number: ${{ github.event.number }},
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '<b>Build failure</b> \n\n This pull request contains a build failure which needs addressed [here](${{ env.gha_url}}) .'
+            })

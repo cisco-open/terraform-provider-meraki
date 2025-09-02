@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -321,13 +320,23 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 								result := make([]ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesPacketsOverviewByDeviceItemsInterfaces, len(*items.Interfaces))
 								for i, interfaces := range *items.Interfaces {
 									result[i] = ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesPacketsOverviewByDeviceItemsInterfaces{
-										Name: types.StringValue(interfaces.Name),
+										Name: func() types.String {
+											if interfaces.Name != "" {
+												return types.StringValue(interfaces.Name)
+											}
+											return types.String{}
+										}(),
 										Readings: func() *[]ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesPacketsOverviewByDeviceItemsInterfacesReadings {
 											if interfaces.Readings != nil {
 												result := make([]ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesPacketsOverviewByDeviceItemsInterfacesReadings, len(*interfaces.Readings))
 												for i, readings := range *interfaces.Readings {
 													result[i] = ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesPacketsOverviewByDeviceItemsInterfacesReadings{
-														Name: types.StringValue(readings.Name),
+														Name: func() types.String {
+															if readings.Name != "" {
+																return types.StringValue(readings.Name)
+															}
+															return types.String{}
+														}(),
 														Rate: func() *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesPacketsOverviewByDeviceItemsInterfacesReadingsRate {
 															if readings.Rate != nil {
 																return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesPacketsOverviewByDeviceItemsInterfacesReadingsRate{
@@ -383,7 +392,12 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 							}
 							return nil
 						}(),
-						Serial: types.StringValue(items.Serial),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

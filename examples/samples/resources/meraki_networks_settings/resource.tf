@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "1.1.8-beta"
+      version = "1.2.0-beta"
       source  = "hashicorp.com/edu/meraki"
       # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
@@ -136,9 +136,9 @@ resource "meraki_networks_settings" "example" {
   local_status_page = {
 
     authentication = {
-
+      username = "miles"
       enabled  = false
-      password = "miles123"
+      password = "miles123*Asadsadsa"
     }
   }
   local_status_page_enabled  = true

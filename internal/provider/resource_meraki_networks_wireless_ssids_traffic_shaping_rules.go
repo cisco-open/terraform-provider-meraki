@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"log"
@@ -32,9 +33,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -72,7 +73,6 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Schema(_ context.Cont
 		Attributes: map[string]schema.Attribute{
 			"default_rules_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Whether default traffic shaping rules are enabled (true) or disabled (false). There are 4 default rules, which can be seen on your network's traffic shaping page. Note that default rules count against the rule limit of 8.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -86,26 +86,24 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Schema(_ context.Cont
 				MarkdownDescription: `number path parameter.`,
 				Required:            true,
 			},
-			"rules": schema.SetNestedAttribute{
+			"rules": schema.ListNestedAttribute{
 				MarkdownDescription: `    An array of traffic shaping rules. Rules are applied in the order that
     they are specified in. An empty list (or null) means no rules. Note that
     you are allowed a maximum of 8 rules.
 `,
-				Computed: true,
 				Optional: true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
-						"definitions": schema.SetNestedAttribute{
+						"definitions": schema.ListNestedAttribute{
 							MarkdownDescription: `    A list of objects describing the definitions of your traffic shaping rule. At least one definition is required.
 `,
-							Computed: true,
 							Optional: true,
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
@@ -113,7 +111,6 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Schema(_ context.Cont
 									"type": schema.StringAttribute{
 										MarkdownDescription: `The type of definition. Can be one of 'application', 'applicationCategory', 'host', 'port', 'ipRange' or 'localNet'.
                                               Allowed values: [application,applicationCategory,host,ipRange,localNet,port]`,
-										Computed: true,
 										Optional: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -139,7 +136,6 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Schema(_ context.Cont
     application ID (for a list of IDs for your network, use the trafficShaping/applicationCategories
     endpoint).
 `,
-										Computed: true,
 										Optional: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -152,7 +148,6 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Schema(_ context.Cont
 							MarkdownDescription: `    The DSCP tag applied by your rule. null means 'Do not change DSCP tag'.
     For a list of possible tag values, use the trafficShaping/dscpTaggingOptions endpoint.
 `,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -162,7 +157,6 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Schema(_ context.Cont
 							MarkdownDescription: `    The PCP tag applied by your rule. Can be 0 (lowest priority) through 7 (highest priority).
     null means 'Do not set PCP tag'.
 `,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -171,7 +165,6 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Schema(_ context.Cont
 						"per_client_bandwidth_limits": schema.SingleNestedAttribute{
 							MarkdownDescription: `    An object describing the bandwidth settings for your rule.
 `,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.Object{
 								objectplanmodifier.UseStateForUnknown(),
@@ -180,7 +173,6 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Schema(_ context.Cont
 
 								"bandwidth_limits": schema.SingleNestedAttribute{
 									MarkdownDescription: `The bandwidth limits object, specifying the upload ('limitUp') and download ('limitDown') speed in Kbps. These are only enforced if 'settings' is set to 'custom'.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Object{
 										objectplanmodifier.UseStateForUnknown(),
@@ -189,7 +181,6 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Schema(_ context.Cont
 
 										"limit_down": schema.Int64Attribute{
 											MarkdownDescription: `The maximum download limit (integer, in Kbps).`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.Int64{
 												int64planmodifier.UseStateForUnknown(),
@@ -197,7 +188,6 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Schema(_ context.Cont
 										},
 										"limit_up": schema.Int64Attribute{
 											MarkdownDescription: `The maximum upload limit (integer, in Kbps).`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.Int64{
 												int64planmodifier.UseStateForUnknown(),
@@ -207,7 +197,6 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Schema(_ context.Cont
 								},
 								"settings": schema.StringAttribute{
 									MarkdownDescription: `How bandwidth limits are applied by your rule. Can be one of 'network default', 'ignore' or 'custom'.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -220,7 +209,6 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Schema(_ context.Cont
 			},
 			"traffic_shaping_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Whether traffic shaping rules are applied to clients on your SSID.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -253,27 +241,6 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Create(ctx context.Co
 	vvNumber := data.Number.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" && vvNumber != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDTrafficShapingRules(vvNetworkID, vvNumber)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessSsidsTrafficShapingRules  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessSsidsTrafficShapingRules only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDTrafficShapingRules(vvNetworkID, vvNumber, dataRequest)
@@ -282,7 +249,7 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Create(ctx context.Co
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDTrafficShapingRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -293,49 +260,19 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Create(ctx context.Co
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDTrafficShapingRules(vvNetworkID, vvNumber)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkWirelessSSIDTrafficShapingRules",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkWirelessSSIDTrafficShapingRules",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseWirelessGetNetworkWirelessSSIDTrafficShapingRulesItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksWirelessSSIDsTrafficShapingRulesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -366,9 +303,7 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Read(ctx context.Cont
 	}
 	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSSIDTrafficShapingRulesItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -376,35 +311,31 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) ImportState(ctx conte
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,number. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("number"), idParts[1])...)
 }
 
 func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksWirelessSSIDsTrafficShapingRulesRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksWirelessSSIDsTrafficShapingRulesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvNumber := data.Number.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvNumber := plan.Number.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDTrafficShapingRules(vvNetworkID, vvNumber, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDTrafficShapingRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -414,9 +345,7 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Update(ctx context.Co
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksWirelessSSIDsTrafficShapingRulesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -549,7 +478,7 @@ func (r *NetworksWirelessSSIDsTrafficShapingRulesRs) toSdkApiRequestUpdate(ctx c
 	out := merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDTrafficShapingRules{
 		DefaultRulesEnabled: defaultRulesEnabled,
 		Rules: func() *[]merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRules {
-			if len(requestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRules) > 0 || r.Rules != nil {
+			if len(requestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRules) > 0 {
 				return &requestWirelessUpdateNetworkWirelessSSIDTrafficShapingRulesRules
 			}
 			return nil
@@ -578,8 +507,18 @@ func ResponseWirelessGetNetworkWirelessSSIDTrafficShapingRulesItemToBodyRs(state
 								result := make([]ResponseWirelessGetNetworkWirelessSsidTrafficShapingRulesRulesDefinitionsRs, len(*rules.Definitions))
 								for i, definitions := range *rules.Definitions {
 									result[i] = ResponseWirelessGetNetworkWirelessSsidTrafficShapingRulesRulesDefinitionsRs{
-										Type:  types.StringValue(definitions.Type),
-										Value: types.StringValue(definitions.Value),
+										Type: func() types.String {
+											if definitions.Type != "" {
+												return types.StringValue(definitions.Type)
+											}
+											return types.String{}
+										}(),
+										Value: func() types.String {
+											if definitions.Value != "" {
+												return types.StringValue(definitions.Value)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -620,7 +559,12 @@ func ResponseWirelessGetNetworkWirelessSSIDTrafficShapingRulesItemToBodyRs(state
 										}
 										return nil
 									}(),
-									Settings: types.StringValue(rules.PerClientBandwidthLimits.Settings),
+									Settings: func() types.String {
+										if rules.PerClientBandwidthLimits.Settings != "" {
+											return types.StringValue(rules.PerClientBandwidthLimits.Settings)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil

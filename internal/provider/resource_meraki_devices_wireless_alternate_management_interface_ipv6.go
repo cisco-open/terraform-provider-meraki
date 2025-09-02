@@ -96,7 +96,7 @@ func (r *DevicesWirelessAlternateManagementInterfaceIPv6Resource) Schema(_ conte
 									Computed:            true,
 									Attributes: map[string]schema.Attribute{
 
-										"addresses": schema.SetAttribute{
+										"addresses": schema.ListAttribute{
 											MarkdownDescription: `Up to 2 nameserver addresses to use, ordered in priority from highest to lowest priority.`,
 											Computed:            true,
 											ElementType:         types.StringType,
@@ -284,7 +284,7 @@ type RequestWirelessUpdateDeviceWirelessAlternateManagementInterfaceIpv6Addresse
 }
 
 type RequestWirelessUpdateDeviceWirelessAlternateManagementInterfaceIpv6AddressesNameserversRs struct {
-	Addresses types.Set `tfsdk:"addresses"`
+	Addresses types.List `tfsdk:"addresses"`
 }
 
 // FromBody
@@ -322,12 +322,7 @@ func (r *DevicesWirelessAlternateManagementInterfaceIPv6) toSdkApiRequestUpdate(
 		}
 	}
 	out := merakigosdk.RequestWirelessUpdateDeviceWirelessAlternateManagementInterfaceIPv6{
-		Addresses: func() *[]merakigosdk.RequestWirelessUpdateDeviceWirelessAlternateManagementInterfaceIPv6Addresses {
-			if len(requestWirelessUpdateDeviceWirelessAlternateManagementInterfaceIPv6Addresses) > 0 {
-				return &requestWirelessUpdateDeviceWirelessAlternateManagementInterfaceIPv6Addresses
-			}
-			return nil
-		}(),
+		Addresses: &requestWirelessUpdateDeviceWirelessAlternateManagementInterfaceIPv6Addresses,
 	}
 	return &out
 }
@@ -340,9 +335,24 @@ func ResponseWirelessUpdateDeviceWirelessAlternateManagementInterfaceIPv6ItemToB
 				result := make([]ResponseWirelessUpdateDeviceWirelessAlternateManagementInterfaceIpv6Addresses, len(*response.Addresses))
 				for i, addresses := range *response.Addresses {
 					result[i] = ResponseWirelessUpdateDeviceWirelessAlternateManagementInterfaceIpv6Addresses{
-						Address:        types.StringValue(addresses.Address),
-						AssignmentMode: types.StringValue(addresses.AssignmentMode),
-						Gateway:        types.StringValue(addresses.Gateway),
+						Address: func() types.String {
+							if addresses.Address != "" {
+								return types.StringValue(addresses.Address)
+							}
+							return types.String{}
+						}(),
+						AssignmentMode: func() types.String {
+							if addresses.AssignmentMode != "" {
+								return types.StringValue(addresses.AssignmentMode)
+							}
+							return types.String{}
+						}(),
+						Gateway: func() types.String {
+							if addresses.Gateway != "" {
+								return types.StringValue(addresses.Gateway)
+							}
+							return types.String{}
+						}(),
 						Nameservers: func() *ResponseWirelessUpdateDeviceWirelessAlternateManagementInterfaceIpv6AddressesNameservers {
 							if addresses.Nameservers != nil {
 								return &ResponseWirelessUpdateDeviceWirelessAlternateManagementInterfaceIpv6AddressesNameservers{
@@ -351,8 +361,18 @@ func ResponseWirelessUpdateDeviceWirelessAlternateManagementInterfaceIPv6ItemToB
 							}
 							return nil
 						}(),
-						Prefix:   types.StringValue(addresses.Prefix),
-						Protocol: types.StringValue(addresses.Protocol),
+						Prefix: func() types.String {
+							if addresses.Prefix != "" {
+								return types.StringValue(addresses.Prefix)
+							}
+							return types.String{}
+						}(),
+						Protocol: func() types.String {
+							if addresses.Protocol != "" {
+								return types.StringValue(addresses.Protocol)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

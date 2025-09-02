@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"log"
@@ -32,9 +33,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -72,7 +73,6 @@ func (r *NetworksWirelessSSIDsVpnResource) Schema(_ context.Context, _ resource.
 		Attributes: map[string]schema.Attribute{
 			"concentrator": schema.SingleNestedAttribute{
 				MarkdownDescription: `The VPN concentrator settings for this SSID.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -84,7 +84,6 @@ func (r *NetworksWirelessSSIDsVpnResource) Schema(_ context.Context, _ resource.
 					},
 					"network_id": schema.StringAttribute{
 						MarkdownDescription: `The NAT ID of the concentrator that should be set.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -92,7 +91,6 @@ func (r *NetworksWirelessSSIDsVpnResource) Schema(_ context.Context, _ resource.
 					},
 					"vlan_id": schema.Int64Attribute{
 						MarkdownDescription: `The VLAN that should be tagged for the concentrator.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -102,7 +100,6 @@ func (r *NetworksWirelessSSIDsVpnResource) Schema(_ context.Context, _ resource.
 			},
 			"failover": schema.SingleNestedAttribute{
 				MarkdownDescription: `Secondary VPN concentrator settings. This is only used when two VPN concentrators are configured on the SSID.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -111,7 +108,6 @@ func (r *NetworksWirelessSSIDsVpnResource) Schema(_ context.Context, _ resource.
 
 					"heartbeat_interval": schema.Int64Attribute{
 						MarkdownDescription: `Idle timer interval in seconds.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -119,7 +115,6 @@ func (r *NetworksWirelessSSIDsVpnResource) Schema(_ context.Context, _ resource.
 					},
 					"idle_timeout": schema.Int64Attribute{
 						MarkdownDescription: `Idle timer timeout in seconds.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -127,7 +122,6 @@ func (r *NetworksWirelessSSIDsVpnResource) Schema(_ context.Context, _ resource.
 					},
 					"request_ip": schema.StringAttribute{
 						MarkdownDescription: `IP addressed reserved on DHCP server where SSID will terminate.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -145,7 +139,6 @@ func (r *NetworksWirelessSSIDsVpnResource) Schema(_ context.Context, _ resource.
 			},
 			"split_tunnel": schema.SingleNestedAttribute{
 				MarkdownDescription: `The VPN split tunnel settings for this SSID.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -154,25 +147,22 @@ func (r *NetworksWirelessSSIDsVpnResource) Schema(_ context.Context, _ resource.
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `If true, VPN split tunnel is enabled.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
 						},
 					},
-					"rules": schema.SetNestedAttribute{
+					"rules": schema.ListNestedAttribute{
 						MarkdownDescription: `List of VPN split tunnel rules.`,
-						Computed:            true,
 						Optional:            true,
-						PlanModifiers: []planmodifier.Set{
-							setplanmodifier.UseStateForUnknown(),
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.UseStateForUnknown(),
 						},
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"comment": schema.StringAttribute{
 									MarkdownDescription: `Description for this split tunnel rule (optional).`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -180,7 +170,6 @@ func (r *NetworksWirelessSSIDsVpnResource) Schema(_ context.Context, _ resource.
 								},
 								"dest_cidr": schema.StringAttribute{
 									MarkdownDescription: `Destination for this split tunnel rule. IP address, fully-qualified domain names (FQDN) or 'any'.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -188,7 +177,6 @@ func (r *NetworksWirelessSSIDsVpnResource) Schema(_ context.Context, _ resource.
 								},
 								"dest_port": schema.StringAttribute{
 									MarkdownDescription: `Destination port for this split tunnel rule, (integer in the range 1-65535), or 'any'.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -196,7 +184,6 @@ func (r *NetworksWirelessSSIDsVpnResource) Schema(_ context.Context, _ resource.
 								},
 								"policy": schema.StringAttribute{
 									MarkdownDescription: `Traffic policy specified for this split tunnel rule, 'allow' or 'deny'.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -205,7 +192,6 @@ func (r *NetworksWirelessSSIDsVpnResource) Schema(_ context.Context, _ resource.
 								"protocol": schema.StringAttribute{
 									MarkdownDescription: `Protocol for this split tunnel rule.
                                               Allowed values: [Any,TCP,UDP]`,
-									Computed: true,
 									Optional: true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -250,27 +236,6 @@ func (r *NetworksWirelessSSIDsVpnResource) Create(ctx context.Context, req resou
 	vvNumber := data.Number.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" && vvNumber != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDVpn(vvNetworkID, vvNumber)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessSsidsVpn  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessSsidsVpn only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDVpn(vvNetworkID, vvNumber, dataRequest)
@@ -279,7 +244,7 @@ func (r *NetworksWirelessSSIDsVpnResource) Create(ctx context.Context, req resou
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDVpn",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -290,49 +255,19 @@ func (r *NetworksWirelessSSIDsVpnResource) Create(ctx context.Context, req resou
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDVpn(vvNetworkID, vvNumber)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkWirelessSSIDVpn",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkWirelessSSIDVpn",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseWirelessGetNetworkWirelessSSIDVpnItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksWirelessSSIDsVpnResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksWirelessSSIDsVpnRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -363,9 +298,7 @@ func (r *NetworksWirelessSSIDsVpnResource) Read(ctx context.Context, req resourc
 	}
 	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSSIDVpnItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksWirelessSSIDsVpnResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -373,35 +306,31 @@ func (r *NetworksWirelessSSIDsVpnResource) ImportState(ctx context.Context, req 
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,number. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("number"), idParts[1])...)
 }
 
 func (r *NetworksWirelessSSIDsVpnResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksWirelessSSIDsVpnRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksWirelessSSIDsVpnRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvNumber := data.Number.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvNumber := plan.Number.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDVpn(vvNetworkID, vvNumber, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDVpn",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -411,9 +340,7 @@ func (r *NetworksWirelessSSIDsVpnResource) Update(ctx context.Context, req resou
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksWirelessSSIDsVpnResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -552,8 +479,18 @@ func ResponseWirelessGetNetworkWirelessSSIDVpnItemToBodyRs(state NetworksWireles
 		Concentrator: func() *ResponseWirelessGetNetworkWirelessSsidVpnConcentratorRs {
 			if response.Concentrator != nil {
 				return &ResponseWirelessGetNetworkWirelessSsidVpnConcentratorRs{
-					Name:      types.StringValue(response.Concentrator.Name),
-					NetworkID: types.StringValue(response.Concentrator.NetworkID),
+					Name: func() types.String {
+						if response.Concentrator.Name != "" {
+							return types.StringValue(response.Concentrator.Name)
+						}
+						return types.String{}
+					}(),
+					NetworkID: func() types.String {
+						if response.Concentrator.NetworkID != "" {
+							return types.StringValue(response.Concentrator.NetworkID)
+						}
+						return types.String{}
+					}(),
 					VLANID: func() types.Int64 {
 						if response.Concentrator.VLANID != nil {
 							return types.Int64Value(int64(*response.Concentrator.VLANID))
@@ -579,7 +516,12 @@ func ResponseWirelessGetNetworkWirelessSSIDVpnItemToBodyRs(state NetworksWireles
 						}
 						return types.Int64{}
 					}(),
-					RequestIP: types.StringValue(response.Failover.RequestIP),
+					RequestIP: func() types.String {
+						if response.Failover.RequestIP != "" {
+							return types.StringValue(response.Failover.RequestIP)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -598,11 +540,36 @@ func ResponseWirelessGetNetworkWirelessSSIDVpnItemToBodyRs(state NetworksWireles
 							result := make([]ResponseWirelessGetNetworkWirelessSsidVpnSplitTunnelRulesRs, len(*response.SplitTunnel.Rules))
 							for i, rules := range *response.SplitTunnel.Rules {
 								result[i] = ResponseWirelessGetNetworkWirelessSsidVpnSplitTunnelRulesRs{
-									Comment:  types.StringValue(rules.Comment),
-									DestCidr: types.StringValue(rules.DestCidr),
-									DestPort: types.StringValue(rules.DestPort),
-									Policy:   types.StringValue(rules.Policy),
-									Protocol: types.StringValue(rules.Protocol),
+									Comment: func() types.String {
+										if rules.Comment != "" {
+											return types.StringValue(rules.Comment)
+										}
+										return types.String{}
+									}(),
+									DestCidr: func() types.String {
+										if rules.DestCidr != "" {
+											return types.StringValue(rules.DestCidr)
+										}
+										return types.String{}
+									}(),
+									DestPort: func() types.String {
+										if rules.DestPort != "" {
+											return types.StringValue(rules.DestPort)
+										}
+										return types.String{}
+									}(),
+									Policy: func() types.String {
+										if rules.Policy != "" {
+											return types.StringValue(rules.Policy)
+										}
+										return types.String{}
+									}(),
+									Protocol: func() types.String {
+										if rules.Protocol != "" {
+											return types.StringValue(rules.Protocol)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return &result

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -176,13 +175,28 @@ func ResponseOrganizationsGetOrganizationInventoryOnboardingCloudMonitoringImpor
 							}
 							return types.Bool{}
 						}(),
-						Status: types.StringValue(item.Device.Status),
-						URL:    types.StringValue(item.Device.URL),
+						Status: func() types.String {
+							if item.Device.Status != "" {
+								return types.StringValue(item.Device.Status)
+							}
+							return types.String{}
+						}(),
+						URL: func() types.String {
+							if item.Device.URL != "" {
+								return types.StringValue(item.Device.URL)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			ImportID: types.StringValue(item.ImportID),
+			ImportID: func() types.String {
+				if item.ImportID != "" {
+					return types.StringValue(item.ImportID)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -181,23 +180,58 @@ func ResponseOrganizationsGetOrganizationEarlyAccessFeaturesItemsToBody(state Or
 			Descriptions: func() *ResponseItemOrganizationsGetOrganizationEarlyAccessFeaturesDescriptions {
 				if item.Descriptions != nil {
 					return &ResponseItemOrganizationsGetOrganizationEarlyAccessFeaturesDescriptions{
-						Long:  types.StringValue(item.Descriptions.Long),
-						Short: types.StringValue(item.Descriptions.Short),
+						Long: func() types.String {
+							if item.Descriptions.Long != "" {
+								return types.StringValue(item.Descriptions.Long)
+							}
+							return types.String{}
+						}(),
+						Short: func() types.String {
+							if item.Descriptions.Short != "" {
+								return types.StringValue(item.Descriptions.Short)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			DocumentationLink: types.StringValue(item.DocumentationLink),
+			DocumentationLink: func() types.String {
+				if item.DocumentationLink != "" {
+					return types.StringValue(item.DocumentationLink)
+				}
+				return types.String{}
+			}(),
 			IsOrgScopedOnly: func() types.Bool {
 				if item.IsOrgScopedOnly != nil {
 					return types.BoolValue(*item.IsOrgScopedOnly)
 				}
 				return types.Bool{}
 			}(),
-			Name:        types.StringValue(item.Name),
-			ShortName:   types.StringValue(item.ShortName),
-			SupportLink: types.StringValue(item.SupportLink),
-			Topic:       types.StringValue(item.Topic),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			ShortName: func() types.String {
+				if item.ShortName != "" {
+					return types.StringValue(item.ShortName)
+				}
+				return types.String{}
+			}(),
+			SupportLink: func() types.String {
+				if item.SupportLink != "" {
+					return types.StringValue(item.SupportLink)
+				}
+				return types.String{}
+			}(),
+			Topic: func() types.String {
+				if item.Topic != "" {
+					return types.StringValue(item.Topic)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

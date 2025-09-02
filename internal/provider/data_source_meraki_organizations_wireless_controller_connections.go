@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -266,7 +265,12 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerConnectionsItemT
 						Controller: func() *ResponseWirelessControllerGetOrganizationWirelessControllerConnectionsItemsController {
 							if items.Controller != nil {
 								return &ResponseWirelessControllerGetOrganizationWirelessControllerConnectionsItemsController{
-									Serial: types.StringValue(items.Controller.Serial),
+									Serial: func() types.String {
+										if items.Controller.Serial != "" {
+											return types.StringValue(items.Controller.Serial)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -274,14 +278,34 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerConnectionsItemT
 						Network: func() *ResponseWirelessControllerGetOrganizationWirelessControllerConnectionsItemsNetwork {
 							if items.Network != nil {
 								return &ResponseWirelessControllerGetOrganizationWirelessControllerConnectionsItemsNetwork{
-									ID:   types.StringValue(items.Network.ID),
-									Name: types.StringValue(items.Network.Name),
-									URL:  types.StringValue(items.Network.URL),
+									ID: func() types.String {
+										if items.Network.ID != "" {
+											return types.StringValue(items.Network.ID)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if items.Network.Name != "" {
+											return types.StringValue(items.Network.Name)
+										}
+										return types.String{}
+									}(),
+									URL: func() types.String {
+										if items.Network.URL != "" {
+											return types.StringValue(items.Network.URL)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						Serial: types.StringValue(items.Serial),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

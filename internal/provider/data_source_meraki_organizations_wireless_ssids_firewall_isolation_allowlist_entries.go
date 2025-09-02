@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -302,20 +301,55 @@ func ResponseWirelessGetOrganizationWirelessSSIDsFirewallIsolationAllowlistEntri
 						Client: func() *ResponseWirelessGetOrganizationWirelessSsidsFirewallIsolationAllowlistEntriesItemsClient {
 							if items.Client != nil {
 								return &ResponseWirelessGetOrganizationWirelessSsidsFirewallIsolationAllowlistEntriesItemsClient{
-									Mac: types.StringValue(items.Client.Mac),
+									Mac: func() types.String {
+										if items.Client.Mac != "" {
+											return types.StringValue(items.Client.Mac)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						CreatedAt:     types.StringValue(items.CreatedAt),
-						Description:   types.StringValue(items.Description),
-						EntryID:       types.StringValue(items.EntryID),
-						LastUpdatedAt: types.StringValue(items.LastUpdatedAt),
+						CreatedAt: func() types.String {
+							if items.CreatedAt != "" {
+								return types.StringValue(items.CreatedAt)
+							}
+							return types.String{}
+						}(),
+						Description: func() types.String {
+							if items.Description != "" {
+								return types.StringValue(items.Description)
+							}
+							return types.String{}
+						}(),
+						EntryID: func() types.String {
+							if items.EntryID != "" {
+								return types.StringValue(items.EntryID)
+							}
+							return types.String{}
+						}(),
+						LastUpdatedAt: func() types.String {
+							if items.LastUpdatedAt != "" {
+								return types.StringValue(items.LastUpdatedAt)
+							}
+							return types.String{}
+						}(),
 						Network: func() *ResponseWirelessGetOrganizationWirelessSsidsFirewallIsolationAllowlistEntriesItemsNetwork {
 							if items.Network != nil {
 								return &ResponseWirelessGetOrganizationWirelessSsidsFirewallIsolationAllowlistEntriesItemsNetwork{
-									ID:   types.StringValue(items.Network.ID),
-									Name: types.StringValue(items.Network.Name),
+									ID: func() types.String {
+										if items.Network.ID != "" {
+											return types.StringValue(items.Network.ID)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if items.Network.Name != "" {
+											return types.StringValue(items.Network.Name)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -323,8 +357,18 @@ func ResponseWirelessGetOrganizationWirelessSSIDsFirewallIsolationAllowlistEntri
 						SSID: func() *ResponseWirelessGetOrganizationWirelessSsidsFirewallIsolationAllowlistEntriesItemsSsid {
 							if items.SSID != nil {
 								return &ResponseWirelessGetOrganizationWirelessSsidsFirewallIsolationAllowlistEntriesItemsSsid{
-									ID:   types.StringValue(items.SSID.ID),
-									Name: types.StringValue(items.SSID.Name),
+									ID: func() types.String {
+										if items.SSID.ID != "" {
+											return types.StringValue(items.SSID.ID)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if items.SSID.Name != "" {
+											return types.StringValue(items.SSID.Name)
+										}
+										return types.String{}
+									}(),
 									Number: func() types.Int64 {
 										if items.SSID.Number != nil {
 											return types.Int64Value(int64(*items.SSID.Number))

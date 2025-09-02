@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -66,7 +67,6 @@ func (r *NetworksWirelessBluetoothSettingsResource) Schema(_ context.Context, _ 
 		Attributes: map[string]schema.Attribute{
 			"advertising_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Whether APs will advertise beacons.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -78,7 +78,6 @@ func (r *NetworksWirelessBluetoothSettingsResource) Schema(_ context.Context, _ 
 			},
 			"major": schema.Int64Attribute{
 				MarkdownDescription: `The major number to be used in the beacon identifier. Only valid in 'Non-unique' mode.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -87,7 +86,6 @@ func (r *NetworksWirelessBluetoothSettingsResource) Schema(_ context.Context, _ 
 			"major_minor_assignment_mode": schema.StringAttribute{
 				MarkdownDescription: `The way major and minor number should be assigned to nodes in the network. ('Unique', 'Non-unique')
                                   Allowed values: [Non-unique,Unique]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -101,7 +99,6 @@ func (r *NetworksWirelessBluetoothSettingsResource) Schema(_ context.Context, _ 
 			},
 			"minor": schema.Int64Attribute{
 				MarkdownDescription: `The minor number to be used in the beacon identifier. Only valid in 'Non-unique' mode.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -113,7 +110,6 @@ func (r *NetworksWirelessBluetoothSettingsResource) Schema(_ context.Context, _ 
 			},
 			"scanning_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Whether APs will scan for Bluetooth enabled clients.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -121,7 +117,6 @@ func (r *NetworksWirelessBluetoothSettingsResource) Schema(_ context.Context, _ 
 			},
 			"uuid": schema.StringAttribute{
 				MarkdownDescription: `The UUID to be used in the beacon identifier.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -153,27 +148,6 @@ func (r *NetworksWirelessBluetoothSettingsResource) Create(ctx context.Context, 
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessBluetoothSettings(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessBluetoothSettings  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessBluetoothSettings only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessBluetoothSettings(vvNetworkID, dataRequest)
@@ -182,7 +156,7 @@ func (r *NetworksWirelessBluetoothSettingsResource) Create(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessBluetoothSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -193,49 +167,19 @@ func (r *NetworksWirelessBluetoothSettingsResource) Create(ctx context.Context, 
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessBluetoothSettings(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkWirelessBluetoothSettings",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkWirelessBluetoothSettings",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseWirelessGetNetworkWirelessBluetoothSettingsItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksWirelessBluetoothSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksWirelessBluetoothSettingsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -265,33 +209,28 @@ func (r *NetworksWirelessBluetoothSettingsResource) Read(ctx context.Context, re
 	}
 	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessBluetoothSettingsItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksWirelessBluetoothSettingsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksWirelessBluetoothSettingsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksWirelessBluetoothSettingsRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksWirelessBluetoothSettingsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessBluetoothSettings(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessBluetoothSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -301,9 +240,7 @@ func (r *NetworksWirelessBluetoothSettingsResource) Update(ctx context.Context, 
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksWirelessBluetoothSettingsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -395,7 +332,12 @@ func ResponseWirelessGetNetworkWirelessBluetoothSettingsItemToBodyRs(state Netwo
 			}
 			return types.Int64{}
 		}(),
-		MajorMinorAssignmentMode: types.StringValue(response.MajorMinorAssignmentMode),
+		MajorMinorAssignmentMode: func() types.String {
+			if response.MajorMinorAssignmentMode != "" {
+				return types.StringValue(response.MajorMinorAssignmentMode)
+			}
+			return types.String{}
+		}(),
 		Minor: func() types.Int64 {
 			if response.Minor != nil {
 				return types.Int64Value(int64(*response.Minor))
@@ -408,7 +350,12 @@ func ResponseWirelessGetNetworkWirelessBluetoothSettingsItemToBodyRs(state Netwo
 			}
 			return types.Bool{}
 		}(),
-		UUID: types.StringValue(response.UUID),
+		UUID: func() types.String {
+			if response.UUID != "" {
+				return types.StringValue(response.UUID)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksWirelessBluetoothSettingsRs)

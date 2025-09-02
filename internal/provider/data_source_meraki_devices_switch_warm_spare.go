@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -142,8 +141,18 @@ func ResponseSwitchGetDeviceSwitchWarmSpareItemToBody(state DevicesSwitchWarmSpa
 			}
 			return types.Bool{}
 		}(),
-		PrimarySerial: types.StringValue(response.PrimarySerial),
-		SpareSerial:   types.StringValue(response.SpareSerial),
+		PrimarySerial: func() types.String {
+			if response.PrimarySerial != "" {
+				return types.StringValue(response.PrimarySerial)
+			}
+			return types.String{}
+		}(),
+		SpareSerial: func() types.String {
+			if response.SpareSerial != "" {
+				return types.StringValue(response.SpareSerial)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

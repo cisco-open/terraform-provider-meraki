@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -250,7 +249,12 @@ func ResponseLicensingGetOrganizationLicensingCotermLicensesItemsToBody(state Or
 	var items []ResponseItemLicensingGetOrganizationLicensingCotermLicenses
 	for _, item := range *response {
 		itemState := ResponseItemLicensingGetOrganizationLicensingCotermLicenses{
-			ClaimedAt: types.StringValue(item.ClaimedAt),
+			ClaimedAt: func() types.String {
+				if item.ClaimedAt != "" {
+					return types.StringValue(item.ClaimedAt)
+				}
+				return types.String{}
+			}(),
 			Counts: func() *[]ResponseItemLicensingGetOrganizationLicensingCotermLicensesCounts {
 				if item.Counts != nil {
 					result := make([]ResponseItemLicensingGetOrganizationLicensingCotermLicensesCounts, len(*item.Counts))
@@ -262,7 +266,12 @@ func ResponseLicensingGetOrganizationLicensingCotermLicensesItemsToBody(state Or
 								}
 								return types.Int64{}
 							}(),
-							Model: types.StringValue(counts.Model),
+							Model: func() types.String {
+								if counts.Model != "" {
+									return types.StringValue(counts.Model)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
@@ -280,8 +289,18 @@ func ResponseLicensingGetOrganizationLicensingCotermLicensesItemsToBody(state Or
 					result := make([]ResponseItemLicensingGetOrganizationLicensingCotermLicensesEditions, len(*item.Editions))
 					for i, editions := range *item.Editions {
 						result[i] = ResponseItemLicensingGetOrganizationLicensingCotermLicensesEditions{
-							Edition:     types.StringValue(editions.Edition),
-							ProductType: types.StringValue(editions.ProductType),
+							Edition: func() types.String {
+								if editions.Edition != "" {
+									return types.StringValue(editions.Edition)
+								}
+								return types.String{}
+							}(),
+							ProductType: func() types.String {
+								if editions.ProductType != "" {
+									return types.StringValue(editions.ProductType)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
@@ -300,11 +319,36 @@ func ResponseLicensingGetOrganizationLicensingCotermLicensesItemsToBody(state Or
 				}
 				return types.Bool{}
 			}(),
-			InvalidatedAt:  types.StringValue(item.InvalidatedAt),
-			Key:            types.StringValue(item.Key),
-			Mode:           types.StringValue(item.Mode),
-			OrganizationID: types.StringValue(item.OrganizationID),
-			StartedAt:      types.StringValue(item.StartedAt),
+			InvalidatedAt: func() types.String {
+				if item.InvalidatedAt != "" {
+					return types.StringValue(item.InvalidatedAt)
+				}
+				return types.String{}
+			}(),
+			Key: func() types.String {
+				if item.Key != "" {
+					return types.StringValue(item.Key)
+				}
+				return types.String{}
+			}(),
+			Mode: func() types.String {
+				if item.Mode != "" {
+					return types.StringValue(item.Mode)
+				}
+				return types.String{}
+			}(),
+			OrganizationID: func() types.String {
+				if item.OrganizationID != "" {
+					return types.StringValue(item.OrganizationID)
+				}
+				return types.String{}
+			}(),
+			StartedAt: func() types.String {
+				if item.StartedAt != "" {
+					return types.StringValue(item.StartedAt)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

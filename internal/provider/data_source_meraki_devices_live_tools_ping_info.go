@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -259,7 +258,12 @@ type ResponseDevicesGetDeviceLiveToolsPingResultsReplies struct {
 // ToBody
 func ResponseDevicesGetDeviceLiveToolsPingItemToBody(state DevicesLiveToolsPingInfo, response *merakigosdk.ResponseDevicesGetDeviceLiveToolsPing) DevicesLiveToolsPingInfo {
 	itemState := ResponseDevicesGetDeviceLiveToolsPing{
-		PingID: types.StringValue(response.PingID),
+		PingID: func() types.String {
+			if response.PingID != "" {
+				return types.StringValue(response.PingID)
+			}
+			return types.String{}
+		}(),
 		Request: func() *ResponseDevicesGetDeviceLiveToolsPingRequest {
 			if response.Request != nil {
 				return &ResponseDevicesGetDeviceLiveToolsPingRequest{
@@ -269,8 +273,18 @@ func ResponseDevicesGetDeviceLiveToolsPingItemToBody(state DevicesLiveToolsPingI
 						}
 						return types.Int64{}
 					}(),
-					Serial: types.StringValue(response.Request.Serial),
-					Target: types.StringValue(response.Request.Target),
+					Serial: func() types.String {
+						if response.Request.Serial != "" {
+							return types.StringValue(response.Request.Serial)
+						}
+						return types.String{}
+					}(),
+					Target: func() types.String {
+						if response.Request.Target != "" {
+							return types.StringValue(response.Request.Target)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -361,8 +375,18 @@ func ResponseDevicesGetDeviceLiveToolsPingItemToBody(state DevicesLiveToolsPingI
 			}
 			return nil
 		}(),
-		Status: types.StringValue(response.Status),
-		URL:    types.StringValue(response.URL),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

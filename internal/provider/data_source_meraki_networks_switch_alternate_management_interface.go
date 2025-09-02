@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -182,10 +181,30 @@ func ResponseSwitchGetNetworkSwitchAlternateManagementInterfaceItemToBody(state 
 				result := make([]ResponseSwitchGetNetworkSwitchAlternateManagementInterfaceSwitches, len(*response.Switches))
 				for i, switches := range *response.Switches {
 					result[i] = ResponseSwitchGetNetworkSwitchAlternateManagementInterfaceSwitches{
-						AlternateManagementIP: types.StringValue(switches.AlternateManagementIP),
-						Gateway:               types.StringValue(switches.Gateway),
-						Serial:                types.StringValue(switches.Serial),
-						SubnetMask:            types.StringValue(switches.SubnetMask),
+						AlternateManagementIP: func() types.String {
+							if switches.AlternateManagementIP != "" {
+								return types.StringValue(switches.AlternateManagementIP)
+							}
+							return types.String{}
+						}(),
+						Gateway: func() types.String {
+							if switches.Gateway != "" {
+								return types.StringValue(switches.Gateway)
+							}
+							return types.String{}
+						}(),
+						Serial: func() types.String {
+							if switches.Serial != "" {
+								return types.StringValue(switches.Serial)
+							}
+							return types.String{}
+						}(),
+						SubnetMask: func() types.String {
+							if switches.SubnetMask != "" {
+								return types.StringValue(switches.SubnetMask)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

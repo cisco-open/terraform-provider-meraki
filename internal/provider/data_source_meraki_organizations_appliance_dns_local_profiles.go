@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -146,8 +145,18 @@ func ResponseApplianceGetOrganizationApplianceDNSLocalProfilesItemsToBody(state 
 	var items []ResponseItemApplianceGetOrganizationApplianceDnsLocalProfiles
 	for _, item := range *response {
 		itemState := ResponseItemApplianceGetOrganizationApplianceDnsLocalProfiles{
-			Name:      types.StringValue(item.Name),
-			ProfileID: types.StringValue(item.ProfileID),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			ProfileID: func() types.String {
+				if item.ProfileID != "" {
+					return types.StringValue(item.ProfileID)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

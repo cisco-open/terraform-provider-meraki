@@ -32,19 +32,19 @@ import (
 )
 
 var (
-	_ resource.Resource              = &ApplianceApplianceDNSSplitProfilesAssignmentsBulkDeleteResource{}
-	_ resource.ResourceWithConfigure = &ApplianceApplianceDNSSplitProfilesAssignmentsBulkDeleteResource{}
+	_ resource.Resource              = &OrganizationsApplianceDNSSplitProfilesAssignmentsBulkDeleteResource{}
+	_ resource.ResourceWithConfigure = &OrganizationsApplianceDNSSplitProfilesAssignmentsBulkDeleteResource{}
 )
 
-func NewApplianceApplianceDNSSplitProfilesAssignmentsBulkDeleteResource() resource.Resource {
-	return &ApplianceApplianceDNSSplitProfilesAssignmentsBulkDeleteResource{}
+func NewOrganizationsApplianceDNSSplitProfilesAssignmentsBulkDeleteResource() resource.Resource {
+	return &OrganizationsApplianceDNSSplitProfilesAssignmentsBulkDeleteResource{}
 }
 
-type ApplianceApplianceDNSSplitProfilesAssignmentsBulkDeleteResource struct {
+type OrganizationsApplianceDNSSplitProfilesAssignmentsBulkDeleteResource struct {
 	client *merakigosdk.Client
 }
 
-func (r *ApplianceApplianceDNSSplitProfilesAssignmentsBulkDeleteResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *OrganizationsApplianceDNSSplitProfilesAssignmentsBulkDeleteResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -53,12 +53,12 @@ func (r *ApplianceApplianceDNSSplitProfilesAssignmentsBulkDeleteResource) Config
 }
 
 // Metadata returns the data source type name.
-func (r *ApplianceApplianceDNSSplitProfilesAssignmentsBulkDeleteResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_Appliance_appliance_dns_split_profiles_assignments_bulk_delete"
+func (r *OrganizationsApplianceDNSSplitProfilesAssignmentsBulkDeleteResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_organizations_appliance_dns_split_profiles_assignments_bulk_delete"
 }
 
 // resourceAction
-func (r *ApplianceApplianceDNSSplitProfilesAssignmentsBulkDeleteResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *OrganizationsApplianceDNSSplitProfilesAssignmentsBulkDeleteResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"organization_id": schema.StringAttribute{
@@ -135,9 +135,9 @@ func (r *ApplianceApplianceDNSSplitProfilesAssignmentsBulkDeleteResource) Schema
 		},
 	}
 }
-func (r *ApplianceApplianceDNSSplitProfilesAssignmentsBulkDeleteResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *OrganizationsApplianceDNSSplitProfilesAssignmentsBulkDeleteResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var data ApplianceApplianceDNSSplitProfilesAssignmentsBulkDelete
+	var data OrganizationsApplianceDNSSplitProfilesAssignmentsBulkDelete
 
 	var item types.Object
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &item)...)
@@ -177,21 +177,21 @@ func (r *ApplianceApplianceDNSSplitProfilesAssignmentsBulkDeleteResource) Create
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *ApplianceApplianceDNSSplitProfilesAssignmentsBulkDeleteResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *OrganizationsApplianceDNSSplitProfilesAssignmentsBulkDeleteResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
-func (r *ApplianceApplianceDNSSplitProfilesAssignmentsBulkDeleteResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *OrganizationsApplianceDNSSplitProfilesAssignmentsBulkDeleteResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
-func (r *ApplianceApplianceDNSSplitProfilesAssignmentsBulkDeleteResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *OrganizationsApplianceDNSSplitProfilesAssignmentsBulkDeleteResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
 // TF Structs Schema
-type ApplianceApplianceDNSSplitProfilesAssignmentsBulkDelete struct {
+type OrganizationsApplianceDNSSplitProfilesAssignmentsBulkDelete struct {
 	OrganizationID types.String                                                                        `tfsdk:"organization_id"`
 	Item           *ResponseApplianceCreateOrganizationApplianceDnsSplitProfilesAssignmentsBulkDelete  `tfsdk:"item"`
 	Parameters     *RequestApplianceCreateOrganizationApplianceDnsSplitProfilesAssignmentsBulkDeleteRs `tfsdk:"parameters"`
@@ -224,7 +224,7 @@ type RequestApplianceCreateOrganizationApplianceDnsSplitProfilesAssignmentsBulkD
 }
 
 // FromBody
-func (r *ApplianceApplianceDNSSplitProfilesAssignmentsBulkDelete) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestApplianceCreateOrganizationApplianceDNSSplitProfilesAssignmentsBulkDelete {
+func (r *OrganizationsApplianceDNSSplitProfilesAssignmentsBulkDelete) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestApplianceCreateOrganizationApplianceDNSSplitProfilesAssignmentsBulkDelete {
 	re := *r.Parameters
 	var requestApplianceCreateOrganizationApplianceDNSSplitProfilesAssignmentsBulkDeleteItems []merakigosdk.RequestApplianceCreateOrganizationApplianceDNSSplitProfilesAssignmentsBulkDeleteItems
 
@@ -244,18 +244,28 @@ func (r *ApplianceApplianceDNSSplitProfilesAssignmentsBulkDelete) toSdkApiReques
 }
 
 // ToBody
-func ResponseApplianceCreateOrganizationApplianceDNSSplitProfilesAssignmentsBulkDeleteItemToBody(state ApplianceApplianceDNSSplitProfilesAssignmentsBulkDelete, response *merakigosdk.ResponseApplianceCreateOrganizationApplianceDNSSplitProfilesAssignmentsBulkDelete) ApplianceApplianceDNSSplitProfilesAssignmentsBulkDelete {
+func ResponseApplianceCreateOrganizationApplianceDNSSplitProfilesAssignmentsBulkDeleteItemToBody(state OrganizationsApplianceDNSSplitProfilesAssignmentsBulkDelete, response *merakigosdk.ResponseApplianceCreateOrganizationApplianceDNSSplitProfilesAssignmentsBulkDelete) OrganizationsApplianceDNSSplitProfilesAssignmentsBulkDelete {
 	itemState := ResponseApplianceCreateOrganizationApplianceDnsSplitProfilesAssignmentsBulkDelete{
 		Items: func() *[]ResponseApplianceCreateOrganizationApplianceDnsSplitProfilesAssignmentsBulkDeleteItems {
 			if response.Items != nil {
 				result := make([]ResponseApplianceCreateOrganizationApplianceDnsSplitProfilesAssignmentsBulkDeleteItems, len(*response.Items))
 				for i, items := range *response.Items {
 					result[i] = ResponseApplianceCreateOrganizationApplianceDnsSplitProfilesAssignmentsBulkDeleteItems{
-						AssignmentID: types.StringValue(items.AssignmentID),
+						AssignmentID: func() types.String {
+							if items.AssignmentID != "" {
+								return types.StringValue(items.AssignmentID)
+							}
+							return types.String{}
+						}(),
 						Network: func() *ResponseApplianceCreateOrganizationApplianceDnsSplitProfilesAssignmentsBulkDeleteItemsNetwork {
 							if items.Network != nil {
 								return &ResponseApplianceCreateOrganizationApplianceDnsSplitProfilesAssignmentsBulkDeleteItemsNetwork{
-									ID: types.StringValue(items.Network.ID),
+									ID: func() types.String {
+										if items.Network.ID != "" {
+											return types.StringValue(items.Network.ID)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -263,7 +273,12 @@ func ResponseApplianceCreateOrganizationApplianceDNSSplitProfilesAssignmentsBulk
 						Profile: func() *ResponseApplianceCreateOrganizationApplianceDnsSplitProfilesAssignmentsBulkDeleteItemsProfile {
 							if items.Profile != nil {
 								return &ResponseApplianceCreateOrganizationApplianceDnsSplitProfilesAssignmentsBulkDeleteItemsProfile{
-									ID: types.StringValue(items.Profile.ID),
+									ID: func() types.String {
+										if items.Profile.ID != "" {
+											return types.StringValue(items.Profile.ID)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil

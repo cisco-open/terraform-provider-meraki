@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -69,7 +70,6 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 		Attributes: map[string]schema.Attribute{
 			"default_gateway": schema.StringAttribute{
 				MarkdownDescription: `IPv4 default gateway`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -77,7 +77,6 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 			},
 			"interface_id": schema.StringAttribute{
 				MarkdownDescription: `The ID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -85,7 +84,6 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 			},
 			"interface_ip": schema.StringAttribute{
 				MarkdownDescription: `IPv4 address`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -93,7 +91,6 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 			},
 			"ipv6": schema.SingleNestedAttribute{
 				MarkdownDescription: `IPv6 addressing`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -102,7 +99,6 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 
 					"address": schema.StringAttribute{
 						MarkdownDescription: `IPv6 address`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -110,7 +106,6 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 					},
 					"assignment_mode": schema.StringAttribute{
 						MarkdownDescription: `Assignment mode`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -118,7 +113,6 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 					},
 					"gateway": schema.StringAttribute{
 						MarkdownDescription: `IPv6 gateway`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -126,7 +120,6 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 					},
 					"prefix": schema.StringAttribute{
 						MarkdownDescription: `IPv6 subnet`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -137,7 +130,6 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 			"multicast_routing": schema.StringAttribute{
 				MarkdownDescription: `Multicast routing status
                                   Allowed values: [IGMP snooping querier,disabled,enabled]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -152,7 +144,6 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -160,7 +151,6 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 			},
 			"ospf_settings": schema.SingleNestedAttribute{
 				MarkdownDescription: `IPv4 OSPF Settings`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -169,7 +159,6 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 
 					"area": schema.StringAttribute{
 						MarkdownDescription: `Area ID`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -177,7 +166,6 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 					},
 					"cost": schema.Int64Attribute{
 						MarkdownDescription: `OSPF Cost`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -185,7 +173,6 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 					},
 					"is_passive_enabled": schema.BoolAttribute{
 						MarkdownDescription: `Disable sending Hello packets on this interface's IPv4 area`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -196,35 +183,19 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 			"ospf_v3": schema.SingleNestedAttribute{
 				MarkdownDescription: `IPv6 OSPF Settings`,
 				Computed:            true,
-				Optional:            true,
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
 				Attributes: map[string]schema.Attribute{
 
 					"area": schema.StringAttribute{
 						MarkdownDescription: `Area ID`,
 						Computed:            true,
-						Optional:            true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
 					},
 					"cost": schema.Int64Attribute{
 						MarkdownDescription: `OSPF Cost`,
 						Computed:            true,
-						Optional:            true,
-						PlanModifiers: []planmodifier.Int64{
-							int64planmodifier.UseStateForUnknown(),
-						},
 					},
 					"is_passive_enabled": schema.BoolAttribute{
 						MarkdownDescription: `Disable sending Hello packets on this interface's IPv6 area`,
 						Computed:            true,
-						Optional:            true,
-						PlanModifiers: []planmodifier.Bool{
-							boolplanmodifier.UseStateForUnknown(),
-						},
 					},
 				},
 			},
@@ -234,7 +205,6 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 			},
 			"subnet": schema.StringAttribute{
 				MarkdownDescription: `IPv4 subnet`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -250,7 +220,6 @@ func (r *DevicesSwitchRoutingInterfacesResource) Schema(_ context.Context, _ res
 			},
 			"vlan_id": schema.Int64Attribute{
 				MarkdownDescription: `VLAN ID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -331,7 +300,7 @@ func (r *DevicesSwitchRoutingInterfacesResource) Create(ctx context.Context, req
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateDeviceSwitchRoutingInterface",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -403,21 +372,11 @@ func (r *DevicesSwitchRoutingInterfacesResource) Create(ctx context.Context, req
 func (r *DevicesSwitchRoutingInterfacesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data DevicesSwitchRoutingInterfacesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -448,9 +407,7 @@ func (r *DevicesSwitchRoutingInterfacesResource) Read(ctx context.Context, req r
 	}
 	//entro aqui 2
 	data = ResponseSwitchGetDeviceSwitchRoutingInterfaceItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *DevicesSwitchRoutingInterfacesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -458,35 +415,31 @@ func (r *DevicesSwitchRoutingInterfacesResource) ImportState(ctx context.Context
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: serial,interfaceId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("serial"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("interface_id"), idParts[1])...)
 }
 
 func (r *DevicesSwitchRoutingInterfacesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data DevicesSwitchRoutingInterfacesRs
-	merge(ctx, req, resp, &data)
+	var plan DevicesSwitchRoutingInterfacesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvSerial := data.Serial.ValueString()
-	vvInterfaceID := data.InterfaceID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvSerial := plan.Serial.ValueString()
+	vvInterfaceID := plan.InterfaceID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateDeviceSwitchRoutingInterface(vvSerial, vvInterfaceID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceSwitchRoutingInterface",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -496,9 +449,7 @@ func (r *DevicesSwitchRoutingInterfacesResource) Update(ctx context.Context, req
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *DevicesSwitchRoutingInterfacesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -748,26 +699,76 @@ func (r *DevicesSwitchRoutingInterfacesRs) toSdkApiRequestUpdate(ctx context.Con
 // From gosdk to TF Structs Schema
 func ResponseSwitchGetDeviceSwitchRoutingInterfaceItemToBodyRs(state DevicesSwitchRoutingInterfacesRs, response *merakigosdk.ResponseSwitchGetDeviceSwitchRoutingInterface, is_read bool) DevicesSwitchRoutingInterfacesRs {
 	itemState := DevicesSwitchRoutingInterfacesRs{
-		DefaultGateway: types.StringValue(response.DefaultGateway),
-		InterfaceID:    types.StringValue(response.InterfaceID),
-		InterfaceIP:    types.StringValue(response.InterfaceIP),
+		DefaultGateway: func() types.String {
+			if response.DefaultGateway != "" {
+				return types.StringValue(response.DefaultGateway)
+			}
+			return types.String{}
+		}(),
+		InterfaceID: func() types.String {
+			if response.InterfaceID != "" {
+				return types.StringValue(response.InterfaceID)
+			}
+			return types.String{}
+		}(),
+		InterfaceIP: func() types.String {
+			if response.InterfaceIP != "" {
+				return types.StringValue(response.InterfaceIP)
+			}
+			return types.String{}
+		}(),
 		IPv6: func() *ResponseSwitchGetDeviceSwitchRoutingInterfaceIpv6Rs {
 			if response.IPv6 != nil {
 				return &ResponseSwitchGetDeviceSwitchRoutingInterfaceIpv6Rs{
-					Address:        types.StringValue(response.IPv6.Address),
-					AssignmentMode: types.StringValue(response.IPv6.AssignmentMode),
-					Gateway:        types.StringValue(response.IPv6.Gateway),
-					Prefix:         types.StringValue(response.IPv6.Prefix),
+					Address: func() types.String {
+						if response.IPv6.Address != "" {
+							return types.StringValue(response.IPv6.Address)
+						}
+						return types.String{}
+					}(),
+					AssignmentMode: func() types.String {
+						if response.IPv6.AssignmentMode != "" {
+							return types.StringValue(response.IPv6.AssignmentMode)
+						}
+						return types.String{}
+					}(),
+					Gateway: func() types.String {
+						if response.IPv6.Gateway != "" {
+							return types.StringValue(response.IPv6.Gateway)
+						}
+						return types.String{}
+					}(),
+					Prefix: func() types.String {
+						if response.IPv6.Prefix != "" {
+							return types.StringValue(response.IPv6.Prefix)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		MulticastRouting: types.StringValue(response.MulticastRouting),
-		Name:             types.StringValue(response.Name),
+		MulticastRouting: func() types.String {
+			if response.MulticastRouting != "" {
+				return types.StringValue(response.MulticastRouting)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		OspfSettings: func() *ResponseSwitchGetDeviceSwitchRoutingInterfaceOspfSettingsRs {
 			if response.OspfSettings != nil {
 				return &ResponseSwitchGetDeviceSwitchRoutingInterfaceOspfSettingsRs{
-					Area: types.StringValue(response.OspfSettings.Area),
+					Area: func() types.String {
+						if response.OspfSettings.Area != "" {
+							return types.StringValue(response.OspfSettings.Area)
+						}
+						return types.String{}
+					}(),
 					Cost: func() types.Int64 {
 						if response.OspfSettings.Cost != nil {
 							return types.Int64Value(int64(*response.OspfSettings.Cost))
@@ -787,7 +788,12 @@ func ResponseSwitchGetDeviceSwitchRoutingInterfaceItemToBodyRs(state DevicesSwit
 		OspfV3: func() *ResponseSwitchGetDeviceSwitchRoutingInterfaceOspfV3Rs {
 			if response.OspfV3 != nil {
 				return &ResponseSwitchGetDeviceSwitchRoutingInterfaceOspfV3Rs{
-					Area: types.StringValue(response.OspfV3.Area),
+					Area: func() types.String {
+						if response.OspfV3.Area != "" {
+							return types.StringValue(response.OspfV3.Area)
+						}
+						return types.String{}
+					}(),
 					Cost: func() types.Int64 {
 						if response.OspfV3.Cost != nil {
 							return types.Int64Value(int64(*response.OspfV3.Cost))
@@ -804,7 +810,12 @@ func ResponseSwitchGetDeviceSwitchRoutingInterfaceItemToBodyRs(state DevicesSwit
 			}
 			return nil
 		}(),
-		Subnet: types.StringValue(response.Subnet),
+		Subnet: func() types.String {
+			if response.Subnet != "" {
+				return types.StringValue(response.Subnet)
+			}
+			return types.String{}
+		}(),
 		UplinkV4: func() types.Bool {
 			if response.UplinkV4 != nil {
 				return types.BoolValue(*response.UplinkV4)

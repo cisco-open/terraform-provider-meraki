@@ -31,9 +31,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -72,7 +72,6 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 			"auth_mode": schema.StringAttribute{
 				MarkdownDescription: `The association control method for the SSID.
                                   Allowed values: [8021x-meraki,8021x-radius,open,psk]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -88,7 +87,6 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"default_vlan_id": schema.Int64Attribute{
 				MarkdownDescription: `The VLAN ID of the VLAN associated to this SSID.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -96,7 +94,6 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"dhcp_enforced_deauthentication": schema.SingleNestedAttribute{
 				MarkdownDescription: `DHCP Enforced Deauthentication enables the disassociation of wireless clients in addition to Mandatory DHCP. This param is only valid on firmware versions >= MX 17.0 where the associated LAN has Mandatory DHCP Enabled `,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -105,7 +102,6 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Enable DCHP Enforced Deauthentication on the SSID.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -115,7 +111,6 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"dot11w": schema.SingleNestedAttribute{
 				MarkdownDescription: `The current setting for Protected Management Frames (802.11w).`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -124,7 +119,6 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Whether 802.11w is enabled or not.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -132,7 +126,6 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 					},
 					"required": schema.BoolAttribute{
 						MarkdownDescription: `(Optional) Whether 802.11w is required or not.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -142,7 +135,6 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: `Whether or not the SSID is enabled.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -151,7 +143,6 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 			"encryption_mode": schema.StringAttribute{
 				MarkdownDescription: `The psk encryption mode for the SSID.
                                   Allowed values: [wep,wpa]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -165,7 +156,6 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name of the SSID.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -175,32 +165,29 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"number": schema.Int64Attribute{
+			"number": schema.StringAttribute{
 				MarkdownDescription: `The number of the SSID.`,
 				Required:            true,
 				//            Differents_types: `   parameter: schema.TypeString, item: schema.TypeInt`,
 			},
 			"psk": schema.StringAttribute{
 				MarkdownDescription: `The passkey for the SSID. This param is only valid if the authMode is 'psk'.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"radius_servers": schema.SetNestedAttribute{
+			"radius_servers": schema.ListNestedAttribute{
 				MarkdownDescription: `The RADIUS 802.1x servers to be used for authentication.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"host": schema.StringAttribute{
 							MarkdownDescription: `The IP address of your RADIUS server.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -208,7 +195,6 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 						},
 						"port": schema.Int64Attribute{
 							MarkdownDescription: `The UDP port your RADIUS servers listens on for Access-requests.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -216,41 +202,7 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 						},
 						"secret": schema.StringAttribute{
 							MarkdownDescription: `The RADIUS client shared secret.`,
-							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-					},
-				},
-			},
-			"radius_servers_response": schema.SetNestedAttribute{
-				MarkdownDescription: `The RADIUS 802.1x servers to be used for authentication.`,
-				Computed:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
-				},
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-
-						"host": schema.StringAttribute{
-							MarkdownDescription: `The IP address of your RADIUS server.`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"port": schema.Int64Attribute{
-							MarkdownDescription: `The UDP port your RADIUS servers listens on for Access-requests.`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.Int64{
-								int64planmodifier.UseStateForUnknown(),
-							},
-						},
-						"secret": schema.StringAttribute{
-							MarkdownDescription: `The RADIUS client shared secret.`,
-							Computed:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -260,7 +212,6 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"visible": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating whether the MX should advertise or hide this SSID.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -269,7 +220,6 @@ func (r *NetworksApplianceSSIDsResource) Schema(_ context.Context, _ resource.Sc
 			"wpa_encryption_mode": schema.StringAttribute{
 				MarkdownDescription: `WPA encryption mode for the SSID.
                                   Allowed values: [WPA1 and WPA2,WPA2 only,WPA3 Transition Mode,WPA3 only]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -309,27 +259,8 @@ func (r *NetworksApplianceSSIDsResource) Create(ctx context.Context, req resourc
 	}
 	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
-	a := int(data.Number.ValueInt64())
-	vvNumber := strconv.Itoa(a)
-	//Item
-	responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceSSID(vvNetworkID, vvNumber)
-	// No Post
-	if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceSsids  only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
-
-	if responseVerifyItem == nil {
-		resp.Diagnostics.AddError(
-			"Resource NetworksApplianceSsids only have update context, not create.",
-			err.Error(),
-		)
-		return
-	}
+	vvNumber := data.Number.ValueString()
+	//Has Item and has items and not post
 
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
@@ -339,7 +270,7 @@ func (r *NetworksApplianceSSIDsResource) Create(ctx context.Context, req resourc
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceSSID",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -350,56 +281,24 @@ func (r *NetworksApplianceSSIDsResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceSSID(vvNetworkID, vvNumber)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceSSID",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkApplianceSSID",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseApplianceGetNetworkApplianceSSIDItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksApplianceSSIDsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksApplianceSSIDsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
-	a := int(data.Number.ValueInt64())
-	vvNumber := strconv.Itoa(a)
+	vvNumber := data.Number.ValueString()
 	responseGet, restyRespGet, err := r.client.Appliance.GetNetworkApplianceSSID(vvNetworkID, vvNumber)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -425,47 +324,39 @@ func (r *NetworksApplianceSSIDsResource) Read(ctx context.Context, req resource.
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceSSIDItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
-
 func (r *NetworksApplianceSSIDsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
+
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,number. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("number"), idParts[1])...)
 }
 
 func (r *NetworksApplianceSSIDsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksApplianceSSIDsRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksApplianceSSIDsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	// network_id
-	a := int(data.Number.ValueInt64())
-	vvNumber := strconv.Itoa(a)
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvNumber := plan.Number.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceSSID(vvNetworkID, vvNumber, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceSSID",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -475,59 +366,25 @@ func (r *NetworksApplianceSSIDsResource) Update(ctx context.Context, req resourc
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksApplianceSSIDsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	resp.Diagnostics.AddWarning("Warning deleting NetworksApplianceSSIDs", "This will restore default config except for VLAN ID")
-
-	var data NetworksApplianceSSIDsRs
-	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	networkID := data.NetworkID.ValueString()
-	number := int(data.Number.ValueInt64())
-
-	/* Meraki API doesn't provide a delete method so update to default config as much as possible.
-	   DefaultVLANID will not be set as this depends on what VLANs are configured on the appliance.
-
-	   AuthMode: "open"
-	   Enabled: false
-	   Name: "Unconfigured SSID " + number
-	*/
-	disableRequest := &merakigosdk.RequestApplianceUpdateNetworkApplianceSSID{
-		AuthMode: "open",
-		Enabled:  func() *bool { b := false; return &b }(),
-		Name:     "Unconfigured SSID " + strconv.Itoa(number),
-	}
-
-	_, _, err := r.client.Appliance.UpdateNetworkApplianceSSID(networkID, strconv.Itoa(number), disableRequest)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error disabling NetworksApplianceSSIDs",
-			"Couldn't disable the SSID: "+err.Error(),
-		)
-		return
-	}
-
+	//missing delete
+	resp.Diagnostics.AddWarning("Error deleting NetworksApplianceSSIDs", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
 // TF Structs Schema
 type NetworksApplianceSSIDsRs struct {
 	NetworkID                    types.String                                                              `tfsdk:"network_id"`
-	Number                       types.Int64                                                               `tfsdk:"number"`
+	Number                       types.String                                                              `tfsdk:"number"`
 	AuthMode                     types.String                                                              `tfsdk:"auth_mode"`
 	DefaultVLANID                types.Int64                                                               `tfsdk:"default_vlan_id"`
 	Enabled                      types.Bool                                                                `tfsdk:"enabled"`
 	EncryptionMode               types.String                                                              `tfsdk:"encryption_mode"`
 	Name                         types.String                                                              `tfsdk:"name"`
 	RadiusServers                *[]ResponseApplianceGetNetworkApplianceSsidRadiusServersRs                `tfsdk:"radius_servers"`
-	RadiusServersResponse        *[]ResponseApplianceGetNetworkApplianceSsidRadiusServersRs                `tfsdk:"radius_servers_response"`
 	Visible                      types.Bool                                                                `tfsdk:"visible"`
 	WpaEncryptionMode            types.String                                                              `tfsdk:"wpa_encryption_mode"`
 	DhcpEnforcedDeauthentication *RequestApplianceUpdateNetworkApplianceSsidDhcpEnforcedDeauthenticationRs `tfsdk:"dhcp_enforced_deauthentication"`
@@ -680,7 +537,12 @@ func (r *NetworksApplianceSSIDsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 // From gosdk to TF Structs Schema
 func ResponseApplianceGetNetworkApplianceSSIDItemToBodyRs(state NetworksApplianceSSIDsRs, response *merakigosdk.ResponseApplianceGetNetworkApplianceSSID, is_read bool) NetworksApplianceSSIDsRs {
 	itemState := NetworksApplianceSSIDsRs{
-		AuthMode: types.StringValue(response.AuthMode),
+		AuthMode: func() types.String {
+			if response.AuthMode != "" {
+				return types.StringValue(response.AuthMode)
+			}
+			return types.String{}
+		}(),
 		DefaultVLANID: func() types.Int64 {
 			if response.DefaultVLANID != nil {
 				return types.Int64Value(int64(*response.DefaultVLANID))
@@ -693,20 +555,35 @@ func ResponseApplianceGetNetworkApplianceSSIDItemToBodyRs(state NetworksApplianc
 			}
 			return types.Bool{}
 		}(),
-		EncryptionMode: types.StringValue(response.EncryptionMode),
-		Name:           types.StringValue(response.Name),
-		Number: func() types.Int64 {
-			if response.Number != nil {
-				return types.Int64Value(int64(*response.Number))
+		EncryptionMode: func() types.String {
+			if response.EncryptionMode != "" {
+				return types.StringValue(response.EncryptionMode)
 			}
-			return types.Int64{}
+			return types.String{}
 		}(),
-		RadiusServersResponse: func() *[]ResponseApplianceGetNetworkApplianceSsidRadiusServersRs {
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		Number: func() types.String {
+			if strconv.Itoa(*response.Number) != "" {
+				return types.StringValue(strconv.Itoa(*response.Number))
+			}
+			return types.String{}
+		}(),
+		RadiusServers: func() *[]ResponseApplianceGetNetworkApplianceSsidRadiusServersRs {
 			if response.RadiusServers != nil {
 				result := make([]ResponseApplianceGetNetworkApplianceSsidRadiusServersRs, len(*response.RadiusServers))
 				for i, radiusServers := range *response.RadiusServers {
 					result[i] = ResponseApplianceGetNetworkApplianceSsidRadiusServersRs{
-						Host: types.StringValue(radiusServers.Host),
+						Host: func() types.String {
+							if radiusServers.Host != "" {
+								return types.StringValue(radiusServers.Host)
+							}
+							return types.String{}
+						}(),
 						Port: func() types.Int64 {
 							if radiusServers.Port != nil {
 								return types.Int64Value(int64(*radiusServers.Port))
@@ -725,9 +602,13 @@ func ResponseApplianceGetNetworkApplianceSSIDItemToBodyRs(state NetworksApplianc
 			}
 			return types.Bool{}
 		}(),
-		WpaEncryptionMode: types.StringValue(response.WpaEncryptionMode),
+		WpaEncryptionMode: func() types.String {
+			if response.WpaEncryptionMode != "" {
+				return types.StringValue(response.WpaEncryptionMode)
+			}
+			return types.String{}
+		}(),
 	}
-	itemState.RadiusServers = state.RadiusServers
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksApplianceSSIDsRs)
 	}

@@ -347,14 +347,34 @@ func ResponseDevicesCreateDeviceLiveToolsPingDeviceItemToBody(state DevicesLiveT
 		Callback: func() *ResponseDevicesCreateDeviceLiveToolsPingDeviceCallback {
 			if response.Callback != nil {
 				return &ResponseDevicesCreateDeviceLiveToolsPingDeviceCallback{
-					ID:     types.StringValue(response.Callback.ID),
-					Status: types.StringValue(response.Callback.Status),
-					URL:    types.StringValue(response.Callback.URL),
+					ID: func() types.String {
+						if response.Callback.ID != "" {
+							return types.StringValue(response.Callback.ID)
+						}
+						return types.String{}
+					}(),
+					Status: func() types.String {
+						if response.Callback.Status != "" {
+							return types.StringValue(response.Callback.Status)
+						}
+						return types.String{}
+					}(),
+					URL: func() types.String {
+						if response.Callback.URL != "" {
+							return types.StringValue(response.Callback.URL)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		PingID: types.StringValue(response.PingID),
+		PingID: func() types.String {
+			if response.PingID != "" {
+				return types.StringValue(response.PingID)
+			}
+			return types.String{}
+		}(),
 		Request: func() *ResponseDevicesCreateDeviceLiveToolsPingDeviceRequest {
 			if response.Request != nil {
 				return &ResponseDevicesCreateDeviceLiveToolsPingDeviceRequest{
@@ -364,13 +384,28 @@ func ResponseDevicesCreateDeviceLiveToolsPingDeviceItemToBody(state DevicesLiveT
 						}
 						return types.Int64{}
 					}(),
-					Serial: types.StringValue(response.Request.Serial),
+					Serial: func() types.String {
+						if response.Request.Serial != "" {
+							return types.StringValue(response.Request.Serial)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Status: types.StringValue(response.Status),
-		URL:    types.StringValue(response.URL),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

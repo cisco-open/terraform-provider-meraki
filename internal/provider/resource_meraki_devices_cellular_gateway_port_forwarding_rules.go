@@ -19,14 +19,15 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -61,37 +62,33 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Metadata(_ context.C
 func (r *DevicesCellularGatewayPortForwardingRulesResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"rules": schema.SetNestedAttribute{
+			"rules": schema.ListNestedAttribute{
 				MarkdownDescription: `An array of port forwarding params`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"access": schema.StringAttribute{
 							MarkdownDescription: `**any** or **restricted**. Specify the right to make inbound connections on the specified ports or port ranges. If **restricted**, a list of allowed IPs is mandatory.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
-						"allowed_ips": schema.SetAttribute{
+						"allowed_ips": schema.ListAttribute{
 							MarkdownDescription: `An array of ranges of WAN IP addresses that are allowed to make inbound connections on the specified ports or port ranges.`,
-							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
 
 							ElementType: types.StringType,
 						},
 						"lan_ip": schema.StringAttribute{
 							MarkdownDescription: `The IP address of the server or device that hosts the internal resource that you wish to make available on the WAN`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -99,7 +96,6 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Schema(_ context.Con
 						},
 						"local_port": schema.StringAttribute{
 							MarkdownDescription: `A port or port ranges that will receive the forwarded traffic from the WAN`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -107,7 +103,6 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Schema(_ context.Con
 						},
 						"name": schema.StringAttribute{
 							MarkdownDescription: `A descriptive name for the rule`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -115,7 +110,6 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Schema(_ context.Con
 						},
 						"protocol": schema.StringAttribute{
 							MarkdownDescription: `TCP or UDP`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -123,7 +117,6 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Schema(_ context.Con
 						},
 						"public_port": schema.StringAttribute{
 							MarkdownDescription: `A port or port ranges that will be forwarded to the host on the LAN`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -162,27 +155,6 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Create(ctx context.C
 	vvSerial := data.Serial.ValueString()
 	//Has Item and not has items
 
-	if vvSerial != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.CellularGateway.GetDeviceCellularGatewayPortForwardingRules(vvSerial)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesCellularGatewayPortForwardingRules  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesCellularGatewayPortForwardingRules only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.CellularGateway.UpdateDeviceCellularGatewayPortForwardingRules(vvSerial, dataRequest)
@@ -191,7 +163,7 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Create(ctx context.C
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCellularGatewayPortForwardingRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -202,49 +174,19 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Create(ctx context.C
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.CellularGateway.GetDeviceCellularGatewayPortForwardingRules(vvSerial)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetDeviceCellularGatewayPortForwardingRules",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetDeviceCellularGatewayPortForwardingRules",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRulesItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *DevicesCellularGatewayPortForwardingRulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data DevicesCellularGatewayPortForwardingRulesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -274,33 +216,28 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Read(ctx context.Con
 	}
 	//entro aqui 2
 	data = ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRulesItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *DevicesCellularGatewayPortForwardingRulesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("serial"), req.ID)...)
 }
 
 func (r *DevicesCellularGatewayPortForwardingRulesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data DevicesCellularGatewayPortForwardingRulesRs
-	merge(ctx, req, resp, &data)
+	var plan DevicesCellularGatewayPortForwardingRulesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvSerial := data.Serial.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvSerial := plan.Serial.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.CellularGateway.UpdateDeviceCellularGatewayPortForwardingRules(vvSerial, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCellularGatewayPortForwardingRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -310,9 +247,7 @@ func (r *DevicesCellularGatewayPortForwardingRulesResource) Update(ctx context.C
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *DevicesCellularGatewayPortForwardingRulesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -329,7 +264,7 @@ type DevicesCellularGatewayPortForwardingRulesRs struct {
 
 type ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRulesRulesRs struct {
 	Access     types.String `tfsdk:"access"`
-	AllowedIPs types.Set    `tfsdk:"allowed_ips"`
+	AllowedIPs types.List   `tfsdk:"allowed_ips"`
 	LanIP      types.String `tfsdk:"lan_ip"`
 	LocalPort  types.String `tfsdk:"local_port"`
 	Name       types.String `tfsdk:"name"`
@@ -366,7 +301,7 @@ func (r *DevicesCellularGatewayPortForwardingRulesRs) toSdkApiRequestUpdate(ctx 
 	}
 	out := merakigosdk.RequestCellularGatewayUpdateDeviceCellularGatewayPortForwardingRules{
 		Rules: func() *[]merakigosdk.RequestCellularGatewayUpdateDeviceCellularGatewayPortForwardingRulesRules {
-			if len(requestCellularGatewayUpdateDeviceCellularGatewayPortForwardingRulesRules) > 0 || r.Rules != nil {
+			if len(requestCellularGatewayUpdateDeviceCellularGatewayPortForwardingRulesRules) > 0 {
 				return &requestCellularGatewayUpdateDeviceCellularGatewayPortForwardingRulesRules
 			}
 			return nil
@@ -383,13 +318,43 @@ func ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRulesItemToBod
 				result := make([]ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRulesRulesRs, len(*response.Rules))
 				for i, rules := range *response.Rules {
 					result[i] = ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRulesRulesRs{
-						Access:     types.StringValue(rules.Access),
-						AllowedIPs: StringSliceToSet(rules.AllowedIPs),
-						LanIP:      types.StringValue(rules.LanIP),
-						LocalPort:  types.StringValue(rules.LocalPort),
-						Name:       types.StringValue(rules.Name),
-						Protocol:   types.StringValue(rules.Protocol),
-						PublicPort: types.StringValue(rules.PublicPort),
+						Access: func() types.String {
+							if rules.Access != "" {
+								return types.StringValue(rules.Access)
+							}
+							return types.String{}
+						}(),
+						AllowedIPs: StringSliceToList(rules.AllowedIPs),
+						LanIP: func() types.String {
+							if rules.LanIP != "" {
+								return types.StringValue(rules.LanIP)
+							}
+							return types.String{}
+						}(),
+						LocalPort: func() types.String {
+							if rules.LocalPort != "" {
+								return types.StringValue(rules.LocalPort)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if rules.Name != "" {
+								return types.StringValue(rules.Name)
+							}
+							return types.String{}
+						}(),
+						Protocol: func() types.String {
+							if rules.Protocol != "" {
+								return types.StringValue(rules.Protocol)
+							}
+							return types.String{}
+						}(),
+						PublicPort: func() types.String {
+							if rules.PublicPort != "" {
+								return types.StringValue(rules.PublicPort)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

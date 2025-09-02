@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -245,19 +244,49 @@ func ResponseOrganizationsGetOrganizationSummaryTopAppliancesByUtilizationItemsT
 	var items []ResponseItemOrganizationsGetOrganizationSummaryTopAppliancesByUtilization
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationSummaryTopAppliancesByUtilization{
-			Mac:   types.StringValue(item.Mac),
-			Model: types.StringValue(item.Model),
-			Name:  types.StringValue(item.Name),
+			Mac: func() types.String {
+				if item.Mac != "" {
+					return types.StringValue(item.Mac)
+				}
+				return types.String{}
+			}(),
+			Model: func() types.String {
+				if item.Model != "" {
+					return types.StringValue(item.Model)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			Network: func() *ResponseItemOrganizationsGetOrganizationSummaryTopAppliancesByUtilizationNetwork {
 				if item.Network != nil {
 					return &ResponseItemOrganizationsGetOrganizationSummaryTopAppliancesByUtilizationNetwork{
-						ID:   types.StringValue(item.Network.ID),
-						Name: types.StringValue(item.Network.Name),
+						ID: func() types.String {
+							if item.Network.ID != "" {
+								return types.StringValue(item.Network.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if item.Network.Name != "" {
+								return types.StringValue(item.Network.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			Serial: types.StringValue(item.Serial),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
 			Utilization: func() *ResponseItemOrganizationsGetOrganizationSummaryTopAppliancesByUtilizationUtilization {
 				if item.Utilization != nil {
 					return &ResponseItemOrganizationsGetOrganizationSummaryTopAppliancesByUtilizationUtilization{

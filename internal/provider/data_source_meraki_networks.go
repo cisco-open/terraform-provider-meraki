@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -330,21 +329,56 @@ func ResponseNetworksGetOrganizationNetworksItemsToBody(state Networks, response
 	var items []ResponseItemOrganizationsGetOrganizationNetworks
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationNetworks{
-			EnrollmentString: types.StringValue(item.EnrollmentString),
-			ID:               types.StringValue(item.ID),
+			EnrollmentString: func() types.String {
+				if item.EnrollmentString != "" {
+					return types.StringValue(item.EnrollmentString)
+				}
+				return types.String{}
+			}(),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
 			IsBoundToConfigTemplate: func() types.Bool {
 				if item.IsBoundToConfigTemplate != nil {
 					return types.BoolValue(*item.IsBoundToConfigTemplate)
 				}
 				return types.Bool{}
 			}(),
-			Name:           types.StringValue(item.Name),
-			Notes:          types.StringValue(item.Notes),
-			OrganizationID: types.StringValue(item.OrganizationID),
-			ProductTypes:   StringSliceToList(item.ProductTypes),
-			Tags:           StringSliceToList(item.Tags),
-			TimeZone:       types.StringValue(item.TimeZone),
-			URL:            types.StringValue(item.URL),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			Notes: func() types.String {
+				if item.Notes != "" {
+					return types.StringValue(item.Notes)
+				}
+				return types.String{}
+			}(),
+			OrganizationID: func() types.String {
+				if item.OrganizationID != "" {
+					return types.StringValue(item.OrganizationID)
+				}
+				return types.String{}
+			}(),
+			ProductTypes: StringSliceToList(item.ProductTypes),
+			Tags:         StringSliceToList(item.Tags),
+			TimeZone: func() types.String {
+				if item.TimeZone != "" {
+					return types.StringValue(item.TimeZone)
+				}
+				return types.String{}
+			}(),
+			URL: func() types.String {
+				if item.URL != "" {
+					return types.StringValue(item.URL)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -354,21 +388,56 @@ func ResponseNetworksGetOrganizationNetworksItemsToBody(state Networks, response
 
 func ResponseNetworksGetNetworkItemToBody(state Networks, response *merakigosdk.ResponseNetworksGetNetwork) Networks {
 	itemState := ResponseNetworksGetNetwork{
-		EnrollmentString: types.StringValue(response.EnrollmentString),
-		ID:               types.StringValue(response.ID),
+		EnrollmentString: func() types.String {
+			if response.EnrollmentString != "" {
+				return types.StringValue(response.EnrollmentString)
+			}
+			return types.String{}
+		}(),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		IsBoundToConfigTemplate: func() types.Bool {
 			if response.IsBoundToConfigTemplate != nil {
 				return types.BoolValue(*response.IsBoundToConfigTemplate)
 			}
 			return types.Bool{}
 		}(),
-		Name:           types.StringValue(response.Name),
-		Notes:          types.StringValue(response.Notes),
-		OrganizationID: types.StringValue(response.OrganizationID),
-		ProductTypes:   StringSliceToList(response.ProductTypes),
-		Tags:           StringSliceToList(response.Tags),
-		TimeZone:       types.StringValue(response.TimeZone),
-		URL:            types.StringValue(response.URL),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		Notes: func() types.String {
+			if response.Notes != "" {
+				return types.StringValue(response.Notes)
+			}
+			return types.String{}
+		}(),
+		OrganizationID: func() types.String {
+			if response.OrganizationID != "" {
+				return types.StringValue(response.OrganizationID)
+			}
+			return types.String{}
+		}(),
+		ProductTypes: StringSliceToList(response.ProductTypes),
+		Tags:         StringSliceToList(response.Tags),
+		TimeZone: func() types.String {
+			if response.TimeZone != "" {
+				return types.StringValue(response.TimeZone)
+			}
+			return types.String{}
+		}(),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

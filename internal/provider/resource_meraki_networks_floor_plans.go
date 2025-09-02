@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -66,7 +67,6 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 		Attributes: map[string]schema.Attribute{
 			"bottom_left_corner": schema.SingleNestedAttribute{
 				MarkdownDescription: `The longitude and latitude of the bottom left corner of your floor plan.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -75,7 +75,6 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 
 					"lat": schema.Float64Attribute{
 						MarkdownDescription: `Latitude`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Float64{
 							float64planmodifier.UseStateForUnknown(),
@@ -83,7 +82,6 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 					},
 					"lng": schema.Float64Attribute{
 						MarkdownDescription: `Longitude`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Float64{
 							float64planmodifier.UseStateForUnknown(),
@@ -93,7 +91,6 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"bottom_right_corner": schema.SingleNestedAttribute{
 				MarkdownDescription: `The longitude and latitude of the bottom right corner of your floor plan.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -102,7 +99,6 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 
 					"lat": schema.Float64Attribute{
 						MarkdownDescription: `Latitude`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Float64{
 							float64planmodifier.UseStateForUnknown(),
@@ -110,7 +106,6 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 					},
 					"lng": schema.Float64Attribute{
 						MarkdownDescription: `Longitude`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Float64{
 							float64planmodifier.UseStateForUnknown(),
@@ -120,7 +115,6 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"center": schema.SingleNestedAttribute{
 				MarkdownDescription: `The longitude and latitude of the center of your floor plan. The 'center' or two adjacent corners (e.g. 'topLeftCorner' and 'bottomLeftCorner') must be specified. If 'center' is specified, the floor plan is placed over that point with no rotation. If two adjacent corners are specified, the floor plan is rotated to line up with the two specified points. The aspect ratio of the floor plan's image is preserved regardless of which corners/center are specified. (This means if that more than two corners are specified, only two corners may be used to preserve the floor plan's aspect ratio.). No two points can have the same latitude, longitude pair.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -129,7 +123,6 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 
 					"lat": schema.Float64Attribute{
 						MarkdownDescription: `Latitude`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Float64{
 							float64planmodifier.UseStateForUnknown(),
@@ -137,7 +130,6 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 					},
 					"lng": schema.Float64Attribute{
 						MarkdownDescription: `Longitude`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Float64{
 							float64planmodifier.UseStateForUnknown(),
@@ -145,7 +137,7 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 					},
 				},
 			},
-			"devices": schema.SetNestedAttribute{
+			"devices": schema.ListNestedAttribute{
 				MarkdownDescription: `List of devices for the floorplan`,
 				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
@@ -155,7 +147,7 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 							MarkdownDescription: `Physical address of the device`,
 							Computed:            true,
 						},
-						"details": schema.SetNestedAttribute{
+						"details": schema.ListNestedAttribute{
 							MarkdownDescription: `Additional device information`,
 							Computed:            true,
 							NestedObject: schema.NestedAttributeObject{
@@ -220,7 +212,7 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 							MarkdownDescription: `Serial number of the device`,
 							Computed:            true,
 						},
-						"tags": schema.SetAttribute{
+						"tags": schema.ListAttribute{
 							MarkdownDescription: `List of tags assigned to the device`,
 							Computed:            true,
 							ElementType:         types.StringType,
@@ -230,7 +222,6 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"floor_number": schema.Float64Attribute{
 				MarkdownDescription: `The floor number of the floor within the building.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Float64{
 					float64planmodifier.UseStateForUnknown(),
@@ -238,7 +229,6 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"floor_plan_id": schema.StringAttribute{
 				MarkdownDescription: `Floor plan ID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -250,7 +240,6 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"image_contents": schema.StringAttribute{
 				MarkdownDescription: `The file contents (a base 64 encoded string) of your image. Supported formats are PNG, GIF, and JPG. Note that all images are saved as PNG files, regardless of the format they are uploaded in.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -274,7 +263,6 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name of your floor plan.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -286,7 +274,6 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"top_left_corner": schema.SingleNestedAttribute{
 				MarkdownDescription: `The longitude and latitude of the top left corner of your floor plan.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -295,7 +282,6 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 
 					"lat": schema.Float64Attribute{
 						MarkdownDescription: `Latitude`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Float64{
 							float64planmodifier.UseStateForUnknown(),
@@ -303,7 +289,6 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 					},
 					"lng": schema.Float64Attribute{
 						MarkdownDescription: `Longitude`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Float64{
 							float64planmodifier.UseStateForUnknown(),
@@ -313,7 +298,6 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"top_right_corner": schema.SingleNestedAttribute{
 				MarkdownDescription: `The longitude and latitude of the top right corner of your floor plan.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -322,7 +306,6 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 
 					"lat": schema.Float64Attribute{
 						MarkdownDescription: `Latitude`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Float64{
 							float64planmodifier.UseStateForUnknown(),
@@ -330,7 +313,6 @@ func (r *NetworksFloorPlansResource) Schema(_ context.Context, _ resource.Schema
 					},
 					"lng": schema.Float64Attribute{
 						MarkdownDescription: `Longitude`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Float64{
 							float64planmodifier.UseStateForUnknown(),
@@ -417,7 +399,7 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkFloorPlan",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -489,21 +471,11 @@ func (r *NetworksFloorPlansResource) Create(ctx context.Context, req resource.Cr
 func (r *NetworksFloorPlansResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksFloorPlansRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -534,9 +506,7 @@ func (r *NetworksFloorPlansResource) Read(ctx context.Context, req resource.Read
 	}
 	//entro aqui 2
 	data = ResponseNetworksGetNetworkFloorPlanItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksFloorPlansResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -544,35 +514,31 @@ func (r *NetworksFloorPlansResource) ImportState(ctx context.Context, req resour
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,floorPlanId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("floor_plan_id"), idParts[1])...)
 }
 
 func (r *NetworksFloorPlansResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksFloorPlansRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksFloorPlansRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvFloorPlanID := data.FloorPlanID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvFloorPlanID := plan.FloorPlanID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkFloorPlan(vvNetworkID, vvFloorPlanID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkFloorPlan",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -582,9 +548,7 @@ func (r *NetworksFloorPlansResource) Update(ctx context.Context, req resource.Up
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksFloorPlansResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -668,7 +632,7 @@ type ResponseNetworksGetNetworkFloorPlanDevicesRs struct {
 	Notes       types.String                                           `tfsdk:"notes"`
 	ProductType types.String                                           `tfsdk:"product_type"`
 	Serial      types.String                                           `tfsdk:"serial"`
-	Tags        types.Set                                              `tfsdk:"tags"`
+	Tags        types.List                                             `tfsdk:"tags"`
 }
 
 type ResponseNetworksGetNetworkFloorPlanDevicesDetailsRs struct {
@@ -1027,23 +991,53 @@ func ResponseNetworksGetNetworkFloorPlanItemToBodyRs(state NetworksFloorPlansRs,
 				result := make([]ResponseNetworksGetNetworkFloorPlanDevicesRs, len(*response.Devices))
 				for i, devices := range *response.Devices {
 					result[i] = ResponseNetworksGetNetworkFloorPlanDevicesRs{
-						Address: types.StringValue(devices.Address),
+						Address: func() types.String {
+							if devices.Address != "" {
+								return types.StringValue(devices.Address)
+							}
+							return types.String{}
+						}(),
 						Details: func() *[]ResponseNetworksGetNetworkFloorPlanDevicesDetailsRs {
 							if devices.Details != nil {
 								result := make([]ResponseNetworksGetNetworkFloorPlanDevicesDetailsRs, len(*devices.Details))
 								for i, details := range *devices.Details {
 									result[i] = ResponseNetworksGetNetworkFloorPlanDevicesDetailsRs{
-										Name:  types.StringValue(details.Name),
-										Value: types.StringValue(details.Value),
+										Name: func() types.String {
+											if details.Name != "" {
+												return types.StringValue(details.Name)
+											}
+											return types.String{}
+										}(),
+										Value: func() types.String {
+											if details.Value != "" {
+												return types.StringValue(details.Value)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						Firmware: types.StringValue(devices.Firmware),
-						Imei:     types.StringValue(devices.Imei),
-						LanIP:    types.StringValue(devices.LanIP),
+						Firmware: func() types.String {
+							if devices.Firmware != "" {
+								return types.StringValue(devices.Firmware)
+							}
+							return types.String{}
+						}(),
+						Imei: func() types.String {
+							if devices.Imei != "" {
+								return types.StringValue(devices.Imei)
+							}
+							return types.String{}
+						}(),
+						LanIP: func() types.String {
+							if devices.LanIP != "" {
+								return types.StringValue(devices.LanIP)
+							}
+							return types.String{}
+						}(),
 						Lat: func() types.Float64 {
 							if devices.Lat != nil {
 								return types.Float64Value(float64(*devices.Lat))
@@ -1056,14 +1050,49 @@ func ResponseNetworksGetNetworkFloorPlanItemToBodyRs(state NetworksFloorPlansRs,
 							}
 							return types.Float64{}
 						}(),
-						Mac:         types.StringValue(devices.Mac),
-						Model:       types.StringValue(devices.Model),
-						Name:        types.StringValue(devices.Name),
-						NetworkID:   types.StringValue(devices.NetworkID),
-						Notes:       types.StringValue(devices.Notes),
-						ProductType: types.StringValue(devices.ProductType),
-						Serial:      types.StringValue(devices.Serial),
-						Tags:        StringSliceToSet(devices.Tags),
+						Mac: func() types.String {
+							if devices.Mac != "" {
+								return types.StringValue(devices.Mac)
+							}
+							return types.String{}
+						}(),
+						Model: func() types.String {
+							if devices.Model != "" {
+								return types.StringValue(devices.Model)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if devices.Name != "" {
+								return types.StringValue(devices.Name)
+							}
+							return types.String{}
+						}(),
+						NetworkID: func() types.String {
+							if devices.NetworkID != "" {
+								return types.StringValue(devices.NetworkID)
+							}
+							return types.String{}
+						}(),
+						Notes: func() types.String {
+							if devices.Notes != "" {
+								return types.StringValue(devices.Notes)
+							}
+							return types.String{}
+						}(),
+						ProductType: func() types.String {
+							if devices.ProductType != "" {
+								return types.StringValue(devices.ProductType)
+							}
+							return types.String{}
+						}(),
+						Serial: func() types.String {
+							if devices.Serial != "" {
+								return types.StringValue(devices.Serial)
+							}
+							return types.String{}
+						}(),
+						Tags: StringSliceToList(devices.Tags),
 					}
 				}
 				return &result
@@ -1076,18 +1105,48 @@ func ResponseNetworksGetNetworkFloorPlanItemToBodyRs(state NetworksFloorPlansRs,
 			}
 			return types.Float64{}
 		}(),
-		FloorPlanID: types.StringValue(response.FloorPlanID),
+		FloorPlanID: func() types.String {
+			if response.FloorPlanID != "" {
+				return types.StringValue(response.FloorPlanID)
+			}
+			return types.String{}
+		}(),
 		Height: func() types.Float64 {
 			if response.Height != nil {
 				return types.Float64Value(float64(*response.Height))
 			}
 			return types.Float64{}
 		}(),
-		ImageExtension:    types.StringValue(response.ImageExtension),
-		ImageMd5:          types.StringValue(response.ImageMd5),
-		ImageURL:          types.StringValue(response.ImageURL),
-		ImageURLExpiresAt: types.StringValue(response.ImageURLExpiresAt),
-		Name:              types.StringValue(response.Name),
+		ImageExtension: func() types.String {
+			if response.ImageExtension != "" {
+				return types.StringValue(response.ImageExtension)
+			}
+			return types.String{}
+		}(),
+		ImageMd5: func() types.String {
+			if response.ImageMd5 != "" {
+				return types.StringValue(response.ImageMd5)
+			}
+			return types.String{}
+		}(),
+		ImageURL: func() types.String {
+			if response.ImageURL != "" {
+				return types.StringValue(response.ImageURL)
+			}
+			return types.String{}
+		}(),
+		ImageURLExpiresAt: func() types.String {
+			if response.ImageURLExpiresAt != "" {
+				return types.StringValue(response.ImageURLExpiresAt)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		TopLeftCorner: func() *ResponseNetworksGetNetworkFloorPlanTopLeftCornerRs {
 			if response.TopLeftCorner != nil {
 				return &ResponseNetworksGetNetworkFloorPlanTopLeftCornerRs{

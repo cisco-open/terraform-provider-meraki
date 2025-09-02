@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -29,6 +30,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -153,6 +155,7 @@ func (r *DevicesLiveToolsCableResource) Schema(_ context.Context, _ resource.Sch
 				},
 
 				ElementType: types.StringType,
+				Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
 			},
 			"request": schema.SingleNestedAttribute{
 				MarkdownDescription: `Cable test request parameters`,
@@ -289,7 +292,7 @@ func (r *DevicesLiveToolsCableResource) Create(ctx context.Context, req resource
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateDeviceLiveToolsCableTest",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -509,13 +512,28 @@ func (r *DevicesLiveToolsCableRs) toSdkApiRequestCreate(ctx context.Context) *me
 // From gosdk to TF Structs Schema
 func ResponseDevicesGetDeviceLiveToolsCableTestItemToBodyRs(state DevicesLiveToolsCableRs, response *merakigosdk.ResponseDevicesGetDeviceLiveToolsCableTest, is_read bool) DevicesLiveToolsCableRs {
 	itemState := DevicesLiveToolsCableRs{
-		CableTestID: types.StringValue(response.CableTestID),
-		Error:       types.StringValue(response.Error),
+		CableTestID: func() types.String {
+			if response.CableTestID != "" {
+				return types.StringValue(response.CableTestID)
+			}
+			return types.String{}
+		}(),
+		Error: func() types.String {
+			if response.Error != "" {
+				return types.StringValue(response.Error)
+			}
+			return types.String{}
+		}(),
 		Request: func() *ResponseDevicesGetDeviceLiveToolsCableTestRequestRs {
 			if response.Request != nil {
 				return &ResponseDevicesGetDeviceLiveToolsCableTestRequestRs{
-					Ports:  StringSliceToSet(response.Request.Ports),
-					Serial: types.StringValue(response.Request.Serial),
+					Ports: StringSliceToSet(response.Request.Ports),
+					Serial: func() types.String {
+						if response.Request.Serial != "" {
+							return types.StringValue(response.Request.Serial)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -525,7 +543,12 @@ func ResponseDevicesGetDeviceLiveToolsCableTestItemToBodyRs(state DevicesLiveToo
 				result := make([]ResponseDevicesGetDeviceLiveToolsCableTestResultsRs, len(*response.Results))
 				for i, results := range *response.Results {
 					result[i] = ResponseDevicesGetDeviceLiveToolsCableTestResultsRs{
-						Error: types.StringValue(results.Error),
+						Error: func() types.String {
+							if results.Error != "" {
+								return types.StringValue(results.Error)
+							}
+							return types.String{}
+						}(),
 						Pairs: func() *[]ResponseDevicesGetDeviceLiveToolsCableTestResultsPairsRs {
 							if results.Pairs != nil {
 								result := make([]ResponseDevicesGetDeviceLiveToolsCableTestResultsPairsRs, len(*results.Pairs))
@@ -543,29 +566,54 @@ func ResponseDevicesGetDeviceLiveToolsCableTestItemToBodyRs(state DevicesLiveToo
 											}
 											return types.Int64{}
 										}(),
-										Status: types.StringValue(pairs.Status),
+										Status: func() types.String {
+											if pairs.Status != "" {
+												return types.StringValue(pairs.Status)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						Port: types.StringValue(results.Port),
+						Port: func() types.String {
+							if results.Port != "" {
+								return types.StringValue(results.Port)
+							}
+							return types.String{}
+						}(),
 						SpeedMbps: func() types.Int64 {
 							if results.SpeedMbps != nil {
 								return types.Int64Value(int64(*results.SpeedMbps))
 							}
 							return types.Int64{}
 						}(),
-						Status: types.StringValue(results.Status),
+						Status: func() types.String {
+							if results.Status != "" {
+								return types.StringValue(results.Status)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		Status: types.StringValue(response.Status),
-		URL:    types.StringValue(response.URL),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(DevicesLiveToolsCableRs)

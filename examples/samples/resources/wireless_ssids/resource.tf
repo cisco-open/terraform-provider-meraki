@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "1.1.8-beta"
+      version = "1.2.0-beta"
       source  = "hashicorp.com/edu/meraki"
       # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
@@ -28,4 +28,5 @@ resource "meraki_networks_wireless_ssids" "test" {
   mandatory_dhcp_enabled          = true
   default_vlan_id                 = "10"
   lan_isolation_enabled           = false
+  splash_page                     = "Click-through splash page"
 }

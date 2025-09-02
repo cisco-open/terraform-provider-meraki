@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -344,6 +343,17 @@ func (d *OrganizationsInventoryDevicesDataSource) Read(ctx context.Context, req 
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetOrganizationInventoryDevice",
+				err.Error(),
+			)
+			return
+		}
+
 		organizationsInventoryDevices = ResponseOrganizationsGetOrganizationInventoryDeviceItemToBody(organizationsInventoryDevices, response2)
 		diags = resp.State.Set(ctx, &organizationsInventoryDevices)
 		resp.Diagnostics.Append(diags...)
@@ -420,30 +430,90 @@ func ResponseOrganizationsGetOrganizationInventoryDevicesItemsToBody(state Organ
 	var items []ResponseItemOrganizationsGetOrganizationInventoryDevices
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationInventoryDevices{
-			ClaimedAt:   types.StringValue(item.ClaimedAt),
-			CountryCode: types.StringValue(item.CountryCode),
+			ClaimedAt: func() types.String {
+				if item.ClaimedAt != "" {
+					return types.StringValue(item.ClaimedAt)
+				}
+				return types.String{}
+			}(),
+			CountryCode: func() types.String {
+				if item.CountryCode != "" {
+					return types.StringValue(item.CountryCode)
+				}
+				return types.String{}
+			}(),
 			Details: func() *[]ResponseItemOrganizationsGetOrganizationInventoryDevicesDetails {
 				if item.Details != nil {
 					result := make([]ResponseItemOrganizationsGetOrganizationInventoryDevicesDetails, len(*item.Details))
 					for i, details := range *item.Details {
 						result[i] = ResponseItemOrganizationsGetOrganizationInventoryDevicesDetails{
-							Name:  types.StringValue(details.Name),
-							Value: types.StringValue(details.Value),
+							Name: func() types.String {
+								if details.Name != "" {
+									return types.StringValue(details.Name)
+								}
+								return types.String{}
+							}(),
+							Value: func() types.String {
+								if details.Value != "" {
+									return types.StringValue(details.Value)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
 				}
 				return nil
 			}(),
-			LicenseExpirationDate: types.StringValue(item.LicenseExpirationDate),
-			Mac:                   types.StringValue(item.Mac),
-			Model:                 types.StringValue(item.Model),
-			Name:                  types.StringValue(item.Name),
-			NetworkID:             types.StringValue(item.NetworkID),
-			OrderNumber:           types.StringValue(item.OrderNumber),
-			ProductType:           types.StringValue(item.ProductType),
-			Serial:                types.StringValue(item.Serial),
-			Tags:                  StringSliceToList(item.Tags),
+			LicenseExpirationDate: func() types.String {
+				if item.LicenseExpirationDate != "" {
+					return types.StringValue(item.LicenseExpirationDate)
+				}
+				return types.String{}
+			}(),
+			Mac: func() types.String {
+				if item.Mac != "" {
+					return types.StringValue(item.Mac)
+				}
+				return types.String{}
+			}(),
+			Model: func() types.String {
+				if item.Model != "" {
+					return types.StringValue(item.Model)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			NetworkID: func() types.String {
+				if item.NetworkID != "" {
+					return types.StringValue(item.NetworkID)
+				}
+				return types.String{}
+			}(),
+			OrderNumber: func() types.String {
+				if item.OrderNumber != "" {
+					return types.StringValue(item.OrderNumber)
+				}
+				return types.String{}
+			}(),
+			ProductType: func() types.String {
+				if item.ProductType != "" {
+					return types.StringValue(item.ProductType)
+				}
+				return types.String{}
+			}(),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
+			Tags: StringSliceToList(item.Tags),
 		}
 		items = append(items, itemState)
 	}
@@ -453,30 +523,90 @@ func ResponseOrganizationsGetOrganizationInventoryDevicesItemsToBody(state Organ
 
 func ResponseOrganizationsGetOrganizationInventoryDeviceItemToBody(state OrganizationsInventoryDevices, response *merakigosdk.ResponseOrganizationsGetOrganizationInventoryDevice) OrganizationsInventoryDevices {
 	itemState := ResponseOrganizationsGetOrganizationInventoryDevice{
-		ClaimedAt:   types.StringValue(response.ClaimedAt),
-		CountryCode: types.StringValue(response.CountryCode),
+		ClaimedAt: func() types.String {
+			if response.ClaimedAt != "" {
+				return types.StringValue(response.ClaimedAt)
+			}
+			return types.String{}
+		}(),
+		CountryCode: func() types.String {
+			if response.CountryCode != "" {
+				return types.StringValue(response.CountryCode)
+			}
+			return types.String{}
+		}(),
 		Details: func() *[]ResponseOrganizationsGetOrganizationInventoryDeviceDetails {
 			if response.Details != nil {
 				result := make([]ResponseOrganizationsGetOrganizationInventoryDeviceDetails, len(*response.Details))
 				for i, details := range *response.Details {
 					result[i] = ResponseOrganizationsGetOrganizationInventoryDeviceDetails{
-						Name:  types.StringValue(details.Name),
-						Value: types.StringValue(details.Value),
+						Name: func() types.String {
+							if details.Name != "" {
+								return types.StringValue(details.Name)
+							}
+							return types.String{}
+						}(),
+						Value: func() types.String {
+							if details.Value != "" {
+								return types.StringValue(details.Value)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		LicenseExpirationDate: types.StringValue(response.LicenseExpirationDate),
-		Mac:                   types.StringValue(response.Mac),
-		Model:                 types.StringValue(response.Model),
-		Name:                  types.StringValue(response.Name),
-		NetworkID:             types.StringValue(response.NetworkID),
-		OrderNumber:           types.StringValue(response.OrderNumber),
-		ProductType:           types.StringValue(response.ProductType),
-		Serial:                types.StringValue(response.Serial),
-		Tags:                  StringSliceToList(response.Tags),
+		LicenseExpirationDate: func() types.String {
+			if response.LicenseExpirationDate != "" {
+				return types.StringValue(response.LicenseExpirationDate)
+			}
+			return types.String{}
+		}(),
+		Mac: func() types.String {
+			if response.Mac != "" {
+				return types.StringValue(response.Mac)
+			}
+			return types.String{}
+		}(),
+		Model: func() types.String {
+			if response.Model != "" {
+				return types.StringValue(response.Model)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
+		OrderNumber: func() types.String {
+			if response.OrderNumber != "" {
+				return types.StringValue(response.OrderNumber)
+			}
+			return types.String{}
+		}(),
+		ProductType: func() types.String {
+			if response.ProductType != "" {
+				return types.StringValue(response.ProductType)
+			}
+			return types.String{}
+		}(),
+		Serial: func() types.String {
+			if response.Serial != "" {
+				return types.StringValue(response.Serial)
+			}
+			return types.String{}
+		}(),
+		Tags: StringSliceToList(response.Tags),
 	}
 	state.Item = &itemState
 	return state

@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -28,6 +29,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
@@ -74,12 +76,11 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Schema(_ context.
 				MarkdownDescription: `number path parameter.`,
 				Required:            true,
 			},
-			"rules": schema.SetNestedAttribute{
+			"rules": schema.ListNestedAttribute{
 				MarkdownDescription: `An ordered array of the firewall rules for this SSID (not including the local LAN access rule or the default rule).`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -87,7 +88,6 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Schema(_ context.
 						"policy": schema.StringAttribute{
 							MarkdownDescription: `'Deny' traffic specified by this rule
                                         Allowed values: [deny]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -101,7 +101,6 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Schema(_ context.
 						"type": schema.StringAttribute{
 							MarkdownDescription: `Type of the L7 firewall rule. One of: 'application', 'applicationCategory', 'host', 'port', 'ipRange'
                                         Allowed values: [application,applicationCategory,host,ipRange,port]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -118,7 +117,6 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Schema(_ context.
 						},
 						"value": schema.StringAttribute{
 							MarkdownDescription: `The value of what needs to get blocked. Format of the value varies depending on type of the firewall rule selected.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -183,27 +181,6 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Create(ctx contex
 	vvNumber := data.Number.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" && vvNumber != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDFirewallL7FirewallRules(vvNetworkID, vvNumber)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessSsidsFirewallL7FirewallRules  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessSsidsFirewallL7FirewallRules only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDFirewallL7FirewallRules(vvNetworkID, vvNumber, dataRequest)
@@ -212,7 +189,7 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Create(ctx contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDFirewallL7FirewallRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -223,49 +200,19 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Create(ctx contex
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDFirewallL7FirewallRules(vvNetworkID, vvNumber)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkWirelessSSIDFirewallL7FirewallRules",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkWirelessSSIDFirewallL7FirewallRules",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseWirelessGetNetworkWirelessSSIDFirewallL7FirewallRulesItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksWirelessSSIDsFirewallL7FirewallRulesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -296,9 +243,7 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Read(ctx context.
 	}
 	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSSIDFirewallL7FirewallRulesItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -306,35 +251,31 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) ImportState(ctx c
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,number. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("number"), idParts[1])...)
 }
 
 func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksWirelessSSIDsFirewallL7FirewallRulesRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksWirelessSSIDsFirewallL7FirewallRulesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvNumber := data.Number.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvNumber := plan.Number.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDFirewallL7FirewallRules(vvNetworkID, vvNumber, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDFirewallL7FirewallRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -344,9 +285,7 @@ func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Update(ctx contex
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksWirelessSSIDsFirewallL7FirewallRulesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -363,11 +302,11 @@ type NetworksWirelessSSIDsFirewallL7FirewallRulesRs struct {
 }
 
 type ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesRs struct {
-	Policy    types.String                                                              `tfsdk:"policy"`
-	Type      types.String                                                              `tfsdk:"type"`
-	Value     types.String                                                              `tfsdk:"value"`
-	ValueList types.Set                                                                 `tfsdk:"value_list"`
-	ValueObj  *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj `tfsdk:"value_obj"`
+	Policy    types.String                                                                `tfsdk:"policy"`
+	Type      types.String                                                                `tfsdk:"type"`
+	Value     types.String                                                                `tfsdk:"value"`
+	ValueList types.Set                                                                   `tfsdk:"value_list"`
+	ValueObj  *ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesValueObj `tfsdk:"value_obj"`
 }
 
 // FromBody
@@ -427,8 +366,18 @@ func ResponseWirelessGetNetworkWirelessSSIDFirewallL7FirewallRulesItemToBodyRs(s
 				result := make([]ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesRs, len(*response.Rules))
 				for i, rules := range *response.Rules {
 					result[i] = ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesRs{
-						Policy: types.StringValue(rules.Policy),
-						Type:   types.StringValue(rules.Type),
+						Policy: func() types.String {
+							if rules.Policy != "" {
+								return types.StringValue(rules.Policy)
+							}
+							return types.String{}
+						}(),
+						Type: func() types.String {
+							if rules.Type != "" {
+								return types.StringValue(rules.Type)
+							}
+							return types.String{}
+						}(),
 						Value: func() types.String {
 							if rules.Value != nil {
 								return types.StringValue(*rules.Value)
@@ -441,13 +390,23 @@ func ResponseWirelessGetNetworkWirelessSSIDFirewallL7FirewallRulesItemToBodyRs(s
 							}
 							return StringSliceToSet(*rules.ValueList)
 						}(),
-						ValueObj: func() *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj {
+						ValueObj: func() *ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesValueObj {
 							if rules.ValueObj == nil {
 								return nil
 							}
-							return &ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj{
-								ID:   types.StringValue(rules.ValueObj.ID),
-								Name: types.StringValue(rules.ValueObj.Name),
+							return &ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesValueObj{
+								ID: func() types.String {
+									if rules.ValueObj.ID != "" {
+										return types.StringValue(rules.ValueObj.ID)
+									}
+									return types.String{}
+								}(),
+								Name: func() types.String {
+									if rules.ValueObj.Name != "" {
+										return types.StringValue(rules.ValueObj.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}(),
 					}

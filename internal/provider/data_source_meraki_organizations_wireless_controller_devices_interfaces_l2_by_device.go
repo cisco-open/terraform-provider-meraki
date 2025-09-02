@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -345,7 +344,12 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 											}
 											return nil
 										}(),
-										Description: types.StringValue(interfaces.Description),
+										Description: func() types.String {
+											if interfaces.Description != "" {
+												return types.StringValue(interfaces.Description)
+											}
+											return types.String{}
+										}(),
 										Enabled: func() types.Bool {
 											if interfaces.Enabled != nil {
 												return types.BoolValue(*interfaces.Enabled)
@@ -364,19 +368,49 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 											}
 											return types.Bool{}
 										}(),
-										LinkNegotiation: types.StringValue(interfaces.LinkNegotiation),
-										Mac:             types.StringValue(interfaces.Mac),
+										LinkNegotiation: func() types.String {
+											if interfaces.LinkNegotiation != "" {
+												return types.StringValue(interfaces.LinkNegotiation)
+											}
+											return types.String{}
+										}(),
+										Mac: func() types.String {
+											if interfaces.Mac != "" {
+												return types.StringValue(interfaces.Mac)
+											}
+											return types.String{}
+										}(),
 										Module: func() *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2ByDeviceItemsInterfacesModule {
 											if interfaces.Module != nil {
 												return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL2ByDeviceItemsInterfacesModule{
-													Model: types.StringValue(interfaces.Module.Model),
+													Model: func() types.String {
+														if interfaces.Module.Model != "" {
+															return types.StringValue(interfaces.Module.Model)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return nil
 										}(),
-										Name:   types.StringValue(interfaces.Name),
-										Speed:  types.StringValue(interfaces.Speed),
-										Status: types.StringValue(interfaces.Status),
+										Name: func() types.String {
+											if interfaces.Name != "" {
+												return types.StringValue(interfaces.Name)
+											}
+											return types.String{}
+										}(),
+										Speed: func() types.String {
+											if interfaces.Speed != "" {
+												return types.StringValue(interfaces.Speed)
+											}
+											return types.String{}
+										}(),
+										Status: func() types.String {
+											if interfaces.Status != "" {
+												return types.StringValue(interfaces.Status)
+											}
+											return types.String{}
+										}(),
 										VLAN: func() types.Int64 {
 											if interfaces.VLAN != nil {
 												return types.Int64Value(int64(*interfaces.VLAN))
@@ -389,7 +423,12 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 							}
 							return nil
 						}(),
-						Serial: types.StringValue(items.Serial),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

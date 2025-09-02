@@ -216,21 +216,56 @@ func ResponseNetworksSplitNetworkItemToBody(state NetworksSplit, response *merak
 				result := make([]ResponseNetworksSplitNetworkResultingNetworks, len(*response.ResultingNetworks))
 				for i, resultingNetworks := range *response.ResultingNetworks {
 					result[i] = ResponseNetworksSplitNetworkResultingNetworks{
-						EnrollmentString: types.StringValue(resultingNetworks.EnrollmentString),
-						ID:               types.StringValue(resultingNetworks.ID),
+						EnrollmentString: func() types.String {
+							if resultingNetworks.EnrollmentString != "" {
+								return types.StringValue(resultingNetworks.EnrollmentString)
+							}
+							return types.String{}
+						}(),
+						ID: func() types.String {
+							if resultingNetworks.ID != "" {
+								return types.StringValue(resultingNetworks.ID)
+							}
+							return types.String{}
+						}(),
 						IsBoundToConfigTemplate: func() types.Bool {
 							if resultingNetworks.IsBoundToConfigTemplate != nil {
 								return types.BoolValue(*resultingNetworks.IsBoundToConfigTemplate)
 							}
 							return types.Bool{}
 						}(),
-						Name:           types.StringValue(resultingNetworks.Name),
-						Notes:          types.StringValue(resultingNetworks.Notes),
-						OrganizationID: types.StringValue(resultingNetworks.OrganizationID),
-						ProductTypes:   StringSliceToList(resultingNetworks.ProductTypes),
-						Tags:           StringSliceToList(resultingNetworks.Tags),
-						TimeZone:       types.StringValue(resultingNetworks.TimeZone),
-						URL:            types.StringValue(resultingNetworks.URL),
+						Name: func() types.String {
+							if resultingNetworks.Name != "" {
+								return types.StringValue(resultingNetworks.Name)
+							}
+							return types.String{}
+						}(),
+						Notes: func() types.String {
+							if resultingNetworks.Notes != "" {
+								return types.StringValue(resultingNetworks.Notes)
+							}
+							return types.String{}
+						}(),
+						OrganizationID: func() types.String {
+							if resultingNetworks.OrganizationID != "" {
+								return types.StringValue(resultingNetworks.OrganizationID)
+							}
+							return types.String{}
+						}(),
+						ProductTypes: StringSliceToList(resultingNetworks.ProductTypes),
+						Tags:         StringSliceToList(resultingNetworks.Tags),
+						TimeZone: func() types.String {
+							if resultingNetworks.TimeZone != "" {
+								return types.StringValue(resultingNetworks.TimeZone)
+							}
+							return types.String{}
+						}(),
+						URL: func() types.String {
+							if resultingNetworks.URL != "" {
+								return types.StringValue(resultingNetworks.URL)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

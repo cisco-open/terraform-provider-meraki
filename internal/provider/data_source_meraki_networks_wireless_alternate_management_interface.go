@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -175,12 +174,42 @@ func ResponseWirelessGetNetworkWirelessAlternateManagementInterfaceItemToBody(st
 				result := make([]ResponseWirelessGetNetworkWirelessAlternateManagementInterfaceAccessPoints, len(*response.AccessPoints))
 				for i, accessPoints := range *response.AccessPoints {
 					result[i] = ResponseWirelessGetNetworkWirelessAlternateManagementInterfaceAccessPoints{
-						AlternateManagementIP: types.StringValue(accessPoints.AlternateManagementIP),
-						DNS1:                  types.StringValue(accessPoints.DNS1),
-						DNS2:                  types.StringValue(accessPoints.DNS2),
-						Gateway:               types.StringValue(accessPoints.Gateway),
-						Serial:                types.StringValue(accessPoints.Serial),
-						SubnetMask:            types.StringValue(accessPoints.SubnetMask),
+						AlternateManagementIP: func() types.String {
+							if accessPoints.AlternateManagementIP != "" {
+								return types.StringValue(accessPoints.AlternateManagementIP)
+							}
+							return types.String{}
+						}(),
+						DNS1: func() types.String {
+							if accessPoints.DNS1 != "" {
+								return types.StringValue(accessPoints.DNS1)
+							}
+							return types.String{}
+						}(),
+						DNS2: func() types.String {
+							if accessPoints.DNS2 != "" {
+								return types.StringValue(accessPoints.DNS2)
+							}
+							return types.String{}
+						}(),
+						Gateway: func() types.String {
+							if accessPoints.Gateway != "" {
+								return types.StringValue(accessPoints.Gateway)
+							}
+							return types.String{}
+						}(),
+						Serial: func() types.String {
+							if accessPoints.Serial != "" {
+								return types.StringValue(accessPoints.Serial)
+							}
+							return types.String{}
+						}(),
+						SubnetMask: func() types.String {
+							if accessPoints.SubnetMask != "" {
+								return types.StringValue(accessPoints.SubnetMask)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

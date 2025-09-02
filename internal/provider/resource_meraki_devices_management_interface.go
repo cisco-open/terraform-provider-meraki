@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -300,7 +301,7 @@ func (r *DevicesManagementInterfaceResource) Create(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing RebootDevice",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -409,7 +410,7 @@ func (r *DevicesManagementInterfaceResource) Update(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceManagementInterface",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -545,9 +546,24 @@ func ResponseDevicesGetDeviceManagementInterfaceItemToBodyRs(state DevicesManage
 		DdnsHostnames: func() *ResponseDevicesGetDeviceManagementInterfaceDdnsHostnamesRs {
 			if response.DdnsHostnames != nil {
 				return &ResponseDevicesGetDeviceManagementInterfaceDdnsHostnamesRs{
-					ActiveDdnsHostname: types.StringValue(response.DdnsHostnames.ActiveDdnsHostname),
-					DdnsHostnameWan1:   types.StringValue(response.DdnsHostnames.DdnsHostnameWan1),
-					DdnsHostnameWan2:   types.StringValue(response.DdnsHostnames.DdnsHostnameWan2),
+					ActiveDdnsHostname: func() types.String {
+						if response.DdnsHostnames.ActiveDdnsHostname != "" {
+							return types.StringValue(response.DdnsHostnames.ActiveDdnsHostname)
+						}
+						return types.String{}
+					}(),
+					DdnsHostnameWan1: func() types.String {
+						if response.DdnsHostnames.DdnsHostnameWan1 != "" {
+							return types.StringValue(response.DdnsHostnames.DdnsHostnameWan1)
+						}
+						return types.String{}
+					}(),
+					DdnsHostnameWan2: func() types.String {
+						if response.DdnsHostnames.DdnsHostnameWan2 != "" {
+							return types.StringValue(response.DdnsHostnames.DdnsHostnameWan2)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -555,10 +571,25 @@ func ResponseDevicesGetDeviceManagementInterfaceItemToBodyRs(state DevicesManage
 		Wan1: func() *ResponseDevicesGetDeviceManagementInterfaceWan1Rs {
 			if response.Wan1 != nil {
 				return &ResponseDevicesGetDeviceManagementInterfaceWan1Rs{
-					StaticDNS:        StringSliceToSet(response.Wan1.StaticDNS),
-					StaticGatewayIP:  types.StringValue(response.Wan1.StaticGatewayIP),
-					StaticIP:         types.StringValue(response.Wan1.StaticIP),
-					StaticSubnetMask: types.StringValue(response.Wan1.StaticSubnetMask),
+					StaticDNS: StringSliceToSet(response.Wan1.StaticDNS),
+					StaticGatewayIP: func() types.String {
+						if response.Wan1.StaticGatewayIP != "" {
+							return types.StringValue(response.Wan1.StaticGatewayIP)
+						}
+						return types.String{}
+					}(),
+					StaticIP: func() types.String {
+						if response.Wan1.StaticIP != "" {
+							return types.StringValue(response.Wan1.StaticIP)
+						}
+						return types.String{}
+					}(),
+					StaticSubnetMask: func() types.String {
+						if response.Wan1.StaticSubnetMask != "" {
+							return types.StringValue(response.Wan1.StaticSubnetMask)
+						}
+						return types.String{}
+					}(),
 					UsingStaticIP: func() types.Bool {
 						if response.Wan1.UsingStaticIP != nil {
 							return types.BoolValue(*response.Wan1.UsingStaticIP)
@@ -571,7 +602,12 @@ func ResponseDevicesGetDeviceManagementInterfaceItemToBodyRs(state DevicesManage
 						}
 						return types.Int64{}
 					}(),
-					WanEnabled: types.StringValue(response.Wan1.WanEnabled),
+					WanEnabled: func() types.String {
+						if response.Wan1.WanEnabled != "" {
+							return types.StringValue(response.Wan1.WanEnabled)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -579,10 +615,25 @@ func ResponseDevicesGetDeviceManagementInterfaceItemToBodyRs(state DevicesManage
 		Wan2: func() *ResponseDevicesGetDeviceManagementInterfaceWan2Rs {
 			if response.Wan2 != nil {
 				return &ResponseDevicesGetDeviceManagementInterfaceWan2Rs{
-					StaticDNS:        StringSliceToSet(response.Wan2.StaticDNS),
-					StaticGatewayIP:  types.StringValue(response.Wan2.StaticGatewayIP),
-					StaticIP:         types.StringValue(response.Wan2.StaticIP),
-					StaticSubnetMask: types.StringValue(response.Wan2.StaticSubnetMask),
+					StaticDNS: StringSliceToSet(response.Wan2.StaticDNS),
+					StaticGatewayIP: func() types.String {
+						if response.Wan2.StaticGatewayIP != "" {
+							return types.StringValue(response.Wan2.StaticGatewayIP)
+						}
+						return types.String{}
+					}(),
+					StaticIP: func() types.String {
+						if response.Wan2.StaticIP != "" {
+							return types.StringValue(response.Wan2.StaticIP)
+						}
+						return types.String{}
+					}(),
+					StaticSubnetMask: func() types.String {
+						if response.Wan2.StaticSubnetMask != "" {
+							return types.StringValue(response.Wan2.StaticSubnetMask)
+						}
+						return types.String{}
+					}(),
 					UsingStaticIP: func() types.Bool {
 						if response.Wan2.UsingStaticIP != nil {
 							return types.BoolValue(*response.Wan2.UsingStaticIP)
@@ -595,7 +646,12 @@ func ResponseDevicesGetDeviceManagementInterfaceItemToBodyRs(state DevicesManage
 						}
 						return types.Int64{}
 					}(),
-					WanEnabled: types.StringValue(response.Wan2.WanEnabled),
+					WanEnabled: func() types.String {
+						if response.Wan2.WanEnabled != "" {
+							return types.StringValue(response.Wan2.WanEnabled)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil

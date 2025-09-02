@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -335,21 +334,61 @@ func ResponseCellularGatewayGetOrganizationCellularGatewayEsimsInventoryItemToBo
 						Device: func() *ResponseCellularGatewayGetOrganizationCellularGatewayEsimsInventoryItemsDevice {
 							if items.Device != nil {
 								return &ResponseCellularGatewayGetOrganizationCellularGatewayEsimsInventoryItemsDevice{
-									Model:  types.StringValue(items.Device.Model),
-									Name:   types.StringValue(items.Device.Name),
-									Serial: types.StringValue(items.Device.Serial),
-									Status: types.StringValue(items.Device.Status),
-									URL:    types.StringValue(items.Device.URL),
+									Model: func() types.String {
+										if items.Device.Model != "" {
+											return types.StringValue(items.Device.Model)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if items.Device.Name != "" {
+											return types.StringValue(items.Device.Name)
+										}
+										return types.String{}
+									}(),
+									Serial: func() types.String {
+										if items.Device.Serial != "" {
+											return types.StringValue(items.Device.Serial)
+										}
+										return types.String{}
+									}(),
+									Status: func() types.String {
+										if items.Device.Status != "" {
+											return types.StringValue(items.Device.Status)
+										}
+										return types.String{}
+									}(),
+									URL: func() types.String {
+										if items.Device.URL != "" {
+											return types.StringValue(items.Device.URL)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						Eid:           types.StringValue(items.Eid),
-						LastUpdatedAt: types.StringValue(items.LastUpdatedAt),
+						Eid: func() types.String {
+							if items.Eid != "" {
+								return types.StringValue(items.Eid)
+							}
+							return types.String{}
+						}(),
+						LastUpdatedAt: func() types.String {
+							if items.LastUpdatedAt != "" {
+								return types.StringValue(items.LastUpdatedAt)
+							}
+							return types.String{}
+						}(),
 						Network: func() *ResponseCellularGatewayGetOrganizationCellularGatewayEsimsInventoryItemsNetwork {
 							if items.Network != nil {
 								return &ResponseCellularGatewayGetOrganizationCellularGatewayEsimsInventoryItemsNetwork{
-									ID: types.StringValue(items.Network.ID),
+									ID: func() types.String {
+										if items.Network.ID != "" {
+											return types.StringValue(items.Network.ID)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -360,18 +399,38 @@ func ResponseCellularGatewayGetOrganizationCellularGatewayEsimsInventoryItemToBo
 								for i, profiles := range *items.Profiles {
 									result[i] = ResponseCellularGatewayGetOrganizationCellularGatewayEsimsInventoryItemsProfiles{
 										CustomApns: StringSliceToList(profiles.CustomApns),
-										Iccid:      types.StringValue(profiles.Iccid),
+										Iccid: func() types.String {
+											if profiles.Iccid != "" {
+												return types.StringValue(profiles.Iccid)
+											}
+											return types.String{}
+										}(),
 										ServiceProvider: func() *ResponseCellularGatewayGetOrganizationCellularGatewayEsimsInventoryItemsProfilesServiceProvider {
 											if profiles.ServiceProvider != nil {
 												return &ResponseCellularGatewayGetOrganizationCellularGatewayEsimsInventoryItemsProfilesServiceProvider{
-													Name: types.StringValue(profiles.ServiceProvider.Name),
+													Name: func() types.String {
+														if profiles.ServiceProvider.Name != "" {
+															return types.StringValue(profiles.ServiceProvider.Name)
+														}
+														return types.String{}
+													}(),
 													Plans: func() *[]ResponseCellularGatewayGetOrganizationCellularGatewayEsimsInventoryItemsProfilesServiceProviderPlans {
 														if profiles.ServiceProvider.Plans != nil {
 															result := make([]ResponseCellularGatewayGetOrganizationCellularGatewayEsimsInventoryItemsProfilesServiceProviderPlans, len(*profiles.ServiceProvider.Plans))
 															for i, plans := range *profiles.ServiceProvider.Plans {
 																result[i] = ResponseCellularGatewayGetOrganizationCellularGatewayEsimsInventoryItemsProfilesServiceProviderPlans{
-																	Name: types.StringValue(plans.Name),
-																	Type: types.StringValue(plans.Type),
+																	Name: func() types.String {
+																		if plans.Name != "" {
+																			return types.StringValue(plans.Name)
+																		}
+																		return types.String{}
+																	}(),
+																	Type: func() types.String {
+																		if plans.Type != "" {
+																			return types.StringValue(plans.Type)
+																		}
+																		return types.String{}
+																	}(),
 																}
 															}
 															return &result
@@ -382,7 +441,12 @@ func ResponseCellularGatewayGetOrganizationCellularGatewayEsimsInventoryItemToBo
 											}
 											return nil
 										}(),
-										Status: types.StringValue(profiles.Status),
+										Status: func() types.String {
+											if profiles.Status != "" {
+												return types.StringValue(profiles.Status)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result

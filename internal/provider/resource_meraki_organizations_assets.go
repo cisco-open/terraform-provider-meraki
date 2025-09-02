@@ -218,9 +218,24 @@ func (r *OrganizationsAssets) toSdkApiRequestCreate(ctx context.Context) *meraki
 // ToBody
 func ResponseOrganizationsCreateOrganizationSplashThemeAssetItemToBody(state OrganizationsAssets, response *merakigosdk.ResponseOrganizationsCreateOrganizationSplashThemeAsset) OrganizationsAssets {
 	itemState := ResponseOrganizationsCreateOrganizationSplashThemeAsset{
-		FileData: types.StringValue(response.FileData),
-		ID:       types.StringValue(response.ID),
-		Name:     types.StringValue(response.Name),
+		FileData: func() types.String {
+			if response.FileData != "" {
+				return types.StringValue(response.FileData)
+			}
+			return types.String{}
+		}(),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -158,7 +159,7 @@ func (r *NetworksSwitchRoutingMulticastRendezvousPointsResource) Create(ctx cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing ",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -279,7 +280,7 @@ func (r *NetworksSwitchRoutingMulticastRendezvousPointsResource) Update(ctx cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchRoutingMulticastRendezvousPoint",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -379,11 +380,36 @@ func (r *NetworksSwitchRoutingMulticastRendezvousPointsRs) toSdkApiRequestUpdate
 // From gosdk to TF Structs Schema
 func ResponseSwitchGetNetworkSwitchRoutingMulticastRendezvousPointItemToBodyRs(state NetworksSwitchRoutingMulticastRendezvousPointsRs, response *merakigosdk.ResponseSwitchGetNetworkSwitchRoutingMulticastRendezvousPoint, is_read bool) NetworksSwitchRoutingMulticastRendezvousPointsRs {
 	itemState := NetworksSwitchRoutingMulticastRendezvousPointsRs{
-		InterfaceIP:       types.StringValue(response.InterfaceIP),
-		InterfaceName:     types.StringValue(response.InterfaceName),
-		MulticastGroup:    types.StringValue(response.MulticastGroup),
-		RendezvousPointID: types.StringValue(response.RendezvousPointID),
-		Serial:            types.StringValue(response.Serial),
+		InterfaceIP: func() types.String {
+			if response.InterfaceIP != "" {
+				return types.StringValue(response.InterfaceIP)
+			}
+			return types.String{}
+		}(),
+		InterfaceName: func() types.String {
+			if response.InterfaceName != "" {
+				return types.StringValue(response.InterfaceName)
+			}
+			return types.String{}
+		}(),
+		MulticastGroup: func() types.String {
+			if response.MulticastGroup != "" {
+				return types.StringValue(response.MulticastGroup)
+			}
+			return types.String{}
+		}(),
+		RendezvousPointID: func() types.String {
+			if response.RendezvousPointID != "" {
+				return types.StringValue(response.RendezvousPointID)
+			}
+			return types.String{}
+		}(),
+		Serial: func() types.String {
+			if response.Serial != "" {
+				return types.StringValue(response.Serial)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksSwitchRoutingMulticastRendezvousPointsRs)

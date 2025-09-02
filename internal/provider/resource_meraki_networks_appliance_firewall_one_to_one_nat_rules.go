@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	"log"
 
@@ -28,8 +29,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -69,42 +70,38 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Schema(_ context.Con
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"rules": schema.SetNestedAttribute{
+			"rules": schema.ListNestedAttribute{
 				MarkdownDescription: `An array of 1:1 nat rules`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
-						"allowed_inbound": schema.SetNestedAttribute{
+						"allowed_inbound": schema.ListNestedAttribute{
 							MarkdownDescription: `The ports this mapping will provide access on, and the remote IPs that will be allowed access to the resource`,
-							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 
-									"allowed_ips": schema.SetAttribute{
+									"allowed_ips": schema.ListAttribute{
 										MarkdownDescription: `An array of ranges of WAN IP addresses that are allowed to make inbound connections on the specified ports or port ranges, or 'any'`,
-										Computed:            true,
 										Optional:            true,
-										PlanModifiers: []planmodifier.Set{
-											setplanmodifier.UseStateForUnknown(),
+										PlanModifiers: []planmodifier.List{
+											listplanmodifier.UseStateForUnknown(),
 										},
 
 										ElementType: types.StringType,
 									},
-									"destination_ports": schema.SetAttribute{
+									"destination_ports": schema.ListAttribute{
 										MarkdownDescription: `An array of ports or port ranges that will be forwarded to the host on the LAN`,
-										Computed:            true,
 										Optional:            true,
-										PlanModifiers: []planmodifier.Set{
-											setplanmodifier.UseStateForUnknown(),
+										PlanModifiers: []planmodifier.List{
+											listplanmodifier.UseStateForUnknown(),
 										},
 
 										ElementType: types.StringType,
@@ -112,7 +109,6 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Schema(_ context.Con
 									"protocol": schema.StringAttribute{
 										MarkdownDescription: `Either of the following: 'tcp', 'udp', 'icmp-ping' or 'any'
                                               Allowed values: [any,icmp-ping,tcp,udp]`,
-										Computed: true,
 										Optional: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -131,7 +127,6 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Schema(_ context.Con
 						},
 						"lan_ip": schema.StringAttribute{
 							MarkdownDescription: `The IP address of the server or device that hosts the internal resource that you wish to make available on the WAN`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -139,7 +134,6 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Schema(_ context.Con
 						},
 						"name": schema.StringAttribute{
 							MarkdownDescription: `A descriptive name for the rule`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -147,17 +141,14 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Schema(_ context.Con
 						},
 						"public_ip": schema.StringAttribute{
 							MarkdownDescription: `The IP address that will be used to access the internal resource from the WAN`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
 						"uplink": schema.StringAttribute{
-							MarkdownDescription: `The physical WAN interface on which the traffic will arrive ('internet1' or, if available, 'internet2')
-                                        Allowed values: [internet1,internet2]`,
-							Computed: true,
-							Optional: true,
+							MarkdownDescription: `The physical WAN interface on which the traffic will arrive, formatted as 'internetN' where N is an integer representing a valid uplink for the network's appliance`,
+							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -197,27 +188,6 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Create(ctx context.C
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallOneToOneNatRules(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceFirewallOneToOneNatRules  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceFirewallOneToOneNatRules only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallOneToOneNatRules(vvNetworkID, dataRequest)
@@ -226,7 +196,7 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Create(ctx context.C
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallOneToOneNatRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -237,49 +207,19 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Create(ctx context.C
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallOneToOneNatRules(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceFirewallOneToOneNatRules",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkApplianceFirewallOneToOneNatRules",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseApplianceGetNetworkApplianceFirewallOneToOneNatRulesItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksApplianceFirewallOneToOneNatRulesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -309,33 +249,28 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Read(ctx context.Con
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceFirewallOneToOneNatRulesItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksApplianceFirewallOneToOneNatRulesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksApplianceFirewallOneToOneNatRulesRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksApplianceFirewallOneToOneNatRulesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallOneToOneNatRules(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallOneToOneNatRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -345,9 +280,7 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Update(ctx context.C
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksApplianceFirewallOneToOneNatRulesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -371,8 +304,8 @@ type ResponseApplianceGetNetworkApplianceFirewallOneToOneNatRulesRulesRs struct 
 }
 
 type ResponseApplianceGetNetworkApplianceFirewallOneToOneNatRulesRulesAllowedInboundRs struct {
-	AllowedIPs       types.Set    `tfsdk:"allowed_ips"`
-	DestinationPorts types.Set    `tfsdk:"destination_ports"`
+	AllowedIPs       types.List   `tfsdk:"allowed_ips"`
+	DestinationPorts types.List   `tfsdk:"destination_ports"`
 	Protocol         types.String `tfsdk:"protocol"`
 }
 
@@ -425,6 +358,9 @@ func (r *NetworksApplianceFirewallOneToOneNatRulesRs) toSdkApiRequestUpdate(ctx 
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallOneToOneNatRules{
 		Rules: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallOneToOneNatRulesRules {
 			if len(requestApplianceUpdateNetworkApplianceFirewallOneToOneNatRulesRules) > 0 || r.Rules != nil {
+				if len(requestApplianceUpdateNetworkApplianceFirewallOneToOneNatRulesRules) == 0 {
+					requestApplianceUpdateNetworkApplianceFirewallOneToOneNatRulesRules = make([]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallOneToOneNatRulesRules, 0)
+				}
 				return &requestApplianceUpdateNetworkApplianceFirewallOneToOneNatRulesRules
 			}
 			return nil
@@ -446,19 +382,44 @@ func ResponseApplianceGetNetworkApplianceFirewallOneToOneNatRulesItemToBodyRs(st
 								result := make([]ResponseApplianceGetNetworkApplianceFirewallOneToOneNatRulesRulesAllowedInboundRs, len(*rules.AllowedInbound))
 								for i, allowedInbound := range *rules.AllowedInbound {
 									result[i] = ResponseApplianceGetNetworkApplianceFirewallOneToOneNatRulesRulesAllowedInboundRs{
-										AllowedIPs:       StringSliceToSet(allowedInbound.AllowedIPs),
-										DestinationPorts: StringSliceToSet(allowedInbound.DestinationPorts),
-										Protocol:         types.StringValue(allowedInbound.Protocol),
+										AllowedIPs:       StringSliceToList(allowedInbound.AllowedIPs),
+										DestinationPorts: StringSliceToList(allowedInbound.DestinationPorts),
+										Protocol: func() types.String {
+											if allowedInbound.Protocol != "" {
+												return types.StringValue(allowedInbound.Protocol)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						LanIP:    types.StringValue(rules.LanIP),
-						Name:     types.StringValue(rules.Name),
-						PublicIP: types.StringValue(rules.PublicIP),
-						Uplink:   types.StringValue(rules.Uplink),
+						LanIP: func() types.String {
+							if rules.LanIP != "" {
+								return types.StringValue(rules.LanIP)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if rules.Name != "" {
+								return types.StringValue(rules.Name)
+							}
+							return types.String{}
+						}(),
+						PublicIP: func() types.String {
+							if rules.PublicIP != "" {
+								return types.StringValue(rules.PublicIP)
+							}
+							return types.String{}
+						}(),
+						Uplink: func() types.String {
+							if rules.Uplink != "" {
+								return types.StringValue(rules.Uplink)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

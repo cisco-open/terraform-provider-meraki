@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -620,22 +619,52 @@ func ResponseSwitchGetNetworkSwitchDhcpV4ServersSeenItemsToBody(state NetworksSw
 	var items []ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeen
 	for _, item := range *response {
 		itemState := ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeen{
-			ClientID: types.StringValue(item.ClientID),
+			ClientID: func() types.String {
+				if item.ClientID != "" {
+					return types.StringValue(item.ClientID)
+				}
+				return types.String{}
+			}(),
 			Device: func() *ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenDevice {
 				if item.Device != nil {
 					return &ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenDevice{
 						Interface: func() *ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenDeviceInterface {
 							if item.Device.Interface != nil {
 								return &ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenDeviceInterface{
-									Name: types.StringValue(item.Device.Interface.Name),
-									URL:  types.StringValue(item.Device.Interface.URL),
+									Name: func() types.String {
+										if item.Device.Interface.Name != "" {
+											return types.StringValue(item.Device.Interface.Name)
+										}
+										return types.String{}
+									}(),
+									URL: func() types.String {
+										if item.Device.Interface.URL != "" {
+											return types.StringValue(item.Device.Interface.URL)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						Name:   types.StringValue(item.Device.Name),
-						Serial: types.StringValue(item.Device.Serial),
-						URL:    types.StringValue(item.Device.URL),
+						Name: func() types.String {
+							if item.Device.Name != "" {
+								return types.StringValue(item.Device.Name)
+							}
+							return types.String{}
+						}(),
+						Serial: func() types.String {
+							if item.Device.Serial != "" {
+								return types.StringValue(item.Device.Serial)
+							}
+							return types.String{}
+						}(),
+						URL: func() types.String {
+							if item.Device.URL != "" {
+								return types.StringValue(item.Device.URL)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -643,9 +672,24 @@ func ResponseSwitchGetNetworkSwitchDhcpV4ServersSeenItemsToBody(state NetworksSw
 			IPv4: func() *ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenIpv4 {
 				if item.IPv4 != nil {
 					return &ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenIpv4{
-						Address: types.StringValue(item.IPv4.Address),
-						Gateway: types.StringValue(item.IPv4.Gateway),
-						Subnet:  types.StringValue(item.IPv4.Subnet),
+						Address: func() types.String {
+							if item.IPv4.Address != "" {
+								return types.StringValue(item.IPv4.Address)
+							}
+							return types.String{}
+						}(),
+						Gateway: func() types.String {
+							if item.IPv4.Gateway != "" {
+								return types.StringValue(item.IPv4.Gateway)
+							}
+							return types.String{}
+						}(),
+						Subnet: func() types.String {
+							if item.IPv4.Subnet != "" {
+								return types.StringValue(item.IPv4.Subnet)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -668,12 +712,22 @@ func ResponseSwitchGetNetworkSwitchDhcpV4ServersSeenItemsToBody(state NetworksSw
 						IPv4: func() *ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenLastAckIpv4 {
 							if item.LastAck.IPv4 != nil {
 								return &ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenLastAckIpv4{
-									Address: types.StringValue(item.LastAck.IPv4.Address),
+									Address: func() types.String {
+										if item.LastAck.IPv4.Address != "" {
+											return types.StringValue(item.LastAck.IPv4.Address)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						Ts: types.StringValue(item.LastAck.Ts),
+						Ts: func() types.String {
+							if item.LastAck.Ts != "" {
+								return types.StringValue(item.LastAck.Ts)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -687,12 +741,22 @@ func ResponseSwitchGetNetworkSwitchDhcpV4ServersSeenItemsToBody(state NetworksSw
 									IPv4: func() *ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenLastPacketDestinationIpv4 {
 										if item.LastPacket.Destination.IPv4 != nil {
 											return &ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenLastPacketDestinationIpv4{
-												Address: types.StringValue(item.LastPacket.Destination.IPv4.Address),
+												Address: func() types.String {
+													if item.LastPacket.Destination.IPv4.Address != "" {
+														return types.StringValue(item.LastPacket.Destination.IPv4.Address)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return nil
 									}(),
-									Mac: types.StringValue(item.LastPacket.Destination.Mac),
+									Mac: func() types.String {
+										if item.LastPacket.Destination.Mac != "" {
+											return types.StringValue(item.LastPacket.Destination.Mac)
+										}
+										return types.String{}
+									}(),
 									Port: func() types.Int64 {
 										if item.LastPacket.Destination.Port != nil {
 											return types.Int64Value(int64(*item.LastPacket.Destination.Port))
@@ -706,7 +770,12 @@ func ResponseSwitchGetNetworkSwitchDhcpV4ServersSeenItemsToBody(state NetworksSw
 						Ethernet: func() *ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenLastPacketEthernet {
 							if item.LastPacket.Ethernet != nil {
 								return &ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenLastPacketEthernet{
-									Type: types.StringValue(item.LastPacket.Ethernet.Type),
+									Type: func() types.String {
+										if item.LastPacket.Ethernet.Type != "" {
+											return types.StringValue(item.LastPacket.Ethernet.Type)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -714,10 +783,30 @@ func ResponseSwitchGetNetworkSwitchDhcpV4ServersSeenItemsToBody(state NetworksSw
 						Fields: func() *ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenLastPacketFields {
 							if item.LastPacket.Fields != nil {
 								return &ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenLastPacketFields{
-									Chaddr: types.StringValue(item.LastPacket.Fields.Chaddr),
-									Ciaddr: types.StringValue(item.LastPacket.Fields.Ciaddr),
-									Flags:  types.StringValue(item.LastPacket.Fields.Flags),
-									Giaddr: types.StringValue(item.LastPacket.Fields.Giaddr),
+									Chaddr: func() types.String {
+										if item.LastPacket.Fields.Chaddr != "" {
+											return types.StringValue(item.LastPacket.Fields.Chaddr)
+										}
+										return types.String{}
+									}(),
+									Ciaddr: func() types.String {
+										if item.LastPacket.Fields.Ciaddr != "" {
+											return types.StringValue(item.LastPacket.Fields.Ciaddr)
+										}
+										return types.String{}
+									}(),
+									Flags: func() types.String {
+										if item.LastPacket.Fields.Flags != "" {
+											return types.StringValue(item.LastPacket.Fields.Flags)
+										}
+										return types.String{}
+									}(),
+									Giaddr: func() types.String {
+										if item.LastPacket.Fields.Giaddr != "" {
+											return types.StringValue(item.LastPacket.Fields.Giaddr)
+										}
+										return types.String{}
+									}(),
 									Hlen: func() types.Int64 {
 										if item.LastPacket.Fields.Hlen != nil {
 											return types.Int64Value(int64(*item.LastPacket.Fields.Hlen))
@@ -736,7 +825,12 @@ func ResponseSwitchGetNetworkSwitchDhcpV4ServersSeenItemsToBody(state NetworksSw
 										}
 										return types.Int64{}
 									}(),
-									MagicCookie: types.StringValue(item.LastPacket.Fields.MagicCookie),
+									MagicCookie: func() types.String {
+										if item.LastPacket.Fields.MagicCookie != "" {
+											return types.StringValue(item.LastPacket.Fields.MagicCookie)
+										}
+										return types.String{}
+									}(),
 									Op: func() types.Int64 {
 										if item.LastPacket.Fields.Op != nil {
 											return types.Int64Value(int64(*item.LastPacket.Fields.Op))
@@ -748,8 +842,18 @@ func ResponseSwitchGetNetworkSwitchDhcpV4ServersSeenItemsToBody(state NetworksSw
 											result := make([]ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenLastPacketFieldsOptions, len(*item.LastPacket.Fields.Options))
 											for i, options := range *item.LastPacket.Fields.Options {
 												result[i] = ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenLastPacketFieldsOptions{
-													Name:  types.StringValue(options.Name),
-													Value: types.StringValue(options.Value),
+													Name: func() types.String {
+														if options.Name != "" {
+															return types.StringValue(options.Name)
+														}
+														return types.String{}
+													}(),
+													Value: func() types.String {
+														if options.Value != "" {
+															return types.StringValue(options.Value)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return &result
@@ -762,10 +866,30 @@ func ResponseSwitchGetNetworkSwitchDhcpV4ServersSeenItemsToBody(state NetworksSw
 										}
 										return types.Int64{}
 									}(),
-									Siaddr: types.StringValue(item.LastPacket.Fields.Siaddr),
-									Sname:  types.StringValue(item.LastPacket.Fields.Sname),
-									Xid:    types.StringValue(item.LastPacket.Fields.Xid),
-									Yiaddr: types.StringValue(item.LastPacket.Fields.Yiaddr),
+									Siaddr: func() types.String {
+										if item.LastPacket.Fields.Siaddr != "" {
+											return types.StringValue(item.LastPacket.Fields.Siaddr)
+										}
+										return types.String{}
+									}(),
+									Sname: func() types.String {
+										if item.LastPacket.Fields.Sname != "" {
+											return types.StringValue(item.LastPacket.Fields.Sname)
+										}
+										return types.String{}
+									}(),
+									Xid: func() types.String {
+										if item.LastPacket.Fields.Xid != "" {
+											return types.StringValue(item.LastPacket.Fields.Xid)
+										}
+										return types.String{}
+									}(),
+									Yiaddr: func() types.String {
+										if item.LastPacket.Fields.Yiaddr != "" {
+											return types.StringValue(item.LastPacket.Fields.Yiaddr)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -798,7 +922,12 @@ func ResponseSwitchGetNetworkSwitchDhcpV4ServersSeenItemsToBody(state NetworksSw
 										}
 										return types.Int64{}
 									}(),
-									ID: types.StringValue(item.LastPacket.IP.ID),
+									ID: func() types.String {
+										if item.LastPacket.IP.ID != "" {
+											return types.StringValue(item.LastPacket.IP.ID)
+										}
+										return types.String{}
+									}(),
 									Length: func() types.Int64 {
 										if item.LastPacket.IP.Length != nil {
 											return types.Int64Value(int64(*item.LastPacket.IP.Length))
@@ -833,12 +962,22 @@ func ResponseSwitchGetNetworkSwitchDhcpV4ServersSeenItemsToBody(state NetworksSw
 									IPv4: func() *ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenLastPacketSourceIpv4 {
 										if item.LastPacket.Source.IPv4 != nil {
 											return &ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenLastPacketSourceIpv4{
-												Address: types.StringValue(item.LastPacket.Source.IPv4.Address),
+												Address: func() types.String {
+													if item.LastPacket.Source.IPv4.Address != "" {
+														return types.StringValue(item.LastPacket.Source.IPv4.Address)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return nil
 									}(),
-									Mac: types.StringValue(item.LastPacket.Source.Mac),
+									Mac: func() types.String {
+										if item.LastPacket.Source.Mac != "" {
+											return types.StringValue(item.LastPacket.Source.Mac)
+										}
+										return types.String{}
+									}(),
 									Port: func() types.Int64 {
 										if item.LastPacket.Source.Port != nil {
 											return types.Int64Value(int64(*item.LastPacket.Source.Port))
@@ -849,11 +988,21 @@ func ResponseSwitchGetNetworkSwitchDhcpV4ServersSeenItemsToBody(state NetworksSw
 							}
 							return nil
 						}(),
-						Type: types.StringValue(item.LastPacket.Type),
+						Type: func() types.String {
+							if item.LastPacket.Type != "" {
+								return types.StringValue(item.LastPacket.Type)
+							}
+							return types.String{}
+						}(),
 						UDP: func() *ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenLastPacketUdp {
 							if item.LastPacket.UDP != nil {
 								return &ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenLastPacketUdp{
-									Checksum: types.StringValue(item.LastPacket.UDP.Checksum),
+									Checksum: func() types.String {
+										if item.LastPacket.UDP.Checksum != "" {
+											return types.StringValue(item.LastPacket.UDP.Checksum)
+										}
+										return types.String{}
+									}(),
 									Length: func() types.Int64 {
 										if item.LastPacket.UDP.Length != nil {
 											return types.Int64Value(int64(*item.LastPacket.UDP.Length))
@@ -868,23 +1017,53 @@ func ResponseSwitchGetNetworkSwitchDhcpV4ServersSeenItemsToBody(state NetworksSw
 				}
 				return nil
 			}(),
-			LastSeenAt: types.StringValue(item.LastSeenAt),
-			Mac:        types.StringValue(item.Mac),
+			LastSeenAt: func() types.String {
+				if item.LastSeenAt != "" {
+					return types.StringValue(item.LastSeenAt)
+				}
+				return types.String{}
+			}(),
+			Mac: func() types.String {
+				if item.Mac != "" {
+					return types.StringValue(item.Mac)
+				}
+				return types.String{}
+			}(),
 			SeenBy: func() *[]ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenSeenBy {
 				if item.SeenBy != nil {
 					result := make([]ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenSeenBy, len(*item.SeenBy))
 					for i, seenBy := range *item.SeenBy {
 						result[i] = ResponseItemSwitchGetNetworkSwitchDhcpV4ServersSeenSeenBy{
-							Name:   types.StringValue(seenBy.Name),
-							Serial: types.StringValue(seenBy.Serial),
-							URL:    types.StringValue(seenBy.URL),
+							Name: func() types.String {
+								if seenBy.Name != "" {
+									return types.StringValue(seenBy.Name)
+								}
+								return types.String{}
+							}(),
+							Serial: func() types.String {
+								if seenBy.Serial != "" {
+									return types.StringValue(seenBy.Serial)
+								}
+								return types.String{}
+							}(),
+							URL: func() types.String {
+								if seenBy.URL != "" {
+									return types.StringValue(seenBy.URL)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
 				}
 				return nil
 			}(),
-			Type: types.StringValue(item.Type),
+			Type: func() types.String {
+				if item.Type != "" {
+					return types.StringValue(item.Type)
+				}
+				return types.String{}
+			}(),
 			VLAN: func() types.Int64 {
 				if item.VLAN != nil {
 					return types.Int64Value(int64(*item.VLAN))

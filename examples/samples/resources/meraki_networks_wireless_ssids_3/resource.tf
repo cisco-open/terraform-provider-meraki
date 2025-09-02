@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "1.1.8-beta"
+      version = "1.2.0-beta"
       source  = "hashicorp.com/edu/meraki"
       # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
@@ -13,11 +13,12 @@ provider "meraki" {
 }
 
 resource "meraki_networks_wireless_ssids" "this_ssid" {
+  
   network_id  = "L_828099381482771185"
   number      = 0
   name        = "SSID Test Terraform"
   enabled     = true
-  splash_page = "None"
+  splash_page = "Click-through splash page"
   auth_mode   = "8021x-radius"
   dot11w = {
     enabled  = false
@@ -32,14 +33,14 @@ resource "meraki_networks_wireless_ssids" "this_ssid" {
     host           = "192.168.10.2"
     port           = 1812
     radsec_enabled = false
-    # secret         = "<-blanked->"
+    secret         = "<-blanked->"
   }]
   radius_accounting_enabled = true
   radius_accounting_servers = [{
     host           = "192.168.10.3"
     port           = 1813
     radsec_enabled = false
-    # secret         = "<-blanked->"
+    secret         = "<-blanked->"
   }]
   radius_testing_enabled             = false
   radius_server_timeout              = 1
@@ -63,7 +64,7 @@ resource "meraki_networks_wireless_ssids" "this_ssid" {
   lan_isolation_enabled              = true
   visible                            = true
   available_on_all_aps               = true
-  availability_tags                  = []
+  availability_tags                  = null
   speed_burst = {
     enabled = false
   }

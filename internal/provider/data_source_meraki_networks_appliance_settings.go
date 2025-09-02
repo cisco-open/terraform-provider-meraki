@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -157,8 +156,18 @@ type ResponseApplianceGetNetworkApplianceSettingsDynamicDns struct {
 // ToBody
 func ResponseApplianceGetNetworkApplianceSettingsItemToBody(state NetworksApplianceSettings, response *merakigosdk.ResponseApplianceGetNetworkApplianceSettings) NetworksApplianceSettings {
 	itemState := ResponseApplianceGetNetworkApplianceSettings{
-		ClientTrackingMethod: types.StringValue(response.ClientTrackingMethod),
-		DeploymentMode:       types.StringValue(response.DeploymentMode),
+		ClientTrackingMethod: func() types.String {
+			if response.ClientTrackingMethod != "" {
+				return types.StringValue(response.ClientTrackingMethod)
+			}
+			return types.String{}
+		}(),
+		DeploymentMode: func() types.String {
+			if response.DeploymentMode != "" {
+				return types.StringValue(response.DeploymentMode)
+			}
+			return types.String{}
+		}(),
 		DynamicDNS: func() *ResponseApplianceGetNetworkApplianceSettingsDynamicDns {
 			if response.DynamicDNS != nil {
 				return &ResponseApplianceGetNetworkApplianceSettingsDynamicDns{
@@ -168,8 +177,18 @@ func ResponseApplianceGetNetworkApplianceSettingsItemToBody(state NetworksApplia
 						}
 						return types.Bool{}
 					}(),
-					Prefix: types.StringValue(response.DynamicDNS.Prefix),
-					URL:    types.StringValue(response.DynamicDNS.URL),
+					Prefix: func() types.String {
+						if response.DynamicDNS.Prefix != "" {
+							return types.StringValue(response.DynamicDNS.Prefix)
+						}
+						return types.String{}
+					}(),
+					URL: func() types.String {
+						if response.DynamicDNS.URL != "" {
+							return types.StringValue(response.DynamicDNS.URL)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil

@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -210,7 +211,7 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Create(ctx context.Cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationEarlyAccessFeaturesOptIn",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -334,7 +335,7 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsResource) Update(ctx context.Cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationEarlyAccessFeaturesOptIn",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -436,15 +437,35 @@ func (r *OrganizationsEarlyAccessFeaturesOptInsRs) toSdkApiRequestUpdate(ctx con
 // From gosdk to TF Structs Schema
 func ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInItemToBodyRs(state OrganizationsEarlyAccessFeaturesOptInsRs, response *merakigosdk.ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptIn, is_read bool) OrganizationsEarlyAccessFeaturesOptInsRs {
 	itemState := OrganizationsEarlyAccessFeaturesOptInsRs{
-		CreatedAt: types.StringValue(response.CreatedAt),
-		ID:        types.StringValue(response.ID),
+		CreatedAt: func() types.String {
+			if response.CreatedAt != "" {
+				return types.StringValue(response.CreatedAt)
+			}
+			return types.String{}
+		}(),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		LimitScopeToNetworks: func() *[]ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInLimitScopeToNetworksRs {
 			if response.LimitScopeToNetworks != nil {
 				result := make([]ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInLimitScopeToNetworksRs, len(*response.LimitScopeToNetworks))
 				for i, limitScopeToNetworks := range *response.LimitScopeToNetworks {
 					result[i] = ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInLimitScopeToNetworksRs{
-						ID:   types.StringValue(limitScopeToNetworks.ID),
-						Name: types.StringValue(limitScopeToNetworks.Name),
+						ID: func() types.String {
+							if limitScopeToNetworks.ID != "" {
+								return types.StringValue(limitScopeToNetworks.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if limitScopeToNetworks.Name != "" {
+								return types.StringValue(limitScopeToNetworks.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -463,18 +484,38 @@ func ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInItemToBodyRs(st
 					Help: func() *ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInOptOutEligibilityHelpRs {
 						if response.OptOutEligibility.Help != nil {
 							return &ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInOptOutEligibilityHelpRs{
-								Label: types.StringValue(response.OptOutEligibility.Help.Label),
-								URL:   types.StringValue(response.OptOutEligibility.Help.URL),
+								Label: func() types.String {
+									if response.OptOutEligibility.Help.Label != "" {
+										return types.StringValue(response.OptOutEligibility.Help.Label)
+									}
+									return types.String{}
+								}(),
+								URL: func() types.String {
+									if response.OptOutEligibility.Help.URL != "" {
+										return types.StringValue(response.OptOutEligibility.Help.URL)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
 					}(),
-					Reason: types.StringValue(response.OptOutEligibility.Reason),
+					Reason: func() types.String {
+						if response.OptOutEligibility.Reason != "" {
+							return types.StringValue(response.OptOutEligibility.Reason)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		ShortName:              types.StringValue(response.ShortName),
+		ShortName: func() types.String {
+			if response.ShortName != "" {
+				return types.StringValue(response.ShortName)
+			}
+			return types.String{}
+		}(),
 		OrganizationID:         state.OrganizationID,
 		LimitScopeToNetworksRs: state.LimitScopeToNetworksRs,
 	}

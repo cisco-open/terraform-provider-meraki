@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -232,9 +231,24 @@ func ResponseApplianceGetOrganizationApplianceTrafficShapingVpnExclusionsByNetwo
 								result := make([]ResponseApplianceGetOrganizationApplianceTrafficShapingVpnExclusionsByNetworkItemsCustom, len(*items.Custom))
 								for i, custom := range *items.Custom {
 									result[i] = ResponseApplianceGetOrganizationApplianceTrafficShapingVpnExclusionsByNetworkItemsCustom{
-										Destination: types.StringValue(custom.Destination),
-										Port:        types.StringValue(custom.Port),
-										Protocol:    types.StringValue(custom.Protocol),
+										Destination: func() types.String {
+											if custom.Destination != "" {
+												return types.StringValue(custom.Destination)
+											}
+											return types.String{}
+										}(),
+										Port: func() types.String {
+											if custom.Port != "" {
+												return types.StringValue(custom.Port)
+											}
+											return types.String{}
+										}(),
+										Protocol: func() types.String {
+											if custom.Protocol != "" {
+												return types.StringValue(custom.Protocol)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -246,16 +260,36 @@ func ResponseApplianceGetOrganizationApplianceTrafficShapingVpnExclusionsByNetwo
 								result := make([]ResponseApplianceGetOrganizationApplianceTrafficShapingVpnExclusionsByNetworkItemsMajorApplications, len(*items.MajorApplications))
 								for i, majorApplications := range *items.MajorApplications {
 									result[i] = ResponseApplianceGetOrganizationApplianceTrafficShapingVpnExclusionsByNetworkItemsMajorApplications{
-										ID:   types.StringValue(majorApplications.ID),
-										Name: types.StringValue(majorApplications.Name),
+										ID: func() types.String {
+											if majorApplications.ID != "" {
+												return types.StringValue(majorApplications.ID)
+											}
+											return types.String{}
+										}(),
+										Name: func() types.String {
+											if majorApplications.Name != "" {
+												return types.StringValue(majorApplications.Name)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						NetworkID:   types.StringValue(items.NetworkID),
-						NetworkName: types.StringValue(items.NetworkName),
+						NetworkID: func() types.String {
+							if items.NetworkID != "" {
+								return types.StringValue(items.NetworkID)
+							}
+							return types.String{}
+						}(),
+						NetworkName: func() types.String {
+							if items.NetworkName != "" {
+								return types.StringValue(items.NetworkName)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

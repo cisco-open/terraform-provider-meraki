@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -174,7 +173,12 @@ func ResponseWirelessGetNetworkWirelessBluetoothSettingsItemToBody(state Network
 			}
 			return types.Int64{}
 		}(),
-		MajorMinorAssignmentMode: types.StringValue(response.MajorMinorAssignmentMode),
+		MajorMinorAssignmentMode: func() types.String {
+			if response.MajorMinorAssignmentMode != "" {
+				return types.StringValue(response.MajorMinorAssignmentMode)
+			}
+			return types.String{}
+		}(),
 		Minor: func() types.Int64 {
 			if response.Minor != nil {
 				return types.Int64Value(int64(*response.Minor))
@@ -187,7 +191,12 @@ func ResponseWirelessGetNetworkWirelessBluetoothSettingsItemToBody(state Network
 			}
 			return types.Bool{}
 		}(),
-		UUID: types.StringValue(response.UUID),
+		UUID: func() types.String {
+			if response.UUID != "" {
+				return types.StringValue(response.UUID)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

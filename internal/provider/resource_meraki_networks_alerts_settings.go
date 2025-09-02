@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	"log"
 
@@ -28,14 +29,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -71,246 +70,11 @@ func (r *NetworksAlertsSettingsResource) Metadata(_ context.Context, req resourc
 func (r *NetworksAlertsSettingsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"alerts_response": schema.SetNestedAttribute{
-				MarkdownDescription: `Alert-specific configuration for each type. Only alerts that pertain to the network can be updated.`,
-				Computed:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
-				},
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-
-						"alert_destinations": schema.SingleNestedAttribute{
-							MarkdownDescription: `A hash of destinations for this specific alert`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.Object{
-								objectplanmodifier.UseStateForUnknown(),
-							},
-							Attributes: map[string]schema.Attribute{
-
-								"all_admins": schema.BoolAttribute{
-									MarkdownDescription: `If true, then all network admins will receive emails for this alert`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.Bool{
-										boolplanmodifier.UseStateForUnknown(),
-									},
-								},
-								"emails": schema.SetAttribute{
-									MarkdownDescription: `A list of emails that will receive information about the alert`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.Set{
-										setplanmodifier.UseStateForUnknown(),
-									},
-
-									ElementType: types.StringType,
-								},
-								"http_server_ids": schema.SetAttribute{
-									MarkdownDescription: `A list of HTTP server IDs to send a Webhook to for this alert`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.Set{
-										setplanmodifier.UseStateForUnknown(),
-									},
-									Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
-									ElementType: types.StringType,
-								},
-								"sms_numbers": schema.SetAttribute{
-									MarkdownDescription: `A list of phone numbers that will receive text messages about the alert. Only available for sensors status alerts.`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.Set{
-										setplanmodifier.UseStateForUnknown(),
-									},
-
-									ElementType: types.StringType,
-								},
-								"snmp": schema.BoolAttribute{
-									MarkdownDescription: `If true, then an SNMP trap will be sent for this alert if there is an SNMP trap server configured for this network`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.Bool{
-										boolplanmodifier.UseStateForUnknown(),
-									},
-								},
-							},
-						},
-						"enabled": schema.BoolAttribute{
-							MarkdownDescription: `A boolean depicting if the alert is turned on or off`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.Bool{
-								boolplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"filters": schema.SingleNestedAttribute{
-							MarkdownDescription: `A hash of specific configuration data for the alert. Only filters specific to the alert will be updated.`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.Object{
-								objectplanmodifier.UseStateForUnknown(),
-							},
-							Attributes: map[string]schema.Attribute{
-
-								"conditions": schema.SetNestedAttribute{
-									MarkdownDescription: `Conditions`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.Set{
-										setplanmodifier.UseStateForUnknown(),
-									},
-									NestedObject: schema.NestedAttributeObject{
-										Attributes: map[string]schema.Attribute{
-
-											"direction": schema.StringAttribute{
-												MarkdownDescription: `Direction
-                                                    Allowed values: [+,-]`,
-												Computed: true,
-												Optional: true,
-												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
-												},
-												Validators: []validator.String{
-													stringvalidator.OneOf(
-														"+",
-														"-",
-													),
-												},
-											},
-											"duration": schema.Int64Attribute{
-												MarkdownDescription: `Duration`,
-												Computed:            true,
-												PlanModifiers: []planmodifier.Int64{
-													int64planmodifier.UseStateForUnknown(),
-												},
-											},
-											"threshold": schema.Float64Attribute{
-												MarkdownDescription: `Threshold`,
-												Computed:            true,
-												PlanModifiers: []planmodifier.Float64{
-													float64planmodifier.UseStateForUnknown(),
-												},
-											},
-											"type": schema.StringAttribute{
-												MarkdownDescription: `Type of condition`,
-												Computed:            true,
-												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
-												},
-											},
-											"unit": schema.StringAttribute{
-												MarkdownDescription: `Unit`,
-												Computed:            true,
-												PlanModifiers: []planmodifier.String{
-													stringplanmodifier.UseStateForUnknown(),
-												},
-											},
-										},
-									},
-								},
-								"failure_type": schema.StringAttribute{
-									MarkdownDescription: `Failure Type`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.UseStateForUnknown(),
-									},
-								},
-								"lookback_window": schema.Int64Attribute{
-									MarkdownDescription: `Loopback Window (in sec)`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.Int64{
-										int64planmodifier.UseStateForUnknown(),
-									},
-								},
-								"min_duration": schema.Int64Attribute{
-									MarkdownDescription: `Min Duration`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.Int64{
-										int64planmodifier.UseStateForUnknown(),
-									},
-								},
-								"name": schema.StringAttribute{
-									MarkdownDescription: `Name`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.UseStateForUnknown(),
-									},
-								},
-								"period": schema.Int64Attribute{
-									MarkdownDescription: `Period`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.Int64{
-										int64planmodifier.UseStateForUnknown(),
-									},
-								},
-								"priority": schema.StringAttribute{
-									MarkdownDescription: `Priority`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.UseStateForUnknown(),
-									},
-								},
-								"regex": schema.StringAttribute{
-									MarkdownDescription: `Regex`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.UseStateForUnknown(),
-									},
-								},
-								"selector": schema.StringAttribute{
-									MarkdownDescription: `Selector`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.UseStateForUnknown(),
-									},
-								},
-								"serials": schema.SetAttribute{
-									MarkdownDescription: `Serials`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.Set{
-										setplanmodifier.UseStateForUnknown(),
-									},
-
-									ElementType: types.StringType,
-								},
-								"ssid_num": schema.Int64Attribute{
-									MarkdownDescription: `SSID Number`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.Int64{
-										int64planmodifier.UseStateForUnknown(),
-									},
-								},
-								"tag": schema.StringAttribute{
-									MarkdownDescription: `Tag`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.UseStateForUnknown(),
-									},
-								},
-								"threshold": schema.Int64Attribute{
-									MarkdownDescription: `Threshold`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.Int64{
-										int64planmodifier.UseStateForUnknown(),
-									},
-								},
-								"timeout": schema.Int64Attribute{
-									MarkdownDescription: `Timeout`,
-									Computed:            true,
-									PlanModifiers: []planmodifier.Int64{
-										int64planmodifier.UseStateForUnknown(),
-									},
-								},
-							},
-						},
-						"type": schema.StringAttribute{
-							MarkdownDescription: `The type of alert`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-					},
-				},
-			},
-			"alerts": schema.SetNestedAttribute{
+			"alerts": schema.ListNestedAttribute{
 				MarkdownDescription: `Alert-specific configuration for each type. Only alerts that pertain to the network can be updated.`,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -330,29 +94,29 @@ func (r *NetworksAlertsSettingsResource) Schema(_ context.Context, _ resource.Sc
 										boolplanmodifier.UseStateForUnknown(),
 									},
 								},
-								"emails": schema.SetAttribute{
+								"emails": schema.ListAttribute{
 									MarkdownDescription: `A list of emails that will receive information about the alert`,
 									Optional:            true,
-									PlanModifiers: []planmodifier.Set{
-										setplanmodifier.UseStateForUnknown(),
+									PlanModifiers: []planmodifier.List{
+										listplanmodifier.UseStateForUnknown(),
 									},
 
 									ElementType: types.StringType,
 								},
-								"http_server_ids": schema.SetAttribute{
+								"http_server_ids": schema.ListAttribute{
 									MarkdownDescription: `A list of HTTP server IDs to send a Webhook to for this alert`,
 									Optional:            true,
-									PlanModifiers: []planmodifier.Set{
-										setplanmodifier.UseStateForUnknown(),
+									PlanModifiers: []planmodifier.List{
+										listplanmodifier.UseStateForUnknown(),
 									},
 
 									ElementType: types.StringType,
 								},
-								"sms_numbers": schema.SetAttribute{
+								"sms_numbers": schema.ListAttribute{
 									MarkdownDescription: `A list of phone numbers that will receive text messages about the alert. Only available for sensors status alerts.`,
 									Optional:            true,
-									PlanModifiers: []planmodifier.Set{
-										setplanmodifier.UseStateForUnknown(),
+									PlanModifiers: []planmodifier.List{
+										listplanmodifier.UseStateForUnknown(),
 									},
 
 									ElementType: types.StringType,
@@ -381,11 +145,11 @@ func (r *NetworksAlertsSettingsResource) Schema(_ context.Context, _ resource.Sc
 							},
 							Attributes: map[string]schema.Attribute{
 
-								"conditions": schema.SetNestedAttribute{
+								"conditions": schema.ListNestedAttribute{
 									MarkdownDescription: `Conditions`,
 									Optional:            true,
-									PlanModifiers: []planmodifier.Set{
-										setplanmodifier.UseStateForUnknown(),
+									PlanModifiers: []planmodifier.List{
+										listplanmodifier.UseStateForUnknown(),
 									},
 									NestedObject: schema.NestedAttributeObject{
 										Attributes: map[string]schema.Attribute{
@@ -491,11 +255,11 @@ func (r *NetworksAlertsSettingsResource) Schema(_ context.Context, _ resource.Sc
 										stringplanmodifier.UseStateForUnknown(),
 									},
 								},
-								"serials": schema.SetAttribute{
+								"serials": schema.ListAttribute{
 									MarkdownDescription: `Serials`,
 									Optional:            true,
-									PlanModifiers: []planmodifier.Set{
-										setplanmodifier.UseStateForUnknown(),
+									PlanModifiers: []planmodifier.List{
+										listplanmodifier.UseStateForUnknown(),
 									},
 
 									ElementType: types.StringType,
@@ -542,7 +306,6 @@ func (r *NetworksAlertsSettingsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"default_destinations": schema.SingleNestedAttribute{
 				MarkdownDescription: `The network-wide destinations for all alerts on the network.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -551,46 +314,40 @@ func (r *NetworksAlertsSettingsResource) Schema(_ context.Context, _ resource.Sc
 
 					"all_admins": schema.BoolAttribute{
 						MarkdownDescription: `If true, then all network admins will receive emails.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
 						},
 					},
-					"emails": schema.SetAttribute{
+					"emails": schema.ListAttribute{
 						MarkdownDescription: `A list of emails that will receive the alert(s).`,
-						Computed:            true,
 						Optional:            true,
-						PlanModifiers: []planmodifier.Set{
-							setplanmodifier.UseStateForUnknown(),
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.UseStateForUnknown(),
 						},
-						Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
+
 						ElementType: types.StringType,
 					},
-					"http_server_ids": schema.SetAttribute{
+					"http_server_ids": schema.ListAttribute{
 						MarkdownDescription: `A list of HTTP server IDs to send a Webhook to`,
-						Computed:            true,
 						Optional:            true,
-						PlanModifiers: []planmodifier.Set{
-							setplanmodifier.UseStateForUnknown(),
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.UseStateForUnknown(),
 						},
-						Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
+
 						ElementType: types.StringType,
 					},
 					"snmp": schema.BoolAttribute{
 						MarkdownDescription: `If true, then an SNMP trap will be sent if there is an SNMP trap server configured for this network.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
 						},
-						Default: booldefault.StaticBool(false),
 					},
 				},
 			},
 			"muting": schema.SingleNestedAttribute{
 				MarkdownDescription: `Mute alerts under certain conditions`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -599,7 +356,6 @@ func (r *NetworksAlertsSettingsResource) Schema(_ context.Context, _ resource.Sc
 
 					"by_port_schedules": schema.SingleNestedAttribute{
 						MarkdownDescription: `Mute wireless unreachable alerts based on switch port schedules`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -608,12 +364,10 @@ func (r *NetworksAlertsSettingsResource) Schema(_ context.Context, _ resource.Sc
 
 							"enabled": schema.BoolAttribute{
 								MarkdownDescription: `If true, then wireless unreachable alerts will be muted when caused by a port schedule`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
 								},
-								Default: booldefault.StaticBool(false),
 							},
 						},
 					},
@@ -649,27 +403,6 @@ func (r *NetworksAlertsSettingsResource) Create(ctx context.Context, req resourc
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkAlertsSettings(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksAlertsSettings  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksAlertsSettings only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkAlertsSettings(vvNetworkID, dataRequest)
@@ -678,7 +411,7 @@ func (r *NetworksAlertsSettingsResource) Create(ctx context.Context, req resourc
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkAlertsSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -689,49 +422,19 @@ func (r *NetworksAlertsSettingsResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Networks.GetNetworkAlertsSettings(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkAlertsSettings",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkAlertsSettings",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseNetworksGetNetworkAlertsSettingsItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksAlertsSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksAlertsSettingsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -761,33 +464,28 @@ func (r *NetworksAlertsSettingsResource) Read(ctx context.Context, req resource.
 	}
 	//entro aqui 2
 	data = ResponseNetworksGetNetworkAlertsSettingsItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksAlertsSettingsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksAlertsSettingsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksAlertsSettingsRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksAlertsSettingsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkAlertsSettings(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkAlertsSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -797,9 +495,7 @@ func (r *NetworksAlertsSettingsResource) Update(ctx context.Context, req resourc
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksAlertsSettingsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -812,7 +508,6 @@ func (r *NetworksAlertsSettingsResource) Delete(ctx context.Context, req resourc
 type NetworksAlertsSettingsRs struct {
 	NetworkID           types.String                                                   `tfsdk:"network_id"`
 	Alerts              *[]ResponseNetworksGetNetworkAlertsSettingsAlertsRs            `tfsdk:"alerts"`
-	AlertsResponse      *[]ResponseNetworksGetNetworkAlertsSettingsAlertsRs            `tfsdk:"alerts_response"`
 	DefaultDestinations *ResponseNetworksGetNetworkAlertsSettingsDefaultDestinationsRs `tfsdk:"default_destinations"`
 	Muting              *ResponseNetworksGetNetworkAlertsSettingsMutingRs              `tfsdk:"muting"`
 }
@@ -826,9 +521,9 @@ type ResponseNetworksGetNetworkAlertsSettingsAlertsRs struct {
 
 type ResponseNetworksGetNetworkAlertsSettingsAlertsAlertDestinationsRs struct {
 	AllAdmins     types.Bool `tfsdk:"all_admins"`
-	Emails        types.Set  `tfsdk:"emails"`
-	HTTPServerIDs types.Set  `tfsdk:"http_server_ids"`
-	SmsNumbers    types.Set  `tfsdk:"sms_numbers"`
+	Emails        types.List `tfsdk:"emails"`
+	HTTPServerIDs types.List `tfsdk:"http_server_ids"`
+	SmsNumbers    types.List `tfsdk:"sms_numbers"`
 	SNMP          types.Bool `tfsdk:"snmp"`
 }
 
@@ -842,7 +537,7 @@ type ResponseNetworksGetNetworkAlertsSettingsAlertsFiltersRs struct {
 	Priority       types.String                                                         `tfsdk:"priority"`
 	Regex          types.String                                                         `tfsdk:"regex"`
 	Selector       types.String                                                         `tfsdk:"selector"`
-	Serials        types.Set                                                            `tfsdk:"serials"`
+	Serials        types.List                                                           `tfsdk:"serials"`
 	SSIDNum        types.Int64                                                          `tfsdk:"ssid_num"`
 	Tag            types.String                                                         `tfsdk:"tag"`
 	Threshold      types.Int64                                                          `tfsdk:"threshold"`
@@ -859,8 +554,8 @@ type ResponseNetworksGetNetworkAlertsSettingsAlertsFiltersConditionsRs struct {
 
 type ResponseNetworksGetNetworkAlertsSettingsDefaultDestinationsRs struct {
 	AllAdmins     types.Bool `tfsdk:"all_admins"`
-	Emails        types.Set  `tfsdk:"emails"`
-	HTTPServerIDs types.Set  `tfsdk:"http_server_ids"`
+	Emails        types.List `tfsdk:"emails"`
+	HTTPServerIDs types.List `tfsdk:"http_server_ids"`
 	SNMP          types.Bool `tfsdk:"snmp"`
 }
 
@@ -1096,7 +791,7 @@ func (r *NetworksAlertsSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 // From gosdk to TF Structs Schema
 func ResponseNetworksGetNetworkAlertsSettingsItemToBodyRs(state NetworksAlertsSettingsRs, response *merakigosdk.ResponseNetworksGetNetworkAlertsSettings, is_read bool) NetworksAlertsSettingsRs {
 	itemState := NetworksAlertsSettingsRs{
-		AlertsResponse: func() *[]ResponseNetworksGetNetworkAlertsSettingsAlertsRs {
+		Alerts: func() *[]ResponseNetworksGetNetworkAlertsSettingsAlertsRs {
 			if response.Alerts != nil {
 				result := make([]ResponseNetworksGetNetworkAlertsSettingsAlertsRs, len(*response.Alerts))
 				for i, alerts := range *response.Alerts {
@@ -1110,9 +805,9 @@ func ResponseNetworksGetNetworkAlertsSettingsItemToBodyRs(state NetworksAlertsSe
 										}
 										return types.Bool{}
 									}(),
-									Emails:        StringSliceToSet(alerts.AlertDestinations.Emails),
-									HTTPServerIDs: StringSliceToSet(alerts.AlertDestinations.HTTPServerIDs),
-									SmsNumbers:    StringSliceToSet(alerts.AlertDestinations.SmsNumbers),
+									Emails:        StringSliceToList(alerts.AlertDestinations.Emails),
+									HTTPServerIDs: StringSliceToList(alerts.AlertDestinations.HTTPServerIDs),
+									SmsNumbers:    StringSliceToList(alerts.AlertDestinations.SmsNumbers),
 									SNMP: func() types.Bool {
 										if alerts.AlertDestinations.SNMP != nil {
 											return types.BoolValue(*alerts.AlertDestinations.SNMP)
@@ -1137,7 +832,12 @@ func ResponseNetworksGetNetworkAlertsSettingsItemToBodyRs(state NetworksAlertsSe
 											result := make([]ResponseNetworksGetNetworkAlertsSettingsAlertsFiltersConditionsRs, len(*alerts.Filters.Conditions))
 											for i, conditions := range *alerts.Filters.Conditions {
 												result[i] = ResponseNetworksGetNetworkAlertsSettingsAlertsFiltersConditionsRs{
-													Direction: types.StringValue(conditions.Direction),
+													Direction: func() types.String {
+														if conditions.Direction != "" {
+															return types.StringValue(conditions.Direction)
+														}
+														return types.String{}
+													}(),
 													Duration: func() types.Int64 {
 														if conditions.Duration != nil {
 															return types.Int64Value(int64(*conditions.Duration))
@@ -1150,15 +850,30 @@ func ResponseNetworksGetNetworkAlertsSettingsItemToBodyRs(state NetworksAlertsSe
 														}
 														return types.Float64{}
 													}(),
-													Type: types.StringValue(conditions.Type),
-													Unit: types.StringValue(conditions.Unit),
+													Type: func() types.String {
+														if conditions.Type != "" {
+															return types.StringValue(conditions.Type)
+														}
+														return types.String{}
+													}(),
+													Unit: func() types.String {
+														if conditions.Unit != "" {
+															return types.StringValue(conditions.Unit)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return &result
 										}
 										return nil
 									}(),
-									FailureType: types.StringValue(alerts.Filters.FailureType),
+									FailureType: func() types.String {
+										if alerts.Filters.FailureType != "" {
+											return types.StringValue(alerts.Filters.FailureType)
+										}
+										return types.String{}
+									}(),
 									LookbackWindow: func() types.Int64 {
 										if alerts.Filters.LookbackWindow != nil {
 											return types.Int64Value(int64(*alerts.Filters.LookbackWindow))
@@ -1171,24 +886,49 @@ func ResponseNetworksGetNetworkAlertsSettingsItemToBodyRs(state NetworksAlertsSe
 										}
 										return types.Int64{}
 									}(),
-									Name: types.StringValue(alerts.Filters.Name),
+									Name: func() types.String {
+										if alerts.Filters.Name != "" {
+											return types.StringValue(alerts.Filters.Name)
+										}
+										return types.String{}
+									}(),
 									Period: func() types.Int64 {
 										if alerts.Filters.Period != nil {
 											return types.Int64Value(int64(*alerts.Filters.Period))
 										}
 										return types.Int64{}
 									}(),
-									Priority: types.StringValue(alerts.Filters.Priority),
-									Regex:    types.StringValue(alerts.Filters.Regex),
-									Selector: types.StringValue(alerts.Filters.Selector),
-									Serials:  StringSliceToSet(alerts.Filters.Serials),
+									Priority: func() types.String {
+										if alerts.Filters.Priority != "" {
+											return types.StringValue(alerts.Filters.Priority)
+										}
+										return types.String{}
+									}(),
+									Regex: func() types.String {
+										if alerts.Filters.Regex != "" {
+											return types.StringValue(alerts.Filters.Regex)
+										}
+										return types.String{}
+									}(),
+									Selector: func() types.String {
+										if alerts.Filters.Selector != "" {
+											return types.StringValue(alerts.Filters.Selector)
+										}
+										return types.String{}
+									}(),
+									Serials: StringSliceToList(alerts.Filters.Serials),
 									SSIDNum: func() types.Int64 {
 										if alerts.Filters.SSIDNum != nil {
 											return types.Int64Value(int64(*alerts.Filters.SSIDNum))
 										}
 										return types.Int64{}
 									}(),
-									Tag: types.StringValue(alerts.Filters.Tag),
+									Tag: func() types.String {
+										if alerts.Filters.Tag != "" {
+											return types.StringValue(alerts.Filters.Tag)
+										}
+										return types.String{}
+									}(),
 									Threshold: func() types.Int64 {
 										if alerts.Filters.Threshold != nil {
 											return types.Int64Value(int64(*alerts.Filters.Threshold))
@@ -1205,7 +945,12 @@ func ResponseNetworksGetNetworkAlertsSettingsItemToBodyRs(state NetworksAlertsSe
 							}
 							return nil
 						}(),
-						Type: types.StringValue(alerts.Type),
+						Type: func() types.String {
+							if alerts.Type != "" {
+								return types.StringValue(alerts.Type)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -1221,8 +966,8 @@ func ResponseNetworksGetNetworkAlertsSettingsItemToBodyRs(state NetworksAlertsSe
 						}
 						return types.Bool{}
 					}(),
-					Emails:        StringSliceToSet(response.DefaultDestinations.Emails),
-					HTTPServerIDs: StringSliceToSet(response.DefaultDestinations.HTTPServerIDs),
+					Emails:        StringSliceToList(response.DefaultDestinations.Emails),
+					HTTPServerIDs: StringSliceToList(response.DefaultDestinations.HTTPServerIDs),
 					SNMP: func() types.Bool {
 						if response.DefaultDestinations.SNMP != nil {
 							return types.BoolValue(*response.DefaultDestinations.SNMP)
@@ -1231,15 +976,29 @@ func ResponseNetworksGetNetworkAlertsSettingsItemToBodyRs(state NetworksAlertsSe
 					}(),
 				}
 			}
-			return &ResponseNetworksGetNetworkAlertsSettingsDefaultDestinationsRs{}
+			return nil
 		}(),
-		Muting: state.Muting,
+		Muting: func() *ResponseNetworksGetNetworkAlertsSettingsMutingRs {
+			if response.Muting != nil {
+				return &ResponseNetworksGetNetworkAlertsSettingsMutingRs{
+					ByPortSchedules: func() *ResponseNetworksGetNetworkAlertsSettingsMutingByPortSchedulesRs {
+						if response.Muting.ByPortSchedules != nil {
+							return &ResponseNetworksGetNetworkAlertsSettingsMutingByPortSchedulesRs{
+								Enabled: func() types.Bool {
+									if response.Muting.ByPortSchedules.Enabled != nil {
+										return types.BoolValue(*response.Muting.ByPortSchedules.Enabled)
+									}
+									return types.Bool{}
+								}(),
+							}
+						}
+						return nil
+					}(),
+				}
+			}
+			return nil
+		}(),
 	}
-	if itemState.DefaultDestinations != nil && state.DefaultDestinations != nil {
-		itemState.DefaultDestinations.SNMP = state.DefaultDestinations.SNMP
-	}
-
-	itemState.Alerts = state.Alerts
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksAlertsSettingsRs)
 	}

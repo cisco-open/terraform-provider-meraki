@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -189,19 +188,54 @@ func ResponseApplianceGetNetworkApplianceFirewallOneToManyNatRulesItemToBody(sta
 								for i, portRules := range *rules.PortRules {
 									result[i] = ResponseApplianceGetNetworkApplianceFirewallOneToManyNatRulesRulesPortRules{
 										AllowedIPs: StringSliceToList(portRules.AllowedIPs),
-										LocalIP:    types.StringValue(portRules.LocalIP),
-										LocalPort:  types.StringValue(portRules.LocalPort),
-										Name:       types.StringValue(portRules.Name),
-										Protocol:   types.StringValue(portRules.Protocol),
-										PublicPort: types.StringValue(portRules.PublicPort),
+										LocalIP: func() types.String {
+											if portRules.LocalIP != "" {
+												return types.StringValue(portRules.LocalIP)
+											}
+											return types.String{}
+										}(),
+										LocalPort: func() types.String {
+											if portRules.LocalPort != "" {
+												return types.StringValue(portRules.LocalPort)
+											}
+											return types.String{}
+										}(),
+										Name: func() types.String {
+											if portRules.Name != "" {
+												return types.StringValue(portRules.Name)
+											}
+											return types.String{}
+										}(),
+										Protocol: func() types.String {
+											if portRules.Protocol != "" {
+												return types.StringValue(portRules.Protocol)
+											}
+											return types.String{}
+										}(),
+										PublicPort: func() types.String {
+											if portRules.PublicPort != "" {
+												return types.StringValue(portRules.PublicPort)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						PublicIP: types.StringValue(rules.PublicIP),
-						Uplink:   types.StringValue(rules.Uplink),
+						PublicIP: func() types.String {
+							if rules.PublicIP != "" {
+								return types.StringValue(rules.PublicIP)
+							}
+							return types.String{}
+						}(),
+						Uplink: func() types.String {
+							if rules.Uplink != "" {
+								return types.StringValue(rules.Uplink)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

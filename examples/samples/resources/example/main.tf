@@ -1,11 +1,15 @@
 terraform {
   required_providers {
     meraki = {
-      version = "1.1.8-beta"
+      version = "1.2.0-beta"
       source  = "hashicorp.com/edu/meraki"
       # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
   }
+}
+
+provider "meraki" {
+  meraki_debug = true
 }
 
 resource "meraki_networks_wireless_ssids_firewall_l3_firewall_rules" "test-Terraform" {
@@ -41,7 +45,7 @@ resource "meraki_networks_wireless_ssids_firewall_l3_firewall_rules" "test-Terra
       # comment = ""
       dest_cidr = "10.0.0.0/8"
       dest_port = "any"
-      policy    = "deny"
+      policy    = "allow"
       protocol  = "any"
       ip_ver    = "ipv4"
     }

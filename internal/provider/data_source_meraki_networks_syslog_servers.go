@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -155,8 +154,18 @@ func ResponseNetworksGetNetworkSyslogServersItemToBody(state NetworksSyslogServe
 				result := make([]ResponseNetworksGetNetworkSyslogServersServers, len(*response.Servers))
 				for i, servers := range *response.Servers {
 					result[i] = ResponseNetworksGetNetworkSyslogServersServers{
-						Host:  types.StringValue(servers.Host),
-						Port:  types.StringValue(servers.Port),
+						Host: func() types.String {
+							if servers.Host != "" {
+								return types.StringValue(servers.Host)
+							}
+							return types.String{}
+						}(),
+						Port: func() types.String {
+							if servers.Port != "" {
+								return types.StringValue(servers.Port)
+							}
+							return types.String{}
+						}(),
 						Roles: StringSliceToList(servers.Roles),
 					}
 				}

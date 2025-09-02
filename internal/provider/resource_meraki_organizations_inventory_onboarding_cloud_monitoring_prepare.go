@@ -759,12 +759,7 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringPrepare) toSdkApiRequest
 		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepare{
-		Devices: func() *[]merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevices {
-			if len(requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevices) > 0 {
-				return &requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevices
-			}
-			return nil
-		}(),
+		Devices: &requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareDevices,
 		Options: requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareOptions,
 	}
 	return &out
@@ -778,19 +773,54 @@ func ResponseOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPr
 			ConfigParams: func() *ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareConfigParams {
 				if item.ConfigParams != nil {
 					return &ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareConfigParams{
-						CloudStaticIP: types.StringValue(item.ConfigParams.CloudStaticIP),
+						CloudStaticIP: func() types.String {
+							if item.ConfigParams.CloudStaticIP != "" {
+								return types.StringValue(item.ConfigParams.CloudStaticIP)
+							}
+							return types.String{}
+						}(),
 						Tunnel: func() *ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareConfigParamsTunnel {
 							if item.ConfigParams.Tunnel != nil {
 								return &ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareConfigParamsTunnel{
-									Host: types.StringValue(item.ConfigParams.Tunnel.Host),
-									Mode: types.StringValue(item.ConfigParams.Tunnel.Mode),
-									Name: types.StringValue(item.ConfigParams.Tunnel.Name),
-									Port: types.StringValue(item.ConfigParams.Tunnel.Port),
+									Host: func() types.String {
+										if item.ConfigParams.Tunnel.Host != "" {
+											return types.StringValue(item.ConfigParams.Tunnel.Host)
+										}
+										return types.String{}
+									}(),
+									Mode: func() types.String {
+										if item.ConfigParams.Tunnel.Mode != "" {
+											return types.StringValue(item.ConfigParams.Tunnel.Mode)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if item.ConfigParams.Tunnel.Name != "" {
+											return types.StringValue(item.ConfigParams.Tunnel.Name)
+										}
+										return types.String{}
+									}(),
+									Port: func() types.String {
+										if item.ConfigParams.Tunnel.Port != "" {
+											return types.StringValue(item.ConfigParams.Tunnel.Port)
+										}
+										return types.String{}
+									}(),
 									RootCertificate: func() *ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareConfigParamsTunnelRootCertificate {
 										if item.ConfigParams.Tunnel.RootCertificate != nil {
 											return &ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareConfigParamsTunnelRootCertificate{
-												Content: types.StringValue(item.ConfigParams.Tunnel.RootCertificate.Content),
-												Name:    types.StringValue(item.ConfigParams.Tunnel.RootCertificate.Name),
+												Content: func() types.String {
+													if item.ConfigParams.Tunnel.RootCertificate.Content != "" {
+														return types.StringValue(item.ConfigParams.Tunnel.RootCertificate.Content)
+													}
+													return types.String{}
+												}(),
+												Name: func() types.String {
+													if item.ConfigParams.Tunnel.RootCertificate.Name != "" {
+														return types.StringValue(item.ConfigParams.Tunnel.RootCertificate.Name)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return nil
@@ -802,16 +832,31 @@ func ResponseOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPr
 						User: func() *ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareConfigParamsUser {
 							if item.ConfigParams.User != nil {
 								return &ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareConfigParamsUser{
-									PublicKey: types.StringValue(item.ConfigParams.User.PublicKey),
+									PublicKey: func() types.String {
+										if item.ConfigParams.User.PublicKey != "" {
+											return types.StringValue(item.ConfigParams.User.PublicKey)
+										}
+										return types.String{}
+									}(),
 									Secret: func() *ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareConfigParamsUserSecret {
 										if item.ConfigParams.User.Secret != nil {
 											return &ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPrepareConfigParamsUserSecret{
-												Hash: types.StringValue(item.ConfigParams.User.Secret.Hash),
+												Hash: func() types.String {
+													if item.ConfigParams.User.Secret.Hash != "" {
+														return types.StringValue(item.ConfigParams.User.Secret.Hash)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return nil
 									}(),
-									Username: types.StringValue(item.ConfigParams.User.Username),
+									Username: func() types.String {
+										if item.ConfigParams.User.Username != "" {
+											return types.StringValue(item.ConfigParams.User.Username)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -820,10 +865,30 @@ func ResponseOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringPr
 				}
 				return nil
 			}(),
-			DeviceID: types.StringValue(item.DeviceID),
-			Message:  types.StringValue(item.Message),
-			Status:   types.StringValue(item.Status),
-			Udi:      types.StringValue(item.Udi),
+			DeviceID: func() types.String {
+				if item.DeviceID != "" {
+					return types.StringValue(item.DeviceID)
+				}
+				return types.String{}
+			}(),
+			Message: func() types.String {
+				if item.Message != "" {
+					return types.StringValue(item.Message)
+				}
+				return types.String{}
+			}(),
+			Status: func() types.String {
+				if item.Status != "" {
+					return types.StringValue(item.Status)
+				}
+				return types.String{}
+			}(),
+			Udi: func() types.String {
+				if item.Udi != "" {
+					return types.StringValue(item.Udi)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

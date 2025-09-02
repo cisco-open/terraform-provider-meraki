@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -137,9 +136,19 @@ type ResponseCellularGatewayGetNetworkCellularGatewayDhcp struct {
 // ToBody
 func ResponseCellularGatewayGetNetworkCellularGatewayDhcpItemToBody(state NetworksCellularGatewayDhcp, response *merakigosdk.ResponseCellularGatewayGetNetworkCellularGatewayDhcp) NetworksCellularGatewayDhcp {
 	itemState := ResponseCellularGatewayGetNetworkCellularGatewayDhcp{
-		DhcpLeaseTime:        types.StringValue(response.DhcpLeaseTime),
+		DhcpLeaseTime: func() types.String {
+			if response.DhcpLeaseTime != "" {
+				return types.StringValue(response.DhcpLeaseTime)
+			}
+			return types.String{}
+		}(),
 		DNSCustomNameservers: StringSliceToList(response.DNSCustomNameservers),
-		DNSNameservers:       types.StringValue(response.DNSNameservers),
+		DNSNameservers: func() types.String {
+			if response.DNSNameservers != "" {
+				return types.StringValue(response.DNSNameservers)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

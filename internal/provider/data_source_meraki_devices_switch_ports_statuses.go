@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -455,21 +454,66 @@ func ResponseSwitchGetDeviceSwitchPortsStatusesItemsToBody(state DevicesSwitchPo
 			Cdp: func() *ResponseItemSwitchGetDeviceSwitchPortsStatusesCdp {
 				if item.Cdp != nil {
 					return &ResponseItemSwitchGetDeviceSwitchPortsStatusesCdp{
-						Address:           types.StringValue(item.Cdp.Address),
-						Capabilities:      types.StringValue(item.Cdp.Capabilities),
-						DeviceID:          types.StringValue(item.Cdp.DeviceID),
-						ManagementAddress: types.StringValue(item.Cdp.ManagementAddress),
+						Address: func() types.String {
+							if item.Cdp.Address != "" {
+								return types.StringValue(item.Cdp.Address)
+							}
+							return types.String{}
+						}(),
+						Capabilities: func() types.String {
+							if item.Cdp.Capabilities != "" {
+								return types.StringValue(item.Cdp.Capabilities)
+							}
+							return types.String{}
+						}(),
+						DeviceID: func() types.String {
+							if item.Cdp.DeviceID != "" {
+								return types.StringValue(item.Cdp.DeviceID)
+							}
+							return types.String{}
+						}(),
+						ManagementAddress: func() types.String {
+							if item.Cdp.ManagementAddress != "" {
+								return types.StringValue(item.Cdp.ManagementAddress)
+							}
+							return types.String{}
+						}(),
 						NativeVLAN: func() types.Int64 {
 							if item.Cdp.NativeVLAN != nil {
 								return types.Int64Value(int64(*item.Cdp.NativeVLAN))
 							}
 							return types.Int64{}
 						}(),
-						Platform:            types.StringValue(item.Cdp.Platform),
-						PortID:              types.StringValue(item.Cdp.PortID),
-						SystemName:          types.StringValue(item.Cdp.SystemName),
-						Version:             types.StringValue(item.Cdp.Version),
-						VtpManagementDomain: types.StringValue(item.Cdp.VtpManagementDomain),
+						Platform: func() types.String {
+							if item.Cdp.Platform != "" {
+								return types.StringValue(item.Cdp.Platform)
+							}
+							return types.String{}
+						}(),
+						PortID: func() types.String {
+							if item.Cdp.PortID != "" {
+								return types.StringValue(item.Cdp.PortID)
+							}
+							return types.String{}
+						}(),
+						SystemName: func() types.String {
+							if item.Cdp.SystemName != "" {
+								return types.StringValue(item.Cdp.SystemName)
+							}
+							return types.String{}
+						}(),
+						Version: func() types.String {
+							if item.Cdp.Version != "" {
+								return types.StringValue(item.Cdp.Version)
+							}
+							return types.String{}
+						}(),
+						VtpManagementDomain: func() types.String {
+							if item.Cdp.VtpManagementDomain != "" {
+								return types.StringValue(item.Cdp.VtpManagementDomain)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -480,7 +524,12 @@ func ResponseSwitchGetDeviceSwitchPortsStatusesItemsToBody(state DevicesSwitchPo
 				}
 				return types.Int64{}
 			}(),
-			Duplex: types.StringValue(item.Duplex),
+			Duplex: func() types.String {
+				if item.Duplex != "" {
+					return types.StringValue(item.Duplex)
+				}
+				return types.String{}
+			}(),
 			Enabled: func() types.Bool {
 				if item.Enabled != nil {
 					return types.BoolValue(*item.Enabled)
@@ -497,25 +546,60 @@ func ResponseSwitchGetDeviceSwitchPortsStatusesItemsToBody(state DevicesSwitchPo
 			Lldp: func() *ResponseItemSwitchGetDeviceSwitchPortsStatusesLldp {
 				if item.Lldp != nil {
 					return &ResponseItemSwitchGetDeviceSwitchPortsStatusesLldp{
-						ChassisID:         types.StringValue(item.Lldp.ChassisID),
-						ManagementAddress: types.StringValue(item.Lldp.ManagementAddress),
+						ChassisID: func() types.String {
+							if item.Lldp.ChassisID != "" {
+								return types.StringValue(item.Lldp.ChassisID)
+							}
+							return types.String{}
+						}(),
+						ManagementAddress: func() types.String {
+							if item.Lldp.ManagementAddress != "" {
+								return types.StringValue(item.Lldp.ManagementAddress)
+							}
+							return types.String{}
+						}(),
 						ManagementVLAN: func() types.Int64 {
 							if item.Lldp.ManagementVLAN != nil {
 								return types.Int64Value(int64(*item.Lldp.ManagementVLAN))
 							}
 							return types.Int64{}
 						}(),
-						PortDescription: types.StringValue(item.Lldp.PortDescription),
-						PortID:          types.StringValue(item.Lldp.PortID),
+						PortDescription: func() types.String {
+							if item.Lldp.PortDescription != "" {
+								return types.StringValue(item.Lldp.PortDescription)
+							}
+							return types.String{}
+						}(),
+						PortID: func() types.String {
+							if item.Lldp.PortID != "" {
+								return types.StringValue(item.Lldp.PortID)
+							}
+							return types.String{}
+						}(),
 						PortVLAN: func() types.Int64 {
 							if item.Lldp.PortVLAN != nil {
 								return types.Int64Value(int64(*item.Lldp.PortVLAN))
 							}
 							return types.Int64{}
 						}(),
-						SystemCapabilities: types.StringValue(item.Lldp.SystemCapabilities),
-						SystemDescription:  types.StringValue(item.Lldp.SystemDescription),
-						SystemName:         types.StringValue(item.Lldp.SystemName),
+						SystemCapabilities: func() types.String {
+							if item.Lldp.SystemCapabilities != "" {
+								return types.StringValue(item.Lldp.SystemCapabilities)
+							}
+							return types.String{}
+						}(),
+						SystemDescription: func() types.String {
+							if item.Lldp.SystemDescription != "" {
+								return types.StringValue(item.Lldp.SystemDescription)
+							}
+							return types.String{}
+						}(),
+						SystemName: func() types.String {
+							if item.Lldp.SystemName != "" {
+								return types.StringValue(item.Lldp.SystemName)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -533,7 +617,12 @@ func ResponseSwitchGetDeviceSwitchPortsStatusesItemsToBody(state DevicesSwitchPo
 				}
 				return nil
 			}(),
-			PortID: types.StringValue(item.PortID),
+			PortID: func() types.String {
+				if item.PortID != "" {
+					return types.StringValue(item.PortID)
+				}
+				return types.String{}
+			}(),
 			PowerUsageInWh: func() types.Float64 {
 				if item.PowerUsageInWh != nil {
 					return types.Float64Value(float64(*item.PowerUsageInWh))
@@ -549,12 +638,27 @@ func ResponseSwitchGetDeviceSwitchPortsStatusesItemsToBody(state DevicesSwitchPo
 							}
 							return types.Bool{}
 						}(),
-						AuthenticationStatus: types.StringValue(item.SecurePort.AuthenticationStatus),
+						AuthenticationStatus: func() types.String {
+							if item.SecurePort.AuthenticationStatus != "" {
+								return types.StringValue(item.SecurePort.AuthenticationStatus)
+							}
+							return types.String{}
+						}(),
 						ConfigOverrides: func() *ResponseItemSwitchGetDeviceSwitchPortsStatusesSecurePortConfigOverrides {
 							if item.SecurePort.ConfigOverrides != nil {
 								return &ResponseItemSwitchGetDeviceSwitchPortsStatusesSecurePortConfigOverrides{
-									AllowedVLANs: types.StringValue(item.SecurePort.ConfigOverrides.AllowedVLANs),
-									Type:         types.StringValue(item.SecurePort.ConfigOverrides.Type),
+									AllowedVLANs: func() types.String {
+										if item.SecurePort.ConfigOverrides.AllowedVLANs != "" {
+											return types.StringValue(item.SecurePort.ConfigOverrides.AllowedVLANs)
+										}
+										return types.String{}
+									}(),
+									Type: func() types.String {
+										if item.SecurePort.ConfigOverrides.Type != "" {
+											return types.StringValue(item.SecurePort.ConfigOverrides.Type)
+										}
+										return types.String{}
+									}(),
 									VLAN: func() types.Int64 {
 										if item.SecurePort.ConfigOverrides.VLAN != nil {
 											return types.Int64Value(int64(*item.SecurePort.ConfigOverrides.VLAN))
@@ -589,8 +693,18 @@ func ResponseSwitchGetDeviceSwitchPortsStatusesItemsToBody(state DevicesSwitchPo
 				}
 				return nil
 			}(),
-			Speed:  types.StringValue(item.Speed),
-			Status: types.StringValue(item.Status),
+			Speed: func() types.String {
+				if item.Speed != "" {
+					return types.StringValue(item.Speed)
+				}
+				return types.String{}
+			}(),
+			Status: func() types.String {
+				if item.Status != "" {
+					return types.StringValue(item.Status)
+				}
+				return types.String{}
+			}(),
 			TrafficInKbps: func() *ResponseItemSwitchGetDeviceSwitchPortsStatusesTrafficInKbps {
 				if item.TrafficInKbps != nil {
 					return &ResponseItemSwitchGetDeviceSwitchPortsStatusesTrafficInKbps{

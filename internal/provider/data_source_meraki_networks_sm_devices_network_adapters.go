@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -173,14 +172,54 @@ func ResponseSmGetNetworkSmDeviceNetworkAdaptersItemsToBody(state NetworksSmDevi
 	var items []ResponseItemSmGetNetworkSmDeviceNetworkAdapters
 	for _, item := range *response {
 		itemState := ResponseItemSmGetNetworkSmDeviceNetworkAdapters{
-			DhcpServer: types.StringValue(item.DhcpServer),
-			DNSServer:  types.StringValue(item.DNSServer),
-			Gateway:    types.StringValue(item.Gateway),
-			ID:         types.StringValue(item.ID),
-			IP:         types.StringValue(item.IP),
-			Mac:        types.StringValue(item.Mac),
-			Name:       types.StringValue(item.Name),
-			Subnet:     types.StringValue(item.Subnet),
+			DhcpServer: func() types.String {
+				if item.DhcpServer != "" {
+					return types.StringValue(item.DhcpServer)
+				}
+				return types.String{}
+			}(),
+			DNSServer: func() types.String {
+				if item.DNSServer != "" {
+					return types.StringValue(item.DNSServer)
+				}
+				return types.String{}
+			}(),
+			Gateway: func() types.String {
+				if item.Gateway != "" {
+					return types.StringValue(item.Gateway)
+				}
+				return types.String{}
+			}(),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			IP: func() types.String {
+				if item.IP != "" {
+					return types.StringValue(item.IP)
+				}
+				return types.String{}
+			}(),
+			Mac: func() types.String {
+				if item.Mac != "" {
+					return types.StringValue(item.Mac)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			Subnet: func() types.String {
+				if item.Subnet != "" {
+					return types.StringValue(item.Subnet)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

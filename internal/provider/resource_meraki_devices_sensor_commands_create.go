@@ -238,22 +238,62 @@ func (r *DevicesSensorCommandsCreate) toSdkApiRequestCreate(ctx context.Context)
 // ToBody
 func ResponseSensorCreateDeviceSensorCommandItemToBody(state DevicesSensorCommandsCreate, response *merakigosdk.ResponseSensorCreateDeviceSensorCommand) DevicesSensorCommandsCreate {
 	itemState := ResponseSensorCreateDeviceSensorCommand{
-		CommandID:   types.StringValue(response.CommandID),
-		CompletedAt: types.StringValue(response.CompletedAt),
-		CreatedAt:   types.StringValue(response.CreatedAt),
+		CommandID: func() types.String {
+			if response.CommandID != "" {
+				return types.StringValue(response.CommandID)
+			}
+			return types.String{}
+		}(),
+		CompletedAt: func() types.String {
+			if response.CompletedAt != "" {
+				return types.StringValue(response.CompletedAt)
+			}
+			return types.String{}
+		}(),
+		CreatedAt: func() types.String {
+			if response.CreatedAt != "" {
+				return types.StringValue(response.CreatedAt)
+			}
+			return types.String{}
+		}(),
 		CreatedBy: func() *ResponseSensorCreateDeviceSensorCommandCreatedBy {
 			if response.CreatedBy != nil {
 				return &ResponseSensorCreateDeviceSensorCommandCreatedBy{
-					AdminID: types.StringValue(response.CreatedBy.AdminID),
-					Email:   types.StringValue(response.CreatedBy.Email),
-					Name:    types.StringValue(response.CreatedBy.Name),
+					AdminID: func() types.String {
+						if response.CreatedBy.AdminID != "" {
+							return types.StringValue(response.CreatedBy.AdminID)
+						}
+						return types.String{}
+					}(),
+					Email: func() types.String {
+						if response.CreatedBy.Email != "" {
+							return types.StringValue(response.CreatedBy.Email)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.CreatedBy.Name != "" {
+							return types.StringValue(response.CreatedBy.Name)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Errors:    StringSliceToList(response.Errors),
-		Operation: types.StringValue(response.Operation),
-		Status:    types.StringValue(response.Status),
+		Errors: StringSliceToList(response.Errors),
+		Operation: func() types.String {
+			if response.Operation != "" {
+				return types.StringValue(response.Operation)
+			}
+			return types.String{}
+		}(),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

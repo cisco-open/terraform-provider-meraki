@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -63,7 +64,6 @@ func (r *NetworksCellularGatewaySubnetPoolResource) Schema(_ context.Context, _ 
 		Attributes: map[string]schema.Attribute{
 			"cidr": schema.StringAttribute{
 				MarkdownDescription: `CIDR of the pool of subnets. Each MG in this network will automatically pick a subnet from this pool.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -75,7 +75,6 @@ func (r *NetworksCellularGatewaySubnetPoolResource) Schema(_ context.Context, _ 
 			},
 			"mask": schema.Int64Attribute{
 				MarkdownDescription: `Mask used for the subnet of all MGs in  this network.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -85,7 +84,7 @@ func (r *NetworksCellularGatewaySubnetPoolResource) Schema(_ context.Context, _ 
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"subnets": schema.SetNestedAttribute{
+			"subnets": schema.ListNestedAttribute{
 				MarkdownDescription: `List of subnets of all MGs in this network.`,
 				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
@@ -136,27 +135,6 @@ func (r *NetworksCellularGatewaySubnetPoolResource) Create(ctx context.Context, 
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.CellularGateway.GetNetworkCellularGatewaySubnetPool(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksCellularGatewaySubnetPool  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksCellularGatewaySubnetPool only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.CellularGateway.UpdateNetworkCellularGatewaySubnetPool(vvNetworkID, dataRequest)
@@ -165,7 +143,7 @@ func (r *NetworksCellularGatewaySubnetPoolResource) Create(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCellularGatewaySubnetPool",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -176,49 +154,19 @@ func (r *NetworksCellularGatewaySubnetPoolResource) Create(ctx context.Context, 
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.CellularGateway.GetNetworkCellularGatewaySubnetPool(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkCellularGatewaySubnetPool",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkCellularGatewaySubnetPool",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseCellularGatewayGetNetworkCellularGatewaySubnetPoolItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksCellularGatewaySubnetPoolResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksCellularGatewaySubnetPoolRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -248,33 +196,28 @@ func (r *NetworksCellularGatewaySubnetPoolResource) Read(ctx context.Context, re
 	}
 	//entro aqui 2
 	data = ResponseCellularGatewayGetNetworkCellularGatewaySubnetPoolItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksCellularGatewaySubnetPoolResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksCellularGatewaySubnetPoolResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksCellularGatewaySubnetPoolRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksCellularGatewaySubnetPoolRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.CellularGateway.UpdateNetworkCellularGatewaySubnetPool(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCellularGatewaySubnetPool",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -284,9 +227,7 @@ func (r *NetworksCellularGatewaySubnetPoolResource) Update(ctx context.Context, 
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksCellularGatewaySubnetPoolResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -336,8 +277,18 @@ func (r *NetworksCellularGatewaySubnetPoolRs) toSdkApiRequestUpdate(ctx context.
 // From gosdk to TF Structs Schema
 func ResponseCellularGatewayGetNetworkCellularGatewaySubnetPoolItemToBodyRs(state NetworksCellularGatewaySubnetPoolRs, response *merakigosdk.ResponseCellularGatewayGetNetworkCellularGatewaySubnetPool, is_read bool) NetworksCellularGatewaySubnetPoolRs {
 	itemState := NetworksCellularGatewaySubnetPoolRs{
-		Cidr:           types.StringValue(response.Cidr),
-		DeploymentMode: types.StringValue(response.DeploymentMode),
+		Cidr: func() types.String {
+			if response.Cidr != "" {
+				return types.StringValue(response.Cidr)
+			}
+			return types.String{}
+		}(),
+		DeploymentMode: func() types.String {
+			if response.DeploymentMode != "" {
+				return types.StringValue(response.DeploymentMode)
+			}
+			return types.String{}
+		}(),
 		Mask: func() types.Int64 {
 			if response.Mask != nil {
 				return types.Int64Value(int64(*response.Mask))
@@ -349,10 +300,30 @@ func ResponseCellularGatewayGetNetworkCellularGatewaySubnetPoolItemToBodyRs(stat
 				result := make([]ResponseCellularGatewayGetNetworkCellularGatewaySubnetPoolSubnetsRs, len(*response.Subnets))
 				for i, subnets := range *response.Subnets {
 					result[i] = ResponseCellularGatewayGetNetworkCellularGatewaySubnetPoolSubnetsRs{
-						ApplianceIP: types.StringValue(subnets.ApplianceIP),
-						Name:        types.StringValue(subnets.Name),
-						Serial:      types.StringValue(subnets.Serial),
-						Subnet:      types.StringValue(subnets.Subnet),
+						ApplianceIP: func() types.String {
+							if subnets.ApplianceIP != "" {
+								return types.StringValue(subnets.ApplianceIP)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if subnets.Name != "" {
+								return types.StringValue(subnets.Name)
+							}
+							return types.String{}
+						}(),
+						Serial: func() types.String {
+							if subnets.Serial != "" {
+								return types.StringValue(subnets.Serial)
+							}
+							return types.String{}
+						}(),
+						Subnet: func() types.String {
+							if subnets.Subnet != "" {
+								return types.StringValue(subnets.Subnet)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -29,8 +30,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -67,7 +68,6 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Schema(_ context.Context, _ res
 		Attributes: map[string]schema.Attribute{
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: `If true, the SSID outage schedule is enabled.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -81,19 +81,17 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Schema(_ context.Context, _ res
 				MarkdownDescription: `number path parameter.`,
 				Required:            true,
 			},
-			"ranges": schema.SetNestedAttribute{
+			"ranges": schema.ListNestedAttribute{
 				MarkdownDescription: `List of outage ranges. Has a start date and time, and end date and time. If this parameter is passed in along with rangesInSeconds parameter, this will take precedence.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"end_day": schema.StringAttribute{
 							MarkdownDescription: `Day of when the outage ends. Can be either full day name, or three letter abbreviation`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -101,7 +99,6 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Schema(_ context.Context, _ res
 						},
 						"end_time": schema.StringAttribute{
 							MarkdownDescription: `24 hour time when the outage ends.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -109,7 +106,6 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Schema(_ context.Context, _ res
 						},
 						"start_day": schema.StringAttribute{
 							MarkdownDescription: `Day of when the outage starts. Can be either full day name, or three letter abbreviation.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -117,7 +113,6 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Schema(_ context.Context, _ res
 						},
 						"start_time": schema.StringAttribute{
 							MarkdownDescription: `24 hour time when the outage starts.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -126,19 +121,17 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Schema(_ context.Context, _ res
 					},
 				},
 			},
-			"ranges_in_seconds": schema.SetNestedAttribute{
+			"ranges_in_seconds": schema.ListNestedAttribute{
 				MarkdownDescription: `List of outage ranges in seconds since Sunday at Midnight. Has a start and end. If this parameter is passed in along with the ranges parameter, ranges will take precedence.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"end": schema.Int64Attribute{
 							MarkdownDescription: `Seconds since Sunday at midnight when that outage range ends.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -146,7 +139,6 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Schema(_ context.Context, _ res
 						},
 						"start": schema.Int64Attribute{
 							MarkdownDescription: `Seconds since Sunday at midnight when the outage range starts.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -182,27 +174,6 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Create(ctx context.Context, req
 	vvNumber := data.Number.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" && vvNumber != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDSchedules(vvNetworkID, vvNumber)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessSsidsSchedules  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessSsidsSchedules only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDSchedules(vvNetworkID, vvNumber, dataRequest)
@@ -211,7 +182,7 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Create(ctx context.Context, req
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDSchedules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -222,49 +193,19 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Create(ctx context.Context, req
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDSchedules(vvNetworkID, vvNumber)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkWirelessSSIDSchedules",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkWirelessSSIDSchedules",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseWirelessGetNetworkWirelessSSIDSchedulesItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksWirelessSSIDsSchedulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksWirelessSSIDsSchedulesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -295,9 +236,7 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Read(ctx context.Context, req r
 	}
 	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSSIDSchedulesItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksWirelessSSIDsSchedulesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -305,35 +244,31 @@ func (r *NetworksWirelessSSIDsSchedulesResource) ImportState(ctx context.Context
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,number. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("number"), idParts[1])...)
 }
 
 func (r *NetworksWirelessSSIDsSchedulesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksWirelessSSIDsSchedulesRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksWirelessSSIDsSchedulesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvNumber := data.Number.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvNumber := plan.Number.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDSchedules(vvNetworkID, vvNumber, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDSchedules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -343,9 +278,7 @@ func (r *NetworksWirelessSSIDsSchedulesResource) Update(ctx context.Context, req
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksWirelessSSIDsSchedulesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -455,10 +388,30 @@ func ResponseWirelessGetNetworkWirelessSSIDSchedulesItemToBodyRs(state NetworksW
 				result := make([]ResponseWirelessGetNetworkWirelessSsidSchedulesRangesRs, len(*response.Ranges))
 				for i, ranges := range *response.Ranges {
 					result[i] = ResponseWirelessGetNetworkWirelessSsidSchedulesRangesRs{
-						EndDay:    types.StringValue(ranges.EndDay),
-						EndTime:   types.StringValue(ranges.EndTime),
-						StartDay:  types.StringValue(ranges.StartDay),
-						StartTime: types.StringValue(ranges.StartTime),
+						EndDay: func() types.String {
+							if ranges.EndDay != "" {
+								return types.StringValue(ranges.EndDay)
+							}
+							return types.String{}
+						}(),
+						EndTime: func() types.String {
+							if ranges.EndTime != "" {
+								return types.StringValue(ranges.EndTime)
+							}
+							return types.String{}
+						}(),
+						StartDay: func() types.String {
+							if ranges.StartDay != "" {
+								return types.StringValue(ranges.StartDay)
+							}
+							return types.String{}
+						}(),
+						StartTime: func() types.String {
+							if ranges.StartTime != "" {
+								return types.StringValue(ranges.StartTime)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

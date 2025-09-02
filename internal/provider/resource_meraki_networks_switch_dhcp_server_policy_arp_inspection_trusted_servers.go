@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -182,7 +183,7 @@ func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersResource) Crea
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchDhcpServerPolicyArpInspectionTrustedServer",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -334,7 +335,7 @@ func (r *NetworksSwitchDhcpServerPolicyArpInspectionTrustedServersResource) Upda
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchDhcpServerPolicyArpInspectionTrustedServer",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -461,13 +462,28 @@ func ResponseSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServersIt
 		IPv4: func() *ResponseItemSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServersIpv4Rs {
 			if response.IPv4 != nil {
 				return &ResponseItemSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServersIpv4Rs{
-					Address: types.StringValue(response.IPv4.Address),
+					Address: func() types.String {
+						if response.IPv4.Address != "" {
+							return types.StringValue(response.IPv4.Address)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Mac:             types.StringValue(response.Mac),
-		TrustedServerID: types.StringValue(response.TrustedServerID),
+		Mac: func() types.String {
+			if response.Mac != "" {
+				return types.StringValue(response.Mac)
+			}
+			return types.String{}
+		}(),
+		TrustedServerID: func() types.String {
+			if response.TrustedServerID != "" {
+				return types.StringValue(response.TrustedServerID)
+			}
+			return types.String{}
+		}(),
 		VLAN: func() types.Int64 {
 			if response.VLAN != nil {
 				return types.Int64Value(int64(*response.VLAN))

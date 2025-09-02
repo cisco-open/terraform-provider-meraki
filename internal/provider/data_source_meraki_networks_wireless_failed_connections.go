@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -218,17 +217,42 @@ func ResponseWirelessGetNetworkWirelessFailedConnectionsItemsToBody(state Networ
 	var items []ResponseItemWirelessGetNetworkWirelessFailedConnections
 	for _, item := range *response {
 		itemState := ResponseItemWirelessGetNetworkWirelessFailedConnections{
-			ClientMac:   types.StringValue(item.ClientMac),
-			FailureStep: types.StringValue(item.FailureStep),
-			Serial:      types.StringValue(item.Serial),
+			ClientMac: func() types.String {
+				if item.ClientMac != "" {
+					return types.StringValue(item.ClientMac)
+				}
+				return types.String{}
+			}(),
+			FailureStep: func() types.String {
+				if item.FailureStep != "" {
+					return types.StringValue(item.FailureStep)
+				}
+				return types.String{}
+			}(),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
 			SSIDNumber: func() types.Int64 {
 				if item.SSIDNumber != nil {
 					return types.Int64Value(int64(*item.SSIDNumber))
 				}
 				return types.Int64{}
 			}(),
-			Ts:   types.StringValue(item.Ts),
-			Type: types.StringValue(item.Type),
+			Ts: func() types.String {
+				if item.Ts != "" {
+					return types.StringValue(item.Ts)
+				}
+				return types.String{}
+			}(),
+			Type: func() types.String {
+				if item.Type != "" {
+					return types.StringValue(item.Type)
+				}
+				return types.String{}
+			}(),
 			VLAN: func() types.Int64 {
 				if item.VLAN != nil {
 					return types.Int64Value(int64(*item.VLAN))

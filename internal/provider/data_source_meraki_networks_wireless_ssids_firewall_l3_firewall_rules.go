@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -181,11 +180,36 @@ func ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRulesItemToBody(sta
 				result := make([]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRules, len(*response.Rules))
 				for i, rules := range *response.Rules {
 					result[i] = ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRules{
-						Comment:  types.StringValue(rules.Comment),
-						DestCidr: types.StringValue(rules.DestCidr),
-						DestPort: types.StringValue(rules.DestPort),
-						Policy:   types.StringValue(rules.Policy),
-						Protocol: types.StringValue(rules.Protocol),
+						Comment: func() types.String {
+							if rules.Comment != "" {
+								return types.StringValue(rules.Comment)
+							}
+							return types.String{}
+						}(),
+						DestCidr: func() types.String {
+							if rules.DestCidr != "" {
+								return types.StringValue(rules.DestCidr)
+							}
+							return types.String{}
+						}(),
+						DestPort: func() types.String {
+							if rules.DestPort != "" {
+								return types.StringValue(rules.DestPort)
+							}
+							return types.String{}
+						}(),
+						Policy: func() types.String {
+							if rules.Policy != "" {
+								return types.StringValue(rules.Policy)
+							}
+							return types.String{}
+						}(),
+						Protocol: func() types.String {
+							if rules.Protocol != "" {
+								return types.StringValue(rules.Protocol)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

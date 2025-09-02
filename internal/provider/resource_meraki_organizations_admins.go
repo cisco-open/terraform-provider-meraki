@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -297,7 +298,7 @@ func (r *OrganizationsAdminsResource) Create(ctx context.Context, req resource.C
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationAdmin",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -453,7 +454,7 @@ func (r *OrganizationsAdminsResource) Update(ctx context.Context, req resource.U
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationAdmin",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -661,40 +662,95 @@ func (r *OrganizationsAdminsRs) toSdkApiRequestUpdate(ctx context.Context) *mera
 // From gosdk to TF Structs Schema
 func ResponseOrganizationsGetOrganizationAdminsItemToBodyRs(state OrganizationsAdminsRs, response *merakigosdk.ResponseItemOrganizationsGetOrganizationAdmins, is_read bool) OrganizationsAdminsRs {
 	itemState := OrganizationsAdminsRs{
-		AccountStatus:        types.StringValue(response.AccountStatus),
-		OrganizationID:       state.OrganizationID,
-		AuthenticationMethod: types.StringValue(response.AuthenticationMethod),
-		Email:                types.StringValue(response.Email),
+		AccountStatus: func() types.String {
+			if response.AccountStatus != "" {
+				return types.StringValue(response.AccountStatus)
+			}
+			return types.String{}
+		}(),
+		OrganizationID: state.OrganizationID,
+		AuthenticationMethod: func() types.String {
+			if response.AuthenticationMethod != "" {
+				return types.StringValue(response.AuthenticationMethod)
+			}
+			return types.String{}
+		}(),
+		Email: func() types.String {
+			if response.Email != "" {
+				return types.StringValue(response.Email)
+			}
+			return types.String{}
+		}(),
 		HasAPIKey: func() types.Bool {
 			if response.HasAPIKey != nil {
 				return types.BoolValue(*response.HasAPIKey)
 			}
 			return types.Bool{}
 		}(),
-		ID:         types.StringValue(response.ID),
-		LastActive: types.StringValue(response.LastActive),
-		Name:       types.StringValue(response.Name),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		LastActive: func() types.String {
+			if response.LastActive != "" {
+				return types.StringValue(response.LastActive)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		Networks: func() *[]ResponseItemOrganizationsGetOrganizationAdminsNetworksRs {
 			if response.Networks != nil {
 				result := make([]ResponseItemOrganizationsGetOrganizationAdminsNetworksRs, len(*response.Networks))
 				for i, networks := range *response.Networks {
 					result[i] = ResponseItemOrganizationsGetOrganizationAdminsNetworksRs{
-						Access: types.StringValue(networks.Access),
-						ID:     types.StringValue(networks.ID),
+						Access: func() types.String {
+							if networks.Access != "" {
+								return types.StringValue(networks.Access)
+							}
+							return types.String{}
+						}(),
+						ID: func() types.String {
+							if networks.ID != "" {
+								return types.StringValue(networks.ID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		OrgAccess: types.StringValue(response.OrgAccess),
+		OrgAccess: func() types.String {
+			if response.OrgAccess != "" {
+				return types.StringValue(response.OrgAccess)
+			}
+			return types.String{}
+		}(),
 		Tags: func() *[]ResponseItemOrganizationsGetOrganizationAdminsTagsRs {
 			if response.Tags != nil {
 				result := make([]ResponseItemOrganizationsGetOrganizationAdminsTagsRs, len(*response.Tags))
 				for i, tags := range *response.Tags {
 					result[i] = ResponseItemOrganizationsGetOrganizationAdminsTagsRs{
-						Access: types.StringValue(tags.Access),
-						Tag:    types.StringValue(tags.Tag),
+						Access: func() types.String {
+							if tags.Access != "" {
+								return types.StringValue(tags.Access)
+							}
+							return types.String{}
+						}(),
+						Tag: func() types.String {
+							if tags.Tag != "" {
+								return types.StringValue(tags.Tag)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

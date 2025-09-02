@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -28,9 +29,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -68,7 +69,6 @@ func (r *NetworksSwitchSettingsResource) Schema(_ context.Context, _ resource.Sc
 		Attributes: map[string]schema.Attribute{
 			"mac_blocklist": schema.SingleNestedAttribute{
 				MarkdownDescription: `MAC blocklist`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -77,7 +77,6 @@ func (r *NetworksSwitchSettingsResource) Schema(_ context.Context, _ resource.Sc
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Enable MAC blocklist for switches in the network`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -89,12 +88,11 @@ func (r *NetworksSwitchSettingsResource) Schema(_ context.Context, _ resource.Sc
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"power_exceptions": schema.SetNestedAttribute{
+			"power_exceptions": schema.ListNestedAttribute{
 				MarkdownDescription: `Exceptions on a per switch basis to "useCombinedPower"`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -102,7 +100,6 @@ func (r *NetworksSwitchSettingsResource) Schema(_ context.Context, _ resource.Sc
 						"power_type": schema.StringAttribute{
 							MarkdownDescription: `Per switch exception (combined, redundant, useNetworkSetting)
                                         Allowed values: [combined,redundant,useNetworkSetting]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -117,7 +114,6 @@ func (r *NetworksSwitchSettingsResource) Schema(_ context.Context, _ resource.Sc
 						},
 						"serial": schema.StringAttribute{
 							MarkdownDescription: `Serial number of the switch`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -128,7 +124,6 @@ func (r *NetworksSwitchSettingsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"uplink_client_sampling": schema.SingleNestedAttribute{
 				MarkdownDescription: `Uplink client sampling`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -137,7 +132,6 @@ func (r *NetworksSwitchSettingsResource) Schema(_ context.Context, _ resource.Sc
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Enable client sampling on uplink`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -147,7 +141,6 @@ func (r *NetworksSwitchSettingsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"use_combined_power": schema.BoolAttribute{
 				MarkdownDescription: `The use Combined Power as the default behavior of secondary power supplies on supported devices.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -155,7 +148,6 @@ func (r *NetworksSwitchSettingsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"vlan": schema.Int64Attribute{
 				MarkdownDescription: `Management VLAN`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -187,27 +179,6 @@ func (r *NetworksSwitchSettingsResource) Create(ctx context.Context, req resourc
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchSettings(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSwitchSettings  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSwitchSettings only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchSettings(vvNetworkID, dataRequest)
@@ -216,7 +187,7 @@ func (r *NetworksSwitchSettingsResource) Create(ctx context.Context, req resourc
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -227,49 +198,19 @@ func (r *NetworksSwitchSettingsResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchSettings(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkSwitchSettings",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkSwitchSettings",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseSwitchGetNetworkSwitchSettingsItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksSwitchSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksSwitchSettingsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -299,33 +240,28 @@ func (r *NetworksSwitchSettingsResource) Read(ctx context.Context, req resource.
 	}
 	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchSettingsItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksSwitchSettingsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksSwitchSettingsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksSwitchSettingsRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksSwitchSettingsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchSettings(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -335,9 +271,7 @@ func (r *NetworksSwitchSettingsResource) Update(ctx context.Context, req resourc
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksSwitchSettingsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -460,8 +394,18 @@ func ResponseSwitchGetNetworkSwitchSettingsItemToBodyRs(state NetworksSwitchSett
 				result := make([]ResponseSwitchGetNetworkSwitchSettingsPowerExceptionsRs, len(*response.PowerExceptions))
 				for i, powerExceptions := range *response.PowerExceptions {
 					result[i] = ResponseSwitchGetNetworkSwitchSettingsPowerExceptionsRs{
-						PowerType: types.StringValue(powerExceptions.PowerType),
-						Serial:    types.StringValue(powerExceptions.Serial),
+						PowerType: func() types.String {
+							if powerExceptions.PowerType != "" {
+								return types.StringValue(powerExceptions.PowerType)
+							}
+							return types.String{}
+						}(),
+						Serial: func() types.String {
+							if powerExceptions.Serial != "" {
+								return types.StringValue(powerExceptions.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

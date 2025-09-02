@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -65,7 +66,6 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Schema(_ context.Con
 		Attributes: map[string]schema.Attribute{
 			"address": schema.StringAttribute{
 				MarkdownDescription: `The IP address (IPv4 only) or hostname of the media server to monitor`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -73,7 +73,6 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Schema(_ context.Con
 			},
 			"best_effort_monitoring_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Indicates that if the media server doesn't respond to ICMP pings, the nearest hop will be used in its stead`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -92,7 +91,6 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Schema(_ context.Con
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name of the VoIP provider`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -177,7 +175,7 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Create(ctx context.C
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationInsightMonitoredMediaServer",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -249,21 +247,11 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Create(ctx context.C
 func (r *OrganizationsInsightMonitoredMediaServersResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data OrganizationsInsightMonitoredMediaServersRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -294,9 +282,7 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Read(ctx context.Con
 	}
 	//entro aqui 2
 	data = ResponseInsightGetOrganizationInsightMonitoredMediaServerItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *OrganizationsInsightMonitoredMediaServersResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -304,35 +290,31 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) ImportState(ctx cont
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: organizationId,monitoredMediaServerId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), idParts[0])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("monitered_media_server_id"), idParts[1])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("monitored_media_server_id"), idParts[1])...)
 }
 
 func (r *OrganizationsInsightMonitoredMediaServersResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data OrganizationsInsightMonitoredMediaServersRs
-	merge(ctx, req, resp, &data)
+	var plan OrganizationsInsightMonitoredMediaServersRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvOrganizationID := data.OrganizationID.ValueString()
-	vvMonitoredMediaServerID := data.MonitoredMediaServerID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvOrganizationID := plan.OrganizationID.ValueString()
+	vvMonitoredMediaServerID := plan.MonitoredMediaServerID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Insight.UpdateOrganizationInsightMonitoredMediaServer(vvOrganizationID, vvMonitoredMediaServerID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationInsightMonitoredMediaServer",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -342,9 +324,7 @@ func (r *OrganizationsInsightMonitoredMediaServersResource) Update(ctx context.C
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *OrganizationsInsightMonitoredMediaServersResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -446,15 +426,30 @@ func (r *OrganizationsInsightMonitoredMediaServersRs) toSdkApiRequestUpdate(ctx 
 // From gosdk to TF Structs Schema
 func ResponseInsightGetOrganizationInsightMonitoredMediaServerItemToBodyRs(state OrganizationsInsightMonitoredMediaServersRs, response *merakigosdk.ResponseInsightGetOrganizationInsightMonitoredMediaServer, is_read bool) OrganizationsInsightMonitoredMediaServersRs {
 	itemState := OrganizationsInsightMonitoredMediaServersRs{
-		Address: types.StringValue(response.Address),
+		Address: func() types.String {
+			if response.Address != "" {
+				return types.StringValue(response.Address)
+			}
+			return types.String{}
+		}(),
 		BestEffortMonitoringEnabled: func() types.Bool {
 			if response.BestEffortMonitoringEnabled != nil {
 				return types.BoolValue(*response.BestEffortMonitoringEnabled)
 			}
 			return types.Bool{}
 		}(),
-		ID:   types.StringValue(response.ID),
-		Name: types.StringValue(response.Name),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsInsightMonitoredMediaServersRs)

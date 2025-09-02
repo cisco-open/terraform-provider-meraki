@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -178,6 +177,17 @@ func (d *OrganizationsInsightMonitoredMediaServersDataSource) Read(ctx context.C
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetOrganizationInsightMonitoredMediaServer",
+				err.Error(),
+			)
+			return
+		}
+
 		organizationsInsightMonitoredMediaServers = ResponseInsightGetOrganizationInsightMonitoredMediaServerItemToBody(organizationsInsightMonitoredMediaServers, response2)
 		diags = resp.State.Set(ctx, &organizationsInsightMonitoredMediaServers)
 		resp.Diagnostics.Append(diags...)
@@ -215,15 +225,30 @@ func ResponseInsightGetOrganizationInsightMonitoredMediaServersItemsToBody(state
 	var items []ResponseItemInsightGetOrganizationInsightMonitoredMediaServers
 	for _, item := range *response {
 		itemState := ResponseItemInsightGetOrganizationInsightMonitoredMediaServers{
-			Address: types.StringValue(item.Address),
+			Address: func() types.String {
+				if item.Address != "" {
+					return types.StringValue(item.Address)
+				}
+				return types.String{}
+			}(),
 			BestEffortMonitoringEnabled: func() types.Bool {
 				if item.BestEffortMonitoringEnabled != nil {
 					return types.BoolValue(*item.BestEffortMonitoringEnabled)
 				}
 				return types.Bool{}
 			}(),
-			ID:   types.StringValue(item.ID),
-			Name: types.StringValue(item.Name),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -233,15 +258,30 @@ func ResponseInsightGetOrganizationInsightMonitoredMediaServersItemsToBody(state
 
 func ResponseInsightGetOrganizationInsightMonitoredMediaServerItemToBody(state OrganizationsInsightMonitoredMediaServers, response *merakigosdk.ResponseInsightGetOrganizationInsightMonitoredMediaServer) OrganizationsInsightMonitoredMediaServers {
 	itemState := ResponseInsightGetOrganizationInsightMonitoredMediaServer{
-		Address: types.StringValue(response.Address),
+		Address: func() types.String {
+			if response.Address != "" {
+				return types.StringValue(response.Address)
+			}
+			return types.String{}
+		}(),
 		BestEffortMonitoringEnabled: func() types.Bool {
 			if response.BestEffortMonitoringEnabled != nil {
 				return types.BoolValue(*response.BestEffortMonitoringEnabled)
 			}
 			return types.Bool{}
 		}(),
-		ID:   types.StringValue(response.ID),
-		Name: types.StringValue(response.Name),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -534,6 +533,17 @@ func (d *NetworksFloorPlansDataSource) Read(ctx context.Context, req datasource.
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkFloorPlan",
+				err.Error(),
+			)
+			return
+		}
+
 		networksFloorPlans = ResponseNetworksGetNetworkFloorPlanItemToBody(networksFloorPlans, response2)
 		diags = resp.State.Set(ctx, &networksFloorPlans)
 		resp.Diagnostics.Append(diags...)
@@ -751,23 +761,53 @@ func ResponseNetworksGetNetworkFloorPlansItemsToBody(state NetworksFloorPlans, r
 					result := make([]ResponseItemNetworksGetNetworkFloorPlansDevices, len(*item.Devices))
 					for i, devices := range *item.Devices {
 						result[i] = ResponseItemNetworksGetNetworkFloorPlansDevices{
-							Address: types.StringValue(devices.Address),
+							Address: func() types.String {
+								if devices.Address != "" {
+									return types.StringValue(devices.Address)
+								}
+								return types.String{}
+							}(),
 							Details: func() *[]ResponseItemNetworksGetNetworkFloorPlansDevicesDetails {
 								if devices.Details != nil {
 									result := make([]ResponseItemNetworksGetNetworkFloorPlansDevicesDetails, len(*devices.Details))
 									for i, details := range *devices.Details {
 										result[i] = ResponseItemNetworksGetNetworkFloorPlansDevicesDetails{
-											Name:  types.StringValue(details.Name),
-											Value: types.StringValue(details.Value),
+											Name: func() types.String {
+												if details.Name != "" {
+													return types.StringValue(details.Name)
+												}
+												return types.String{}
+											}(),
+											Value: func() types.String {
+												if details.Value != "" {
+													return types.StringValue(details.Value)
+												}
+												return types.String{}
+											}(),
 										}
 									}
 									return &result
 								}
 								return nil
 							}(),
-							Firmware: types.StringValue(devices.Firmware),
-							Imei:     types.StringValue(devices.Imei),
-							LanIP:    types.StringValue(devices.LanIP),
+							Firmware: func() types.String {
+								if devices.Firmware != "" {
+									return types.StringValue(devices.Firmware)
+								}
+								return types.String{}
+							}(),
+							Imei: func() types.String {
+								if devices.Imei != "" {
+									return types.StringValue(devices.Imei)
+								}
+								return types.String{}
+							}(),
+							LanIP: func() types.String {
+								if devices.LanIP != "" {
+									return types.StringValue(devices.LanIP)
+								}
+								return types.String{}
+							}(),
 							Lat: func() types.Float64 {
 								if devices.Lat != nil {
 									return types.Float64Value(float64(*devices.Lat))
@@ -780,14 +820,49 @@ func ResponseNetworksGetNetworkFloorPlansItemsToBody(state NetworksFloorPlans, r
 								}
 								return types.Float64{}
 							}(),
-							Mac:         types.StringValue(devices.Mac),
-							Model:       types.StringValue(devices.Model),
-							Name:        types.StringValue(devices.Name),
-							NetworkID:   types.StringValue(devices.NetworkID),
-							Notes:       types.StringValue(devices.Notes),
-							ProductType: types.StringValue(devices.ProductType),
-							Serial:      types.StringValue(devices.Serial),
-							Tags:        StringSliceToList(devices.Tags),
+							Mac: func() types.String {
+								if devices.Mac != "" {
+									return types.StringValue(devices.Mac)
+								}
+								return types.String{}
+							}(),
+							Model: func() types.String {
+								if devices.Model != "" {
+									return types.StringValue(devices.Model)
+								}
+								return types.String{}
+							}(),
+							Name: func() types.String {
+								if devices.Name != "" {
+									return types.StringValue(devices.Name)
+								}
+								return types.String{}
+							}(),
+							NetworkID: func() types.String {
+								if devices.NetworkID != "" {
+									return types.StringValue(devices.NetworkID)
+								}
+								return types.String{}
+							}(),
+							Notes: func() types.String {
+								if devices.Notes != "" {
+									return types.StringValue(devices.Notes)
+								}
+								return types.String{}
+							}(),
+							ProductType: func() types.String {
+								if devices.ProductType != "" {
+									return types.StringValue(devices.ProductType)
+								}
+								return types.String{}
+							}(),
+							Serial: func() types.String {
+								if devices.Serial != "" {
+									return types.StringValue(devices.Serial)
+								}
+								return types.String{}
+							}(),
+							Tags: StringSliceToList(devices.Tags),
 						}
 					}
 					return &result
@@ -800,18 +875,48 @@ func ResponseNetworksGetNetworkFloorPlansItemsToBody(state NetworksFloorPlans, r
 				}
 				return types.Float64{}
 			}(),
-			FloorPlanID: types.StringValue(item.FloorPlanID),
+			FloorPlanID: func() types.String {
+				if item.FloorPlanID != "" {
+					return types.StringValue(item.FloorPlanID)
+				}
+				return types.String{}
+			}(),
 			Height: func() types.Float64 {
 				if item.Height != nil {
 					return types.Float64Value(float64(*item.Height))
 				}
 				return types.Float64{}
 			}(),
-			ImageExtension:    types.StringValue(item.ImageExtension),
-			ImageMd5:          types.StringValue(item.ImageMd5),
-			ImageURL:          types.StringValue(item.ImageURL),
-			ImageURLExpiresAt: types.StringValue(item.ImageURLExpiresAt),
-			Name:              types.StringValue(item.Name),
+			ImageExtension: func() types.String {
+				if item.ImageExtension != "" {
+					return types.StringValue(item.ImageExtension)
+				}
+				return types.String{}
+			}(),
+			ImageMd5: func() types.String {
+				if item.ImageMd5 != "" {
+					return types.StringValue(item.ImageMd5)
+				}
+				return types.String{}
+			}(),
+			ImageURL: func() types.String {
+				if item.ImageURL != "" {
+					return types.StringValue(item.ImageURL)
+				}
+				return types.String{}
+			}(),
+			ImageURLExpiresAt: func() types.String {
+				if item.ImageURLExpiresAt != "" {
+					return types.StringValue(item.ImageURLExpiresAt)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			TopLeftCorner: func() *ResponseItemNetworksGetNetworkFloorPlansTopLeftCorner {
 				if item.TopLeftCorner != nil {
 					return &ResponseItemNetworksGetNetworkFloorPlansTopLeftCorner{
@@ -927,23 +1032,53 @@ func ResponseNetworksGetNetworkFloorPlanItemToBody(state NetworksFloorPlans, res
 				result := make([]ResponseNetworksGetNetworkFloorPlanDevices, len(*response.Devices))
 				for i, devices := range *response.Devices {
 					result[i] = ResponseNetworksGetNetworkFloorPlanDevices{
-						Address: types.StringValue(devices.Address),
+						Address: func() types.String {
+							if devices.Address != "" {
+								return types.StringValue(devices.Address)
+							}
+							return types.String{}
+						}(),
 						Details: func() *[]ResponseNetworksGetNetworkFloorPlanDevicesDetails {
 							if devices.Details != nil {
 								result := make([]ResponseNetworksGetNetworkFloorPlanDevicesDetails, len(*devices.Details))
 								for i, details := range *devices.Details {
 									result[i] = ResponseNetworksGetNetworkFloorPlanDevicesDetails{
-										Name:  types.StringValue(details.Name),
-										Value: types.StringValue(details.Value),
+										Name: func() types.String {
+											if details.Name != "" {
+												return types.StringValue(details.Name)
+											}
+											return types.String{}
+										}(),
+										Value: func() types.String {
+											if details.Value != "" {
+												return types.StringValue(details.Value)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						Firmware: types.StringValue(devices.Firmware),
-						Imei:     types.StringValue(devices.Imei),
-						LanIP:    types.StringValue(devices.LanIP),
+						Firmware: func() types.String {
+							if devices.Firmware != "" {
+								return types.StringValue(devices.Firmware)
+							}
+							return types.String{}
+						}(),
+						Imei: func() types.String {
+							if devices.Imei != "" {
+								return types.StringValue(devices.Imei)
+							}
+							return types.String{}
+						}(),
+						LanIP: func() types.String {
+							if devices.LanIP != "" {
+								return types.StringValue(devices.LanIP)
+							}
+							return types.String{}
+						}(),
 						Lat: func() types.Float64 {
 							if devices.Lat != nil {
 								return types.Float64Value(float64(*devices.Lat))
@@ -956,14 +1091,49 @@ func ResponseNetworksGetNetworkFloorPlanItemToBody(state NetworksFloorPlans, res
 							}
 							return types.Float64{}
 						}(),
-						Mac:         types.StringValue(devices.Mac),
-						Model:       types.StringValue(devices.Model),
-						Name:        types.StringValue(devices.Name),
-						NetworkID:   types.StringValue(devices.NetworkID),
-						Notes:       types.StringValue(devices.Notes),
-						ProductType: types.StringValue(devices.ProductType),
-						Serial:      types.StringValue(devices.Serial),
-						Tags:        StringSliceToList(devices.Tags),
+						Mac: func() types.String {
+							if devices.Mac != "" {
+								return types.StringValue(devices.Mac)
+							}
+							return types.String{}
+						}(),
+						Model: func() types.String {
+							if devices.Model != "" {
+								return types.StringValue(devices.Model)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if devices.Name != "" {
+								return types.StringValue(devices.Name)
+							}
+							return types.String{}
+						}(),
+						NetworkID: func() types.String {
+							if devices.NetworkID != "" {
+								return types.StringValue(devices.NetworkID)
+							}
+							return types.String{}
+						}(),
+						Notes: func() types.String {
+							if devices.Notes != "" {
+								return types.StringValue(devices.Notes)
+							}
+							return types.String{}
+						}(),
+						ProductType: func() types.String {
+							if devices.ProductType != "" {
+								return types.StringValue(devices.ProductType)
+							}
+							return types.String{}
+						}(),
+						Serial: func() types.String {
+							if devices.Serial != "" {
+								return types.StringValue(devices.Serial)
+							}
+							return types.String{}
+						}(),
+						Tags: StringSliceToList(devices.Tags),
 					}
 				}
 				return &result
@@ -976,18 +1146,48 @@ func ResponseNetworksGetNetworkFloorPlanItemToBody(state NetworksFloorPlans, res
 			}
 			return types.Float64{}
 		}(),
-		FloorPlanID: types.StringValue(response.FloorPlanID),
+		FloorPlanID: func() types.String {
+			if response.FloorPlanID != "" {
+				return types.StringValue(response.FloorPlanID)
+			}
+			return types.String{}
+		}(),
 		Height: func() types.Float64 {
 			if response.Height != nil {
 				return types.Float64Value(float64(*response.Height))
 			}
 			return types.Float64{}
 		}(),
-		ImageExtension:    types.StringValue(response.ImageExtension),
-		ImageMd5:          types.StringValue(response.ImageMd5),
-		ImageURL:          types.StringValue(response.ImageURL),
-		ImageURLExpiresAt: types.StringValue(response.ImageURLExpiresAt),
-		Name:              types.StringValue(response.Name),
+		ImageExtension: func() types.String {
+			if response.ImageExtension != "" {
+				return types.StringValue(response.ImageExtension)
+			}
+			return types.String{}
+		}(),
+		ImageMd5: func() types.String {
+			if response.ImageMd5 != "" {
+				return types.StringValue(response.ImageMd5)
+			}
+			return types.String{}
+		}(),
+		ImageURL: func() types.String {
+			if response.ImageURL != "" {
+				return types.StringValue(response.ImageURL)
+			}
+			return types.String{}
+		}(),
+		ImageURLExpiresAt: func() types.String {
+			if response.ImageURLExpiresAt != "" {
+				return types.StringValue(response.ImageURLExpiresAt)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		TopLeftCorner: func() *ResponseNetworksGetNetworkFloorPlanTopLeftCorner {
 			if response.TopLeftCorner != nil {
 				return &ResponseNetworksGetNetworkFloorPlanTopLeftCorner{

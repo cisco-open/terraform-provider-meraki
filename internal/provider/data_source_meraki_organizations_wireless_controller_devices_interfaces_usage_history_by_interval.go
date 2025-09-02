@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -342,7 +341,12 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 												result := make([]ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesUsageHistoryByIntervalItemsIntervalsByInterface, len(*intervals.ByInterface))
 												for i, byInterface := range *intervals.ByInterface {
 													result[i] = ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesUsageHistoryByIntervalItemsIntervalsByInterface{
-														Name: types.StringValue(byInterface.Name),
+														Name: func() types.String {
+															if byInterface.Name != "" {
+																return types.StringValue(byInterface.Name)
+															}
+															return types.String{}
+														}(),
 														Usage: func() *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesUsageHistoryByIntervalItemsIntervalsByInterfaceUsage {
 															if byInterface.Usage != nil {
 																return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesUsageHistoryByIntervalItemsIntervalsByInterfaceUsage{
@@ -374,7 +378,12 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 											}
 											return nil
 										}(),
-										EndTs: types.StringValue(intervals.EndTs),
+										EndTs: func() types.String {
+											if intervals.EndTs != "" {
+												return types.StringValue(intervals.EndTs)
+											}
+											return types.String{}
+										}(),
 										Overall: func() *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesUsageHistoryByIntervalItemsIntervalsOverall {
 											if intervals.Overall != nil {
 												return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesUsageHistoryByIntervalItemsIntervalsOverall{
@@ -400,14 +409,24 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 											}
 											return nil
 										}(),
-										StartTs: types.StringValue(intervals.StartTs),
+										StartTs: func() types.String {
+											if intervals.StartTs != "" {
+												return types.StringValue(intervals.StartTs)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						Serial: types.StringValue(items.Serial),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

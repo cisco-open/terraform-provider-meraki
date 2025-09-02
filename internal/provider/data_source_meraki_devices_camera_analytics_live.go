@@ -152,7 +152,12 @@ type ResponseCameraGetDeviceCameraAnalyticsLiveZonesZoneId struct {
 // ToBody
 func ResponseCameraGetDeviceCameraAnalyticsLiveItemToBody(state DevicesCameraAnalyticsLive, response *merakigosdk.ResponseCameraGetDeviceCameraAnalyticsLive) DevicesCameraAnalyticsLive {
 	itemState := ResponseCameraGetDeviceCameraAnalyticsLive{
-		Ts: types.StringValue(response.Ts),
+		Ts: func() types.String {
+			if response.Ts != "" {
+				return types.StringValue(response.Ts)
+			}
+			return types.String{}
+		}(),
 		Zones: func() *ResponseCameraGetDeviceCameraAnalyticsLiveZones {
 			if response.Zones != nil {
 				return &ResponseCameraGetDeviceCameraAnalyticsLiveZones{

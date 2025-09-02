@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -324,7 +325,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Create(ctx context.Conte
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchStackRoutingInterface",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -483,7 +484,7 @@ func (r *NetworksSwitchStacksRoutingInterfacesResource) Update(ctx context.Conte
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStackRoutingInterface",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -751,27 +752,82 @@ func (r *NetworksSwitchStacksRoutingInterfacesRs) toSdkApiRequestUpdate(ctx cont
 // From gosdk to TF Structs Schema
 func ResponseSwitchGetNetworkSwitchStackRoutingInterfaceItemToBodyRs(state NetworksSwitchStacksRoutingInterfacesRs, response *merakigosdk.ResponseSwitchGetNetworkSwitchStackRoutingInterface, is_read bool) NetworksSwitchStacksRoutingInterfacesRs {
 	itemState := NetworksSwitchStacksRoutingInterfacesRs{
-		DefaultGateway:         types.StringValue(response.DefaultGateway),
-		DefaultGatewayResponse: types.StringValue(response.DefaultGateway),
-		InterfaceID:            types.StringValue(response.InterfaceID),
-		InterfaceIP:            types.StringValue(response.InterfaceIP),
+		DefaultGateway: func() types.String {
+			if response.DefaultGateway != "" {
+				return types.StringValue(response.DefaultGateway)
+			}
+			return types.String{}
+		}(),
+		DefaultGatewayResponse: func() types.String {
+			if response.DefaultGateway != "" {
+				return types.StringValue(response.DefaultGateway)
+			}
+			return types.String{}
+		}(),
+		InterfaceID: func() types.String {
+			if response.InterfaceID != "" {
+				return types.StringValue(response.InterfaceID)
+			}
+			return types.String{}
+		}(),
+		InterfaceIP: func() types.String {
+			if response.InterfaceIP != "" {
+				return types.StringValue(response.InterfaceIP)
+			}
+			return types.String{}
+		}(),
 		IPv6: func() *ResponseSwitchGetNetworkSwitchStackRoutingInterfaceIpv6Rs {
 			if response.IPv6 != nil {
 				return &ResponseSwitchGetNetworkSwitchStackRoutingInterfaceIpv6Rs{
-					Address:        types.StringValue(response.IPv6.Address),
-					AssignmentMode: types.StringValue(response.IPv6.AssignmentMode),
-					Gateway:        types.StringValue(response.IPv6.Gateway),
-					Prefix:         types.StringValue(response.IPv6.Prefix),
+					Address: func() types.String {
+						if response.IPv6.Address != "" {
+							return types.StringValue(response.IPv6.Address)
+						}
+						return types.String{}
+					}(),
+					AssignmentMode: func() types.String {
+						if response.IPv6.AssignmentMode != "" {
+							return types.StringValue(response.IPv6.AssignmentMode)
+						}
+						return types.String{}
+					}(),
+					Gateway: func() types.String {
+						if response.IPv6.Gateway != "" {
+							return types.StringValue(response.IPv6.Gateway)
+						}
+						return types.String{}
+					}(),
+					Prefix: func() types.String {
+						if response.IPv6.Prefix != "" {
+							return types.StringValue(response.IPv6.Prefix)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		MulticastRouting: types.StringValue(response.MulticastRouting),
-		Name:             types.StringValue(response.Name),
+		MulticastRouting: func() types.String {
+			if response.MulticastRouting != "" {
+				return types.StringValue(response.MulticastRouting)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		OspfSettings: func() *ResponseSwitchGetNetworkSwitchStackRoutingInterfaceOspfSettingsRs {
 			if response.OspfSettings != nil {
 				return &ResponseSwitchGetNetworkSwitchStackRoutingInterfaceOspfSettingsRs{
-					Area: types.StringValue(response.OspfSettings.Area),
+					Area: func() types.String {
+						if response.OspfSettings.Area != "" {
+							return types.StringValue(response.OspfSettings.Area)
+						}
+						return types.String{}
+					}(),
 					Cost: func() types.Int64 {
 						if response.OspfSettings.Cost != nil {
 							return types.Int64Value(int64(*response.OspfSettings.Cost))
@@ -791,7 +847,12 @@ func ResponseSwitchGetNetworkSwitchStackRoutingInterfaceItemToBodyRs(state Netwo
 		OspfV3: func() *ResponseSwitchGetNetworkSwitchStackRoutingInterfaceOspfV3Rs {
 			if response.OspfV3 != nil {
 				return &ResponseSwitchGetNetworkSwitchStackRoutingInterfaceOspfV3Rs{
-					Area: types.StringValue(response.OspfV3.Area),
+					Area: func() types.String {
+						if response.OspfV3.Area != "" {
+							return types.StringValue(response.OspfV3.Area)
+						}
+						return types.String{}
+					}(),
 					Cost: func() types.Int64 {
 						if response.OspfV3.Cost != nil {
 							return types.Int64Value(int64(*response.OspfV3.Cost))
@@ -808,7 +869,12 @@ func ResponseSwitchGetNetworkSwitchStackRoutingInterfaceItemToBodyRs(state Netwo
 			}
 			return nil
 		}(),
-		Subnet: types.StringValue(response.Subnet),
+		Subnet: func() types.String {
+			if response.Subnet != "" {
+				return types.StringValue(response.Subnet)
+			}
+			return types.String{}
+		}(),
 		UplinkV4: func() types.Bool {
 			if response.UplinkV4 != nil {
 				return types.BoolValue(*response.UplinkV4)

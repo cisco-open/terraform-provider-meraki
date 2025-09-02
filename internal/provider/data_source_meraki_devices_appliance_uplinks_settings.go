@@ -497,7 +497,12 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBody(state DevicesA
 															}
 															return types.Bool{}
 														}(),
-														Username: types.StringValue(response.Interfaces.Wan1.Pppoe.Authentication.Username),
+														Username: func() types.String {
+															if response.Interfaces.Wan1.Pppoe.Authentication.Username != "" {
+																return types.StringValue(response.Interfaces.Wan1.Pppoe.Authentication.Username)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -518,9 +523,24 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBody(state DevicesA
 											IPv4: func() *ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1SvisIpv4 {
 												if response.Interfaces.Wan1.Svis.IPv4 != nil {
 													return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1SvisIpv4{
-														Address:        types.StringValue(response.Interfaces.Wan1.Svis.IPv4.Address),
-														AssignmentMode: types.StringValue(response.Interfaces.Wan1.Svis.IPv4.AssignmentMode),
-														Gateway:        types.StringValue(response.Interfaces.Wan1.Svis.IPv4.Gateway),
+														Address: func() types.String {
+															if response.Interfaces.Wan1.Svis.IPv4.Address != "" {
+																return types.StringValue(response.Interfaces.Wan1.Svis.IPv4.Address)
+															}
+															return types.String{}
+														}(),
+														AssignmentMode: func() types.String {
+															if response.Interfaces.Wan1.Svis.IPv4.AssignmentMode != "" {
+																return types.StringValue(response.Interfaces.Wan1.Svis.IPv4.AssignmentMode)
+															}
+															return types.String{}
+														}(),
+														Gateway: func() types.String {
+															if response.Interfaces.Wan1.Svis.IPv4.Gateway != "" {
+																return types.StringValue(response.Interfaces.Wan1.Svis.IPv4.Gateway)
+															}
+															return types.String{}
+														}(),
 														Nameservers: func() *ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1SvisIpv4Nameservers {
 															if response.Interfaces.Wan1.Svis.IPv4.Nameservers != nil {
 																return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1SvisIpv4Nameservers{
@@ -536,9 +556,24 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBody(state DevicesA
 											IPv6: func() *ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1SvisIpv6 {
 												if response.Interfaces.Wan1.Svis.IPv6 != nil {
 													return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1SvisIpv6{
-														Address:        types.StringValue(response.Interfaces.Wan1.Svis.IPv6.Address),
-														AssignmentMode: types.StringValue(response.Interfaces.Wan1.Svis.IPv6.AssignmentMode),
-														Gateway:        types.StringValue(response.Interfaces.Wan1.Svis.IPv6.Gateway),
+														Address: func() types.String {
+															if response.Interfaces.Wan1.Svis.IPv6.Address != "" {
+																return types.StringValue(response.Interfaces.Wan1.Svis.IPv6.Address)
+															}
+															return types.String{}
+														}(),
+														AssignmentMode: func() types.String {
+															if response.Interfaces.Wan1.Svis.IPv6.AssignmentMode != "" {
+																return types.StringValue(response.Interfaces.Wan1.Svis.IPv6.AssignmentMode)
+															}
+															return types.String{}
+														}(),
+														Gateway: func() types.String {
+															if response.Interfaces.Wan1.Svis.IPv6.Gateway != "" {
+																return types.StringValue(response.Interfaces.Wan1.Svis.IPv6.Gateway)
+															}
+															return types.String{}
+														}(),
 														Nameservers: func() *ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1SvisIpv6Nameservers {
 															if response.Interfaces.Wan1.Svis.IPv6.Nameservers != nil {
 																return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan1SvisIpv6Nameservers{
@@ -599,7 +634,12 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBody(state DevicesA
 															}
 															return types.Bool{}
 														}(),
-														Username: types.StringValue(response.Interfaces.Wan2.Pppoe.Authentication.Username),
+														Username: func() types.String {
+															if response.Interfaces.Wan2.Pppoe.Authentication.Username != "" {
+																return types.StringValue(response.Interfaces.Wan2.Pppoe.Authentication.Username)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -620,9 +660,24 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBody(state DevicesA
 											IPv4: func() *ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2SvisIpv4 {
 												if response.Interfaces.Wan2.Svis.IPv4 != nil {
 													return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2SvisIpv4{
-														Address:        types.StringValue(response.Interfaces.Wan2.Svis.IPv4.Address),
-														AssignmentMode: types.StringValue(response.Interfaces.Wan2.Svis.IPv4.AssignmentMode),
-														Gateway:        types.StringValue(response.Interfaces.Wan2.Svis.IPv4.Gateway),
+														Address: func() types.String {
+															if response.Interfaces.Wan2.Svis.IPv4.Address != "" {
+																return types.StringValue(response.Interfaces.Wan2.Svis.IPv4.Address)
+															}
+															return types.String{}
+														}(),
+														AssignmentMode: func() types.String {
+															if response.Interfaces.Wan2.Svis.IPv4.AssignmentMode != "" {
+																return types.StringValue(response.Interfaces.Wan2.Svis.IPv4.AssignmentMode)
+															}
+															return types.String{}
+														}(),
+														Gateway: func() types.String {
+															if response.Interfaces.Wan2.Svis.IPv4.Gateway != "" {
+																return types.StringValue(response.Interfaces.Wan2.Svis.IPv4.Gateway)
+															}
+															return types.String{}
+														}(),
 														Nameservers: func() *ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2SvisIpv4Nameservers {
 															if response.Interfaces.Wan2.Svis.IPv4.Nameservers != nil {
 																return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2SvisIpv4Nameservers{
@@ -638,9 +693,24 @@ func ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBody(state DevicesA
 											IPv6: func() *ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2SvisIpv6 {
 												if response.Interfaces.Wan2.Svis.IPv6 != nil {
 													return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2SvisIpv6{
-														Address:        types.StringValue(response.Interfaces.Wan2.Svis.IPv6.Address),
-														AssignmentMode: types.StringValue(response.Interfaces.Wan2.Svis.IPv6.AssignmentMode),
-														Gateway:        types.StringValue(response.Interfaces.Wan2.Svis.IPv6.Gateway),
+														Address: func() types.String {
+															if response.Interfaces.Wan2.Svis.IPv6.Address != "" {
+																return types.StringValue(response.Interfaces.Wan2.Svis.IPv6.Address)
+															}
+															return types.String{}
+														}(),
+														AssignmentMode: func() types.String {
+															if response.Interfaces.Wan2.Svis.IPv6.AssignmentMode != "" {
+																return types.StringValue(response.Interfaces.Wan2.Svis.IPv6.AssignmentMode)
+															}
+															return types.String{}
+														}(),
+														Gateway: func() types.String {
+															if response.Interfaces.Wan2.Svis.IPv6.Gateway != "" {
+																return types.StringValue(response.Interfaces.Wan2.Svis.IPv6.Gateway)
+															}
+															return types.String{}
+														}(),
 														Nameservers: func() *ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2SvisIpv6Nameservers {
 															if response.Interfaces.Wan2.Svis.IPv6.Nameservers != nil {
 																return &ResponseApplianceGetDeviceApplianceUplinksSettingsInterfacesWan2SvisIpv6Nameservers{

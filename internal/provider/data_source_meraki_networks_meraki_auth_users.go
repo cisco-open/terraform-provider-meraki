@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -252,6 +251,17 @@ func (d *NetworksMerakiAuthUsersDataSource) Read(ctx context.Context, req dataso
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkMerakiAuthUser",
+				err.Error(),
+			)
+			return
+		}
+
 		networksMerakiAuthUsers = ResponseNetworksGetNetworkMerakiAuthUserItemToBody(networksMerakiAuthUsers, response2)
 		diags = resp.State.Set(ctx, &networksMerakiAuthUsers)
 		resp.Diagnostics.Append(diags...)
@@ -311,16 +321,41 @@ func ResponseNetworksGetNetworkMerakiAuthUsersItemsToBody(state NetworksMerakiAu
 	var items []ResponseItemNetworksGetNetworkMerakiAuthUsers
 	for _, item := range *response {
 		itemState := ResponseItemNetworksGetNetworkMerakiAuthUsers{
-			AccountType: types.StringValue(item.AccountType),
+			AccountType: func() types.String {
+				if item.AccountType != "" {
+					return types.StringValue(item.AccountType)
+				}
+				return types.String{}
+			}(),
 			Authorizations: func() *[]ResponseItemNetworksGetNetworkMerakiAuthUsersAuthorizations {
 				if item.Authorizations != nil {
 					result := make([]ResponseItemNetworksGetNetworkMerakiAuthUsersAuthorizations, len(*item.Authorizations))
 					for i, authorizations := range *item.Authorizations {
 						result[i] = ResponseItemNetworksGetNetworkMerakiAuthUsersAuthorizations{
-							AuthorizedByEmail: types.StringValue(authorizations.AuthorizedByEmail),
-							AuthorizedByName:  types.StringValue(authorizations.AuthorizedByName),
-							AuthorizedZone:    types.StringValue(authorizations.AuthorizedZone),
-							ExpiresAt:         types.StringValue(authorizations.ExpiresAt),
+							AuthorizedByEmail: func() types.String {
+								if authorizations.AuthorizedByEmail != "" {
+									return types.StringValue(authorizations.AuthorizedByEmail)
+								}
+								return types.String{}
+							}(),
+							AuthorizedByName: func() types.String {
+								if authorizations.AuthorizedByName != "" {
+									return types.StringValue(authorizations.AuthorizedByName)
+								}
+								return types.String{}
+							}(),
+							AuthorizedZone: func() types.String {
+								if authorizations.AuthorizedZone != "" {
+									return types.StringValue(authorizations.AuthorizedZone)
+								}
+								return types.String{}
+							}(),
+							ExpiresAt: func() types.String {
+								if authorizations.ExpiresAt != "" {
+									return types.StringValue(authorizations.ExpiresAt)
+								}
+								return types.String{}
+							}(),
 							SSIDNumber: func() types.Int64 {
 								if authorizations.SSIDNumber != nil {
 									return types.Int64Value(int64(*authorizations.SSIDNumber))
@@ -333,16 +368,36 @@ func ResponseNetworksGetNetworkMerakiAuthUsersItemsToBody(state NetworksMerakiAu
 				}
 				return nil
 			}(),
-			CreatedAt: types.StringValue(item.CreatedAt),
-			Email:     types.StringValue(item.Email),
-			ID:        types.StringValue(item.ID),
+			CreatedAt: func() types.String {
+				if item.CreatedAt != "" {
+					return types.StringValue(item.CreatedAt)
+				}
+				return types.String{}
+			}(),
+			Email: func() types.String {
+				if item.Email != "" {
+					return types.StringValue(item.Email)
+				}
+				return types.String{}
+			}(),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
 			IsAdmin: func() types.Bool {
 				if item.IsAdmin != nil {
 					return types.BoolValue(*item.IsAdmin)
 				}
 				return types.Bool{}
 			}(),
-			Name: types.StringValue(item.Name),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -352,16 +407,41 @@ func ResponseNetworksGetNetworkMerakiAuthUsersItemsToBody(state NetworksMerakiAu
 
 func ResponseNetworksGetNetworkMerakiAuthUserItemToBody(state NetworksMerakiAuthUsers, response *merakigosdk.ResponseNetworksGetNetworkMerakiAuthUser) NetworksMerakiAuthUsers {
 	itemState := ResponseNetworksGetNetworkMerakiAuthUser{
-		AccountType: types.StringValue(response.AccountType),
+		AccountType: func() types.String {
+			if response.AccountType != "" {
+				return types.StringValue(response.AccountType)
+			}
+			return types.String{}
+		}(),
 		Authorizations: func() *[]ResponseNetworksGetNetworkMerakiAuthUserAuthorizations {
 			if response.Authorizations != nil {
 				result := make([]ResponseNetworksGetNetworkMerakiAuthUserAuthorizations, len(*response.Authorizations))
 				for i, authorizations := range *response.Authorizations {
 					result[i] = ResponseNetworksGetNetworkMerakiAuthUserAuthorizations{
-						AuthorizedByEmail: types.StringValue(authorizations.AuthorizedByEmail),
-						AuthorizedByName:  types.StringValue(authorizations.AuthorizedByName),
-						AuthorizedZone:    types.StringValue(authorizations.AuthorizedZone),
-						ExpiresAt:         types.StringValue(authorizations.ExpiresAt),
+						AuthorizedByEmail: func() types.String {
+							if authorizations.AuthorizedByEmail != "" {
+								return types.StringValue(authorizations.AuthorizedByEmail)
+							}
+							return types.String{}
+						}(),
+						AuthorizedByName: func() types.String {
+							if authorizations.AuthorizedByName != "" {
+								return types.StringValue(authorizations.AuthorizedByName)
+							}
+							return types.String{}
+						}(),
+						AuthorizedZone: func() types.String {
+							if authorizations.AuthorizedZone != "" {
+								return types.StringValue(authorizations.AuthorizedZone)
+							}
+							return types.String{}
+						}(),
+						ExpiresAt: func() types.String {
+							if authorizations.ExpiresAt != "" {
+								return types.StringValue(authorizations.ExpiresAt)
+							}
+							return types.String{}
+						}(),
 						SSIDNumber: func() types.Int64 {
 							if authorizations.SSIDNumber != nil {
 								return types.Int64Value(int64(*authorizations.SSIDNumber))
@@ -374,16 +454,36 @@ func ResponseNetworksGetNetworkMerakiAuthUserItemToBody(state NetworksMerakiAuth
 			}
 			return nil
 		}(),
-		CreatedAt: types.StringValue(response.CreatedAt),
-		Email:     types.StringValue(response.Email),
-		ID:        types.StringValue(response.ID),
+		CreatedAt: func() types.String {
+			if response.CreatedAt != "" {
+				return types.StringValue(response.CreatedAt)
+			}
+			return types.String{}
+		}(),
+		Email: func() types.String {
+			if response.Email != "" {
+				return types.StringValue(response.Email)
+			}
+			return types.String{}
+		}(),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		IsAdmin: func() types.Bool {
 			if response.IsAdmin != nil {
 				return types.BoolValue(*response.IsAdmin)
 			}
 			return types.Bool{}
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

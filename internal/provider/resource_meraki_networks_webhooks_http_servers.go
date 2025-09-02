@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -66,7 +67,6 @@ func (r *NetworksWebhooksHTTPServersResource) Schema(_ context.Context, _ resour
 			"http_server_id": schema.StringAttribute{
 				MarkdownDescription: `httpServerId path parameter. Http server ID`,
 				Optional:            true,
-				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -74,13 +74,9 @@ func (r *NetworksWebhooksHTTPServersResource) Schema(_ context.Context, _ resour
 			"id": schema.StringAttribute{
 				MarkdownDescription: `A Base64 encoded ID.`,
 				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `A name for easy reference to the HTTP server`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -92,7 +88,6 @@ func (r *NetworksWebhooksHTTPServersResource) Schema(_ context.Context, _ resour
 			},
 			"payload_template": schema.SingleNestedAttribute{
 				MarkdownDescription: `The payload template to use when posting data to the HTTP server.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -101,7 +96,6 @@ func (r *NetworksWebhooksHTTPServersResource) Schema(_ context.Context, _ resour
 
 					"name": schema.StringAttribute{
 						MarkdownDescription: `The name of the payload template.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -110,7 +104,6 @@ func (r *NetworksWebhooksHTTPServersResource) Schema(_ context.Context, _ resour
 					},
 					"payload_template_id": schema.StringAttribute{
 						MarkdownDescription: `The ID of the payload template.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -120,7 +113,6 @@ func (r *NetworksWebhooksHTTPServersResource) Schema(_ context.Context, _ resour
 			},
 			"shared_secret": schema.StringAttribute{
 				MarkdownDescription: `A shared secret that will be included in POSTs sent to the HTTP server. This secret can be used to verify that the request was sent by Meraki.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -128,7 +120,6 @@ func (r *NetworksWebhooksHTTPServersResource) Schema(_ context.Context, _ resour
 			},
 			"url": schema.StringAttribute{
 				MarkdownDescription: `The URL of the HTTP server.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -211,7 +202,7 @@ func (r *NetworksWebhooksHTTPServersResource) Create(ctx context.Context, req re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkWebhooksHTTPServer",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -283,21 +274,11 @@ func (r *NetworksWebhooksHTTPServersResource) Create(ctx context.Context, req re
 func (r *NetworksWebhooksHTTPServersResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksWebhooksHTTPServersRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -328,9 +309,7 @@ func (r *NetworksWebhooksHTTPServersResource) Read(ctx context.Context, req reso
 	}
 	//entro aqui 2
 	data = ResponseNetworksGetNetworkWebhooksHTTPServerItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksWebhooksHTTPServersResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -338,35 +317,31 @@ func (r *NetworksWebhooksHTTPServersResource) ImportState(ctx context.Context, r
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,httpServerId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("http_server_id"), idParts[1])...)
 }
 
 func (r *NetworksWebhooksHTTPServersResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksWebhooksHTTPServersRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksWebhooksHTTPServersRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvHTTPServerID := data.HTTPServerID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvHTTPServerID := plan.HTTPServerID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkWebhooksHTTPServer(vvNetworkID, vvHTTPServerID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWebhooksHTTPServer",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -376,9 +351,7 @@ func (r *NetworksWebhooksHTTPServersResource) Update(ctx context.Context, req re
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksWebhooksHTTPServersResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -501,20 +474,49 @@ func (r *NetworksWebhooksHTTPServersRs) toSdkApiRequestUpdate(ctx context.Contex
 // From gosdk to TF Structs Schema
 func ResponseNetworksGetNetworkWebhooksHTTPServerItemToBodyRs(state NetworksWebhooksHTTPServersRs, response *merakigosdk.ResponseNetworksGetNetworkWebhooksHTTPServer, is_read bool) NetworksWebhooksHTTPServersRs {
 	itemState := NetworksWebhooksHTTPServersRs{
-		ID:        types.StringValue(response.ID),
-		Name:      types.StringValue(response.Name),
-		NetworkID: types.StringValue(response.NetworkID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
 		PayloadTemplate: func() *ResponseNetworksGetNetworkWebhooksHttpServerPayloadTemplateRs {
 			if response.PayloadTemplate != nil {
 				return &ResponseNetworksGetNetworkWebhooksHttpServerPayloadTemplateRs{
-					Name:              types.StringValue(response.PayloadTemplate.Name),
-					PayloadTemplateID: types.StringValue(response.PayloadTemplate.PayloadTemplateID),
+					Name: func() types.String {
+						if response.PayloadTemplate.Name != "" {
+							return types.StringValue(response.PayloadTemplate.Name)
+						}
+						return types.String{}
+					}(),
+					PayloadTemplateID: func() types.String {
+						if response.PayloadTemplate.PayloadTemplateID != "" {
+							return types.StringValue(response.PayloadTemplate.PayloadTemplateID)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		URL:          types.StringValue(response.URL),
-		SharedSecret: state.SharedSecret,
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksWebhooksHTTPServersRs)

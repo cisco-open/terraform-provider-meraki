@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -238,17 +237,37 @@ func ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersI
 						Logo: func() *ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersItemsLogo {
 							if items.Logo != nil {
 								return &ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersItemsLogo{
-									URL: types.StringValue(items.Logo.URL),
+									URL: func() types.String {
+										if items.Logo.URL != "" {
+											return types.StringValue(items.Logo.URL)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						Name: types.StringValue(items.Name),
+						Name: func() types.String {
+							if items.Name != "" {
+								return types.StringValue(items.Name)
+							}
+							return types.String{}
+						}(),
 						Terms: func() *ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersItemsTerms {
 							if items.Terms != nil {
 								return &ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersItemsTerms{
-									Content: types.StringValue(items.Terms.Content),
-									Name:    types.StringValue(items.Terms.Name),
+									Content: func() types.String {
+										if items.Terms.Content != "" {
+											return types.StringValue(items.Terms.Content)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if items.Terms.Name != "" {
+											return types.StringValue(items.Terms.Name)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil

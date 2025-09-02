@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -204,8 +203,18 @@ func ResponseSwitchGetNetworkSwitchSettingsItemToBody(state NetworksSwitchSettin
 				result := make([]ResponseSwitchGetNetworkSwitchSettingsPowerExceptions, len(*response.PowerExceptions))
 				for i, powerExceptions := range *response.PowerExceptions {
 					result[i] = ResponseSwitchGetNetworkSwitchSettingsPowerExceptions{
-						PowerType: types.StringValue(powerExceptions.PowerType),
-						Serial:    types.StringValue(powerExceptions.Serial),
+						PowerType: func() types.String {
+							if powerExceptions.PowerType != "" {
+								return types.StringValue(powerExceptions.PowerType)
+							}
+							return types.String{}
+						}(),
+						Serial: func() types.String {
+							if powerExceptions.Serial != "" {
+								return types.StringValue(powerExceptions.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

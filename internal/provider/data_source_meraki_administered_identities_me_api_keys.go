@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -131,8 +130,18 @@ func ResponseAdministeredGetAdministeredIDentitiesMeAPIKeysItemsToBody(state Adm
 	var items []ResponseItemAdministeredGetAdministeredIdentitiesMeApiKeys
 	for _, item := range *response {
 		itemState := ResponseItemAdministeredGetAdministeredIdentitiesMeApiKeys{
-			CreatedAt: types.StringValue(item.CreatedAt),
-			Suffix:    types.StringValue(item.Suffix),
+			CreatedAt: func() types.String {
+				if item.CreatedAt != "" {
+					return types.StringValue(item.CreatedAt)
+				}
+				return types.String{}
+			}(),
+			Suffix: func() types.String {
+				if item.Suffix != "" {
+					return types.StringValue(item.Suffix)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -376,14 +375,39 @@ func ResponseSwitchGetOrganizationSwitchPortsTopologyDiscoveryByDeviceItemToBody
 				result := make([]ResponseSwitchGetOrganizationSwitchPortsTopologyDiscoveryByDeviceItems, len(*response.Items))
 				for i, items := range *response.Items {
 					result[i] = ResponseSwitchGetOrganizationSwitchPortsTopologyDiscoveryByDeviceItems{
-						Mac:   types.StringValue(items.Mac),
-						Model: types.StringValue(items.Model),
-						Name:  types.StringValue(items.Name),
+						Mac: func() types.String {
+							if items.Mac != "" {
+								return types.StringValue(items.Mac)
+							}
+							return types.String{}
+						}(),
+						Model: func() types.String {
+							if items.Model != "" {
+								return types.StringValue(items.Model)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if items.Name != "" {
+								return types.StringValue(items.Name)
+							}
+							return types.String{}
+						}(),
 						Network: func() *ResponseSwitchGetOrganizationSwitchPortsTopologyDiscoveryByDeviceItemsNetwork {
 							if items.Network != nil {
 								return &ResponseSwitchGetOrganizationSwitchPortsTopologyDiscoveryByDeviceItemsNetwork{
-									ID:   types.StringValue(items.Network.ID),
-									Name: types.StringValue(items.Network.Name),
+									ID: func() types.String {
+										if items.Network.ID != "" {
+											return types.StringValue(items.Network.ID)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if items.Network.Name != "" {
+											return types.StringValue(items.Network.Name)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -398,36 +422,71 @@ func ResponseSwitchGetOrganizationSwitchPortsTopologyDiscoveryByDeviceItemToBody
 												result := make([]ResponseSwitchGetOrganizationSwitchPortsTopologyDiscoveryByDeviceItemsPortsCdp, len(*ports.Cdp))
 												for i, cdp := range *ports.Cdp {
 													result[i] = ResponseSwitchGetOrganizationSwitchPortsTopologyDiscoveryByDeviceItemsPortsCdp{
-														Name:  types.StringValue(cdp.Name),
-														Value: types.StringValue(cdp.Value),
+														Name: func() types.String {
+															if cdp.Name != "" {
+																return types.StringValue(cdp.Name)
+															}
+															return types.String{}
+														}(),
+														Value: func() types.String {
+															if cdp.Value != "" {
+																return types.StringValue(cdp.Value)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return &result
 											}
 											return nil
 										}(),
-										LastUpdatedAt: types.StringValue(ports.LastUpdatedAt),
+										LastUpdatedAt: func() types.String {
+											if ports.LastUpdatedAt != "" {
+												return types.StringValue(ports.LastUpdatedAt)
+											}
+											return types.String{}
+										}(),
 										Lldp: func() *[]ResponseSwitchGetOrganizationSwitchPortsTopologyDiscoveryByDeviceItemsPortsLldp {
 											if ports.Lldp != nil {
 												result := make([]ResponseSwitchGetOrganizationSwitchPortsTopologyDiscoveryByDeviceItemsPortsLldp, len(*ports.Lldp))
 												for i, lldp := range *ports.Lldp {
 													result[i] = ResponseSwitchGetOrganizationSwitchPortsTopologyDiscoveryByDeviceItemsPortsLldp{
-														Name:  types.StringValue(lldp.Name),
-														Value: types.StringValue(lldp.Value),
+														Name: func() types.String {
+															if lldp.Name != "" {
+																return types.StringValue(lldp.Name)
+															}
+															return types.String{}
+														}(),
+														Value: func() types.String {
+															if lldp.Value != "" {
+																return types.StringValue(lldp.Value)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return &result
 											}
 											return nil
 										}(),
-										PortID: types.StringValue(ports.PortID),
+										PortID: func() types.String {
+											if ports.PortID != "" {
+												return types.StringValue(ports.PortID)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						Serial: types.StringValue(items.Serial),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

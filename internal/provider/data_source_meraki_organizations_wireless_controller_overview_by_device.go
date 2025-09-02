@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -464,7 +463,12 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDevice
 									Version: func() *ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDeviceItemsFirmwareVersion {
 										if items.Firmware.Version != nil {
 											return &ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDeviceItemsFirmwareVersion{
-												ShortName: types.StringValue(items.Firmware.Version.ShortName),
+												ShortName: func() types.String {
+													if items.Firmware.Version.ShortName != "" {
+														return types.StringValue(items.Firmware.Version.ShortName)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return nil
@@ -476,7 +480,12 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDevice
 						Network: func() *ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDeviceItemsNetwork {
 							if items.Network != nil {
 								return &ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDeviceItemsNetwork{
-									ID: types.StringValue(items.Network.ID),
+									ID: func() types.String {
+										if items.Network.ID != "" {
+											return types.StringValue(items.Network.ID)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -484,8 +493,18 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDevice
 						Redundancy: func() *ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDeviceItemsRedundancy {
 							if items.Redundancy != nil {
 								return &ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDeviceItemsRedundancy{
-									ChassisName: types.StringValue(items.Redundancy.ChassisName),
-									ID:          types.StringValue(items.Redundancy.ID),
+									ChassisName: func() types.String {
+										if items.Redundancy.ChassisName != "" {
+											return types.StringValue(items.Redundancy.ChassisName)
+										}
+										return types.String{}
+									}(),
+									ID: func() types.String {
+										if items.Redundancy.ID != "" {
+											return types.StringValue(items.Redundancy.ID)
+										}
+										return types.String{}
+									}(),
 									Management: func() *ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDeviceItemsRedundancyManagement {
 										if items.Redundancy.Management != nil {
 											return &ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDeviceItemsRedundancyManagement{
@@ -494,7 +513,12 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDevice
 														result := make([]ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDeviceItemsRedundancyManagementAddresses, len(*items.Redundancy.Management.Addresses))
 														for i, addresses := range *items.Redundancy.Management.Addresses {
 															result[i] = ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDeviceItemsRedundancyManagementAddresses{
-																Address: types.StringValue(addresses.Address),
+																Address: func() types.String {
+																	if addresses.Address != "" {
+																		return types.StringValue(addresses.Address)
+																	}
+																	return types.String{}
+																}(),
 															}
 														}
 														return &result
@@ -505,13 +529,28 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerOverviewByDevice
 										}
 										return nil
 									}(),
-									RedundantSerial: types.StringValue(items.Redundancy.RedundantSerial),
-									Role:            types.StringValue(items.Redundancy.Role),
+									RedundantSerial: func() types.String {
+										if items.Redundancy.RedundantSerial != "" {
+											return types.StringValue(items.Redundancy.RedundantSerial)
+										}
+										return types.String{}
+									}(),
+									Role: func() types.String {
+										if items.Redundancy.Role != "" {
+											return types.StringValue(items.Redundancy.Role)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						Serial: types.StringValue(items.Serial),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

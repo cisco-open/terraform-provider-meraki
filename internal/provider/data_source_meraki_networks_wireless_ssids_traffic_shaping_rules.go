@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -253,8 +252,18 @@ func ResponseWirelessGetNetworkWirelessSSIDTrafficShapingRulesItemToBody(state N
 								result := make([]ResponseWirelessGetNetworkWirelessSsidTrafficShapingRulesRulesDefinitions, len(*rules.Definitions))
 								for i, definitions := range *rules.Definitions {
 									result[i] = ResponseWirelessGetNetworkWirelessSsidTrafficShapingRulesRulesDefinitions{
-										Type:  types.StringValue(definitions.Type),
-										Value: types.StringValue(definitions.Value),
+										Type: func() types.String {
+											if definitions.Type != "" {
+												return types.StringValue(definitions.Type)
+											}
+											return types.String{}
+										}(),
+										Value: func() types.String {
+											if definitions.Value != "" {
+												return types.StringValue(definitions.Value)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -295,7 +304,12 @@ func ResponseWirelessGetNetworkWirelessSSIDTrafficShapingRulesItemToBody(state N
 										}
 										return nil
 									}(),
-									Settings: types.StringValue(rules.PerClientBandwidthLimits.Settings),
+									Settings: func() types.String {
+										if rules.PerClientBandwidthLimits.Settings != "" {
+											return types.StringValue(rules.PerClientBandwidthLimits.Settings)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil

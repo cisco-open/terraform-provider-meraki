@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -255,7 +254,12 @@ func ResponseOrganizationsGetOrganizationSummaryTopClientsManufacturersByUsageIt
 				}
 				return nil
 			}(),
-			Name: types.StringValue(item.Name),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			Usage: func() *ResponseItemOrganizationsGetOrganizationSummaryTopClientsManufacturersByUsageUsage {
 				if item.Usage != nil {
 					return &ResponseItemOrganizationsGetOrganizationSummaryTopClientsManufacturersByUsageUsage{

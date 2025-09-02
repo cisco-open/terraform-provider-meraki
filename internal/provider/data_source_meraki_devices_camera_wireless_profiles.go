@@ -145,9 +145,24 @@ func ResponseCameraGetDeviceCameraWirelessProfilesItemToBody(state DevicesCamera
 		IDs: func() *ResponseCameraGetDeviceCameraWirelessProfilesIds {
 			if response.IDs != nil {
 				return &ResponseCameraGetDeviceCameraWirelessProfilesIds{
-					Backup:    types.StringValue(response.IDs.Backup),
-					Primary:   types.StringValue(response.IDs.Primary),
-					Secondary: types.StringValue(response.IDs.Secondary),
+					Backup: func() types.String {
+						if response.IDs.Backup != "" {
+							return types.StringValue(response.IDs.Backup)
+						}
+						return types.String{}
+					}(),
+					Primary: func() types.String {
+						if response.IDs.Primary != "" {
+							return types.StringValue(response.IDs.Primary)
+						}
+						return types.String{}
+					}(),
+					Secondary: func() types.String {
+						if response.IDs.Secondary != "" {
+							return types.StringValue(response.IDs.Secondary)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil

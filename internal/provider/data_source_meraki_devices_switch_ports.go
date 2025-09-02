@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -556,6 +555,17 @@ func (d *DevicesSwitchPortsDataSource) Read(ctx context.Context, req datasource.
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetDeviceSwitchPort",
+				err.Error(),
+			)
+			return
+		}
+
 		devicesSwitchPorts = ResponseSwitchGetDeviceSwitchPortItemToBody(devicesSwitchPorts, response2)
 		diags = resp.State.Set(ctx, &devicesSwitchPorts)
 		resp.Diagnostics.Append(diags...)
@@ -723,18 +733,43 @@ func ResponseSwitchGetDeviceSwitchPortsItemsToBody(state DevicesSwitchPorts, res
 				}
 				return types.Int64{}
 			}(),
-			AccessPolicyType: types.StringValue(item.AccessPolicyType),
+			AccessPolicyType: func() types.String {
+				if item.AccessPolicyType != "" {
+					return types.StringValue(item.AccessPolicyType)
+				}
+				return types.String{}
+			}(),
 			AdaptivePolicyGroup: func() *ResponseItemSwitchGetDeviceSwitchPortsAdaptivePolicyGroup {
 				if item.AdaptivePolicyGroup != nil {
 					return &ResponseItemSwitchGetDeviceSwitchPortsAdaptivePolicyGroup{
-						ID:   types.StringValue(item.AdaptivePolicyGroup.ID),
-						Name: types.StringValue(item.AdaptivePolicyGroup.Name),
+						ID: func() types.String {
+							if item.AdaptivePolicyGroup.ID != "" {
+								return types.StringValue(item.AdaptivePolicyGroup.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if item.AdaptivePolicyGroup.Name != "" {
+								return types.StringValue(item.AdaptivePolicyGroup.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			AdaptivePolicyGroupID: types.StringValue(item.AdaptivePolicyGroupID),
-			AllowedVLANs:          types.StringValue(item.AllowedVLANs),
+			AdaptivePolicyGroupID: func() types.String {
+				if item.AdaptivePolicyGroupID != "" {
+					return types.StringValue(item.AdaptivePolicyGroupID)
+				}
+				return types.String{}
+			}(),
+			AllowedVLANs: func() types.String {
+				if item.AllowedVLANs != "" {
+					return types.StringValue(item.AllowedVLANs)
+				}
+				return types.String{}
+			}(),
 			DaiTrusted: func() types.Bool {
 				if item.DaiTrusted != nil {
 					return types.BoolValue(*item.DaiTrusted)
@@ -772,13 +807,23 @@ func ResponseSwitchGetDeviceSwitchPortsItemsToBody(state DevicesSwitchPorts, res
 				}
 				return types.Bool{}
 			}(),
-			LinkNegotiation:             types.StringValue(item.LinkNegotiation),
+			LinkNegotiation: func() types.String {
+				if item.LinkNegotiation != "" {
+					return types.StringValue(item.LinkNegotiation)
+				}
+				return types.String{}
+			}(),
 			LinkNegotiationCapabilities: StringSliceToList(item.LinkNegotiationCapabilities),
 			MacAllowList:                StringSliceToList(item.MacAllowList),
 			Mirror: func() *ResponseItemSwitchGetDeviceSwitchPortsMirror {
 				if item.Mirror != nil {
 					return &ResponseItemSwitchGetDeviceSwitchPortsMirror{
-						Mode: types.StringValue(item.Mirror.Mode),
+						Mode: func() types.String {
+							if item.Mirror.Mode != "" {
+								return types.StringValue(item.Mirror.Mode)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -786,12 +831,22 @@ func ResponseSwitchGetDeviceSwitchPortsItemsToBody(state DevicesSwitchPorts, res
 			Module: func() *ResponseItemSwitchGetDeviceSwitchPortsModule {
 				if item.Module != nil {
 					return &ResponseItemSwitchGetDeviceSwitchPortsModule{
-						Model: types.StringValue(item.Module.Model),
+						Model: func() types.String {
+							if item.Module.Model != "" {
+								return types.StringValue(item.Module.Model)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			Name: types.StringValue(item.Name),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			PeerSgtCapable: func() types.Bool {
 				if item.PeerSgtCapable != nil {
 					return types.BoolValue(*item.PeerSgtCapable)
@@ -804,8 +859,18 @@ func ResponseSwitchGetDeviceSwitchPortsItemsToBody(state DevicesSwitchPorts, res
 				}
 				return types.Bool{}
 			}(),
-			PortID:         types.StringValue(item.PortID),
-			PortScheduleID: types.StringValue(item.PortScheduleID),
+			PortID: func() types.String {
+				if item.PortID != "" {
+					return types.StringValue(item.PortID)
+				}
+				return types.String{}
+			}(),
+			PortScheduleID: func() types.String {
+				if item.PortScheduleID != "" {
+					return types.StringValue(item.PortScheduleID)
+				}
+				return types.String{}
+			}(),
 			Profile: func() *ResponseItemSwitchGetDeviceSwitchPortsProfile {
 				if item.Profile != nil {
 					return &ResponseItemSwitchGetDeviceSwitchPortsProfile{
@@ -815,8 +880,18 @@ func ResponseSwitchGetDeviceSwitchPortsItemsToBody(state DevicesSwitchPorts, res
 							}
 							return types.Bool{}
 						}(),
-						ID:    types.StringValue(item.Profile.ID),
-						Iname: types.StringValue(item.Profile.Iname),
+						ID: func() types.String {
+							if item.Profile.ID != "" {
+								return types.StringValue(item.Profile.ID)
+							}
+							return types.String{}
+						}(),
+						Iname: func() types.String {
+							if item.Profile.Iname != "" {
+								return types.StringValue(item.Profile.Iname)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -830,8 +905,18 @@ func ResponseSwitchGetDeviceSwitchPortsItemsToBody(state DevicesSwitchPorts, res
 			Schedule: func() *ResponseItemSwitchGetDeviceSwitchPortsSchedule {
 				if item.Schedule != nil {
 					return &ResponseItemSwitchGetDeviceSwitchPortsSchedule{
-						ID:   types.StringValue(item.Schedule.ID),
-						Name: types.StringValue(item.Schedule.Name),
+						ID: func() types.String {
+							if item.Schedule.ID != "" {
+								return types.StringValue(item.Schedule.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if item.Schedule.Name != "" {
+								return types.StringValue(item.Schedule.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -868,10 +953,25 @@ func ResponseSwitchGetDeviceSwitchPortsItemsToBody(state DevicesSwitchPorts, res
 				}
 				return types.Bool{}
 			}(),
-			StpGuard: types.StringValue(item.StpGuard),
-			Tags:     StringSliceToList(item.Tags),
-			Type:     types.StringValue(item.Type),
-			Udld:     types.StringValue(item.Udld),
+			StpGuard: func() types.String {
+				if item.StpGuard != "" {
+					return types.StringValue(item.StpGuard)
+				}
+				return types.String{}
+			}(),
+			Tags: StringSliceToList(item.Tags),
+			Type: func() types.String {
+				if item.Type != "" {
+					return types.StringValue(item.Type)
+				}
+				return types.String{}
+			}(),
+			Udld: func() types.String {
+				if item.Udld != "" {
+					return types.StringValue(item.Udld)
+				}
+				return types.String{}
+			}(),
 			VLAN: func() types.Int64 {
 				if item.VLAN != nil {
 					return types.Int64Value(int64(*item.VLAN))
@@ -899,18 +999,43 @@ func ResponseSwitchGetDeviceSwitchPortItemToBody(state DevicesSwitchPorts, respo
 			}
 			return types.Int64{}
 		}(),
-		AccessPolicyType: types.StringValue(response.AccessPolicyType),
+		AccessPolicyType: func() types.String {
+			if response.AccessPolicyType != "" {
+				return types.StringValue(response.AccessPolicyType)
+			}
+			return types.String{}
+		}(),
 		AdaptivePolicyGroup: func() *ResponseSwitchGetDeviceSwitchPortAdaptivePolicyGroup {
 			if response.AdaptivePolicyGroup != nil {
 				return &ResponseSwitchGetDeviceSwitchPortAdaptivePolicyGroup{
-					ID:   types.StringValue(response.AdaptivePolicyGroup.ID),
-					Name: types.StringValue(response.AdaptivePolicyGroup.Name),
+					ID: func() types.String {
+						if response.AdaptivePolicyGroup.ID != "" {
+							return types.StringValue(response.AdaptivePolicyGroup.ID)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.AdaptivePolicyGroup.Name != "" {
+							return types.StringValue(response.AdaptivePolicyGroup.Name)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		AdaptivePolicyGroupID: types.StringValue(response.AdaptivePolicyGroupID),
-		AllowedVLANs:          types.StringValue(response.AllowedVLANs),
+		AdaptivePolicyGroupID: func() types.String {
+			if response.AdaptivePolicyGroupID != "" {
+				return types.StringValue(response.AdaptivePolicyGroupID)
+			}
+			return types.String{}
+		}(),
+		AllowedVLANs: func() types.String {
+			if response.AllowedVLANs != "" {
+				return types.StringValue(response.AllowedVLANs)
+			}
+			return types.String{}
+		}(),
 		DaiTrusted: func() types.Bool {
 			if response.DaiTrusted != nil {
 				return types.BoolValue(*response.DaiTrusted)
@@ -948,13 +1073,23 @@ func ResponseSwitchGetDeviceSwitchPortItemToBody(state DevicesSwitchPorts, respo
 			}
 			return types.Bool{}
 		}(),
-		LinkNegotiation:             types.StringValue(response.LinkNegotiation),
+		LinkNegotiation: func() types.String {
+			if response.LinkNegotiation != "" {
+				return types.StringValue(response.LinkNegotiation)
+			}
+			return types.String{}
+		}(),
 		LinkNegotiationCapabilities: StringSliceToList(response.LinkNegotiationCapabilities),
 		MacAllowList:                StringSliceToList(response.MacAllowList),
 		Mirror: func() *ResponseSwitchGetDeviceSwitchPortMirror {
 			if response.Mirror != nil {
 				return &ResponseSwitchGetDeviceSwitchPortMirror{
-					Mode: types.StringValue(response.Mirror.Mode),
+					Mode: func() types.String {
+						if response.Mirror.Mode != "" {
+							return types.StringValue(response.Mirror.Mode)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -962,12 +1097,22 @@ func ResponseSwitchGetDeviceSwitchPortItemToBody(state DevicesSwitchPorts, respo
 		Module: func() *ResponseSwitchGetDeviceSwitchPortModule {
 			if response.Module != nil {
 				return &ResponseSwitchGetDeviceSwitchPortModule{
-					Model: types.StringValue(response.Module.Model),
+					Model: func() types.String {
+						if response.Module.Model != "" {
+							return types.StringValue(response.Module.Model)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		PeerSgtCapable: func() types.Bool {
 			if response.PeerSgtCapable != nil {
 				return types.BoolValue(*response.PeerSgtCapable)
@@ -980,8 +1125,18 @@ func ResponseSwitchGetDeviceSwitchPortItemToBody(state DevicesSwitchPorts, respo
 			}
 			return types.Bool{}
 		}(),
-		PortID:         types.StringValue(response.PortID),
-		PortScheduleID: types.StringValue(response.PortScheduleID),
+		PortID: func() types.String {
+			if response.PortID != "" {
+				return types.StringValue(response.PortID)
+			}
+			return types.String{}
+		}(),
+		PortScheduleID: func() types.String {
+			if response.PortScheduleID != "" {
+				return types.StringValue(response.PortScheduleID)
+			}
+			return types.String{}
+		}(),
 		Profile: func() *ResponseSwitchGetDeviceSwitchPortProfile {
 			if response.Profile != nil {
 				return &ResponseSwitchGetDeviceSwitchPortProfile{
@@ -991,8 +1146,18 @@ func ResponseSwitchGetDeviceSwitchPortItemToBody(state DevicesSwitchPorts, respo
 						}
 						return types.Bool{}
 					}(),
-					ID:    types.StringValue(response.Profile.ID),
-					Iname: types.StringValue(response.Profile.Iname),
+					ID: func() types.String {
+						if response.Profile.ID != "" {
+							return types.StringValue(response.Profile.ID)
+						}
+						return types.String{}
+					}(),
+					Iname: func() types.String {
+						if response.Profile.Iname != "" {
+							return types.StringValue(response.Profile.Iname)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -1006,8 +1171,18 @@ func ResponseSwitchGetDeviceSwitchPortItemToBody(state DevicesSwitchPorts, respo
 		Schedule: func() *ResponseSwitchGetDeviceSwitchPortSchedule {
 			if response.Schedule != nil {
 				return &ResponseSwitchGetDeviceSwitchPortSchedule{
-					ID:   types.StringValue(response.Schedule.ID),
-					Name: types.StringValue(response.Schedule.Name),
+					ID: func() types.String {
+						if response.Schedule.ID != "" {
+							return types.StringValue(response.Schedule.ID)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.Schedule.Name != "" {
+							return types.StringValue(response.Schedule.Name)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -1044,10 +1219,25 @@ func ResponseSwitchGetDeviceSwitchPortItemToBody(state DevicesSwitchPorts, respo
 			}
 			return types.Bool{}
 		}(),
-		StpGuard: types.StringValue(response.StpGuard),
-		Tags:     StringSliceToList(response.Tags),
-		Type:     types.StringValue(response.Type),
-		Udld:     types.StringValue(response.Udld),
+		StpGuard: func() types.String {
+			if response.StpGuard != "" {
+				return types.StringValue(response.StpGuard)
+			}
+			return types.String{}
+		}(),
+		Tags: StringSliceToList(response.Tags),
+		Type: func() types.String {
+			if response.Type != "" {
+				return types.StringValue(response.Type)
+			}
+			return types.String{}
+		}(),
+		Udld: func() types.String {
+			if response.Udld != "" {
+				return types.StringValue(response.Udld)
+			}
+			return types.String{}
+		}(),
 		VLAN: func() types.Int64 {
 			if response.VLAN != nil {
 				return types.Int64Value(int64(*response.VLAN))

@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -387,7 +388,7 @@ func (r *OrganizationsAdaptivePolicyPoliciesResource) Update(ctx context.Context
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationAdaptivePolicyPolicy",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -612,21 +613,51 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyItemToBodyRs(state 
 				result := make([]ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyAclsRs, len(*response.ACLs))
 				for i, aCLs := range *response.ACLs {
 					result[i] = ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyAclsRs{
-						ID:   types.StringValue(aCLs.ID),
-						Name: types.StringValue(aCLs.Name),
+						ID: func() types.String {
+							if aCLs.ID != "" {
+								return types.StringValue(aCLs.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if aCLs.Name != "" {
+								return types.StringValue(aCLs.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		AdaptivePolicyID: types.StringValue(response.AdaptivePolicyID),
-		CreatedAt:        types.StringValue(response.CreatedAt),
+		AdaptivePolicyID: func() types.String {
+			if response.AdaptivePolicyID != "" {
+				return types.StringValue(response.AdaptivePolicyID)
+			}
+			return types.String{}
+		}(),
+		CreatedAt: func() types.String {
+			if response.CreatedAt != "" {
+				return types.StringValue(response.CreatedAt)
+			}
+			return types.String{}
+		}(),
 		DestinationGroup: func() *ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyDestinationGroupRs {
 			if response.DestinationGroup != nil {
 				return &ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyDestinationGroupRs{
-					ID:   types.StringValue(response.DestinationGroup.ID),
-					Name: types.StringValue(response.DestinationGroup.Name),
+					ID: func() types.String {
+						if response.DestinationGroup.ID != "" {
+							return types.StringValue(response.DestinationGroup.ID)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.DestinationGroup.Name != "" {
+							return types.StringValue(response.DestinationGroup.Name)
+						}
+						return types.String{}
+					}(),
 					Sgt: func() types.Int64 {
 						if response.DestinationGroup.Sgt != nil {
 							return types.Int64Value(int64(*response.DestinationGroup.Sgt))
@@ -637,12 +668,27 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyItemToBodyRs(state 
 			}
 			return nil
 		}(),
-		LastEntryRule: types.StringValue(response.LastEntryRule),
+		LastEntryRule: func() types.String {
+			if response.LastEntryRule != "" {
+				return types.StringValue(response.LastEntryRule)
+			}
+			return types.String{}
+		}(),
 		SourceGroup: func() *ResponseOrganizationsGetOrganizationAdaptivePolicyPolicySourceGroupRs {
 			if response.SourceGroup != nil {
 				return &ResponseOrganizationsGetOrganizationAdaptivePolicyPolicySourceGroupRs{
-					ID:   types.StringValue(response.SourceGroup.ID),
-					Name: types.StringValue(response.SourceGroup.Name),
+					ID: func() types.String {
+						if response.SourceGroup.ID != "" {
+							return types.StringValue(response.SourceGroup.ID)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.SourceGroup.Name != "" {
+							return types.StringValue(response.SourceGroup.Name)
+						}
+						return types.String{}
+					}(),
 					Sgt: func() types.Int64 {
 						if response.SourceGroup.Sgt != nil {
 							return types.Int64Value(int64(*response.SourceGroup.Sgt))
@@ -653,7 +699,12 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyItemToBodyRs(state 
 			}
 			return nil
 		}(),
-		UpdatedAt: types.StringValue(response.UpdatedAt),
+		UpdatedAt: func() types.String {
+			if response.UpdatedAt != "" {
+				return types.StringValue(response.UpdatedAt)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsAdaptivePolicyPoliciesRs)

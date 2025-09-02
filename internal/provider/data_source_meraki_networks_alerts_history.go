@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -263,16 +262,36 @@ func ResponseNetworksGetNetworkAlertsHistoryItemsToBody(state NetworksAlertsHist
 	var items []ResponseItemNetworksGetNetworkAlertsHistory
 	for _, item := range *response {
 		itemState := ResponseItemNetworksGetNetworkAlertsHistory{
-			AlertData:   types.StringValue(fmt.Sprintf("%v", item.AlertData)), //TODO POSIBLE interface
-			AlertType:   types.StringValue(item.AlertType),
-			AlertTypeID: types.StringValue(item.AlertTypeID),
+			AlertData: func() types.String {
+				if fmt.Sprintf("%v", item.AlertData) != "" {
+					return types.StringValue(fmt.Sprintf("%v", item.AlertData))
+				}
+				return types.String{}
+			}(), //TODO POSIBLE interface
+			AlertType: func() types.String {
+				if item.AlertType != "" {
+					return types.StringValue(item.AlertType)
+				}
+				return types.String{}
+			}(),
+			AlertTypeID: func() types.String {
+				if item.AlertTypeID != "" {
+					return types.StringValue(item.AlertTypeID)
+				}
+				return types.String{}
+			}(),
 			Destinations: func() *ResponseItemNetworksGetNetworkAlertsHistoryDestinations {
 				if item.Destinations != nil {
 					return &ResponseItemNetworksGetNetworkAlertsHistoryDestinations{
 						Email: func() *ResponseItemNetworksGetNetworkAlertsHistoryDestinationsEmail {
 							if item.Destinations.Email != nil {
 								return &ResponseItemNetworksGetNetworkAlertsHistoryDestinationsEmail{
-									SentAt: types.StringValue(item.Destinations.Email.SentAt),
+									SentAt: func() types.String {
+										if item.Destinations.Email.SentAt != "" {
+											return types.StringValue(item.Destinations.Email.SentAt)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -280,7 +299,12 @@ func ResponseNetworksGetNetworkAlertsHistoryItemsToBody(state NetworksAlertsHist
 						Push: func() *ResponseItemNetworksGetNetworkAlertsHistoryDestinationsPush {
 							if item.Destinations.Push != nil {
 								return &ResponseItemNetworksGetNetworkAlertsHistoryDestinationsPush{
-									SentAt: types.StringValue(item.Destinations.Push.SentAt),
+									SentAt: func() types.String {
+										if item.Destinations.Push.SentAt != "" {
+											return types.StringValue(item.Destinations.Push.SentAt)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -288,7 +312,12 @@ func ResponseNetworksGetNetworkAlertsHistoryItemsToBody(state NetworksAlertsHist
 						Sms: func() *ResponseItemNetworksGetNetworkAlertsHistoryDestinationsSms {
 							if item.Destinations.Sms != nil {
 								return &ResponseItemNetworksGetNetworkAlertsHistoryDestinationsSms{
-									SentAt: types.StringValue(item.Destinations.Sms.SentAt),
+									SentAt: func() types.String {
+										if item.Destinations.Sms.SentAt != "" {
+											return types.StringValue(item.Destinations.Sms.SentAt)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -296,7 +325,12 @@ func ResponseNetworksGetNetworkAlertsHistoryItemsToBody(state NetworksAlertsHist
 						Webhook: func() *ResponseItemNetworksGetNetworkAlertsHistoryDestinationsWebhook {
 							if item.Destinations.Webhook != nil {
 								return &ResponseItemNetworksGetNetworkAlertsHistoryDestinationsWebhook{
-									SentAt: types.StringValue(item.Destinations.Webhook.SentAt),
+									SentAt: func() types.String {
+										if item.Destinations.Webhook.SentAt != "" {
+											return types.StringValue(item.Destinations.Webhook.SentAt)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -308,12 +342,22 @@ func ResponseNetworksGetNetworkAlertsHistoryItemsToBody(state NetworksAlertsHist
 			Device: func() *ResponseItemNetworksGetNetworkAlertsHistoryDevice {
 				if item.Device != nil {
 					return &ResponseItemNetworksGetNetworkAlertsHistoryDevice{
-						Serial: types.StringValue(item.Device.Serial),
+						Serial: func() types.String {
+							if item.Device.Serial != "" {
+								return types.StringValue(item.Device.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			OccurredAt: types.StringValue(item.OccurredAt),
+			OccurredAt: func() types.String {
+				if item.OccurredAt != "" {
+					return types.StringValue(item.OccurredAt)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

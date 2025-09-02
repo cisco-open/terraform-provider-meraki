@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -208,7 +207,12 @@ func ResponseOrganizationsGetOrganizationSummaryTopApplicationsCategoriesByUsage
 	var items []ResponseItemOrganizationsGetOrganizationSummaryTopApplicationsCategoriesByUsage
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationSummaryTopApplicationsCategoriesByUsage{
-			Category: types.StringValue(item.Category),
+			Category: func() types.String {
+				if item.Category != "" {
+					return types.StringValue(item.Category)
+				}
+				return types.String{}
+			}(),
 			Downstream: func() types.Float64 {
 				if item.Downstream != nil {
 					return types.Float64Value(float64(*item.Downstream))

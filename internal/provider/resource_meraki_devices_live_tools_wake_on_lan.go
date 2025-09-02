@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -246,7 +247,7 @@ func (r *DevicesLiveToolsWakeOnLanResource) Create(ctx context.Context, req reso
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateDeviceLiveToolsWakeOnLan",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -464,12 +465,27 @@ func (r *DevicesLiveToolsWakeOnLanRs) toSdkApiRequestCreate(ctx context.Context)
 // From gosdk to TF Structs Schema
 func ResponseDevicesGetDeviceLiveToolsWakeOnLanItemToBodyRs(state DevicesLiveToolsWakeOnLanRs, response *merakigosdk.ResponseDevicesGetDeviceLiveToolsWakeOnLan, is_read bool) DevicesLiveToolsWakeOnLanRs {
 	itemState := DevicesLiveToolsWakeOnLanRs{
-		Error: types.StringValue(response.Error),
+		Error: func() types.String {
+			if response.Error != "" {
+				return types.StringValue(response.Error)
+			}
+			return types.String{}
+		}(),
 		Request: func() *ResponseDevicesGetDeviceLiveToolsWakeOnLanRequestRs {
 			if response.Request != nil {
 				return &ResponseDevicesGetDeviceLiveToolsWakeOnLanRequestRs{
-					Mac:    types.StringValue(response.Request.Mac),
-					Serial: types.StringValue(response.Request.Serial),
+					Mac: func() types.String {
+						if response.Request.Mac != "" {
+							return types.StringValue(response.Request.Mac)
+						}
+						return types.String{}
+					}(),
+					Serial: func() types.String {
+						if response.Request.Serial != "" {
+							return types.StringValue(response.Request.Serial)
+						}
+						return types.String{}
+					}(),
 					VLANID: func() types.Int64 {
 						if response.Request.VLANID != nil {
 							return types.Int64Value(int64(*response.Request.VLANID))
@@ -480,9 +496,24 @@ func ResponseDevicesGetDeviceLiveToolsWakeOnLanItemToBodyRs(state DevicesLiveToo
 			}
 			return nil
 		}(),
-		Status:      types.StringValue(response.Status),
-		URL:         types.StringValue(response.URL),
-		WakeOnLanID: types.StringValue(response.WakeOnLanID),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
+		WakeOnLanID: func() types.String {
+			if response.WakeOnLanID != "" {
+				return types.StringValue(response.WakeOnLanID)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(DevicesLiveToolsWakeOnLanRs)

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -302,8 +301,18 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundanc
 									Last: func() *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyStatusesItemsFailoverLast {
 										if items.Failover.Last != nil {
 											return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyStatusesItemsFailoverLast{
-												Reason: types.StringValue(items.Failover.Last.Reason),
-												Ts:     types.StringValue(items.Failover.Last.Ts),
+												Reason: func() types.String {
+													if items.Failover.Last.Reason != "" {
+														return types.StringValue(items.Failover.Last.Reason)
+													}
+													return types.String{}
+												}(),
+												Ts: func() types.String {
+													if items.Failover.Last.Ts != "" {
+														return types.StringValue(items.Failover.Last.Ts)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return nil
@@ -312,9 +321,24 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundanc
 							}
 							return nil
 						}(),
-						MobilityMac: types.StringValue(items.MobilityMac),
-						Mode:        types.StringValue(items.Mode),
-						Serial:      types.StringValue(items.Serial),
+						MobilityMac: func() types.String {
+							if items.MobilityMac != "" {
+								return types.StringValue(items.MobilityMac)
+							}
+							return types.String{}
+						}(),
+						Mode: func() types.String {
+							if items.Mode != "" {
+								return types.StringValue(items.Mode)
+							}
+							return types.String{}
+						}(),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

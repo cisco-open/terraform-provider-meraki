@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -26,8 +27,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -67,29 +68,26 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Schema(_ context.
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"rules": schema.SetNestedAttribute{
+			"rules": schema.ListNestedAttribute{
 				MarkdownDescription: `An array of port forwarding rules`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
-						"allowed_ips": schema.SetAttribute{
+						"allowed_ips": schema.ListAttribute{
 							MarkdownDescription: `An array of ranges of WAN IP addresses that are allowed to make inbound connections on the specified ports or port ranges (or any)`,
-							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
 
 							ElementType: types.StringType,
 						},
 						"lan_ip": schema.StringAttribute{
 							MarkdownDescription: `IP address of the device subject to port forwarding`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -97,7 +95,6 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Schema(_ context.
 						},
 						"local_port": schema.StringAttribute{
 							MarkdownDescription: `The port or port range that receives forwarded traffic from the WAN`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -105,7 +102,6 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Schema(_ context.
 						},
 						"name": schema.StringAttribute{
 							MarkdownDescription: `Name of the rule`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -114,7 +110,6 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Schema(_ context.
 						"protocol": schema.StringAttribute{
 							MarkdownDescription: `Protocol the rule applies to
                                         Allowed values: [tcp,udp]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -128,7 +123,6 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Schema(_ context.
 						},
 						"public_port": schema.StringAttribute{
 							MarkdownDescription: `The port or port range forwarded to the host on the LAN`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -137,7 +131,6 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Schema(_ context.
 						"uplink": schema.StringAttribute{
 							MarkdownDescription: `The physical WAN interface on which the traffic arrives; allowed values vary by appliance model and configuration
                                         Allowed values: [both,internet1,internet2,internet3]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -180,27 +173,6 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Create(ctx contex
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallPortForwardingRules(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceFirewallPortForwardingRules  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceFirewallPortForwardingRules only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallPortForwardingRules(vvNetworkID, dataRequest)
@@ -209,7 +181,7 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Create(ctx contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallPortForwardingRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -220,49 +192,19 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Create(ctx contex
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallPortForwardingRules(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceFirewallPortForwardingRules",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkApplianceFirewallPortForwardingRules",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseApplianceGetNetworkApplianceFirewallPortForwardingRulesItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksApplianceFirewallPortForwardingRulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksApplianceFirewallPortForwardingRulesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -292,33 +234,28 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Read(ctx context.
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceFirewallPortForwardingRulesItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksApplianceFirewallPortForwardingRulesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksApplianceFirewallPortForwardingRulesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksApplianceFirewallPortForwardingRulesRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksApplianceFirewallPortForwardingRulesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallPortForwardingRules(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallPortForwardingRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -328,9 +265,7 @@ func (r *NetworksApplianceFirewallPortForwardingRulesResource) Update(ctx contex
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksApplianceFirewallPortForwardingRulesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -346,7 +281,7 @@ type NetworksApplianceFirewallPortForwardingRulesRs struct {
 }
 
 type ResponseApplianceGetNetworkApplianceFirewallPortForwardingRulesRulesRs struct {
-	AllowedIPs types.Set    `tfsdk:"allowed_ips"`
+	AllowedIPs types.List   `tfsdk:"allowed_ips"`
 	LanIP      types.String `tfsdk:"lan_ip"`
 	LocalPort  types.String `tfsdk:"local_port"`
 	Name       types.String `tfsdk:"name"`
@@ -401,13 +336,43 @@ func ResponseApplianceGetNetworkApplianceFirewallPortForwardingRulesItemToBodyRs
 				result := make([]ResponseApplianceGetNetworkApplianceFirewallPortForwardingRulesRulesRs, len(*response.Rules))
 				for i, rules := range *response.Rules {
 					result[i] = ResponseApplianceGetNetworkApplianceFirewallPortForwardingRulesRulesRs{
-						AllowedIPs: StringSliceToSet(rules.AllowedIPs),
-						LanIP:      types.StringValue(rules.LanIP),
-						LocalPort:  types.StringValue(rules.LocalPort),
-						Name:       types.StringValue(rules.Name),
-						Protocol:   types.StringValue(rules.Protocol),
-						PublicPort: types.StringValue(rules.PublicPort),
-						Uplink:     types.StringValue(rules.Uplink),
+						AllowedIPs: StringSliceToList(rules.AllowedIPs),
+						LanIP: func() types.String {
+							if rules.LanIP != "" {
+								return types.StringValue(rules.LanIP)
+							}
+							return types.String{}
+						}(),
+						LocalPort: func() types.String {
+							if rules.LocalPort != "" {
+								return types.StringValue(rules.LocalPort)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if rules.Name != "" {
+								return types.StringValue(rules.Name)
+							}
+							return types.String{}
+						}(),
+						Protocol: func() types.String {
+							if rules.Protocol != "" {
+								return types.StringValue(rules.Protocol)
+							}
+							return types.String{}
+						}(),
+						PublicPort: func() types.String {
+							if rules.PublicPort != "" {
+								return types.StringValue(rules.PublicPort)
+							}
+							return types.String{}
+						}(),
+						Uplink: func() types.String {
+							if rules.Uplink != "" {
+								return types.StringValue(rules.Uplink)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

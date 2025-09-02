@@ -426,8 +426,18 @@ func ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClai
 			}
 			return nil
 		}(),
-		Description: types.StringValue(response.Description),
-		EndDate:     types.StringValue(response.EndDate),
+		Description: func() types.String {
+			if response.Description != "" {
+				return types.StringValue(response.Description)
+			}
+			return types.String{}
+		}(),
+		EndDate: func() types.String {
+			if response.EndDate != "" {
+				return types.StringValue(response.EndDate)
+			}
+			return types.String{}
+		}(),
 		EnterpriseAgreement: func() *ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyEnterpriseAgreement {
 			if response.EnterpriseAgreement != nil {
 				return &ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeyEnterpriseAgreement{
@@ -466,17 +476,37 @@ func ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClai
 							}
 							return nil
 						}(),
-						Sku:            types.StringValue(entitlements.Sku),
-						WebOrderLineID: types.StringValue(entitlements.WebOrderLineID),
+						Sku: func() types.String {
+							if entitlements.Sku != "" {
+								return types.StringValue(entitlements.Sku)
+							}
+							return types.String{}
+						}(),
+						WebOrderLineID: func() types.String {
+							if entitlements.WebOrderLineID != "" {
+								return types.StringValue(entitlements.WebOrderLineID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		LastUpdatedAt: types.StringValue(response.LastUpdatedAt),
-		Name:          types.StringValue(response.Name),
-		ProductTypes:  StringSliceToList(response.ProductTypes),
+		LastUpdatedAt: func() types.String {
+			if response.LastUpdatedAt != "" {
+				return types.StringValue(response.LastUpdatedAt)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		ProductTypes: StringSliceToList(response.ProductTypes),
 		RenewalRequested: func() types.Bool {
 			if response.RenewalRequested != nil {
 				return types.BoolValue(*response.RenewalRequested)
@@ -489,23 +519,68 @@ func ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClai
 					Account: func() *ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeySmartAccountAccount {
 						if response.SmartAccount.Account != nil {
 							return &ResponseLicensingValidateAdministeredLicensingSubscriptionSubscriptionsClaimKeySmartAccountAccount{
-								Domain: types.StringValue(response.SmartAccount.Account.Domain),
-								ID:     types.StringValue(response.SmartAccount.Account.ID),
-								Name:   types.StringValue(response.SmartAccount.Account.Name),
+								Domain: func() types.String {
+									if response.SmartAccount.Account.Domain != "" {
+										return types.StringValue(response.SmartAccount.Account.Domain)
+									}
+									return types.String{}
+								}(),
+								ID: func() types.String {
+									if response.SmartAccount.Account.ID != "" {
+										return types.StringValue(response.SmartAccount.Account.ID)
+									}
+									return types.String{}
+								}(),
+								Name: func() types.String {
+									if response.SmartAccount.Account.Name != "" {
+										return types.StringValue(response.SmartAccount.Account.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
 					}(),
-					Status: types.StringValue(response.SmartAccount.Status),
+					Status: func() types.String {
+						if response.SmartAccount.Status != "" {
+							return types.StringValue(response.SmartAccount.Status)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		StartDate:      types.StringValue(response.StartDate),
-		Status:         types.StringValue(response.Status),
-		SubscriptionID: types.StringValue(response.SubscriptionID),
-		Type:           types.StringValue(response.Type),
-		WebOrderID:     types.StringValue(response.WebOrderID),
+		StartDate: func() types.String {
+			if response.StartDate != "" {
+				return types.StringValue(response.StartDate)
+			}
+			return types.String{}
+		}(),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
+		SubscriptionID: func() types.String {
+			if response.SubscriptionID != "" {
+				return types.StringValue(response.SubscriptionID)
+			}
+			return types.String{}
+		}(),
+		Type: func() types.String {
+			if response.Type != "" {
+				return types.StringValue(response.Type)
+			}
+			return types.String{}
+		}(),
+		WebOrderID: func() types.String {
+			if response.WebOrderID != "" {
+				return types.StringValue(response.WebOrderID)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

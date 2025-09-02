@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -154,15 +153,35 @@ type ResponseNetworksGetNetworkSnmpUsers struct {
 // ToBody
 func ResponseNetworksGetNetworkSNMPItemToBody(state NetworksSNMP, response *merakigosdk.ResponseNetworksGetNetworkSNMP) NetworksSNMP {
 	itemState := ResponseNetworksGetNetworkSnmp{
-		Access:          types.StringValue(response.Access),
-		CommunityString: types.StringValue(response.CommunityString),
+		Access: func() types.String {
+			if response.Access != "" {
+				return types.StringValue(response.Access)
+			}
+			return types.String{}
+		}(),
+		CommunityString: func() types.String {
+			if response.CommunityString != "" {
+				return types.StringValue(response.CommunityString)
+			}
+			return types.String{}
+		}(),
 		Users: func() *[]ResponseNetworksGetNetworkSnmpUsers {
 			if response.Users != nil {
 				result := make([]ResponseNetworksGetNetworkSnmpUsers, len(*response.Users))
 				for i, users := range *response.Users {
 					result[i] = ResponseNetworksGetNetworkSnmpUsers{
-						Passphrase: types.StringValue(users.Passphrase),
-						Username:   types.StringValue(users.Username),
+						Passphrase: func() types.String {
+							if users.Passphrase != "" {
+								return types.StringValue(users.Passphrase)
+							}
+							return types.String{}
+						}(),
+						Username: func() types.String {
+							if users.Username != "" {
+								return types.StringValue(users.Username)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

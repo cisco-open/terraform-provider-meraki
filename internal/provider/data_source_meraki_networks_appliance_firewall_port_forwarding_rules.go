@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -176,12 +175,42 @@ func ResponseApplianceGetNetworkApplianceFirewallPortForwardingRulesItemToBody(s
 				for i, rules := range *response.Rules {
 					result[i] = ResponseApplianceGetNetworkApplianceFirewallPortForwardingRulesRules{
 						AllowedIPs: StringSliceToList(rules.AllowedIPs),
-						LanIP:      types.StringValue(rules.LanIP),
-						LocalPort:  types.StringValue(rules.LocalPort),
-						Name:       types.StringValue(rules.Name),
-						Protocol:   types.StringValue(rules.Protocol),
-						PublicPort: types.StringValue(rules.PublicPort),
-						Uplink:     types.StringValue(rules.Uplink),
+						LanIP: func() types.String {
+							if rules.LanIP != "" {
+								return types.StringValue(rules.LanIP)
+							}
+							return types.String{}
+						}(),
+						LocalPort: func() types.String {
+							if rules.LocalPort != "" {
+								return types.StringValue(rules.LocalPort)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if rules.Name != "" {
+								return types.StringValue(rules.Name)
+							}
+							return types.String{}
+						}(),
+						Protocol: func() types.String {
+							if rules.Protocol != "" {
+								return types.StringValue(rules.Protocol)
+							}
+							return types.String{}
+						}(),
+						PublicPort: func() types.String {
+							if rules.PublicPort != "" {
+								return types.StringValue(rules.PublicPort)
+							}
+							return types.String{}
+						}(),
+						Uplink: func() types.String {
+							if rules.Uplink != "" {
+								return types.StringValue(rules.Uplink)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -412,7 +411,12 @@ type ResponseOrganizationsGetOrganizationLicensesOverviewSystemsManagerCounts st
 // ToBody
 func ResponseOrganizationsGetOrganizationLicensesOverviewItemToBody(state OrganizationsLicensesOverview, response *merakigosdk.ResponseOrganizationsGetOrganizationLicensesOverview) OrganizationsLicensesOverview {
 	itemState := ResponseOrganizationsGetOrganizationLicensesOverview{
-		ExpirationDate: types.StringValue(response.ExpirationDate),
+		ExpirationDate: func() types.String {
+			if response.ExpirationDate != "" {
+				return types.StringValue(response.ExpirationDate)
+			}
+			return types.String{}
+		}(),
 		LicenseCount: func() types.Int64 {
 			if response.LicenseCount != nil {
 				return types.Int64Value(int64(*response.LicenseCount))
@@ -437,14 +441,19 @@ func ResponseOrganizationsGetOrganizationLicensesOverviewItemToBody(state Organi
 							}
 							return nil
 						}(),
-						LicenseType: types.StringValue(licenseTypes.LicenseType),
+						LicenseType: func() types.String {
+							if licenseTypes.LicenseType != "" {
+								return types.StringValue(licenseTypes.LicenseType)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		// LicensedDeviceCounts: types.StringValue(response.LicensedDeviceCounts), //TODO POSIBLE interface
+		// LicensedDeviceCounts: func() types.String {
 		States: func() *ResponseOrganizationsGetOrganizationLicensesOverviewStates {
 			if response.States != nil {
 				return &ResponseOrganizationsGetOrganizationLicensesOverviewStates{
@@ -550,7 +559,12 @@ func ResponseOrganizationsGetOrganizationLicensesOverviewItemToBody(state Organi
 								SoonestActivation: func() *ResponseOrganizationsGetOrganizationLicensesOverviewStatesUnusedSoonestActivation {
 									if response.States.Unused.SoonestActivation != nil {
 										return &ResponseOrganizationsGetOrganizationLicensesOverviewStatesUnusedSoonestActivation{
-											ActivationDate: types.StringValue(response.States.Unused.SoonestActivation.ActivationDate),
+											ActivationDate: func() types.String {
+												if response.States.Unused.SoonestActivation.ActivationDate != "" {
+													return types.StringValue(response.States.Unused.SoonestActivation.ActivationDate)
+												}
+												return types.String{}
+											}(),
 											ToActivateCount: func() types.Int64 {
 												if response.States.Unused.SoonestActivation.ToActivateCount != nil {
 													return types.Int64Value(int64(*response.States.Unused.SoonestActivation.ToActivateCount))
@@ -577,7 +591,12 @@ func ResponseOrganizationsGetOrganizationLicensesOverviewItemToBody(state Organi
 								OldestActivation: func() *ResponseOrganizationsGetOrganizationLicensesOverviewStatesUnusedActiveOldestActivation {
 									if response.States.UnusedActive.OldestActivation != nil {
 										return &ResponseOrganizationsGetOrganizationLicensesOverviewStatesUnusedActiveOldestActivation{
-											ActivationDate: types.StringValue(response.States.UnusedActive.OldestActivation.ActivationDate),
+											ActivationDate: func() types.String {
+												if response.States.UnusedActive.OldestActivation.ActivationDate != "" {
+													return types.StringValue(response.States.UnusedActive.OldestActivation.ActivationDate)
+												}
+												return types.String{}
+											}(),
 											ActiveCount: func() types.Int64 {
 												if response.States.UnusedActive.OldestActivation.ActiveCount != nil {
 													return types.Int64Value(int64(*response.States.UnusedActive.OldestActivation.ActiveCount))
@@ -596,7 +615,12 @@ func ResponseOrganizationsGetOrganizationLicensesOverviewItemToBody(state Organi
 			}
 			return nil
 		}(),
-		Status: types.StringValue(response.Status),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
 		SystemsManager: func() *ResponseOrganizationsGetOrganizationLicensesOverviewSystemsManager {
 			if response.SystemsManager != nil {
 				return &ResponseOrganizationsGetOrganizationLicensesOverviewSystemsManager{

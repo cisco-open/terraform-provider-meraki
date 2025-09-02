@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -26,8 +27,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -63,19 +64,17 @@ func (r *NetworksTrafficAnalysisResource) Metadata(_ context.Context, req resour
 func (r *NetworksTrafficAnalysisResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"custom_pie_chart_items": schema.SetNestedAttribute{
+			"custom_pie_chart_items": schema.ListNestedAttribute{
 				MarkdownDescription: `The list of items that make up the custom pie chart for traffic reporting.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"name": schema.StringAttribute{
 							MarkdownDescription: `The name of the custom pie chart item.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -85,7 +84,6 @@ func (r *NetworksTrafficAnalysisResource) Schema(_ context.Context, _ resource.S
 							MarkdownDescription: `    The signature type for the custom pie chart item. Can be one of 'host', 'port' or 'ipRange'.
 
                                         Allowed values: [host,ipRange,port]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -102,7 +100,6 @@ func (r *NetworksTrafficAnalysisResource) Schema(_ context.Context, _ resource.S
 							MarkdownDescription: `    The value of the custom pie chart item. Valid syntax depends on the signature type of the chart item
     (see sample request/response for more details).
 `,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -116,7 +113,6 @@ func (r *NetworksTrafficAnalysisResource) Schema(_ context.Context, _ resource.S
     'basic' (collect generic traffic categories), or 'detailed' (collect destination hostnames).
 
                                   Allowed values: [basic,detailed,disabled]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -159,27 +155,6 @@ func (r *NetworksTrafficAnalysisResource) Create(ctx context.Context, req resour
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkTrafficAnalysis(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksTrafficAnalysis  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksTrafficAnalysis only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkTrafficAnalysis(vvNetworkID, dataRequest)
@@ -188,7 +163,7 @@ func (r *NetworksTrafficAnalysisResource) Create(ctx context.Context, req resour
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkTrafficAnalysis",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -199,49 +174,19 @@ func (r *NetworksTrafficAnalysisResource) Create(ctx context.Context, req resour
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Networks.GetNetworkTrafficAnalysis(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkTrafficAnalysis",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkTrafficAnalysis",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseNetworksGetNetworkTrafficAnalysisItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksTrafficAnalysisResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksTrafficAnalysisRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -271,33 +216,28 @@ func (r *NetworksTrafficAnalysisResource) Read(ctx context.Context, req resource
 	}
 	//entro aqui 2
 	data = ResponseNetworksGetNetworkTrafficAnalysisItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksTrafficAnalysisResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksTrafficAnalysisResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksTrafficAnalysisRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksTrafficAnalysisRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkTrafficAnalysis(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkTrafficAnalysis",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -307,9 +247,7 @@ func (r *NetworksTrafficAnalysisResource) Update(ctx context.Context, req resour
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksTrafficAnalysisResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -375,16 +313,36 @@ func ResponseNetworksGetNetworkTrafficAnalysisItemToBodyRs(state NetworksTraffic
 				result := make([]ResponseNetworksGetNetworkTrafficAnalysisCustomPieChartItemsRs, len(*response.CustomPieChartItems))
 				for i, customPieChartItems := range *response.CustomPieChartItems {
 					result[i] = ResponseNetworksGetNetworkTrafficAnalysisCustomPieChartItemsRs{
-						Name:  types.StringValue(customPieChartItems.Name),
-						Type:  types.StringValue(customPieChartItems.Type),
-						Value: types.StringValue(customPieChartItems.Value),
+						Name: func() types.String {
+							if customPieChartItems.Name != "" {
+								return types.StringValue(customPieChartItems.Name)
+							}
+							return types.String{}
+						}(),
+						Type: func() types.String {
+							if customPieChartItems.Type != "" {
+								return types.StringValue(customPieChartItems.Type)
+							}
+							return types.String{}
+						}(),
+						Value: func() types.String {
+							if customPieChartItems.Value != "" {
+								return types.StringValue(customPieChartItems.Value)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		Mode: types.StringValue(response.Mode),
+		Mode: func() types.String {
+			if response.Mode != "" {
+				return types.StringValue(response.Mode)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksTrafficAnalysisRs)

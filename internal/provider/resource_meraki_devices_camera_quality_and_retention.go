@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -66,7 +67,6 @@ func (r *DevicesCameraQualityAndRetentionResource) Schema(_ context.Context, _ r
 		Attributes: map[string]schema.Attribute{
 			"audio_recording_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating if audio recording is enabled(true) or disabled(false) on the camera`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -74,7 +74,6 @@ func (r *DevicesCameraQualityAndRetentionResource) Schema(_ context.Context, _ r
 			},
 			"motion_based_retention_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating if motion-based retention is enabled(true) or disabled(false) on the camera.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -83,7 +82,6 @@ func (r *DevicesCameraQualityAndRetentionResource) Schema(_ context.Context, _ r
 			"motion_detector_version": schema.Int64Attribute{
 				MarkdownDescription: `The version of the motion detector that will be used by the camera. Only applies to Gen 2 cameras. Defaults to v2.
                                   Allowed values: [1,2]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -91,7 +89,6 @@ func (r *DevicesCameraQualityAndRetentionResource) Schema(_ context.Context, _ r
 			},
 			"profile_id": schema.StringAttribute{
 				MarkdownDescription: `The ID of a quality and retention profile to assign to the camera. The profile's settings will override all of the per-camera quality and retention settings. If the value of this parameter is null, any existing profile will be unassigned from the camera.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -100,7 +97,6 @@ func (r *DevicesCameraQualityAndRetentionResource) Schema(_ context.Context, _ r
 			"quality": schema.StringAttribute{
 				MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'High', 'Enhanced' or 'Ultra'. Not all qualities are supported by every camera model.
                                   Allowed values: [Enhanced,High,Standard,Ultra]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -117,7 +113,6 @@ func (r *DevicesCameraQualityAndRetentionResource) Schema(_ context.Context, _ r
 			"resolution": schema.StringAttribute{
 				MarkdownDescription: `Resolution of the camera. Can be one of '1280x720', '1920x1080', '1080x1080', '2112x2112', '2880x2880', '2688x1512' or '3840x2160'.Not all resolutions are supported by every camera model.
                                   Allowed values: [1080x1080,1280x720,1920x1080,2112x2112,2688x1512,2880x2880,3840x2160]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -136,7 +131,6 @@ func (r *DevicesCameraQualityAndRetentionResource) Schema(_ context.Context, _ r
 			},
 			"restricted_bandwidth_mode_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating if restricted bandwidth is enabled(true) or disabled(false) on the camera. This setting does not apply to MV2 cameras.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -172,27 +166,6 @@ func (r *DevicesCameraQualityAndRetentionResource) Create(ctx context.Context, r
 	vvSerial := data.Serial.ValueString()
 	//Has Item and not has items
 
-	if vvSerial != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Camera.GetDeviceCameraQualityAndRetention(vvSerial)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesCameraQualityAndRetention  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesCameraQualityAndRetention only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Camera.UpdateDeviceCameraQualityAndRetention(vvSerial, dataRequest)
@@ -201,7 +174,7 @@ func (r *DevicesCameraQualityAndRetentionResource) Create(ctx context.Context, r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCameraQualityAndRetention",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -212,49 +185,19 @@ func (r *DevicesCameraQualityAndRetentionResource) Create(ctx context.Context, r
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Camera.GetDeviceCameraQualityAndRetention(vvSerial)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetDeviceCameraQualityAndRetention",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetDeviceCameraQualityAndRetention",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseCameraGetDeviceCameraQualityAndRetentionItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *DevicesCameraQualityAndRetentionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data DevicesCameraQualityAndRetentionRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -284,33 +227,28 @@ func (r *DevicesCameraQualityAndRetentionResource) Read(ctx context.Context, req
 	}
 	//entro aqui 2
 	data = ResponseCameraGetDeviceCameraQualityAndRetentionItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *DevicesCameraQualityAndRetentionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("serial"), req.ID)...)
 }
 
 func (r *DevicesCameraQualityAndRetentionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data DevicesCameraQualityAndRetentionRs
-	merge(ctx, req, resp, &data)
+	var plan DevicesCameraQualityAndRetentionRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvSerial := data.Serial.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvSerial := plan.Serial.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Camera.UpdateDeviceCameraQualityAndRetention(vvSerial, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCameraQualityAndRetention",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -320,9 +258,7 @@ func (r *DevicesCameraQualityAndRetentionResource) Update(ctx context.Context, r
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *DevicesCameraQualityAndRetentionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -421,9 +357,24 @@ func ResponseCameraGetDeviceCameraQualityAndRetentionItemToBodyRs(state DevicesC
 			}
 			return types.Int64{}
 		}(),
-		ProfileID:  types.StringValue(response.ProfileID),
-		Quality:    types.StringValue(response.Quality),
-		Resolution: types.StringValue(response.Resolution),
+		ProfileID: func() types.String {
+			if response.ProfileID != "" {
+				return types.StringValue(response.ProfileID)
+			}
+			return types.String{}
+		}(),
+		Quality: func() types.String {
+			if response.Quality != "" {
+				return types.StringValue(response.Quality)
+			}
+			return types.String{}
+		}(),
+		Resolution: func() types.String {
+			if response.Resolution != "" {
+				return types.StringValue(response.Resolution)
+			}
+			return types.String{}
+		}(),
 		RestrictedBandwidthModeEnabled: func() types.Bool {
 			if response.RestrictedBandwidthModeEnabled != nil {
 				return types.BoolValue(*response.RestrictedBandwidthModeEnabled)

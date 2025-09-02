@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -277,6 +276,17 @@ func (d *DevicesSensorCommandsDataSource) Read(ctx context.Context, req datasour
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetDeviceSensorCommand",
+				err.Error(),
+			)
+			return
+		}
+
 		devicesSensorCommands = ResponseSensorGetDeviceSensorCommandItemToBody(devicesSensorCommands, response2)
 		diags = resp.State.Set(ctx, &devicesSensorCommands)
 		resp.Diagnostics.Append(diags...)
@@ -340,22 +350,62 @@ func ResponseSensorGetDeviceSensorCommandsItemsToBody(state DevicesSensorCommand
 	var items []ResponseItemSensorGetDeviceSensorCommands
 	for _, item := range *response {
 		itemState := ResponseItemSensorGetDeviceSensorCommands{
-			CommandID:   types.StringValue(item.CommandID),
-			CompletedAt: types.StringValue(item.CompletedAt),
-			CreatedAt:   types.StringValue(item.CreatedAt),
+			CommandID: func() types.String {
+				if item.CommandID != "" {
+					return types.StringValue(item.CommandID)
+				}
+				return types.String{}
+			}(),
+			CompletedAt: func() types.String {
+				if item.CompletedAt != "" {
+					return types.StringValue(item.CompletedAt)
+				}
+				return types.String{}
+			}(),
+			CreatedAt: func() types.String {
+				if item.CreatedAt != "" {
+					return types.StringValue(item.CreatedAt)
+				}
+				return types.String{}
+			}(),
 			CreatedBy: func() *ResponseItemSensorGetDeviceSensorCommandsCreatedBy {
 				if item.CreatedBy != nil {
 					return &ResponseItemSensorGetDeviceSensorCommandsCreatedBy{
-						AdminID: types.StringValue(item.CreatedBy.AdminID),
-						Email:   types.StringValue(item.CreatedBy.Email),
-						Name:    types.StringValue(item.CreatedBy.Name),
+						AdminID: func() types.String {
+							if item.CreatedBy.AdminID != "" {
+								return types.StringValue(item.CreatedBy.AdminID)
+							}
+							return types.String{}
+						}(),
+						Email: func() types.String {
+							if item.CreatedBy.Email != "" {
+								return types.StringValue(item.CreatedBy.Email)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if item.CreatedBy.Name != "" {
+								return types.StringValue(item.CreatedBy.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			Errors:    StringSliceToList(item.Errors),
-			Operation: types.StringValue(item.Operation),
-			Status:    types.StringValue(item.Status),
+			Errors: StringSliceToList(item.Errors),
+			Operation: func() types.String {
+				if item.Operation != "" {
+					return types.StringValue(item.Operation)
+				}
+				return types.String{}
+			}(),
+			Status: func() types.String {
+				if item.Status != "" {
+					return types.StringValue(item.Status)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -365,22 +415,62 @@ func ResponseSensorGetDeviceSensorCommandsItemsToBody(state DevicesSensorCommand
 
 func ResponseSensorGetDeviceSensorCommandItemToBody(state DevicesSensorCommands, response *merakigosdk.ResponseSensorGetDeviceSensorCommand) DevicesSensorCommands {
 	itemState := ResponseSensorGetDeviceSensorCommand{
-		CommandID:   types.StringValue(response.CommandID),
-		CompletedAt: types.StringValue(response.CompletedAt),
-		CreatedAt:   types.StringValue(response.CreatedAt),
+		CommandID: func() types.String {
+			if response.CommandID != "" {
+				return types.StringValue(response.CommandID)
+			}
+			return types.String{}
+		}(),
+		CompletedAt: func() types.String {
+			if response.CompletedAt != "" {
+				return types.StringValue(response.CompletedAt)
+			}
+			return types.String{}
+		}(),
+		CreatedAt: func() types.String {
+			if response.CreatedAt != "" {
+				return types.StringValue(response.CreatedAt)
+			}
+			return types.String{}
+		}(),
 		CreatedBy: func() *ResponseSensorGetDeviceSensorCommandCreatedBy {
 			if response.CreatedBy != nil {
 				return &ResponseSensorGetDeviceSensorCommandCreatedBy{
-					AdminID: types.StringValue(response.CreatedBy.AdminID),
-					Email:   types.StringValue(response.CreatedBy.Email),
-					Name:    types.StringValue(response.CreatedBy.Name),
+					AdminID: func() types.String {
+						if response.CreatedBy.AdminID != "" {
+							return types.StringValue(response.CreatedBy.AdminID)
+						}
+						return types.String{}
+					}(),
+					Email: func() types.String {
+						if response.CreatedBy.Email != "" {
+							return types.StringValue(response.CreatedBy.Email)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.CreatedBy.Name != "" {
+							return types.StringValue(response.CreatedBy.Name)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Errors:    StringSliceToList(response.Errors),
-		Operation: types.StringValue(response.Operation),
-		Status:    types.StringValue(response.Status),
+		Errors: StringSliceToList(response.Errors),
+		Operation: func() types.String {
+			if response.Operation != "" {
+				return types.StringValue(response.Operation)
+			}
+			return types.String{}
+		}(),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

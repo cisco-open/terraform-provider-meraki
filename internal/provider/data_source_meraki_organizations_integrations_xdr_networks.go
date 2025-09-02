@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -247,8 +246,18 @@ func ResponseOrganizationsGetOrganizationIntegrationsXdrNetworksItemToBody(state
 							}
 							return types.Bool{}
 						}(),
-						Name:         types.StringValue(items.Name),
-						NetworkID:    types.StringValue(items.NetworkID),
+						Name: func() types.String {
+							if items.Name != "" {
+								return types.StringValue(items.Name)
+							}
+							return types.String{}
+						}(),
+						NetworkID: func() types.String {
+							if items.NetworkID != "" {
+								return types.StringValue(items.NetworkID)
+							}
+							return types.String{}
+						}(),
 						ProductTypes: StringSliceToList(items.ProductTypes),
 					}
 				}

@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -31,6 +32,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -188,6 +190,7 @@ func (r *OrganizationsAlertsProfilesResource) Schema(_ context.Context, _ resour
 				},
 
 				ElementType: types.StringType,
+				Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
@@ -443,7 +446,7 @@ func (r *OrganizationsAlertsProfilesResource) Update(ctx context.Context, req re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationAlertsProfile",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -741,7 +744,12 @@ func ResponseOrganizationsGetOrganizationAlertsProfilesItemToBodyRs(state Organi
 						}
 						return types.Int64{}
 					}(),
-					Interface: types.StringValue(response.AlertCondition.Interface),
+					Interface: func() types.String {
+						if response.AlertCondition.Interface != "" {
+							return types.StringValue(response.AlertCondition.Interface)
+						}
+						return types.String{}
+					}(),
 					Window: func() types.Int64 {
 						if response.AlertCondition.Window != nil {
 							return types.Int64Value(int64(*response.AlertCondition.Window))
@@ -752,14 +760,24 @@ func ResponseOrganizationsGetOrganizationAlertsProfilesItemToBodyRs(state Organi
 			}
 			return nil
 		}(),
-		Description: types.StringValue(response.Description),
+		Description: func() types.String {
+			if response.Description != "" {
+				return types.StringValue(response.Description)
+			}
+			return types.String{}
+		}(),
 		Enabled: func() types.Bool {
 			if response.Enabled != nil {
 				return types.BoolValue(*response.Enabled)
 			}
 			return types.Bool{}
 		}(),
-		ID:          types.StringValue(response.ID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		NetworkTags: StringSliceToSet(response.NetworkTags),
 		Recipients: func() *ResponseItemOrganizationsGetOrganizationAlertsProfilesRecipientsRs {
 			if response.Recipients != nil {
@@ -770,7 +788,12 @@ func ResponseOrganizationsGetOrganizationAlertsProfilesItemToBodyRs(state Organi
 			}
 			return nil
 		}(),
-		Type: types.StringValue(response.Type),
+		Type: func() types.String {
+			if response.Type != "" {
+				return types.StringValue(response.Type)
+			}
+			return types.String{}
+		}(),
 	}
 	state = itemState
 	return state

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -721,7 +720,7 @@ func (d *NetworksWirelessRfProfilesDataSource) Schema(_ context.Context, _ datas
 								MarkdownDescription: `Sets valid auto channels for 6Ghz band. Can be one of '1', '5', '9', '13', '17', '21', '25', '29', '33', '37', '41', '45', '49', '53', '57', '61', '65', '69', '73', '77', '81', '85', '89', '93', '97', '101', '105', '109', '113', '117', '121', '125', '129', '133', '137', '141', '145', '149', '153', '157', '161', '165', '169', '173', '177', '181', '185', '189', '193', '197', '201', '205', '209', '213', '217', '221', '225', '229' or '233'. Defaults to auto.`,
 								Computed:            true,
 								ElementType:         types.StringType, //TODO FINAL ELSE param_schema.Elem.Type para revisar
-								// {'Type': 'schema.TypeInt'}
+
 							},
 						},
 					},
@@ -1111,7 +1110,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 		ApBandSettings: func() *ResponseWirelessGetNetworkWirelessRfProfileApBandSettings {
 			if response.ApBandSettings != nil {
 				return &ResponseWirelessGetNetworkWirelessRfProfileApBandSettings{
-					BandOperationMode: types.StringValue(response.ApBandSettings.BandOperationMode),
+					BandOperationMode: func() types.String {
+						if response.ApBandSettings.BandOperationMode != "" {
+							return types.StringValue(response.ApBandSettings.BandOperationMode)
+						}
+						return types.String{}
+					}(),
 					BandSteeringEnabled: func() types.Bool {
 						if response.ApBandSettings.BandSteeringEnabled != nil {
 							return types.BoolValue(*response.ApBandSettings.BandSteeringEnabled)
@@ -1130,7 +1134,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 			}
 			return nil
 		}(),
-		BandSelectionType: types.StringValue(response.BandSelectionType),
+		BandSelectionType: func() types.String {
+			if response.BandSelectionType != "" {
+				return types.StringValue(response.BandSelectionType)
+			}
+			return types.String{}
+		}(),
 		ClientBalancingEnabled: func() types.Bool {
 			if response.ClientBalancingEnabled != nil {
 				return types.BoolValue(*response.ClientBalancingEnabled)
@@ -1140,7 +1149,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 		FiveGhzSettings: func() *ResponseWirelessGetNetworkWirelessRfProfileFiveGhzSettings {
 			if response.FiveGhzSettings != nil {
 				return &ResponseWirelessGetNetworkWirelessRfProfileFiveGhzSettings{
-					ChannelWidth: types.StringValue(response.FiveGhzSettings.ChannelWidth),
+					ChannelWidth: func() types.String {
+						if response.FiveGhzSettings.ChannelWidth != "" {
+							return types.StringValue(response.FiveGhzSettings.ChannelWidth)
+						}
+						return types.String{}
+					}(),
 					MaxPower: func() types.Int64 {
 						if response.FiveGhzSettings.MaxPower != nil {
 							return types.Int64Value(int64(*response.FiveGhzSettings.MaxPower))
@@ -1170,7 +1184,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 			}
 			return nil
 		}(),
-		ID: types.StringValue(response.ID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		IsIndoorDefault: func() types.Bool {
 			if response.IsIndoorDefault != nil {
 				return types.BoolValue(*response.IsIndoorDefault)
@@ -1183,16 +1202,36 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 			}
 			return types.Bool{}
 		}(),
-		MinBitrateType: types.StringValue(response.MinBitrateType),
-		Name:           types.StringValue(response.Name),
-		NetworkID:      types.StringValue(response.NetworkID),
+		MinBitrateType: func() types.String {
+			if response.MinBitrateType != "" {
+				return types.StringValue(response.MinBitrateType)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
 		PerSSIDSettings: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings {
 			if response.PerSSIDSettings != nil {
 				return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings{
 					Status0: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings0 {
 						if response.PerSSIDSettings.Status0 != nil {
 							return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings0{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status0.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status0.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status0.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status0.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status0.BandSteeringEnabled)
@@ -1213,7 +1252,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 									}
 									return types.Int64{}
 								}(),
-								Name: types.StringValue(response.PerSSIDSettings.Status0.Name),
+								Name: func() types.String {
+									if response.PerSSIDSettings.Status0.Name != "" {
+										return types.StringValue(response.PerSSIDSettings.Status0.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -1221,7 +1265,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 					Status1: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings1 {
 						if response.PerSSIDSettings.Status1 != nil {
 							return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings1{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status1.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status1.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status1.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status1.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status1.BandSteeringEnabled)
@@ -1242,7 +1291,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 									}
 									return types.Int64{}
 								}(),
-								Name: types.StringValue(response.PerSSIDSettings.Status1.Name),
+								Name: func() types.String {
+									if response.PerSSIDSettings.Status1.Name != "" {
+										return types.StringValue(response.PerSSIDSettings.Status1.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -1250,7 +1304,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 					Status10: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings10 {
 						if response.PerSSIDSettings.Status10 != nil {
 							return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings10{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status10.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status10.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status10.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status10.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status10.BandSteeringEnabled)
@@ -1271,7 +1330,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 									}
 									return types.Int64{}
 								}(),
-								Name: types.StringValue(response.PerSSIDSettings.Status10.Name),
+								Name: func() types.String {
+									if response.PerSSIDSettings.Status10.Name != "" {
+										return types.StringValue(response.PerSSIDSettings.Status10.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -1279,7 +1343,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 					Status11: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings11 {
 						if response.PerSSIDSettings.Status11 != nil {
 							return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings11{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status11.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status11.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status11.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status11.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status11.BandSteeringEnabled)
@@ -1300,7 +1369,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 									}
 									return types.Int64{}
 								}(),
-								Name: types.StringValue(response.PerSSIDSettings.Status11.Name),
+								Name: func() types.String {
+									if response.PerSSIDSettings.Status11.Name != "" {
+										return types.StringValue(response.PerSSIDSettings.Status11.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -1308,7 +1382,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 					Status12: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings12 {
 						if response.PerSSIDSettings.Status12 != nil {
 							return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings12{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status12.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status12.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status12.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status12.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status12.BandSteeringEnabled)
@@ -1329,7 +1408,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 									}
 									return types.Int64{}
 								}(),
-								Name: types.StringValue(response.PerSSIDSettings.Status12.Name),
+								Name: func() types.String {
+									if response.PerSSIDSettings.Status12.Name != "" {
+										return types.StringValue(response.PerSSIDSettings.Status12.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -1337,7 +1421,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 					Status13: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings13 {
 						if response.PerSSIDSettings.Status13 != nil {
 							return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings13{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status13.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status13.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status13.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status13.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status13.BandSteeringEnabled)
@@ -1358,7 +1447,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 									}
 									return types.Int64{}
 								}(),
-								Name: types.StringValue(response.PerSSIDSettings.Status13.Name),
+								Name: func() types.String {
+									if response.PerSSIDSettings.Status13.Name != "" {
+										return types.StringValue(response.PerSSIDSettings.Status13.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -1366,7 +1460,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 					Status14: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings14 {
 						if response.PerSSIDSettings.Status14 != nil {
 							return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings14{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status14.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status14.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status14.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status14.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status14.BandSteeringEnabled)
@@ -1387,7 +1486,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 									}
 									return types.Int64{}
 								}(),
-								Name: types.StringValue(response.PerSSIDSettings.Status14.Name),
+								Name: func() types.String {
+									if response.PerSSIDSettings.Status14.Name != "" {
+										return types.StringValue(response.PerSSIDSettings.Status14.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -1395,7 +1499,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 					Status2: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings2 {
 						if response.PerSSIDSettings.Status2 != nil {
 							return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings2{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status2.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status2.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status2.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status2.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status2.BandSteeringEnabled)
@@ -1416,7 +1525,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 									}
 									return types.Int64{}
 								}(),
-								Name: types.StringValue(response.PerSSIDSettings.Status2.Name),
+								Name: func() types.String {
+									if response.PerSSIDSettings.Status2.Name != "" {
+										return types.StringValue(response.PerSSIDSettings.Status2.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -1424,7 +1538,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 					Status3: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings3 {
 						if response.PerSSIDSettings.Status3 != nil {
 							return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings3{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status3.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status3.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status3.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status3.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status3.BandSteeringEnabled)
@@ -1445,7 +1564,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 									}
 									return types.Int64{}
 								}(),
-								Name: types.StringValue(response.PerSSIDSettings.Status3.Name),
+								Name: func() types.String {
+									if response.PerSSIDSettings.Status3.Name != "" {
+										return types.StringValue(response.PerSSIDSettings.Status3.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -1453,7 +1577,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 					Status4: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings4 {
 						if response.PerSSIDSettings.Status4 != nil {
 							return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings4{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status4.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status4.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status4.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status4.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status4.BandSteeringEnabled)
@@ -1474,7 +1603,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 									}
 									return types.Int64{}
 								}(),
-								Name: types.StringValue(response.PerSSIDSettings.Status4.Name),
+								Name: func() types.String {
+									if response.PerSSIDSettings.Status4.Name != "" {
+										return types.StringValue(response.PerSSIDSettings.Status4.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -1482,7 +1616,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 					Status5: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings5 {
 						if response.PerSSIDSettings.Status5 != nil {
 							return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings5{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status5.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status5.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status5.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status5.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status5.BandSteeringEnabled)
@@ -1503,7 +1642,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 									}
 									return types.Int64{}
 								}(),
-								Name: types.StringValue(response.PerSSIDSettings.Status5.Name),
+								Name: func() types.String {
+									if response.PerSSIDSettings.Status5.Name != "" {
+										return types.StringValue(response.PerSSIDSettings.Status5.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -1511,7 +1655,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 					Status6: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings6 {
 						if response.PerSSIDSettings.Status6 != nil {
 							return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings6{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status6.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status6.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status6.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status6.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status6.BandSteeringEnabled)
@@ -1532,7 +1681,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 									}
 									return types.Int64{}
 								}(),
-								Name: types.StringValue(response.PerSSIDSettings.Status6.Name),
+								Name: func() types.String {
+									if response.PerSSIDSettings.Status6.Name != "" {
+										return types.StringValue(response.PerSSIDSettings.Status6.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -1540,7 +1694,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 					Status7: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings7 {
 						if response.PerSSIDSettings.Status7 != nil {
 							return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings7{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status7.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status7.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status7.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status7.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status7.BandSteeringEnabled)
@@ -1561,7 +1720,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 									}
 									return types.Int64{}
 								}(),
-								Name: types.StringValue(response.PerSSIDSettings.Status7.Name),
+								Name: func() types.String {
+									if response.PerSSIDSettings.Status7.Name != "" {
+										return types.StringValue(response.PerSSIDSettings.Status7.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -1569,7 +1733,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 					Status8: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings8 {
 						if response.PerSSIDSettings.Status8 != nil {
 							return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings8{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status8.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status8.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status8.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status8.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status8.BandSteeringEnabled)
@@ -1590,7 +1759,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 									}
 									return types.Int64{}
 								}(),
-								Name: types.StringValue(response.PerSSIDSettings.Status8.Name),
+								Name: func() types.String {
+									if response.PerSSIDSettings.Status8.Name != "" {
+										return types.StringValue(response.PerSSIDSettings.Status8.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -1598,7 +1772,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 					Status9: func() *ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings9 {
 						if response.PerSSIDSettings.Status9 != nil {
 							return &ResponseWirelessGetNetworkWirelessRfProfilePerSsidSettings9{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status9.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status9.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status9.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status9.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status9.BandSteeringEnabled)
@@ -1619,7 +1798,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 									}
 									return types.Int64{}
 								}(),
-								Name: types.StringValue(response.PerSSIDSettings.Status9.Name),
+								Name: func() types.String {
+									if response.PerSSIDSettings.Status9.Name != "" {
+										return types.StringValue(response.PerSSIDSettings.Status9.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -1631,7 +1815,12 @@ func ResponseWirelessGetNetworkWirelessRfProfileItemToBody(state NetworksWireles
 		SixGhzSettings: func() *ResponseWirelessGetNetworkWirelessRfProfileSixGhzSettings {
 			if response.SixGhzSettings != nil {
 				return &ResponseWirelessGetNetworkWirelessRfProfileSixGhzSettings{
-					ChannelWidth: types.StringValue(response.SixGhzSettings.ChannelWidth),
+					ChannelWidth: func() types.String {
+						if response.SixGhzSettings.ChannelWidth != "" {
+							return types.StringValue(response.SixGhzSettings.ChannelWidth)
+						}
+						return types.String{}
+					}(),
 					MaxPower: func() types.Int64 {
 						if response.SixGhzSettings.MaxPower != nil {
 							return types.Int64Value(int64(*response.SixGhzSettings.MaxPower))

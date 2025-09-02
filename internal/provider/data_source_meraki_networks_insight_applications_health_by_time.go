@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -219,7 +218,12 @@ func ResponseInsightGetNetworkInsightApplicationHealthByTimeItemsToBody(state Ne
 	var items []ResponseItemInsightGetNetworkInsightApplicationHealthByTime
 	for _, item := range *response {
 		itemState := ResponseItemInsightGetNetworkInsightApplicationHealthByTime{
-			EndTs: types.StringValue(item.EndTs),
+			EndTs: func() types.String {
+				if item.EndTs != "" {
+					return types.StringValue(item.EndTs)
+				}
+				return types.String{}
+			}(),
 			LanGoodput: func() types.Int64 {
 				if item.LanGoodput != nil {
 					return types.Int64Value(int64(*item.LanGoodput))
@@ -262,7 +266,12 @@ func ResponseInsightGetNetworkInsightApplicationHealthByTimeItemsToBody(state Ne
 				}
 				return types.Int64{}
 			}(),
-			StartTs: types.StringValue(item.StartTs),
+			StartTs: func() types.String {
+				if item.StartTs != "" {
+					return types.StringValue(item.StartTs)
+				}
+				return types.String{}
+			}(),
 			WanGoodput: func() types.Int64 {
 				if item.WanGoodput != nil {
 					return types.Int64Value(int64(*item.WanGoodput))

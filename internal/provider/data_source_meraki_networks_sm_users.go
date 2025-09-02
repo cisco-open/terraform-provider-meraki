@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -234,9 +233,24 @@ func ResponseSmGetNetworkSmUsersItemsToBody(state NetworksSmUsers, response *mer
 			AdGroups:      StringSliceToList(item.AdGroups),
 			AsmGroups:     StringSliceToList(item.AsmGroups),
 			AzureAdGroups: StringSliceToList(item.AzureAdGroups),
-			DisplayName:   types.StringValue(item.DisplayName),
-			Email:         types.StringValue(item.Email),
-			FullName:      types.StringValue(item.FullName),
+			DisplayName: func() types.String {
+				if item.DisplayName != "" {
+					return types.StringValue(item.DisplayName)
+				}
+				return types.String{}
+			}(),
+			Email: func() types.String {
+				if item.Email != "" {
+					return types.StringValue(item.Email)
+				}
+				return types.String{}
+			}(),
+			FullName: func() types.String {
+				if item.FullName != "" {
+					return types.StringValue(item.FullName)
+				}
+				return types.String{}
+			}(),
 			HasIDentityCertificate: func() types.Bool {
 				if item.HasIDentityCertificate != nil {
 					return types.BoolValue(*item.HasIDentityCertificate)
@@ -249,17 +263,37 @@ func ResponseSmGetNetworkSmUsersItemsToBody(state NetworksSmUsers, response *mer
 				}
 				return types.Bool{}
 			}(),
-			ID: types.StringValue(item.ID),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
 			IsExternal: func() types.Bool {
 				if item.IsExternal != nil {
 					return types.BoolValue(*item.IsExternal)
 				}
 				return types.Bool{}
 			}(),
-			SamlGroups:    StringSliceToList(item.SamlGroups),
-			Tags:          types.StringValue(item.Tags),
-			UserThumbnail: types.StringValue(item.UserThumbnail),
-			Username:      types.StringValue(item.Username),
+			SamlGroups: StringSliceToList(item.SamlGroups),
+			Tags: func() types.String {
+				if item.Tags != "" {
+					return types.StringValue(item.Tags)
+				}
+				return types.String{}
+			}(),
+			UserThumbnail: func() types.String {
+				if item.UserThumbnail != "" {
+					return types.StringValue(item.UserThumbnail)
+				}
+				return types.String{}
+			}(),
+			Username: func() types.String {
+				if item.Username != "" {
+					return types.StringValue(item.Username)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

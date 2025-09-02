@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -323,11 +322,21 @@ func ResponseWirelessGetOrganizationWirelessDevicesEthernetStatusesItemsToBody(s
 				}
 				return nil
 			}(),
-			Name: types.StringValue(item.Name),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			Network: func() *ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesNetwork {
 				if item.Network != nil {
 					return &ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesNetwork{
-						ID: types.StringValue(item.Network.ID),
+						ID: func() types.String {
+							if item.Network.ID != "" {
+								return types.StringValue(item.Network.ID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -340,7 +349,12 @@ func ResponseWirelessGetOrganizationWirelessDevicesEthernetStatusesItemsToBody(s
 							LinkNegotiation: func() *ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesPortsLinkNegotiation {
 								if ports.LinkNegotiation != nil {
 									return &ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesPortsLinkNegotiation{
-										Duplex: types.StringValue(ports.LinkNegotiation.Duplex),
+										Duplex: func() types.String {
+											if ports.LinkNegotiation.Duplex != "" {
+												return types.StringValue(ports.LinkNegotiation.Duplex)
+											}
+											return types.String{}
+										}(),
 										Speed: func() types.Int64 {
 											if ports.LinkNegotiation.Speed != nil {
 												return types.Int64Value(int64(*ports.LinkNegotiation.Speed))
@@ -351,11 +365,21 @@ func ResponseWirelessGetOrganizationWirelessDevicesEthernetStatusesItemsToBody(s
 								}
 								return nil
 							}(),
-							Name: types.StringValue(ports.Name),
+							Name: func() types.String {
+								if ports.Name != "" {
+									return types.StringValue(ports.Name)
+								}
+								return types.String{}
+							}(),
 							Poe: func() *ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesPortsPoe {
 								if ports.Poe != nil {
 									return &ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesPortsPoe{
-										Standard: types.StringValue(ports.Poe.Standard),
+										Standard: func() types.String {
+											if ports.Poe.Standard != "" {
+												return types.StringValue(ports.Poe.Standard)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return nil
@@ -382,7 +406,12 @@ func ResponseWirelessGetOrganizationWirelessDevicesEthernetStatusesItemsToBody(s
 							}
 							return nil
 						}(),
-						Mode: types.StringValue(item.Power.Mode),
+						Mode: func() types.String {
+							if item.Power.Mode != "" {
+								return types.StringValue(item.Power.Mode)
+							}
+							return types.String{}
+						}(),
 						Poe: func() *ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesPowerPoe {
 							if item.Power.Poe != nil {
 								return &ResponseItemWirelessGetOrganizationWirelessDevicesEthernetStatusesPowerPoe{
@@ -400,7 +429,12 @@ func ResponseWirelessGetOrganizationWirelessDevicesEthernetStatusesItemsToBody(s
 				}
 				return nil
 			}(),
-			Serial: types.StringValue(item.Serial),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

@@ -160,8 +160,13 @@ func ResponseCameraGetDeviceCameraSenseItemToBody(state DevicesCameraSense, resp
 			}
 			return nil
 		}(),
-		MqttBrokerID: types.StringValue(response.MqttBrokerID),
-		MqttTopics:   StringSliceToList(response.MqttTopics),
+		MqttBrokerID: func() types.String {
+			if response.MqttBrokerID != "" {
+				return types.StringValue(response.MqttBrokerID)
+			}
+			return types.String{}
+		}(),
+		MqttTopics: StringSliceToList(response.MqttTopics),
 		SenseEnabled: func() types.Bool {
 			if response.SenseEnabled != nil {
 				return types.BoolValue(*response.SenseEnabled)

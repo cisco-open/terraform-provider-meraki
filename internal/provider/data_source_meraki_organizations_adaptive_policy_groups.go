@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -246,6 +245,17 @@ func (d *OrganizationsAdaptivePolicyGroupsDataSource) Read(ctx context.Context, 
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetOrganizationAdaptivePolicyGroup",
+				err.Error(),
+			)
+			return
+		}
+
 		organizationsAdaptivePolicyGroups = ResponseOrganizationsGetOrganizationAdaptivePolicyGroupItemToBody(organizationsAdaptivePolicyGroups, response2)
 		diags = resp.State.Set(ctx, &organizationsAdaptivePolicyGroups)
 		resp.Diagnostics.Append(diags...)
@@ -303,23 +313,53 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyGroupsItemsToBody(state O
 	var items []ResponseItemOrganizationsGetOrganizationAdaptivePolicyGroups
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationAdaptivePolicyGroups{
-			CreatedAt:   types.StringValue(item.CreatedAt),
-			Description: types.StringValue(item.Description),
-			GroupID:     types.StringValue(item.GroupID),
+			CreatedAt: func() types.String {
+				if item.CreatedAt != "" {
+					return types.StringValue(item.CreatedAt)
+				}
+				return types.String{}
+			}(),
+			Description: func() types.String {
+				if item.Description != "" {
+					return types.StringValue(item.Description)
+				}
+				return types.String{}
+			}(),
+			GroupID: func() types.String {
+				if item.GroupID != "" {
+					return types.StringValue(item.GroupID)
+				}
+				return types.String{}
+			}(),
 			IsDefaultGroup: func() types.Bool {
 				if item.IsDefaultGroup != nil {
 					return types.BoolValue(*item.IsDefaultGroup)
 				}
 				return types.Bool{}
 			}(),
-			Name: types.StringValue(item.Name),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			PolicyObjects: func() *[]ResponseItemOrganizationsGetOrganizationAdaptivePolicyGroupsPolicyObjects {
 				if item.PolicyObjects != nil {
 					result := make([]ResponseItemOrganizationsGetOrganizationAdaptivePolicyGroupsPolicyObjects, len(*item.PolicyObjects))
 					for i, policyObjects := range *item.PolicyObjects {
 						result[i] = ResponseItemOrganizationsGetOrganizationAdaptivePolicyGroupsPolicyObjects{
-							ID:   types.StringValue(policyObjects.ID),
-							Name: types.StringValue(policyObjects.Name),
+							ID: func() types.String {
+								if policyObjects.ID != "" {
+									return types.StringValue(policyObjects.ID)
+								}
+								return types.String{}
+							}(),
+							Name: func() types.String {
+								if policyObjects.Name != "" {
+									return types.StringValue(policyObjects.Name)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
@@ -333,7 +373,12 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyGroupsItemsToBody(state O
 				}
 				return types.Int64{}
 			}(),
-			UpdatedAt: types.StringValue(item.UpdatedAt),
+			UpdatedAt: func() types.String {
+				if item.UpdatedAt != "" {
+					return types.StringValue(item.UpdatedAt)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -343,23 +388,53 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyGroupsItemsToBody(state O
 
 func ResponseOrganizationsGetOrganizationAdaptivePolicyGroupItemToBody(state OrganizationsAdaptivePolicyGroups, response *merakigosdk.ResponseOrganizationsGetOrganizationAdaptivePolicyGroup) OrganizationsAdaptivePolicyGroups {
 	itemState := ResponseOrganizationsGetOrganizationAdaptivePolicyGroup{
-		CreatedAt:   types.StringValue(response.CreatedAt),
-		Description: types.StringValue(response.Description),
-		GroupID:     types.StringValue(response.GroupID),
+		CreatedAt: func() types.String {
+			if response.CreatedAt != "" {
+				return types.StringValue(response.CreatedAt)
+			}
+			return types.String{}
+		}(),
+		Description: func() types.String {
+			if response.Description != "" {
+				return types.StringValue(response.Description)
+			}
+			return types.String{}
+		}(),
+		GroupID: func() types.String {
+			if response.GroupID != "" {
+				return types.StringValue(response.GroupID)
+			}
+			return types.String{}
+		}(),
 		IsDefaultGroup: func() types.Bool {
 			if response.IsDefaultGroup != nil {
 				return types.BoolValue(*response.IsDefaultGroup)
 			}
 			return types.Bool{}
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		PolicyObjects: func() *[]ResponseOrganizationsGetOrganizationAdaptivePolicyGroupPolicyObjects {
 			if response.PolicyObjects != nil {
 				result := make([]ResponseOrganizationsGetOrganizationAdaptivePolicyGroupPolicyObjects, len(*response.PolicyObjects))
 				for i, policyObjects := range *response.PolicyObjects {
 					result[i] = ResponseOrganizationsGetOrganizationAdaptivePolicyGroupPolicyObjects{
-						ID:   types.StringValue(policyObjects.ID),
-						Name: types.StringValue(policyObjects.Name),
+						ID: func() types.String {
+							if policyObjects.ID != "" {
+								return types.StringValue(policyObjects.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if policyObjects.Name != "" {
+								return types.StringValue(policyObjects.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -373,7 +448,12 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyGroupItemToBody(state Org
 			}
 			return types.Int64{}
 		}(),
-		UpdatedAt: types.StringValue(response.UpdatedAt),
+		UpdatedAt: func() types.String {
+			if response.UpdatedAt != "" {
+				return types.StringValue(response.UpdatedAt)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

@@ -502,12 +502,7 @@ func (r *OrganizationsLicensingCotermLicensesMove) toSdkApiRequestCreate(ctx con
 	}
 	out := merakigosdk.RequestLicensingMoveOrganizationLicensingCotermLicenses{
 		Destination: requestLicensingMoveOrganizationLicensingCotermLicensesDestination,
-		Licenses: func() *[]merakigosdk.RequestLicensingMoveOrganizationLicensingCotermLicensesLicenses {
-			if len(requestLicensingMoveOrganizationLicensingCotermLicensesLicenses) > 0 {
-				return &requestLicensingMoveOrganizationLicensingCotermLicensesLicenses
-			}
-			return nil
-		}(),
+		Licenses:    &requestLicensingMoveOrganizationLicensingCotermLicensesLicenses,
 	}
 	return &out
 }
@@ -520,7 +515,12 @@ func ResponseLicensingMoveOrganizationLicensingCotermLicensesItemToBody(state Or
 				result := make([]ResponseLicensingMoveOrganizationLicensingCotermLicensesMovedLicenses, len(*response.MovedLicenses))
 				for i, movedLicenses := range *response.MovedLicenses {
 					result[i] = ResponseLicensingMoveOrganizationLicensingCotermLicensesMovedLicenses{
-						ClaimedAt: types.StringValue(movedLicenses.ClaimedAt),
+						ClaimedAt: func() types.String {
+							if movedLicenses.ClaimedAt != "" {
+								return types.StringValue(movedLicenses.ClaimedAt)
+							}
+							return types.String{}
+						}(),
 						Counts: func() *[]ResponseLicensingMoveOrganizationLicensingCotermLicensesMovedLicensesCounts {
 							if movedLicenses.Counts != nil {
 								result := make([]ResponseLicensingMoveOrganizationLicensingCotermLicensesMovedLicensesCounts, len(*movedLicenses.Counts))
@@ -532,7 +532,12 @@ func ResponseLicensingMoveOrganizationLicensingCotermLicensesItemToBody(state Or
 											}
 											return types.Int64{}
 										}(),
-										Model: types.StringValue(counts.Model),
+										Model: func() types.String {
+											if counts.Model != "" {
+												return types.StringValue(counts.Model)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -550,8 +555,18 @@ func ResponseLicensingMoveOrganizationLicensingCotermLicensesItemToBody(state Or
 								result := make([]ResponseLicensingMoveOrganizationLicensingCotermLicensesMovedLicensesEditions, len(*movedLicenses.Editions))
 								for i, editions := range *movedLicenses.Editions {
 									result[i] = ResponseLicensingMoveOrganizationLicensingCotermLicensesMovedLicensesEditions{
-										Edition:     types.StringValue(editions.Edition),
-										ProductType: types.StringValue(editions.ProductType),
+										Edition: func() types.String {
+											if editions.Edition != "" {
+												return types.StringValue(editions.Edition)
+											}
+											return types.String{}
+										}(),
+										ProductType: func() types.String {
+											if editions.ProductType != "" {
+												return types.StringValue(editions.ProductType)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -570,11 +585,36 @@ func ResponseLicensingMoveOrganizationLicensingCotermLicensesItemToBody(state Or
 							}
 							return types.Bool{}
 						}(),
-						InvalidatedAt:  types.StringValue(movedLicenses.InvalidatedAt),
-						Key:            types.StringValue(movedLicenses.Key),
-						Mode:           types.StringValue(movedLicenses.Mode),
-						OrganizationID: types.StringValue(movedLicenses.OrganizationID),
-						StartedAt:      types.StringValue(movedLicenses.StartedAt),
+						InvalidatedAt: func() types.String {
+							if movedLicenses.InvalidatedAt != "" {
+								return types.StringValue(movedLicenses.InvalidatedAt)
+							}
+							return types.String{}
+						}(),
+						Key: func() types.String {
+							if movedLicenses.Key != "" {
+								return types.StringValue(movedLicenses.Key)
+							}
+							return types.String{}
+						}(),
+						Mode: func() types.String {
+							if movedLicenses.Mode != "" {
+								return types.StringValue(movedLicenses.Mode)
+							}
+							return types.String{}
+						}(),
+						OrganizationID: func() types.String {
+							if movedLicenses.OrganizationID != "" {
+								return types.StringValue(movedLicenses.OrganizationID)
+							}
+							return types.String{}
+						}(),
+						StartedAt: func() types.String {
+							if movedLicenses.StartedAt != "" {
+								return types.StringValue(movedLicenses.StartedAt)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -586,7 +626,12 @@ func ResponseLicensingMoveOrganizationLicensingCotermLicensesItemToBody(state Or
 				result := make([]ResponseLicensingMoveOrganizationLicensingCotermLicensesRemainderLicenses, len(*response.RemainderLicenses))
 				for i, remainderLicenses := range *response.RemainderLicenses {
 					result[i] = ResponseLicensingMoveOrganizationLicensingCotermLicensesRemainderLicenses{
-						ClaimedAt: types.StringValue(remainderLicenses.ClaimedAt),
+						ClaimedAt: func() types.String {
+							if remainderLicenses.ClaimedAt != "" {
+								return types.StringValue(remainderLicenses.ClaimedAt)
+							}
+							return types.String{}
+						}(),
 						Counts: func() *[]ResponseLicensingMoveOrganizationLicensingCotermLicensesRemainderLicensesCounts {
 							if remainderLicenses.Counts != nil {
 								result := make([]ResponseLicensingMoveOrganizationLicensingCotermLicensesRemainderLicensesCounts, len(*remainderLicenses.Counts))
@@ -598,7 +643,12 @@ func ResponseLicensingMoveOrganizationLicensingCotermLicensesItemToBody(state Or
 											}
 											return types.Int64{}
 										}(),
-										Model: types.StringValue(counts.Model),
+										Model: func() types.String {
+											if counts.Model != "" {
+												return types.StringValue(counts.Model)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -616,8 +666,18 @@ func ResponseLicensingMoveOrganizationLicensingCotermLicensesItemToBody(state Or
 								result := make([]ResponseLicensingMoveOrganizationLicensingCotermLicensesRemainderLicensesEditions, len(*remainderLicenses.Editions))
 								for i, editions := range *remainderLicenses.Editions {
 									result[i] = ResponseLicensingMoveOrganizationLicensingCotermLicensesRemainderLicensesEditions{
-										Edition:     types.StringValue(editions.Edition),
-										ProductType: types.StringValue(editions.ProductType),
+										Edition: func() types.String {
+											if editions.Edition != "" {
+												return types.StringValue(editions.Edition)
+											}
+											return types.String{}
+										}(),
+										ProductType: func() types.String {
+											if editions.ProductType != "" {
+												return types.StringValue(editions.ProductType)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -636,11 +696,36 @@ func ResponseLicensingMoveOrganizationLicensingCotermLicensesItemToBody(state Or
 							}
 							return types.Bool{}
 						}(),
-						InvalidatedAt:  types.StringValue(remainderLicenses.InvalidatedAt),
-						Key:            types.StringValue(remainderLicenses.Key),
-						Mode:           types.StringValue(remainderLicenses.Mode),
-						OrganizationID: types.StringValue(remainderLicenses.OrganizationID),
-						StartedAt:      types.StringValue(remainderLicenses.StartedAt),
+						InvalidatedAt: func() types.String {
+							if remainderLicenses.InvalidatedAt != "" {
+								return types.StringValue(remainderLicenses.InvalidatedAt)
+							}
+							return types.String{}
+						}(),
+						Key: func() types.String {
+							if remainderLicenses.Key != "" {
+								return types.StringValue(remainderLicenses.Key)
+							}
+							return types.String{}
+						}(),
+						Mode: func() types.String {
+							if remainderLicenses.Mode != "" {
+								return types.StringValue(remainderLicenses.Mode)
+							}
+							return types.String{}
+						}(),
+						OrganizationID: func() types.String {
+							if remainderLicenses.OrganizationID != "" {
+								return types.StringValue(remainderLicenses.OrganizationID)
+							}
+							return types.String{}
+						}(),
+						StartedAt: func() types.String {
+							if remainderLicenses.StartedAt != "" {
+								return types.StringValue(remainderLicenses.StartedAt)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

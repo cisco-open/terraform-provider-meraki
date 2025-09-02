@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -173,8 +172,18 @@ func ResponseSmGetNetworkSmUserDeviceProfilesItemsToBody(state NetworksSmUsersDe
 	var items []ResponseItemSmGetNetworkSmUserDeviceProfiles
 	for _, item := range *response {
 		itemState := ResponseItemSmGetNetworkSmUserDeviceProfiles{
-			DeviceID: types.StringValue(item.DeviceID),
-			ID:       types.StringValue(item.ID),
+			DeviceID: func() types.String {
+				if item.DeviceID != "" {
+					return types.StringValue(item.DeviceID)
+				}
+				return types.String{}
+			}(),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
 			IsEncrypted: func() types.Bool {
 				if item.IsEncrypted != nil {
 					return types.BoolValue(*item.IsEncrypted)
@@ -187,10 +196,30 @@ func ResponseSmGetNetworkSmUserDeviceProfilesItemsToBody(state NetworksSmUsersDe
 				}
 				return types.Bool{}
 			}(),
-			Name:              types.StringValue(item.Name),
-			ProfileData:       types.StringValue(item.ProfileData),
-			ProfileIDentifier: types.StringValue(item.ProfileIDentifier),
-			Version:           types.StringValue(item.Version),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			ProfileData: func() types.String {
+				if item.ProfileData != "" {
+					return types.StringValue(item.ProfileData)
+				}
+				return types.String{}
+			}(),
+			ProfileIDentifier: func() types.String {
+				if item.ProfileIDentifier != "" {
+					return types.StringValue(item.ProfileIDentifier)
+				}
+				return types.String{}
+			}(),
+			Version: func() types.String {
+				if item.Version != "" {
+					return types.StringValue(item.Version)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

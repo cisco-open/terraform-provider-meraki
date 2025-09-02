@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -28,9 +29,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -72,7 +73,6 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Schema(_ context.Con
 			},
 			"description": schema.StringAttribute{
 				MarkdownDescription: `Identifying description for the prefix.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -84,19 +84,17 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Schema(_ context.Con
 			},
 			"origin": schema.SingleNestedAttribute{
 				MarkdownDescription: `WAN1/WAN2/Independent prefix.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
 				Attributes: map[string]schema.Attribute{
 
-					"interfaces": schema.SetAttribute{
+					"interfaces": schema.ListAttribute{
 						MarkdownDescription: `Uplink provided or independent`,
-						Computed:            true,
 						Optional:            true,
-						PlanModifiers: []planmodifier.Set{
-							setplanmodifier.UseStateForUnknown(),
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.UseStateForUnknown(),
 						},
 
 						ElementType: types.StringType,
@@ -104,7 +102,6 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Schema(_ context.Con
 					"type": schema.StringAttribute{
 						MarkdownDescription: `Origin type
                                         Allowed values: [independent,internet]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -120,7 +117,6 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Schema(_ context.Con
 			},
 			"prefix": schema.StringAttribute{
 				MarkdownDescription: `IPv6 prefix/prefix length.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -128,7 +124,6 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Schema(_ context.Con
 			},
 			"static_delegated_prefix_id": schema.StringAttribute{
 				MarkdownDescription: `Static delegated prefix id.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -213,7 +208,7 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Create(ctx context.C
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkAppliancePrefixesDelegatedStatic",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -285,21 +280,11 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Create(ctx context.C
 func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksAppliancePrefixesDelegatedStaticsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -330,9 +315,7 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Read(ctx context.Con
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkAppliancePrefixesDelegatedStaticItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksAppliancePrefixesDelegatedStaticsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -340,35 +323,31 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) ImportState(ctx cont
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,staticDelegatedPrefixId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("static_delegated_prefix_id"), idParts[1])...)
 }
 
 func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksAppliancePrefixesDelegatedStaticsRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksAppliancePrefixesDelegatedStaticsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvStaticDelegatedPrefixID := data.StaticDelegatedPrefixID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvStaticDelegatedPrefixID := plan.StaticDelegatedPrefixID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkAppliancePrefixesDelegatedStatic(vvNetworkID, vvStaticDelegatedPrefixID, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkAppliancePrefixesDelegatedStatic",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -378,9 +357,7 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Update(ctx context.C
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksAppliancePrefixesDelegatedStaticsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -425,7 +402,7 @@ type NetworksAppliancePrefixesDelegatedStaticsRs struct {
 }
 
 type ResponseApplianceGetNetworkAppliancePrefixesDelegatedStaticOriginRs struct {
-	Interfaces types.Set    `tfsdk:"interfaces"`
+	Interfaces types.List   `tfsdk:"interfaces"`
 	Type       types.String `tfsdk:"type"`
 }
 
@@ -502,20 +479,50 @@ func (r *NetworksAppliancePrefixesDelegatedStaticsRs) toSdkApiRequestUpdate(ctx 
 // From gosdk to TF Structs Schema
 func ResponseApplianceGetNetworkAppliancePrefixesDelegatedStaticItemToBodyRs(state NetworksAppliancePrefixesDelegatedStaticsRs, response *merakigosdk.ResponseApplianceGetNetworkAppliancePrefixesDelegatedStatic, is_read bool) NetworksAppliancePrefixesDelegatedStaticsRs {
 	itemState := NetworksAppliancePrefixesDelegatedStaticsRs{
-		CreatedAt:   types.StringValue(response.CreatedAt),
-		Description: types.StringValue(response.Description),
+		CreatedAt: func() types.String {
+			if response.CreatedAt != "" {
+				return types.StringValue(response.CreatedAt)
+			}
+			return types.String{}
+		}(),
+		Description: func() types.String {
+			if response.Description != "" {
+				return types.StringValue(response.Description)
+			}
+			return types.String{}
+		}(),
 		Origin: func() *ResponseApplianceGetNetworkAppliancePrefixesDelegatedStaticOriginRs {
 			if response.Origin != nil {
 				return &ResponseApplianceGetNetworkAppliancePrefixesDelegatedStaticOriginRs{
-					Interfaces: StringSliceToSet(response.Origin.Interfaces),
-					Type:       types.StringValue(response.Origin.Type),
+					Interfaces: StringSliceToList(response.Origin.Interfaces),
+					Type: func() types.String {
+						if response.Origin.Type != "" {
+							return types.StringValue(response.Origin.Type)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Prefix:                  types.StringValue(response.Prefix),
-		StaticDelegatedPrefixID: types.StringValue(response.StaticDelegatedPrefixID),
-		UpdatedAt:               types.StringValue(response.UpdatedAt),
+		Prefix: func() types.String {
+			if response.Prefix != "" {
+				return types.StringValue(response.Prefix)
+			}
+			return types.String{}
+		}(),
+		StaticDelegatedPrefixID: func() types.String {
+			if response.StaticDelegatedPrefixID != "" {
+				return types.StringValue(response.StaticDelegatedPrefixID)
+			}
+			return types.String{}
+		}(),
+		UpdatedAt: func() types.String {
+			if response.UpdatedAt != "" {
+				return types.StringValue(response.UpdatedAt)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksAppliancePrefixesDelegatedStaticsRs)

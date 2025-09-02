@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -143,9 +142,19 @@ type ResponseApplianceGetNetworkApplianceFirewallFirewalledService struct {
 // ToBody
 func ResponseApplianceGetNetworkApplianceFirewallFirewalledServiceItemToBody(state NetworksApplianceFirewallFirewalledServices, response *merakigosdk.ResponseApplianceGetNetworkApplianceFirewallFirewalledService) NetworksApplianceFirewallFirewalledServices {
 	itemState := ResponseApplianceGetNetworkApplianceFirewallFirewalledService{
-		Access:     types.StringValue(response.Access),
+		Access: func() types.String {
+			if response.Access != "" {
+				return types.StringValue(response.Access)
+			}
+			return types.String{}
+		}(),
 		AllowedIPs: StringSliceToList(response.AllowedIPs),
-		Service:    types.StringValue(response.Service),
+		Service: func() types.String {
+			if response.Service != "" {
+				return types.StringValue(response.Service)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

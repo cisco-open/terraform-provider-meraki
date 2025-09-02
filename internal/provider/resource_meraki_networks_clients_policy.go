@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -68,7 +69,6 @@ func (r *NetworksClientsPolicyResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"device_policy": schema.StringAttribute{
 				MarkdownDescription: `The name of the client's policy`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -76,7 +76,6 @@ func (r *NetworksClientsPolicyResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"group_policy_id": schema.StringAttribute{
 				MarkdownDescription: `The group policy identifier of the client`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -117,27 +116,6 @@ func (r *NetworksClientsPolicyResource) Create(ctx context.Context, req resource
 	vvClientID := data.ClientID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" && vvClientID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkClientPolicy(vvNetworkID, vvClientID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksClientsPolicy  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksClientsPolicy only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkClientPolicy(vvNetworkID, vvClientID, dataRequest)
@@ -146,7 +124,7 @@ func (r *NetworksClientsPolicyResource) Create(ctx context.Context, req resource
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkClientPolicy",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -157,49 +135,19 @@ func (r *NetworksClientsPolicyResource) Create(ctx context.Context, req resource
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Networks.GetNetworkClientPolicy(vvNetworkID, vvClientID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkClientPolicy",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkClientPolicy",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseNetworksGetNetworkClientPolicyItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksClientsPolicyResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksClientsPolicyRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -230,9 +178,7 @@ func (r *NetworksClientsPolicyResource) Read(ctx context.Context, req resource.R
 	}
 	//entro aqui 2
 	data = ResponseNetworksGetNetworkClientPolicyItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksClientsPolicyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -240,35 +186,31 @@ func (r *NetworksClientsPolicyResource) ImportState(ctx context.Context, req res
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,clientId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("client_id"), idParts[1])...)
 }
 
 func (r *NetworksClientsPolicyResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksClientsPolicyRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksClientsPolicyRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvClientID := data.ClientID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvClientID := plan.ClientID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkClientPolicy(vvNetworkID, vvClientID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkClientPolicy",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -278,9 +220,7 @@ func (r *NetworksClientsPolicyResource) Update(ctx context.Context, req resource
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksClientsPolicyResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -323,9 +263,24 @@ func (r *NetworksClientsPolicyRs) toSdkApiRequestUpdate(ctx context.Context) *me
 // From gosdk to TF Structs Schema
 func ResponseNetworksGetNetworkClientPolicyItemToBodyRs(state NetworksClientsPolicyRs, response *merakigosdk.ResponseNetworksGetNetworkClientPolicy, is_read bool) NetworksClientsPolicyRs {
 	itemState := NetworksClientsPolicyRs{
-		DevicePolicy:  types.StringValue(response.DevicePolicy),
-		GroupPolicyID: types.StringValue(response.GroupPolicyID),
-		Mac:           types.StringValue(response.Mac),
+		DevicePolicy: func() types.String {
+			if response.DevicePolicy != "" {
+				return types.StringValue(response.DevicePolicy)
+			}
+			return types.String{}
+		}(),
+		GroupPolicyID: func() types.String {
+			if response.GroupPolicyID != "" {
+				return types.StringValue(response.GroupPolicyID)
+			}
+			return types.String{}
+		}(),
+		Mac: func() types.String {
+			if response.Mac != "" {
+				return types.StringValue(response.Mac)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksClientsPolicyRs)

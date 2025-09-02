@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -214,7 +213,12 @@ func ResponseWirelessGetNetworkWirelessUsageHistoryItemsToBody(state NetworksWir
 	var items []ResponseItemWirelessGetNetworkWirelessUsageHistory
 	for _, item := range *response {
 		itemState := ResponseItemWirelessGetNetworkWirelessUsageHistory{
-			EndTs: types.StringValue(item.EndTs),
+			EndTs: func() types.String {
+				if item.EndTs != "" {
+					return types.StringValue(item.EndTs)
+				}
+				return types.String{}
+			}(),
 			ReceivedKbps: func() types.Int64 {
 				if item.ReceivedKbps != nil {
 					return types.Int64Value(int64(*item.ReceivedKbps))
@@ -227,7 +231,12 @@ func ResponseWirelessGetNetworkWirelessUsageHistoryItemsToBody(state NetworksWir
 				}
 				return types.Int64{}
 			}(),
-			StartTs: types.StringValue(item.StartTs),
+			StartTs: func() types.String {
+				if item.StartTs != "" {
+					return types.StringValue(item.StartTs)
+				}
+				return types.String{}
+			}(),
 			TotalKbps: func() types.Int64 {
 				if item.TotalKbps != nil {
 					return types.Int64Value(int64(*item.TotalKbps))

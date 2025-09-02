@@ -166,9 +166,24 @@ func ResponseCameraGetDeviceCameraQualityAndRetentionItemToBody(state DevicesCam
 			}
 			return types.Int64{}
 		}(),
-		ProfileID:  types.StringValue(response.ProfileID),
-		Quality:    types.StringValue(response.Quality),
-		Resolution: types.StringValue(response.Resolution),
+		ProfileID: func() types.String {
+			if response.ProfileID != "" {
+				return types.StringValue(response.ProfileID)
+			}
+			return types.String{}
+		}(),
+		Quality: func() types.String {
+			if response.Quality != "" {
+				return types.StringValue(response.Quality)
+			}
+			return types.String{}
+		}(),
+		Resolution: func() types.String {
+			if response.Resolution != "" {
+				return types.StringValue(response.Resolution)
+			}
+			return types.String{}
+		}(),
 		RestrictedBandwidthModeEnabled: func() types.Bool {
 			if response.RestrictedBandwidthModeEnabled != nil {
 				return types.BoolValue(*response.RestrictedBandwidthModeEnabled)

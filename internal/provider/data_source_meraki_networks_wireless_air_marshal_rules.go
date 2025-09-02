@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -217,7 +216,12 @@ func ResponseWirelessGetNetworkWirelessAirMarshalItemsToBody(state NetworksWirel
 					result := make([]ResponseItemWirelessGetNetworkWirelessAirMarshalBssids, len(*item.Bssids))
 					for i, bssids := range *item.Bssids {
 						result[i] = ResponseItemWirelessGetNetworkWirelessAirMarshalBssids{
-							Bssid: types.StringValue(bssids.Bssid),
+							Bssid: func() types.String {
+								if bssids.Bssid != "" {
+									return types.StringValue(bssids.Bssid)
+								}
+								return types.String{}
+							}(),
 							Contained: func() types.Bool {
 								if bssids.Contained != nil {
 									return types.BoolValue(*bssids.Contained)
@@ -229,7 +233,12 @@ func ResponseWirelessGetNetworkWirelessAirMarshalItemsToBody(state NetworksWirel
 									result := make([]ResponseItemWirelessGetNetworkWirelessAirMarshalBssidsDetectedBy, len(*bssids.DetectedBy))
 									for i, detectedBy := range *bssids.DetectedBy {
 										result[i] = ResponseItemWirelessGetNetworkWirelessAirMarshalBssidsDetectedBy{
-											Device: types.StringValue(detectedBy.Device),
+											Device: func() types.String {
+												if detectedBy.Device != "" {
+													return types.StringValue(detectedBy.Device)
+												}
+												return types.String{}
+											}(),
 											Rssi: func() types.Int64 {
 												if detectedBy.Rssi != nil {
 													return types.Int64Value(int64(*detectedBy.Rssi))
@@ -261,7 +270,12 @@ func ResponseWirelessGetNetworkWirelessAirMarshalItemsToBody(state NetworksWirel
 				}
 				return types.Int64{}
 			}(),
-			SSID: types.StringValue(item.SSID),
+			SSID: func() types.String {
+				if item.SSID != "" {
+					return types.StringValue(item.SSID)
+				}
+				return types.String{}
+			}(),
 			WiredLastSeen: func() types.Int64 {
 				if item.WiredLastSeen != nil {
 					return types.Int64Value(int64(*item.WiredLastSeen))

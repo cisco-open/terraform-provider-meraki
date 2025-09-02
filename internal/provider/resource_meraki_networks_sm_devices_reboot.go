@@ -209,14 +209,14 @@ type ResponseSmRebootNetworkSmDevices struct {
 }
 
 type RequestSmRebootNetworkSmDevicesRs struct {
-	IDs                          types.Set  `tfsdk:"ids"`
-	KextPaths                    types.Set  `tfsdk:"kext_paths"`
+	IDs                          types.List `tfsdk:"ids"`
+	KextPaths                    types.List `tfsdk:"kext_paths"`
 	NotifyUser                   types.Bool `tfsdk:"notify_user"`
 	RebuildKernelCache           types.Bool `tfsdk:"rebuild_kernel_cache"`
 	RequestRequiresNetworkTether types.Bool `tfsdk:"request_requires_network_tether"`
-	Scope                        types.Set  `tfsdk:"scope"`
-	Serials                      types.Set  `tfsdk:"serials"`
-	WifiMacs                     types.Set  `tfsdk:"wifi_macs"`
+	Scope                        types.List `tfsdk:"scope"`
+	Serials                      types.List `tfsdk:"serials"`
+	WifiMacs                     types.List `tfsdk:"wifi_macs"`
 }
 
 // FromBody

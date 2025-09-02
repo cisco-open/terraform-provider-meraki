@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -147,7 +148,7 @@ func (r *OrganizationsApplianceDNSLocalProfilesResource) Create(ctx context.Cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationApplianceDNSLocalProfile",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -338,8 +339,18 @@ func (r *OrganizationsApplianceDNSLocalProfilesRs) toSdkApiRequestCreate(ctx con
 // From gosdk to TF Structs Schema
 func ResponseApplianceGetOrganizationApplianceDNSLocalProfilesItemToBodyRs(state OrganizationsApplianceDNSLocalProfilesRs, response *merakigosdk.ResponseItemApplianceGetOrganizationApplianceDNSLocalProfiles, is_read bool) OrganizationsApplianceDNSLocalProfilesRs {
 	itemState := OrganizationsApplianceDNSLocalProfilesRs{
-		Name:      types.StringValue(response.Name),
-		ProfileID: types.StringValue(response.ProfileID),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		ProfileID: func() types.String {
+			if response.ProfileID != "" {
+				return types.StringValue(response.ProfileID)
+			}
+			return types.String{}
+		}(),
 	}
 	state = itemState
 	return state

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -182,8 +181,18 @@ func ResponseWirelessGetNetworkWirelessSSIDFirewallL7FirewallRulesItemToBody(sta
 				result := make([]ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRules, len(*response.Rules))
 				for i, rules := range *response.Rules {
 					result[i] = ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRules{
-						Policy: types.StringValue(rules.Policy),
-						Type:   types.StringValue(rules.Type),
+						Policy: func() types.String {
+							if rules.Policy != "" {
+								return types.StringValue(rules.Policy)
+							}
+							return types.String{}
+						}(),
+						Type: func() types.String {
+							if rules.Type != "" {
+								return types.StringValue(rules.Type)
+							}
+							return types.String{}
+						}(),
 						Value: func() types.String {
 							if rules.Value == nil {
 								return types.StringNull()
@@ -201,8 +210,18 @@ func ResponseWirelessGetNetworkWirelessSSIDFirewallL7FirewallRulesItemToBody(sta
 								return nil
 							}
 							return &ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesValueObj{
-								ID:   types.StringValue(rules.ValueObj.ID),
-								Name: types.StringValue(rules.ValueObj.Name),
+								ID: func() types.String {
+									if rules.ValueObj.ID != "" {
+										return types.StringValue(rules.ValueObj.ID)
+									}
+									return types.String{}
+								}(),
+								Name: func() types.String {
+									if rules.ValueObj.Name != "" {
+										return types.StringValue(rules.ValueObj.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}(),
 					}

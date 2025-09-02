@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -242,10 +241,30 @@ func ResponseOrganizationsGetOrganizationDevicesControllerMigrationsItemToBody(s
 				result := make([]ResponseOrganizationsGetOrganizationDevicesControllerMigrationsItems, len(*response.Items))
 				for i, items := range *response.Items {
 					result[i] = ResponseOrganizationsGetOrganizationDevicesControllerMigrationsItems{
-						CreatedAt:  types.StringValue(items.CreatedAt),
-						MigratedAt: types.StringValue(items.MigratedAt),
-						Serial:     types.StringValue(items.Serial),
-						Target:     types.StringValue(items.Target),
+						CreatedAt: func() types.String {
+							if items.CreatedAt != "" {
+								return types.StringValue(items.CreatedAt)
+							}
+							return types.String{}
+						}(),
+						MigratedAt: func() types.String {
+							if items.MigratedAt != "" {
+								return types.StringValue(items.MigratedAt)
+							}
+							return types.String{}
+						}(),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
+						Target: func() types.String {
+							if items.Target != "" {
+								return types.StringValue(items.Target)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

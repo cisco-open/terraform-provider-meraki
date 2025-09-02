@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -63,7 +64,6 @@ func (r *DevicesCameraWirelessProfilesResource) Schema(_ context.Context, _ reso
 		Attributes: map[string]schema.Attribute{
 			"ids": schema.SingleNestedAttribute{
 				MarkdownDescription: `The ids of the wireless profile to assign to the given camera`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -72,7 +72,6 @@ func (r *DevicesCameraWirelessProfilesResource) Schema(_ context.Context, _ reso
 
 					"backup": schema.StringAttribute{
 						MarkdownDescription: `The id of the backup wireless profile`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -80,7 +79,6 @@ func (r *DevicesCameraWirelessProfilesResource) Schema(_ context.Context, _ reso
 					},
 					"primary": schema.StringAttribute{
 						MarkdownDescription: `The id of the primary wireless profile`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -88,7 +86,6 @@ func (r *DevicesCameraWirelessProfilesResource) Schema(_ context.Context, _ reso
 					},
 					"secondary": schema.StringAttribute{
 						MarkdownDescription: `The id of the secondary wireless profile`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -126,27 +123,6 @@ func (r *DevicesCameraWirelessProfilesResource) Create(ctx context.Context, req 
 	vvSerial := data.Serial.ValueString()
 	//Has Item and not has items
 
-	if vvSerial != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Camera.GetDeviceCameraWirelessProfiles(vvSerial)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesCameraWirelessProfiles  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesCameraWirelessProfiles only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Camera.UpdateDeviceCameraWirelessProfiles(vvSerial, dataRequest)
@@ -155,7 +131,7 @@ func (r *DevicesCameraWirelessProfilesResource) Create(ctx context.Context, req 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCameraWirelessProfiles",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -166,49 +142,19 @@ func (r *DevicesCameraWirelessProfilesResource) Create(ctx context.Context, req 
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Camera.GetDeviceCameraWirelessProfiles(vvSerial)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetDeviceCameraWirelessProfiles",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetDeviceCameraWirelessProfiles",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseCameraGetDeviceCameraWirelessProfilesItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *DevicesCameraWirelessProfilesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data DevicesCameraWirelessProfilesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -238,33 +184,28 @@ func (r *DevicesCameraWirelessProfilesResource) Read(ctx context.Context, req re
 	}
 	//entro aqui 2
 	data = ResponseCameraGetDeviceCameraWirelessProfilesItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *DevicesCameraWirelessProfilesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("serial"), req.ID)...)
 }
 
 func (r *DevicesCameraWirelessProfilesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data DevicesCameraWirelessProfilesRs
-	merge(ctx, req, resp, &data)
+	var plan DevicesCameraWirelessProfilesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvSerial := data.Serial.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvSerial := plan.Serial.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Camera.UpdateDeviceCameraWirelessProfiles(vvSerial, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCameraWirelessProfiles",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -274,9 +215,7 @@ func (r *DevicesCameraWirelessProfilesResource) Update(ctx context.Context, req 
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *DevicesCameraWirelessProfilesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -324,9 +263,24 @@ func ResponseCameraGetDeviceCameraWirelessProfilesItemToBodyRs(state DevicesCame
 		IDs: func() *ResponseCameraGetDeviceCameraWirelessProfilesIdsRs {
 			if response.IDs != nil {
 				return &ResponseCameraGetDeviceCameraWirelessProfilesIdsRs{
-					Backup:    types.StringValue(response.IDs.Backup),
-					Primary:   types.StringValue(response.IDs.Primary),
-					Secondary: types.StringValue(response.IDs.Secondary),
+					Backup: func() types.String {
+						if response.IDs.Backup != "" {
+							return types.StringValue(response.IDs.Backup)
+						}
+						return types.String{}
+					}(),
+					Primary: func() types.String {
+						if response.IDs.Primary != "" {
+							return types.StringValue(response.IDs.Primary)
+						}
+						return types.String{}
+					}(),
+					Secondary: func() types.String {
+						if response.IDs.Secondary != "" {
+							return types.StringValue(response.IDs.Secondary)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil

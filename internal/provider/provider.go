@@ -40,7 +40,7 @@ import (
 )
 
 const (
-	CUSTOM_USER_AGENT        = "MerakiTerraform/1.1.8-beta Cisco"
+	CUSTOM_USER_AGENT        = "MerakiTerraform/1.2.0-beta Cisco"
 	DEFAULT_USER_AGENT       = ""
 	DEFAULT_MAX_RETRIES      = 3
 	DEFAULT_MAX_RETRY_DELAY  = 1000
@@ -513,16 +513,9 @@ func (p *MerakiProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewOrganizationsAssetsResource,
 		NewOrganizationsWirelessRadioAutoRfChannelsRecalculateResource,
 		NewNetworksApplianceFirewallMulticastForwardingResource,
-		NewApplianceApplianceDNSLocalProfilesAssignmentsBulkCreateResource,
-		NewApplianceApplianceDNSLocalProfilesAssignmentsBulkDeleteResource,
-		NewApplianceApplianceDNSSplitProfilesAssignmentsBulkCreateResource,
-		NewApplianceApplianceDNSSplitProfilesAssignmentsBulkDeleteResource,
 		NewOrganizationsDevicesControllerMigrationsCreateResource,
 		NewOrganizationsIntegrationsXdrNetworksDisableResource,
 		NewOrganizationsIntegrationsXdrNetworksEnableResource,
-		NewWirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource,
-		NewWirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource,
-		NewWirelessWirelessSSIDsFirewallIsolationAllowlistEntriesUpdateResource,
 	}
 }
 

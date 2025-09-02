@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -288,23 +287,48 @@ func ResponseNetworksGetNetworkClientItemToBody(state NetworksClients, response 
 							}
 							return types.Int64{}
 						}(),
-						RemoteIP: types.StringValue(clientVpnConnections.RemoteIP),
+						RemoteIP: func() types.String {
+							if clientVpnConnections.RemoteIP != "" {
+								return types.StringValue(clientVpnConnections.RemoteIP)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		Description: types.StringValue(response.Description),
+		Description: func() types.String {
+			if response.Description != "" {
+				return types.StringValue(response.Description)
+			}
+			return types.String{}
+		}(),
 		FirstSeen: func() types.Int64 {
 			if response.FirstSeen != nil {
 				return types.Int64Value(int64(*response.FirstSeen))
 			}
 			return types.Int64{}
 		}(),
-		ID:  types.StringValue(response.ID),
-		IP:  types.StringValue(response.IP),
-		IP6: types.StringValue(response.IP6),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		IP: func() types.String {
+			if response.IP != "" {
+				return types.StringValue(response.IP)
+			}
+			return types.String{}
+		}(),
+		IP6: func() types.String {
+			if response.IP6 != "" {
+				return types.StringValue(response.IP6)
+			}
+			return types.String{}
+		}(),
 		LastSeen: func() types.Int64 {
 			if response.LastSeen != nil {
 				return types.Int64Value(int64(*response.LastSeen))
@@ -312,26 +336,96 @@ func ResponseNetworksGetNetworkClientItemToBody(state NetworksClients, response 
 			return types.Int64{}
 		}(),
 		//TODO [][]
-		Mac:                    types.StringValue(response.Mac),
-		Manufacturer:           types.StringValue(response.Manufacturer),
-		Notes:                  types.StringValue(response.Notes),
-		Os:                     types.StringValue(response.Os),
-		RecentDeviceConnection: types.StringValue(response.RecentDeviceConnection),
-		RecentDeviceMac:        types.StringValue(response.RecentDeviceMac),
-		RecentDeviceName:       types.StringValue(response.RecentDeviceName),
-		RecentDeviceSerial:     types.StringValue(response.RecentDeviceSerial),
+		Mac: func() types.String {
+			if response.Mac != "" {
+				return types.StringValue(response.Mac)
+			}
+			return types.String{}
+		}(),
+		Manufacturer: func() types.String {
+			if response.Manufacturer != "" {
+				return types.StringValue(response.Manufacturer)
+			}
+			return types.String{}
+		}(),
+		Notes: func() types.String {
+			if response.Notes != "" {
+				return types.StringValue(response.Notes)
+			}
+			return types.String{}
+		}(),
+		Os: func() types.String {
+			if response.Os != "" {
+				return types.StringValue(response.Os)
+			}
+			return types.String{}
+		}(),
+		RecentDeviceConnection: func() types.String {
+			if response.RecentDeviceConnection != "" {
+				return types.StringValue(response.RecentDeviceConnection)
+			}
+			return types.String{}
+		}(),
+		RecentDeviceMac: func() types.String {
+			if response.RecentDeviceMac != "" {
+				return types.StringValue(response.RecentDeviceMac)
+			}
+			return types.String{}
+		}(),
+		RecentDeviceName: func() types.String {
+			if response.RecentDeviceName != "" {
+				return types.StringValue(response.RecentDeviceName)
+			}
+			return types.String{}
+		}(),
+		RecentDeviceSerial: func() types.String {
+			if response.RecentDeviceSerial != "" {
+				return types.StringValue(response.RecentDeviceSerial)
+			}
+			return types.String{}
+		}(),
 		SmInstalled: func() types.Bool {
 			if response.SmInstalled != nil {
 				return types.BoolValue(*response.SmInstalled)
 			}
 			return types.Bool{}
 		}(),
-		SSID:                 types.StringValue(response.SSID),
-		Status:               types.StringValue(response.Status),
-		Switchport:           types.StringValue(response.Switchport),
-		User:                 types.StringValue(response.User),
-		VLAN:                 types.StringValue(response.VLAN),
-		WirelessCapabilities: types.StringValue(response.WirelessCapabilities),
+		SSID: func() types.String {
+			if response.SSID != "" {
+				return types.StringValue(response.SSID)
+			}
+			return types.String{}
+		}(),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
+		Switchport: func() types.String {
+			if response.Switchport != "" {
+				return types.StringValue(response.Switchport)
+			}
+			return types.String{}
+		}(),
+		User: func() types.String {
+			if response.User != "" {
+				return types.StringValue(response.User)
+			}
+			return types.String{}
+		}(),
+		VLAN: func() types.String {
+			if response.VLAN != "" {
+				return types.StringValue(response.VLAN)
+			}
+			return types.String{}
+		}(),
+		WirelessCapabilities: func() types.String {
+			if response.WirelessCapabilities != "" {
+				return types.StringValue(response.WirelessCapabilities)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -30,8 +31,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -67,12 +68,11 @@ func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Metadata(_ contex
 func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"device_type_policies": schema.SetNestedAttribute{
+			"device_type_policies": schema.ListNestedAttribute{
 				MarkdownDescription: `List of device type policies.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -80,7 +80,6 @@ func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Schema(_ context.
 						"device_policy": schema.StringAttribute{
 							MarkdownDescription: `The device policy. Can be one of 'Allowed', 'Blocked' or 'Group policy'
                                         Allowed values: [Allowed,Blocked,Group policy]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -96,7 +95,6 @@ func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Schema(_ context.
 						"device_type": schema.StringAttribute{
 							MarkdownDescription: `The device type. Can be one of 'Android', 'BlackBerry', 'Chrome OS', 'iPad', 'iPhone', 'iPod', 'Mac OS X', 'Windows', 'Windows Phone', 'B&N Nook' or 'Other OS'
                                         Allowed values: [Android,B&N Nook,BlackBerry,Chrome OS,Mac OS X,Other OS,Windows,Windows Phone,iPad,iPhone,iPod]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -119,7 +117,6 @@ func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Schema(_ context.
 						},
 						"group_policy_id": schema.Int64Attribute{
 							MarkdownDescription: `ID of the group policy object.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -130,7 +127,6 @@ func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Schema(_ context.
 			},
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: `If true, the SSID device type group policies are enabled.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -171,27 +167,6 @@ func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Create(ctx contex
 	vvNumber := data.Number.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" && vvNumber != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDDeviceTypeGroupPolicies(vvNetworkID, vvNumber)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessSsidsDeviceTypeGroupPolicies  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessSsidsDeviceTypeGroupPolicies only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDDeviceTypeGroupPolicies(vvNetworkID, vvNumber, dataRequest)
@@ -200,7 +175,7 @@ func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Create(ctx contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDDeviceTypeGroupPolicies",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -211,49 +186,19 @@ func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Create(ctx contex
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDDeviceTypeGroupPolicies(vvNetworkID, vvNumber)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkWirelessSSIDDeviceTypeGroupPolicies",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkWirelessSSIDDeviceTypeGroupPolicies",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseWirelessGetNetworkWirelessSSIDDeviceTypeGroupPoliciesItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksWirelessSSIDsDeviceTypeGroupPoliciesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -284,9 +229,7 @@ func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Read(ctx context.
 	}
 	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSSIDDeviceTypeGroupPoliciesItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -294,35 +237,31 @@ func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) ImportState(ctx c
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,number. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("number"), idParts[1])...)
 }
 
 func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksWirelessSSIDsDeviceTypeGroupPoliciesRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksWirelessSSIDsDeviceTypeGroupPoliciesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvNumber := data.Number.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvNumber := plan.Number.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDDeviceTypeGroupPolicies(vvNetworkID, vvNumber, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDDeviceTypeGroupPolicies",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -332,9 +271,7 @@ func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Update(ctx contex
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksWirelessSSIDsDeviceTypeGroupPoliciesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -405,8 +342,18 @@ func ResponseWirelessGetNetworkWirelessSSIDDeviceTypeGroupPoliciesItemToBodyRs(s
 				result := make([]ResponseWirelessGetNetworkWirelessSsidDeviceTypeGroupPoliciesDeviceTypePoliciesRs, len(*response.DeviceTypePolicies))
 				for i, deviceTypePolicies := range *response.DeviceTypePolicies {
 					result[i] = ResponseWirelessGetNetworkWirelessSsidDeviceTypeGroupPoliciesDeviceTypePoliciesRs{
-						DevicePolicy: types.StringValue(deviceTypePolicies.DevicePolicy),
-						DeviceType:   types.StringValue(deviceTypePolicies.DeviceType),
+						DevicePolicy: func() types.String {
+							if deviceTypePolicies.DevicePolicy != "" {
+								return types.StringValue(deviceTypePolicies.DevicePolicy)
+							}
+							return types.String{}
+						}(),
+						DeviceType: func() types.String {
+							if deviceTypePolicies.DeviceType != "" {
+								return types.StringValue(deviceTypePolicies.DeviceType)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

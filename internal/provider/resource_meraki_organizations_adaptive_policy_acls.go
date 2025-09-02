@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -29,8 +30,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -68,7 +69,6 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Schema(_ context.Context, _ re
 		Attributes: map[string]schema.Attribute{
 			"acl_id": schema.StringAttribute{
 				MarkdownDescription: `ID of the adaptive policy ACL`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -80,7 +80,6 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Schema(_ context.Context, _ re
 			},
 			"description": schema.StringAttribute{
 				MarkdownDescription: `Description of the adaptive policy ACL`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -89,7 +88,6 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Schema(_ context.Context, _ re
 			"ip_version": schema.StringAttribute{
 				MarkdownDescription: `IP version of adpative policy ACL
                                   Allowed values: [any,ipv4,ipv6]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -104,7 +102,6 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Schema(_ context.Context, _ re
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `Name of the adaptive policy ACL`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -114,19 +111,17 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Schema(_ context.Context, _ re
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
 				Required:            true,
 			},
-			"rules": schema.SetNestedAttribute{
+			"rules": schema.ListNestedAttribute{
 				MarkdownDescription: `An ordered array of the adaptive policy ACL rules`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"dst_port": schema.StringAttribute{
 							MarkdownDescription: `Destination port`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -135,7 +130,6 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Schema(_ context.Context, _ re
 						"log": schema.BoolAttribute{
 							MarkdownDescription: `If enabled, when this rule is hit an entry will be logged to the event log
 `,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.Bool{
 								boolplanmodifier.UseStateForUnknown(),
@@ -144,7 +138,6 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Schema(_ context.Context, _ re
 						"policy": schema.StringAttribute{
 							MarkdownDescription: `'allow' or 'deny' traffic specified by this rule
                                         Allowed values: [allow,deny]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -159,7 +152,6 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Schema(_ context.Context, _ re
 						"protocol": schema.StringAttribute{
 							MarkdownDescription: `The type of protocol
                                         Allowed values: [any,icmp,tcp,udp]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -175,7 +167,6 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Schema(_ context.Context, _ re
 						},
 						"src_port": schema.StringAttribute{
 							MarkdownDescription: `Source port`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -184,7 +175,6 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Schema(_ context.Context, _ re
 						"tcp_established": schema.BoolAttribute{
 							MarkdownDescription: `If enabled, means TCP connection with this node must be established.
 `,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.Bool{
 								boolplanmodifier.UseStateForUnknown(),
@@ -272,7 +262,7 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Create(ctx context.Context, re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationAdaptivePolicyACL",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -344,21 +334,11 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Create(ctx context.Context, re
 func (r *OrganizationsAdaptivePolicyACLsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data OrganizationsAdaptivePolicyACLsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -389,9 +369,7 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Read(ctx context.Context, req 
 	}
 	//entro aqui 2
 	data = ResponseOrganizationsGetOrganizationAdaptivePolicyACLItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *OrganizationsAdaptivePolicyACLsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -399,35 +377,31 @@ func (r *OrganizationsAdaptivePolicyACLsResource) ImportState(ctx context.Contex
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: organizationId,aclId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("acl_id"), idParts[1])...)
 }
 
 func (r *OrganizationsAdaptivePolicyACLsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data OrganizationsAdaptivePolicyACLsRs
-	merge(ctx, req, resp, &data)
+	var plan OrganizationsAdaptivePolicyACLsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvOrganizationID := data.OrganizationID.ValueString()
-	vvACLID := data.ACLID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvOrganizationID := plan.OrganizationID.ValueString()
+	vvACLID := plan.ACLID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationAdaptivePolicyACL(vvOrganizationID, vvACLID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationAdaptivePolicyACL",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -437,9 +411,7 @@ func (r *OrganizationsAdaptivePolicyACLsResource) Update(ctx context.Context, re
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *OrganizationsAdaptivePolicyACLsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -626,26 +598,71 @@ func (r *OrganizationsAdaptivePolicyACLsRs) toSdkApiRequestUpdate(ctx context.Co
 // From gosdk to TF Structs Schema
 func ResponseOrganizationsGetOrganizationAdaptivePolicyACLItemToBodyRs(state OrganizationsAdaptivePolicyACLsRs, response *merakigosdk.ResponseOrganizationsGetOrganizationAdaptivePolicyACL, is_read bool) OrganizationsAdaptivePolicyACLsRs {
 	itemState := OrganizationsAdaptivePolicyACLsRs{
-		ACLID:       types.StringValue(response.ACLID),
-		CreatedAt:   types.StringValue(response.CreatedAt),
-		Description: types.StringValue(response.Description),
-		IPVersion:   types.StringValue(response.IPVersion),
-		Name:        types.StringValue(response.Name),
+		ACLID: func() types.String {
+			if response.ACLID != "" {
+				return types.StringValue(response.ACLID)
+			}
+			return types.String{}
+		}(),
+		CreatedAt: func() types.String {
+			if response.CreatedAt != "" {
+				return types.StringValue(response.CreatedAt)
+			}
+			return types.String{}
+		}(),
+		Description: func() types.String {
+			if response.Description != "" {
+				return types.StringValue(response.Description)
+			}
+			return types.String{}
+		}(),
+		IPVersion: func() types.String {
+			if response.IPVersion != "" {
+				return types.StringValue(response.IPVersion)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		Rules: func() *[]ResponseOrganizationsGetOrganizationAdaptivePolicyAclRulesRs {
 			if response.Rules != nil {
 				result := make([]ResponseOrganizationsGetOrganizationAdaptivePolicyAclRulesRs, len(*response.Rules))
 				for i, rules := range *response.Rules {
 					result[i] = ResponseOrganizationsGetOrganizationAdaptivePolicyAclRulesRs{
-						DstPort: types.StringValue(rules.DstPort),
+						DstPort: func() types.String {
+							if rules.DstPort != "" {
+								return types.StringValue(rules.DstPort)
+							}
+							return types.String{}
+						}(),
 						Log: func() types.Bool {
 							if rules.Log != nil {
 								return types.BoolValue(*rules.Log)
 							}
 							return types.Bool{}
 						}(),
-						Policy:   types.StringValue(rules.Policy),
-						Protocol: types.StringValue(rules.Protocol),
-						SrcPort:  types.StringValue(rules.SrcPort),
+						Policy: func() types.String {
+							if rules.Policy != "" {
+								return types.StringValue(rules.Policy)
+							}
+							return types.String{}
+						}(),
+						Protocol: func() types.String {
+							if rules.Protocol != "" {
+								return types.StringValue(rules.Protocol)
+							}
+							return types.String{}
+						}(),
+						SrcPort: func() types.String {
+							if rules.SrcPort != "" {
+								return types.StringValue(rules.SrcPort)
+							}
+							return types.String{}
+						}(),
 						TCPEstablished: func() types.Bool {
 							if rules.TCPEstablished != nil {
 								return types.BoolValue(*rules.TCPEstablished)
@@ -658,7 +675,12 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyACLItemToBodyRs(state Org
 			}
 			return nil
 		}(),
-		UpdatedAt: types.StringValue(response.UpdatedAt),
+		UpdatedAt: func() types.String {
+			if response.UpdatedAt != "" {
+				return types.StringValue(response.UpdatedAt)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsAdaptivePolicyACLsRs)

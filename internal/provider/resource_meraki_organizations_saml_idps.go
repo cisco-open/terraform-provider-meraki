@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -153,7 +154,7 @@ func (r *OrganizationsSamlIDpsResource) Create(ctx context.Context, req resource
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationSamlIDp",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -277,7 +278,7 @@ func (r *OrganizationsSamlIDpsResource) Update(ctx context.Context, req resource
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationSamlIDp",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -376,10 +377,30 @@ func (r *OrganizationsSamlIDpsRs) toSdkApiRequestUpdate(ctx context.Context) *me
 // From gosdk to TF Structs Schema
 func ResponseOrganizationsGetOrganizationSamlIDpItemToBodyRs(state OrganizationsSamlIDpsRs, response *merakigosdk.ResponseOrganizationsGetOrganizationSamlIDp, is_read bool) OrganizationsSamlIDpsRs {
 	itemState := OrganizationsSamlIDpsRs{
-		ConsumerURL:             types.StringValue(response.ConsumerURL),
-		IDpID:                   types.StringValue(response.IDpID),
-		SloLogoutURL:            types.StringValue(response.SloLogoutURL),
-		X509CertSha1Fingerprint: types.StringValue(response.X509CertSha1Fingerprint),
+		ConsumerURL: func() types.String {
+			if response.ConsumerURL != "" {
+				return types.StringValue(response.ConsumerURL)
+			}
+			return types.String{}
+		}(),
+		IDpID: func() types.String {
+			if response.IDpID != "" {
+				return types.StringValue(response.IDpID)
+			}
+			return types.String{}
+		}(),
+		SloLogoutURL: func() types.String {
+			if response.SloLogoutURL != "" {
+				return types.StringValue(response.SloLogoutURL)
+			}
+			return types.String{}
+		}(),
+		X509CertSha1Fingerprint: func() types.String {
+			if response.X509CertSha1Fingerprint != "" {
+				return types.StringValue(response.X509CertSha1Fingerprint)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsSamlIDpsRs)

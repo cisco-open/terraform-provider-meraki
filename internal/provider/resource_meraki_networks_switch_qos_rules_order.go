@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -205,7 +206,7 @@ func (r *NetworksSwitchQosRulesOrderResource) Create(ctx context.Context, req re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing ",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -327,7 +328,7 @@ func (r *NetworksSwitchQosRulesOrderResource) Update(ctx context.Context, req re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchQosRule",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -513,16 +514,36 @@ func ResponseSwitchGetNetworkSwitchQosRuleItemToBodyRs(state NetworksSwitchQosRu
 			}
 			return types.Int64{}
 		}(),
-		DstPortRange: types.StringValue(response.DstPortRange),
-		ID:           types.StringValue(response.ID),
-		Protocol:     types.StringValue(response.Protocol),
+		DstPortRange: func() types.String {
+			if response.DstPortRange != "" {
+				return types.StringValue(response.DstPortRange)
+			}
+			return types.String{}
+		}(),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Protocol: func() types.String {
+			if response.Protocol != "" {
+				return types.StringValue(response.Protocol)
+			}
+			return types.String{}
+		}(),
 		SrcPort: func() types.Int64 {
 			if response.SrcPort != nil {
 				return types.Int64Value(int64(*response.SrcPort))
 			}
 			return types.Int64{}
 		}(),
-		SrcPortRange: types.StringValue(response.SrcPortRange),
+		SrcPortRange: func() types.String {
+			if response.SrcPortRange != "" {
+				return types.StringValue(response.SrcPortRange)
+			}
+			return types.String{}
+		}(),
 		VLAN: func() types.Int64 {
 			if response.VLAN != nil {
 				return types.Int64Value(int64(*response.VLAN))

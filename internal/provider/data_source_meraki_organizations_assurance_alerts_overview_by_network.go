@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -318,8 +317,18 @@ func ResponseOrganizationsGetOrganizationAssuranceAlertsOverviewByNetworkItemToB
 							}
 							return types.Int64{}
 						}(),
-						NetworkID:   types.StringValue(items.NetworkID),
-						NetworkName: types.StringValue(items.NetworkName),
+						NetworkID: func() types.String {
+							if items.NetworkID != "" {
+								return types.StringValue(items.NetworkID)
+							}
+							return types.String{}
+						}(),
+						NetworkName: func() types.String {
+							if items.NetworkName != "" {
+								return types.StringValue(items.NetworkName)
+							}
+							return types.String{}
+						}(),
 						SeverityCounts: func() *[]ResponseOrganizationsGetOrganizationAssuranceAlertsOverviewByNetworkItemsSeverityCounts {
 							if items.SeverityCounts != nil {
 								result := make([]ResponseOrganizationsGetOrganizationAssuranceAlertsOverviewByNetworkItemsSeverityCounts, len(*items.SeverityCounts))
@@ -331,7 +340,12 @@ func ResponseOrganizationsGetOrganizationAssuranceAlertsOverviewByNetworkItemToB
 											}
 											return types.Int64{}
 										}(),
-										Type: types.StringValue(severityCounts.Type),
+										Type: func() types.String {
+											if severityCounts.Type != "" {
+												return types.StringValue(severityCounts.Type)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result

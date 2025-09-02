@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -184,6 +183,17 @@ func (d *OrganizationsPolicyObjectsDataSource) Read(ctx context.Context, req dat
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetOrganizationPolicyObject",
+				err.Error(),
+			)
+			return
+		}
+
 		organizationsPolicyObjects = ResponseOrganizationsGetOrganizationPolicyObjectItemToBody(organizationsPolicyObjects, response2)
 		diags = resp.State.Set(ctx, &organizationsPolicyObjects)
 		resp.Diagnostics.Append(diags...)
@@ -219,15 +229,50 @@ type ResponseOrganizationsGetOrganizationPolicyObject struct {
 // ToBody
 func ResponseOrganizationsGetOrganizationPolicyObjectItemToBody(state OrganizationsPolicyObjects, response *merakigosdk.ResponseOrganizationsGetOrganizationPolicyObject) OrganizationsPolicyObjects {
 	itemState := ResponseOrganizationsGetOrganizationPolicyObject{
-		Category:   types.StringValue(response.Category),
-		Cidr:       types.StringValue(response.Cidr),
-		CreatedAt:  types.StringValue(response.CreatedAt),
-		GroupIDs:   StringSliceToList(response.GroupIDs),
-		ID:         types.StringValue(response.ID),
-		Name:       types.StringValue(response.Name),
+		Category: func() types.String {
+			if response.Category != "" {
+				return types.StringValue(response.Category)
+			}
+			return types.String{}
+		}(),
+		Cidr: func() types.String {
+			if response.Cidr != "" {
+				return types.StringValue(response.Cidr)
+			}
+			return types.String{}
+		}(),
+		CreatedAt: func() types.String {
+			if response.CreatedAt != "" {
+				return types.StringValue(response.CreatedAt)
+			}
+			return types.String{}
+		}(),
+		GroupIDs: StringSliceToList(response.GroupIDs),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		NetworkIDs: StringSliceToList(response.NetworkIDs),
-		Type:       types.StringValue(response.Type),
-		UpdatedAt:  types.StringValue(response.UpdatedAt),
+		Type: func() types.String {
+			if response.Type != "" {
+				return types.StringValue(response.Type)
+			}
+			return types.String{}
+		}(),
+		UpdatedAt: func() types.String {
+			if response.UpdatedAt != "" {
+				return types.StringValue(response.UpdatedAt)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

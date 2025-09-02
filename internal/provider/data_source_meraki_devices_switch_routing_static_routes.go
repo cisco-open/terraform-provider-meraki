@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -202,6 +201,17 @@ func (d *DevicesSwitchRoutingStaticRoutesDataSource) Read(ctx context.Context, r
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetDeviceSwitchRoutingStaticRoute",
+				err.Error(),
+			)
+			return
+		}
+
 		devicesSwitchRoutingStaticRoutes = ResponseSwitchGetDeviceSwitchRoutingStaticRouteItemToBody(devicesSwitchRoutingStaticRoutes, response2)
 		diags = resp.State.Set(ctx, &devicesSwitchRoutingStaticRoutes)
 		resp.Diagnostics.Append(diags...)
@@ -251,17 +261,42 @@ func ResponseSwitchGetDeviceSwitchRoutingStaticRoutesItemsToBody(state DevicesSw
 				}
 				return types.Bool{}
 			}(),
-			ManagementNextHop: types.StringValue(item.ManagementNextHop),
-			Name:              types.StringValue(item.Name),
-			NextHopIP:         types.StringValue(item.NextHopIP),
+			ManagementNextHop: func() types.String {
+				if item.ManagementNextHop != "" {
+					return types.StringValue(item.ManagementNextHop)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			NextHopIP: func() types.String {
+				if item.NextHopIP != "" {
+					return types.StringValue(item.NextHopIP)
+				}
+				return types.String{}
+			}(),
 			PreferOverOspfRoutesEnabled: func() types.Bool {
 				if item.PreferOverOspfRoutesEnabled != nil {
 					return types.BoolValue(*item.PreferOverOspfRoutesEnabled)
 				}
 				return types.Bool{}
 			}(),
-			StaticRouteID: types.StringValue(item.StaticRouteID),
-			Subnet:        types.StringValue(item.Subnet),
+			StaticRouteID: func() types.String {
+				if item.StaticRouteID != "" {
+					return types.StringValue(item.StaticRouteID)
+				}
+				return types.String{}
+			}(),
+			Subnet: func() types.String {
+				if item.Subnet != "" {
+					return types.StringValue(item.Subnet)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -277,17 +312,42 @@ func ResponseSwitchGetDeviceSwitchRoutingStaticRouteItemToBody(state DevicesSwit
 			}
 			return types.Bool{}
 		}(),
-		ManagementNextHop: types.StringValue(response.ManagementNextHop),
-		Name:              types.StringValue(response.Name),
-		NextHopIP:         types.StringValue(response.NextHopIP),
+		ManagementNextHop: func() types.String {
+			if response.ManagementNextHop != "" {
+				return types.StringValue(response.ManagementNextHop)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		NextHopIP: func() types.String {
+			if response.NextHopIP != "" {
+				return types.StringValue(response.NextHopIP)
+			}
+			return types.String{}
+		}(),
 		PreferOverOspfRoutesEnabled: func() types.Bool {
 			if response.PreferOverOspfRoutesEnabled != nil {
 				return types.BoolValue(*response.PreferOverOspfRoutesEnabled)
 			}
 			return types.Bool{}
 		}(),
-		StaticRouteID: types.StringValue(response.StaticRouteID),
-		Subnet:        types.StringValue(response.Subnet),
+		StaticRouteID: func() types.String {
+			if response.StaticRouteID != "" {
+				return types.StringValue(response.StaticRouteID)
+			}
+			return types.String{}
+		}(),
+		Subnet: func() types.String {
+			if response.Subnet != "" {
+				return types.StringValue(response.Subnet)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

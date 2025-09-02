@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -27,9 +28,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -69,106 +69,52 @@ func (r *NetworksSwitchStpResource) Schema(_ context.Context, _ resource.SchemaR
 			},
 			"rstp_enabled": schema.BoolAttribute{
 				MarkdownDescription: `The spanning tree protocol status in network`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"stp_bridge_priority_response": schema.SetNestedAttribute{
+			"stp_bridge_priority": schema.ListNestedAttribute{
 				MarkdownDescription: `STP bridge priority for switches/stacks or switch templates. An empty array will clear the STP bridge priority settings.`,
-				Computed:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
-				},
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-
-						"stacks": schema.SetAttribute{
-							MarkdownDescription: `List of stack IDs`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
-							},
-
-							ElementType: types.StringType,
-							Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
-						},
-						"stp_priority": schema.Int64Attribute{
-							MarkdownDescription: `STP priority for switch, stacks, or switch templates`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.Int64{
-								int64planmodifier.UseStateForUnknown(),
-							},
-						},
-						"switch_profiles": schema.SetAttribute{
-							MarkdownDescription: `List of switch template IDs`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
-							},
-							Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
-							ElementType: types.StringType,
-						},
-						"switches": schema.SetAttribute{
-							MarkdownDescription: `List of switch serial numbers`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
-							},
-							Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
-							ElementType: types.StringType,
-						},
-					},
-				},
-			},
-			"stp_bridge_priority": schema.SetNestedAttribute{
-				MarkdownDescription: `STP bridge priority for switches/stacks or switch templates. An empty array will clear the STP bridge priority settings.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
-						"stacks": schema.SetAttribute{
+						"stacks": schema.ListAttribute{
 							MarkdownDescription: `List of stack IDs`,
-							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
 
 							ElementType: types.StringType,
-							Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
 						},
 						"stp_priority": schema.Int64Attribute{
 							MarkdownDescription: `STP priority for switch, stacks, or switch templates`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
 							},
 						},
-						"switch_profiles": schema.SetAttribute{
+						"switch_profiles": schema.ListAttribute{
 							MarkdownDescription: `List of switch template IDs`,
-							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
-							Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
+
 							ElementType: types.StringType,
 						},
-						"switches": schema.SetAttribute{
+						"switches": schema.ListAttribute{
 							MarkdownDescription: `List of switch serial numbers`,
-							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
-							Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
+
 							ElementType: types.StringType,
 						},
 					},
@@ -185,10 +131,6 @@ func (r *NetworksSwitchStpResource) Create(ctx context.Context, req resource.Cre
 	var item types.Object
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &item)...)
 	if resp.Diagnostics.HasError() {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchStp Error setting item.",
-			"Setting item issue",
-		)
 		return
 	}
 
@@ -198,36 +140,11 @@ func (r *NetworksSwitchStpResource) Create(ctx context.Context, req resource.Cre
 	})...)
 
 	if resp.Diagnostics.HasError() {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchStp Error setting item.",
-			"Setting item issue",
-		)
 		return
 	}
 	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
-
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchStp(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSwitchStp  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSwitchStp only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
 
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
@@ -237,7 +154,7 @@ func (r *NetworksSwitchStpResource) Create(ctx context.Context, req resource.Cre
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStp",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -248,57 +165,19 @@ func (r *NetworksSwitchStpResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchStp(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkSwitchStp",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkSwitchStp",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseSwitchGetNetworkSwitchStpItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksSwitchStpResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksSwitchStpRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchStp Error setting item.",
-			"Setting item issue",
-		)
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		resp.Diagnostics.AddError(
-			"Resource NetworksSwitchStp Error setting item.",
-			"Setting item issue",
-		)
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -328,17 +207,15 @@ func (r *NetworksSwitchStpResource) Read(ctx context.Context, req resource.ReadR
 	}
 	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchStpItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksSwitchStpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksSwitchStpResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksSwitchStpRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksSwitchStpRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -347,14 +224,14 @@ func (r *NetworksSwitchStpResource) Update(ctx context.Context, req resource.Upd
 	//Update
 
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchStp(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStp",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -364,9 +241,7 @@ func (r *NetworksSwitchStpResource) Update(ctx context.Context, req resource.Upd
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksSwitchStpResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -377,17 +252,16 @@ func (r *NetworksSwitchStpResource) Delete(ctx context.Context, req resource.Del
 
 // TF Structs Schema
 type NetworksSwitchStpRs struct {
-	NetworkID                 types.String                                            `tfsdk:"network_id"`
-	RstpEnabled               types.Bool                                              `tfsdk:"rstp_enabled"`
-	StpBridgePriority         *[]ResponseSwitchGetNetworkSwitchStpStpBridgePriorityRs `tfsdk:"stp_bridge_priority"`
-	StpBridgePriorityResponse *[]ResponseSwitchGetNetworkSwitchStpStpBridgePriorityRs `tfsdk:"stp_bridge_priority_response"`
+	NetworkID         types.String                                            `tfsdk:"network_id"`
+	RstpEnabled       types.Bool                                              `tfsdk:"rstp_enabled"`
+	StpBridgePriority *[]ResponseSwitchGetNetworkSwitchStpStpBridgePriorityRs `tfsdk:"stp_bridge_priority"`
 }
 
 type ResponseSwitchGetNetworkSwitchStpStpBridgePriorityRs struct {
-	Stacks         types.Set   `tfsdk:"stacks"`
+	Stacks         types.List  `tfsdk:"stacks"`
 	StpPriority    types.Int64 `tfsdk:"stp_priority"`
-	SwitchProfiles types.Set   `tfsdk:"switch_profiles"`
-	Switches       types.Set   `tfsdk:"switches"`
+	SwitchProfiles types.List  `tfsdk:"switch_profiles"`
+	Switches       types.List  `tfsdk:"switches"`
 }
 
 // FromBody
@@ -450,33 +324,17 @@ func ResponseSwitchGetNetworkSwitchStpItemToBodyRs(state NetworksSwitchStpRs, re
 		StpBridgePriority: func() *[]ResponseSwitchGetNetworkSwitchStpStpBridgePriorityRs {
 			if response.StpBridgePriority != nil {
 				result := make([]ResponseSwitchGetNetworkSwitchStpStpBridgePriorityRs, len(*response.StpBridgePriority))
-				var localStacks basetypes.SetValue
-				var localSwitchProfiles basetypes.SetValue
-				var b []ResponseSwitchGetNetworkSwitchStpStpBridgePriorityRs
-				if state.StpBridgePriority != nil {
-					b = *state.StpBridgePriority
-				} else {
-					b = make([]ResponseSwitchGetNetworkSwitchStpStpBridgePriorityRs, 0)
-				}
-
 				for i, stpBridgePriority := range *response.StpBridgePriority {
-					if len(b) > i {
-						localStacks = b[i].Stacks
-						localSwitchProfiles = b[i].SwitchProfiles
-					} else {
-						localStacks = types.SetNull(types.StringType)
-						localSwitchProfiles = types.SetNull(types.StringType)
-					}
 					result[i] = ResponseSwitchGetNetworkSwitchStpStpBridgePriorityRs{
+						Stacks: StringSliceToList(stpBridgePriority.Stacks),
 						StpPriority: func() types.Int64 {
 							if stpBridgePriority.StpPriority != nil {
 								return types.Int64Value(int64(*stpBridgePriority.StpPriority))
 							}
 							return types.Int64{}
 						}(),
-						Switches:       StringSliceToSet(stpBridgePriority.Switches),
-						Stacks:         localStacks,
-						SwitchProfiles: localSwitchProfiles,
+						SwitchProfiles: StringSliceToList(stpBridgePriority.SwitchProfiles),
+						Switches:       StringSliceToList(stpBridgePriority.Switches),
 					}
 				}
 				return &result
@@ -484,12 +342,6 @@ func ResponseSwitchGetNetworkSwitchStpItemToBodyRs(state NetworksSwitchStpRs, re
 			return nil
 		}(),
 	}
-
-	// a := *itemState.StpBridgePriority
-	// a[0].Stacks = types.SetNull(types.StringType)
-	// a[0].SwitchProfiles = types.SetNull(types.StringType)
-	// a[0].Switches = types.SetNull(types.StringType)
-	itemState.StpBridgePriority = state.StpBridgePriority
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksSwitchStpRs)
 	}

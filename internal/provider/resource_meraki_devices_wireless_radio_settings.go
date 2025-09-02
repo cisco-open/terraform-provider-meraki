@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -64,7 +65,6 @@ func (r *DevicesWirelessRadioSettingsResource) Schema(_ context.Context, _ resou
 		Attributes: map[string]schema.Attribute{
 			"five_ghz_settings": schema.SingleNestedAttribute{
 				MarkdownDescription: `Manual radio settings for 5 GHz.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -74,7 +74,6 @@ func (r *DevicesWirelessRadioSettingsResource) Schema(_ context.Context, _ resou
 					"channel": schema.Int64Attribute{
 						MarkdownDescription: `Sets a manual channel for 5 GHz. Can be '36', '40', '44', '48', '52', '56', '60', '64', '100', '104', '108', '112', '116', '120', '124', '128', '132', '136', '140', '144', '149', '153', '157', '161', '165', '169', '173' or '177' or null for using auto channel.
                                         Allowed values: [36,40,44,48,52,56,60,64,100,104,108,112,116,120,124,128,132,136,140,144,149,153,157,161,165,169,173,177]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -83,7 +82,6 @@ func (r *DevicesWirelessRadioSettingsResource) Schema(_ context.Context, _ resou
 					"channel_width": schema.Int64Attribute{
 						MarkdownDescription: `Sets a manual channel width for 5 GHz. Can be '0', '20', '40', '80' or '160' or null for using auto channel width.
                                         Allowed values: [0,20,40,80,160]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -91,7 +89,6 @@ func (r *DevicesWirelessRadioSettingsResource) Schema(_ context.Context, _ resou
 					},
 					"target_power": schema.Int64Attribute{
 						MarkdownDescription: `Set a manual target power for 5 GHz (dBm). Enter null for using auto power range.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -101,7 +98,6 @@ func (r *DevicesWirelessRadioSettingsResource) Schema(_ context.Context, _ resou
 			},
 			"rf_profile_id": schema.StringAttribute{
 				MarkdownDescription: `The ID of an RF profile to assign to the device. If the value of this parameter is null, the appropriate basic RF profile (indoor or outdoor) will be assigned to the device. Assigning an RF profile will clear ALL manually configured overrides on the device (channel width, channel, power).`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -113,7 +109,6 @@ func (r *DevicesWirelessRadioSettingsResource) Schema(_ context.Context, _ resou
 			},
 			"two_four_ghz_settings": schema.SingleNestedAttribute{
 				MarkdownDescription: `Manual radio settings for 2.4 GHz.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -123,7 +118,6 @@ func (r *DevicesWirelessRadioSettingsResource) Schema(_ context.Context, _ resou
 					"channel": schema.Int64Attribute{
 						MarkdownDescription: `Sets a manual channel for 2.4 GHz. Can be '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13' or '14' or null for using auto channel.
                                         Allowed values: [1,2,3,4,5,6,7,8,9,10,11,12,13,14]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -131,7 +125,6 @@ func (r *DevicesWirelessRadioSettingsResource) Schema(_ context.Context, _ resou
 					},
 					"target_power": schema.Int64Attribute{
 						MarkdownDescription: `Set a manual target power for 2.4 GHz (dBm). Enter null for using auto power range.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -165,27 +158,6 @@ func (r *DevicesWirelessRadioSettingsResource) Create(ctx context.Context, req r
 	vvSerial := data.Serial.ValueString()
 	//Has Item and not has items
 
-	if vvSerial != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Wireless.GetDeviceWirelessRadioSettings(vvSerial)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesWirelessRadioSettings  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesWirelessRadioSettings only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Wireless.UpdateDeviceWirelessRadioSettings(vvSerial, dataRequest)
@@ -194,7 +166,7 @@ func (r *DevicesWirelessRadioSettingsResource) Create(ctx context.Context, req r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceWirelessRadioSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -205,49 +177,19 @@ func (r *DevicesWirelessRadioSettingsResource) Create(ctx context.Context, req r
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Wireless.GetDeviceWirelessRadioSettings(vvSerial)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetDeviceWirelessRadioSettings",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetDeviceWirelessRadioSettings",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseWirelessGetDeviceWirelessRadioSettingsItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *DevicesWirelessRadioSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data DevicesWirelessRadioSettingsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -277,33 +219,28 @@ func (r *DevicesWirelessRadioSettingsResource) Read(ctx context.Context, req res
 	}
 	//entro aqui 2
 	data = ResponseWirelessGetDeviceWirelessRadioSettingsItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *DevicesWirelessRadioSettingsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("serial"), req.ID)...)
 }
 
 func (r *DevicesWirelessRadioSettingsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data DevicesWirelessRadioSettingsRs
-	merge(ctx, req, resp, &data)
+	var plan DevicesWirelessRadioSettingsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvSerial := data.Serial.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvSerial := plan.Serial.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Wireless.UpdateDeviceWirelessRadioSettings(vvSerial, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceWirelessRadioSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -313,9 +250,7 @@ func (r *DevicesWirelessRadioSettingsResource) Update(ctx context.Context, req r
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *DevicesWirelessRadioSettingsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -437,8 +372,18 @@ func ResponseWirelessGetDeviceWirelessRadioSettingsItemToBodyRs(state DevicesWir
 			}
 			return nil
 		}(),
-		RfProfileID: types.StringValue(response.RfProfileID),
-		Serial:      types.StringValue(response.Serial),
+		RfProfileID: func() types.String {
+			if response.RfProfileID != "" {
+				return types.StringValue(response.RfProfileID)
+			}
+			return types.String{}
+		}(),
+		Serial: func() types.String {
+			if response.Serial != "" {
+				return types.StringValue(response.Serial)
+			}
+			return types.String{}
+		}(),
 		TwoFourGhzSettings: func() *ResponseWirelessGetDeviceWirelessRadioSettingsTwoFourGhzSettingsRs {
 			if response.TwoFourGhzSettings != nil {
 				return &ResponseWirelessGetDeviceWirelessRadioSettingsTwoFourGhzSettingsRs{

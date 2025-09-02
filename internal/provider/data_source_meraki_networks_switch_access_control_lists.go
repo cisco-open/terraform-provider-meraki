@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -184,15 +183,60 @@ func ResponseSwitchGetNetworkSwitchAccessControlListsItemToBody(state NetworksSw
 				result := make([]ResponseSwitchGetNetworkSwitchAccessControlListsRules, len(*response.Rules))
 				for i, rules := range *response.Rules {
 					result[i] = ResponseSwitchGetNetworkSwitchAccessControlListsRules{
-						Comment:   types.StringValue(rules.Comment),
-						DstCidr:   types.StringValue(rules.DstCidr),
-						DstPort:   types.StringValue(rules.DstPort),
-						IPVersion: types.StringValue(rules.IPVersion),
-						Policy:    types.StringValue(rules.Policy),
-						Protocol:  types.StringValue(rules.Protocol),
-						SrcCidr:   types.StringValue(rules.SrcCidr),
-						SrcPort:   types.StringValue(rules.SrcPort),
-						VLAN:      types.StringValue(rules.VLAN),
+						Comment: func() types.String {
+							if rules.Comment != "" {
+								return types.StringValue(rules.Comment)
+							}
+							return types.String{}
+						}(),
+						DstCidr: func() types.String {
+							if rules.DstCidr != "" {
+								return types.StringValue(rules.DstCidr)
+							}
+							return types.String{}
+						}(),
+						DstPort: func() types.String {
+							if rules.DstPort != "" {
+								return types.StringValue(rules.DstPort)
+							}
+							return types.String{}
+						}(),
+						IPVersion: func() types.String {
+							if rules.IPVersion != "" {
+								return types.StringValue(rules.IPVersion)
+							}
+							return types.String{}
+						}(),
+						Policy: func() types.String {
+							if rules.Policy != "" {
+								return types.StringValue(rules.Policy)
+							}
+							return types.String{}
+						}(),
+						Protocol: func() types.String {
+							if rules.Protocol != "" {
+								return types.StringValue(rules.Protocol)
+							}
+							return types.String{}
+						}(),
+						SrcCidr: func() types.String {
+							if rules.SrcCidr != "" {
+								return types.StringValue(rules.SrcCidr)
+							}
+							return types.String{}
+						}(),
+						SrcPort: func() types.String {
+							if rules.SrcPort != "" {
+								return types.StringValue(rules.SrcPort)
+							}
+							return types.String{}
+						}(),
+						VLAN: func() types.String {
+							if rules.VLAN != "" {
+								return types.StringValue(rules.VLAN)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

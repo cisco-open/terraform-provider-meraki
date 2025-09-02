@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -260,6 +259,17 @@ func (d *NetworksFirmwareUpgradesStagedGroupsDataSource) Read(ctx context.Contex
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkFirmwareUpgradesStagedGroup",
+				err.Error(),
+			)
+			return
+		}
+
 		networksFirmwareUpgradesStagedGroups = ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupItemToBody(networksFirmwareUpgradesStagedGroups, response2)
 		diags = resp.State.Set(ctx, &networksFirmwareUpgradesStagedGroups)
 		resp.Diagnostics.Append(diags...)
@@ -337,8 +347,18 @@ func ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupsItemsToBody(state Net
 								result := make([]ResponseItemNetworksGetNetworkFirmwareUpgradesStagedGroupsAssignedDevicesDevices, len(*item.AssignedDevices.Devices))
 								for i, devices := range *item.AssignedDevices.Devices {
 									result[i] = ResponseItemNetworksGetNetworkFirmwareUpgradesStagedGroupsAssignedDevicesDevices{
-										Name:   types.StringValue(devices.Name),
-										Serial: types.StringValue(devices.Serial),
+										Name: func() types.String {
+											if devices.Name != "" {
+												return types.StringValue(devices.Name)
+											}
+											return types.String{}
+										}(),
+										Serial: func() types.String {
+											if devices.Serial != "" {
+												return types.StringValue(devices.Serial)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -350,8 +370,18 @@ func ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupsItemsToBody(state Net
 								result := make([]ResponseItemNetworksGetNetworkFirmwareUpgradesStagedGroupsAssignedDevicesSwitchStacks, len(*item.AssignedDevices.SwitchStacks))
 								for i, switchStacks := range *item.AssignedDevices.SwitchStacks {
 									result[i] = ResponseItemNetworksGetNetworkFirmwareUpgradesStagedGroupsAssignedDevicesSwitchStacks{
-										ID:   types.StringValue(switchStacks.ID),
-										Name: types.StringValue(switchStacks.Name),
+										ID: func() types.String {
+											if switchStacks.ID != "" {
+												return types.StringValue(switchStacks.ID)
+											}
+											return types.String{}
+										}(),
+										Name: func() types.String {
+											if switchStacks.Name != "" {
+												return types.StringValue(switchStacks.Name)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -362,15 +392,30 @@ func ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupsItemsToBody(state Net
 				}
 				return nil
 			}(),
-			Description: types.StringValue(item.Description),
-			GroupID:     types.StringValue(item.GroupID),
+			Description: func() types.String {
+				if item.Description != "" {
+					return types.StringValue(item.Description)
+				}
+				return types.String{}
+			}(),
+			GroupID: func() types.String {
+				if item.GroupID != "" {
+					return types.StringValue(item.GroupID)
+				}
+				return types.String{}
+			}(),
 			IsDefault: func() types.Bool {
 				if item.IsDefault != nil {
 					return types.BoolValue(*item.IsDefault)
 				}
 				return types.Bool{}
 			}(),
-			Name: types.StringValue(item.Name),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -388,8 +433,18 @@ func ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupItemToBody(state Netwo
 							result := make([]ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupAssignedDevicesDevices, len(*response.AssignedDevices.Devices))
 							for i, devices := range *response.AssignedDevices.Devices {
 								result[i] = ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupAssignedDevicesDevices{
-									Name:   types.StringValue(devices.Name),
-									Serial: types.StringValue(devices.Serial),
+									Name: func() types.String {
+										if devices.Name != "" {
+											return types.StringValue(devices.Name)
+										}
+										return types.String{}
+									}(),
+									Serial: func() types.String {
+										if devices.Serial != "" {
+											return types.StringValue(devices.Serial)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return &result
@@ -401,8 +456,18 @@ func ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupItemToBody(state Netwo
 							result := make([]ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupAssignedDevicesSwitchStacks, len(*response.AssignedDevices.SwitchStacks))
 							for i, switchStacks := range *response.AssignedDevices.SwitchStacks {
 								result[i] = ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupAssignedDevicesSwitchStacks{
-									ID:   types.StringValue(switchStacks.ID),
-									Name: types.StringValue(switchStacks.Name),
+									ID: func() types.String {
+										if switchStacks.ID != "" {
+											return types.StringValue(switchStacks.ID)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if switchStacks.Name != "" {
+											return types.StringValue(switchStacks.Name)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return &result
@@ -413,15 +478,30 @@ func ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupItemToBody(state Netwo
 			}
 			return nil
 		}(),
-		Description: types.StringValue(response.Description),
-		GroupID:     types.StringValue(response.GroupID),
+		Description: func() types.String {
+			if response.Description != "" {
+				return types.StringValue(response.Description)
+			}
+			return types.String{}
+		}(),
+		GroupID: func() types.String {
+			if response.GroupID != "" {
+				return types.StringValue(response.GroupID)
+			}
+			return types.String{}
+		}(),
 		IsDefault: func() types.Bool {
 			if response.IsDefault != nil {
 				return types.BoolValue(*response.IsDefault)
 			}
 			return types.Bool{}
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

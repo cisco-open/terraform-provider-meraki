@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -244,6 +243,17 @@ func (d *NetworksApplianceSSIDsDataSource) Read(ctx context.Context, req datasou
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkApplianceSSID",
+				err.Error(),
+			)
+			return
+		}
+
 		networksApplianceSSIDs = ResponseApplianceGetNetworkApplianceSSIDItemToBody(networksApplianceSSIDs, response2)
 		diags = resp.State.Set(ctx, &networksApplianceSSIDs)
 		resp.Diagnostics.Append(diags...)
@@ -301,7 +311,12 @@ func ResponseApplianceGetNetworkApplianceSSIDsItemsToBody(state NetworksApplianc
 	var items []ResponseItemApplianceGetNetworkApplianceSsids
 	for _, item := range *response {
 		itemState := ResponseItemApplianceGetNetworkApplianceSsids{
-			AuthMode: types.StringValue(item.AuthMode),
+			AuthMode: func() types.String {
+				if item.AuthMode != "" {
+					return types.StringValue(item.AuthMode)
+				}
+				return types.String{}
+			}(),
 			DefaultVLANID: func() types.Int64 {
 				if item.DefaultVLANID != nil {
 					return types.Int64Value(int64(*item.DefaultVLANID))
@@ -314,8 +329,18 @@ func ResponseApplianceGetNetworkApplianceSSIDsItemsToBody(state NetworksApplianc
 				}
 				return types.Bool{}
 			}(),
-			EncryptionMode: types.StringValue(item.EncryptionMode),
-			Name:           types.StringValue(item.Name),
+			EncryptionMode: func() types.String {
+				if item.EncryptionMode != "" {
+					return types.StringValue(item.EncryptionMode)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			Number: func() types.Int64 {
 				if item.Number != nil {
 					return types.Int64Value(int64(*item.Number))
@@ -327,7 +352,12 @@ func ResponseApplianceGetNetworkApplianceSSIDsItemsToBody(state NetworksApplianc
 					result := make([]ResponseItemApplianceGetNetworkApplianceSsidsRadiusServers, len(*item.RadiusServers))
 					for i, radiusServers := range *item.RadiusServers {
 						result[i] = ResponseItemApplianceGetNetworkApplianceSsidsRadiusServers{
-							Host: types.StringValue(radiusServers.Host),
+							Host: func() types.String {
+								if radiusServers.Host != "" {
+									return types.StringValue(radiusServers.Host)
+								}
+								return types.String{}
+							}(),
 							Port: func() types.Int64 {
 								if radiusServers.Port != nil {
 									return types.Int64Value(int64(*radiusServers.Port))
@@ -346,7 +376,12 @@ func ResponseApplianceGetNetworkApplianceSSIDsItemsToBody(state NetworksApplianc
 				}
 				return types.Bool{}
 			}(),
-			WpaEncryptionMode: types.StringValue(item.WpaEncryptionMode),
+			WpaEncryptionMode: func() types.String {
+				if item.WpaEncryptionMode != "" {
+					return types.StringValue(item.WpaEncryptionMode)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -356,7 +391,12 @@ func ResponseApplianceGetNetworkApplianceSSIDsItemsToBody(state NetworksApplianc
 
 func ResponseApplianceGetNetworkApplianceSSIDItemToBody(state NetworksApplianceSSIDs, response *merakigosdk.ResponseApplianceGetNetworkApplianceSSID) NetworksApplianceSSIDs {
 	itemState := ResponseApplianceGetNetworkApplianceSsid{
-		AuthMode: types.StringValue(response.AuthMode),
+		AuthMode: func() types.String {
+			if response.AuthMode != "" {
+				return types.StringValue(response.AuthMode)
+			}
+			return types.String{}
+		}(),
 		DefaultVLANID: func() types.Int64 {
 			if response.DefaultVLANID != nil {
 				return types.Int64Value(int64(*response.DefaultVLANID))
@@ -369,8 +409,18 @@ func ResponseApplianceGetNetworkApplianceSSIDItemToBody(state NetworksApplianceS
 			}
 			return types.Bool{}
 		}(),
-		EncryptionMode: types.StringValue(response.EncryptionMode),
-		Name:           types.StringValue(response.Name),
+		EncryptionMode: func() types.String {
+			if response.EncryptionMode != "" {
+				return types.StringValue(response.EncryptionMode)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		Number: func() types.Int64 {
 			if response.Number != nil {
 				return types.Int64Value(int64(*response.Number))
@@ -382,7 +432,12 @@ func ResponseApplianceGetNetworkApplianceSSIDItemToBody(state NetworksApplianceS
 				result := make([]ResponseApplianceGetNetworkApplianceSsidRadiusServers, len(*response.RadiusServers))
 				for i, radiusServers := range *response.RadiusServers {
 					result[i] = ResponseApplianceGetNetworkApplianceSsidRadiusServers{
-						Host: types.StringValue(radiusServers.Host),
+						Host: func() types.String {
+							if radiusServers.Host != "" {
+								return types.StringValue(radiusServers.Host)
+							}
+							return types.String{}
+						}(),
 						Port: func() types.Int64 {
 							if radiusServers.Port != nil {
 								return types.Int64Value(int64(*radiusServers.Port))
@@ -401,7 +456,12 @@ func ResponseApplianceGetNetworkApplianceSSIDItemToBody(state NetworksApplianceS
 			}
 			return types.Bool{}
 		}(),
-		WpaEncryptionMode: types.StringValue(response.WpaEncryptionMode),
+		WpaEncryptionMode: func() types.String {
+			if response.WpaEncryptionMode != "" {
+				return types.StringValue(response.WpaEncryptionMode)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

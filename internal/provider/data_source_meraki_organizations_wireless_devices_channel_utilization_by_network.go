@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -272,7 +271,12 @@ func ResponseWirelessGetOrganizationWirelessDevicesChannelUtilizationByNetworkIt
 					result := make([]ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByNetworkByBand, len(*item.ByBand))
 					for i, byBand := range *item.ByBand {
 						result[i] = ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByNetworkByBand{
-							Band: types.StringValue(byBand.Band),
+							Band: func() types.String {
+								if byBand.Band != "" {
+									return types.StringValue(byBand.Band)
+								}
+								return types.String{}
+							}(),
 							NonWifi: func() *ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByNetworkByBandNonWifi {
 								if byBand.NonWifi != nil {
 									return &ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByNetworkByBandNonWifi{
@@ -321,7 +325,12 @@ func ResponseWirelessGetOrganizationWirelessDevicesChannelUtilizationByNetworkIt
 			Network: func() *ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByNetworkNetwork {
 				if item.Network != nil {
 					return &ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByNetworkNetwork{
-						ID: types.StringValue(item.Network.ID),
+						ID: func() types.String {
+							if item.Network.ID != "" {
+								return types.StringValue(item.Network.ID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil

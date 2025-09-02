@@ -270,21 +270,56 @@ func ResponseOrganizationsCombineOrganizationNetworksItemToBody(state Organizati
 		ResultingNetwork: func() *ResponseOrganizationsCombineOrganizationNetworksResultingNetwork {
 			if response.ResultingNetwork != nil {
 				return &ResponseOrganizationsCombineOrganizationNetworksResultingNetwork{
-					EnrollmentString: types.StringValue(response.ResultingNetwork.EnrollmentString),
-					ID:               types.StringValue(response.ResultingNetwork.ID),
+					EnrollmentString: func() types.String {
+						if response.ResultingNetwork.EnrollmentString != "" {
+							return types.StringValue(response.ResultingNetwork.EnrollmentString)
+						}
+						return types.String{}
+					}(),
+					ID: func() types.String {
+						if response.ResultingNetwork.ID != "" {
+							return types.StringValue(response.ResultingNetwork.ID)
+						}
+						return types.String{}
+					}(),
 					IsBoundToConfigTemplate: func() types.Bool {
 						if response.ResultingNetwork.IsBoundToConfigTemplate != nil {
 							return types.BoolValue(*response.ResultingNetwork.IsBoundToConfigTemplate)
 						}
 						return types.Bool{}
 					}(),
-					Name:           types.StringValue(response.ResultingNetwork.Name),
-					Notes:          types.StringValue(response.ResultingNetwork.Notes),
-					OrganizationID: types.StringValue(response.ResultingNetwork.OrganizationID),
-					ProductTypes:   StringSliceToList(response.ResultingNetwork.ProductTypes),
-					Tags:           StringSliceToList(response.ResultingNetwork.Tags),
-					TimeZone:       types.StringValue(response.ResultingNetwork.TimeZone),
-					URL:            types.StringValue(response.ResultingNetwork.URL),
+					Name: func() types.String {
+						if response.ResultingNetwork.Name != "" {
+							return types.StringValue(response.ResultingNetwork.Name)
+						}
+						return types.String{}
+					}(),
+					Notes: func() types.String {
+						if response.ResultingNetwork.Notes != "" {
+							return types.StringValue(response.ResultingNetwork.Notes)
+						}
+						return types.String{}
+					}(),
+					OrganizationID: func() types.String {
+						if response.ResultingNetwork.OrganizationID != "" {
+							return types.StringValue(response.ResultingNetwork.OrganizationID)
+						}
+						return types.String{}
+					}(),
+					ProductTypes: StringSliceToList(response.ResultingNetwork.ProductTypes),
+					Tags:         StringSliceToList(response.ResultingNetwork.Tags),
+					TimeZone: func() types.String {
+						if response.ResultingNetwork.TimeZone != "" {
+							return types.StringValue(response.ResultingNetwork.TimeZone)
+						}
+						return types.String{}
+					}(),
+					URL: func() types.String {
+						if response.ResultingNetwork.URL != "" {
+							return types.StringValue(response.ResultingNetwork.URL)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil

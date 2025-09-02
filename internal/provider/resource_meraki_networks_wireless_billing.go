@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -28,9 +29,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -68,7 +69,6 @@ func (r *NetworksWirelessBillingResource) Schema(_ context.Context, _ resource.S
 		Attributes: map[string]schema.Attribute{
 			"currency": schema.StringAttribute{
 				MarkdownDescription: `The currency code of this node group's billing plans`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -78,19 +78,17 @@ func (r *NetworksWirelessBillingResource) Schema(_ context.Context, _ resource.S
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"plans": schema.SetNestedAttribute{
+			"plans": schema.ListNestedAttribute{
 				MarkdownDescription: `Array of billing plans in the node group. (Can configure a maximum of 5)`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"bandwidth_limits": schema.SingleNestedAttribute{
 							MarkdownDescription: `The uplink bandwidth settings for the pricing plan.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Object{
 								objectplanmodifier.UseStateForUnknown(),
@@ -99,7 +97,6 @@ func (r *NetworksWirelessBillingResource) Schema(_ context.Context, _ resource.S
 
 								"limit_down": schema.Int64Attribute{
 									MarkdownDescription: `The maximum download limit (integer, in Kbps).`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Int64{
 										int64planmodifier.UseStateForUnknown(),
@@ -107,7 +104,6 @@ func (r *NetworksWirelessBillingResource) Schema(_ context.Context, _ resource.S
 								},
 								"limit_up": schema.Int64Attribute{
 									MarkdownDescription: `The maximum upload limit (integer, in Kbps).`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Int64{
 										int64planmodifier.UseStateForUnknown(),
@@ -117,7 +113,6 @@ func (r *NetworksWirelessBillingResource) Schema(_ context.Context, _ resource.S
 						},
 						"id": schema.StringAttribute{
 							MarkdownDescription: `The id of the pricing plan to update.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -125,7 +120,6 @@ func (r *NetworksWirelessBillingResource) Schema(_ context.Context, _ resource.S
 						},
 						"price": schema.Float64Attribute{
 							MarkdownDescription: `The price of the billing plan.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Float64{
 								float64planmodifier.UseStateForUnknown(),
@@ -134,7 +128,6 @@ func (r *NetworksWirelessBillingResource) Schema(_ context.Context, _ resource.S
 						"time_limit": schema.StringAttribute{
 							MarkdownDescription: `The time limit of the pricing plan in minutes.
                                         Allowed values: [1 day,1 hour,1 week,30 days]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -177,27 +170,6 @@ func (r *NetworksWirelessBillingResource) Create(ctx context.Context, req resour
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessBilling(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessBilling  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessBilling only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessBilling(vvNetworkID, dataRequest)
@@ -206,7 +178,7 @@ func (r *NetworksWirelessBillingResource) Create(ctx context.Context, req resour
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessBilling",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -217,49 +189,19 @@ func (r *NetworksWirelessBillingResource) Create(ctx context.Context, req resour
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessBilling(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkWirelessBilling",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkWirelessBilling",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseWirelessGetNetworkWirelessBillingItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksWirelessBillingResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksWirelessBillingRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -289,33 +231,28 @@ func (r *NetworksWirelessBillingResource) Read(ctx context.Context, req resource
 	}
 	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessBillingItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksWirelessBillingResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksWirelessBillingResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksWirelessBillingRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksWirelessBillingRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessBilling(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessBilling",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -325,9 +262,7 @@ func (r *NetworksWirelessBillingResource) Update(ctx context.Context, req resour
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksWirelessBillingResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -421,7 +356,12 @@ func (r *NetworksWirelessBillingRs) toSdkApiRequestUpdate(ctx context.Context) *
 // From gosdk to TF Structs Schema
 func ResponseWirelessGetNetworkWirelessBillingItemToBodyRs(state NetworksWirelessBillingRs, response *merakigosdk.ResponseWirelessGetNetworkWirelessBilling, is_read bool) NetworksWirelessBillingRs {
 	itemState := NetworksWirelessBillingRs{
-		Currency: types.StringValue(response.Currency),
+		Currency: func() types.String {
+			if response.Currency != "" {
+				return types.StringValue(response.Currency)
+			}
+			return types.String{}
+		}(),
 		Plans: func() *[]ResponseWirelessGetNetworkWirelessBillingPlansRs {
 			if response.Plans != nil {
 				result := make([]ResponseWirelessGetNetworkWirelessBillingPlansRs, len(*response.Plans))
@@ -446,14 +386,24 @@ func ResponseWirelessGetNetworkWirelessBillingItemToBodyRs(state NetworksWireles
 							}
 							return nil
 						}(),
-						ID: types.StringValue(plans.ID),
+						ID: func() types.String {
+							if plans.ID != "" {
+								return types.StringValue(plans.ID)
+							}
+							return types.String{}
+						}(),
 						Price: func() types.Float64 {
 							if plans.Price != nil {
 								return types.Float64Value(float64(*plans.Price))
 							}
 							return types.Float64{}
 						}(),
-						TimeLimit: types.StringValue(plans.TimeLimit),
+						TimeLimit: func() types.String {
+							if plans.TimeLimit != "" {
+								return types.StringValue(plans.TimeLimit)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

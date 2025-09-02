@@ -32,19 +32,19 @@ import (
 )
 
 var (
-	_ resource.Resource              = &WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource{}
-	_ resource.ResourceWithConfigure = &WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource{}
+	_ resource.Resource              = &OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource{}
+	_ resource.ResourceWithConfigure = &OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource{}
 )
 
-func NewWirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource() resource.Resource {
-	return &WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource{}
+func NewOrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource() resource.Resource {
+	return &OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource{}
 }
 
-type WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource struct {
+type OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource struct {
 	client *merakigosdk.Client
 }
 
-func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -53,12 +53,12 @@ func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource) C
 }
 
 // Metadata returns the data source type name.
-func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_Wireless_wireless_ssids_firewall_isolation_allowlist_entries_delete"
+func (r *OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_organizations_wireless_ssids_firewall_isolation_allowlist_entries_delete"
 }
 
 // resourceAction
-func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"entry_id": schema.StringAttribute{
@@ -78,9 +78,9 @@ func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource) S
 		},
 	}
 }
-func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var data WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDelete
+	var data OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesDelete
 
 	var item types.Object
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &item)...)
@@ -122,21 +122,21 @@ func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource) C
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
-func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
-func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesDeleteResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
 // TF Structs Schema
-type WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesDelete struct {
+type OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesDelete struct {
 	OrganizationID types.String `tfsdk:"organization_id"`
 	EntryID        types.String `tfsdk:"entry_id"`
 }

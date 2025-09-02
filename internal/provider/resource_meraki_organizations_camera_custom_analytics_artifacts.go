@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -64,15 +65,14 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Schema(_ context.C
 		Attributes: map[string]schema.Attribute{
 			"artifact_id": schema.StringAttribute{
 				MarkdownDescription: `Custom analytics artifact ID`,
-				Computed:            true,
 				Optional:            true,
+				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `Custom analytics artifact name`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -168,7 +168,7 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Create(ctx context
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationCameraCustomAnalyticsArtifact",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -240,21 +240,11 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Create(ctx context
 func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data OrganizationsCameraCustomAnalyticsArtifactsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -285,36 +275,29 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Read(ctx context.C
 	}
 	//entro aqui 2
 	data = ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
-
 func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
 
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: organizationId,artifactId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("artifact_id"), idParts[1])...)
 }
 
 func (r *OrganizationsCameraCustomAnalyticsArtifactsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data OrganizationsCameraCustomAnalyticsArtifactsRs
-	merge(ctx, req, resp, &data)
+	var plan OrganizationsCameraCustomAnalyticsArtifactsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
-	}
-	//Has Paths
-	//Update
-	// No update
+	} // No update
 	resp.Diagnostics.AddError(
 		"Update operation not supported in OrganizationsCameraCustomAnalyticsArtifacts",
 		"Update operation not supported in OrganizationsCameraCustomAnalyticsArtifacts",
@@ -383,14 +366,39 @@ func (r *OrganizationsCameraCustomAnalyticsArtifactsRs) toSdkApiRequestCreate(ct
 // From gosdk to TF Structs Schema
 func ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactItemToBodyRs(state OrganizationsCameraCustomAnalyticsArtifactsRs, response *merakigosdk.ResponseCameraGetOrganizationCameraCustomAnalyticsArtifact, is_read bool) OrganizationsCameraCustomAnalyticsArtifactsRs {
 	itemState := OrganizationsCameraCustomAnalyticsArtifactsRs{
-		ArtifactID:     types.StringValue(response.ArtifactID),
-		Name:           types.StringValue(response.Name),
-		OrganizationID: types.StringValue(response.OrganizationID),
+		ArtifactID: func() types.String {
+			if response.ArtifactID != "" {
+				return types.StringValue(response.ArtifactID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		OrganizationID: func() types.String {
+			if response.OrganizationID != "" {
+				return types.StringValue(response.OrganizationID)
+			}
+			return types.String{}
+		}(),
 		Status: func() *ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactStatusRs {
 			if response.Status != nil {
 				return &ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactStatusRs{
-					Message: types.StringValue(response.Status.Message),
-					Type:    types.StringValue(response.Status.Type),
+					Message: func() types.String {
+						if response.Status.Message != "" {
+							return types.StringValue(response.Status.Message)
+						}
+						return types.String{}
+					}(),
+					Type: func() types.String {
+						if response.Status.Type != "" {
+							return types.StringValue(response.Status.Type)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil

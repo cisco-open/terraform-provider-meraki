@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -150,8 +149,18 @@ func ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesItemToBody(state
 				result := make([]ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRules, len(*response.Rules))
 				for i, rules := range *response.Rules {
 					result[i] = ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRules{
-						Policy: types.StringValue(rules.Policy),
-						Type:   types.StringValue(rules.Type),
+						Policy: func() types.String {
+							if rules.Policy != "" {
+								return types.StringValue(rules.Policy)
+							}
+							return types.String{}
+						}(),
+						Type: func() types.String {
+							if rules.Type != "" {
+								return types.StringValue(rules.Type)
+							}
+							return types.String{}
+						}(),
 						Value: func() types.String {
 							if rules.Value == nil {
 								return types.StringNull()

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -371,9 +370,24 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 												result := make([]ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL3ByDeviceItemsInterfacesAddresses, len(*interfaces.Addresses))
 												for i, addresses := range *interfaces.Addresses {
 													result[i] = ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL3ByDeviceItemsInterfacesAddresses{
-														Address:  types.StringValue(addresses.Address),
-														Protocol: types.StringValue(addresses.Protocol),
-														Subnet:   types.StringValue(addresses.Subnet),
+														Address: func() types.String {
+															if addresses.Address != "" {
+																return types.StringValue(addresses.Address)
+															}
+															return types.String{}
+														}(),
+														Protocol: func() types.String {
+															if addresses.Protocol != "" {
+																return types.StringValue(addresses.Protocol)
+															}
+															return types.String{}
+														}(),
+														Subnet: func() types.String {
+															if addresses.Subnet != "" {
+																return types.StringValue(addresses.Subnet)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return &result
@@ -393,26 +407,61 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 											}
 											return nil
 										}(),
-										Description: types.StringValue(interfaces.Description),
+										Description: func() types.String {
+											if interfaces.Description != "" {
+												return types.StringValue(interfaces.Description)
+											}
+											return types.String{}
+										}(),
 										IsUplink: func() types.Bool {
 											if interfaces.IsUplink != nil {
 												return types.BoolValue(*interfaces.IsUplink)
 											}
 											return types.Bool{}
 										}(),
-										LinkNegotiation: types.StringValue(interfaces.LinkNegotiation),
-										Mac:             types.StringValue(interfaces.Mac),
+										LinkNegotiation: func() types.String {
+											if interfaces.LinkNegotiation != "" {
+												return types.StringValue(interfaces.LinkNegotiation)
+											}
+											return types.String{}
+										}(),
+										Mac: func() types.String {
+											if interfaces.Mac != "" {
+												return types.StringValue(interfaces.Mac)
+											}
+											return types.String{}
+										}(),
 										Module: func() *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL3ByDeviceItemsInterfacesModule {
 											if interfaces.Module != nil {
 												return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL3ByDeviceItemsInterfacesModule{
-													Model: types.StringValue(interfaces.Module.Model),
+													Model: func() types.String {
+														if interfaces.Module.Model != "" {
+															return types.StringValue(interfaces.Module.Model)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return nil
 										}(),
-										Name:   types.StringValue(interfaces.Name),
-										Speed:  types.StringValue(interfaces.Speed),
-										Status: types.StringValue(interfaces.Status),
+										Name: func() types.String {
+											if interfaces.Name != "" {
+												return types.StringValue(interfaces.Name)
+											}
+											return types.String{}
+										}(),
+										Speed: func() types.String {
+											if interfaces.Speed != "" {
+												return types.StringValue(interfaces.Speed)
+											}
+											return types.String{}
+										}(),
+										Status: func() types.String {
+											if interfaces.Status != "" {
+												return types.StringValue(interfaces.Status)
+											}
+											return types.String{}
+										}(),
 										VLAN: func() types.Int64 {
 											if interfaces.VLAN != nil {
 												return types.Int64Value(int64(*interfaces.VLAN))
@@ -422,7 +471,12 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 										Vrf: func() *ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL3ByDeviceItemsInterfacesVrf {
 											if interfaces.Vrf != nil {
 												return &ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL3ByDeviceItemsInterfacesVrf{
-													Name: types.StringValue(interfaces.Vrf.Name),
+													Name: func() types.String {
+														if interfaces.Vrf.Name != "" {
+															return types.StringValue(interfaces.Vrf.Name)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return nil
@@ -433,7 +487,12 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 							}
 							return nil
 						}(),
-						Serial: types.StringValue(items.Serial),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

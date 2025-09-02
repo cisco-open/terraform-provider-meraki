@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -275,8 +274,18 @@ func ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBody(state NetworksWir
 				result := make([]ResponseWirelessGetNetworkWirelessSsidHotspot20MccMncs, len(*response.MccMncs))
 				for i, mccMncs := range *response.MccMncs {
 					result[i] = ResponseWirelessGetNetworkWirelessSsidHotspot20MccMncs{
-						Mcc: types.StringValue(mccMncs.Mcc),
-						Mnc: types.StringValue(mccMncs.Mnc),
+						Mcc: func() types.String {
+							if mccMncs.Mcc != "" {
+								return types.StringValue(mccMncs.Mcc)
+							}
+							return types.String{}
+						}(),
+						Mnc: func() types.String {
+							if mccMncs.Mnc != "" {
+								return types.StringValue(mccMncs.Mnc)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -288,7 +297,12 @@ func ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBody(state NetworksWir
 				result := make([]ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealms, len(*response.NaiRealms))
 				for i, naiRealms := range *response.NaiRealms {
 					result[i] = ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealms{
-						Format: types.StringValue(naiRealms.Format),
+						Format: func() types.String {
+							if naiRealms.Format != "" {
+								return types.StringValue(naiRealms.Format)
+							}
+							return types.String{}
+						}(),
 						Methods: func() *[]ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealmsMethods {
 							if naiRealms.Methods != nil {
 								result := make([]ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealmsMethods, len(*naiRealms.Methods))
@@ -305,25 +319,45 @@ func ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBody(state NetworksWir
 											}
 											return nil
 										}(),
-										ID: types.StringValue(methods.ID),
+										ID: func() types.String {
+											if methods.ID != "" {
+												return types.StringValue(methods.ID)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						Name: types.StringValue(naiRealms.Name),
+						Name: func() types.String {
+							if naiRealms.Name != "" {
+								return types.StringValue(naiRealms.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		NetworkAccessType: types.StringValue(response.NetworkAccessType),
+		NetworkAccessType: func() types.String {
+			if response.NetworkAccessType != "" {
+				return types.StringValue(response.NetworkAccessType)
+			}
+			return types.String{}
+		}(),
 		Operator: func() *ResponseWirelessGetNetworkWirelessSsidHotspot20Operator {
 			if response.Operator != nil {
 				return &ResponseWirelessGetNetworkWirelessSsidHotspot20Operator{
-					Name: types.StringValue(response.Operator.Name),
+					Name: func() types.String {
+						if response.Operator.Name != "" {
+							return types.StringValue(response.Operator.Name)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -332,8 +366,18 @@ func ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBody(state NetworksWir
 		Venue: func() *ResponseWirelessGetNetworkWirelessSsidHotspot20Venue {
 			if response.Venue != nil {
 				return &ResponseWirelessGetNetworkWirelessSsidHotspot20Venue{
-					Name: types.StringValue(response.Venue.Name),
-					Type: types.StringValue(response.Venue.Type),
+					Name: func() types.String {
+						if response.Venue.Name != "" {
+							return types.StringValue(response.Venue.Name)
+						}
+						return types.String{}
+					}(),
+					Type: func() types.String {
+						if response.Venue.Type != "" {
+							return types.StringValue(response.Venue.Type)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil

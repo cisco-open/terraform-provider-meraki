@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -748,6 +747,17 @@ func (d *NetworksSensorAlertsProfilesDataSource) Read(ctx context.Context, req d
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkSensorAlertsProfile",
+				err.Error(),
+			)
+			return
+		}
+
 		networksSensorAlertsProfiles = ResponseSensorGetNetworkSensorAlertsProfileItemToBody(networksSensorAlertsProfiles, response2)
 		diags = resp.State.Set(ctx, &networksSensorAlertsProfiles)
 		resp.Diagnostics.Append(diags...)
@@ -1024,14 +1034,24 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 					result := make([]ResponseItemSensorGetNetworkSensorAlertsProfilesConditions, len(*item.Conditions))
 					for i, conditions := range *item.Conditions {
 						result[i] = ResponseItemSensorGetNetworkSensorAlertsProfilesConditions{
-							Direction: types.StringValue(conditions.Direction),
+							Direction: func() types.String {
+								if conditions.Direction != "" {
+									return types.StringValue(conditions.Direction)
+								}
+								return types.String{}
+							}(),
 							Duration: func() types.Int64 {
 								if conditions.Duration != nil {
 									return types.Int64Value(int64(*conditions.Duration))
 								}
 								return types.Int64{}
 							}(),
-							Metric: types.StringValue(conditions.Metric),
+							Metric: func() types.String {
+								if conditions.Metric != "" {
+									return types.StringValue(conditions.Metric)
+								}
+								return types.String{}
+							}(),
 							Threshold: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThreshold {
 								if conditions.Threshold != nil {
 									return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThreshold{
@@ -1057,7 +1077,12 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 														}
 														return types.Int64{}
 													}(),
-													Quality: types.StringValue(conditions.Threshold.Co2.Quality),
+													Quality: func() types.String {
+														if conditions.Threshold.Co2.Quality != "" {
+															return types.StringValue(conditions.Threshold.Co2.Quality)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return nil
@@ -1104,7 +1129,12 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 										Humidity: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdHumidity {
 											if conditions.Threshold.Humidity != nil {
 												return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdHumidity{
-													Quality: types.StringValue(conditions.Threshold.Humidity.Quality),
+													Quality: func() types.String {
+														if conditions.Threshold.Humidity.Quality != "" {
+															return types.StringValue(conditions.Threshold.Humidity.Quality)
+														}
+														return types.String{}
+													}(),
 													RelativePercentage: func() types.Int64 {
 														if conditions.Threshold.Humidity.RelativePercentage != nil {
 															return types.Int64Value(int64(*conditions.Threshold.Humidity.RelativePercentage))
@@ -1118,7 +1148,12 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 										IndoorAirQuality: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdIndoorAirQuality {
 											if conditions.Threshold.IndoorAirQuality != nil {
 												return &ResponseItemSensorGetNetworkSensorAlertsProfilesConditionsThresholdIndoorAirQuality{
-													Quality: types.StringValue(conditions.Threshold.IndoorAirQuality.Quality),
+													Quality: func() types.String {
+														if conditions.Threshold.IndoorAirQuality.Quality != "" {
+															return types.StringValue(conditions.Threshold.IndoorAirQuality.Quality)
+														}
+														return types.String{}
+													}(),
 													Score: func() types.Int64 {
 														if conditions.Threshold.IndoorAirQuality.Score != nil {
 															return types.Int64Value(int64(*conditions.Threshold.IndoorAirQuality.Score))
@@ -1141,7 +1176,12 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 																	}
 																	return types.Int64{}
 																}(),
-																Quality: types.StringValue(conditions.Threshold.Noise.Ambient.Quality),
+																Quality: func() types.String {
+																	if conditions.Threshold.Noise.Ambient.Quality != "" {
+																		return types.StringValue(conditions.Threshold.Noise.Ambient.Quality)
+																	}
+																	return types.String{}
+																}(),
 															}
 														}
 														return nil
@@ -1159,7 +1199,12 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 														}
 														return types.Int64{}
 													}(),
-													Quality: types.StringValue(conditions.Threshold.Pm25.Quality),
+													Quality: func() types.String {
+														if conditions.Threshold.Pm25.Quality != "" {
+															return types.StringValue(conditions.Threshold.Pm25.Quality)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return nil
@@ -1205,7 +1250,12 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 														}
 														return types.Float64{}
 													}(),
-													Quality: types.StringValue(conditions.Threshold.Temperature.Quality),
+													Quality: func() types.String {
+														if conditions.Threshold.Temperature.Quality != "" {
+															return types.StringValue(conditions.Threshold.Temperature.Quality)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return nil
@@ -1219,7 +1269,12 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 														}
 														return types.Int64{}
 													}(),
-													Quality: types.StringValue(conditions.Threshold.Tvoc.Quality),
+													Quality: func() types.String {
+														if conditions.Threshold.Tvoc.Quality != "" {
+															return types.StringValue(conditions.Threshold.Tvoc.Quality)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return nil
@@ -1279,9 +1334,24 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 				}
 				return types.Bool{}
 			}(),
-			Message:   types.StringValue(item.Message),
-			Name:      types.StringValue(item.Name),
-			ProfileID: types.StringValue(item.ProfileID),
+			Message: func() types.String {
+				if item.Message != "" {
+					return types.StringValue(item.Message)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			ProfileID: func() types.String {
+				if item.ProfileID != "" {
+					return types.StringValue(item.ProfileID)
+				}
+				return types.String{}
+			}(),
 			Recipients: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesRecipients {
 				if item.Recipients != nil {
 					return &ResponseItemSensorGetNetworkSensorAlertsProfilesRecipients{
@@ -1295,8 +1365,18 @@ func ResponseSensorGetNetworkSensorAlertsProfilesItemsToBody(state NetworksSenso
 			Schedule: func() *ResponseItemSensorGetNetworkSensorAlertsProfilesSchedule {
 				if item.Schedule != nil {
 					return &ResponseItemSensorGetNetworkSensorAlertsProfilesSchedule{
-						ID:   types.StringValue(item.Schedule.ID),
-						Name: types.StringValue(item.Schedule.Name),
+						ID: func() types.String {
+							if item.Schedule.ID != "" {
+								return types.StringValue(item.Schedule.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if item.Schedule.Name != "" {
+								return types.StringValue(item.Schedule.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -1316,14 +1396,24 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 				result := make([]ResponseSensorGetNetworkSensorAlertsProfileConditions, len(*response.Conditions))
 				for i, conditions := range *response.Conditions {
 					result[i] = ResponseSensorGetNetworkSensorAlertsProfileConditions{
-						Direction: types.StringValue(conditions.Direction),
+						Direction: func() types.String {
+							if conditions.Direction != "" {
+								return types.StringValue(conditions.Direction)
+							}
+							return types.String{}
+						}(),
 						Duration: func() types.Int64 {
 							if conditions.Duration != nil {
 								return types.Int64Value(int64(*conditions.Duration))
 							}
 							return types.Int64{}
 						}(),
-						Metric: types.StringValue(conditions.Metric),
+						Metric: func() types.String {
+							if conditions.Metric != "" {
+								return types.StringValue(conditions.Metric)
+							}
+							return types.String{}
+						}(),
 						Threshold: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThreshold {
 							if conditions.Threshold != nil {
 								return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThreshold{
@@ -1349,7 +1439,12 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 													}
 													return types.Int64{}
 												}(),
-												Quality: types.StringValue(conditions.Threshold.Co2.Quality),
+												Quality: func() types.String {
+													if conditions.Threshold.Co2.Quality != "" {
+														return types.StringValue(conditions.Threshold.Co2.Quality)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return nil
@@ -1396,7 +1491,12 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 									Humidity: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdHumidity {
 										if conditions.Threshold.Humidity != nil {
 											return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdHumidity{
-												Quality: types.StringValue(conditions.Threshold.Humidity.Quality),
+												Quality: func() types.String {
+													if conditions.Threshold.Humidity.Quality != "" {
+														return types.StringValue(conditions.Threshold.Humidity.Quality)
+													}
+													return types.String{}
+												}(),
 												RelativePercentage: func() types.Int64 {
 													if conditions.Threshold.Humidity.RelativePercentage != nil {
 														return types.Int64Value(int64(*conditions.Threshold.Humidity.RelativePercentage))
@@ -1410,7 +1510,12 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 									IndoorAirQuality: func() *ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdIndoorAirQuality {
 										if conditions.Threshold.IndoorAirQuality != nil {
 											return &ResponseSensorGetNetworkSensorAlertsProfileConditionsThresholdIndoorAirQuality{
-												Quality: types.StringValue(conditions.Threshold.IndoorAirQuality.Quality),
+												Quality: func() types.String {
+													if conditions.Threshold.IndoorAirQuality.Quality != "" {
+														return types.StringValue(conditions.Threshold.IndoorAirQuality.Quality)
+													}
+													return types.String{}
+												}(),
 												Score: func() types.Int64 {
 													if conditions.Threshold.IndoorAirQuality.Score != nil {
 														return types.Int64Value(int64(*conditions.Threshold.IndoorAirQuality.Score))
@@ -1433,7 +1538,12 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 																}
 																return types.Int64{}
 															}(),
-															Quality: types.StringValue(conditions.Threshold.Noise.Ambient.Quality),
+															Quality: func() types.String {
+																if conditions.Threshold.Noise.Ambient.Quality != "" {
+																	return types.StringValue(conditions.Threshold.Noise.Ambient.Quality)
+																}
+																return types.String{}
+															}(),
 														}
 													}
 													return nil
@@ -1451,7 +1561,12 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 													}
 													return types.Int64{}
 												}(),
-												Quality: types.StringValue(conditions.Threshold.Pm25.Quality),
+												Quality: func() types.String {
+													if conditions.Threshold.Pm25.Quality != "" {
+														return types.StringValue(conditions.Threshold.Pm25.Quality)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return nil
@@ -1497,7 +1612,12 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 													}
 													return types.Float64{}
 												}(),
-												Quality: types.StringValue(conditions.Threshold.Temperature.Quality),
+												Quality: func() types.String {
+													if conditions.Threshold.Temperature.Quality != "" {
+														return types.StringValue(conditions.Threshold.Temperature.Quality)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return nil
@@ -1511,7 +1631,12 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 													}
 													return types.Int64{}
 												}(),
-												Quality: types.StringValue(conditions.Threshold.Tvoc.Quality),
+												Quality: func() types.String {
+													if conditions.Threshold.Tvoc.Quality != "" {
+														return types.StringValue(conditions.Threshold.Tvoc.Quality)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return nil
@@ -1571,9 +1696,24 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 			}
 			return types.Bool{}
 		}(),
-		Message:   types.StringValue(response.Message),
-		Name:      types.StringValue(response.Name),
-		ProfileID: types.StringValue(response.ProfileID),
+		Message: func() types.String {
+			if response.Message != "" {
+				return types.StringValue(response.Message)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		ProfileID: func() types.String {
+			if response.ProfileID != "" {
+				return types.StringValue(response.ProfileID)
+			}
+			return types.String{}
+		}(),
 		Recipients: func() *ResponseSensorGetNetworkSensorAlertsProfileRecipients {
 			if response.Recipients != nil {
 				return &ResponseSensorGetNetworkSensorAlertsProfileRecipients{
@@ -1587,8 +1727,18 @@ func ResponseSensorGetNetworkSensorAlertsProfileItemToBody(state NetworksSensorA
 		Schedule: func() *ResponseSensorGetNetworkSensorAlertsProfileSchedule {
 			if response.Schedule != nil {
 				return &ResponseSensorGetNetworkSensorAlertsProfileSchedule{
-					ID:   types.StringValue(response.Schedule.ID),
-					Name: types.StringValue(response.Schedule.Name),
+					ID: func() types.String {
+						if response.Schedule.ID != "" {
+							return types.StringValue(response.Schedule.ID)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.Schedule.Name != "" {
+							return types.StringValue(response.Schedule.Name)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil

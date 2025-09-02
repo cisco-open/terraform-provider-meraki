@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -66,7 +67,6 @@ func (r *NetworksAppliancePortsResource) Schema(_ context.Context, _ resource.Sc
 		Attributes: map[string]schema.Attribute{
 			"access_policy": schema.StringAttribute{
 				MarkdownDescription: `The name of the policy. Only applicable to Access ports.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -74,7 +74,6 @@ func (r *NetworksAppliancePortsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"allowed_vlans": schema.StringAttribute{
 				MarkdownDescription: `Comma-delimited list of the VLAN ID's allowed on the port, or 'all' to permit all VLAN's on the port.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -82,7 +81,6 @@ func (r *NetworksAppliancePortsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"drop_untagged_traffic": schema.BoolAttribute{
 				MarkdownDescription: `Whether the trunk port can drop all untagged traffic.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -90,7 +88,6 @@ func (r *NetworksAppliancePortsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: `The status of the port`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -110,7 +107,6 @@ func (r *NetworksAppliancePortsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"type": schema.StringAttribute{
 				MarkdownDescription: `The type of the port: 'access' or 'trunk'.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -118,7 +114,6 @@ func (r *NetworksAppliancePortsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"vlan": schema.Int64Attribute{
 				MarkdownDescription: `Native VLAN when the port is in Trunk mode. Access VLAN when the port is in Access mode.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -153,27 +148,6 @@ func (r *NetworksAppliancePortsResource) Create(ctx context.Context, req resourc
 	vvPortID := data.PortID.ValueString()
 	//Has Item and has items and not post
 
-	if vvNetworkID != "" && vvPortID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkAppliancePort(vvNetworkID, vvPortID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksAppliancePorts  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksAppliancePorts only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkAppliancePort(vvNetworkID, vvPortID, dataRequest)
@@ -182,7 +156,7 @@ func (r *NetworksAppliancePortsResource) Create(ctx context.Context, req resourc
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkAppliancePort",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -193,49 +167,19 @@ func (r *NetworksAppliancePortsResource) Create(ctx context.Context, req resourc
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkAppliancePort(vvNetworkID, vvPortID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkAppliancePort",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkAppliancePort",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseApplianceGetNetworkAppliancePortItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksAppliancePortsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksAppliancePortsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -266,9 +210,7 @@ func (r *NetworksAppliancePortsResource) Read(ctx context.Context, req resource.
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkAppliancePortItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksAppliancePortsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -276,35 +218,31 @@ func (r *NetworksAppliancePortsResource) ImportState(ctx context.Context, req re
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,portId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("port_id"), idParts[1])...)
 }
 
 func (r *NetworksAppliancePortsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksAppliancePortsRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksAppliancePortsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvPortID := data.PortID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvPortID := plan.PortID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkAppliancePort(vvNetworkID, vvPortID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkAppliancePort",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -314,9 +252,7 @@ func (r *NetworksAppliancePortsResource) Update(ctx context.Context, req resourc
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksAppliancePortsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -391,8 +327,18 @@ func (r *NetworksAppliancePortsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 // From gosdk to TF Structs Schema
 func ResponseApplianceGetNetworkAppliancePortItemToBodyRs(state NetworksAppliancePortsRs, response *merakigosdk.ResponseApplianceGetNetworkAppliancePort, is_read bool) NetworksAppliancePortsRs {
 	itemState := NetworksAppliancePortsRs{
-		AccessPolicy: types.StringValue(response.AccessPolicy),
-		AllowedVLANs: types.StringValue(response.AllowedVLANs),
+		AccessPolicy: func() types.String {
+			if response.AccessPolicy != "" {
+				return types.StringValue(response.AccessPolicy)
+			}
+			return types.String{}
+		}(),
+		AllowedVLANs: func() types.String {
+			if response.AllowedVLANs != "" {
+				return types.StringValue(response.AllowedVLANs)
+			}
+			return types.String{}
+		}(),
 		DropUntaggedTraffic: func() types.Bool {
 			if response.DropUntaggedTraffic != nil {
 				return types.BoolValue(*response.DropUntaggedTraffic)
@@ -411,7 +357,12 @@ func ResponseApplianceGetNetworkAppliancePortItemToBodyRs(state NetworksApplianc
 			}
 			return types.Int64{}
 		}(),
-		Type: types.StringValue(response.Type),
+		Type: func() types.String {
+			if response.Type != "" {
+				return types.StringValue(response.Type)
+			}
+			return types.String{}
+		}(),
 		VLAN: func() types.Int64 {
 			if response.VLAN != nil {
 				return types.Int64Value(int64(*response.VLAN))

@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -63,7 +64,6 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Schema(_ contex
 		Attributes: map[string]schema.Attribute{
 			"bandwidth_limits": schema.SingleNestedAttribute{
 				MarkdownDescription: `A hash uplink keys and their configured settings for the Appliance`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -72,7 +72,6 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Schema(_ contex
 
 					"cellular": schema.SingleNestedAttribute{
 						MarkdownDescription: `uplink cellular configured limits [optional]`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -81,7 +80,6 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Schema(_ contex
 
 							"limit_down": schema.Int64Attribute{
 								MarkdownDescription: `configured DOWN limit for the uplink (in Kbps).  Null indicated unlimited`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Int64{
 									int64planmodifier.UseStateForUnknown(),
@@ -89,7 +87,6 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Schema(_ contex
 							},
 							"limit_up": schema.Int64Attribute{
 								MarkdownDescription: `configured UP limit for the uplink (in Kbps).  Null indicated unlimited`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Int64{
 									int64planmodifier.UseStateForUnknown(),
@@ -99,7 +96,6 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Schema(_ contex
 					},
 					"wan1": schema.SingleNestedAttribute{
 						MarkdownDescription: `uplink wan1 configured limits [optional]`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -108,7 +104,6 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Schema(_ contex
 
 							"limit_down": schema.Int64Attribute{
 								MarkdownDescription: `configured DOWN limit for the uplink (in Kbps).  Null indicated unlimited`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Int64{
 									int64planmodifier.UseStateForUnknown(),
@@ -116,7 +111,6 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Schema(_ contex
 							},
 							"limit_up": schema.Int64Attribute{
 								MarkdownDescription: `configured UP limit for the uplink (in Kbps).  Null indicated unlimited`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Int64{
 									int64planmodifier.UseStateForUnknown(),
@@ -126,7 +120,6 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Schema(_ contex
 					},
 					"wan2": schema.SingleNestedAttribute{
 						MarkdownDescription: `uplink wan2 configured limits [optional]`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -135,7 +128,6 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Schema(_ contex
 
 							"limit_down": schema.Int64Attribute{
 								MarkdownDescription: `configured DOWN limit for the uplink (in Kbps).  Null indicated unlimited`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Int64{
 									int64planmodifier.UseStateForUnknown(),
@@ -143,7 +135,6 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Schema(_ contex
 							},
 							"limit_up": schema.Int64Attribute{
 								MarkdownDescription: `configured UP limit for the uplink (in Kbps).  Null indicated unlimited`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Int64{
 									int64planmodifier.UseStateForUnknown(),
@@ -183,27 +174,6 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Create(ctx cont
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceTrafficShapingUplinkBandwidth(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceTrafficShapingUplinkBandwidth  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceTrafficShapingUplinkBandwidth only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceTrafficShapingUplinkBandwidth(vvNetworkID, dataRequest)
@@ -212,7 +182,7 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Create(ctx cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceTrafficShapingUplinkBandwidth",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -223,49 +193,19 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Create(ctx cont
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceTrafficShapingUplinkBandwidth(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceTrafficShapingUplinkBandwidth",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkApplianceTrafficShapingUplinkBandwidth",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkBandwidthItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksApplianceTrafficShapingUplinkBandwidthRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -295,33 +235,28 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Read(ctx contex
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkBandwidthItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksApplianceTrafficShapingUplinkBandwidthRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksApplianceTrafficShapingUplinkBandwidthRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceTrafficShapingUplinkBandwidth(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceTrafficShapingUplinkBandwidth",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -331,9 +266,7 @@ func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Update(ctx cont
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksApplianceTrafficShapingUplinkBandwidthResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

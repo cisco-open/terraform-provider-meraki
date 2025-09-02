@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -243,24 +242,114 @@ func ResponseSmGetNetworkSmDeviceDesktopLogsItemsToBody(state NetworksSmDevicesD
 	var items []ResponseItemSmGetNetworkSmDeviceDesktopLogs
 	for _, item := range *response {
 		itemState := ResponseItemSmGetNetworkSmDeviceDesktopLogs{
-			DhcpServer:    types.StringValue(item.DhcpServer),
-			DNSServer:     types.StringValue(item.DNSServer),
-			Gateway:       types.StringValue(item.Gateway),
-			IP:            types.StringValue(item.IP),
-			MeasuredAt:    types.StringValue(item.MeasuredAt),
-			NetworkDevice: types.StringValue(item.NetworkDevice),
-			NetworkDriver: types.StringValue(item.NetworkDriver),
-			NetworkMTU:    types.StringValue(item.NetworkMTU),
-			PublicIP:      types.StringValue(item.PublicIP),
-			Subnet:        types.StringValue(item.Subnet),
-			Ts:            types.StringValue(item.Ts),
-			User:          types.StringValue(item.User),
-			WifiAuth:      types.StringValue(item.WifiAuth),
-			WifiBssid:     types.StringValue(item.WifiBssid),
-			WifiChannel:   types.StringValue(item.WifiChannel),
-			WifiNoise:     types.StringValue(item.WifiNoise),
-			WifiRssi:      types.StringValue(item.WifiRssi),
-			WifiSSID:      types.StringValue(item.WifiSSID),
+			DhcpServer: func() types.String {
+				if item.DhcpServer != "" {
+					return types.StringValue(item.DhcpServer)
+				}
+				return types.String{}
+			}(),
+			DNSServer: func() types.String {
+				if item.DNSServer != "" {
+					return types.StringValue(item.DNSServer)
+				}
+				return types.String{}
+			}(),
+			Gateway: func() types.String {
+				if item.Gateway != "" {
+					return types.StringValue(item.Gateway)
+				}
+				return types.String{}
+			}(),
+			IP: func() types.String {
+				if item.IP != "" {
+					return types.StringValue(item.IP)
+				}
+				return types.String{}
+			}(),
+			MeasuredAt: func() types.String {
+				if item.MeasuredAt != "" {
+					return types.StringValue(item.MeasuredAt)
+				}
+				return types.String{}
+			}(),
+			NetworkDevice: func() types.String {
+				if item.NetworkDevice != "" {
+					return types.StringValue(item.NetworkDevice)
+				}
+				return types.String{}
+			}(),
+			NetworkDriver: func() types.String {
+				if item.NetworkDriver != "" {
+					return types.StringValue(item.NetworkDriver)
+				}
+				return types.String{}
+			}(),
+			NetworkMTU: func() types.String {
+				if item.NetworkMTU != "" {
+					return types.StringValue(item.NetworkMTU)
+				}
+				return types.String{}
+			}(),
+			PublicIP: func() types.String {
+				if item.PublicIP != "" {
+					return types.StringValue(item.PublicIP)
+				}
+				return types.String{}
+			}(),
+			Subnet: func() types.String {
+				if item.Subnet != "" {
+					return types.StringValue(item.Subnet)
+				}
+				return types.String{}
+			}(),
+			Ts: func() types.String {
+				if item.Ts != "" {
+					return types.StringValue(item.Ts)
+				}
+				return types.String{}
+			}(),
+			User: func() types.String {
+				if item.User != "" {
+					return types.StringValue(item.User)
+				}
+				return types.String{}
+			}(),
+			WifiAuth: func() types.String {
+				if item.WifiAuth != "" {
+					return types.StringValue(item.WifiAuth)
+				}
+				return types.String{}
+			}(),
+			WifiBssid: func() types.String {
+				if item.WifiBssid != "" {
+					return types.StringValue(item.WifiBssid)
+				}
+				return types.String{}
+			}(),
+			WifiChannel: func() types.String {
+				if item.WifiChannel != "" {
+					return types.StringValue(item.WifiChannel)
+				}
+				return types.String{}
+			}(),
+			WifiNoise: func() types.String {
+				if item.WifiNoise != "" {
+					return types.StringValue(item.WifiNoise)
+				}
+				return types.String{}
+			}(),
+			WifiRssi: func() types.String {
+				if item.WifiRssi != "" {
+					return types.StringValue(item.WifiRssi)
+				}
+				return types.String{}
+			}(),
+			WifiSSID: func() types.String {
+				if item.WifiSSID != "" {
+					return types.StringValue(item.WifiSSID)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

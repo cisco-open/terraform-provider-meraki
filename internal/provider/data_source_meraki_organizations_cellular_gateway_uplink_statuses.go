@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -328,40 +327,140 @@ func ResponseCellularGatewayGetOrganizationCellularGatewayUplinkStatusesItemsToB
 	var items []ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatuses
 	for _, item := range *response {
 		itemState := ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatuses{
-			LastReportedAt: types.StringValue(item.LastReportedAt),
-			Model:          types.StringValue(item.Model),
-			NetworkID:      types.StringValue(item.NetworkID),
-			Serial:         types.StringValue(item.Serial),
+			LastReportedAt: func() types.String {
+				if item.LastReportedAt != "" {
+					return types.StringValue(item.LastReportedAt)
+				}
+				return types.String{}
+			}(),
+			Model: func() types.String {
+				if item.Model != "" {
+					return types.StringValue(item.Model)
+				}
+				return types.String{}
+			}(),
+			NetworkID: func() types.String {
+				if item.NetworkID != "" {
+					return types.StringValue(item.NetworkID)
+				}
+				return types.String{}
+			}(),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
 			Uplinks: func() *[]ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUplinks {
 				if item.Uplinks != nil {
 					result := make([]ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUplinks, len(*item.Uplinks))
 					for i, uplinks := range *item.Uplinks {
 						result[i] = ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUplinks{
-							Apn:            types.StringValue(uplinks.Apn),
-							ConnectionType: types.StringValue(uplinks.ConnectionType),
-							DNS1:           types.StringValue(uplinks.DNS1),
-							DNS2:           types.StringValue(uplinks.DNS2),
-							Gateway:        types.StringValue(uplinks.Gateway),
-							Iccid:          types.StringValue(uplinks.Iccid),
-							Imsi:           types.StringValue(uplinks.Imsi),
-							Interface:      types.StringValue(uplinks.Interface),
-							IP:             types.StringValue(uplinks.IP),
-							Mcc:            types.StringValue(uplinks.Mcc),
-							Mnc:            types.StringValue(uplinks.Mnc),
-							Model:          types.StringValue(uplinks.Model),
-							Msisdn:         types.StringValue(uplinks.Msisdn),
+							Apn: func() types.String {
+								if uplinks.Apn != "" {
+									return types.StringValue(uplinks.Apn)
+								}
+								return types.String{}
+							}(),
+							ConnectionType: func() types.String {
+								if uplinks.ConnectionType != "" {
+									return types.StringValue(uplinks.ConnectionType)
+								}
+								return types.String{}
+							}(),
+							DNS1: func() types.String {
+								if uplinks.DNS1 != "" {
+									return types.StringValue(uplinks.DNS1)
+								}
+								return types.String{}
+							}(),
+							DNS2: func() types.String {
+								if uplinks.DNS2 != "" {
+									return types.StringValue(uplinks.DNS2)
+								}
+								return types.String{}
+							}(),
+							Gateway: func() types.String {
+								if uplinks.Gateway != "" {
+									return types.StringValue(uplinks.Gateway)
+								}
+								return types.String{}
+							}(),
+							Iccid: func() types.String {
+								if uplinks.Iccid != "" {
+									return types.StringValue(uplinks.Iccid)
+								}
+								return types.String{}
+							}(),
+							Imsi: func() types.String {
+								if uplinks.Imsi != "" {
+									return types.StringValue(uplinks.Imsi)
+								}
+								return types.String{}
+							}(),
+							Interface: func() types.String {
+								if uplinks.Interface != "" {
+									return types.StringValue(uplinks.Interface)
+								}
+								return types.String{}
+							}(),
+							IP: func() types.String {
+								if uplinks.IP != "" {
+									return types.StringValue(uplinks.IP)
+								}
+								return types.String{}
+							}(),
+							Mcc: func() types.String {
+								if uplinks.Mcc != "" {
+									return types.StringValue(uplinks.Mcc)
+								}
+								return types.String{}
+							}(),
+							Mnc: func() types.String {
+								if uplinks.Mnc != "" {
+									return types.StringValue(uplinks.Mnc)
+								}
+								return types.String{}
+							}(),
+							Model: func() types.String {
+								if uplinks.Model != "" {
+									return types.StringValue(uplinks.Model)
+								}
+								return types.String{}
+							}(),
+							Msisdn: func() types.String {
+								if uplinks.Msisdn != "" {
+									return types.StringValue(uplinks.Msisdn)
+								}
+								return types.String{}
+							}(),
 							Mtu: func() types.Int64 {
 								if uplinks.Mtu != nil {
 									return types.Int64Value(int64(*uplinks.Mtu))
 								}
 								return types.Int64{}
 							}(),
-							Provider: types.StringValue(uplinks.Provider),
-							PublicIP: types.StringValue(uplinks.PublicIP),
+							Provider: func() types.String {
+								if uplinks.Provider != "" {
+									return types.StringValue(uplinks.Provider)
+								}
+								return types.String{}
+							}(),
+							PublicIP: func() types.String {
+								if uplinks.PublicIP != "" {
+									return types.StringValue(uplinks.PublicIP)
+								}
+								return types.String{}
+							}(),
 							Roaming: func() *ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUplinksRoaming {
 								if uplinks.Roaming != nil {
 									return &ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUplinksRoaming{
-										Status: types.StringValue(uplinks.Roaming.Status),
+										Status: func() types.String {
+											if uplinks.Roaming.Status != "" {
+												return types.StringValue(uplinks.Roaming.Status)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return nil
@@ -369,14 +468,34 @@ func ResponseCellularGatewayGetOrganizationCellularGatewayUplinkStatusesItemsToB
 							SignalStat: func() *ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUplinksSignalStat {
 								if uplinks.SignalStat != nil {
 									return &ResponseItemCellularGatewayGetOrganizationCellularGatewayUplinkStatusesUplinksSignalStat{
-										Rsrp: types.StringValue(uplinks.SignalStat.Rsrp),
-										Rsrq: types.StringValue(uplinks.SignalStat.Rsrq),
+										Rsrp: func() types.String {
+											if uplinks.SignalStat.Rsrp != "" {
+												return types.StringValue(uplinks.SignalStat.Rsrp)
+											}
+											return types.String{}
+										}(),
+										Rsrq: func() types.String {
+											if uplinks.SignalStat.Rsrq != "" {
+												return types.StringValue(uplinks.SignalStat.Rsrq)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return nil
 							}(),
-							SignalType: types.StringValue(uplinks.SignalType),
-							Status:     types.StringValue(uplinks.Status),
+							SignalType: func() types.String {
+								if uplinks.SignalType != "" {
+									return types.StringValue(uplinks.SignalType)
+								}
+								return types.String{}
+							}(),
+							Status: func() types.String {
+								if uplinks.Status != "" {
+									return types.StringValue(uplinks.Status)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result

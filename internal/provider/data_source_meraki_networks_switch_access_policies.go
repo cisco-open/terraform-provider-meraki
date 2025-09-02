@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -508,6 +507,17 @@ func (d *NetworksSwitchAccessPoliciesDataSource) Read(ctx context.Context, req d
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkSwitchAccessPolicy",
+				err.Error(),
+			)
+			return
+		}
+
 		networksSwitchAccessPolicies = ResponseSwitchGetNetworkSwitchAccessPolicyItemToBody(networksSwitchAccessPolicies, response2)
 		diags = resp.State.Set(ctx, &networksSwitchAccessPolicies)
 		resp.Diagnostics.Append(diags...)
@@ -661,7 +671,12 @@ func ResponseSwitchGetNetworkSwitchAccessPoliciesItemsToBody(state NetworksSwitc
 	var items []ResponseItemSwitchGetNetworkSwitchAccessPolicies
 	for _, item := range *response {
 		itemState := ResponseItemSwitchGetNetworkSwitchAccessPolicies{
-			AccessPolicyType: types.StringValue(item.AccessPolicyType),
+			AccessPolicyType: func() types.String {
+				if item.AccessPolicyType != "" {
+					return types.StringValue(item.AccessPolicyType)
+				}
+				return types.String{}
+			}(),
 			Counts: func() *ResponseItemSwitchGetNetworkSwitchAccessPoliciesCounts {
 				if item.Counts != nil {
 					return &ResponseItemSwitchGetNetworkSwitchAccessPoliciesCounts{
@@ -685,7 +700,12 @@ func ResponseSwitchGetNetworkSwitchAccessPoliciesItemsToBody(state NetworksSwitc
 			Dot1X: func() *ResponseItemSwitchGetNetworkSwitchAccessPoliciesDot1X {
 				if item.Dot1X != nil {
 					return &ResponseItemSwitchGetNetworkSwitchAccessPoliciesDot1X{
-						ControlDirection: types.StringValue(item.Dot1X.ControlDirection),
+						ControlDirection: func() types.String {
+							if item.Dot1X.ControlDirection != "" {
+								return types.StringValue(item.Dot1X.ControlDirection)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -702,14 +722,24 @@ func ResponseSwitchGetNetworkSwitchAccessPoliciesItemsToBody(state NetworksSwitc
 				}
 				return types.Int64{}
 			}(),
-			HostMode: types.StringValue(item.HostMode),
+			HostMode: func() types.String {
+				if item.HostMode != "" {
+					return types.StringValue(item.HostMode)
+				}
+				return types.String{}
+			}(),
 			IncreaseAccessSpeed: func() types.Bool {
 				if item.IncreaseAccessSpeed != nil {
 					return types.BoolValue(*item.IncreaseAccessSpeed)
 				}
 				return types.Bool{}
 			}(),
-			Name: types.StringValue(item.Name),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			Radius: func() *ResponseItemSwitchGetNetworkSwitchAccessPoliciesRadius {
 				if item.Radius != nil {
 					return &ResponseItemSwitchGetNetworkSwitchAccessPoliciesRadius{
@@ -784,15 +814,30 @@ func ResponseSwitchGetNetworkSwitchAccessPoliciesItemsToBody(state NetworksSwitc
 					result := make([]ResponseItemSwitchGetNetworkSwitchAccessPoliciesRadiusAccountingServers, len(*item.RadiusAccountingServers))
 					for i, radiusAccountingServers := range *item.RadiusAccountingServers {
 						result[i] = ResponseItemSwitchGetNetworkSwitchAccessPoliciesRadiusAccountingServers{
-							Host:                       types.StringValue(radiusAccountingServers.Host),
-							OrganizationRadiusServerID: types.StringValue(radiusAccountingServers.OrganizationRadiusServerID),
+							Host: func() types.String {
+								if radiusAccountingServers.Host != "" {
+									return types.StringValue(radiusAccountingServers.Host)
+								}
+								return types.String{}
+							}(),
+							OrganizationRadiusServerID: func() types.String {
+								if radiusAccountingServers.OrganizationRadiusServerID != "" {
+									return types.StringValue(radiusAccountingServers.OrganizationRadiusServerID)
+								}
+								return types.String{}
+							}(),
 							Port: func() types.Int64 {
 								if radiusAccountingServers.Port != nil {
 									return types.Int64Value(int64(*radiusAccountingServers.Port))
 								}
 								return types.Int64{}
 							}(),
-							ServerID: types.StringValue(radiusAccountingServers.ServerID),
+							ServerID: func() types.String {
+								if radiusAccountingServers.ServerID != "" {
+									return types.StringValue(radiusAccountingServers.ServerID)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
@@ -805,21 +850,41 @@ func ResponseSwitchGetNetworkSwitchAccessPoliciesItemsToBody(state NetworksSwitc
 				}
 				return types.Bool{}
 			}(),
-			RadiusGroupAttribute: types.StringValue(item.RadiusGroupAttribute),
+			RadiusGroupAttribute: func() types.String {
+				if item.RadiusGroupAttribute != "" {
+					return types.StringValue(item.RadiusGroupAttribute)
+				}
+				return types.String{}
+			}(),
 			RadiusServers: func() *[]ResponseItemSwitchGetNetworkSwitchAccessPoliciesRadiusServers {
 				if item.RadiusServers != nil {
 					result := make([]ResponseItemSwitchGetNetworkSwitchAccessPoliciesRadiusServers, len(*item.RadiusServers))
 					for i, radiusServers := range *item.RadiusServers {
 						result[i] = ResponseItemSwitchGetNetworkSwitchAccessPoliciesRadiusServers{
-							Host:                       types.StringValue(radiusServers.Host),
-							OrganizationRadiusServerID: types.StringValue(radiusServers.OrganizationRadiusServerID),
+							Host: func() types.String {
+								if radiusServers.Host != "" {
+									return types.StringValue(radiusServers.Host)
+								}
+								return types.String{}
+							}(),
+							OrganizationRadiusServerID: func() types.String {
+								if radiusServers.OrganizationRadiusServerID != "" {
+									return types.StringValue(radiusServers.OrganizationRadiusServerID)
+								}
+								return types.String{}
+							}(),
 							Port: func() types.Int64 {
 								if radiusServers.Port != nil {
 									return types.Int64Value(int64(*radiusServers.Port))
 								}
 								return types.Int64{}
 							}(),
-							ServerID: types.StringValue(radiusServers.ServerID),
+							ServerID: func() types.String {
+								if radiusServers.ServerID != "" {
+									return types.StringValue(radiusServers.ServerID)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
@@ -854,7 +919,12 @@ func ResponseSwitchGetNetworkSwitchAccessPoliciesItemsToBody(state NetworksSwitc
 
 func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBody(state NetworksSwitchAccessPolicies, response *merakigosdk.ResponseSwitchGetNetworkSwitchAccessPolicy) NetworksSwitchAccessPolicies {
 	itemState := ResponseSwitchGetNetworkSwitchAccessPolicy{
-		AccessPolicyType: types.StringValue(response.AccessPolicyType),
+		AccessPolicyType: func() types.String {
+			if response.AccessPolicyType != "" {
+				return types.StringValue(response.AccessPolicyType)
+			}
+			return types.String{}
+		}(),
 		Counts: func() *ResponseSwitchGetNetworkSwitchAccessPolicyCounts {
 			if response.Counts != nil {
 				return &ResponseSwitchGetNetworkSwitchAccessPolicyCounts{
@@ -878,7 +948,12 @@ func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBody(state NetworksSwitchAc
 		Dot1X: func() *ResponseSwitchGetNetworkSwitchAccessPolicyDot1X {
 			if response.Dot1X != nil {
 				return &ResponseSwitchGetNetworkSwitchAccessPolicyDot1X{
-					ControlDirection: types.StringValue(response.Dot1X.ControlDirection),
+					ControlDirection: func() types.String {
+						if response.Dot1X.ControlDirection != "" {
+							return types.StringValue(response.Dot1X.ControlDirection)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -895,14 +970,24 @@ func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBody(state NetworksSwitchAc
 			}
 			return types.Int64{}
 		}(),
-		HostMode: types.StringValue(response.HostMode),
+		HostMode: func() types.String {
+			if response.HostMode != "" {
+				return types.StringValue(response.HostMode)
+			}
+			return types.String{}
+		}(),
 		IncreaseAccessSpeed: func() types.Bool {
 			if response.IncreaseAccessSpeed != nil {
 				return types.BoolValue(*response.IncreaseAccessSpeed)
 			}
 			return types.Bool{}
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		Radius: func() *ResponseSwitchGetNetworkSwitchAccessPolicyRadius {
 			if response.Radius != nil {
 				return &ResponseSwitchGetNetworkSwitchAccessPolicyRadius{
@@ -977,15 +1062,30 @@ func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBody(state NetworksSwitchAc
 				result := make([]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusAccountingServers, len(*response.RadiusAccountingServers))
 				for i, radiusAccountingServers := range *response.RadiusAccountingServers {
 					result[i] = ResponseSwitchGetNetworkSwitchAccessPolicyRadiusAccountingServers{
-						Host:                       types.StringValue(radiusAccountingServers.Host),
-						OrganizationRadiusServerID: types.StringValue(radiusAccountingServers.OrganizationRadiusServerID),
+						Host: func() types.String {
+							if radiusAccountingServers.Host != "" {
+								return types.StringValue(radiusAccountingServers.Host)
+							}
+							return types.String{}
+						}(),
+						OrganizationRadiusServerID: func() types.String {
+							if radiusAccountingServers.OrganizationRadiusServerID != "" {
+								return types.StringValue(radiusAccountingServers.OrganizationRadiusServerID)
+							}
+							return types.String{}
+						}(),
 						Port: func() types.Int64 {
 							if radiusAccountingServers.Port != nil {
 								return types.Int64Value(int64(*radiusAccountingServers.Port))
 							}
 							return types.Int64{}
 						}(),
-						ServerID: types.StringValue(radiusAccountingServers.ServerID),
+						ServerID: func() types.String {
+							if radiusAccountingServers.ServerID != "" {
+								return types.StringValue(radiusAccountingServers.ServerID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -998,21 +1098,41 @@ func ResponseSwitchGetNetworkSwitchAccessPolicyItemToBody(state NetworksSwitchAc
 			}
 			return types.Bool{}
 		}(),
-		RadiusGroupAttribute: types.StringValue(response.RadiusGroupAttribute),
+		RadiusGroupAttribute: func() types.String {
+			if response.RadiusGroupAttribute != "" {
+				return types.StringValue(response.RadiusGroupAttribute)
+			}
+			return types.String{}
+		}(),
 		RadiusServers: func() *[]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusServers {
 			if response.RadiusServers != nil {
 				result := make([]ResponseSwitchGetNetworkSwitchAccessPolicyRadiusServers, len(*response.RadiusServers))
 				for i, radiusServers := range *response.RadiusServers {
 					result[i] = ResponseSwitchGetNetworkSwitchAccessPolicyRadiusServers{
-						Host:                       types.StringValue(radiusServers.Host),
-						OrganizationRadiusServerID: types.StringValue(radiusServers.OrganizationRadiusServerID),
+						Host: func() types.String {
+							if radiusServers.Host != "" {
+								return types.StringValue(radiusServers.Host)
+							}
+							return types.String{}
+						}(),
+						OrganizationRadiusServerID: func() types.String {
+							if radiusServers.OrganizationRadiusServerID != "" {
+								return types.StringValue(radiusServers.OrganizationRadiusServerID)
+							}
+							return types.String{}
+						}(),
 						Port: func() types.Int64 {
 							if radiusServers.Port != nil {
 								return types.Int64Value(int64(*radiusServers.Port))
 							}
 							return types.Int64{}
 						}(),
-						ServerID: types.StringValue(radiusServers.ServerID),
+						ServerID: func() types.String {
+							if radiusServers.ServerID != "" {
+								return types.StringValue(radiusServers.ServerID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

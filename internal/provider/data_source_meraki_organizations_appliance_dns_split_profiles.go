@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -170,7 +169,12 @@ func ResponseApplianceGetOrganizationApplianceDNSSplitProfilesItemsToBody(state 
 	for _, item := range *response {
 		itemState := ResponseItemApplianceGetOrganizationApplianceDnsSplitProfiles{
 			Hostnames: StringSliceToList(item.Hostnames),
-			Name:      types.StringValue(item.Name),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			Nameservers: func() *ResponseItemApplianceGetOrganizationApplianceDnsSplitProfilesNameservers {
 				if item.Nameservers != nil {
 					return &ResponseItemApplianceGetOrganizationApplianceDnsSplitProfilesNameservers{
@@ -179,7 +183,12 @@ func ResponseApplianceGetOrganizationApplianceDNSSplitProfilesItemsToBody(state 
 				}
 				return nil
 			}(),
-			ProfileID: types.StringValue(item.ProfileID),
+			ProfileID: func() types.String {
+				if item.ProfileID != "" {
+					return types.StringValue(item.ProfileID)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

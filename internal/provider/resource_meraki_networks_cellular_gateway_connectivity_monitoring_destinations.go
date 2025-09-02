@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -26,8 +27,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -62,19 +63,17 @@ func (r *NetworksCellularGatewayConnectivityMonitoringDestinationsResource) Meta
 func (r *NetworksCellularGatewayConnectivityMonitoringDestinationsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"destinations": schema.SetNestedAttribute{
+			"destinations": schema.ListNestedAttribute{
 				MarkdownDescription: `The list of connectivity monitoring destinations`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"default": schema.BoolAttribute{
 							MarkdownDescription: `Boolean indicating whether this is the default testing destination (true) or not (false). Defaults to false. Only one default is allowed`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Bool{
 								boolplanmodifier.UseStateForUnknown(),
@@ -82,7 +81,6 @@ func (r *NetworksCellularGatewayConnectivityMonitoringDestinationsResource) Sche
 						},
 						"description": schema.StringAttribute{
 							MarkdownDescription: `Description of the testing destination. Optional, defaults to an empty string`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -90,7 +88,6 @@ func (r *NetworksCellularGatewayConnectivityMonitoringDestinationsResource) Sche
 						},
 						"ip": schema.StringAttribute{
 							MarkdownDescription: `The IP address to test connectivity with`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -129,27 +126,6 @@ func (r *NetworksCellularGatewayConnectivityMonitoringDestinationsResource) Crea
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.CellularGateway.GetNetworkCellularGatewayConnectivityMonitoringDestinations(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksCellularGatewayConnectivityMonitoringDestinations  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksCellularGatewayConnectivityMonitoringDestinations only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.CellularGateway.UpdateNetworkCellularGatewayConnectivityMonitoringDestinations(vvNetworkID, dataRequest)
@@ -158,7 +134,7 @@ func (r *NetworksCellularGatewayConnectivityMonitoringDestinationsResource) Crea
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCellularGatewayConnectivityMonitoringDestinations",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -169,49 +145,19 @@ func (r *NetworksCellularGatewayConnectivityMonitoringDestinationsResource) Crea
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.CellularGateway.GetNetworkCellularGatewayConnectivityMonitoringDestinations(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkCellularGatewayConnectivityMonitoringDestinations",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkCellularGatewayConnectivityMonitoringDestinations",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseCellularGatewayGetNetworkCellularGatewayConnectivityMonitoringDestinationsItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksCellularGatewayConnectivityMonitoringDestinationsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksCellularGatewayConnectivityMonitoringDestinationsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -241,33 +187,28 @@ func (r *NetworksCellularGatewayConnectivityMonitoringDestinationsResource) Read
 	}
 	//entro aqui 2
 	data = ResponseCellularGatewayGetNetworkCellularGatewayConnectivityMonitoringDestinationsItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksCellularGatewayConnectivityMonitoringDestinationsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksCellularGatewayConnectivityMonitoringDestinationsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksCellularGatewayConnectivityMonitoringDestinationsRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksCellularGatewayConnectivityMonitoringDestinationsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.CellularGateway.UpdateNetworkCellularGatewayConnectivityMonitoringDestinations(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCellularGatewayConnectivityMonitoringDestinations",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -277,9 +218,7 @@ func (r *NetworksCellularGatewayConnectivityMonitoringDestinationsResource) Upda
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksCellularGatewayConnectivityMonitoringDestinationsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -347,8 +286,18 @@ func ResponseCellularGatewayGetNetworkCellularGatewayConnectivityMonitoringDesti
 							}
 							return types.Bool{}
 						}(),
-						Description: types.StringValue(destinations.Description),
-						IP:          types.StringValue(destinations.IP),
+						Description: func() types.String {
+							if destinations.Description != "" {
+								return types.StringValue(destinations.Description)
+							}
+							return types.String{}
+						}(),
+						IP: func() types.String {
+							if destinations.IP != "" {
+								return types.StringValue(destinations.IP)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

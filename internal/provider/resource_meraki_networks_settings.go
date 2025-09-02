@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -32,6 +33,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
+
+// Custom plan modifier to ignore "null" password values
 
 var (
 	_ resource.Resource              = &NetworksSettingsResource{}
@@ -75,8 +78,8 @@ func (r *NetworksSettingsResource) Schema(_ context.Context, _ resource.SchemaRe
 			},
 			"local_status_page": schema.SingleNestedAttribute{
 				MarkdownDescription: `A hash of Local Status page(s)' authentication options applied to the Network.`,
-				Computed:            true,
 				Optional:            true,
+				Computed:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
@@ -84,8 +87,8 @@ func (r *NetworksSettingsResource) Schema(_ context.Context, _ resource.SchemaRe
 
 					"authentication": schema.SingleNestedAttribute{
 						MarkdownDescription: `A hash of Local Status page(s)' authentication options applied to the Network.`,
-						Computed:            true,
 						Optional:            true,
+						Computed:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
 						},
@@ -93,8 +96,8 @@ func (r *NetworksSettingsResource) Schema(_ context.Context, _ resource.SchemaRe
 
 							"enabled": schema.BoolAttribute{
 								MarkdownDescription: `Enables / disables the authentication on Local Status page(s).`,
-								Computed:            true,
 								Optional:            true,
+								Computed:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
 								},
@@ -103,14 +106,15 @@ func (r *NetworksSettingsResource) Schema(_ context.Context, _ resource.SchemaRe
 								MarkdownDescription: `The password used for Local Status Page(s). Set this to null to clear the password.`,
 								Sensitive:           true,
 								Optional:            true,
+								Computed:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
 							},
 							"username": schema.StringAttribute{
 								MarkdownDescription: `The username used for Local Status Page(s).`,
-								Computed:            true,
 								Optional:            true,
+								Computed:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
 								},
@@ -121,16 +125,16 @@ func (r *NetworksSettingsResource) Schema(_ context.Context, _ resource.SchemaRe
 			},
 			"local_status_page_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Enables / disables the local device status pages (<a target='_blank' href='http://my.meraki.com/'>my.meraki.com, </a><a target='_blank' href='http://ap.meraki.com/'>ap.meraki.com, </a><a target='_blank' href='http://switch.meraki.com/'>switch.meraki.com, </a><a target='_blank' href='http://wired.meraki.com/'>wired.meraki.com</a>). Optional (defaults to false)`,
-				Computed:            true,
 				Optional:            true,
+				Computed:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"named_vlans": schema.SingleNestedAttribute{
 				MarkdownDescription: `A hash of Named VLANs options applied to the Network.`,
-				Computed:            true,
 				Optional:            true,
+				Computed:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
@@ -138,8 +142,8 @@ func (r *NetworksSettingsResource) Schema(_ context.Context, _ resource.SchemaRe
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Enables / disables Named VLANs on the Network.`,
-						Computed:            true,
 						Optional:            true,
+						Computed:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
 						},
@@ -152,7 +156,6 @@ func (r *NetworksSettingsResource) Schema(_ context.Context, _ resource.SchemaRe
 			},
 			"remote_status_page_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Enables / disables access to the device status page (<a target='_blank'>http://[device's LAN IP])</a>. Optional. Can only be set if localStatusPageEnabled is set to true`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -160,7 +163,6 @@ func (r *NetworksSettingsResource) Schema(_ context.Context, _ resource.SchemaRe
 			},
 			"secure_port": schema.SingleNestedAttribute{
 				MarkdownDescription: `A hash of SecureConnect options applied to the Network.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -169,7 +171,6 @@ func (r *NetworksSettingsResource) Schema(_ context.Context, _ resource.SchemaRe
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Enables / disables SecureConnect on the network. Optional.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -199,30 +200,10 @@ func (r *NetworksSettingsResource) Create(ctx context.Context, req resource.Crea
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
 	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
-
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkSettings(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSettings  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSettings only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
 
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
@@ -232,7 +213,7 @@ func (r *NetworksSettingsResource) Create(ctx context.Context, req resource.Crea
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -243,36 +224,14 @@ func (r *NetworksSettingsResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Networks.GetNetworkSettings(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkSettings",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkSettings",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseNetworksGetNetworkSettingsItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksSettingsRs
-
 	var item types.Object
-
 	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -286,6 +245,7 @@ func (r *NetworksSettingsResource) Read(ctx context.Context, req resource.ReadRe
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
 	//Has Paths
 	// Has Item2
 
@@ -315,33 +275,47 @@ func (r *NetworksSettingsResource) Read(ctx context.Context, req resource.ReadRe
 	}
 	//entro aqui 2
 	data = ResponseNetworksGetNetworkSettingsItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksSettingsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksSettingsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksSettingsRs
-	merge(ctx, req, resp, &data)
+	var plan, state NetworksSettingsRs
+
+	var itemPlan, itemState types.Object
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &itemPlan)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &itemState)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(itemPlan.As(ctx, &plan, basetypes.ObjectAsOptions{
+		UnhandledUnknownAsEmpty: true,
+	})...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
+	resp.Diagnostics.Append(itemState.As(ctx, &state, basetypes.ObjectAsOptions{
+		UnhandledNullAsEmpty:    true,
+		UnhandledUnknownAsEmpty: true,
+	})...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkSettings(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -351,9 +325,7 @@ func (r *NetworksSettingsResource) Update(ctx context.Context, req resource.Upda
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksSettingsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -365,7 +337,7 @@ func (r *NetworksSettingsResource) Delete(ctx context.Context, req resource.Dele
 // TF Structs Schema
 type NetworksSettingsRs struct {
 	NetworkID               types.String                                         `tfsdk:"network_id"`
-	Fips                    *ResponseNetworksGetNetworkSettingsFipsRs            `tfsdk:"fips"`
+	Fips                    ResponseNetworksGetNetworkSettingsFipsRs             `tfsdk:"fips"`
 	LocalStatusPage         *ResponseNetworksGetNetworkSettingsLocalStatusPageRs `tfsdk:"local_status_page"`
 	LocalStatusPageEnabled  types.Bool                                           `tfsdk:"local_status_page_enabled"`
 	NamedVLANs              *ResponseNetworksGetNetworkSettingsNamedVlansRs      `tfsdk:"named_vlans"`
@@ -476,9 +448,9 @@ func (r *NetworksSettingsRs) toSdkApiRequestUpdate(ctx context.Context) *merakig
 // From gosdk to TF Structs Schema
 func ResponseNetworksGetNetworkSettingsItemToBodyRs(state NetworksSettingsRs, response *merakigosdk.ResponseNetworksGetNetworkSettings, is_read bool) NetworksSettingsRs {
 	itemState := NetworksSettingsRs{
-		Fips: func() *ResponseNetworksGetNetworkSettingsFipsRs {
+		Fips: func() ResponseNetworksGetNetworkSettingsFipsRs {
 			if response.Fips != nil {
-				return &ResponseNetworksGetNetworkSettingsFipsRs{
+				return ResponseNetworksGetNetworkSettingsFipsRs{
 					Enabled: func() types.Bool {
 						if response.Fips.Enabled != nil {
 							return types.BoolValue(*response.Fips.Enabled)
@@ -487,7 +459,7 @@ func ResponseNetworksGetNetworkSettingsItemToBodyRs(state NetworksSettingsRs, re
 					}(),
 				}
 			}
-			return nil
+			return ResponseNetworksGetNetworkSettingsFipsRs{}
 		}(),
 		LocalStatusPage: func() *ResponseNetworksGetNetworkSettingsLocalStatusPageRs {
 			if response.LocalStatusPage != nil {
@@ -501,15 +473,13 @@ func ResponseNetworksGetNetworkSettingsItemToBodyRs(state NetworksSettingsRs, re
 									}
 									return types.Bool{}
 								}(),
-								Username: types.StringValue(response.LocalStatusPage.Authentication.Username),
-								Password: func() types.String {
-									if state.LocalStatusPage != nil {
-										if state.LocalStatusPage.Authentication != nil {
-											return state.LocalStatusPage.Authentication.Password
-										}
+								Username: func() types.String {
+									if response.LocalStatusPage.Authentication.Username != "" {
+										return types.StringValue(response.LocalStatusPage.Authentication.Username)
 									}
 									return types.String{}
 								}(),
+								Password: state.LocalStatusPage.Authentication.Password,
 							}
 						}
 						return nil

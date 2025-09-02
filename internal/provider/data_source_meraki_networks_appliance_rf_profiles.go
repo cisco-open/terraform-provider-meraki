@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -238,6 +237,17 @@ func (d *NetworksApplianceRfProfilesDataSource) Read(ctx context.Context, req da
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkApplianceRfProfile",
+				err.Error(),
+			)
+			return
+		}
+
 		networksApplianceRfProfiles = ResponseApplianceGetNetworkApplianceRfProfileItemToBody(networksApplianceRfProfiles, response2)
 		diags = resp.State.Set(ctx, &networksApplianceRfProfiles)
 		resp.Diagnostics.Append(diags...)
@@ -323,16 +333,36 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBody(state NetworksAppli
 			}
 			return nil
 		}(),
-		ID:        types.StringValue(response.ID),
-		Name:      types.StringValue(response.Name),
-		NetworkID: types.StringValue(response.NetworkID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
 		PerSSIDSettings: func() *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings {
 			if response.PerSSIDSettings != nil {
 				return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings{
 					Status1: func() *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings1 {
 						if response.PerSSIDSettings.Status1 != nil {
 							return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings1{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status1.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status1.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status1.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status1.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status1.BandSteeringEnabled)
@@ -346,7 +376,12 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBody(state NetworksAppli
 					Status2: func() *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings2 {
 						if response.PerSSIDSettings.Status2 != nil {
 							return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings2{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status2.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status2.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status2.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status2.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status2.BandSteeringEnabled)
@@ -360,7 +395,12 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBody(state NetworksAppli
 					Status3: func() *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings3 {
 						if response.PerSSIDSettings.Status3 != nil {
 							return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings3{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status3.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status3.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status3.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status3.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status3.BandSteeringEnabled)
@@ -374,7 +414,12 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBody(state NetworksAppli
 					Status4: func() *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings4 {
 						if response.PerSSIDSettings.Status4 != nil {
 							return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings4{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status4.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status4.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status4.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status4.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status4.BandSteeringEnabled)

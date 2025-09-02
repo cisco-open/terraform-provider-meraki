@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -334,45 +333,105 @@ func ResponseWirelessGetOrganizationWirelessDevicesWirelessControllersByDeviceIt
 						Controller: func() *ResponseWirelessGetOrganizationWirelessDevicesWirelessControllersByDeviceItemsController {
 							if items.Controller != nil {
 								return &ResponseWirelessGetOrganizationWirelessDevicesWirelessControllersByDeviceItemsController{
-									Serial: types.StringValue(items.Controller.Serial),
+									Serial: func() types.String {
+										if items.Controller.Serial != "" {
+											return types.StringValue(items.Controller.Serial)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						CountryCode: types.StringValue(items.CountryCode),
+						CountryCode: func() types.String {
+							if items.CountryCode != "" {
+								return types.StringValue(items.CountryCode)
+							}
+							return types.String{}
+						}(),
 						Details: func() *[]ResponseWirelessGetOrganizationWirelessDevicesWirelessControllersByDeviceItemsDetails {
 							if items.Details != nil {
 								result := make([]ResponseWirelessGetOrganizationWirelessDevicesWirelessControllersByDeviceItemsDetails, len(*items.Details))
 								for i, details := range *items.Details {
 									result[i] = ResponseWirelessGetOrganizationWirelessDevicesWirelessControllersByDeviceItemsDetails{
-										Name:  types.StringValue(details.Name),
-										Value: types.StringValue(details.Value),
+										Name: func() types.String {
+											if details.Name != "" {
+												return types.StringValue(details.Name)
+											}
+											return types.String{}
+										}(),
+										Value: func() types.String {
+											if details.Value != "" {
+												return types.StringValue(details.Value)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						JoinedAt: types.StringValue(items.JoinedAt),
-						Mode:     types.StringValue(items.Mode),
-						Model:    types.StringValue(items.Model),
+						JoinedAt: func() types.String {
+							if items.JoinedAt != "" {
+								return types.StringValue(items.JoinedAt)
+							}
+							return types.String{}
+						}(),
+						Mode: func() types.String {
+							if items.Mode != "" {
+								return types.StringValue(items.Mode)
+							}
+							return types.String{}
+						}(),
+						Model: func() types.String {
+							if items.Model != "" {
+								return types.StringValue(items.Model)
+							}
+							return types.String{}
+						}(),
 						Network: func() *ResponseWirelessGetOrganizationWirelessDevicesWirelessControllersByDeviceItemsNetwork {
 							if items.Network != nil {
 								return &ResponseWirelessGetOrganizationWirelessDevicesWirelessControllersByDeviceItemsNetwork{
-									ID: types.StringValue(items.Network.ID),
+									ID: func() types.String {
+										if items.Network.ID != "" {
+											return types.StringValue(items.Network.ID)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						Serial: types.StringValue(items.Serial),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
 						Tags: func() *[]ResponseWirelessGetOrganizationWirelessDevicesWirelessControllersByDeviceItemsTags {
 							if items.Tags != nil {
 								result := make([]ResponseWirelessGetOrganizationWirelessDevicesWirelessControllersByDeviceItemsTags, len(*items.Tags))
 								for i, tags := range *items.Tags {
 									result[i] = ResponseWirelessGetOrganizationWirelessDevicesWirelessControllersByDeviceItemsTags{
-										Policy: types.StringValue(tags.Policy),
-										Rf:     types.StringValue(tags.Rf),
-										Site:   types.StringValue(tags.Site),
+										Policy: func() types.String {
+											if tags.Policy != "" {
+												return types.StringValue(tags.Policy)
+											}
+											return types.String{}
+										}(),
+										Rf: func() types.String {
+											if tags.Rf != "" {
+												return types.StringValue(tags.Rf)
+											}
+											return types.String{}
+										}(),
+										Site: func() types.String {
+											if tags.Site != "" {
+												return types.StringValue(tags.Site)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result

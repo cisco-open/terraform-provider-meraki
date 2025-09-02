@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -201,9 +200,19 @@ func ResponseWirelessGetNetworkWirelessSSIDBonjourForwardingItemToBody(state Net
 				result := make([]ResponseWirelessGetNetworkWirelessSsidBonjourForwardingRules, len(*response.Rules))
 				for i, rules := range *response.Rules {
 					result[i] = ResponseWirelessGetNetworkWirelessSsidBonjourForwardingRules{
-						Description: types.StringValue(rules.Description),
-						Services:    StringSliceToList(rules.Services),
-						VLANID:      types.StringValue(rules.VLANID),
+						Description: func() types.String {
+							if rules.Description != "" {
+								return types.StringValue(rules.Description)
+							}
+							return types.String{}
+						}(),
+						Services: StringSliceToList(rules.Services),
+						VLANID: func() types.String {
+							if rules.VLANID != "" {
+								return types.StringValue(rules.VLANID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

@@ -325,12 +325,22 @@ func ResponseOrganizationsCloneOrganizationItemToBody(state OrganizationsClone, 
 								Host: func() *ResponseOrganizationsCloneOrganizationCloudRegionHost {
 									if response.Cloud.Region.Host != nil {
 										return &ResponseOrganizationsCloneOrganizationCloudRegionHost{
-											Name: types.StringValue(response.Cloud.Region.Host.Name),
+											Name: func() types.String {
+												if response.Cloud.Region.Host.Name != "" {
+													return types.StringValue(response.Cloud.Region.Host.Name)
+												}
+												return types.String{}
+											}(),
 										}
 									}
 									return nil
 								}(),
-								Name: types.StringValue(response.Cloud.Region.Name),
+								Name: func() types.String {
+									if response.Cloud.Region.Name != "" {
+										return types.StringValue(response.Cloud.Region.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -339,11 +349,21 @@ func ResponseOrganizationsCloneOrganizationItemToBody(state OrganizationsClone, 
 			}
 			return nil
 		}(),
-		ID: types.StringValue(response.ID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		Licensing: func() *ResponseOrganizationsCloneOrganizationLicensing {
 			if response.Licensing != nil {
 				return &ResponseOrganizationsCloneOrganizationLicensing{
-					Model: types.StringValue(response.Licensing.Model),
+					Model: func() types.String {
+						if response.Licensing.Model != "" {
+							return types.StringValue(response.Licensing.Model)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -356,8 +376,18 @@ func ResponseOrganizationsCloneOrganizationItemToBody(state OrganizationsClone, 
 							result := make([]ResponseOrganizationsCloneOrganizationManagementDetails, len(*response.Management.Details))
 							for i, details := range *response.Management.Details {
 								result[i] = ResponseOrganizationsCloneOrganizationManagementDetails{
-									Name:  types.StringValue(details.Name),
-									Value: types.StringValue(details.Value),
+									Name: func() types.String {
+										if details.Name != "" {
+											return types.StringValue(details.Name)
+										}
+										return types.String{}
+									}(),
+									Value: func() types.String {
+										if details.Value != "" {
+											return types.StringValue(details.Value)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return &result
@@ -368,8 +398,18 @@ func ResponseOrganizationsCloneOrganizationItemToBody(state OrganizationsClone, 
 			}
 			return nil
 		}(),
-		Name: types.StringValue(response.Name),
-		URL:  types.StringValue(response.URL),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

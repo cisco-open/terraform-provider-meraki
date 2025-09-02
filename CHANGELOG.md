@@ -1,5 +1,27 @@
 ## Unreleased (- -, -)
 
+### 1.2.0-beta (September 2, 2025)
+FEATURES:
+* Updated Meraki Dashboard API SDK from v5.0.6 to v5.0.7 for improved compatibility and performance
+* Enhanced utility functions for better handling of Set and List types in Terraform schemas
+* Improved null field handling and validation across all data sources and resources
+* Added comprehensive logging and debugging capabilities for better troubleshooting
+* Optimized field assignment and type conversion logic for enhanced data integrity
+
+IMPROVEMENTS:
+* Refactored 635+ files with 29,984+ improvements and 18,373+ optimizations
+* Enhanced data source handling for better null field management and optional field support
+* Improved resource schema validation and field type consistency
+* Better handling of optional fields and default values throughout the provider
+* Optimized memory usage and performance for large-scale deployments
+
+BUGFIXES:
+* Fixed inconsistent handling of empty lists and sets in data source responses
+* Resolved field assignment issues with pointer types and null values
+* Improved error handling for malformed API responses
+* Enhanced validation logic for optional and required fields
+* Fixed type conversion issues between API responses and Terraform schemas
+
 ### 1.1.8-beta (July 29, 2025)
 FEATURES:
 * Added support for configuring retry options directly in provider block

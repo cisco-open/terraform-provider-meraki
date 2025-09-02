@@ -19,6 +19,8 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"fmt"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -27,8 +29,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -65,36 +68,17 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 		Attributes: map[string]schema.Attribute{
 			"address": schema.StringAttribute{
 				MarkdownDescription: `Physical address of the device`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"details": schema.SetNestedAttribute{
-				MarkdownDescription: `Additional device information`,
-				Computed:            true,
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-
-						"name": schema.StringAttribute{
-							MarkdownDescription: `Additional property name`,
-							Computed:            true,
-						},
-						"value": schema.StringAttribute{
-							MarkdownDescription: `Additional property value`,
-							Computed:            true,
-						},
-					},
-				},
-			},
 			"firmware": schema.StringAttribute{
 				MarkdownDescription: `Firmware version of the device`,
-				Computed:            true,
+				Optional:            true,
 			},
 			"floor_plan_id": schema.StringAttribute{
 				MarkdownDescription: `The floor plan to associate to this device. null disassociates the device from the floorplan.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -102,11 +86,10 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			},
 			"lan_ip": schema.StringAttribute{
 				MarkdownDescription: `LAN IP address of the device`,
-				Computed:            true,
+				Optional:            true,
 			},
 			"lat": schema.Float64Attribute{
 				MarkdownDescription: `Latitude of the device`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Float64{
 					float64planmodifier.UseStateForUnknown(),
@@ -114,7 +97,6 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			},
 			"lng": schema.Float64Attribute{
 				MarkdownDescription: `Longitude of the device`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Float64{
 					float64planmodifier.UseStateForUnknown(),
@@ -122,15 +104,14 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			},
 			"mac": schema.StringAttribute{
 				MarkdownDescription: `MAC address of the device`,
-				Computed:            true,
+				Optional:            true,
 			},
 			"model": schema.StringAttribute{
 				MarkdownDescription: `Model of the device`,
-				Computed:            true,
+				Optional:            true,
 			},
 			"move_map_marker": schema.BoolAttribute{
 				MarkdownDescription: `Whether or not to set the latitude and longitude of a device based on the new address. Only applies when lat and lng are not specified.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -138,7 +119,6 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `Name of the device`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -146,11 +126,10 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			},
 			"network_id": schema.StringAttribute{
 				MarkdownDescription: `ID of the network the device belongs to`,
-				Computed:            true,
+				Optional:            true,
 			},
 			"notes": schema.StringAttribute{
 				MarkdownDescription: `Notes for the device, limited to 255 characters`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -166,18 +145,18 @@ func (r *DevicesResource) Schema(_ context.Context, _ resource.SchemaRequest, re
 			},
 			"switch_profile_id": schema.StringAttribute{
 				MarkdownDescription: `The ID of a switch template to bind to the device (for available switch templates, see the 'Switch Templates' endpoint). Use null to unbind the switch device from the current profile. For a device to be bindable to a switch template, it must (1) be a switch, and (2) belong to a network that is bound to a configuration template.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"tags": schema.SetAttribute{
+			"tags": schema.ListAttribute{
 				MarkdownDescription: `List of tags assigned to the device`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				Default:             listdefault.StaticValue(types.ListNull(types.StringType)),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
@@ -210,27 +189,6 @@ func (r *DevicesResource) Create(ctx context.Context, req resource.CreateRequest
 	vvSerial := data.Serial.ValueString()
 	//Has Item and has items and not post
 
-	if vvSerial != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Devices.GetDevice(vvSerial)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource Devices  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource Devices only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Devices.UpdateDevice(vvSerial, dataRequest)
@@ -239,7 +197,7 @@ func (r *DevicesResource) Create(ctx context.Context, req resource.CreateRequest
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDevice",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -250,49 +208,18 @@ func (r *DevicesResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Devices.GetDevice(vvSerial)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetDevice",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetDevice",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseDevicesGetDeviceItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *DevicesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data DevicesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -322,33 +249,29 @@ func (r *DevicesResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 	//entro aqui 2
 	data = ResponseDevicesGetDeviceItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	fmt.Printf("SEE HEEREEEEEE: %+v\n", data)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *DevicesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("serial"), req.ID)...)
 }
 
 func (r *DevicesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data DevicesRs
-	merge(ctx, req, resp, &data)
+	var plan DevicesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvSerial := data.Serial.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvSerial := plan.Serial.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Devices.UpdateDevice(vvSerial, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDevice",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -358,9 +281,7 @@ func (r *DevicesResource) Update(ctx context.Context, req resource.UpdateRequest
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *DevicesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -371,28 +292,27 @@ func (r *DevicesResource) Delete(ctx context.Context, req resource.DeleteRequest
 
 // TF Structs Schema
 type DevicesRs struct {
-	Serial types.String `tfsdk:"serial"`
-	// OrganizationID  types.String                              `tfsdk:"organization_id"`
-	Address         types.String                         `tfsdk:"address"`
-	Details         *[]ResponseDevicesGetDeviceDetailsRs `tfsdk:"details"`
-	Firmware        types.String                         `tfsdk:"firmware"`
-	FloorPlanID     types.String                         `tfsdk:"floor_plan_id"`
-	LanIP           types.String                         `tfsdk:"lan_ip"`
-	Lat             types.Float64                        `tfsdk:"lat"`
-	Lng             types.Float64                        `tfsdk:"lng"`
-	Mac             types.String                         `tfsdk:"mac"`
-	Model           types.String                         `tfsdk:"model"`
-	Name            types.String                         `tfsdk:"name"`
-	NetworkID       types.String                         `tfsdk:"network_id"`
-	Notes           types.String                         `tfsdk:"notes"`
-	Tags            types.Set                            `tfsdk:"tags"`
-	MoveMapMarker   types.Bool                           `tfsdk:"move_map_marker"`
-	SwitchProfileID types.String                         `tfsdk:"switch_profile_id"`
+	Serial          types.String  `tfsdk:"serial"`
+	Address         types.String  `tfsdk:"address"`
+	Firmware        types.String  `tfsdk:"firmware"`
+	FloorPlanID     types.String  `tfsdk:"floor_plan_id"`
+	LanIP           types.String  `tfsdk:"lan_ip"`
+	Lat             types.Float64 `tfsdk:"lat"`
+	Lng             types.Float64 `tfsdk:"lng"`
+	Mac             types.String  `tfsdk:"mac"`
+	Model           types.String  `tfsdk:"model"`
+	Name            types.String  `tfsdk:"name"`
+	NetworkID       types.String  `tfsdk:"network_id"`
+	Notes           types.String  `tfsdk:"notes"`
+	Tags            types.List    `tfsdk:"tags"`
+	MoveMapMarker   types.Bool    `tfsdk:"move_map_marker"`
+	SwitchProfileID types.String  `tfsdk:"switch_profile_id"`
 }
 
-type ResponseDevicesGetDeviceDetailsRs struct {
-	Name  types.String `tfsdk:"name"`
-	Value types.String `tfsdk:"value"`
+type ResponseDevicesGetDeviceBeaconIdParamsRs struct {
+	Major types.Int64  `tfsdk:"major"`
+	Minor types.Int64  `tfsdk:"minor"`
+	UUID  types.String `tfsdk:"uuid"`
 }
 
 // FromBody
@@ -464,24 +384,32 @@ func (r *DevicesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.Requ
 
 // From gosdk to TF Structs Schema
 func ResponseDevicesGetDeviceItemToBodyRs(state DevicesRs, response *merakigosdk.ResponseDevicesGetDevice, is_read bool) DevicesRs {
+	fmt.Printf("Aqui llego: %+v\n", response)
 	itemState := DevicesRs{
-		Address: types.StringValue(response.Address),
-		Details: func() *[]ResponseDevicesGetDeviceDetailsRs {
-			if response.Details != nil {
-				result := make([]ResponseDevicesGetDeviceDetailsRs, len(*response.Details))
-				for i, details := range *response.Details {
-					result[i] = ResponseDevicesGetDeviceDetailsRs{
-						Name:  types.StringValue(details.Name),
-						Value: types.StringValue(details.Value),
-					}
-				}
-				return &result
+		Address: func() types.String {
+			if response.Address != "" {
+				return types.StringValue(response.Address)
 			}
-			return nil
+			return types.StringNull()
 		}(),
-		Firmware:    types.StringValue(response.Firmware),
-		FloorPlanID: types.StringValue(response.FloorPlanID),
-		LanIP:       types.StringValue(response.LanIP),
+		Firmware: func() types.String {
+			if response.Firmware != "" {
+				return types.StringValue(response.Firmware)
+			}
+			return types.StringNull()
+		}(),
+		FloorPlanID: func() types.String {
+			if response.FloorPlanID != "" {
+				return types.StringValue(response.FloorPlanID)
+			}
+			return types.StringNull()
+		}(),
+		LanIP: func() types.String {
+			if response.LanIP != "" {
+				return types.StringValue(response.LanIP)
+			}
+			return types.StringNull()
+		}(),
 		Lat: func() types.Float64 {
 			if response.Lat != nil {
 				return types.Float64Value(float64(*response.Lat))
@@ -494,13 +422,48 @@ func ResponseDevicesGetDeviceItemToBodyRs(state DevicesRs, response *merakigosdk
 			}
 			return types.Float64{}
 		}(),
-		Mac:       types.StringValue(response.Mac),
-		Model:     types.StringValue(response.Model),
-		Name:      types.StringValue(response.Name),
-		NetworkID: types.StringValue(response.NetworkID),
-		Notes:     types.StringValue(response.Notes),
-		Serial:    types.StringValue(response.Serial),
-		Tags:      StringSliceToSet(response.Tags),
+		Mac: func() types.String {
+			if response.Mac != "" {
+				return types.StringValue(response.Mac)
+			}
+			return types.StringNull()
+		}(),
+		Model: func() types.String {
+			if response.Model != "" {
+				return types.StringValue(response.Model)
+			}
+			return types.StringNull()
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.StringNull()
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.StringNull()
+		}(),
+		Notes: func() types.String {
+			if response.Notes != "" {
+				return types.StringValue(response.Notes)
+			}
+			return types.StringNull()
+		}(),
+		Serial: func() types.String {
+			if response.Serial != "" {
+				return types.StringValue(response.Serial)
+			}
+			return types.StringNull()
+		}(),
+		Tags: func() types.List {
+			if len(response.Tags) > 0 {
+				return StringSliceToList(response.Tags)
+			}
+			return state.Tags
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(DevicesRs)

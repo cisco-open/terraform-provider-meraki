@@ -25,7 +25,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -93,13 +92,11 @@ func (r *OrganizationsInventoryClaimResource) Schema(_ context.Context, _ resour
 					"orders": schema.ListAttribute{
 						MarkdownDescription: `The numbers of the orders claimed`,
 						Computed:            true,
-						Default:             listdefault.StaticValue(types.ListNull(types.StringType)),
 						ElementType:         types.StringType,
 					},
 					"serials": schema.ListAttribute{
 						MarkdownDescription: `The serials of the devices claimed`,
 						Computed:            true,
-						Default:             listdefault.StaticValue(types.ListNull(types.StringType)),
 						ElementType:         types.StringType,
 					},
 				},
@@ -226,8 +223,8 @@ type ResponseOrganizationsClaimIntoOrganizationInventoryLicenses struct {
 
 type RequestOrganizationsClaimIntoOrganizationInventoryRs struct {
 	Licenses *[]RequestOrganizationsClaimIntoOrganizationInventoryLicensesRs `tfsdk:"licenses"`
-	Orders   types.Set                                                       `tfsdk:"orders"`
-	Serials  types.Set                                                       `tfsdk:"serials"`
+	Orders   types.List                                                      `tfsdk:"orders"`
+	Serials  types.List                                                      `tfsdk:"serials"`
 }
 
 type RequestOrganizationsClaimIntoOrganizationInventoryLicensesRs struct {
@@ -256,14 +253,9 @@ func (r *OrganizationsInventoryClaim) toSdkApiRequestCreate(ctx context.Context)
 	var serials []string = nil
 	re.Serials.ElementsAs(ctx, &serials, false)
 	out := merakigosdk.RequestOrganizationsClaimIntoOrganizationInventory{
-		Licenses: func() *[]merakigosdk.RequestOrganizationsClaimIntoOrganizationInventoryLicenses {
-			if len(requestOrganizationsClaimIntoOrganizationInventoryLicenses) > 0 {
-				return &requestOrganizationsClaimIntoOrganizationInventoryLicenses
-			}
-			return nil
-		}(),
-		Orders:  orders,
-		Serials: serials,
+		Licenses: &requestOrganizationsClaimIntoOrganizationInventoryLicenses,
+		Orders:   orders,
+		Serials:  serials,
 	}
 	return &out
 }
@@ -276,8 +268,18 @@ func ResponseOrganizationsClaimIntoOrganizationInventoryItemToBody(state Organiz
 				result := make([]ResponseOrganizationsClaimIntoOrganizationInventoryLicenses, len(*response.Licenses))
 				for i, licenses := range *response.Licenses {
 					result[i] = ResponseOrganizationsClaimIntoOrganizationInventoryLicenses{
-						Key:  types.StringValue(licenses.Key),
-						Mode: types.StringValue(licenses.Mode),
+						Key: func() types.String {
+							if licenses.Key != "" {
+								return types.StringValue(licenses.Key)
+							}
+							return types.String{}
+						}(),
+						Mode: func() types.String {
+							if licenses.Mode != "" {
+								return types.StringValue(licenses.Mode)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

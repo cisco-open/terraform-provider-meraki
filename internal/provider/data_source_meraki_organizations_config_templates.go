@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -180,6 +179,17 @@ func (d *OrganizationsConfigTemplatesDataSource) Read(ctx context.Context, req d
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetOrganizationConfigTemplate",
+				err.Error(),
+			)
+			return
+		}
+
 		organizationsConfigTemplates = ResponseOrganizationsGetOrganizationConfigTemplateItemToBody(organizationsConfigTemplates, response2)
 		diags = resp.State.Set(ctx, &organizationsConfigTemplates)
 		resp.Diagnostics.Append(diags...)
@@ -217,10 +227,25 @@ func ResponseOrganizationsGetOrganizationConfigTemplatesItemsToBody(state Organi
 	var items []ResponseItemOrganizationsGetOrganizationConfigTemplates
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationConfigTemplates{
-			ID:           types.StringValue(item.ID),
-			Name:         types.StringValue(item.Name),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			ProductTypes: StringSliceToList(item.ProductTypes),
-			TimeZone:     types.StringValue(item.TimeZone),
+			TimeZone: func() types.String {
+				if item.TimeZone != "" {
+					return types.StringValue(item.TimeZone)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -230,10 +255,25 @@ func ResponseOrganizationsGetOrganizationConfigTemplatesItemsToBody(state Organi
 
 func ResponseOrganizationsGetOrganizationConfigTemplateItemToBody(state OrganizationsConfigTemplates, response *merakigosdk.ResponseOrganizationsGetOrganizationConfigTemplate) OrganizationsConfigTemplates {
 	itemState := ResponseOrganizationsGetOrganizationConfigTemplate{
-		ID:           types.StringValue(response.ID),
-		Name:         types.StringValue(response.Name),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		ProductTypes: StringSliceToList(response.ProductTypes),
-		TimeZone:     types.StringValue(response.TimeZone),
+		TimeZone: func() types.String {
+			if response.TimeZone != "" {
+				return types.StringValue(response.TimeZone)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

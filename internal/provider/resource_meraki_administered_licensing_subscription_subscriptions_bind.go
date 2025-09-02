@@ -248,7 +248,12 @@ func ResponseLicensingBindAdministeredLicensingSubscriptionSubscriptionItemToBod
 							}
 							return types.Int64{}
 						}(),
-						Sku: types.StringValue(insufficientEntitlements.Sku),
+						Sku: func() types.String {
+							if insufficientEntitlements.Sku != "" {
+								return types.StringValue(insufficientEntitlements.Sku)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -260,15 +265,30 @@ func ResponseLicensingBindAdministeredLicensingSubscriptionSubscriptionItemToBod
 				result := make([]ResponseLicensingBindAdministeredLicensingSubscriptionSubscriptionNetworks, len(*response.Networks))
 				for i, networks := range *response.Networks {
 					result[i] = ResponseLicensingBindAdministeredLicensingSubscriptionSubscriptionNetworks{
-						ID:   types.StringValue(networks.ID),
-						Name: types.StringValue(networks.Name),
+						ID: func() types.String {
+							if networks.ID != "" {
+								return types.StringValue(networks.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if networks.Name != "" {
+								return types.StringValue(networks.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		SubscriptionID: types.StringValue(response.SubscriptionID),
+		SubscriptionID: func() types.String {
+			if response.SubscriptionID != "" {
+				return types.StringValue(response.SubscriptionID)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

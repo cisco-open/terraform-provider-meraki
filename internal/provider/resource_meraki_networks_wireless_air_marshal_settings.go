@@ -189,8 +189,18 @@ func (r *NetworksWirelessAirMarshalSettings) toSdkApiRequestUpdate(ctx context.C
 // ToBody
 func ResponseWirelessUpdateNetworkWirelessAirMarshalSettingsItemToBody(state NetworksWirelessAirMarshalSettings, response *merakigosdk.ResponseWirelessUpdateNetworkWirelessAirMarshalSettings) NetworksWirelessAirMarshalSettings {
 	itemState := ResponseWirelessUpdateNetworkWirelessAirMarshalSettings{
-		DefaultPolicy: types.StringValue(response.DefaultPolicy),
-		NetworkID:     types.StringValue(response.NetworkID),
+		DefaultPolicy: func() types.String {
+			if response.DefaultPolicy != "" {
+				return types.StringValue(response.DefaultPolicy)
+			}
+			return types.String{}
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

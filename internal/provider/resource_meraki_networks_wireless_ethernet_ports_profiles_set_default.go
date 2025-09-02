@@ -183,7 +183,12 @@ func (r *NetworksWirelessEthernetPortsProfilesSetDefault) toSdkApiRequestCreate(
 // ToBody
 func ResponseWirelessSetNetworkWirelessEthernetPortsProfilesDefaultItemToBody(state NetworksWirelessEthernetPortsProfilesSetDefault, response *merakigosdk.ResponseWirelessSetNetworkWirelessEthernetPortsProfilesDefault) NetworksWirelessEthernetPortsProfilesSetDefault {
 	itemState := ResponseWirelessSetNetworkWirelessEthernetPortsProfilesDefault{
-		ProfileID: types.StringValue(response.ProfileID),
+		ProfileID: func() types.String {
+			if response.ProfileID != "" {
+				return types.StringValue(response.ProfileID)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

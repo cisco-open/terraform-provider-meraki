@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -211,10 +210,30 @@ func ResponseOrganizationsGetOrganizationWebhooksLogsItemsToBody(state Organizat
 	var items []ResponseItemOrganizationsGetOrganizationWebhooksLogs
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationWebhooksLogs{
-			AlertType:      types.StringValue(item.AlertType),
-			LoggedAt:       types.StringValue(item.LoggedAt),
-			NetworkID:      types.StringValue(item.NetworkID),
-			OrganizationID: types.StringValue(item.OrganizationID),
+			AlertType: func() types.String {
+				if item.AlertType != "" {
+					return types.StringValue(item.AlertType)
+				}
+				return types.String{}
+			}(),
+			LoggedAt: func() types.String {
+				if item.LoggedAt != "" {
+					return types.StringValue(item.LoggedAt)
+				}
+				return types.String{}
+			}(),
+			NetworkID: func() types.String {
+				if item.NetworkID != "" {
+					return types.StringValue(item.NetworkID)
+				}
+				return types.String{}
+			}(),
+			OrganizationID: func() types.String {
+				if item.OrganizationID != "" {
+					return types.StringValue(item.OrganizationID)
+				}
+				return types.String{}
+			}(),
 			ResponseCode: func() types.Int64 {
 				if item.ResponseCode != nil {
 					return types.Int64Value(int64(*item.ResponseCode))
@@ -227,8 +246,18 @@ func ResponseOrganizationsGetOrganizationWebhooksLogsItemsToBody(state Organizat
 				}
 				return types.Int64{}
 			}(),
-			SentAt: types.StringValue(item.SentAt),
-			URL:    types.StringValue(item.URL),
+			SentAt: func() types.String {
+				if item.SentAt != "" {
+					return types.StringValue(item.SentAt)
+				}
+				return types.String{}
+			}(),
+			URL: func() types.String {
+				if item.URL != "" {
+					return types.StringValue(item.URL)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

@@ -160,7 +160,7 @@ type ResponseSwitchCycleDeviceSwitchPorts struct {
 }
 
 type RequestSwitchCycleDeviceSwitchPortsRs struct {
-	Ports types.Set `tfsdk:"ports"`
+	Ports types.List `tfsdk:"ports"`
 }
 
 // FromBody

@@ -191,11 +191,11 @@ type ResponseSmMoveNetworkSmDevices struct {
 }
 
 type RequestSmMoveNetworkSmDevicesRs struct {
-	IDs        types.Set    `tfsdk:"ids"`
+	IDs        types.List   `tfsdk:"ids"`
 	NewNetwork types.String `tfsdk:"new_network"`
-	Scope      types.Set    `tfsdk:"scope"`
-	Serials    types.Set    `tfsdk:"serials"`
-	WifiMacs   types.Set    `tfsdk:"wifi_macs"`
+	Scope      types.List   `tfsdk:"scope"`
+	Serials    types.List   `tfsdk:"serials"`
+	WifiMacs   types.List   `tfsdk:"wifi_macs"`
 }
 
 // FromBody
@@ -229,8 +229,13 @@ func (r *NetworksSmDevicesMove) toSdkApiRequestCreate(ctx context.Context) *mera
 // ToBody
 func ResponseSmMoveNetworkSmDevicesItemToBody(state NetworksSmDevicesMove, response *merakigosdk.ResponseSmMoveNetworkSmDevices) NetworksSmDevicesMove {
 	itemState := ResponseSmMoveNetworkSmDevices{
-		IDs:        StringSliceToList(response.IDs),
-		NewNetwork: types.StringValue(response.NewNetwork),
+		IDs: StringSliceToList(response.IDs),
+		NewNetwork: func() types.String {
+			if response.NewNetwork != "" {
+				return types.StringValue(response.NewNetwork)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

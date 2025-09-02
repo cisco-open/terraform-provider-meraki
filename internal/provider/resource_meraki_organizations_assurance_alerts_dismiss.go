@@ -71,7 +71,7 @@ func (r *OrganizationsAssuranceAlertsDismissResource) Schema(_ context.Context, 
 			"parameters": schema.SingleNestedAttribute{
 				Required: true,
 				Attributes: map[string]schema.Attribute{
-					"alert_ids": schema.SetAttribute{
+					"alert_ids": schema.ListAttribute{
 						MarkdownDescription: `Array of alert IDs to dismiss`,
 						Optional:            true,
 						Computed:            true,
@@ -146,7 +146,7 @@ type OrganizationsAssuranceAlertsDismiss struct {
 }
 
 type RequestOrganizationsDismissOrganizationAssuranceAlertsRs struct {
-	AlertIDs types.Set `tfsdk:"alert_ids"`
+	AlertIDs types.List `tfsdk:"alert_ids"`
 }
 
 // FromBody

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -194,8 +193,18 @@ func ResponseWirelessGetDeviceWirelessRadioSettingsItemToBody(state DevicesWirel
 			}
 			return nil
 		}(),
-		RfProfileID: types.StringValue(response.RfProfileID),
-		Serial:      types.StringValue(response.Serial),
+		RfProfileID: func() types.String {
+			if response.RfProfileID != "" {
+				return types.StringValue(response.RfProfileID)
+			}
+			return types.String{}
+		}(),
+		Serial: func() types.String {
+			if response.Serial != "" {
+				return types.StringValue(response.Serial)
+			}
+			return types.String{}
+		}(),
 		TwoFourGhzSettings: func() *ResponseWirelessGetDeviceWirelessRadioSettingsTwoFourGhzSettings {
 			if response.TwoFourGhzSettings != nil {
 				return &ResponseWirelessGetDeviceWirelessRadioSettingsTwoFourGhzSettings{

@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	"log"
 
@@ -30,9 +31,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -74,7 +76,6 @@ func (r *DevicesCellularSimsResource) Schema(_ context.Context, _ resource.Schem
 			},
 			"sim_failover": schema.SingleNestedAttribute{
 				MarkdownDescription: `SIM Failover settings.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -83,7 +84,6 @@ func (r *DevicesCellularSimsResource) Schema(_ context.Context, _ resource.Schem
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Failover to secondary SIM`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -91,7 +91,6 @@ func (r *DevicesCellularSimsResource) Schema(_ context.Context, _ resource.Schem
 					},
 					"timeout": schema.Int64Attribute{
 						MarkdownDescription: `Failover timeout in seconds`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -99,49 +98,46 @@ func (r *DevicesCellularSimsResource) Schema(_ context.Context, _ resource.Schem
 					},
 				},
 			},
-			"sim_ordering": schema.SetAttribute{
+			"sim_ordering": schema.ListAttribute{
 				MarkdownDescription: `Specifies the ordering of all SIMs for an MG: primary, secondary, and not-in-use (when applicable). It's required for devices with 3 or more SIMs and can be used in place of 'isPrimary' for dual-SIM devices. To indicate eSIM, use 'sim3'. Sim failover will occur only between primary and secondary sim slots.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
-			"sims": schema.SetNestedAttribute{
+			"sims": schema.ListNestedAttribute{
 				MarkdownDescription: `List of SIMs. If a SIM was previously configured and not specified in this request, it will remain unchanged.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
-						"apns": schema.SetNestedAttribute{
+						"apns": schema.ListNestedAttribute{
 							MarkdownDescription: `APN configurations. If empty, the default APN will be used.`,
-							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 
-									"allowed_ip_types": schema.SetAttribute{
+									"allowed_ip_types": schema.ListAttribute{
 										MarkdownDescription: `IP versions to support (permitted values include 'ipv4', 'ipv6').`,
-										Computed:            true,
 										Optional:            true,
-										PlanModifiers: []planmodifier.Set{
-											setplanmodifier.UseStateForUnknown(),
+										PlanModifiers: []planmodifier.List{
+											listplanmodifier.UseStateForUnknown(),
 										},
 
 										ElementType: types.StringType,
 									},
 									"authentication": schema.SingleNestedAttribute{
 										MarkdownDescription: `APN authentication configurations.`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Object{
 											objectplanmodifier.UseStateForUnknown(),
@@ -151,7 +147,6 @@ func (r *DevicesCellularSimsResource) Schema(_ context.Context, _ resource.Schem
 											"password": schema.StringAttribute{
 												MarkdownDescription: `APN password, if type is set (if APN password is not supplied, the password is left unchanged).`,
 												Sensitive:           true,
-												Computed:            true,
 												Optional:            true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
@@ -160,7 +155,6 @@ func (r *DevicesCellularSimsResource) Schema(_ context.Context, _ resource.Schem
 											"type": schema.StringAttribute{
 												MarkdownDescription: `APN auth type.
                                                     Allowed values: [chap,none,pap]`,
-												Computed: true,
 												Optional: true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
@@ -175,7 +169,6 @@ func (r *DevicesCellularSimsResource) Schema(_ context.Context, _ resource.Schem
 											},
 											"username": schema.StringAttribute{
 												MarkdownDescription: `APN username, if type is set.`,
-												Computed:            true,
 												Optional:            true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
@@ -185,7 +178,6 @@ func (r *DevicesCellularSimsResource) Schema(_ context.Context, _ resource.Schem
 									},
 									"name": schema.StringAttribute{
 										MarkdownDescription: `APN name.`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -196,7 +188,6 @@ func (r *DevicesCellularSimsResource) Schema(_ context.Context, _ resource.Schem
 						},
 						"is_primary": schema.BoolAttribute{
 							MarkdownDescription: `If true, this SIM is activated on platform bootup. It must be true on single-SIM devices and is a required field for dual-SIM MGs unless it is being configured using 'simOrdering'.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Bool{
 								boolplanmodifier.UseStateForUnknown(),
@@ -204,7 +195,6 @@ func (r *DevicesCellularSimsResource) Schema(_ context.Context, _ resource.Schem
 						},
 						"sim_order": schema.Int64Attribute{
 							MarkdownDescription: `Priority of SIM slot being configured. Use a value between 1 and total number of SIMs available. The value must be unique for each SIM.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -212,16 +202,9 @@ func (r *DevicesCellularSimsResource) Schema(_ context.Context, _ resource.Schem
 						},
 						"slot": schema.StringAttribute{
 							MarkdownDescription: `SIM slot being configured. Must be 'sim1' on single-sim devices. Use 'sim3' for eSIM.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
-							},
-							Validators: []validator.String{
-								stringvalidator.OneOf(
-									"sim1",
-									"sim2",
-								),
 							},
 						},
 					},
@@ -253,27 +236,6 @@ func (r *DevicesCellularSimsResource) Create(ctx context.Context, req resource.C
 	vvSerial := data.Serial.ValueString()
 	//Has Item and not has items
 
-	if vvSerial != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Devices.GetDeviceCellularSims(vvSerial)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesCellularSims  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesCellularSims only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Devices.UpdateDeviceCellularSims(vvSerial, dataRequest)
@@ -282,7 +244,7 @@ func (r *DevicesCellularSimsResource) Create(ctx context.Context, req resource.C
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCellularSims",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -293,49 +255,19 @@ func (r *DevicesCellularSimsResource) Create(ctx context.Context, req resource.C
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Devices.GetDeviceCellularSims(vvSerial)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetDeviceCellularSims",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetDeviceCellularSims",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseDevicesGetDeviceCellularSimsItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *DevicesCellularSimsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data DevicesCellularSimsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -365,33 +297,28 @@ func (r *DevicesCellularSimsResource) Read(ctx context.Context, req resource.Rea
 	}
 	//entro aqui 2
 	data = ResponseDevicesGetDeviceCellularSimsItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *DevicesCellularSimsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("serial"), req.ID)...)
 }
 
 func (r *DevicesCellularSimsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data DevicesCellularSimsRs
-	merge(ctx, req, resp, &data)
+	var plan DevicesCellularSimsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvSerial := data.Serial.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvSerial := plan.Serial.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Devices.UpdateDeviceCellularSims(vvSerial, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCellularSims",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -401,9 +328,7 @@ func (r *DevicesCellularSimsResource) Update(ctx context.Context, req resource.U
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *DevicesCellularSimsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -416,7 +341,7 @@ func (r *DevicesCellularSimsResource) Delete(ctx context.Context, req resource.D
 type DevicesCellularSimsRs struct {
 	Serial      types.String                                       `tfsdk:"serial"`
 	SimFailover *ResponseDevicesGetDeviceCellularSimsSimFailoverRs `tfsdk:"sim_failover"`
-	SimOrdering types.Set                                          `tfsdk:"sim_ordering"`
+	SimOrdering types.List                                         `tfsdk:"sim_ordering"`
 	Sims        *[]ResponseDevicesGetDeviceCellularSimsSimsRs      `tfsdk:"sims"`
 }
 
@@ -433,7 +358,7 @@ type ResponseDevicesGetDeviceCellularSimsSimsRs struct {
 }
 
 type ResponseDevicesGetDeviceCellularSimsSimsApnsRs struct {
-	AllowedIPTypes types.Set                                                     `tfsdk:"allowed_ip_types"`
+	AllowedIPTypes types.List                                                    `tfsdk:"allowed_ip_types"`
 	Authentication *ResponseDevicesGetDeviceCellularSimsSimsApnsAuthenticationRs `tfsdk:"authentication"`
 	Name           types.String                                                  `tfsdk:"name"`
 }
@@ -566,7 +491,7 @@ func ResponseDevicesGetDeviceCellularSimsItemToBodyRs(state DevicesCellularSimsR
 			}
 			return nil
 		}(),
-		SimOrdering: StringSliceToSet(response.SimOrdering),
+		SimOrdering: StringSliceToList(response.SimOrdering),
 		Sims: func() *[]ResponseDevicesGetDeviceCellularSimsSimsRs {
 			if response.Sims != nil {
 				result := make([]ResponseDevicesGetDeviceCellularSimsSimsRs, len(*response.Sims))
@@ -577,17 +502,38 @@ func ResponseDevicesGetDeviceCellularSimsItemToBodyRs(state DevicesCellularSimsR
 								result := make([]ResponseDevicesGetDeviceCellularSimsSimsApnsRs, len(*sims.Apns))
 								for i, apns := range *sims.Apns {
 									result[i] = ResponseDevicesGetDeviceCellularSimsSimsApnsRs{
-										AllowedIPTypes: StringSliceToSet(apns.AllowedIPTypes),
+										AllowedIPTypes: StringSliceToList(apns.AllowedIPTypes),
 										Authentication: func() *ResponseDevicesGetDeviceCellularSimsSimsApnsAuthenticationRs {
 											if apns.Authentication != nil {
 												return &ResponseDevicesGetDeviceCellularSimsSimsApnsAuthenticationRs{
-													Type:     types.StringValue(apns.Authentication.Type),
-													Username: types.StringValue(apns.Authentication.Username),
+													Password: func() types.String {
+														if apns.Authentication.Password != "" {
+															return types.StringValue(apns.Authentication.Password)
+														}
+														return types.String{}
+													}(),
+													Type: func() types.String {
+														if apns.Authentication.Type != "" {
+															return types.StringValue(apns.Authentication.Type)
+														}
+														return types.String{}
+													}(),
+													Username: func() types.String {
+														if apns.Authentication.Username != "" {
+															return types.StringValue(apns.Authentication.Username)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return nil
 										}(),
-										Name: types.StringValue(apns.Name),
+										Name: func() types.String {
+											if apns.Name != "" {
+												return types.StringValue(apns.Name)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -600,7 +546,12 @@ func ResponseDevicesGetDeviceCellularSimsItemToBodyRs(state DevicesCellularSimsR
 							}
 							return types.Bool{}
 						}(),
-						Slot: types.StringValue(sims.Slot),
+						Slot: func() types.String {
+							if sims.Slot != "" {
+								return types.StringValue(sims.Slot)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

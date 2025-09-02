@@ -66,6 +66,7 @@ var pathParams = []string{
 	"PolicyObjectID",
 	"SamlRoleID",
 	"OrganizationID",
+	"ProfileID",
 }
 
 type cmpFunc func(interface{}, interface{}) bool
@@ -107,7 +108,9 @@ func pickMethod(methods [][]bool) int {
 
 func StringSliceToList(items []string) types.List {
 	var eles []attr.Value
-	if len(items) == 0 {
+	log.Printf("[DEBUG] StringSliceToList: %v", items)
+	if len(items) == 0 || items == nil {
+		log.Printf("[DEBUG] StringSliceToList: returning null for empty list")
 		return types.ListNull(types.StringType)
 	}
 	for _, item := range items {
@@ -115,6 +118,47 @@ func StringSliceToList(items []string) types.List {
 	}
 
 	return types.ListValueMust(types.StringType, eles)
+}
+
+// isSetOrListType checks if a reflect.Type is a Set or List type
+func isSetOrListType(fieldType reflect.Type) bool {
+	// Check for the primitive types
+	if fieldType == reflect.TypeOf(types.Set{}) || fieldType == reflect.TypeOf(types.List{}) {
+		return true
+	}
+
+	// Check for pointer types
+	if fieldType.Kind() == reflect.Ptr {
+		elemType := fieldType.Elem()
+		if elemType == reflect.TypeOf(types.Set{}) || elemType == reflect.TypeOf(types.List{}) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// createEmptySetOrList creates an empty Set or List of the appropriate type
+func createEmptySetOrList(fieldType reflect.Type) interface{} {
+	if fieldType == reflect.TypeOf(types.Set{}) {
+		return types.SetNull(types.StringType)
+	}
+	if fieldType == reflect.TypeOf(types.List{}) {
+		return types.ListNull(types.StringType)
+	}
+
+	// For pointer types
+	if fieldType.Kind() == reflect.Ptr {
+		elemType := fieldType.Elem()
+		if elemType == reflect.TypeOf(types.Set{}) {
+			return types.SetNull(types.StringType)
+		}
+		if elemType == reflect.TypeOf(types.List{}) {
+			return types.ListNull(types.StringType)
+		}
+	}
+
+	return reflect.Zero(fieldType).Interface()
 }
 
 func StringSliceToSet(items []string) basetypes.SetValue {
@@ -686,6 +730,143 @@ func replaceUnknownFields(data interface{}) interface{} {
 	return val
 }
 
+// isNullOrZero checks if a value is null, zero, or represents an unknown/empty state
+func isNullOrZero(value reflect.Value) bool {
+	if !value.IsValid() {
+		return true
+	}
+
+	// Check for unknown values
+	if value.CanInterface() {
+		valStr := fmt.Sprint(value.Interface())
+		if valStr == "<unknown>" || valStr == "<nil>" || valStr == "<null>" {
+			return true
+		}
+	}
+
+	// Check if it's zero value
+	return reflect.DeepEqual(value.Interface(), reflect.Zero(value.Type()).Interface())
+}
+
+// prioritizeNonNullValues returns the non-null value, prioritizing b over a when both have values
+func prioritizeNonNullValues(fieldA, fieldB reflect.Value) reflect.Value {
+	isANull := isNullOrZero(fieldA)
+	isBNull := isNullOrZero(fieldB)
+
+	// If A is null and B is not null, use B
+	if isANull && !isBNull {
+		return fieldB
+	}
+
+	// If B is null and A is not null, use A
+	if isBNull && !isANull {
+		return fieldA
+	}
+
+	// If both are null, return A (preserve original null state)
+	if isANull && isBNull {
+		return fieldA
+	}
+
+	// If both have values, prioritize B
+	return fieldB
+}
+
+// prioritizeNonNullValuesForMerge returns the non-null value, prioritizing a over b when both have values
+// and prioritizing unknown values from a to get values from b if available, otherwise null
+func prioritizeNonNullValuesForMerge(fieldA, fieldB reflect.Value) reflect.Value {
+	isANull := isNullOrZero(fieldA)
+	isBNull := isNullOrZero(fieldB)
+
+	// Check if fieldA is unknown
+	isAUnknown := false
+	if fieldA.CanInterface() {
+		valStr := fmt.Sprint(fieldA.Interface())
+		isAUnknown = valStr == "<unknown>"
+	}
+
+	// Check if fieldA is empty string and treat it as null
+	isAEmptyString := false
+	if fieldA.Kind() == reflect.String {
+		if fieldA.CanInterface() {
+			valStr := fieldA.Interface().(string)
+			isAEmptyString = valStr == ""
+		}
+	}
+
+	// If A is unknown, prioritize B if available, otherwise return null
+	if isAUnknown {
+		if !isBNull {
+			return fieldB
+		}
+		// Return null for unknown values when B is not available
+		return reflect.Zero(fieldA.Type())
+	}
+
+	// If A is empty string, treat it as null and use B if available, otherwise return null
+	if isAEmptyString {
+		if !isBNull {
+			return fieldB
+		}
+		// Return null for empty string values when B is not available
+		return reflect.Zero(fieldA.Type())
+	}
+
+	// If A is null and B is not null, use B
+	// if isANull && !isBNull {
+	// 	return fieldB
+	// }
+
+	// If B is null and A is not null, use A
+	if isBNull && !isANull {
+		return fieldA
+	}
+
+	// If both are null, return null (except for List/Set which return empty)
+	if isANull && isBNull {
+		// If it's a List or Set, return an empty slice/set
+		if fieldA.Type() == reflect.TypeOf(types.List{}) || fieldA.Type() == reflect.TypeOf(types.Set{}) {
+			return reflect.ValueOf(createEmptySetOrList(fieldA.Type()))
+		}
+		// For all other types, return zero value (which represents null in Terraform)
+		return reflect.Zero(fieldA.Type())
+	}
+
+	// If both have values, prioritize A (changed from B to A)
+	return fieldA
+}
+
+// safeSetField safely sets a field value, handling pointer types correctly
+func safeSetField(field reflect.Value, value interface{}) bool {
+	if !field.CanSet() {
+		return false
+	}
+
+	valueReflect := reflect.ValueOf(value)
+
+	// If the field expects a pointer and we have a value
+	if field.Type().Kind() == reflect.Ptr {
+		if valueReflect.Kind() != reflect.Ptr {
+			// Create a pointer to the value
+			ptr := reflect.New(field.Type().Elem())
+			ptr.Elem().Set(valueReflect)
+			field.Set(ptr)
+		} else {
+			// Both are pointers, set directly
+			field.Set(valueReflect)
+		}
+	} else {
+		// Field expects a value, dereference if needed
+		if valueReflect.Kind() == reflect.Ptr {
+			field.Set(valueReflect.Elem())
+		} else {
+			field.Set(valueReflect)
+		}
+	}
+
+	return true
+}
+
 func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 	if a == nil {
 		return b
@@ -732,8 +913,9 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 	}
 
 	if valueA.Kind() != reflect.Struct || valueB.Kind() != reflect.Struct {
-		// If they are not slices or structs, we simply return the second value
-		return b
+		// Use the new prioritization logic for non-struct values
+		prioritizedValue := prioritizeNonNullValuesForMerge(valueA, valueB)
+		return prioritizedValue.Interface()
 	}
 
 	// Mixing fields of structs
@@ -767,45 +949,29 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 
 		// Check if both fields are valid before proceeding
 		if fieldA.IsValid() && fieldB.IsValid() {
+			// Handle slices recursively
 			if fieldA.Kind() == reflect.Slice && fieldB.Kind() == reflect.Slice && valueA.Field(i).Kind() == reflect.Slice && valueB.Field(i).Kind() == reflect.Slice {
 				log.Printf("IF Slice:")
 				// If both fields are slices, merge them recursively
 				if field := replaceUnknownFields(valueA.Field(i)); field != nil {
 					log.Printf("IF Slice Replace:")
-					resultStruct.Field(i).Set(reflect.ValueOf(field))
+					if resultStruct.Field(i).CanSet() {
+						resultStruct.Field(i).Set(reflect.ValueOf(field))
+					}
 				} else {
 					log.Printf("Else Slice Replace:")
-					resultStruct.Field(i).Set(valueB.Field(i))
-				}
-			} else if reflect.DeepEqual(fieldA.Interface(), reflect.Zero(fieldA.Type()).Interface()) && !reflect.DeepEqual(fieldB.Interface(), reflect.Zero(fieldB.Type()).Interface()) {
-				// If field a is null and field b is not, we use field b
-				log.Printf("IF DeepEqual:")
-				resultStruct.Field(i).Set(valueB.Field(i))
-			} else {
-				if fmt.Sprint(fieldA.Interface()) == "<unknown>" || fmt.Sprint(fieldA.Interface()) == "<nil>" || fmt.Sprint(fieldA.Interface()) == "<null>" {
-					log.Printf("IF unkown:")
-					if fmt.Sprint(fieldB.Interface()) != "<unknown>" {
+					if resultStruct.Field(i).CanSet() {
 						resultStruct.Field(i).Set(valueB.Field(i))
 					}
-				} else {
-					if valueA.Field(i).Type() != reflect.TypeOf(types.String{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Bool{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Int64{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Float64{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Set{}) {
-						// log.Printf("IF Struct:")
-						// log.Printf("[DEBUG] Result Struct: %v", valueA.Field(i).Interface())
-						// log.Printf("[DEBUG] Kind: %v", valueA.Field(i).Kind())
-						// log.Printf("[DEBUG] Kind: %v", valueA.Field(i).Type())
-						// log.Printf("[DEBUG] NameA: %v", valueA.Type().Field(i).Name)
-						// log.Printf("[DEBUG] NameB: %v", valueB.Type().Field(i).Name)
-						mergedValues := changeStructUnknowns(fieldA.Interface(), fieldB.Interface())
-						// log.Printf(" End 2")
-						// log.Printf(" Print Key Value %v", PrintKeyValue(mergedValues))
-						fieldValueBPtr := reflect.New(fieldA.Type())
-						fieldValueBPtr.Elem().Set(reflect.ValueOf(mergedValues))
-						resultStruct.Field(i).Set(fieldValueBPtr)
-					} else {
-						// log.Printf("ELSE Struct:")
-						resultStruct.Field(i).Set(valueA.Field(i))
-					}
 				}
+			} else if valueA.Field(i).Type() != reflect.TypeOf(types.String{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Bool{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Int64{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Float64{}) && !isSetOrListType(valueA.Field(i).Type()) {
+				// Handle complex struct types recursively
+				mergedValues := changeStructUnknowns(fieldA.Interface(), fieldB.Interface())
+				safeSetField(resultStruct.Field(i), mergedValues)
+			} else {
+				// Use the new prioritization logic for simple types
+				prioritizedValue := prioritizeNonNullValuesForMerge(fieldA, fieldB)
+				safeSetField(resultStruct.Field(i), prioritizedValue.Interface())
 			}
 		} else {
 			log.Printf("One or both fields are invalid.")
@@ -824,7 +990,9 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 				// log.Printf("After FOR path  %v", path)
 				// log.Printf("After FOR valueB.Type().Field(i).Name  %v", valueB.Type().Field(i).Name)
 				if valueB.Type().Field(i).Name == path && fieldB.IsZero() && !fieldA.IsZero() && fmt.Sprint(fieldA.Interface()) != "<unknown>" {
-					resultStruct.Field(i).Set(fieldA)
+					if resultStruct.Field(i).CanSet() {
+						resultStruct.Field(i).Set(fieldA)
+					}
 				} else {
 					// resultStruct.Field(i).Set(fieldB)
 					if valueB.Type().Field(i).Name == path && valueB.Type().Field(i).Name != "ID" && fieldB.IsZero() {
@@ -833,7 +1001,9 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 						// log.Printf("After FOR fieldB.Type().Value() 22%v", fieldB.IsZero())
 						if valueB.FieldByName("ID").IsValid() {
 							if !valueB.FieldByName("ID").IsZero() {
-								resultStruct.Field(i).Set(valueB.FieldByName("ID"))
+								if resultStruct.Field(i).CanSet() {
+									resultStruct.Field(i).Set(valueB.FieldByName("ID"))
+								}
 							}
 						}
 
@@ -853,12 +1023,20 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 
 func changeStructUnknowns(a interface{}, b interface{}) interface{} {
 	valueA := reflect.ValueOf(a)
-	justA := valueA
 	valueB := reflect.ValueOf(b)
-	// if valueA.IsZero() {
-	// 	valueA = reflect.ValueOf(b)
-	// }
-	// log.Printf("Entre: ")
+
+	// Handle nil/zero values early
+	if !valueA.IsValid() || valueA.IsZero() {
+		if valueB.IsValid() && !valueB.IsZero() {
+			return b
+		}
+		return a
+	}
+
+	if !valueB.IsValid() || valueB.IsZero() {
+		return a
+	}
+
 	if valueA.Kind() == reflect.Ptr {
 		log.Printf("valueA.Kind() == reflect.Ptr")
 		valueA = valueA.Elem()
@@ -868,9 +1046,15 @@ func changeStructUnknowns(a interface{}, b interface{}) interface{} {
 		valueB = valueB.Elem()
 	}
 
-	if justA.IsZero() {
-		log.Printf("Field A = B")
-		valueA = valueB
+	// Check if values are still valid after dereferencing
+	if !valueA.IsValid() || !valueB.IsValid() {
+		if valueA.IsValid() {
+			return a
+		}
+		if valueB.IsValid() {
+			return b
+		}
+		return a
 	}
 
 	resultStruct := reflect.New(valueA.Type()).Elem()
@@ -904,7 +1088,7 @@ func changeStructUnknowns(a interface{}, b interface{}) interface{} {
 
 		var fieldValueB reflect.Value
 
-		if valueB.IsValid() {
+		if valueB.IsValid() && i < valueB.NumField() {
 			fieldValueB = valueB.Field(i)
 		} else {
 			fieldValueB = valueA.Field(i)
@@ -920,45 +1104,36 @@ func changeStructUnknowns(a interface{}, b interface{}) interface{} {
 			fieldValueB = valueB.Field(i)
 		}
 
-		// Get the field name
+		// Get the field name - add safety check
+		if !valueA.IsValid() || i >= valueA.Type().NumField() {
+			continue
+		}
 		fieldName := valueA.Type().Field(i).Name
 		log.Printf("In 2: fieldName %s", fieldName)
-		if fmt.Sprint(fieldValueA.Interface()) == "<unknown>" {
-			if fmt.Sprint(fieldValueB.Interface()) != "<unknown>" {
-				log.Printf("fieldValueB %t", fmt.Sprint(fieldValueB.Interface()) == "<unknown>")
-				log.Printf("Assigned %v to field %v\n", fieldValueB.Interface(), fieldName)
-				resultStruct.Field(i).Set(fieldValueB)
-			} else {
-				log.Printf("Not Assigned")
-			}
-		} else {
-			if valueA.Field(i).Type() != reflect.TypeOf(types.String{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Bool{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Int64{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Float64{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Set{}) {
-				log.Printf("In 3 %v to field %v\n", fieldValueB.Interface(), fieldName)
-				if !fieldValueA.IsZero() || !fieldValueB.IsZero() {
-					nestedResult := changeStructUnknowns(fieldValueA.Interface(), fieldValueB.Interface())
 
-					log.Printf("A pointer: %t", fieldValueA.Kind() != reflect.Ptr)
-					log.Printf("B pointer: %t", fieldValueB.Kind() != reflect.Ptr)
-					if fieldValueB.Kind() != reflect.Ptr {
-						log.Printf("In 3 %v to field %v\n", fieldValueB.Interface(), fieldName)
-						fieldValueBPtr := reflect.New(fieldValueB.Type())
-						fieldValueBPtr.Elem().Set(reflect.ValueOf(nestedResult))
-						resultStruct.Field(i).Set(fieldValueBPtr)
-					} else {
-						if fieldValueA.Kind() != reflect.Ptr {
-							log.Printf("In 3 %v to field %v\n", fieldValueB.Interface(), fieldName)
-							fieldValueAPtr := reflect.New(fieldValueA.Type())
-							fieldValueAPtr.Elem().Set(reflect.ValueOf(nestedResult))
-							resultStruct.Field(i).Set(fieldValueAPtr)
-						}
-					}
+		// Check if we can safely call Interface() on the field
+		canInterfaceA := fieldValueA.IsValid() && fieldValueA.CanInterface()
+		canInterfaceB := fieldValueB.IsValid() && fieldValueB.CanInterface()
+
+		// Use the new prioritization logic for simple types
+		if fieldValueA.IsValid() && (fieldValueA.Type() == reflect.TypeOf(types.String{}) || fieldValueA.Type() == reflect.TypeOf(types.Bool{}) || fieldValueA.Type() == reflect.TypeOf(types.Int64{}) || fieldValueA.Type() == reflect.TypeOf(types.Float64{}) || isSetOrListType(fieldValueA.Type())) {
+			prioritizedValue := prioritizeNonNullValuesForMerge(fieldValueA, fieldValueB)
+			safeSetField(resultStruct.Field(i), prioritizedValue.Interface())
+		} else {
+			// Handle complex struct types recursively
+			if fieldValueA.IsValid() && fieldValueA.Type() != reflect.TypeOf(types.String{}) && fieldValueA.Type() != reflect.TypeOf(types.Bool{}) && fieldValueA.Type() != reflect.TypeOf(types.Int64{}) && fieldValueA.Type() != reflect.TypeOf(types.Float64{}) && !isSetOrListType(fieldValueA.Type()) {
+				if canInterfaceA && canInterfaceB {
+					nestedResult := changeStructUnknowns(fieldValueA.Interface(), fieldValueB.Interface())
+					safeSetField(resultStruct.Field(i), nestedResult)
 				} else {
-					log.Printf("Both null")
+					// If we can't interface, use prioritization logic
+					prioritizedValue := prioritizeNonNullValuesForMerge(fieldValueA, fieldValueB)
+					safeSetField(resultStruct.Field(i), prioritizedValue.Interface())
 				}
 			} else {
-				log.Printf("2. Assigned %v to field %v\n", fieldValueA.Interface(), fieldName)
-
-				resultStruct.Field(i).Set(fieldValueA)
+				// For simple types, use prioritization logic
+				prioritizedValue := prioritizeNonNullValuesForMerge(fieldValueA, fieldValueB)
+				safeSetField(resultStruct.Field(i), prioritizedValue.Interface())
 			}
 		}
 	}
@@ -1000,14 +1175,101 @@ func mergeInterfacesOnlyPath(a, b interface{}) interface{} {
 		log.Printf("fieldA %v", fieldA)
 		log.Printf("fieldB %v", fieldB)
 		log.Printf("fieldB %v", fieldB)
-		if reflect.TypeOf(fieldB).Kind() == reflect.Slice {
-			// Get the length of the slice using reflect
-			length := reflect.ValueOf(fieldB).Elem().Len()
-			if length > 0 {
-				resultStruct.Field(i).Set(valueA.Field(i))
+		// Check if both fields are valid before proceeding
+		if fieldA.IsValid() && fieldB.IsValid() {
+			// Handle slices
+			if reflect.TypeOf(fieldB).Kind() == reflect.Slice {
+				// Get the length of the slice using reflect
+				fieldBValue := reflect.ValueOf(fieldB)
+				if fieldBValue.Kind() == reflect.Ptr && !fieldBValue.IsNil() {
+					fieldBValue = fieldBValue.Elem()
+				}
+				if fieldBValue.Kind() == reflect.Slice {
+					length := fieldBValue.Len()
+					if length > 0 {
+						if resultStruct.Field(i).CanSet() {
+							resultStruct.Field(i).Set(valueA.Field(i))
+						}
+					}
+				}
+			} else {
+				// Use the merge prioritization logic for non-slice types
+				prioritizedValue := prioritizeNonNullValuesForMerge(fieldA, fieldB)
+				if resultStruct.Field(i).CanSet() {
+					// Handle type compatibility for slices and structs
+					if prioritizedValue.Kind() == reflect.Slice && resultStruct.Field(i).Type().Kind() == reflect.Ptr {
+						// Field expects pointer to slice, but we have a slice
+						if prioritizedValue.IsNil() {
+							resultStruct.Field(i).Set(reflect.Zero(resultStruct.Field(i).Type()))
+						} else {
+							// Create a pointer to the slice
+							slicePtr := reflect.New(prioritizedValue.Type())
+							slicePtr.Elem().Set(prioritizedValue)
+							resultStruct.Field(i).Set(slicePtr)
+						}
+					} else if prioritizedValue.Kind() == reflect.Struct && resultStruct.Field(i).Type().Kind() == reflect.Ptr {
+						// Field expects pointer to struct, but we have a struct
+						// Create a pointer to the struct
+						structPtr := reflect.New(prioritizedValue.Type())
+						structPtr.Elem().Set(prioritizedValue)
+						resultStruct.Field(i).Set(structPtr)
+					} else {
+						resultStruct.Field(i).Set(prioritizedValue)
+					}
+				}
+			}
+		} else if fieldA.IsValid() && !fieldB.IsValid() {
+			// If fieldA is valid but fieldB is not valid (null), keep fieldA
+			log.Printf("IF Keep A when B is invalid/null:")
+			if resultStruct.Field(i).CanSet() {
+				// Handle type compatibility for slices and structs
+				if fieldA.Kind() == reflect.Slice && resultStruct.Field(i).Type().Kind() == reflect.Ptr {
+					// Field expects pointer to slice, but we have a slice
+					if fieldA.IsNil() {
+						resultStruct.Field(i).Set(reflect.Zero(resultStruct.Field(i).Type()))
+					} else {
+						// Create a pointer to the slice
+						slicePtr := reflect.New(fieldA.Type())
+						slicePtr.Elem().Set(fieldA)
+						resultStruct.Field(i).Set(slicePtr)
+					}
+				} else if fieldA.Kind() == reflect.Struct && resultStruct.Field(i).Type().Kind() == reflect.Ptr {
+					// Field expects pointer to struct, but we have a struct
+					// Create a pointer to the struct
+					structPtr := reflect.New(fieldA.Type())
+					structPtr.Elem().Set(fieldA)
+					resultStruct.Field(i).Set(structPtr)
+				} else {
+					resultStruct.Field(i).Set(valueA.Field(i))
+				}
+			}
+		} else if !fieldA.IsValid() && fieldB.IsValid() {
+			// If fieldA is not valid (null) but fieldB is valid, use fieldB
+			log.Printf("IF Use B when A is invalid/null:")
+			if resultStruct.Field(i).CanSet() {
+				// Handle type compatibility for slices and structs
+				if fieldB.Kind() == reflect.Slice && resultStruct.Field(i).Type().Kind() == reflect.Ptr {
+					// Field expects pointer to slice, but we have a slice
+					if fieldB.IsNil() {
+						resultStruct.Field(i).Set(reflect.Zero(resultStruct.Field(i).Type()))
+					} else {
+						// Create a pointer to the slice
+						slicePtr := reflect.New(fieldB.Type())
+						slicePtr.Elem().Set(fieldB)
+						resultStruct.Field(i).Set(slicePtr)
+					}
+				} else if fieldB.Kind() == reflect.Struct && resultStruct.Field(i).Type().Kind() == reflect.Ptr {
+					// Field expects pointer to struct, but we have a struct
+					// Create a pointer to the struct
+					structPtr := reflect.New(fieldB.Type())
+					structPtr.Elem().Set(fieldB)
+					resultStruct.Field(i).Set(structPtr)
+				} else {
+					resultStruct.Field(i).Set(fieldB)
+				}
 			}
 		} else {
-			resultStruct.Field(i).Set(valueB.Field(i))
+			log.Printf("One or both fields are invalid.")
 		}
 
 		log.Printf("Before")
@@ -1020,21 +1282,41 @@ func mergeInterfacesOnlyPath(a, b interface{}) interface{} {
 			// }
 
 			if valueB.Type().Field(i).Name == path && fieldB.IsZero() && !fieldA.IsZero() && fmt.Sprint(fieldA.Interface()) != "<unknown>" {
-				resultStruct.Field(i).Set(fieldA)
+				if resultStruct.Field(i).CanSet() {
+					// Handle type compatibility for slices and structs
+					fieldValue := valueA.Field(i)
+					if fieldValue.Kind() == reflect.Slice && resultStruct.Field(i).Type().Kind() == reflect.Ptr {
+						// Field expects pointer to slice, but we have a slice
+						if fieldValue.IsNil() {
+							resultStruct.Field(i).Set(reflect.Zero(resultStruct.Field(i).Type()))
+						} else {
+							// Create a pointer to the slice
+							slicePtr := reflect.New(fieldValue.Type())
+							slicePtr.Elem().Set(fieldValue)
+							resultStruct.Field(i).Set(slicePtr)
+						}
+					} else if fieldValue.Kind() == reflect.Struct && resultStruct.Field(i).Type().Kind() == reflect.Ptr {
+						// Field expects pointer to struct, but we have a struct
+						// Create a pointer to the struct
+						structPtr := reflect.New(fieldValue.Type())
+						structPtr.Elem().Set(fieldValue)
+						resultStruct.Field(i).Set(structPtr)
+					} else {
+						resultStruct.Field(i).Set(fieldValue)
+					}
+				}
 			} else {
 				if valueB.Type().Field(i).Name == path && valueB.Type().Field(i).Name != "ID" && fieldB.IsZero() {
-					// log.Printf("After FOR path  %v", path)
-					// log.Printf("After FOR fieldB.Type().Name() %v", valueB.Type().Field(i).Name)
-					// log.Printf("After FOR fieldB.Type().Value() %v", fieldB.Interface())
-					// log.Printf("After FOR fieldB.Type().Value() 22%v", fieldB.IsZero())
-					if valueB.FieldByName("ID").IsValid() {
-						if !valueB.FieldByName("ID").IsZero() {
-
-							resultStruct.Field(i).Set(valueB.FieldByName("ID"))
+					// Only use ID from B if A is also zero/null, otherwise preserve A's null state
+					if fieldA.IsZero() || !fieldA.IsValid() {
+						if valueB.FieldByName("ID").IsValid() {
+							if !valueB.FieldByName("ID").IsZero() {
+								if resultStruct.Field(i).CanSet() {
+									resultStruct.Field(i).Set(valueB.FieldByName("ID"))
+								}
+							}
 						}
-
 					}
-
 				}
 			}
 

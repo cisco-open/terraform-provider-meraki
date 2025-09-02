@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -27,8 +28,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -65,7 +66,6 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Schema(_ context.Context, _ r
 		Attributes: map[string]schema.Attribute{
 			"body": schema.StringAttribute{
 				MarkdownDescription: `The body of the payload template, in liquid template`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -73,25 +73,22 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Schema(_ context.Context, _ r
 			},
 			"body_file": schema.StringAttribute{
 				MarkdownDescription: `A Base64 encoded file containing liquid template used for the body of the webhook message. Either **body** or **bodyFile** must be specified.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"headers": schema.SetNestedAttribute{
+			"headers": schema.ListNestedAttribute{
 				MarkdownDescription: `The payload template headers, will be rendered as a key-value pair in the webhook.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"name": schema.StringAttribute{
 							MarkdownDescription: `The name of the header attribute`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -99,7 +96,6 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Schema(_ context.Context, _ r
 						},
 						"template": schema.StringAttribute{
 							MarkdownDescription: `The value returned in the header attribute, in liquid template`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -110,7 +106,6 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Schema(_ context.Context, _ r
 			},
 			"headers_file": schema.StringAttribute{
 				MarkdownDescription: `A Base64 encoded file containing the liquid template used with the webhook headers.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -118,7 +113,6 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Schema(_ context.Context, _ r
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name of the payload template`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -130,7 +124,6 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Schema(_ context.Context, _ r
 			},
 			"payload_template_id": schema.StringAttribute{
 				MarkdownDescription: `Webhook payload template Id`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -233,7 +226,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Create(ctx context.Context, r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkWebhooksPayloadTemplate",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -305,21 +298,11 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Create(ctx context.Context, r
 func (r *NetworksWebhooksPayloadTemplatesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksWebhooksPayloadTemplatesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -350,9 +333,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Read(ctx context.Context, req
 	}
 	//entro aqui 2
 	data = ResponseNetworksGetNetworkWebhooksPayloadTemplateItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksWebhooksPayloadTemplatesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -360,35 +341,31 @@ func (r *NetworksWebhooksPayloadTemplatesResource) ImportState(ctx context.Conte
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,payloadTemplateId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("payload_template_id"), idParts[1])...)
 }
 
 func (r *NetworksWebhooksPayloadTemplatesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksWebhooksPayloadTemplatesRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksWebhooksPayloadTemplatesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvPayloadTemplateID := data.PayloadTemplateID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvPayloadTemplateID := plan.PayloadTemplateID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkWebhooksPayloadTemplate(vvNetworkID, vvPayloadTemplateID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWebhooksPayloadTemplate",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -398,9 +375,7 @@ func (r *NetworksWebhooksPayloadTemplatesResource) Update(ctx context.Context, r
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksWebhooksPayloadTemplatesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -570,22 +545,47 @@ func (r *NetworksWebhooksPayloadTemplatesRs) toSdkApiRequestUpdate(ctx context.C
 // From gosdk to TF Structs Schema
 func ResponseNetworksGetNetworkWebhooksPayloadTemplateItemToBodyRs(state NetworksWebhooksPayloadTemplatesRs, response *merakigosdk.ResponseNetworksGetNetworkWebhooksPayloadTemplate, is_read bool) NetworksWebhooksPayloadTemplatesRs {
 	itemState := NetworksWebhooksPayloadTemplatesRs{
-		Body: types.StringValue(response.Body),
+		Body: func() types.String {
+			if response.Body != "" {
+				return types.StringValue(response.Body)
+			}
+			return types.String{}
+		}(),
 		Headers: func() *[]ResponseNetworksGetNetworkWebhooksPayloadTemplateHeadersRs {
 			if response.Headers != nil {
 				result := make([]ResponseNetworksGetNetworkWebhooksPayloadTemplateHeadersRs, len(*response.Headers))
 				for i, headers := range *response.Headers {
 					result[i] = ResponseNetworksGetNetworkWebhooksPayloadTemplateHeadersRs{
-						Name:     types.StringValue(headers.Name),
-						Template: types.StringValue(headers.Template),
+						Name: func() types.String {
+							if headers.Name != "" {
+								return types.StringValue(headers.Name)
+							}
+							return types.String{}
+						}(),
+						Template: func() types.String {
+							if headers.Template != "" {
+								return types.StringValue(headers.Template)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		Name:              types.StringValue(response.Name),
-		PayloadTemplateID: types.StringValue(response.PayloadTemplateID),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		PayloadTemplateID: func() types.String {
+			if response.PayloadTemplateID != "" {
+				return types.StringValue(response.PayloadTemplateID)
+			}
+			return types.String{}
+		}(),
 		Sharing: func() *ResponseNetworksGetNetworkWebhooksPayloadTemplateSharingRs {
 			if response.Sharing != nil {
 				return &ResponseNetworksGetNetworkWebhooksPayloadTemplateSharingRs{
@@ -606,7 +606,12 @@ func ResponseNetworksGetNetworkWebhooksPayloadTemplateItemToBodyRs(state Network
 			}
 			return nil
 		}(),
-		Type: types.StringValue(response.Type),
+		Type: func() types.String {
+			if response.Type != "" {
+				return types.StringValue(response.Type)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksWebhooksPayloadTemplatesRs)

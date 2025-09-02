@@ -252,22 +252,62 @@ func (r *NetworksBind) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.R
 // ToBody
 func ResponseNetworksBindNetworkItemToBody(state NetworksBind, response *merakigosdk.ResponseNetworksBindNetwork) NetworksBind {
 	itemState := ResponseNetworksBindNetwork{
-		ConfigTemplateID: types.StringValue(response.ConfigTemplateID),
-		EnrollmentString: types.StringValue(response.EnrollmentString),
-		ID:               types.StringValue(response.ID),
+		ConfigTemplateID: func() types.String {
+			if response.ConfigTemplateID != "" {
+				return types.StringValue(response.ConfigTemplateID)
+			}
+			return types.String{}
+		}(),
+		EnrollmentString: func() types.String {
+			if response.EnrollmentString != "" {
+				return types.StringValue(response.EnrollmentString)
+			}
+			return types.String{}
+		}(),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		IsBoundToConfigTemplate: func() types.Bool {
 			if response.IsBoundToConfigTemplate != nil {
 				return types.BoolValue(*response.IsBoundToConfigTemplate)
 			}
 			return types.Bool{}
 		}(),
-		Name:           types.StringValue(response.Name),
-		Notes:          types.StringValue(response.Notes),
-		OrganizationID: types.StringValue(response.OrganizationID),
-		ProductTypes:   StringSliceToList(response.ProductTypes),
-		Tags:           StringSliceToList(response.Tags),
-		TimeZone:       types.StringValue(response.TimeZone),
-		URL:            types.StringValue(response.URL),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		Notes: func() types.String {
+			if response.Notes != "" {
+				return types.StringValue(response.Notes)
+			}
+			return types.String{}
+		}(),
+		OrganizationID: func() types.String {
+			if response.OrganizationID != "" {
+				return types.StringValue(response.OrganizationID)
+			}
+			return types.String{}
+		}(),
+		ProductTypes: StringSliceToList(response.ProductTypes),
+		Tags:         StringSliceToList(response.Tags),
+		TimeZone: func() types.String {
+			if response.TimeZone != "" {
+				return types.StringValue(response.TimeZone)
+			}
+			return types.String{}
+		}(),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

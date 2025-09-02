@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -28,6 +29,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -101,6 +103,7 @@ func (r *OrganizationsPolicyObjectsResource) Schema(_ context.Context, _ resourc
 				},
 
 				ElementType: types.StringType,
+				Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
 			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: `Policy object ID`,
@@ -390,7 +393,7 @@ func (r *OrganizationsPolicyObjectsResource) Update(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationPolicyObject",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -560,16 +563,56 @@ func (r *OrganizationsPolicyObjectsRs) toSdkApiRequestUpdate(ctx context.Context
 // From gosdk to TF Structs Schema
 func ResponseOrganizationsGetOrganizationPolicyObjectItemToBodyRs(state OrganizationsPolicyObjectsRs, response *merakigosdk.ResponseOrganizationsGetOrganizationPolicyObject, is_read bool) OrganizationsPolicyObjectsRs {
 	itemState := OrganizationsPolicyObjectsRs{
-		Category:       types.StringValue(response.Category),
-		Cidr:           types.StringValue(response.Cidr),
-		CreatedAt:      types.StringValue(response.CreatedAt),
-		GroupIDs:       StringSliceToSet(response.GroupIDs),
-		ID:             types.StringValue(response.ID),
-		Name:           types.StringValue(response.Name),
-		NetworkIDs:     StringSliceToSet(response.NetworkIDs),
-		Type:           types.StringValue(response.Type),
-		UpdatedAt:      types.StringValue(response.UpdatedAt),
-		PolicyObjectID: types.StringValue(response.ID),
+		Category: func() types.String {
+			if response.Category != "" {
+				return types.StringValue(response.Category)
+			}
+			return types.String{}
+		}(),
+		Cidr: func() types.String {
+			if response.Cidr != "" {
+				return types.StringValue(response.Cidr)
+			}
+			return types.String{}
+		}(),
+		CreatedAt: func() types.String {
+			if response.CreatedAt != "" {
+				return types.StringValue(response.CreatedAt)
+			}
+			return types.String{}
+		}(),
+		GroupIDs: StringSliceToSet(response.GroupIDs),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		NetworkIDs: StringSliceToSet(response.NetworkIDs),
+		Type: func() types.String {
+			if response.Type != "" {
+				return types.StringValue(response.Type)
+			}
+			return types.String{}
+		}(),
+		UpdatedAt: func() types.String {
+			if response.UpdatedAt != "" {
+				return types.StringValue(response.UpdatedAt)
+			}
+			return types.String{}
+		}(),
+		PolicyObjectID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsPolicyObjectsRs)

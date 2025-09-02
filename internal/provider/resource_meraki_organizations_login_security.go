@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -27,9 +28,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -65,7 +67,6 @@ func (r *OrganizationsLoginSecurityResource) Schema(_ context.Context, _ resourc
 		Attributes: map[string]schema.Attribute{
 			"account_lockout_attempts": schema.Int64Attribute{
 				MarkdownDescription: `Number of consecutive failed login attempts after which users' accounts will be locked.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -73,7 +74,6 @@ func (r *OrganizationsLoginSecurityResource) Schema(_ context.Context, _ resourc
 			},
 			"api_authentication": schema.SingleNestedAttribute{
 				MarkdownDescription: `Details for indicating whether organization will restrict access to API (but not Dashboard) to certain IP addresses.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -82,7 +82,6 @@ func (r *OrganizationsLoginSecurityResource) Schema(_ context.Context, _ resourc
 
 					"ip_restrictions_for_keys": schema.SingleNestedAttribute{
 						MarkdownDescription: `Details for API-only IP restrictions.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -91,18 +90,16 @@ func (r *OrganizationsLoginSecurityResource) Schema(_ context.Context, _ resourc
 
 							"enabled": schema.BoolAttribute{
 								MarkdownDescription: `Boolean indicating whether the organization will restrict API key (not Dashboard GUI) usage to a specific list of IP addresses or CIDR ranges.`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
 								},
 							},
-							"ranges": schema.SetAttribute{
+							"ranges": schema.ListAttribute{
 								MarkdownDescription: `List of acceptable IP ranges. Entries can be single IP addresses, IP address ranges, and CIDR subnets.`,
-								Computed:            true,
 								Optional:            true,
-								PlanModifiers: []planmodifier.Set{
-									setplanmodifier.UseStateForUnknown(),
+								PlanModifiers: []planmodifier.List{
+									listplanmodifier.UseStateForUnknown(),
 								},
 
 								ElementType: types.StringType,
@@ -113,7 +110,6 @@ func (r *OrganizationsLoginSecurityResource) Schema(_ context.Context, _ resourc
 			},
 			"enforce_account_lockout": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating whether users' Dashboard accounts will be locked out after a specified number of consecutive failed login attempts.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -121,7 +117,6 @@ func (r *OrganizationsLoginSecurityResource) Schema(_ context.Context, _ resourc
 			},
 			"enforce_different_passwords": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating whether users, when setting a new password, are forced to choose a new password that is different from any past passwords.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -129,7 +124,6 @@ func (r *OrganizationsLoginSecurityResource) Schema(_ context.Context, _ resourc
 			},
 			"enforce_idle_timeout": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating whether users will be logged out after being idle for the specified number of minutes.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -137,7 +131,6 @@ func (r *OrganizationsLoginSecurityResource) Schema(_ context.Context, _ resourc
 			},
 			"enforce_login_ip_ranges": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating whether organization will restrict access to Dashboard (including the API) from certain IP addresses.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -145,7 +138,6 @@ func (r *OrganizationsLoginSecurityResource) Schema(_ context.Context, _ resourc
 			},
 			"enforce_password_expiration": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating whether users are forced to change their password every X number of days.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -153,7 +145,6 @@ func (r *OrganizationsLoginSecurityResource) Schema(_ context.Context, _ resourc
 			},
 			"enforce_strong_passwords": schema.BoolAttribute{
 				MarkdownDescription: `Deprecated. This will always be 'true'.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -161,7 +152,6 @@ func (r *OrganizationsLoginSecurityResource) Schema(_ context.Context, _ resourc
 			},
 			"enforce_two_factor_auth": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating whether users in this organization will be required to use an extra verification code when logging in to Dashboard. This code will be sent to their mobile phone via SMS, or can be generated by the authenticator application.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -169,25 +159,24 @@ func (r *OrganizationsLoginSecurityResource) Schema(_ context.Context, _ resourc
 			},
 			"idle_timeout_minutes": schema.Int64Attribute{
 				MarkdownDescription: `Number of minutes users can remain idle before being logged out of their accounts.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
 			},
-			"login_ip_ranges": schema.SetAttribute{
+			"login_ip_ranges": schema.ListAttribute{
 				MarkdownDescription: `List of acceptable IP ranges. Entries can be single IP addresses, IP address ranges, and CIDR subnets.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"minimum_password_length": schema.Int64Attribute{
 				MarkdownDescription: `The minimum number of characters required in admins' passwords.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -195,7 +184,6 @@ func (r *OrganizationsLoginSecurityResource) Schema(_ context.Context, _ resourc
 			},
 			"num_different_passwords": schema.Int64Attribute{
 				MarkdownDescription: `Number of recent passwords that new password must be distinct from.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -207,7 +195,6 @@ func (r *OrganizationsLoginSecurityResource) Schema(_ context.Context, _ resourc
 			},
 			"password_expiration_days": schema.Int64Attribute{
 				MarkdownDescription: `Number of days after which users will be forced to change their password.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -239,27 +226,6 @@ func (r *OrganizationsLoginSecurityResource) Create(ctx context.Context, req res
 	vvOrganizationID := data.OrganizationID.ValueString()
 	//Has Item and not has items
 
-	if vvOrganizationID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationLoginSecurity(vvOrganizationID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource OrganizationsLoginSecurity  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource OrganizationsLoginSecurity only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationLoginSecurity(vvOrganizationID, dataRequest)
@@ -268,7 +234,7 @@ func (r *OrganizationsLoginSecurityResource) Create(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationLoginSecurity",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -279,49 +245,19 @@ func (r *OrganizationsLoginSecurityResource) Create(ctx context.Context, req res
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationLoginSecurity(vvOrganizationID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizationLoginSecurity",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetOrganizationLoginSecurity",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseOrganizationsGetOrganizationLoginSecurityItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *OrganizationsLoginSecurityResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data OrganizationsLoginSecurityRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -351,33 +287,28 @@ func (r *OrganizationsLoginSecurityResource) Read(ctx context.Context, req resou
 	}
 	//entro aqui 2
 	data = ResponseOrganizationsGetOrganizationLoginSecurityItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *OrganizationsLoginSecurityResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), req.ID)...)
 }
 
 func (r *OrganizationsLoginSecurityResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data OrganizationsLoginSecurityRs
-	merge(ctx, req, resp, &data)
+	var plan OrganizationsLoginSecurityRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvOrganizationID := data.OrganizationID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvOrganizationID := plan.OrganizationID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationLoginSecurity(vvOrganizationID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationLoginSecurity",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -387,9 +318,7 @@ func (r *OrganizationsLoginSecurityResource) Update(ctx context.Context, req res
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *OrganizationsLoginSecurityResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -411,7 +340,7 @@ type OrganizationsLoginSecurityRs struct {
 	EnforceStrongPasswords    types.Bool                                                            `tfsdk:"enforce_strong_passwords"`
 	EnforceTwoFactorAuth      types.Bool                                                            `tfsdk:"enforce_two_factor_auth"`
 	IDleTimeoutMinutes        types.Int64                                                           `tfsdk:"idle_timeout_minutes"`
-	LoginIPRanges             types.Set                                                             `tfsdk:"login_ip_ranges"`
+	LoginIPRanges             types.List                                                            `tfsdk:"login_ip_ranges"`
 	MinimumPasswordLength     types.Int64                                                           `tfsdk:"minimum_password_length"`
 	NumDifferentPasswords     types.Int64                                                           `tfsdk:"num_different_passwords"`
 	PasswordExpirationDays    types.Int64                                                           `tfsdk:"password_expiration_days"`
@@ -423,7 +352,7 @@ type ResponseOrganizationsGetOrganizationLoginSecurityApiAuthenticationRs struct
 
 type ResponseOrganizationsGetOrganizationLoginSecurityApiAuthenticationIpRestrictionsForKeysRs struct {
 	Enabled types.Bool `tfsdk:"enabled"`
-	Ranges  types.Set  `tfsdk:"ranges"`
+	Ranges  types.List `tfsdk:"ranges"`
 }
 
 // FromBody
@@ -568,7 +497,7 @@ func ResponseOrganizationsGetOrganizationLoginSecurityItemToBodyRs(state Organiz
 									}
 									return types.Bool{}
 								}(),
-								Ranges: StringSliceToSet(response.APIAuthentication.IPRestrictionsForKeys.Ranges),
+								Ranges: StringSliceToList(response.APIAuthentication.IPRestrictionsForKeys.Ranges),
 							}
 						}
 						return nil
@@ -625,7 +554,7 @@ func ResponseOrganizationsGetOrganizationLoginSecurityItemToBodyRs(state Organiz
 			}
 			return types.Int64{}
 		}(),
-		LoginIPRanges: StringSliceToSet(response.LoginIPRanges),
+		LoginIPRanges: StringSliceToList(response.LoginIPRanges),
 		MinimumPasswordLength: func() types.Int64 {
 			if response.MinimumPasswordLength != nil {
 				return types.Int64Value(int64(*response.MinimumPasswordLength))

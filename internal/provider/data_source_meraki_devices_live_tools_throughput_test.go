@@ -190,11 +190,21 @@ type ResponseDevicesGetDeviceLiveToolsThroughputTestResultSpeeds struct {
 // ToBody
 func ResponseDevicesGetDeviceLiveToolsThroughputTestItemToBody(state DevicesLiveToolsThroughputTest, response *merakigosdk.ResponseDevicesGetDeviceLiveToolsThroughputTest) DevicesLiveToolsThroughputTest {
 	itemState := ResponseDevicesGetDeviceLiveToolsThroughputTest{
-		Error: types.StringValue(response.Error),
+		Error: func() types.String {
+			if response.Error != "" {
+				return types.StringValue(response.Error)
+			}
+			return types.String{}
+		}(),
 		Request: func() *ResponseDevicesGetDeviceLiveToolsThroughputTestRequest {
 			if response.Request != nil {
 				return &ResponseDevicesGetDeviceLiveToolsThroughputTestRequest{
-					Serial: types.StringValue(response.Request.Serial),
+					Serial: func() types.String {
+						if response.Request.Serial != "" {
+							return types.StringValue(response.Request.Serial)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -219,9 +229,24 @@ func ResponseDevicesGetDeviceLiveToolsThroughputTestItemToBody(state DevicesLive
 			}
 			return nil
 		}(),
-		Status:           types.StringValue(response.Status),
-		ThroughputTestID: types.StringValue(response.ThroughputTestID),
-		URL:              types.StringValue(response.URL),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
+		ThroughputTestID: func() types.String {
+			if response.ThroughputTestID != "" {
+				return types.StringValue(response.ThroughputTestID)
+			}
+			return types.String{}
+		}(),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

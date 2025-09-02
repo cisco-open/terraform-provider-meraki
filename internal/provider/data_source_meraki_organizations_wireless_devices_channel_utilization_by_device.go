@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -282,7 +281,12 @@ func ResponseWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceIte
 					result := make([]ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceByBand, len(*item.ByBand))
 					for i, byBand := range *item.ByBand {
 						result[i] = ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceByBand{
-							Band: types.StringValue(byBand.Band),
+							Band: func() types.String {
+								if byBand.Band != "" {
+									return types.StringValue(byBand.Band)
+								}
+								return types.String{}
+							}(),
 							NonWifi: func() *ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceByBandNonWifi {
 								if byBand.NonWifi != nil {
 									return &ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceByBandNonWifi{
@@ -328,16 +332,31 @@ func ResponseWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceIte
 				}
 				return nil
 			}(),
-			Mac: types.StringValue(item.Mac),
+			Mac: func() types.String {
+				if item.Mac != "" {
+					return types.StringValue(item.Mac)
+				}
+				return types.String{}
+			}(),
 			Network: func() *ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceNetwork {
 				if item.Network != nil {
 					return &ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationByDeviceNetwork{
-						ID: types.StringValue(item.Network.ID),
+						ID: func() types.String {
+							if item.Network.ID != "" {
+								return types.StringValue(item.Network.ID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			Serial: types.StringValue(item.Serial),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

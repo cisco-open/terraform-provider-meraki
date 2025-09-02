@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -290,30 +289,85 @@ func ResponseOrganizationsGetOrganizationAPIRequestsItemsToBody(state Organizati
 	var items []ResponseItemOrganizationsGetOrganizationApiRequests
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationApiRequests{
-			AdminID: types.StringValue(item.AdminID),
+			AdminID: func() types.String {
+				if item.AdminID != "" {
+					return types.StringValue(item.AdminID)
+				}
+				return types.String{}
+			}(),
 			Client: func() *ResponseItemOrganizationsGetOrganizationApiRequestsClient {
 				if item.Client != nil {
 					return &ResponseItemOrganizationsGetOrganizationApiRequestsClient{
-						ID:   types.StringValue(item.Client.ID),
-						Type: types.StringValue(item.Client.Type),
+						ID: func() types.String {
+							if item.Client.ID != "" {
+								return types.StringValue(item.Client.ID)
+							}
+							return types.String{}
+						}(),
+						Type: func() types.String {
+							if item.Client.Type != "" {
+								return types.StringValue(item.Client.Type)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			Host:        types.StringValue(item.Host),
-			Method:      types.StringValue(item.Method),
-			OperationID: types.StringValue(item.OperationID),
-			Path:        types.StringValue(item.Path),
-			QueryString: types.StringValue(item.QueryString),
+			Host: func() types.String {
+				if item.Host != "" {
+					return types.StringValue(item.Host)
+				}
+				return types.String{}
+			}(),
+			Method: func() types.String {
+				if item.Method != "" {
+					return types.StringValue(item.Method)
+				}
+				return types.String{}
+			}(),
+			OperationID: func() types.String {
+				if item.OperationID != "" {
+					return types.StringValue(item.OperationID)
+				}
+				return types.String{}
+			}(),
+			Path: func() types.String {
+				if item.Path != "" {
+					return types.StringValue(item.Path)
+				}
+				return types.String{}
+			}(),
+			QueryString: func() types.String {
+				if item.QueryString != "" {
+					return types.StringValue(item.QueryString)
+				}
+				return types.String{}
+			}(),
 			ResponseCode: func() types.Int64 {
 				if item.ResponseCode != nil {
 					return types.Int64Value(int64(*item.ResponseCode))
 				}
 				return types.Int64{}
 			}(),
-			SourceIP:  types.StringValue(item.SourceIP),
-			Ts:        types.StringValue(item.Ts),
-			UserAgent: types.StringValue(item.UserAgent),
+			SourceIP: func() types.String {
+				if item.SourceIP != "" {
+					return types.StringValue(item.SourceIP)
+				}
+				return types.String{}
+			}(),
+			Ts: func() types.String {
+				if item.Ts != "" {
+					return types.StringValue(item.Ts)
+				}
+				return types.String{}
+			}(),
+			UserAgent: func() types.String {
+				if item.UserAgent != "" {
+					return types.StringValue(item.UserAgent)
+				}
+				return types.String{}
+			}(),
 			Version: func() types.Int64 {
 				if item.Version != nil {
 					return types.Int64Value(int64(*item.Version))

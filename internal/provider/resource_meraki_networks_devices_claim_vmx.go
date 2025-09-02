@@ -273,23 +273,53 @@ func (r *NetworksDevicesClaimVmx) toSdkApiRequestCreate(ctx context.Context) *me
 // ToBody
 func ResponseNetworksVmxNetworkDevicesClaimItemToBody(state NetworksDevicesClaimVmx, response *merakigosdk.ResponseNetworksVmxNetworkDevicesClaim) NetworksDevicesClaimVmx {
 	itemState := ResponseNetworksVmxNetworkDevicesClaim{
-		Address: types.StringValue(response.Address),
+		Address: func() types.String {
+			if response.Address != "" {
+				return types.StringValue(response.Address)
+			}
+			return types.String{}
+		}(),
 		Details: func() *[]ResponseNetworksVmxNetworkDevicesClaimDetails {
 			if response.Details != nil {
 				result := make([]ResponseNetworksVmxNetworkDevicesClaimDetails, len(*response.Details))
 				for i, details := range *response.Details {
 					result[i] = ResponseNetworksVmxNetworkDevicesClaimDetails{
-						Name:  types.StringValue(details.Name),
-						Value: types.StringValue(details.Value),
+						Name: func() types.String {
+							if details.Name != "" {
+								return types.StringValue(details.Name)
+							}
+							return types.String{}
+						}(),
+						Value: func() types.String {
+							if details.Value != "" {
+								return types.StringValue(details.Value)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		Firmware: types.StringValue(response.Firmware),
-		Imei:     types.StringValue(response.Imei),
-		LanIP:    types.StringValue(response.LanIP),
+		Firmware: func() types.String {
+			if response.Firmware != "" {
+				return types.StringValue(response.Firmware)
+			}
+			return types.String{}
+		}(),
+		Imei: func() types.String {
+			if response.Imei != "" {
+				return types.StringValue(response.Imei)
+			}
+			return types.String{}
+		}(),
+		LanIP: func() types.String {
+			if response.LanIP != "" {
+				return types.StringValue(response.LanIP)
+			}
+			return types.String{}
+		}(),
 		Lat: func() types.Float64 {
 			if response.Lat != nil {
 				return types.Float64Value(float64(*response.Lat))
@@ -302,14 +332,49 @@ func ResponseNetworksVmxNetworkDevicesClaimItemToBody(state NetworksDevicesClaim
 			}
 			return types.Float64{}
 		}(),
-		Mac:         types.StringValue(response.Mac),
-		Model:       types.StringValue(response.Model),
-		Name:        types.StringValue(response.Name),
-		NetworkID:   types.StringValue(response.NetworkID),
-		Notes:       types.StringValue(response.Notes),
-		ProductType: types.StringValue(response.ProductType),
-		Serial:      types.StringValue(response.Serial),
-		Tags:        StringSliceToList(response.Tags),
+		Mac: func() types.String {
+			if response.Mac != "" {
+				return types.StringValue(response.Mac)
+			}
+			return types.String{}
+		}(),
+		Model: func() types.String {
+			if response.Model != "" {
+				return types.StringValue(response.Model)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
+		Notes: func() types.String {
+			if response.Notes != "" {
+				return types.StringValue(response.Notes)
+			}
+			return types.String{}
+		}(),
+		ProductType: func() types.String {
+			if response.ProductType != "" {
+				return types.StringValue(response.ProductType)
+			}
+			return types.String{}
+		}(),
+		Serial: func() types.String {
+			if response.Serial != "" {
+				return types.StringValue(response.Serial)
+			}
+			return types.String{}
+		}(),
+		Tags: StringSliceToList(response.Tags),
 	}
 	state.Item = &itemState
 	return state

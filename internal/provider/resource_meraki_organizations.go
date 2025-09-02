@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	"log"
 
@@ -265,7 +266,7 @@ func (r *OrganizationsResource) Create(ctx context.Context, req resource.CreateR
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganization",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -408,7 +409,7 @@ func (r *OrganizationsResource) Update(ctx context.Context, req resource.UpdateR
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganization",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -620,12 +621,22 @@ func ResponseOrganizationsGetOrganizationItemToBodyRs(state OrganizationsRs, res
 								Host: func() *ResponseOrganizationsGetOrganizationCloudRegionHostRs {
 									if response.Cloud.Region.Host != nil {
 										return &ResponseOrganizationsGetOrganizationCloudRegionHostRs{
-											Name: types.StringValue(response.Cloud.Region.Host.Name),
+											Name: func() types.String {
+												if response.Cloud.Region.Host.Name != "" {
+													return types.StringValue(response.Cloud.Region.Host.Name)
+												}
+												return types.String{}
+											}(),
 										}
 									}
 									return nil
 								}(),
-								Name: types.StringValue(response.Cloud.Region.Name),
+								Name: func() types.String {
+									if response.Cloud.Region.Name != "" {
+										return types.StringValue(response.Cloud.Region.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -634,11 +645,21 @@ func ResponseOrganizationsGetOrganizationItemToBodyRs(state OrganizationsRs, res
 			}
 			return nil
 		}(),
-		ID: types.StringValue(response.ID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		Licensing: func() *ResponseOrganizationsGetOrganizationLicensingRs {
 			if response.Licensing != nil {
 				return &ResponseOrganizationsGetOrganizationLicensingRs{
-					Model: types.StringValue(response.Licensing.Model),
+					Model: func() types.String {
+						if response.Licensing.Model != "" {
+							return types.StringValue(response.Licensing.Model)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -651,8 +672,18 @@ func ResponseOrganizationsGetOrganizationItemToBodyRs(state OrganizationsRs, res
 							result := make([]ResponseOrganizationsGetOrganizationManagementDetailsRs, len(*response.Management.Details))
 							for i, details := range *response.Management.Details {
 								result[i] = ResponseOrganizationsGetOrganizationManagementDetailsRs{
-									Name:  types.StringValue(details.Name),
-									Value: types.StringValue(details.Value),
+									Name: func() types.String {
+										if details.Name != "" {
+											return types.StringValue(details.Name)
+										}
+										return types.String{}
+									}(),
+									Value: func() types.String {
+										if details.Value != "" {
+											return types.StringValue(details.Value)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return &result
@@ -663,8 +694,18 @@ func ResponseOrganizationsGetOrganizationItemToBodyRs(state OrganizationsRs, res
 			}
 			return nil
 		}(),
-		Name: types.StringValue(response.Name),
-		URL:  types.StringValue(response.URL),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsRs)

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -213,7 +212,12 @@ type ResponseApplianceGetNetworkApplianceSingleLanMandatoryDhcp struct {
 // ToBody
 func ResponseApplianceGetNetworkApplianceSingleLanItemToBody(state NetworksApplianceSingleLan, response *merakigosdk.ResponseApplianceGetNetworkApplianceSingleLan) NetworksApplianceSingleLan {
 	itemState := ResponseApplianceGetNetworkApplianceSingleLan{
-		ApplianceIP: types.StringValue(response.ApplianceIP),
+		ApplianceIP: func() types.String {
+			if response.ApplianceIP != "" {
+				return types.StringValue(response.ApplianceIP)
+			}
+			return types.String{}
+		}(),
 		IPv6: func() *ResponseApplianceGetNetworkApplianceSingleLanIpv6 {
 			if response.IPv6 != nil {
 				return &ResponseApplianceGetNetworkApplianceSingleLanIpv6{
@@ -238,13 +242,28 @@ func ResponseApplianceGetNetworkApplianceSingleLanItemToBody(state NetworksAppli
 										if prefixAssignments.Origin != nil {
 											return &ResponseApplianceGetNetworkApplianceSingleLanIpv6PrefixAssignmentsOrigin{
 												Interfaces: StringSliceToList(prefixAssignments.Origin.Interfaces),
-												Type:       types.StringValue(prefixAssignments.Origin.Type),
+												Type: func() types.String {
+													if prefixAssignments.Origin.Type != "" {
+														return types.StringValue(prefixAssignments.Origin.Type)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return nil
 									}(),
-									StaticApplianceIP6: types.StringValue(prefixAssignments.StaticApplianceIP6),
-									StaticPrefix:       types.StringValue(prefixAssignments.StaticPrefix),
+									StaticApplianceIP6: func() types.String {
+										if prefixAssignments.StaticApplianceIP6 != "" {
+											return types.StringValue(prefixAssignments.StaticApplianceIP6)
+										}
+										return types.String{}
+									}(),
+									StaticPrefix: func() types.String {
+										if prefixAssignments.StaticPrefix != "" {
+											return types.StringValue(prefixAssignments.StaticPrefix)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return &result
@@ -268,7 +287,12 @@ func ResponseApplianceGetNetworkApplianceSingleLanItemToBody(state NetworksAppli
 			}
 			return nil
 		}(),
-		Subnet: types.StringValue(response.Subnet),
+		Subnet: func() types.String {
+			if response.Subnet != "" {
+				return types.StringValue(response.Subnet)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

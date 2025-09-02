@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -75,7 +76,6 @@ func (r *NetworksCameraWirelessProfilesResource) Schema(_ context.Context, _ res
 			},
 			"identity": schema.SingleNestedAttribute{
 				MarkdownDescription: `The identity of the wireless profile. Required for creating wireless profiles in 8021x-radius auth mode.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -85,7 +85,6 @@ func (r *NetworksCameraWirelessProfilesResource) Schema(_ context.Context, _ res
 					"password": schema.StringAttribute{
 						MarkdownDescription: `The password of the identity.`,
 						Sensitive:           true,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -93,7 +92,6 @@ func (r *NetworksCameraWirelessProfilesResource) Schema(_ context.Context, _ res
 					},
 					"username": schema.StringAttribute{
 						MarkdownDescription: `The username of the identity.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -103,7 +101,6 @@ func (r *NetworksCameraWirelessProfilesResource) Schema(_ context.Context, _ res
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name of the camera wireless profile.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -115,7 +112,6 @@ func (r *NetworksCameraWirelessProfilesResource) Schema(_ context.Context, _ res
 			},
 			"ssid": schema.SingleNestedAttribute{
 				MarkdownDescription: `The details of the SSID config.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -125,7 +121,6 @@ func (r *NetworksCameraWirelessProfilesResource) Schema(_ context.Context, _ res
 					"auth_mode": schema.StringAttribute{
 						MarkdownDescription: `The auth mode of the SSID. It can be set to ('psk', '8021x-radius').
                                         Allowed values: [8021x-radius,psk]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -139,7 +134,6 @@ func (r *NetworksCameraWirelessProfilesResource) Schema(_ context.Context, _ res
 					},
 					"encryption_mode": schema.StringAttribute{
 						MarkdownDescription: `The encryption mode of the SSID.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -147,7 +141,6 @@ func (r *NetworksCameraWirelessProfilesResource) Schema(_ context.Context, _ res
 					},
 					"name": schema.StringAttribute{
 						MarkdownDescription: `The name of the SSID.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -155,7 +148,6 @@ func (r *NetworksCameraWirelessProfilesResource) Schema(_ context.Context, _ res
 					},
 					"psk": schema.StringAttribute{
 						MarkdownDescription: `The pre-shared key of the SSID, if mode is PSK`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -245,7 +237,7 @@ func (r *NetworksCameraWirelessProfilesResource) Create(ctx context.Context, req
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkCameraWirelessProfile",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -317,21 +309,11 @@ func (r *NetworksCameraWirelessProfilesResource) Create(ctx context.Context, req
 func (r *NetworksCameraWirelessProfilesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksCameraWirelessProfilesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -362,9 +344,7 @@ func (r *NetworksCameraWirelessProfilesResource) Read(ctx context.Context, req r
 	}
 	//entro aqui 2
 	data = ResponseCameraGetNetworkCameraWirelessProfileItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksCameraWirelessProfilesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -372,35 +352,31 @@ func (r *NetworksCameraWirelessProfilesResource) ImportState(ctx context.Context
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,wirelessProfileId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("wireless_profile_id"), idParts[1])...)
 }
 
 func (r *NetworksCameraWirelessProfilesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksCameraWirelessProfilesRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksCameraWirelessProfilesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvWirelessProfileID := data.WirelessProfileID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvWirelessProfileID := plan.WirelessProfileID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Camera.UpdateNetworkCameraWirelessProfile(vvNetworkID, vvWirelessProfileID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCameraWirelessProfile",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -410,9 +386,7 @@ func (r *NetworksCameraWirelessProfilesResource) Update(ctx context.Context, req
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksCameraWirelessProfilesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -561,24 +535,64 @@ func ResponseCameraGetNetworkCameraWirelessProfileItemToBodyRs(state NetworksCam
 			}
 			return types.Int64{}
 		}(),
-		ID: types.StringValue(response.ID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		IDentity: func() *ResponseCameraGetNetworkCameraWirelessProfileIdentityRs {
 			if response.IDentity != nil {
 				return &ResponseCameraGetNetworkCameraWirelessProfileIdentityRs{
-					Password: types.StringValue(response.IDentity.Password),
-					Username: types.StringValue(response.IDentity.Username),
+					Password: func() types.String {
+						if response.IDentity.Password != "" {
+							return types.StringValue(response.IDentity.Password)
+						}
+						return types.String{}
+					}(),
+					Username: func() types.String {
+						if response.IDentity.Username != "" {
+							return types.StringValue(response.IDentity.Username)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		SSID: func() *ResponseCameraGetNetworkCameraWirelessProfileSsidRs {
 			if response.SSID != nil {
 				return &ResponseCameraGetNetworkCameraWirelessProfileSsidRs{
-					AuthMode:       types.StringValue(response.SSID.AuthMode),
-					EncryptionMode: types.StringValue(response.SSID.EncryptionMode),
-					Name:           types.StringValue(response.SSID.Name),
-					Psk:            types.StringValue(response.SSID.Psk),
+					AuthMode: func() types.String {
+						if response.SSID.AuthMode != "" {
+							return types.StringValue(response.SSID.AuthMode)
+						}
+						return types.String{}
+					}(),
+					EncryptionMode: func() types.String {
+						if response.SSID.EncryptionMode != "" {
+							return types.StringValue(response.SSID.EncryptionMode)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.SSID.Name != "" {
+							return types.StringValue(response.SSID.Name)
+						}
+						return types.String{}
+					}(),
+					Psk: func() types.String {
+						if response.SSID.Psk != "" {
+							return types.StringValue(response.SSID.Psk)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil

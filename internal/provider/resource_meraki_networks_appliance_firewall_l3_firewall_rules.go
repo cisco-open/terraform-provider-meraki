@@ -19,6 +19,10 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"encoding/json"
+	"log"
+	"strconv"
+	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -29,7 +33,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -90,6 +93,7 @@ func (r *NetworksApplianceFirewallL3FirewallRulesResource) Schema(_ context.Cont
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
+								&CaseInsensitiveStringPlanModifier{},
 							},
 						},
 						"dest_port": schema.StringAttribute{
@@ -97,15 +101,16 @@ func (r *NetworksApplianceFirewallL3FirewallRulesResource) Schema(_ context.Cont
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
+								&CaseInsensitiveStringPlanModifier{},
 							},
 						},
 						"policy": schema.StringAttribute{
 							MarkdownDescription: `'allow' or 'deny' traffic specified by this rule
                                         Allowed values: [allow,deny]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
+								&CaseInsensitiveStringPlanModifier{},
 							},
 							Validators: []validator.String{
 								stringvalidator.OneOf(
@@ -117,10 +122,10 @@ func (r *NetworksApplianceFirewallL3FirewallRulesResource) Schema(_ context.Cont
 						"protocol": schema.StringAttribute{
 							MarkdownDescription: `The type of protocol (must be 'tcp', 'udp', 'icmp', 'icmp6' or 'any')
                                         Allowed values: [any,icmp,icmp6,tcp,udp]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
+								&CaseInsensitiveStringPlanModifier{},
 							},
 							Validators: []validator.String{
 								stringvalidator.OneOf(
@@ -149,93 +154,6 @@ func (r *NetworksApplianceFirewallL3FirewallRulesResource) Schema(_ context.Cont
 						"syslog_enabled": schema.BoolAttribute{
 							MarkdownDescription: `Log this rule to syslog (true or false, boolean value) - only applicable if a syslog has been configured (optional)`,
 							Optional:            true,
-							PlanModifiers: []planmodifier.Bool{
-								boolplanmodifier.UseStateForUnknown(),
-							},
-						},
-					},
-				},
-			},
-			"rules_response": schema.SetNestedAttribute{
-				MarkdownDescription: `An ordered array of the firewall rules (not including the default rule)`,
-				Computed:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
-				},
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-
-						"comment": schema.StringAttribute{
-							MarkdownDescription: `Description of the rule (optional)`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"dest_cidr": schema.StringAttribute{
-							MarkdownDescription: `Comma-separated list of destination IP address(es) (in IP or CIDR notation), fully-qualified domain names (FQDN) or 'any'`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"dest_port": schema.StringAttribute{
-							MarkdownDescription: `Comma-separated list of destination port(s) (integer in the range 1-65535), or 'any'`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"policy": schema.StringAttribute{
-							MarkdownDescription: `'allow' or 'deny' traffic specified by this rule
-                                        Allowed values: [allow,deny]`,
-							Computed: true,
-							Optional: true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-							Validators: []validator.String{
-								stringvalidator.OneOf(
-									"allow",
-									"deny",
-								),
-							},
-						},
-						"protocol": schema.StringAttribute{
-							MarkdownDescription: `The type of protocol (must be 'tcp', 'udp', 'icmp', 'icmp6' or 'any')
-                                        Allowed values: [any,icmp,icmp6,tcp,udp]`,
-							Computed: true,
-							Optional: true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-							Validators: []validator.String{
-								stringvalidator.OneOf(
-									"any",
-									"icmp",
-									"icmp6",
-									"tcp",
-									"udp",
-								),
-							},
-						},
-						"src_cidr": schema.StringAttribute{
-							MarkdownDescription: `Comma-separated list of source IP address(es) (in IP or CIDR notation), or 'any' (note: FQDN not supported for source addresses)`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"src_port": schema.StringAttribute{
-							MarkdownDescription: `Comma-separated list of source port(s) (integer in the range 1-65535), or 'any'`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"syslog_enabled": schema.BoolAttribute{
-							MarkdownDescription: `Log this rule to syslog (true or false, boolean value) - only applicable if a syslog has been configured (optional)`,
-							Computed:            true,
 							PlanModifiers: []planmodifier.Bool{
 								boolplanmodifier.UseStateForUnknown(),
 							},
@@ -276,36 +194,16 @@ func (r *NetworksApplianceFirewallL3FirewallRulesResource) Create(ctx context.Co
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallL3FirewallRules(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceFirewallL3FirewallRules  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceFirewallL3FirewallRules only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	log.Printf("[DEBUG] dataRequest: %+v", dataRequest)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallL3FirewallRules(vvNetworkID, dataRequest)
 	//Update
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallL3FirewallRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -316,49 +214,29 @@ func (r *NetworksApplianceFirewallL3FirewallRulesResource) Create(ctx context.Co
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallL3FirewallRules(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceFirewallL3FirewallRules",
-				restyResp1.String(),
-			)
-			return
-		}
+	// Read
+	var responseGet *merakigosdk.ResponseApplianceGetNetworkApplianceFirewallL3FirewallRules
+	err = json.Unmarshal(restyResp2.Body(), &responseGet)
+	if err != nil {
 		resp.Diagnostics.AddError(
 			"Failure when executing GetNetworkApplianceFirewallL3FirewallRules",
 			err.Error(),
 		)
-		return
 	}
-
-	data = ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	data = ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesItemToBodyRs(data, responseGet, true)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksApplianceFirewallL3FirewallRulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksApplianceFirewallL3FirewallRulesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -388,33 +266,28 @@ func (r *NetworksApplianceFirewallL3FirewallRulesResource) Read(ctx context.Cont
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksApplianceFirewallL3FirewallRulesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksApplianceFirewallL3FirewallRulesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksApplianceFirewallL3FirewallRulesRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksApplianceFirewallL3FirewallRulesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallL3FirewallRules(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallL3FirewallRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -424,9 +297,7 @@ func (r *NetworksApplianceFirewallL3FirewallRulesResource) Update(ctx context.Co
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksApplianceFirewallL3FirewallRulesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -439,7 +310,6 @@ func (r *NetworksApplianceFirewallL3FirewallRulesResource) Delete(ctx context.Co
 type NetworksApplianceFirewallL3FirewallRulesRs struct {
 	NetworkID         types.String                                                          `tfsdk:"network_id"`
 	Rules             *[]ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesRulesRs `tfsdk:"rules"`
-	RulesResponse     *[]ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesRulesRs `tfsdk:"rules_response"`
 	SyslogDefaultRule types.Bool                                                            `tfsdk:"syslog_default_rule"`
 }
 
@@ -493,32 +363,85 @@ func (r *NetworksApplianceFirewallL3FirewallRulesRs) toSdkApiRequestUpdate(ctx c
 		syslogDefaultRule = nil
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL3FirewallRules{
-		Rules: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules {
+		Rules: func() []merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules {
+			log.Printf("[DEBUG] requestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules: %+v", requestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules)
 			if len(requestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules) > 0 || r.Rules != nil {
-				return &requestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules
+				if len(requestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules) == 0 {
+					requestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules = make([]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules, 0)
+				}
+				log.Printf("[DEBUG] requestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules 1: %+v", requestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules)
+				return requestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules
 			}
-			return nil
+			rules := make([]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL3FirewallRulesRules, 0)
+			return rules
 		}(),
 		SyslogDefaultRule: syslogDefaultRule,
 	}
+	log.Printf("[DEBUG] out: %+v", out)
 	return &out
 }
 
 // From gosdk to TF Structs Schema
 func ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesItemToBodyRs(state NetworksApplianceFirewallL3FirewallRulesRs, response *merakigosdk.ResponseApplianceGetNetworkApplianceFirewallL3FirewallRules, is_read bool) NetworksApplianceFirewallL3FirewallRulesRs {
+	if response.Rules != nil {
+		var filteredRules []merakigosdk.ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesRules
+		for _, rule := range *response.Rules {
+			// Skip the default rule since it's managed by the system
+			if rule.Comment != "Default rule" {
+				filteredRules = append(filteredRules, rule)
+			}
+		}
+		// Update response with filtered rules, excluding default rule
+		response.Rules = &filteredRules
+	}
 	itemState := NetworksApplianceFirewallL3FirewallRulesRs{
-		RulesResponse: func() *[]ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesRulesRs {
+		Rules: func() *[]ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesRulesRs {
 			if response.Rules != nil {
 				result := make([]ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesRulesRs, len(*response.Rules))
 				for i, rules := range *response.Rules {
 					result[i] = ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesRulesRs{
-						Comment:  types.StringValue(rules.Comment),
-						DestCidr: types.StringValue(rules.DestCidr),
-						DestPort: types.StringValue(rules.DestPort),
-						Policy:   types.StringValue(rules.Policy),
-						Protocol: types.StringValue(rules.Protocol),
-						SrcCidr:  types.StringValue(rules.SrcCidr),
-						SrcPort:  types.StringValue(rules.SrcPort),
+						Comment: func() types.String {
+							if rules.Comment != "" {
+								return types.StringValue(rules.Comment)
+							}
+							return types.String{}
+						}(),
+						DestCidr: func() types.String {
+							if rules.DestCidr != "" {
+								return types.StringValue(strings.ToLower(rules.DestCidr))
+							}
+							return types.String{}
+						}(),
+						DestPort: func() types.String {
+							if rules.DestPort != "" {
+								return types.StringValue(strings.ToLower(rules.DestPort))
+							}
+							return types.String{}
+						}(),
+						Policy: func() types.String {
+							if rules.Policy != "" {
+								return types.StringValue(strings.ToLower(rules.Policy))
+							}
+							return types.String{}
+						}(),
+						Protocol: func() types.String {
+							if rules.Protocol != "" {
+								return types.StringValue(strings.ToLower(rules.Protocol))
+							}
+							return types.String{}
+						}(),
+						SrcCidr: func() types.String {
+							if rules.SrcCidr != "" {
+								return types.StringValue(rules.SrcCidr)
+							}
+							return types.String{}
+						}(),
+						SrcPort: func() types.String {
+							if rules.SrcPort != "" {
+								return types.StringValue(rules.SrcPort)
+							}
+							return types.String{}
+						}(),
 						SyslogEnabled: func() types.Bool {
 							if rules.SyslogEnabled != nil {
 								return types.BoolValue(*rules.SyslogEnabled)
@@ -532,8 +455,6 @@ func ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesItemToBodyRs(sta
 			return nil
 		}(),
 	}
-	itemState.Rules = state.Rules
-	itemState.SyslogDefaultRule = state.SyslogDefaultRule
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksApplianceFirewallL3FirewallRulesRs)
 	}

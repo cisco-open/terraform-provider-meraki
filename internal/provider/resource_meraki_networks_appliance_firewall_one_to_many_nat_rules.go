@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	"log"
 
@@ -28,8 +29,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -69,39 +70,35 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Schema(_ context.Co
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"rules": schema.SetNestedAttribute{
+			"rules": schema.ListNestedAttribute{
 				MarkdownDescription: `An array of 1:Many nat rules`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
-						"port_rules": schema.SetNestedAttribute{
+						"port_rules": schema.ListNestedAttribute{
 							MarkdownDescription: `An array of associated forwarding rules`,
-							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 
-									"allowed_ips": schema.SetAttribute{
+									"allowed_ips": schema.ListAttribute{
 										MarkdownDescription: `Remote IP addresses or ranges that are permitted to access the internal resource via this port forwarding rule, or 'any'`,
-										Computed:            true,
 										Optional:            true,
-										PlanModifiers: []planmodifier.Set{
-											setplanmodifier.UseStateForUnknown(),
+										PlanModifiers: []planmodifier.List{
+											listplanmodifier.UseStateForUnknown(),
 										},
 
 										ElementType: types.StringType,
 									},
 									"local_ip": schema.StringAttribute{
 										MarkdownDescription: `Local IP address to which traffic will be forwarded`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -109,7 +106,6 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Schema(_ context.Co
 									},
 									"local_port": schema.StringAttribute{
 										MarkdownDescription: `Destination port of the forwarded traffic that will be sent from the MX to the specified host on the LAN. If you simply wish to forward the traffic without translating the port, this should be the same as the Public port`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -117,7 +113,6 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Schema(_ context.Co
 									},
 									"name": schema.StringAttribute{
 										MarkdownDescription: `A description of the rule`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -126,7 +121,6 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Schema(_ context.Co
 									"protocol": schema.StringAttribute{
 										MarkdownDescription: `'tcp' or 'udp'
                                               Allowed values: [tcp,udp]`,
-										Computed: true,
 										Optional: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -140,7 +134,6 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Schema(_ context.Co
 									},
 									"public_port": schema.StringAttribute{
 										MarkdownDescription: `Destination port of the traffic that is arriving on the WAN`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -151,17 +144,14 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Schema(_ context.Co
 						},
 						"public_ip": schema.StringAttribute{
 							MarkdownDescription: `The IP address that will be used to access the internal resource from the WAN`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
 						"uplink": schema.StringAttribute{
-							MarkdownDescription: `The physical WAN interface on which the traffic will arrive ('internet1' or, if available, 'internet2')
-                                        Allowed values: [internet1,internet2]`,
-							Computed: true,
-							Optional: true,
+							MarkdownDescription: `The physical WAN interface on which the traffic will arrive, formatted as 'internetN' where N is an integer representing a valid uplink for the network's appliance`,
+							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
@@ -201,27 +191,6 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Create(ctx context.
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallOneToManyNatRules(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceFirewallOneToManyNatRules  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceFirewallOneToManyNatRules only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallOneToManyNatRules(vvNetworkID, dataRequest)
@@ -230,7 +199,7 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Create(ctx context.
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallOneToManyNatRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -241,49 +210,19 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Create(ctx context.
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallOneToManyNatRules(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceFirewallOneToManyNatRules",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkApplianceFirewallOneToManyNatRules",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseApplianceGetNetworkApplianceFirewallOneToManyNatRulesItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksApplianceFirewallOneToManyNatRulesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -313,33 +252,28 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Read(ctx context.Co
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceFirewallOneToManyNatRulesItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksApplianceFirewallOneToManyNatRulesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksApplianceFirewallOneToManyNatRulesRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksApplianceFirewallOneToManyNatRulesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallOneToManyNatRules(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallOneToManyNatRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -349,9 +283,7 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Update(ctx context.
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksApplianceFirewallOneToManyNatRulesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -373,7 +305,7 @@ type ResponseApplianceGetNetworkApplianceFirewallOneToManyNatRulesRulesRs struct
 }
 
 type ResponseApplianceGetNetworkApplianceFirewallOneToManyNatRulesRulesPortRulesRs struct {
-	AllowedIPs types.Set    `tfsdk:"allowed_ips"`
+	AllowedIPs types.List   `tfsdk:"allowed_ips"`
 	LocalIP    types.String `tfsdk:"local_ip"`
 	LocalPort  types.String `tfsdk:"local_port"`
 	Name       types.String `tfsdk:"name"`
@@ -429,10 +361,8 @@ func (r *NetworksApplianceFirewallOneToManyNatRulesRs) toSdkApiRequestUpdate(ctx
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallOneToManyNatRules{
 		Rules: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallOneToManyNatRulesRules {
-			if len(requestApplianceUpdateNetworkApplianceFirewallOneToManyNatRulesRules) > 0 || r.Rules != nil {
-				return &requestApplianceUpdateNetworkApplianceFirewallOneToManyNatRulesRules
-			}
-			return nil
+			// Always return the rules array, even if empty, to avoid sending null
+			return &requestApplianceUpdateNetworkApplianceFirewallOneToManyNatRulesRules
 		}(),
 	}
 	return &out
@@ -451,20 +381,55 @@ func ResponseApplianceGetNetworkApplianceFirewallOneToManyNatRulesItemToBodyRs(s
 								result := make([]ResponseApplianceGetNetworkApplianceFirewallOneToManyNatRulesRulesPortRulesRs, len(*rules.PortRules))
 								for i, portRules := range *rules.PortRules {
 									result[i] = ResponseApplianceGetNetworkApplianceFirewallOneToManyNatRulesRulesPortRulesRs{
-										AllowedIPs: StringSliceToSet(portRules.AllowedIPs),
-										LocalIP:    types.StringValue(portRules.LocalIP),
-										LocalPort:  types.StringValue(portRules.LocalPort),
-										Name:       types.StringValue(portRules.Name),
-										Protocol:   types.StringValue(portRules.Protocol),
-										PublicPort: types.StringValue(portRules.PublicPort),
+										AllowedIPs: StringSliceToList(portRules.AllowedIPs),
+										LocalIP: func() types.String {
+											if portRules.LocalIP != "" {
+												return types.StringValue(portRules.LocalIP)
+											}
+											return types.String{}
+										}(),
+										LocalPort: func() types.String {
+											if portRules.LocalPort != "" {
+												return types.StringValue(portRules.LocalPort)
+											}
+											return types.String{}
+										}(),
+										Name: func() types.String {
+											if portRules.Name != "" {
+												return types.StringValue(portRules.Name)
+											}
+											return types.String{}
+										}(),
+										Protocol: func() types.String {
+											if portRules.Protocol != "" {
+												return types.StringValue(portRules.Protocol)
+											}
+											return types.String{}
+										}(),
+										PublicPort: func() types.String {
+											if portRules.PublicPort != "" {
+												return types.StringValue(portRules.PublicPort)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						PublicIP: types.StringValue(rules.PublicIP),
-						Uplink:   types.StringValue(rules.Uplink),
+						PublicIP: func() types.String {
+							if rules.PublicIP != "" {
+								return types.StringValue(rules.PublicIP)
+							}
+							return types.String{}
+						}(),
+						Uplink: func() types.String {
+							if rules.Uplink != "" {
+								return types.StringValue(rules.Uplink)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

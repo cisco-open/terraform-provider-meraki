@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -256,14 +255,34 @@ func ResponseDevicesGetDeviceCellularSimsItemToBody(state DevicesCellularSims, r
 										Authentication: func() *ResponseDevicesGetDeviceCellularSimsSimsApnsAuthentication {
 											if apns.Authentication != nil {
 												return &ResponseDevicesGetDeviceCellularSimsSimsApnsAuthentication{
-													Password: types.StringValue(apns.Authentication.Password),
-													Type:     types.StringValue(apns.Authentication.Type),
-													Username: types.StringValue(apns.Authentication.Username),
+													Password: func() types.String {
+														if apns.Authentication.Password != "" {
+															return types.StringValue(apns.Authentication.Password)
+														}
+														return types.String{}
+													}(),
+													Type: func() types.String {
+														if apns.Authentication.Type != "" {
+															return types.StringValue(apns.Authentication.Type)
+														}
+														return types.String{}
+													}(),
+													Username: func() types.String {
+														if apns.Authentication.Username != "" {
+															return types.StringValue(apns.Authentication.Username)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return nil
 										}(),
-										Name: types.StringValue(apns.Name),
+										Name: func() types.String {
+											if apns.Name != "" {
+												return types.StringValue(apns.Name)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -276,7 +295,12 @@ func ResponseDevicesGetDeviceCellularSimsItemToBody(state DevicesCellularSims, r
 							}
 							return types.Bool{}
 						}(),
-						Slot: types.StringValue(sims.Slot),
+						Slot: func() types.String {
+							if sims.Slot != "" {
+								return types.StringValue(sims.Slot)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

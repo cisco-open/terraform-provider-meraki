@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -28,8 +29,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -68,7 +70,6 @@ func (r *NetworksApplianceFirewallFirewalledServicesResource) Schema(_ context.C
 			"access": schema.StringAttribute{
 				MarkdownDescription: `A string indicating the rule for which IPs are allowed to use the specified service
                                   Allowed values: [blocked,restricted,unrestricted]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -81,15 +82,16 @@ func (r *NetworksApplianceFirewallFirewalledServicesResource) Schema(_ context.C
 					),
 				},
 			},
-			"allowed_ips": schema.SetAttribute{
+			"allowed_ips": schema.ListAttribute{
 				MarkdownDescription: `An array of allowed IPs that can access the service`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"network_id": schema.StringAttribute{
 				MarkdownDescription: `networkId path parameter. Network ID`,
@@ -126,27 +128,6 @@ func (r *NetworksApplianceFirewallFirewalledServicesResource) Create(ctx context
 	vvService := data.Service.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" && vvService != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallFirewalledService(vvNetworkID, vvService)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceFirewallFirewalledServices  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceFirewallFirewalledServices only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallFirewalledService(vvNetworkID, vvService, dataRequest)
@@ -155,7 +136,7 @@ func (r *NetworksApplianceFirewallFirewalledServicesResource) Create(ctx context
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallFirewalledService",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -166,49 +147,19 @@ func (r *NetworksApplianceFirewallFirewalledServicesResource) Create(ctx context
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallFirewalledService(vvNetworkID, vvService)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceFirewallFirewalledService",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkApplianceFirewallFirewalledService",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseApplianceGetNetworkApplianceFirewallFirewalledServiceItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksApplianceFirewallFirewalledServicesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksApplianceFirewallFirewalledServicesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -239,9 +190,7 @@ func (r *NetworksApplianceFirewallFirewalledServicesResource) Read(ctx context.C
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceFirewallFirewalledServiceItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksApplianceFirewallFirewalledServicesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -249,35 +198,31 @@ func (r *NetworksApplianceFirewallFirewalledServicesResource) ImportState(ctx co
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,service. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("service"), idParts[1])...)
 }
 
 func (r *NetworksApplianceFirewallFirewalledServicesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksApplianceFirewallFirewalledServicesRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksApplianceFirewallFirewalledServicesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvService := data.Service.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvService := plan.Service.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallFirewalledService(vvNetworkID, vvService, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallFirewalledService",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -287,9 +232,7 @@ func (r *NetworksApplianceFirewallFirewalledServicesResource) Update(ctx context
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksApplianceFirewallFirewalledServicesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -303,7 +246,7 @@ type NetworksApplianceFirewallFirewalledServicesRs struct {
 	NetworkID  types.String `tfsdk:"network_id"`
 	Service    types.String `tfsdk:"service"`
 	Access     types.String `tfsdk:"access"`
-	AllowedIPs types.Set    `tfsdk:"allowed_ips"`
+	AllowedIPs types.List   `tfsdk:"allowed_ips"`
 }
 
 // FromBody
@@ -327,9 +270,19 @@ func (r *NetworksApplianceFirewallFirewalledServicesRs) toSdkApiRequestUpdate(ct
 // From gosdk to TF Structs Schema
 func ResponseApplianceGetNetworkApplianceFirewallFirewalledServiceItemToBodyRs(state NetworksApplianceFirewallFirewalledServicesRs, response *merakigosdk.ResponseApplianceGetNetworkApplianceFirewallFirewalledService, is_read bool) NetworksApplianceFirewallFirewalledServicesRs {
 	itemState := NetworksApplianceFirewallFirewalledServicesRs{
-		Access:     types.StringValue(response.Access),
-		AllowedIPs: StringSliceToSet(response.AllowedIPs),
-		Service:    types.StringValue(response.Service),
+		Access: func() types.String {
+			if response.Access != "" {
+				return types.StringValue(response.Access)
+			}
+			return types.String{}
+		}(),
+		AllowedIPs: StringSliceToList(response.AllowedIPs),
+		Service: func() types.String {
+			if response.Service != "" {
+				return types.StringValue(response.Service)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksApplianceFirewallFirewalledServicesRs)

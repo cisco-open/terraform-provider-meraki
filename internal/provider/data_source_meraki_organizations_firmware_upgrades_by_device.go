@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -323,31 +322,76 @@ func ResponseOrganizationsGetOrganizationFirmwareUpgradesByDeviceItemsToBody(sta
 	var items []ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDevice
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDevice{
-			DeviceStatus: types.StringValue(item.DeviceStatus),
-			Name:         types.StringValue(item.Name),
-			Serial:       types.StringValue(item.Serial),
+			DeviceStatus: func() types.String {
+				if item.DeviceStatus != "" {
+					return types.StringValue(item.DeviceStatus)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
 			Upgrade: func() *ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDeviceUpgrade {
 				if item.Upgrade != nil {
 					return &ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDeviceUpgrade{
 						FromVersion: func() *ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDeviceUpgradeFromVersion {
 							if item.Upgrade.FromVersion != nil {
 								return &ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDeviceUpgradeFromVersion{
-									ID:          types.StringValue(item.Upgrade.FromVersion.ID),
-									ReleaseDate: types.StringValue(item.Upgrade.FromVersion.ReleaseDate),
-									ReleaseType: types.StringValue(item.Upgrade.FromVersion.ReleaseType),
-									ShortName:   types.StringValue(item.Upgrade.FromVersion.ShortName),
+									ID: func() types.String {
+										if item.Upgrade.FromVersion.ID != "" {
+											return types.StringValue(item.Upgrade.FromVersion.ID)
+										}
+										return types.String{}
+									}(),
+									ReleaseDate: func() types.String {
+										if item.Upgrade.FromVersion.ReleaseDate != "" {
+											return types.StringValue(item.Upgrade.FromVersion.ReleaseDate)
+										}
+										return types.String{}
+									}(),
+									ReleaseType: func() types.String {
+										if item.Upgrade.FromVersion.ReleaseType != "" {
+											return types.StringValue(item.Upgrade.FromVersion.ReleaseType)
+										}
+										return types.String{}
+									}(),
+									ShortName: func() types.String {
+										if item.Upgrade.FromVersion.ShortName != "" {
+											return types.StringValue(item.Upgrade.FromVersion.ShortName)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						ID: types.StringValue(item.Upgrade.ID),
+						ID: func() types.String {
+							if item.Upgrade.ID != "" {
+								return types.StringValue(item.Upgrade.ID)
+							}
+							return types.String{}
+						}(),
 						Staged: func() *ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDeviceUpgradestaged {
 							if item.Upgrade.Staged != nil {
 								return &ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDeviceUpgradestaged{
 									Group: func() *ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDeviceUpgradestagedGroup {
 										if item.Upgrade.Staged.Group != nil {
 											return &ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDeviceUpgradestagedGroup{
-												ID: types.StringValue(item.Upgrade.Staged.Group.ID),
+												ID: func() types.String {
+													if item.Upgrade.Staged.Group.ID != "" {
+														return types.StringValue(item.Upgrade.Staged.Group.ID)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return nil
@@ -356,20 +400,55 @@ func ResponseOrganizationsGetOrganizationFirmwareUpgradesByDeviceItemsToBody(sta
 							}
 							return nil
 						}(),
-						Status: types.StringValue(item.Upgrade.Status),
-						Time:   types.StringValue(item.Upgrade.Time),
+						Status: func() types.String {
+							if item.Upgrade.Status != "" {
+								return types.StringValue(item.Upgrade.Status)
+							}
+							return types.String{}
+						}(),
+						Time: func() types.String {
+							if item.Upgrade.Time != "" {
+								return types.StringValue(item.Upgrade.Time)
+							}
+							return types.String{}
+						}(),
 						ToVersion: func() *ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDeviceUpgradeToVersion {
 							if item.Upgrade.ToVersion != nil {
 								return &ResponseItemOrganizationsGetOrganizationFirmwareUpgradesByDeviceUpgradeToVersion{
-									ID:          types.StringValue(item.Upgrade.ToVersion.ID),
-									ReleaseDate: types.StringValue(item.Upgrade.ToVersion.ReleaseDate),
-									ReleaseType: types.StringValue(item.Upgrade.ToVersion.ReleaseType),
-									ShortName:   types.StringValue(item.Upgrade.ToVersion.ShortName),
+									ID: func() types.String {
+										if item.Upgrade.ToVersion.ID != "" {
+											return types.StringValue(item.Upgrade.ToVersion.ID)
+										}
+										return types.String{}
+									}(),
+									ReleaseDate: func() types.String {
+										if item.Upgrade.ToVersion.ReleaseDate != "" {
+											return types.StringValue(item.Upgrade.ToVersion.ReleaseDate)
+										}
+										return types.String{}
+									}(),
+									ReleaseType: func() types.String {
+										if item.Upgrade.ToVersion.ReleaseType != "" {
+											return types.StringValue(item.Upgrade.ToVersion.ReleaseType)
+										}
+										return types.String{}
+									}(),
+									ShortName: func() types.String {
+										if item.Upgrade.ToVersion.ShortName != "" {
+											return types.StringValue(item.Upgrade.ToVersion.ShortName)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						UpgradeBatchID: types.StringValue(item.Upgrade.UpgradeBatchID),
+						UpgradeBatchID: func() types.String {
+							if item.Upgrade.UpgradeBatchID != "" {
+								return types.StringValue(item.Upgrade.UpgradeBatchID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil

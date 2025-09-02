@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -199,13 +198,23 @@ func ResponseWirelessGetNetworkWirelessMeshStatusesItemsToBody(state NetworksWir
 							}
 							return types.Int64{}
 						}(),
-						UsagePercentage: types.StringValue(item.LatestMeshPerformance.UsagePercentage),
+						UsagePercentage: func() types.String {
+							if item.LatestMeshPerformance.UsagePercentage != "" {
+								return types.StringValue(item.LatestMeshPerformance.UsagePercentage)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
 			MeshRoute: StringSliceToList(item.MeshRoute),
-			Serial:    types.StringValue(item.Serial),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

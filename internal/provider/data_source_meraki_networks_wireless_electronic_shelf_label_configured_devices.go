@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -148,8 +147,18 @@ func ResponseWirelessGetNetworkWirelessElectronicShelfLabelConfiguredDevicesItem
 				}
 				return types.Bool{}
 			}(),
-			Hostname: types.StringValue(item.Hostname),
-			Mode:     types.StringValue(item.Mode),
+			Hostname: func() types.String {
+				if item.Hostname != "" {
+					return types.StringValue(item.Hostname)
+				}
+				return types.String{}
+			}(),
+			Mode: func() types.String {
+				if item.Mode != "" {
+					return types.StringValue(item.Mode)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

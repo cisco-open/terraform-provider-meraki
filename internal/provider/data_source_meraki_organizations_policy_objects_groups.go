@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -210,13 +209,38 @@ type ResponseOrganizationsGetOrganizationPolicyObjectsGroup struct {
 // ToBody
 func ResponseOrganizationsGetOrganizationPolicyObjectsGroupItemToBody(state OrganizationsPolicyObjectsGroups, response *merakigosdk.ResponseOrganizationsGetOrganizationPolicyObjectsGroup) OrganizationsPolicyObjectsGroups {
 	itemState := ResponseOrganizationsGetOrganizationPolicyObjectsGroup{
-		Category:   types.StringValue(response.Category),
-		CreatedAt:  types.StringValue(response.CreatedAt),
-		ID:         types.StringValue(response.ID),
-		Name:       types.StringValue(response.Name),
+		Category: func() types.String {
+			if response.Category != "" {
+				return types.StringValue(response.Category)
+			}
+			return types.String{}
+		}(),
+		CreatedAt: func() types.String {
+			if response.CreatedAt != "" {
+				return types.StringValue(response.CreatedAt)
+			}
+			return types.String{}
+		}(),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		NetworkIDs: StringSliceToList(response.NetworkIDs),
 		ObjectIDs:  StringSliceToList(*response.ObjectIDs),
-		UpdatedAt:  types.StringValue(response.UpdatedAt),
+		UpdatedAt: func() types.String {
+			if response.UpdatedAt != "" {
+				return types.StringValue(response.UpdatedAt)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

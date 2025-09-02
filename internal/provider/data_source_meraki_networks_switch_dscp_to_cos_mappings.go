@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -166,7 +165,12 @@ func ResponseSwitchGetNetworkSwitchDscpToCosMappingsItemToBody(state NetworksSwi
 							}
 							return types.Int64{}
 						}(),
-						Title: types.StringValue(mappings.Title),
+						Title: func() types.String {
+							if mappings.Title != "" {
+								return types.StringValue(mappings.Title)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

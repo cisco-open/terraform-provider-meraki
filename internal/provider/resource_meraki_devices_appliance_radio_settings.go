@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -64,7 +65,6 @@ func (r *DevicesApplianceRadioSettingsResource) Schema(_ context.Context, _ reso
 		Attributes: map[string]schema.Attribute{
 			"five_ghz_settings": schema.SingleNestedAttribute{
 				MarkdownDescription: `Manual radio settings for 5 GHz`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -74,7 +74,6 @@ func (r *DevicesApplianceRadioSettingsResource) Schema(_ context.Context, _ reso
 					"channel": schema.Int64Attribute{
 						MarkdownDescription: `Manual channel for 5 GHz
                                         Allowed values: [36,40,44,48,52,56,60,64,100,104,108,112,116,120,124,128,132,136,140,144,149,153,157,161,165,169,173,177]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -83,7 +82,6 @@ func (r *DevicesApplianceRadioSettingsResource) Schema(_ context.Context, _ reso
 					"channel_width": schema.Int64Attribute{
 						MarkdownDescription: `Manual channel width for 5 GHz
                                         Allowed values: [0,20,40,80,160]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -91,7 +89,6 @@ func (r *DevicesApplianceRadioSettingsResource) Schema(_ context.Context, _ reso
 					},
 					"target_power": schema.Int64Attribute{
 						MarkdownDescription: `Manual target power for 5 GHz`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -101,7 +98,6 @@ func (r *DevicesApplianceRadioSettingsResource) Schema(_ context.Context, _ reso
 			},
 			"rf_profile_id": schema.StringAttribute{
 				MarkdownDescription: `RF Profile ID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -113,7 +109,6 @@ func (r *DevicesApplianceRadioSettingsResource) Schema(_ context.Context, _ reso
 			},
 			"two_four_ghz_settings": schema.SingleNestedAttribute{
 				MarkdownDescription: `Manual radio settings for 2.4 GHz`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -123,7 +118,6 @@ func (r *DevicesApplianceRadioSettingsResource) Schema(_ context.Context, _ reso
 					"channel": schema.Int64Attribute{
 						MarkdownDescription: `Manual channel for 2.4 GHz
                                         Allowed values: [1,2,3,4,5,6,7,8,9,10,11,12,13,14]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -131,7 +125,6 @@ func (r *DevicesApplianceRadioSettingsResource) Schema(_ context.Context, _ reso
 					},
 					"target_power": schema.Int64Attribute{
 						MarkdownDescription: `Manual target power for 2.4 GHz`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -165,27 +158,6 @@ func (r *DevicesApplianceRadioSettingsResource) Create(ctx context.Context, req 
 	vvSerial := data.Serial.ValueString()
 	//Has Item and not has items
 
-	if vvSerial != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Appliance.GetDeviceApplianceRadioSettings(vvSerial)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesApplianceRadioSettings  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesApplianceRadioSettings only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateDeviceApplianceRadioSettings(vvSerial, dataRequest)
@@ -194,7 +166,7 @@ func (r *DevicesApplianceRadioSettingsResource) Create(ctx context.Context, req 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceApplianceRadioSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -205,49 +177,19 @@ func (r *DevicesApplianceRadioSettingsResource) Create(ctx context.Context, req 
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetDeviceApplianceRadioSettings(vvSerial)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetDeviceApplianceRadioSettings",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetDeviceApplianceRadioSettings",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseApplianceGetDeviceApplianceRadioSettingsItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *DevicesApplianceRadioSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data DevicesApplianceRadioSettingsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -277,33 +219,28 @@ func (r *DevicesApplianceRadioSettingsResource) Read(ctx context.Context, req re
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetDeviceApplianceRadioSettingsItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *DevicesApplianceRadioSettingsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("serial"), req.ID)...)
 }
 
 func (r *DevicesApplianceRadioSettingsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data DevicesApplianceRadioSettingsRs
-	merge(ctx, req, resp, &data)
+	var plan DevicesApplianceRadioSettingsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvSerial := data.Serial.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvSerial := plan.Serial.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateDeviceApplianceRadioSettings(vvSerial, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceApplianceRadioSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -313,9 +250,7 @@ func (r *DevicesApplianceRadioSettingsResource) Update(ctx context.Context, req 
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *DevicesApplianceRadioSettingsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -437,8 +372,18 @@ func ResponseApplianceGetDeviceApplianceRadioSettingsItemToBodyRs(state DevicesA
 			}
 			return nil
 		}(),
-		RfProfileID: types.StringValue(response.RfProfileID),
-		Serial:      types.StringValue(response.Serial),
+		RfProfileID: func() types.String {
+			if response.RfProfileID != "" {
+				return types.StringValue(response.RfProfileID)
+			}
+			return types.String{}
+		}(),
+		Serial: func() types.String {
+			if response.Serial != "" {
+				return types.StringValue(response.Serial)
+			}
+			return types.String{}
+		}(),
 		TwoFourGhzSettings: func() *ResponseApplianceGetDeviceApplianceRadioSettingsTwoFourGhzSettingsRs {
 			if response.TwoFourGhzSettings != nil {
 				return &ResponseApplianceGetDeviceApplianceRadioSettingsTwoFourGhzSettingsRs{

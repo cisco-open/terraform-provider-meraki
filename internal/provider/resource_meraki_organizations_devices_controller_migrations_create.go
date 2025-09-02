@@ -207,7 +207,7 @@ type ResponseItemOrganizationsCreateOrganizationDevicesControllerMigration struc
 }
 
 type RequestOrganizationsCreateOrganizationDevicesControllerMigrationRs struct {
-	Serials types.Set    `tfsdk:"serials"`
+	Serials types.List   `tfsdk:"serials"`
 	Target  types.String `tfsdk:"target"`
 }
 
@@ -235,10 +235,30 @@ func ResponseOrganizationsCreateOrganizationDevicesControllerMigrationItemsToBod
 	var items []ResponseItemOrganizationsCreateOrganizationDevicesControllerMigration
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsCreateOrganizationDevicesControllerMigration{
-			CreatedAt:  types.StringValue(item.CreatedAt),
-			MigratedAt: types.StringValue(item.MigratedAt),
-			Serial:     types.StringValue(item.Serial),
-			Target:     types.StringValue(item.Target),
+			CreatedAt: func() types.String {
+				if item.CreatedAt != "" {
+					return types.StringValue(item.CreatedAt)
+				}
+				return types.String{}
+			}(),
+			MigratedAt: func() types.String {
+				if item.MigratedAt != "" {
+					return types.StringValue(item.MigratedAt)
+				}
+				return types.String{}
+			}(),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
+			Target: func() types.String {
+				if item.Target != "" {
+					return types.StringValue(item.Target)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

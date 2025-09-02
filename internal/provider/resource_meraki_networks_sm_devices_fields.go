@@ -305,11 +305,36 @@ func ResponseSmUpdateNetworkSmDevicesFieldsItemsToBody(state NetworksSmDevicesFi
 	var items []ResponseItemSmUpdateNetworkSmDevicesFields
 	for _, item := range *response {
 		itemState := ResponseItemSmUpdateNetworkSmDevicesFields{
-			ID:      types.StringValue(item.ID),
-			Name:    types.StringValue(item.Name),
-			Notes:   types.StringValue(item.Notes),
-			Serial:  types.StringValue(item.Serial),
-			WifiMac: types.StringValue(item.WifiMac),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			Notes: func() types.String {
+				if item.Notes != "" {
+					return types.StringValue(item.Notes)
+				}
+				return types.String{}
+			}(),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
+			WifiMac: func() types.String {
+				if item.WifiMac != "" {
+					return types.StringValue(item.WifiMac)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

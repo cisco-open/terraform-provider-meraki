@@ -178,10 +178,10 @@ type ResponseSmShutdownNetworkSmDevices struct {
 }
 
 type RequestSmShutdownNetworkSmDevicesRs struct {
-	IDs      types.Set `tfsdk:"ids"`
-	Scope    types.Set `tfsdk:"scope"`
-	Serials  types.Set `tfsdk:"serials"`
-	WifiMacs types.Set `tfsdk:"wifi_macs"`
+	IDs      types.List `tfsdk:"ids"`
+	Scope    types.List `tfsdk:"scope"`
+	Serials  types.List `tfsdk:"serials"`
+	WifiMacs types.List `tfsdk:"wifi_macs"`
 }
 
 // FromBody

@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -29,9 +30,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -69,7 +70,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 		Attributes: map[string]schema.Attribute{
 			"admin_settings": schema.SingleNestedAttribute{
 				MarkdownDescription: `Settings for describing which kinds of admins this policy applies to.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -79,7 +79,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 					"applies_to": schema.StringAttribute{
 						MarkdownDescription: `Which kinds of admins this policy applies to. Can be one of 'All organization admins', 'All enterprise admins', 'All network admins', 'All admins of networks...', 'All admins of networks tagged...', 'Specific admins...', 'All admins' or 'All SAML admins'.
                                         Allowed values: [All SAML admins,All admins,All admins of networks tagged...,All admins of networks...,All enterprise admins,All network admins,All organization admins,Specific admins...]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -97,16 +96,15 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 							),
 						},
 					},
-					"values": schema.SetAttribute{
+					"values": schema.ListAttribute{
 						MarkdownDescription: `      If 'appliesTo' is set to one of 'Specific admins...', 'All admins of networks...' or 'All admins of networks tagged...', then you must specify this 'values' property to provide the set of
       entities to apply the branding policy to. For 'Specific admins...', specify an array of admin IDs. For 'All admins of
       networks...', specify an array of network IDs and/or configuration template IDs. For 'All admins of networks tagged...',
       specify an array of tag names.
 `,
-						Computed: true,
 						Optional: true,
-						PlanModifiers: []planmodifier.Set{
-							setplanmodifier.UseStateForUnknown(),
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.UseStateForUnknown(),
 						},
 
 						ElementType: types.StringType,
@@ -122,7 +120,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 			},
 			"custom_logo": schema.SingleNestedAttribute{
 				MarkdownDescription: `Properties describing the custom logo attached to the branding policy.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -131,7 +128,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Whether or not there is a custom logo enabled.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -139,7 +135,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 					},
 					"image": schema.SingleNestedAttribute{
 						MarkdownDescription: `Properties of the image.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -148,7 +143,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 
 							"contents": schema.StringAttribute{
 								MarkdownDescription: `The file contents (a base 64 encoded string) of your new logo.`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -157,7 +151,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 							"format": schema.StringAttribute{
 								MarkdownDescription: `The format of the encoded contents.  Supported formats are 'png', 'gif', and jpg'.
                                               Allowed values: [gif,jpg,png]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -191,7 +184,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 			},
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating whether this policy is enabled.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -203,7 +195,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
       the section on Dashboard). Some properties in this object also accept custom HTML used to replace the section on
       Dashboard; see the documentation for each property to see the allowed values.
 `,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -215,7 +206,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
       'default or inherit', 'hide' or 'show'.
 
                                         Allowed values: [default or inherit,hide,show]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -233,7 +223,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
       of 'default or inherit', 'hide' or 'show'.
 
                                         Allowed values: [default or inherit,hide,show]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -249,7 +238,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 					"cisco_meraki_product_documentation": schema.StringAttribute{
 						MarkdownDescription: `      The 'Product Manuals' section of the 'Help -> Get Help' subtab. Can be one of 'default or inherit', 'hide', 'show', or a replacement custom HTML string.
 `,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -259,7 +247,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 						MarkdownDescription: `      The 'Help -> Community' subtab which provides a link to Meraki Community. Can be one of 'default or inherit', 'hide' or 'show'.
 
                                         Allowed values: [default or inherit,hide,show]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -277,7 +264,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
       be audited. Can be one of 'default or inherit', 'hide' or 'show'.
 
                                         Allowed values: [default or inherit,hide,show]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -295,7 +281,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
       listed. Can be one of 'default or inherit', 'hide' or 'show'.
 
                                         Allowed values: [default or inherit,hide,show]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -314,7 +299,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
       and support contact info will not be visible. Can be one of 'default or inherit', 'hide' or 'show'.
 
                                         Allowed values: [default or inherit,hide,show]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -330,7 +314,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 					"get_help_subtab_knowledge_base_search": schema.StringAttribute{
 						MarkdownDescription: `      The KB search box which appears on the Help page. Can be one of 'default or inherit', 'hide', 'show', or a replacement custom HTML string.
 `,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -341,7 +324,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
       'default or inherit', 'hide' or 'show'.
 
                                         Allowed values: [default or inherit,hide,show]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -359,7 +341,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
       customizations will be visible. Can be one of 'default or inherit', 'hide' or 'show'.
 
                                         Allowed values: [default or inherit,hide,show]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -377,7 +358,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
       and other contact avenues to reach Meraki Support. Can be one of 'default or inherit', 'hide' or 'show'.
 
                                         Allowed values: [default or inherit,hide,show]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -394,7 +374,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 						MarkdownDescription: `      The 'Help -> New features' subtab where new Dashboard features are detailed. Can be one of 'default or inherit', 'hide' or 'show'.
 
                                         Allowed values: [default or inherit,hide,show]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -412,7 +391,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
       organizations that contain Systems Manager networks. Can be one of 'default or inherit', 'hide' or 'show'.
 
                                         Allowed values: [default or inherit,hide,show]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -428,7 +406,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 					"support_contact_info": schema.StringAttribute{
 						MarkdownDescription: `      The 'Contact Meraki Support' section of the 'Help -> Get Help' subtab. Can be one of 'default or inherit', 'hide', 'show', or a replacement custom HTML string.
 `,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -439,7 +416,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
       whether these Meraki KB results should be returned. Can be one of 'default or inherit', 'hide' or 'show'.
 
                                         Allowed values: [default or inherit,hide,show]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -456,7 +432,6 @@ func (r *OrganizationsBrandingPoliciesResource) Schema(_ context.Context, _ reso
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `Name of the Dashboard branding policy.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -515,7 +490,7 @@ func (r *OrganizationsBrandingPoliciesResource) Create(ctx context.Context, req 
 		result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
 		if result != nil {
 			result2 := result.(map[string]interface{})
-			vvBrandingPolicyID, ok := result2["BrandingPolicyID"].(string)
+			vvBrandingPolicyID, ok := result2["ID"].(string)
 			if !ok {
 				resp.Diagnostics.AddError(
 					"Failure when parsing path parameter BrandingPolicyID",
@@ -541,7 +516,7 @@ func (r *OrganizationsBrandingPoliciesResource) Create(ctx context.Context, req 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationBrandingPolicy",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -613,21 +588,11 @@ func (r *OrganizationsBrandingPoliciesResource) Create(ctx context.Context, req 
 func (r *OrganizationsBrandingPoliciesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data OrganizationsBrandingPoliciesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -658,9 +623,7 @@ func (r *OrganizationsBrandingPoliciesResource) Read(ctx context.Context, req re
 	}
 	//entro aqui 2
 	data = ResponseOrganizationsGetOrganizationBrandingPolicyItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *OrganizationsBrandingPoliciesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -668,35 +631,31 @@ func (r *OrganizationsBrandingPoliciesResource) ImportState(ctx context.Context,
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: organizationId,brandingPolicyId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("branding_policy_id"), idParts[1])...)
 }
 
 func (r *OrganizationsBrandingPoliciesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data OrganizationsBrandingPoliciesRs
-	merge(ctx, req, resp, &data)
+	var plan OrganizationsBrandingPoliciesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvOrganizationID := data.OrganizationID.ValueString()
-	vvBrandingPolicyID := data.BrandingPolicyID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvOrganizationID := plan.OrganizationID.ValueString()
+	vvBrandingPolicyID := plan.BrandingPolicyID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationBrandingPolicy(vvOrganizationID, vvBrandingPolicyID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationBrandingPolicy",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -706,9 +665,7 @@ func (r *OrganizationsBrandingPoliciesResource) Update(ctx context.Context, req 
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *OrganizationsBrandingPoliciesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -754,7 +711,7 @@ type OrganizationsBrandingPoliciesRs struct {
 
 type ResponseOrganizationsGetOrganizationBrandingPolicyAdminSettingsRs struct {
 	AppliesTo types.String `tfsdk:"applies_to"`
-	Values    types.Set    `tfsdk:"values"`
+	Values    types.List   `tfsdk:"values"`
 }
 
 type ResponseOrganizationsGetOrganizationBrandingPolicyCustomLogoRs struct {
@@ -997,8 +954,13 @@ func ResponseOrganizationsGetOrganizationBrandingPolicyItemToBodyRs(state Organi
 		AdminSettings: func() *ResponseOrganizationsGetOrganizationBrandingPolicyAdminSettingsRs {
 			if response.AdminSettings != nil {
 				return &ResponseOrganizationsGetOrganizationBrandingPolicyAdminSettingsRs{
-					AppliesTo: types.StringValue(response.AdminSettings.AppliesTo),
-					Values:    StringSliceToSet(response.AdminSettings.Values),
+					AppliesTo: func() types.String {
+						if response.AdminSettings.AppliesTo != "" {
+							return types.StringValue(response.AdminSettings.AppliesTo)
+						}
+						return types.String{}
+					}(),
+					Values: StringSliceToList(response.AdminSettings.Values),
 				}
 			}
 			return nil
@@ -1018,8 +980,18 @@ func ResponseOrganizationsGetOrganizationBrandingPolicyItemToBodyRs(state Organi
 								Preview: func() *ResponseOrganizationsGetOrganizationBrandingPolicyCustomLogoImagePreviewRs {
 									if response.CustomLogo.Image.Preview != nil {
 										return &ResponseOrganizationsGetOrganizationBrandingPolicyCustomLogoImagePreviewRs{
-											ExpiresAt: types.StringValue(response.CustomLogo.Image.Preview.ExpiresAt),
-											URL:       types.StringValue(response.CustomLogo.Image.Preview.URL),
+											ExpiresAt: func() types.String {
+												if response.CustomLogo.Image.Preview.ExpiresAt != "" {
+													return types.StringValue(response.CustomLogo.Image.Preview.ExpiresAt)
+												}
+												return types.String{}
+											}(),
+											URL: func() types.String {
+												if response.CustomLogo.Image.Preview.URL != "" {
+													return types.StringValue(response.CustomLogo.Image.Preview.URL)
+												}
+												return types.String{}
+											}(),
 										}
 									}
 									return nil
@@ -1041,26 +1013,106 @@ func ResponseOrganizationsGetOrganizationBrandingPolicyItemToBodyRs(state Organi
 		HelpSettings: func() *ResponseOrganizationsGetOrganizationBrandingPolicyHelpSettingsRs {
 			if response.HelpSettings != nil {
 				return &ResponseOrganizationsGetOrganizationBrandingPolicyHelpSettingsRs{
-					APIDocsSubtab:                      types.StringValue(response.HelpSettings.APIDocsSubtab),
-					CasesSubtab:                        types.StringValue(response.HelpSettings.CasesSubtab),
-					CiscoMerakiProductDocumentation:    types.StringValue(response.HelpSettings.CiscoMerakiProductDocumentation),
-					CommunitySubtab:                    types.StringValue(response.HelpSettings.CommunitySubtab),
-					DataProtectionRequestsSubtab:       types.StringValue(response.HelpSettings.DataProtectionRequestsSubtab),
-					FirewallInfoSubtab:                 types.StringValue(response.HelpSettings.FirewallInfoSubtab),
-					GetHelpSubtab:                      types.StringValue(response.HelpSettings.GetHelpSubtab),
-					GetHelpSubtabKnowledgeBaseSearch:   types.StringValue(response.HelpSettings.GetHelpSubtabKnowledgeBaseSearch),
-					HardwareReplacementsSubtab:         types.StringValue(response.HelpSettings.HardwareReplacementsSubtab),
-					HelpTab:                            types.StringValue(response.HelpSettings.HelpTab),
-					HelpWidget:                         types.StringValue(response.HelpSettings.HelpWidget),
-					NewFeaturesSubtab:                  types.StringValue(response.HelpSettings.NewFeaturesSubtab),
-					SmForums:                           types.StringValue(response.HelpSettings.SmForums),
-					SupportContactInfo:                 types.StringValue(response.HelpSettings.SupportContactInfo),
-					UniversalSearchKnowledgeBaseSearch: types.StringValue(response.HelpSettings.UniversalSearchKnowledgeBaseSearch),
+					APIDocsSubtab: func() types.String {
+						if response.HelpSettings.APIDocsSubtab != "" {
+							return types.StringValue(response.HelpSettings.APIDocsSubtab)
+						}
+						return types.String{}
+					}(),
+					CasesSubtab: func() types.String {
+						if response.HelpSettings.CasesSubtab != "" {
+							return types.StringValue(response.HelpSettings.CasesSubtab)
+						}
+						return types.String{}
+					}(),
+					CiscoMerakiProductDocumentation: func() types.String {
+						if response.HelpSettings.CiscoMerakiProductDocumentation != "" {
+							return types.StringValue(response.HelpSettings.CiscoMerakiProductDocumentation)
+						}
+						return types.String{}
+					}(),
+					CommunitySubtab: func() types.String {
+						if response.HelpSettings.CommunitySubtab != "" {
+							return types.StringValue(response.HelpSettings.CommunitySubtab)
+						}
+						return types.String{}
+					}(),
+					DataProtectionRequestsSubtab: func() types.String {
+						if response.HelpSettings.DataProtectionRequestsSubtab != "" {
+							return types.StringValue(response.HelpSettings.DataProtectionRequestsSubtab)
+						}
+						return types.String{}
+					}(),
+					FirewallInfoSubtab: func() types.String {
+						if response.HelpSettings.FirewallInfoSubtab != "" {
+							return types.StringValue(response.HelpSettings.FirewallInfoSubtab)
+						}
+						return types.String{}
+					}(),
+					GetHelpSubtab: func() types.String {
+						if response.HelpSettings.GetHelpSubtab != "" {
+							return types.StringValue(response.HelpSettings.GetHelpSubtab)
+						}
+						return types.String{}
+					}(),
+					GetHelpSubtabKnowledgeBaseSearch: func() types.String {
+						if response.HelpSettings.GetHelpSubtabKnowledgeBaseSearch != "" {
+							return types.StringValue(response.HelpSettings.GetHelpSubtabKnowledgeBaseSearch)
+						}
+						return types.String{}
+					}(),
+					HardwareReplacementsSubtab: func() types.String {
+						if response.HelpSettings.HardwareReplacementsSubtab != "" {
+							return types.StringValue(response.HelpSettings.HardwareReplacementsSubtab)
+						}
+						return types.String{}
+					}(),
+					HelpTab: func() types.String {
+						if response.HelpSettings.HelpTab != "" {
+							return types.StringValue(response.HelpSettings.HelpTab)
+						}
+						return types.String{}
+					}(),
+					HelpWidget: func() types.String {
+						if response.HelpSettings.HelpWidget != "" {
+							return types.StringValue(response.HelpSettings.HelpWidget)
+						}
+						return types.String{}
+					}(),
+					NewFeaturesSubtab: func() types.String {
+						if response.HelpSettings.NewFeaturesSubtab != "" {
+							return types.StringValue(response.HelpSettings.NewFeaturesSubtab)
+						}
+						return types.String{}
+					}(),
+					SmForums: func() types.String {
+						if response.HelpSettings.SmForums != "" {
+							return types.StringValue(response.HelpSettings.SmForums)
+						}
+						return types.String{}
+					}(),
+					SupportContactInfo: func() types.String {
+						if response.HelpSettings.SupportContactInfo != "" {
+							return types.StringValue(response.HelpSettings.SupportContactInfo)
+						}
+						return types.String{}
+					}(),
+					UniversalSearchKnowledgeBaseSearch: func() types.String {
+						if response.HelpSettings.UniversalSearchKnowledgeBaseSearch != "" {
+							return types.StringValue(response.HelpSettings.UniversalSearchKnowledgeBaseSearch)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsBrandingPoliciesRs)

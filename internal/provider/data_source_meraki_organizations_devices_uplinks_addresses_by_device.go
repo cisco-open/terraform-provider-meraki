@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -323,19 +322,44 @@ func ResponseOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceItemsToB
 	var items []ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDevice
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDevice{
-			Mac:  types.StringValue(item.Mac),
-			Name: types.StringValue(item.Name),
+			Mac: func() types.String {
+				if item.Mac != "" {
+					return types.StringValue(item.Mac)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			Network: func() *ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceNetwork {
 				if item.Network != nil {
 					return &ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceNetwork{
-						ID: types.StringValue(item.Network.ID),
+						ID: func() types.String {
+							if item.Network.ID != "" {
+								return types.StringValue(item.Network.ID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			ProductType: types.StringValue(item.ProductType),
-			Serial:      types.StringValue(item.Serial),
-			Tags:        StringSliceToList(item.Tags),
+			ProductType: func() types.String {
+				if item.ProductType != "" {
+					return types.StringValue(item.ProductType)
+				}
+				return types.String{}
+			}(),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
+			Tags: StringSliceToList(item.Tags),
 			Uplinks: func() *[]ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinks {
 				if item.Uplinks != nil {
 					result := make([]ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinks, len(*item.Uplinks))
@@ -346,9 +370,24 @@ func ResponseOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceItemsToB
 									result := make([]ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddresses, len(*uplinks.Addresses))
 									for i, addresses := range *uplinks.Addresses {
 										result[i] = ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddresses{
-											Address:        types.StringValue(addresses.Address),
-											AssignmentMode: types.StringValue(addresses.AssignmentMode),
-											Gateway:        types.StringValue(addresses.Gateway),
+											Address: func() types.String {
+												if addresses.Address != "" {
+													return types.StringValue(addresses.Address)
+												}
+												return types.String{}
+											}(),
+											AssignmentMode: func() types.String {
+												if addresses.AssignmentMode != "" {
+													return types.StringValue(addresses.AssignmentMode)
+												}
+												return types.String{}
+											}(),
+											Gateway: func() types.String {
+												if addresses.Gateway != "" {
+													return types.StringValue(addresses.Gateway)
+												}
+												return types.String{}
+											}(),
 											Nameservers: func() *ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesNameservers {
 												if addresses.Nameservers != nil {
 													return &ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesNameservers{
@@ -357,11 +396,21 @@ func ResponseOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceItemsToB
 												}
 												return nil
 											}(),
-											Protocol: types.StringValue(addresses.Protocol),
+											Protocol: func() types.String {
+												if addresses.Protocol != "" {
+													return types.StringValue(addresses.Protocol)
+												}
+												return types.String{}
+											}(),
 											Public: func() *ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesPublic {
 												if addresses.Public != nil {
 													return &ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesPublic{
-														Address: types.StringValue(addresses.Public.Address),
+														Address: func() types.String {
+															if addresses.Public.Address != "" {
+																return types.StringValue(addresses.Public.Address)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -369,7 +418,12 @@ func ResponseOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceItemsToB
 											VLAN: func() *ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesVlan {
 												if addresses.VLAN != nil {
 													return &ResponseItemOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceUplinksAddressesVlan{
-														ID: types.StringValue(addresses.VLAN.ID),
+														ID: func() types.String {
+															if addresses.VLAN.ID != "" {
+																return types.StringValue(addresses.VLAN.ID)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -380,7 +434,12 @@ func ResponseOrganizationsGetOrganizationDevicesUplinksAddressesByDeviceItemsToB
 								}
 								return nil
 							}(),
-							Interface: types.StringValue(uplinks.Interface),
+							Interface: func() types.String {
+								if uplinks.Interface != "" {
+									return types.StringValue(uplinks.Interface)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result

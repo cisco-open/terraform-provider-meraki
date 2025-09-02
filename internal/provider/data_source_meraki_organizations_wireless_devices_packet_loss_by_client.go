@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -290,8 +289,18 @@ func ResponseWirelessGetOrganizationWirelessDevicesPacketLossByClientItemsToBody
 			Client: func() *ResponseItemWirelessGetOrganizationWirelessDevicesPacketLossByClientClient {
 				if item.Client != nil {
 					return &ResponseItemWirelessGetOrganizationWirelessDevicesPacketLossByClientClient{
-						ID:  types.StringValue(item.Client.ID),
-						Mac: types.StringValue(item.Client.Mac),
+						ID: func() types.String {
+							if item.Client.ID != "" {
+								return types.StringValue(item.Client.ID)
+							}
+							return types.String{}
+						}(),
+						Mac: func() types.String {
+							if item.Client.Mac != "" {
+								return types.StringValue(item.Client.Mac)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -324,8 +333,18 @@ func ResponseWirelessGetOrganizationWirelessDevicesPacketLossByClientItemsToBody
 			Network: func() *ResponseItemWirelessGetOrganizationWirelessDevicesPacketLossByClientNetwork {
 				if item.Network != nil {
 					return &ResponseItemWirelessGetOrganizationWirelessDevicesPacketLossByClientNetwork{
-						ID:   types.StringValue(item.Network.ID),
-						Name: types.StringValue(item.Network.Name),
+						ID: func() types.String {
+							if item.Network.ID != "" {
+								return types.StringValue(item.Network.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if item.Network.Name != "" {
+								return types.StringValue(item.Network.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil

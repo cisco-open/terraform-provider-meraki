@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -335,9 +334,24 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemsToBody(state NetworksSwitch
 	var items []ResponseItemSwitchGetNetworkSwitchPortSchedules
 	for _, item := range *response {
 		itemState := ResponseItemSwitchGetNetworkSwitchPortSchedules{
-			ID:        types.StringValue(item.ID),
-			Name:      types.StringValue(item.Name),
-			NetworkID: types.StringValue(item.NetworkID),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			NetworkID: func() types.String {
+				if item.NetworkID != "" {
+					return types.StringValue(item.NetworkID)
+				}
+				return types.String{}
+			}(),
 			PortSchedule: func() *ResponseItemSwitchGetNetworkSwitchPortSchedulesPortSchedule {
 				if item.PortSchedule != nil {
 					return &ResponseItemSwitchGetNetworkSwitchPortSchedulesPortSchedule{
@@ -350,8 +364,18 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemsToBody(state NetworksSwitch
 										}
 										return types.Bool{}
 									}(),
-									From: types.StringValue(item.PortSchedule.Friday.From),
-									To:   types.StringValue(item.PortSchedule.Friday.To),
+									From: func() types.String {
+										if item.PortSchedule.Friday.From != "" {
+											return types.StringValue(item.PortSchedule.Friday.From)
+										}
+										return types.String{}
+									}(),
+									To: func() types.String {
+										if item.PortSchedule.Friday.To != "" {
+											return types.StringValue(item.PortSchedule.Friday.To)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -365,8 +389,18 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemsToBody(state NetworksSwitch
 										}
 										return types.Bool{}
 									}(),
-									From: types.StringValue(item.PortSchedule.Monday.From),
-									To:   types.StringValue(item.PortSchedule.Monday.To),
+									From: func() types.String {
+										if item.PortSchedule.Monday.From != "" {
+											return types.StringValue(item.PortSchedule.Monday.From)
+										}
+										return types.String{}
+									}(),
+									To: func() types.String {
+										if item.PortSchedule.Monday.To != "" {
+											return types.StringValue(item.PortSchedule.Monday.To)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -380,8 +414,18 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemsToBody(state NetworksSwitch
 										}
 										return types.Bool{}
 									}(),
-									From: types.StringValue(item.PortSchedule.Saturday.From),
-									To:   types.StringValue(item.PortSchedule.Saturday.To),
+									From: func() types.String {
+										if item.PortSchedule.Saturday.From != "" {
+											return types.StringValue(item.PortSchedule.Saturday.From)
+										}
+										return types.String{}
+									}(),
+									To: func() types.String {
+										if item.PortSchedule.Saturday.To != "" {
+											return types.StringValue(item.PortSchedule.Saturday.To)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -395,8 +439,18 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemsToBody(state NetworksSwitch
 										}
 										return types.Bool{}
 									}(),
-									From: types.StringValue(item.PortSchedule.Sunday.From),
-									To:   types.StringValue(item.PortSchedule.Sunday.To),
+									From: func() types.String {
+										if item.PortSchedule.Sunday.From != "" {
+											return types.StringValue(item.PortSchedule.Sunday.From)
+										}
+										return types.String{}
+									}(),
+									To: func() types.String {
+										if item.PortSchedule.Sunday.To != "" {
+											return types.StringValue(item.PortSchedule.Sunday.To)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -410,8 +464,18 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemsToBody(state NetworksSwitch
 										}
 										return types.Bool{}
 									}(),
-									From: types.StringValue(item.PortSchedule.Thursday.From),
-									To:   types.StringValue(item.PortSchedule.Thursday.To),
+									From: func() types.String {
+										if item.PortSchedule.Thursday.From != "" {
+											return types.StringValue(item.PortSchedule.Thursday.From)
+										}
+										return types.String{}
+									}(),
+									To: func() types.String {
+										if item.PortSchedule.Thursday.To != "" {
+											return types.StringValue(item.PortSchedule.Thursday.To)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -425,8 +489,18 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemsToBody(state NetworksSwitch
 										}
 										return types.Bool{}
 									}(),
-									From: types.StringValue(item.PortSchedule.Tuesday.From),
-									To:   types.StringValue(item.PortSchedule.Tuesday.To),
+									From: func() types.String {
+										if item.PortSchedule.Tuesday.From != "" {
+											return types.StringValue(item.PortSchedule.Tuesday.From)
+										}
+										return types.String{}
+									}(),
+									To: func() types.String {
+										if item.PortSchedule.Tuesday.To != "" {
+											return types.StringValue(item.PortSchedule.Tuesday.To)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -440,8 +514,18 @@ func ResponseSwitchGetNetworkSwitchPortSchedulesItemsToBody(state NetworksSwitch
 										}
 										return types.Bool{}
 									}(),
-									From: types.StringValue(item.PortSchedule.Wednesday.From),
-									To:   types.StringValue(item.PortSchedule.Wednesday.To),
+									From: func() types.String {
+										if item.PortSchedule.Wednesday.From != "" {
+											return types.StringValue(item.PortSchedule.Wednesday.From)
+										}
+										return types.String{}
+									}(),
+									To: func() types.String {
+										if item.PortSchedule.Wednesday.To != "" {
+											return types.StringValue(item.PortSchedule.Wednesday.To)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil

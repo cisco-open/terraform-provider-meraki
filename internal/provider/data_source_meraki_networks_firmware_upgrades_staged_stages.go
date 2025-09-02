@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -156,9 +155,24 @@ func ResponseNetworksGetNetworkFirmwareUpgradesStagedStagesItemsToBody(state Net
 			Group: func() *ResponseItemNetworksGetNetworkFirmwareUpgradesStagedStagesGroup {
 				if item.Group != nil {
 					return &ResponseItemNetworksGetNetworkFirmwareUpgradesStagedStagesGroup{
-						Description: types.StringValue(item.Group.Description),
-						ID:          types.StringValue(item.Group.ID),
-						Name:        types.StringValue(item.Group.Name),
+						Description: func() types.String {
+							if item.Group.Description != "" {
+								return types.StringValue(item.Group.Description)
+							}
+							return types.String{}
+						}(),
+						ID: func() types.String {
+							if item.Group.ID != "" {
+								return types.StringValue(item.Group.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if item.Group.Name != "" {
+								return types.StringValue(item.Group.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil

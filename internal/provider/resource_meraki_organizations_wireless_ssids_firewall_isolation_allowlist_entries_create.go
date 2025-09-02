@@ -33,19 +33,19 @@ import (
 )
 
 var (
-	_ resource.Resource              = &WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource{}
-	_ resource.ResourceWithConfigure = &WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource{}
+	_ resource.Resource              = &OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource{}
+	_ resource.ResourceWithConfigure = &OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource{}
 )
 
-func NewWirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource() resource.Resource {
-	return &WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource{}
+func NewOrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource() resource.Resource {
+	return &OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource{}
 }
 
-type WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource struct {
+type OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource struct {
 	client *merakigosdk.Client
 }
 
-func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -54,12 +54,12 @@ func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource) C
 }
 
 // Metadata returns the data source type name.
-func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_Wireless_wireless_ssids_firewall_isolation_allowlist_entries_create"
+func (r *OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_organizations_wireless_ssids_firewall_isolation_allowlist_entries_create"
 }
 
 // resourceAction
-func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"organization_id": schema.StringAttribute{
@@ -200,9 +200,9 @@ func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource) S
 		},
 	}
 }
-func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var data WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreate
+	var data OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesCreate
 
 	var item types.Object
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &item)...)
@@ -242,21 +242,21 @@ func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource) C
 	resp.Diagnostics.Append(diags...)
 }
 
-func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 }
 
-func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	// resp.Diagnostics.AddWarning("Error Update Resource", "This resource has no update method in the meraki lab, the resource was deleted only in terraform.")
 }
 
-func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesCreateResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// resp.Diagnostics.AddWarning("Error deleting Resource", "This resource has no delete method in the meraki lab, the resource was deleted only in terraform.")
 	resp.State.RemoveResource(ctx)
 }
 
 // TF Structs Schema
-type WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreate struct {
+type OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesCreate struct {
 	OrganizationID types.String                                                                     `tfsdk:"organization_id"`
 	Item           *ResponseWirelessCreateOrganizationWirelessSsidsFirewallIsolationAllowlistEntry  `tfsdk:"item"`
 	Parameters     *RequestWirelessCreateOrganizationWirelessSsidsFirewallIsolationAllowlistEntryRs `tfsdk:"parameters"`
@@ -307,7 +307,7 @@ type RequestWirelessCreateOrganizationWirelessSsidsFirewallIsolationAllowlistEnt
 }
 
 // FromBody
-func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreate) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestWirelessCreateOrganizationWirelessSSIDsFirewallIsolationAllowlistEntry {
+func (r *OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesCreate) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestWirelessCreateOrganizationWirelessSSIDsFirewallIsolationAllowlistEntry {
 	emptyString := ""
 	re := *r.Parameters
 	var requestWirelessCreateOrganizationWirelessSSIDsFirewallIsolationAllowlistEntryClient *merakigosdk.RequestWirelessCreateOrganizationWirelessSSIDsFirewallIsolationAllowlistEntryClient
@@ -358,25 +358,60 @@ func (r *WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreate) toSdkApiR
 }
 
 // ToBody
-func ResponseWirelessCreateOrganizationWirelessSSIDsFirewallIsolationAllowlistEntryItemToBody(state WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreate, response *merakigosdk.ResponseWirelessCreateOrganizationWirelessSSIDsFirewallIsolationAllowlistEntry) WirelessWirelessSSIDsFirewallIsolationAllowlistEntriesCreate {
+func ResponseWirelessCreateOrganizationWirelessSSIDsFirewallIsolationAllowlistEntryItemToBody(state OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesCreate, response *merakigosdk.ResponseWirelessCreateOrganizationWirelessSSIDsFirewallIsolationAllowlistEntry) OrganizationsWirelessSSIDsFirewallIsolationAllowlistEntriesCreate {
 	itemState := ResponseWirelessCreateOrganizationWirelessSsidsFirewallIsolationAllowlistEntry{
 		Client: func() *ResponseWirelessCreateOrganizationWirelessSsidsFirewallIsolationAllowlistEntryClient {
 			if response.Client != nil {
 				return &ResponseWirelessCreateOrganizationWirelessSsidsFirewallIsolationAllowlistEntryClient{
-					Mac: types.StringValue(response.Client.Mac),
+					Mac: func() types.String {
+						if response.Client.Mac != "" {
+							return types.StringValue(response.Client.Mac)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		CreatedAt:     types.StringValue(response.CreatedAt),
-		Description:   types.StringValue(response.Description),
-		EntryID:       types.StringValue(response.EntryID),
-		LastUpdatedAt: types.StringValue(response.LastUpdatedAt),
+		CreatedAt: func() types.String {
+			if response.CreatedAt != "" {
+				return types.StringValue(response.CreatedAt)
+			}
+			return types.String{}
+		}(),
+		Description: func() types.String {
+			if response.Description != "" {
+				return types.StringValue(response.Description)
+			}
+			return types.String{}
+		}(),
+		EntryID: func() types.String {
+			if response.EntryID != "" {
+				return types.StringValue(response.EntryID)
+			}
+			return types.String{}
+		}(),
+		LastUpdatedAt: func() types.String {
+			if response.LastUpdatedAt != "" {
+				return types.StringValue(response.LastUpdatedAt)
+			}
+			return types.String{}
+		}(),
 		Network: func() *ResponseWirelessCreateOrganizationWirelessSsidsFirewallIsolationAllowlistEntryNetwork {
 			if response.Network != nil {
 				return &ResponseWirelessCreateOrganizationWirelessSsidsFirewallIsolationAllowlistEntryNetwork{
-					ID:   types.StringValue(response.Network.ID),
-					Name: types.StringValue(response.Network.Name),
+					ID: func() types.String {
+						if response.Network.ID != "" {
+							return types.StringValue(response.Network.ID)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.Network.Name != "" {
+							return types.StringValue(response.Network.Name)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -384,8 +419,18 @@ func ResponseWirelessCreateOrganizationWirelessSSIDsFirewallIsolationAllowlistEn
 		SSID: func() *ResponseWirelessCreateOrganizationWirelessSsidsFirewallIsolationAllowlistEntrySsid {
 			if response.SSID != nil {
 				return &ResponseWirelessCreateOrganizationWirelessSsidsFirewallIsolationAllowlistEntrySsid{
-					ID:   types.StringValue(response.SSID.ID),
-					Name: types.StringValue(response.SSID.Name),
+					ID: func() types.String {
+						if response.SSID.ID != "" {
+							return types.StringValue(response.SSID.ID)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.SSID.Name != "" {
+							return types.StringValue(response.SSID.Name)
+						}
+						return types.String{}
+					}(),
 					Number: func() types.Int64 {
 						if response.SSID.Number != nil {
 							return types.Int64Value(int64(*response.SSID.Number))

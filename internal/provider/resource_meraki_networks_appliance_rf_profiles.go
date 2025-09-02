@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -512,7 +513,7 @@ func (r *NetworksApplianceRfProfilesResource) Update(ctx context.Context, req re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceRfProfile",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -895,16 +896,36 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBodyRs(state NetworksApp
 			}
 			return nil
 		}(),
-		ID:        types.StringValue(response.ID),
-		Name:      types.StringValue(response.Name),
-		NetworkID: types.StringValue(response.NetworkID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
 		PerSSIDSettings: func() *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettingsRs {
 			if response.PerSSIDSettings != nil {
 				return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettingsRs{
 					Status1: func() *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings1Rs {
 						if response.PerSSIDSettings.Status1 != nil {
 							return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings1Rs{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status1.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status1.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status1.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status1.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status1.BandSteeringEnabled)
@@ -918,7 +939,12 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBodyRs(state NetworksApp
 					Status2: func() *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings2Rs {
 						if response.PerSSIDSettings.Status2 != nil {
 							return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings2Rs{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status2.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status2.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status2.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status2.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status2.BandSteeringEnabled)
@@ -932,7 +958,12 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBodyRs(state NetworksApp
 					Status3: func() *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings3Rs {
 						if response.PerSSIDSettings.Status3 != nil {
 							return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings3Rs{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status3.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status3.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status3.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status3.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status3.BandSteeringEnabled)
@@ -946,7 +977,12 @@ func ResponseApplianceGetNetworkApplianceRfProfileItemToBodyRs(state NetworksApp
 					Status4: func() *ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings4Rs {
 						if response.PerSSIDSettings.Status4 != nil {
 							return &ResponseApplianceGetNetworkApplianceRfProfilePerSsidSettings4Rs{
-								BandOperationMode: types.StringValue(response.PerSSIDSettings.Status4.BandOperationMode),
+								BandOperationMode: func() types.String {
+									if response.PerSSIDSettings.Status4.BandOperationMode != "" {
+										return types.StringValue(response.PerSSIDSettings.Status4.BandOperationMode)
+									}
+									return types.String{}
+								}(),
 								BandSteeringEnabled: func() types.Bool {
 									if response.PerSSIDSettings.Status4.BandSteeringEnabled != nil {
 										return types.BoolValue(*response.PerSSIDSettings.Status4.BandSteeringEnabled)

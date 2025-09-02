@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -148,9 +147,24 @@ func ResponseSmGetNetworkSmDeviceWLANListsItemsToBody(state NetworksSmDevicesWLA
 	var items []ResponseItemSmGetNetworkSmDeviceWlanLists
 	for _, item := range *response {
 		itemState := ResponseItemSmGetNetworkSmDeviceWlanLists{
-			CreatedAt: types.StringValue(item.CreatedAt),
-			ID:        types.StringValue(item.ID),
-			Xml:       types.StringValue(item.Xml),
+			CreatedAt: func() types.String {
+				if item.CreatedAt != "" {
+					return types.StringValue(item.CreatedAt)
+				}
+				return types.String{}
+			}(),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			Xml: func() types.String {
+				if item.Xml != "" {
+					return types.StringValue(item.Xml)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

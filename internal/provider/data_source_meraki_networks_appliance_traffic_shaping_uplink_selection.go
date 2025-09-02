@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -466,7 +465,12 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 			}
 			return types.Bool{}
 		}(),
-		DefaultUplink: types.StringValue(response.DefaultUplink),
+		DefaultUplink: func() types.String {
+			if response.DefaultUplink != "" {
+				return types.StringValue(response.DefaultUplink)
+			}
+			return types.String{}
+		}(),
 		FailoverAndFailback: func() *ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionFailoverAndFailback {
 			if response.FailoverAndFailback != nil {
 				return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionFailoverAndFailback{
@@ -498,40 +502,90 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 				result := make([]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferences, len(*response.VpnTrafficUplinkPreferences))
 				for i, vpnTrafficUplinkPreferences := range *response.VpnTrafficUplinkPreferences {
 					result[i] = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferences{
-						FailOverCriterion: types.StringValue(vpnTrafficUplinkPreferences.FailOverCriterion),
+						FailOverCriterion: func() types.String {
+							if vpnTrafficUplinkPreferences.FailOverCriterion != "" {
+								return types.StringValue(vpnTrafficUplinkPreferences.FailOverCriterion)
+							}
+							return types.String{}
+						}(),
 						PerformanceClass: func() *ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesPerformanceClass {
 							if vpnTrafficUplinkPreferences.PerformanceClass != nil {
 								return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesPerformanceClass{
-									BuiltinPerformanceClassName: types.StringValue(vpnTrafficUplinkPreferences.PerformanceClass.BuiltinPerformanceClassName),
-									CustomPerformanceClassID:    types.StringValue(vpnTrafficUplinkPreferences.PerformanceClass.CustomPerformanceClassID),
-									Type:                        types.StringValue(vpnTrafficUplinkPreferences.PerformanceClass.Type),
+									BuiltinPerformanceClassName: func() types.String {
+										if vpnTrafficUplinkPreferences.PerformanceClass.BuiltinPerformanceClassName != "" {
+											return types.StringValue(vpnTrafficUplinkPreferences.PerformanceClass.BuiltinPerformanceClassName)
+										}
+										return types.String{}
+									}(),
+									CustomPerformanceClassID: func() types.String {
+										if vpnTrafficUplinkPreferences.PerformanceClass.CustomPerformanceClassID != "" {
+											return types.StringValue(vpnTrafficUplinkPreferences.PerformanceClass.CustomPerformanceClassID)
+										}
+										return types.String{}
+									}(),
+									Type: func() types.String {
+										if vpnTrafficUplinkPreferences.PerformanceClass.Type != "" {
+											return types.StringValue(vpnTrafficUplinkPreferences.PerformanceClass.Type)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						PreferredUplink: types.StringValue(vpnTrafficUplinkPreferences.PreferredUplink),
+						PreferredUplink: func() types.String {
+							if vpnTrafficUplinkPreferences.PreferredUplink != "" {
+								return types.StringValue(vpnTrafficUplinkPreferences.PreferredUplink)
+							}
+							return types.String{}
+						}(),
 						TrafficFilters: func() *[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFilters {
 							if vpnTrafficUplinkPreferences.TrafficFilters != nil {
 								result := make([]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFilters, len(*vpnTrafficUplinkPreferences.TrafficFilters))
 								for i, trafficFilters := range *vpnTrafficUplinkPreferences.TrafficFilters {
 									result[i] = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFilters{
-										Type: types.StringValue(trafficFilters.Type),
+										Type: func() types.String {
+											if trafficFilters.Type != "" {
+												return types.StringValue(trafficFilters.Type)
+											}
+											return types.String{}
+										}(),
 										Value: func() *ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValue {
 											if trafficFilters.Value != nil {
 												return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValue{
 													Destination: func() *ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueDestination {
 														if trafficFilters.Value.Destination != nil {
 															return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueDestination{
-																Cidr: types.StringValue(trafficFilters.Value.Destination.Cidr),
-																Fqdn: types.StringValue(trafficFilters.Value.Destination.Fqdn),
+																Cidr: func() types.String {
+																	if trafficFilters.Value.Destination.Cidr != "" {
+																		return types.StringValue(trafficFilters.Value.Destination.Cidr)
+																	}
+																	return types.String{}
+																}(),
+																Fqdn: func() types.String {
+																	if trafficFilters.Value.Destination.Fqdn != "" {
+																		return types.StringValue(trafficFilters.Value.Destination.Fqdn)
+																	}
+																	return types.String{}
+																}(),
 																Host: func() types.Int64 {
 																	if trafficFilters.Value.Destination.Host != nil {
 																		return types.Int64Value(int64(*trafficFilters.Value.Destination.Host))
 																	}
 																	return types.Int64{}
 																}(),
-																Network: types.StringValue(trafficFilters.Value.Destination.Network),
-																Port:    types.StringValue(trafficFilters.Value.Destination.Port),
+																Network: func() types.String {
+																	if trafficFilters.Value.Destination.Network != "" {
+																		return types.StringValue(trafficFilters.Value.Destination.Network)
+																	}
+																	return types.String{}
+																}(),
+																Port: func() types.String {
+																	if trafficFilters.Value.Destination.Port != "" {
+																		return types.StringValue(trafficFilters.Value.Destination.Port)
+																	}
+																	return types.String{}
+																}(),
 																VLAN: func() types.Int64 {
 																	if trafficFilters.Value.Destination.VLAN != nil {
 																		return types.Int64Value(int64(*trafficFilters.Value.Destination.VLAN))
@@ -542,20 +596,45 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 														}
 														return nil
 													}(),
-													ID:       types.StringValue(trafficFilters.Value.ID),
-													Protocol: types.StringValue(trafficFilters.Value.Protocol),
+													ID: func() types.String {
+														if trafficFilters.Value.ID != "" {
+															return types.StringValue(trafficFilters.Value.ID)
+														}
+														return types.String{}
+													}(),
+													Protocol: func() types.String {
+														if trafficFilters.Value.Protocol != "" {
+															return types.StringValue(trafficFilters.Value.Protocol)
+														}
+														return types.String{}
+													}(),
 													Source: func() *ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueSource {
 														if trafficFilters.Value.Source != nil {
 															return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueSource{
-																Cidr: types.StringValue(trafficFilters.Value.Source.Cidr),
+																Cidr: func() types.String {
+																	if trafficFilters.Value.Source.Cidr != "" {
+																		return types.StringValue(trafficFilters.Value.Source.Cidr)
+																	}
+																	return types.String{}
+																}(),
 																Host: func() types.Int64 {
 																	if trafficFilters.Value.Source.Host != nil {
 																		return types.Int64Value(int64(*trafficFilters.Value.Source.Host))
 																	}
 																	return types.Int64{}
 																}(),
-																Network: types.StringValue(trafficFilters.Value.Source.Network),
-																Port:    types.StringValue(trafficFilters.Value.Source.Port),
+																Network: func() types.String {
+																	if trafficFilters.Value.Source.Network != "" {
+																		return types.StringValue(trafficFilters.Value.Source.Network)
+																	}
+																	return types.String{}
+																}(),
+																Port: func() types.String {
+																	if trafficFilters.Value.Source.Port != "" {
+																		return types.StringValue(trafficFilters.Value.Source.Port)
+																	}
+																	return types.String{}
+																}(),
 																VLAN: func() types.Int64 {
 																	if trafficFilters.Value.Source.VLAN != nil {
 																		return types.Int64Value(int64(*trafficFilters.Value.Source.VLAN))
@@ -587,13 +666,23 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 				result := make([]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferences, len(*response.WanTrafficUplinkPreferences))
 				for i, wanTrafficUplinkPreferences := range *response.WanTrafficUplinkPreferences {
 					result[i] = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferences{
-						PreferredUplink: types.StringValue(wanTrafficUplinkPreferences.PreferredUplink),
+						PreferredUplink: func() types.String {
+							if wanTrafficUplinkPreferences.PreferredUplink != "" {
+								return types.StringValue(wanTrafficUplinkPreferences.PreferredUplink)
+							}
+							return types.String{}
+						}(),
 						TrafficFilters: func() *[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFilters {
 							if wanTrafficUplinkPreferences.TrafficFilters != nil {
 								result := make([]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFilters, len(*wanTrafficUplinkPreferences.TrafficFilters))
 								for i, trafficFilters := range *wanTrafficUplinkPreferences.TrafficFilters {
 									result[i] = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFilters{
-										Type: types.StringValue(trafficFilters.Type),
+										Type: func() types.String {
+											if trafficFilters.Type != "" {
+												return types.StringValue(trafficFilters.Type)
+											}
+											return types.String{}
+										}(),
 										Value: func() *ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValue {
 											if trafficFilters.Value != nil {
 												return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValue{
@@ -605,33 +694,73 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 																		result := make([]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplications, len(*trafficFilters.Value.Destination.Applications))
 																		for i, applications := range *trafficFilters.Value.Destination.Applications {
 																			result[i] = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplications{
-																				ID:   types.StringValue(applications.ID),
-																				Name: types.StringValue(applications.Name),
-																				Type: types.StringValue(applications.Type),
+																				ID: func() types.String {
+																					if applications.ID != "" {
+																						return types.StringValue(applications.ID)
+																					}
+																					return types.String{}
+																				}(),
+																				Name: func() types.String {
+																					if applications.Name != "" {
+																						return types.StringValue(applications.Name)
+																					}
+																					return types.String{}
+																				}(),
+																				Type: func() types.String {
+																					if applications.Type != "" {
+																						return types.StringValue(applications.Type)
+																					}
+																					return types.String{}
+																				}(),
 																			}
 																		}
 																		return &result
 																	}
 																	return nil
 																}(),
-																Cidr: types.StringValue(trafficFilters.Value.Destination.Cidr),
-																Port: types.StringValue(trafficFilters.Value.Destination.Port),
+																Cidr: func() types.String {
+																	if trafficFilters.Value.Destination.Cidr != "" {
+																		return types.StringValue(trafficFilters.Value.Destination.Cidr)
+																	}
+																	return types.String{}
+																}(),
+																Port: func() types.String {
+																	if trafficFilters.Value.Destination.Port != "" {
+																		return types.StringValue(trafficFilters.Value.Destination.Port)
+																	}
+																	return types.String{}
+																}(),
 															}
 														}
 														return nil
 													}(),
-													Protocol: types.StringValue(trafficFilters.Value.Protocol),
+													Protocol: func() types.String {
+														if trafficFilters.Value.Protocol != "" {
+															return types.StringValue(trafficFilters.Value.Protocol)
+														}
+														return types.String{}
+													}(),
 													Source: func() *ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueSource {
 														if trafficFilters.Value.Source != nil {
 															return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueSource{
-																Cidr: types.StringValue(trafficFilters.Value.Source.Cidr),
+																Cidr: func() types.String {
+																	if trafficFilters.Value.Source.Cidr != "" {
+																		return types.StringValue(trafficFilters.Value.Source.Cidr)
+																	}
+																	return types.String{}
+																}(),
 																Host: func() types.Int64 {
 																	if trafficFilters.Value.Source.Host != nil {
 																		return types.Int64Value(int64(*trafficFilters.Value.Source.Host))
 																	}
 																	return types.Int64{}
 																}(),
-																Port: types.StringValue(trafficFilters.Value.Source.Port),
+																Port: func() types.String {
+																	if trafficFilters.Value.Source.Port != "" {
+																		return types.StringValue(trafficFilters.Value.Source.Port)
+																	}
+																	return types.String{}
+																}(),
 																VLAN: func() types.Int64 {
 																	if trafficFilters.Value.Source.VLAN != nil {
 																		return types.Int64Value(int64(*trafficFilters.Value.Source.VLAN))

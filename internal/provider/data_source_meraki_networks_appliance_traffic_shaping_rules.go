@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -195,10 +194,10 @@ type ResponseApplianceGetNetworkApplianceTrafficShapingRulesRules struct {
 }
 
 type ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesDefinitions struct {
-	Type      types.String                                                              `tfsdk:"type"`
-	Value     types.String                                                              `tfsdk:"value"`
-	ValueList types.Set                                                                 `tfsdk:"value_list"`
-	ValueObj  *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj `tfsdk:"value_obj"`
+	Type      types.String                                                                `tfsdk:"type"`
+	Value     types.String                                                                `tfsdk:"value"`
+	ValueList types.Set                                                                   `tfsdk:"value_list"`
+	ValueObj  *ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesValueObj `tfsdk:"value_obj"`
 }
 
 type ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesPerClientBandwidthLimits struct {
@@ -230,7 +229,12 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingRulesItemToBody(state Net
 								result := make([]ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesDefinitions, len(*rules.Definitions))
 								for i, definitions := range *rules.Definitions {
 									result[i] = ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesDefinitions{
-										Type: types.StringValue(definitions.Type),
+										Type: func() types.String {
+											if definitions.Type != "" {
+												return types.StringValue(definitions.Type)
+											}
+											return types.String{}
+										}(),
 										Value: func() types.String {
 											if definitions.Value == nil {
 												return types.StringNull()
@@ -243,13 +247,23 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingRulesItemToBody(state Net
 											}
 											return StringSliceToSet(*definitions.ValueList)
 										}(),
-										ValueObj: func() *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj {
+										ValueObj: func() *ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesValueObj {
 											if definitions.ValueObj == nil {
 												return nil
 											}
-											return &ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj{
-												ID:   types.StringValue(definitions.ValueObj.ID),
-												Name: types.StringValue(definitions.ValueObj.Name),
+											return &ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesValueObj{
+												ID: func() types.String {
+													if definitions.ValueObj.ID != "" {
+														return types.StringValue(definitions.ValueObj.ID)
+													}
+													return types.String{}
+												}(),
+												Name: func() types.String {
+													if definitions.ValueObj.Name != "" {
+														return types.StringValue(definitions.ValueObj.Name)
+													}
+													return types.String{}
+												}(),
 											}
 										}(),
 									}
@@ -286,12 +300,22 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingRulesItemToBody(state Net
 										}
 										return nil
 									}(),
-									Settings: types.StringValue(rules.PerClientBandwidthLimits.Settings),
+									Settings: func() types.String {
+										if rules.PerClientBandwidthLimits.Settings != "" {
+											return types.StringValue(rules.PerClientBandwidthLimits.Settings)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						Priority: types.StringValue(rules.Priority),
+						Priority: func() types.String {
+							if rules.Priority != "" {
+								return types.StringValue(rules.Priority)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

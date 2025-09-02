@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -235,11 +234,21 @@ func ResponseApplianceGetOrganizationApplianceDNSLocalProfilesAssignmentsItemToB
 				result := make([]ResponseApplianceGetOrganizationApplianceDnsLocalProfilesAssignmentsItems, len(*response.Items))
 				for i, items := range *response.Items {
 					result[i] = ResponseApplianceGetOrganizationApplianceDnsLocalProfilesAssignmentsItems{
-						AssignmentID: types.StringValue(items.AssignmentID),
+						AssignmentID: func() types.String {
+							if items.AssignmentID != "" {
+								return types.StringValue(items.AssignmentID)
+							}
+							return types.String{}
+						}(),
 						Network: func() *ResponseApplianceGetOrganizationApplianceDnsLocalProfilesAssignmentsItemsNetwork {
 							if items.Network != nil {
 								return &ResponseApplianceGetOrganizationApplianceDnsLocalProfilesAssignmentsItemsNetwork{
-									ID: types.StringValue(items.Network.ID),
+									ID: func() types.String {
+										if items.Network.ID != "" {
+											return types.StringValue(items.Network.ID)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -247,7 +256,12 @@ func ResponseApplianceGetOrganizationApplianceDNSLocalProfilesAssignmentsItemToB
 						Profile: func() *ResponseApplianceGetOrganizationApplianceDnsLocalProfilesAssignmentsItemsProfile {
 							if items.Profile != nil {
 								return &ResponseApplianceGetOrganizationApplianceDnsLocalProfilesAssignmentsItemsProfile{
-									ID: types.StringValue(items.Profile.ID),
+									ID: func() types.String {
+										if items.Profile.ID != "" {
+											return types.StringValue(items.Profile.ID)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil

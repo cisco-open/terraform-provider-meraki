@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	"log"
 
@@ -72,7 +73,6 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Schema(_ context.Context,
 		Attributes: map[string]schema.Attribute{
 			"default_rules_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Whether default traffic shaping rules are enabled (true) or disabled (false). There are 4 default rules, which can be seen on your network's traffic shaping page. Note that default rules count against the rule limit of 8.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -87,7 +87,6 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Schema(_ context.Context,
     they are specified in. An empty list (or null) means no rules. Note that
     you are allowed a maximum of 8 rules.
 `,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.List{
 					listplanmodifier.UseStateForUnknown(),
@@ -98,7 +97,6 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Schema(_ context.Context,
 						"definitions": schema.ListNestedAttribute{
 							MarkdownDescription: `    A list of objects describing the definitions of your traffic shaping rule. At least one definition is required.
 `,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.List{
 								listplanmodifier.UseStateForUnknown(),
@@ -109,7 +107,6 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Schema(_ context.Context,
 									"type": schema.StringAttribute{
 										MarkdownDescription: `The type of definition. Can be one of 'application', 'applicationCategory', 'host', 'port', 'ipRange' or 'localNet'.
                                               Allowed values: [application,applicationCategory,host,ipRange,localNet,port]`,
-										Computed: true,
 										Optional: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -135,7 +132,6 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Schema(_ context.Context,
     application ID (for a list of IDs for your network, use the trafficShaping/applicationCategories
     endpoint).
 `,
-										Computed: true,
 										Optional: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -187,7 +183,6 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Schema(_ context.Context,
 							MarkdownDescription: `    The DSCP tag applied by your rule. null means 'Do not change DSCP tag'.
     For a list of possible tag values, use the trafficShaping/dscpTaggingOptions endpoint.
 `,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -196,7 +191,6 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Schema(_ context.Context,
 						"per_client_bandwidth_limits": schema.SingleNestedAttribute{
 							MarkdownDescription: `    An object describing the bandwidth settings for your rule.
 `,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.Object{
 								objectplanmodifier.UseStateForUnknown(),
@@ -205,7 +199,6 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Schema(_ context.Context,
 
 								"bandwidth_limits": schema.SingleNestedAttribute{
 									MarkdownDescription: `The bandwidth limits object, specifying the upload ('limitUp') and download ('limitDown') speed in Kbps. These are only enforced if 'settings' is set to 'custom'.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Object{
 										objectplanmodifier.UseStateForUnknown(),
@@ -214,7 +207,6 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Schema(_ context.Context,
 
 										"limit_down": schema.Int64Attribute{
 											MarkdownDescription: `The maximum download limit (integer, in Kbps).`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.Int64{
 												int64planmodifier.UseStateForUnknown(),
@@ -222,7 +214,6 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Schema(_ context.Context,
 										},
 										"limit_up": schema.Int64Attribute{
 											MarkdownDescription: `The maximum upload limit (integer, in Kbps).`,
-											Computed:            true,
 											Optional:            true,
 											PlanModifiers: []planmodifier.Int64{
 												int64planmodifier.UseStateForUnknown(),
@@ -232,7 +223,6 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Schema(_ context.Context,
 								},
 								"settings": schema.StringAttribute{
 									MarkdownDescription: `How bandwidth limits are applied by your rule. Can be one of 'network default', 'ignore' or 'custom'.`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -244,7 +234,6 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Schema(_ context.Context,
 							MarkdownDescription: `    A string, indicating the priority level for packets bound to your rule.
     Can be 'low', 'normal' or 'high'.
 `,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -279,27 +268,6 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Create(ctx context.Contex
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceTrafficShapingRules(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceTrafficShapingRules  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceTrafficShapingRules only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceTrafficShapingRules(vvNetworkID, dataRequest)
@@ -308,7 +276,7 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Create(ctx context.Contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceTrafficShapingRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -319,49 +287,19 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Create(ctx context.Contex
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceTrafficShapingRules(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceTrafficShapingRules",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkApplianceTrafficShapingRules",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseApplianceGetNetworkApplianceTrafficShapingRulesItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksApplianceTrafficShapingRulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksApplianceTrafficShapingRulesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -391,33 +329,28 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Read(ctx context.Context,
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceTrafficShapingRulesItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksApplianceTrafficShapingRulesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksApplianceTrafficShapingRulesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksApplianceTrafficShapingRulesRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksApplianceTrafficShapingRulesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceTrafficShapingRules(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceTrafficShapingRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -427,9 +360,7 @@ func (r *NetworksApplianceTrafficShapingRulesResource) Update(ctx context.Contex
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksApplianceTrafficShapingRulesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -453,10 +384,10 @@ type ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesRs struct {
 }
 
 type ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesDefinitionsRs struct {
-	Type      types.String                                                              `tfsdk:"type"`
-	Value     types.String                                                              `tfsdk:"value"`
-	ValueList types.Set                                                                 `tfsdk:"value_list"`
-	ValueObj  *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj `tfsdk:"value_obj"`
+	Type      types.String                                                                `tfsdk:"type"`
+	Value     types.String                                                                `tfsdk:"value"`
+	ValueList types.Set                                                                   `tfsdk:"value_list"`
+	ValueObj  *ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesValueObj `tfsdk:"value_obj"`
 }
 
 type ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesPerClientBandwidthLimitsRs struct {
@@ -600,7 +531,12 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingRulesItemToBodyRs(state N
 								result := make([]ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesDefinitionsRs, len(*rules.Definitions))
 								for i, definitions := range *rules.Definitions {
 									result[i] = ResponseApplianceGetNetworkApplianceTrafficShapingRulesRulesDefinitionsRs{
-										Type: types.StringValue(definitions.Type),
+										Type: func() types.String {
+											if definitions.Type != "" {
+												return types.StringValue(definitions.Type)
+											}
+											return types.String{}
+										}(),
 										Value: func() types.String {
 											if definitions.Value == nil {
 												return types.StringNull()
@@ -613,13 +549,23 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingRulesItemToBodyRs(state N
 											}
 											return StringSliceToSet(*definitions.ValueList)
 										}(),
-										ValueObj: func() *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj {
+										ValueObj: func() *ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesValueObj {
 											if definitions.ValueObj == nil {
 												return nil
 											}
-											return &ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj{
-												ID:   types.StringValue(definitions.ValueObj.ID),
-												Name: types.StringValue(definitions.ValueObj.Name),
+											return &ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesValueObj{
+												ID: func() types.String {
+													if definitions.ValueObj.ID != "" {
+														return types.StringValue(definitions.ValueObj.ID)
+													}
+													return types.String{}
+												}(),
+												Name: func() types.String {
+													if definitions.ValueObj.Name != "" {
+														return types.StringValue(definitions.ValueObj.Name)
+													}
+													return types.String{}
+												}(),
 											}
 										}(),
 									}
@@ -656,12 +602,22 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingRulesItemToBodyRs(state N
 										}
 										return nil
 									}(),
-									Settings: types.StringValue(rules.PerClientBandwidthLimits.Settings),
+									Settings: func() types.String {
+										if rules.PerClientBandwidthLimits.Settings != "" {
+											return types.StringValue(rules.PerClientBandwidthLimits.Settings)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						Priority: types.StringValue(rules.Priority),
+						Priority: func() types.String {
+							if rules.Priority != "" {
+								return types.StringValue(rules.Priority)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

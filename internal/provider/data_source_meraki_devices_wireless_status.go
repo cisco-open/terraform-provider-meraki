@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -189,29 +188,54 @@ func ResponseWirelessGetDeviceWirelessStatusItemToBody(state DevicesWirelessStat
 				result := make([]ResponseWirelessGetDeviceWirelessStatusBasicServiceSets, len(*response.BasicServiceSets))
 				for i, basicServiceSets := range *response.BasicServiceSets {
 					result[i] = ResponseWirelessGetDeviceWirelessStatusBasicServiceSets{
-						Band: types.StringValue(basicServiceSets.Band),
+						Band: func() types.String {
+							if basicServiceSets.Band != "" {
+								return types.StringValue(basicServiceSets.Band)
+							}
+							return types.String{}
+						}(),
 						Broadcasting: func() types.Bool {
 							if basicServiceSets.Broadcasting != nil {
 								return types.BoolValue(*basicServiceSets.Broadcasting)
 							}
 							return types.Bool{}
 						}(),
-						Bssid: types.StringValue(basicServiceSets.Bssid),
+						Bssid: func() types.String {
+							if basicServiceSets.Bssid != "" {
+								return types.StringValue(basicServiceSets.Bssid)
+							}
+							return types.String{}
+						}(),
 						Channel: func() types.Int64 {
 							if basicServiceSets.Channel != nil {
 								return types.Int64Value(int64(*basicServiceSets.Channel))
 							}
 							return types.Int64{}
 						}(),
-						ChannelWidth: types.StringValue(basicServiceSets.ChannelWidth),
+						ChannelWidth: func() types.String {
+							if basicServiceSets.ChannelWidth != "" {
+								return types.StringValue(basicServiceSets.ChannelWidth)
+							}
+							return types.String{}
+						}(),
 						Enabled: func() types.Bool {
 							if basicServiceSets.Enabled != nil {
 								return types.BoolValue(*basicServiceSets.Enabled)
 							}
 							return types.Bool{}
 						}(),
-						Power:    types.StringValue(basicServiceSets.Power),
-						SSIDName: types.StringValue(basicServiceSets.SSIDName),
+						Power: func() types.String {
+							if basicServiceSets.Power != "" {
+								return types.StringValue(basicServiceSets.Power)
+							}
+							return types.String{}
+						}(),
+						SSIDName: func() types.String {
+							if basicServiceSets.SSIDName != "" {
+								return types.StringValue(basicServiceSets.SSIDName)
+							}
+							return types.String{}
+						}(),
 						SSIDNumber: func() types.Int64 {
 							if basicServiceSets.SSIDNumber != nil {
 								return types.Int64Value(int64(*basicServiceSets.SSIDNumber))

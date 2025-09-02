@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -163,8 +162,18 @@ func ResponseSensorGetDeviceSensorRelationshipsItemToBody(state DevicesSensorRel
 							result := make([]ResponseSensorGetDeviceSensorRelationshipsLivestreamRelatedDevices, len(*response.Livestream.RelatedDevices))
 							for i, relatedDevices := range *response.Livestream.RelatedDevices {
 								result[i] = ResponseSensorGetDeviceSensorRelationshipsLivestreamRelatedDevices{
-									ProductType: types.StringValue(relatedDevices.ProductType),
-									Serial:      types.StringValue(relatedDevices.Serial),
+									ProductType: func() types.String {
+										if relatedDevices.ProductType != "" {
+											return types.StringValue(relatedDevices.ProductType)
+										}
+										return types.String{}
+									}(),
+									Serial: func() types.String {
+										if relatedDevices.Serial != "" {
+											return types.StringValue(relatedDevices.Serial)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return &result

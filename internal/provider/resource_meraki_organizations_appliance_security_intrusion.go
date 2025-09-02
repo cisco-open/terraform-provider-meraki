@@ -19,14 +19,15 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -61,19 +62,17 @@ func (r *OrganizationsApplianceSecurityIntrusionResource) Metadata(_ context.Con
 func (r *OrganizationsApplianceSecurityIntrusionResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"allowed_rules": schema.SetNestedAttribute{
+			"allowed_rules": schema.ListNestedAttribute{
 				MarkdownDescription: `Sets a list of specific SNORT signatures to allow`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"message": schema.StringAttribute{
 							MarkdownDescription: `Message is optional and is ignored on a PUT call. It is allowed in order for PUT to be compatible with GET`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -81,7 +80,6 @@ func (r *OrganizationsApplianceSecurityIntrusionResource) Schema(_ context.Conte
 						},
 						"rule_id": schema.StringAttribute{
 							MarkdownDescription: `A rule identifier of the format meraki:intrusion/snort/GID/<gid>/SID/<sid>. gid and sid can be obtained from either https://www.snort.org/rule-docs or as ruleIds from the security events in /organization/[orgId]/securityEvents`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -120,27 +118,6 @@ func (r *OrganizationsApplianceSecurityIntrusionResource) Create(ctx context.Con
 	vvOrganizationID := data.OrganizationID.ValueString()
 	//Has Item and not has items
 
-	if vvOrganizationID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Appliance.GetOrganizationApplianceSecurityIntrusion(vvOrganizationID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource OrganizationsApplianceSecurityIntrusion  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource OrganizationsApplianceSecurityIntrusion only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateOrganizationApplianceSecurityIntrusion(vvOrganizationID, dataRequest)
@@ -149,7 +126,7 @@ func (r *OrganizationsApplianceSecurityIntrusionResource) Create(ctx context.Con
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationApplianceSecurityIntrusion",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -160,49 +137,19 @@ func (r *OrganizationsApplianceSecurityIntrusionResource) Create(ctx context.Con
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetOrganizationApplianceSecurityIntrusion(vvOrganizationID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizationApplianceSecurityIntrusion",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetOrganizationApplianceSecurityIntrusion",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseApplianceGetOrganizationApplianceSecurityIntrusionItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *OrganizationsApplianceSecurityIntrusionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data OrganizationsApplianceSecurityIntrusionRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -232,33 +179,28 @@ func (r *OrganizationsApplianceSecurityIntrusionResource) Read(ctx context.Conte
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetOrganizationApplianceSecurityIntrusionItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *OrganizationsApplianceSecurityIntrusionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), req.ID)...)
 }
 
 func (r *OrganizationsApplianceSecurityIntrusionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data OrganizationsApplianceSecurityIntrusionRs
-	merge(ctx, req, resp, &data)
+	var plan OrganizationsApplianceSecurityIntrusionRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvOrganizationID := data.OrganizationID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvOrganizationID := plan.OrganizationID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateOrganizationApplianceSecurityIntrusion(vvOrganizationID, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationApplianceSecurityIntrusion",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -268,9 +210,7 @@ func (r *OrganizationsApplianceSecurityIntrusionResource) Update(ctx context.Con
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *OrganizationsApplianceSecurityIntrusionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -324,8 +264,18 @@ func ResponseApplianceGetOrganizationApplianceSecurityIntrusionItemToBodyRs(stat
 				result := make([]ResponseApplianceGetOrganizationApplianceSecurityIntrusionAllowedRulesRs, len(*response.AllowedRules))
 				for i, allowedRules := range *response.AllowedRules {
 					result[i] = ResponseApplianceGetOrganizationApplianceSecurityIntrusionAllowedRulesRs{
-						Message: types.StringValue(allowedRules.Message),
-						RuleID:  types.StringValue(allowedRules.RuleID),
+						Message: func() types.String {
+							if allowedRules.Message != "" {
+								return types.StringValue(allowedRules.Message)
+							}
+							return types.String{}
+						}(),
+						RuleID: func() types.String {
+							if allowedRules.RuleID != "" {
+								return types.StringValue(allowedRules.RuleID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

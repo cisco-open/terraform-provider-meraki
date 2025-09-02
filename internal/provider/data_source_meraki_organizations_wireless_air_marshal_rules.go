@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -266,12 +265,27 @@ func ResponseWirelessGetOrganizationWirelessAirMarshalRulesItemToBody(state Orga
 				result := make([]ResponseWirelessGetOrganizationWirelessAirMarshalRulesItems, len(*response.Items))
 				for i, items := range *response.Items {
 					result[i] = ResponseWirelessGetOrganizationWirelessAirMarshalRulesItems{
-						CreatedAt: types.StringValue(items.CreatedAt),
+						CreatedAt: func() types.String {
+							if items.CreatedAt != "" {
+								return types.StringValue(items.CreatedAt)
+							}
+							return types.String{}
+						}(),
 						Match: func() *ResponseWirelessGetOrganizationWirelessAirMarshalRulesItemsMatch {
 							if items.Match != nil {
 								return &ResponseWirelessGetOrganizationWirelessAirMarshalRulesItemsMatch{
-									String: types.StringValue(items.Match.String),
-									Type:   types.StringValue(items.Match.Type),
+									String: func() types.String {
+										if items.Match.String != "" {
+											return types.StringValue(items.Match.String)
+										}
+										return types.String{}
+									}(),
+									Type: func() types.String {
+										if items.Match.Type != "" {
+											return types.StringValue(items.Match.Type)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -279,15 +293,40 @@ func ResponseWirelessGetOrganizationWirelessAirMarshalRulesItemToBody(state Orga
 						Network: func() *ResponseWirelessGetOrganizationWirelessAirMarshalRulesItemsNetwork {
 							if items.Network != nil {
 								return &ResponseWirelessGetOrganizationWirelessAirMarshalRulesItemsNetwork{
-									ID:   types.StringValue(items.Network.ID),
-									Name: types.StringValue(items.Network.Name),
+									ID: func() types.String {
+										if items.Network.ID != "" {
+											return types.StringValue(items.Network.ID)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if items.Network.Name != "" {
+											return types.StringValue(items.Network.Name)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						RuleID:    types.StringValue(items.RuleID),
-						Type:      types.StringValue(items.Type),
-						UpdatedAt: types.StringValue(items.UpdatedAt),
+						RuleID: func() types.String {
+							if items.RuleID != "" {
+								return types.StringValue(items.RuleID)
+							}
+							return types.String{}
+						}(),
+						Type: func() types.String {
+							if items.Type != "" {
+								return types.StringValue(items.Type)
+							}
+							return types.String{}
+						}(),
+						UpdatedAt: func() types.String {
+							if items.UpdatedAt != "" {
+								return types.StringValue(items.UpdatedAt)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

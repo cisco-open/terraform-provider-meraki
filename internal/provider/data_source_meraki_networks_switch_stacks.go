@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -238,6 +237,17 @@ func (d *NetworksSwitchStacksDataSource) Read(ctx context.Context, req datasourc
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkSwitchStack",
+				err.Error(),
+			)
+			return
+		}
+
 		networksSwitchStacks = ResponseSwitchGetNetworkSwitchStackItemToBody(networksSwitchStacks, response2)
 		diags = resp.State.Set(ctx, &networksSwitchStacks)
 		resp.Diagnostics.Append(diags...)
@@ -293,7 +303,12 @@ func ResponseSwitchGetNetworkSwitchStacksItemsToBody(state NetworksSwitchStacks,
 	var items []ResponseItemSwitchGetNetworkSwitchStacks
 	for _, item := range *response {
 		itemState := ResponseItemSwitchGetNetworkSwitchStacks{
-			ID: types.StringValue(item.ID),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
 			IsMonitorOnly: func() types.Bool {
 				if item.IsMonitorOnly != nil {
 					return types.BoolValue(*item.IsMonitorOnly)
@@ -305,18 +320,48 @@ func ResponseSwitchGetNetworkSwitchStacksItemsToBody(state NetworksSwitchStacks,
 					result := make([]ResponseItemSwitchGetNetworkSwitchStacksMembers, len(*item.Members))
 					for i, members := range *item.Members {
 						result[i] = ResponseItemSwitchGetNetworkSwitchStacksMembers{
-							Mac:    types.StringValue(members.Mac),
-							Model:  types.StringValue(members.Model),
-							Name:   types.StringValue(members.Name),
-							Role:   types.StringValue(members.Role),
-							Serial: types.StringValue(members.Serial),
+							Mac: func() types.String {
+								if members.Mac != "" {
+									return types.StringValue(members.Mac)
+								}
+								return types.String{}
+							}(),
+							Model: func() types.String {
+								if members.Model != "" {
+									return types.StringValue(members.Model)
+								}
+								return types.String{}
+							}(),
+							Name: func() types.String {
+								if members.Name != "" {
+									return types.StringValue(members.Name)
+								}
+								return types.String{}
+							}(),
+							Role: func() types.String {
+								if members.Role != "" {
+									return types.StringValue(members.Role)
+								}
+								return types.String{}
+							}(),
+							Serial: func() types.String {
+								if members.Serial != "" {
+									return types.StringValue(members.Serial)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
 				}
 				return nil
 			}(),
-			Name:    types.StringValue(item.Name),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			Serials: StringSliceToList(item.Serials),
 		}
 		items = append(items, itemState)
@@ -327,7 +372,12 @@ func ResponseSwitchGetNetworkSwitchStacksItemsToBody(state NetworksSwitchStacks,
 
 func ResponseSwitchGetNetworkSwitchStackItemToBody(state NetworksSwitchStacks, response *merakigosdk.ResponseSwitchGetNetworkSwitchStack) NetworksSwitchStacks {
 	itemState := ResponseSwitchGetNetworkSwitchStack{
-		ID: types.StringValue(response.ID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		IsMonitorOnly: func() types.Bool {
 			if response.IsMonitorOnly != nil {
 				return types.BoolValue(*response.IsMonitorOnly)
@@ -339,18 +389,48 @@ func ResponseSwitchGetNetworkSwitchStackItemToBody(state NetworksSwitchStacks, r
 				result := make([]ResponseSwitchGetNetworkSwitchStackMembers, len(*response.Members))
 				for i, members := range *response.Members {
 					result[i] = ResponseSwitchGetNetworkSwitchStackMembers{
-						Mac:    types.StringValue(members.Mac),
-						Model:  types.StringValue(members.Model),
-						Name:   types.StringValue(members.Name),
-						Role:   types.StringValue(members.Role),
-						Serial: types.StringValue(members.Serial),
+						Mac: func() types.String {
+							if members.Mac != "" {
+								return types.StringValue(members.Mac)
+							}
+							return types.String{}
+						}(),
+						Model: func() types.String {
+							if members.Model != "" {
+								return types.StringValue(members.Model)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if members.Name != "" {
+								return types.StringValue(members.Name)
+							}
+							return types.String{}
+						}(),
+						Role: func() types.String {
+							if members.Role != "" {
+								return types.StringValue(members.Role)
+							}
+							return types.String{}
+						}(),
+						Serial: func() types.String {
+							if members.Serial != "" {
+								return types.StringValue(members.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		Name:    types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		Serials: StringSliceToList(response.Serials),
 	}
 	state.Item = &itemState

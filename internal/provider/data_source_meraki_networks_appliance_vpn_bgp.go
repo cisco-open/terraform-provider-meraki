@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -270,7 +269,12 @@ func ResponseApplianceGetNetworkApplianceVpnBgpItemToBody(state NetworksApplianc
 						Authentication: func() *ResponseApplianceGetNetworkApplianceVpnBgpNeighborsAuthentication {
 							if neighbors.Authentication != nil {
 								return &ResponseApplianceGetNetworkApplianceVpnBgpNeighborsAuthentication{
-									Password: types.StringValue(neighbors.Authentication.Password),
+									Password: func() types.String {
+										if neighbors.Authentication.Password != "" {
+											return types.StringValue(neighbors.Authentication.Password)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -287,16 +291,31 @@ func ResponseApplianceGetNetworkApplianceVpnBgpItemToBody(state NetworksApplianc
 							}
 							return types.Int64{}
 						}(),
-						IP: types.StringValue(neighbors.IP),
+						IP: func() types.String {
+							if neighbors.IP != "" {
+								return types.StringValue(neighbors.IP)
+							}
+							return types.String{}
+						}(),
 						IPv6: func() *ResponseApplianceGetNetworkApplianceVpnBgpNeighborsIpv6 {
 							if neighbors.IPv6 != nil {
 								return &ResponseApplianceGetNetworkApplianceVpnBgpNeighborsIpv6{
-									Address: types.StringValue(neighbors.IPv6.Address),
+									Address: func() types.String {
+										if neighbors.IPv6.Address != "" {
+											return types.StringValue(neighbors.IPv6.Address)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						NextHopIP: types.StringValue(neighbors.NextHopIP),
+						NextHopIP: func() types.String {
+							if neighbors.NextHopIP != "" {
+								return types.StringValue(neighbors.NextHopIP)
+							}
+							return types.String{}
+						}(),
 						ReceiveLimit: func() types.Int64 {
 							if neighbors.ReceiveLimit != nil {
 								return types.Int64Value(int64(*neighbors.ReceiveLimit))
@@ -309,7 +328,12 @@ func ResponseApplianceGetNetworkApplianceVpnBgpItemToBody(state NetworksApplianc
 							}
 							return types.Int64{}
 						}(),
-						SourceInterface: types.StringValue(neighbors.SourceInterface),
+						SourceInterface: func() types.String {
+							if neighbors.SourceInterface != "" {
+								return types.StringValue(neighbors.SourceInterface)
+							}
+							return types.String{}
+						}(),
 						TtlSecurity: func() *ResponseApplianceGetNetworkApplianceVpnBgpNeighborsTtlSecurity {
 							if neighbors.TtlSecurity != nil {
 								return &ResponseApplianceGetNetworkApplianceVpnBgpNeighborsTtlSecurity{

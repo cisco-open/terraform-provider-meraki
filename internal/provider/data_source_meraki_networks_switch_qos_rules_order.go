@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -210,6 +209,17 @@ func (d *NetworksSwitchQosRulesOrderDataSource) Read(ctx context.Context, req da
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkSwitchQosRule",
+				err.Error(),
+			)
+			return
+		}
+
 		networksSwitchQosRulesOrder = ResponseSwitchGetNetworkSwitchQosRuleItemToBody(networksSwitchQosRulesOrder, response2)
 		diags = resp.State.Set(ctx, &networksSwitchQosRulesOrder)
 		resp.Diagnostics.Append(diags...)
@@ -267,16 +277,36 @@ func ResponseSwitchGetNetworkSwitchQosRulesItemsToBody(state NetworksSwitchQosRu
 				}
 				return types.Int64{}
 			}(),
-			DstPortRange: types.StringValue(item.DstPortRange),
-			ID:           types.StringValue(item.ID),
-			Protocol:     types.StringValue(item.Protocol),
+			DstPortRange: func() types.String {
+				if item.DstPortRange != "" {
+					return types.StringValue(item.DstPortRange)
+				}
+				return types.String{}
+			}(),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			Protocol: func() types.String {
+				if item.Protocol != "" {
+					return types.StringValue(item.Protocol)
+				}
+				return types.String{}
+			}(),
 			SrcPort: func() types.Int64 {
 				if item.SrcPort != nil {
 					return types.Int64Value(int64(*item.SrcPort))
 				}
 				return types.Int64{}
 			}(),
-			SrcPortRange: types.StringValue(item.SrcPortRange),
+			SrcPortRange: func() types.String {
+				if item.SrcPortRange != "" {
+					return types.StringValue(item.SrcPortRange)
+				}
+				return types.String{}
+			}(),
 			VLAN: func() types.Int64 {
 				if item.VLAN != nil {
 					return types.Int64Value(int64(*item.VLAN))
@@ -304,16 +334,36 @@ func ResponseSwitchGetNetworkSwitchQosRuleItemToBody(state NetworksSwitchQosRule
 			}
 			return types.Int64{}
 		}(),
-		DstPortRange: types.StringValue(response.DstPortRange),
-		ID:           types.StringValue(response.ID),
-		Protocol:     types.StringValue(response.Protocol),
+		DstPortRange: func() types.String {
+			if response.DstPortRange != "" {
+				return types.StringValue(response.DstPortRange)
+			}
+			return types.String{}
+		}(),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Protocol: func() types.String {
+			if response.Protocol != "" {
+				return types.StringValue(response.Protocol)
+			}
+			return types.String{}
+		}(),
 		SrcPort: func() types.Int64 {
 			if response.SrcPort != nil {
 				return types.Int64Value(int64(*response.SrcPort))
 			}
 			return types.Int64{}
 		}(),
-		SrcPortRange: types.StringValue(response.SrcPortRange),
+		SrcPortRange: func() types.String {
+			if response.SrcPortRange != "" {
+				return types.StringValue(response.SrcPortRange)
+			}
+			return types.String{}
+		}(),
 		VLAN: func() types.Int64 {
 			if response.VLAN != nil {
 				return types.Int64Value(int64(*response.VLAN))

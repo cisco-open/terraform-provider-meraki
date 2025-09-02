@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -571,7 +570,12 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 			Button: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryButton {
 				if item.Button != nil {
 					return &ResponseItemSensorGetOrganizationSensorReadingsHistoryButton{
-						PressType: types.StringValue(item.Button.PressType),
+						PressType: func() types.String {
+							if item.Button.PressType != "" {
+								return types.StringValue(item.Button.PressType)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -667,12 +671,27 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 				}
 				return nil
 			}(),
-			Metric: types.StringValue(item.Metric),
+			Metric: func() types.String {
+				if item.Metric != "" {
+					return types.StringValue(item.Metric)
+				}
+				return types.String{}
+			}(),
 			Network: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryNetwork {
 				if item.Network != nil {
 					return &ResponseItemSensorGetOrganizationSensorReadingsHistoryNetwork{
-						ID:   types.StringValue(item.Network.ID),
-						Name: types.StringValue(item.Network.Name),
+						ID: func() types.String {
+							if item.Network.ID != "" {
+								return types.StringValue(item.Network.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if item.Network.Name != "" {
+								return types.StringValue(item.Network.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -749,7 +768,12 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 				}
 				return nil
 			}(),
-			Serial: types.StringValue(item.Serial),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
 			Temperature: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryTemperature {
 				if item.Temperature != nil {
 					return &ResponseItemSensorGetOrganizationSensorReadingsHistoryTemperature{
@@ -769,7 +793,12 @@ func ResponseSensorGetOrganizationSensorReadingsHistoryItemsToBody(state Organiz
 				}
 				return nil
 			}(),
-			Ts: types.StringValue(item.Ts),
+			Ts: func() types.String {
+				if item.Ts != "" {
+					return types.StringValue(item.Ts)
+				}
+				return types.String{}
+			}(),
 			Tvoc: func() *ResponseItemSensorGetOrganizationSensorReadingsHistoryTvoc {
 				if item.Tvoc != nil {
 					return &ResponseItemSensorGetOrganizationSensorReadingsHistoryTvoc{

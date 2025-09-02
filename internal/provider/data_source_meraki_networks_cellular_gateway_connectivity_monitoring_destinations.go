@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -160,8 +159,18 @@ func ResponseCellularGatewayGetNetworkCellularGatewayConnectivityMonitoringDesti
 							}
 							return types.Bool{}
 						}(),
-						Description: types.StringValue(destinations.Description),
-						IP:          types.StringValue(destinations.IP),
+						Description: func() types.String {
+							if destinations.Description != "" {
+								return types.StringValue(destinations.Description)
+							}
+							return types.String{}
+						}(),
+						IP: func() types.String {
+							if destinations.IP != "" {
+								return types.StringValue(destinations.IP)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

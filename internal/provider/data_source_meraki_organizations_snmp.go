@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -167,30 +166,55 @@ type ResponseOrganizationsGetOrganizationSnmp struct {
 // ToBody
 func ResponseOrganizationsGetOrganizationSNMPItemToBody(state OrganizationsSNMP, response *merakigosdk.ResponseOrganizationsGetOrganizationSNMP) OrganizationsSNMP {
 	itemState := ResponseOrganizationsGetOrganizationSnmp{
-		Hostname: types.StringValue(response.Hostname),
-		PeerIPs:  StringSliceToList(response.PeerIPs),
+		Hostname: func() types.String {
+			if response.Hostname != "" {
+				return types.StringValue(response.Hostname)
+			}
+			return types.String{}
+		}(),
+		PeerIPs: StringSliceToList(response.PeerIPs),
 		Port: func() types.Int64 {
 			if response.Port != nil {
 				return types.Int64Value(int64(*response.Port))
 			}
 			return types.Int64{}
 		}(),
-		V2CommunityString: types.StringValue(response.V2CommunityString),
+		V2CommunityString: func() types.String {
+			if response.V2CommunityString != "" {
+				return types.StringValue(response.V2CommunityString)
+			}
+			return types.String{}
+		}(),
 		V2CEnabled: func() types.Bool {
 			if response.V2CEnabled != nil {
 				return types.BoolValue(*response.V2CEnabled)
 			}
 			return types.Bool{}
 		}(),
-		V3AuthMode: types.StringValue(response.V3AuthMode),
+		V3AuthMode: func() types.String {
+			if response.V3AuthMode != "" {
+				return types.StringValue(response.V3AuthMode)
+			}
+			return types.String{}
+		}(),
 		V3Enabled: func() types.Bool {
 			if response.V3Enabled != nil {
 				return types.BoolValue(*response.V3Enabled)
 			}
 			return types.Bool{}
 		}(),
-		V3PrivMode: types.StringValue(response.V3PrivMode),
-		V3User:     types.StringValue(response.V3User),
+		V3PrivMode: func() types.String {
+			if response.V3PrivMode != "" {
+				return types.StringValue(response.V3PrivMode)
+			}
+			return types.String{}
+		}(),
+		V3User: func() types.String {
+			if response.V3User != "" {
+				return types.StringValue(response.V3User)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

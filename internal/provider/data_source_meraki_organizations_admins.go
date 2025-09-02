@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -227,39 +226,94 @@ func ResponseOrganizationsGetOrganizationAdminsItemsToBody(state OrganizationsAd
 	var items []ResponseItemOrganizationsGetOrganizationAdmins
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationAdmins{
-			AccountStatus:        types.StringValue(item.AccountStatus),
-			AuthenticationMethod: types.StringValue(item.AuthenticationMethod),
-			Email:                types.StringValue(item.Email),
+			AccountStatus: func() types.String {
+				if item.AccountStatus != "" {
+					return types.StringValue(item.AccountStatus)
+				}
+				return types.String{}
+			}(),
+			AuthenticationMethod: func() types.String {
+				if item.AuthenticationMethod != "" {
+					return types.StringValue(item.AuthenticationMethod)
+				}
+				return types.String{}
+			}(),
+			Email: func() types.String {
+				if item.Email != "" {
+					return types.StringValue(item.Email)
+				}
+				return types.String{}
+			}(),
 			HasAPIKey: func() types.Bool {
 				if item.HasAPIKey != nil {
 					return types.BoolValue(*item.HasAPIKey)
 				}
 				return types.Bool{}
 			}(),
-			ID:         types.StringValue(item.ID),
-			LastActive: types.StringValue(item.LastActive),
-			Name:       types.StringValue(item.Name),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			LastActive: func() types.String {
+				if item.LastActive != "" {
+					return types.StringValue(item.LastActive)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			Networks: func() *[]ResponseItemOrganizationsGetOrganizationAdminsNetworks {
 				if item.Networks != nil {
 					result := make([]ResponseItemOrganizationsGetOrganizationAdminsNetworks, len(*item.Networks))
 					for i, networks := range *item.Networks {
 						result[i] = ResponseItemOrganizationsGetOrganizationAdminsNetworks{
-							Access: types.StringValue(networks.Access),
-							ID:     types.StringValue(networks.ID),
+							Access: func() types.String {
+								if networks.Access != "" {
+									return types.StringValue(networks.Access)
+								}
+								return types.String{}
+							}(),
+							ID: func() types.String {
+								if networks.ID != "" {
+									return types.StringValue(networks.ID)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
 				}
 				return nil
 			}(),
-			OrgAccess: types.StringValue(item.OrgAccess),
+			OrgAccess: func() types.String {
+				if item.OrgAccess != "" {
+					return types.StringValue(item.OrgAccess)
+				}
+				return types.String{}
+			}(),
 			Tags: func() *[]ResponseItemOrganizationsGetOrganizationAdminsTags {
 				if item.Tags != nil {
 					result := make([]ResponseItemOrganizationsGetOrganizationAdminsTags, len(*item.Tags))
 					for i, tags := range *item.Tags {
 						result[i] = ResponseItemOrganizationsGetOrganizationAdminsTags{
-							Access: types.StringValue(tags.Access),
-							Tag:    types.StringValue(tags.Tag),
+							Access: func() types.String {
+								if tags.Access != "" {
+									return types.StringValue(tags.Access)
+								}
+								return types.String{}
+							}(),
+							Tag: func() types.String {
+								if tags.Tag != "" {
+									return types.StringValue(tags.Tag)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result

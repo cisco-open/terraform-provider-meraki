@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -195,7 +194,12 @@ func ResponseApplianceGetOrganizationApplianceUplinksUsageByNetworkItemsToBody(s
 					result := make([]ResponseItemApplianceGetOrganizationApplianceUplinksUsageByNetworkByUplink, len(*item.ByUplink))
 					for i, byUplink := range *item.ByUplink {
 						result[i] = ResponseItemApplianceGetOrganizationApplianceUplinksUsageByNetworkByUplink{
-							Interface: types.StringValue(byUplink.Interface),
+							Interface: func() types.String {
+								if byUplink.Interface != "" {
+									return types.StringValue(byUplink.Interface)
+								}
+								return types.String{}
+							}(),
 							Received: func() types.Int64 {
 								if byUplink.Received != nil {
 									return types.Int64Value(int64(*byUplink.Received))
@@ -208,15 +212,30 @@ func ResponseApplianceGetOrganizationApplianceUplinksUsageByNetworkItemsToBody(s
 								}
 								return types.Int64{}
 							}(),
-							Serial: types.StringValue(byUplink.Serial),
+							Serial: func() types.String {
+								if byUplink.Serial != "" {
+									return types.StringValue(byUplink.Serial)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
 				}
 				return nil
 			}(),
-			Name:      types.StringValue(item.Name),
-			NetworkID: types.StringValue(item.NetworkID),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			NetworkID: func() types.String {
+				if item.NetworkID != "" {
+					return types.StringValue(item.NetworkID)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

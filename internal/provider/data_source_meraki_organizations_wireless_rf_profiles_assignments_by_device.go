@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -329,12 +328,27 @@ func ResponseWirelessGetOrganizationWirelessRfProfilesAssignmentsByDeviceItemsTo
 					result := make([]ResponseItemWirelessGetOrganizationWirelessRfProfilesAssignmentsByDeviceItems, len(*item.Items))
 					for i, items := range *item.Items {
 						result[i] = ResponseItemWirelessGetOrganizationWirelessRfProfilesAssignmentsByDeviceItems{
-							Model: types.StringValue(items.Model),
-							Name:  types.StringValue(items.Name),
+							Model: func() types.String {
+								if items.Model != "" {
+									return types.StringValue(items.Model)
+								}
+								return types.String{}
+							}(),
+							Name: func() types.String {
+								if items.Name != "" {
+									return types.StringValue(items.Name)
+								}
+								return types.String{}
+							}(),
 							Network: func() *ResponseItemWirelessGetOrganizationWirelessRfProfilesAssignmentsByDeviceItemsNetwork {
 								if items.Network != nil {
 									return &ResponseItemWirelessGetOrganizationWirelessRfProfilesAssignmentsByDeviceItemsNetwork{
-										ID: types.StringValue(items.Network.ID),
+										ID: func() types.String {
+											if items.Network.ID != "" {
+												return types.StringValue(items.Network.ID)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return nil
@@ -342,7 +356,12 @@ func ResponseWirelessGetOrganizationWirelessRfProfilesAssignmentsByDeviceItemsTo
 							RfProfile: func() *ResponseItemWirelessGetOrganizationWirelessRfProfilesAssignmentsByDeviceItemsRfProfile {
 								if items.RfProfile != nil {
 									return &ResponseItemWirelessGetOrganizationWirelessRfProfilesAssignmentsByDeviceItemsRfProfile{
-										ID: types.StringValue(items.RfProfile.ID),
+										ID: func() types.String {
+											if items.RfProfile.ID != "" {
+												return types.StringValue(items.RfProfile.ID)
+											}
+											return types.String{}
+										}(),
 										IsIndoorDefault: func() types.Bool {
 											if items.RfProfile.IsIndoorDefault != nil {
 												return types.BoolValue(*items.RfProfile.IsIndoorDefault)
@@ -355,12 +374,22 @@ func ResponseWirelessGetOrganizationWirelessRfProfilesAssignmentsByDeviceItemsTo
 											}
 											return types.Bool{}
 										}(),
-										Name: types.StringValue(items.RfProfile.Name),
+										Name: func() types.String {
+											if items.RfProfile.Name != "" {
+												return types.StringValue(items.RfProfile.Name)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return nil
 							}(),
-							Serial: types.StringValue(items.Serial),
+							Serial: func() types.String {
+								if items.Serial != "" {
+									return types.StringValue(items.Serial)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -146,8 +145,18 @@ func ResponseApplianceGetOrganizationApplianceSecurityIntrusionItemToBody(state 
 				result := make([]ResponseApplianceGetOrganizationApplianceSecurityIntrusionAllowedRules, len(*response.AllowedRules))
 				for i, allowedRules := range *response.AllowedRules {
 					result[i] = ResponseApplianceGetOrganizationApplianceSecurityIntrusionAllowedRules{
-						Message: types.StringValue(allowedRules.Message),
-						RuleID:  types.StringValue(allowedRules.RuleID),
+						Message: func() types.String {
+							if allowedRules.Message != "" {
+								return types.StringValue(allowedRules.Message)
+							}
+							return types.String{}
+						}(),
+						RuleID: func() types.String {
+							if allowedRules.RuleID != "" {
+								return types.StringValue(allowedRules.RuleID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

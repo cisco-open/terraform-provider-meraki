@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -169,8 +168,18 @@ type ResponseCellularGatewayGetNetworkCellularGatewaySubnetPoolSubnets struct {
 // ToBody
 func ResponseCellularGatewayGetNetworkCellularGatewaySubnetPoolItemToBody(state NetworksCellularGatewaySubnetPool, response *merakigosdk.ResponseCellularGatewayGetNetworkCellularGatewaySubnetPool) NetworksCellularGatewaySubnetPool {
 	itemState := ResponseCellularGatewayGetNetworkCellularGatewaySubnetPool{
-		Cidr:           types.StringValue(response.Cidr),
-		DeploymentMode: types.StringValue(response.DeploymentMode),
+		Cidr: func() types.String {
+			if response.Cidr != "" {
+				return types.StringValue(response.Cidr)
+			}
+			return types.String{}
+		}(),
+		DeploymentMode: func() types.String {
+			if response.DeploymentMode != "" {
+				return types.StringValue(response.DeploymentMode)
+			}
+			return types.String{}
+		}(),
 		Mask: func() types.Int64 {
 			if response.Mask != nil {
 				return types.Int64Value(int64(*response.Mask))
@@ -182,10 +191,30 @@ func ResponseCellularGatewayGetNetworkCellularGatewaySubnetPoolItemToBody(state 
 				result := make([]ResponseCellularGatewayGetNetworkCellularGatewaySubnetPoolSubnets, len(*response.Subnets))
 				for i, subnets := range *response.Subnets {
 					result[i] = ResponseCellularGatewayGetNetworkCellularGatewaySubnetPoolSubnets{
-						ApplianceIP: types.StringValue(subnets.ApplianceIP),
-						Name:        types.StringValue(subnets.Name),
-						Serial:      types.StringValue(subnets.Serial),
-						Subnet:      types.StringValue(subnets.Subnet),
+						ApplianceIP: func() types.String {
+							if subnets.ApplianceIP != "" {
+								return types.StringValue(subnets.ApplianceIP)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if subnets.Name != "" {
+								return types.StringValue(subnets.Name)
+							}
+							return types.String{}
+						}(),
+						Serial: func() types.String {
+							if subnets.Serial != "" {
+								return types.StringValue(subnets.Serial)
+							}
+							return types.String{}
+						}(),
+						Subnet: func() types.String {
+							if subnets.Subnet != "" {
+								return types.StringValue(subnets.Subnet)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

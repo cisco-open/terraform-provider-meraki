@@ -136,8 +136,18 @@ type ResponseCameraGetDeviceCameraVideoLink struct {
 // ToBody
 func ResponseCameraGetDeviceCameraVideoLinkItemToBody(state DevicesCameraVideoLink, response *merakigosdk.ResponseCameraGetDeviceCameraVideoLink) DevicesCameraVideoLink {
 	itemState := ResponseCameraGetDeviceCameraVideoLink{
-		URL:       types.StringValue(response.URL),
-		VisionURL: types.StringValue(response.VisionURL),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
+		VisionURL: func() types.String {
+			if response.VisionURL != "" {
+				return types.StringValue(response.VisionURL)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -187,17 +186,42 @@ func ResponseApplianceGetNetworkApplianceFirewallOneToOneNatRulesItemToBody(stat
 									result[i] = ResponseApplianceGetNetworkApplianceFirewallOneToOneNatRulesRulesAllowedInbound{
 										AllowedIPs:       StringSliceToList(allowedInbound.AllowedIPs),
 										DestinationPorts: StringSliceToList(allowedInbound.DestinationPorts),
-										Protocol:         types.StringValue(allowedInbound.Protocol),
+										Protocol: func() types.String {
+											if allowedInbound.Protocol != "" {
+												return types.StringValue(allowedInbound.Protocol)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						LanIP:    types.StringValue(rules.LanIP),
-						Name:     types.StringValue(rules.Name),
-						PublicIP: types.StringValue(rules.PublicIP),
-						Uplink:   types.StringValue(rules.Uplink),
+						LanIP: func() types.String {
+							if rules.LanIP != "" {
+								return types.StringValue(rules.LanIP)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if rules.Name != "" {
+								return types.StringValue(rules.Name)
+							}
+							return types.String{}
+						}(),
+						PublicIP: func() types.String {
+							if rules.PublicIP != "" {
+								return types.StringValue(rules.PublicIP)
+							}
+							return types.String{}
+						}(),
+						Uplink: func() types.String {
+							if rules.Uplink != "" {
+								return types.StringValue(rules.Uplink)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

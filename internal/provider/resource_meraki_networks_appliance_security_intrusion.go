@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -27,10 +28,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -69,7 +69,6 @@ func (r *NetworksApplianceSecurityIntrusionResource) Schema(_ context.Context, _
 			"ids_rulesets": schema.StringAttribute{
 				MarkdownDescription: `Intrusion detection ruleset
                                   Allowed values: [balanced,connectivity,security]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -85,7 +84,6 @@ func (r *NetworksApplianceSecurityIntrusionResource) Schema(_ context.Context, _
 			"mode": schema.StringAttribute{
 				MarkdownDescription: `Intrusion detection mode
                                   Allowed values: [detection,disabled,prevention]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -104,36 +102,32 @@ func (r *NetworksApplianceSecurityIntrusionResource) Schema(_ context.Context, _
 			},
 			"protected_networks": schema.SingleNestedAttribute{
 				MarkdownDescription: `Networks included in and excluded from the detection engine`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
 				Attributes: map[string]schema.Attribute{
 
-					"excluded_cidr": schema.SetAttribute{
+					"excluded_cidr": schema.ListAttribute{
 						MarkdownDescription: `List of IP addresses or subnets being excluded from protection`,
-						Computed:            true,
 						Optional:            true,
-						PlanModifiers: []planmodifier.Set{
-							setplanmodifier.UseStateForUnknown(),
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.UseStateForUnknown(),
 						},
-						Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
+
 						ElementType: types.StringType,
 					},
-					"included_cidr": schema.SetAttribute{
+					"included_cidr": schema.ListAttribute{
 						MarkdownDescription: `List of IP addresses or subnets being protected`,
-						Computed:            true,
 						Optional:            true,
-						PlanModifiers: []planmodifier.Set{
-							setplanmodifier.UseStateForUnknown(),
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.UseStateForUnknown(),
 						},
-						Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
+
 						ElementType: types.StringType,
 					},
 					"use_default": schema.BoolAttribute{
 						MarkdownDescription: `Whether special IPv4 addresses should be used (see: https://tools.ietf.org/html/rfc5735)`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -167,27 +161,6 @@ func (r *NetworksApplianceSecurityIntrusionResource) Create(ctx context.Context,
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceSecurityIntrusion(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceSecurityIntrusion  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceSecurityIntrusion only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceSecurityIntrusion(vvNetworkID, dataRequest)
@@ -196,7 +169,7 @@ func (r *NetworksApplianceSecurityIntrusionResource) Create(ctx context.Context,
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceSecurityIntrusion",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -207,49 +180,19 @@ func (r *NetworksApplianceSecurityIntrusionResource) Create(ctx context.Context,
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceSecurityIntrusion(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceSecurityIntrusion",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkApplianceSecurityIntrusion",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseApplianceGetNetworkApplianceSecurityIntrusionItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksApplianceSecurityIntrusionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksApplianceSecurityIntrusionRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -279,33 +222,28 @@ func (r *NetworksApplianceSecurityIntrusionResource) Read(ctx context.Context, r
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceSecurityIntrusionItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksApplianceSecurityIntrusionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksApplianceSecurityIntrusionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksApplianceSecurityIntrusionRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksApplianceSecurityIntrusionRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceSecurityIntrusion(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceSecurityIntrusion",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -315,9 +253,7 @@ func (r *NetworksApplianceSecurityIntrusionResource) Update(ctx context.Context,
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksApplianceSecurityIntrusionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -335,8 +271,8 @@ type NetworksApplianceSecurityIntrusionRs struct {
 }
 
 type ResponseApplianceGetNetworkApplianceSecurityIntrusionProtectedNetworksRs struct {
-	ExcludedCidr types.Set  `tfsdk:"excluded_cidr"`
-	IncludedCidr types.Set  `tfsdk:"included_cidr"`
+	ExcludedCidr types.List `tfsdk:"excluded_cidr"`
+	IncludedCidr types.List `tfsdk:"included_cidr"`
 	UseDefault   types.Bool `tfsdk:"use_default"`
 }
 
@@ -388,13 +324,23 @@ func (r *NetworksApplianceSecurityIntrusionRs) toSdkApiRequestUpdate(ctx context
 // From gosdk to TF Structs Schema
 func ResponseApplianceGetNetworkApplianceSecurityIntrusionItemToBodyRs(state NetworksApplianceSecurityIntrusionRs, response *merakigosdk.ResponseApplianceGetNetworkApplianceSecurityIntrusion, is_read bool) NetworksApplianceSecurityIntrusionRs {
 	itemState := NetworksApplianceSecurityIntrusionRs{
-		IDsRulesets: types.StringValue(response.IDsRulesets),
-		Mode:        types.StringValue(response.Mode),
+		IDsRulesets: func() types.String {
+			if response.IDsRulesets != "" {
+				return types.StringValue(response.IDsRulesets)
+			}
+			return types.String{}
+		}(),
+		Mode: func() types.String {
+			if response.Mode != "" {
+				return types.StringValue(response.Mode)
+			}
+			return types.String{}
+		}(),
 		ProtectedNetworks: func() *ResponseApplianceGetNetworkApplianceSecurityIntrusionProtectedNetworksRs {
 			if response.ProtectedNetworks != nil {
 				return &ResponseApplianceGetNetworkApplianceSecurityIntrusionProtectedNetworksRs{
-					ExcludedCidr: StringSliceToSet(response.ProtectedNetworks.ExcludedCidr),
-					IncludedCidr: StringSliceToSet(response.ProtectedNetworks.IncludedCidr),
+					ExcludedCidr: StringSliceToList(response.ProtectedNetworks.ExcludedCidr),
+					IncludedCidr: StringSliceToList(response.ProtectedNetworks.IncludedCidr),
 					UseDefault: func() types.Bool {
 						if response.ProtectedNetworks.UseDefault != nil {
 							return types.BoolValue(*response.ProtectedNetworks.UseDefault)

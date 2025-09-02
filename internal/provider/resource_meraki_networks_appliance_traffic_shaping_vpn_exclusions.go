@@ -320,18 +320,8 @@ func (r *NetworksApplianceTrafficShapingVpnExclusions) toSdkApiRequestUpdate(ctx
 		}
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingVpnExclusions{
-		Custom: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsCustom {
-			if len(requestApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsCustom) > 0 {
-				return &requestApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsCustom
-			}
-			return nil
-		}(),
-		MajorApplications: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsMajorApplications {
-			if len(requestApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsMajorApplications) > 0 {
-				return &requestApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsMajorApplications
-			}
-			return nil
-		}(),
+		Custom:            &requestApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsCustom,
+		MajorApplications: &requestApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsMajorApplications,
 	}
 	return &out
 }
@@ -344,9 +334,24 @@ func ResponseApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsItemToBod
 				result := make([]ResponseApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsCustom, len(*response.Custom))
 				for i, custom := range *response.Custom {
 					result[i] = ResponseApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsCustom{
-						Destination: types.StringValue(custom.Destination),
-						Port:        types.StringValue(custom.Port),
-						Protocol:    types.StringValue(custom.Protocol),
+						Destination: func() types.String {
+							if custom.Destination != "" {
+								return types.StringValue(custom.Destination)
+							}
+							return types.String{}
+						}(),
+						Port: func() types.String {
+							if custom.Port != "" {
+								return types.StringValue(custom.Port)
+							}
+							return types.String{}
+						}(),
+						Protocol: func() types.String {
+							if custom.Protocol != "" {
+								return types.StringValue(custom.Protocol)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -358,16 +363,36 @@ func ResponseApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsItemToBod
 				result := make([]ResponseApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsMajorApplications, len(*response.MajorApplications))
 				for i, majorApplications := range *response.MajorApplications {
 					result[i] = ResponseApplianceUpdateNetworkApplianceTrafficShapingVpnExclusionsMajorApplications{
-						ID:   types.StringValue(majorApplications.ID),
-						Name: types.StringValue(majorApplications.Name),
+						ID: func() types.String {
+							if majorApplications.ID != "" {
+								return types.StringValue(majorApplications.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if majorApplications.Name != "" {
+								return types.StringValue(majorApplications.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		NetworkID:   types.StringValue(response.NetworkID),
-		NetworkName: types.StringValue(response.NetworkName),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
+		NetworkName: func() types.String {
+			if response.NetworkName != "" {
+				return types.StringValue(response.NetworkName)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

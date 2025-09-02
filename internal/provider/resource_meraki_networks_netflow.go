@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -64,7 +65,6 @@ func (r *NetworksNetflowResource) Schema(_ context.Context, _ resource.SchemaReq
 		Attributes: map[string]schema.Attribute{
 			"collector_ip": schema.StringAttribute{
 				MarkdownDescription: `The IPv4 address of the NetFlow collector.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -72,7 +72,6 @@ func (r *NetworksNetflowResource) Schema(_ context.Context, _ resource.SchemaReq
 			},
 			"collector_port": schema.Int64Attribute{
 				MarkdownDescription: `The port that the NetFlow collector will be listening on.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -80,7 +79,6 @@ func (r *NetworksNetflowResource) Schema(_ context.Context, _ resource.SchemaReq
 			},
 			"eta_dst_port": schema.Int64Attribute{
 				MarkdownDescription: `The port that the Encrypted Traffic Analytics collector will be listening on.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -88,7 +86,6 @@ func (r *NetworksNetflowResource) Schema(_ context.Context, _ resource.SchemaReq
 			},
 			"eta_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating whether Encrypted Traffic Analytics is enabled (true) or disabled (false).`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -100,7 +97,6 @@ func (r *NetworksNetflowResource) Schema(_ context.Context, _ resource.SchemaReq
 			},
 			"reporting_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating whether NetFlow traffic reporting is enabled (true) or disabled (false).`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -132,27 +128,6 @@ func (r *NetworksNetflowResource) Create(ctx context.Context, req resource.Creat
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkNetflow(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksNetflow  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksNetflow only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkNetflow(vvNetworkID, dataRequest)
@@ -161,7 +136,7 @@ func (r *NetworksNetflowResource) Create(ctx context.Context, req resource.Creat
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkNetflow",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -172,49 +147,19 @@ func (r *NetworksNetflowResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Networks.GetNetworkNetflow(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkNetflow",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkNetflow",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseNetworksGetNetworkNetflowItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksNetflowResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksNetflowRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -244,34 +189,28 @@ func (r *NetworksNetflowResource) Read(ctx context.Context, req resource.ReadReq
 	}
 	//entro aqui 2
 	data = ResponseNetworksGetNetworkNetflowItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
-
 func (r *NetworksNetflowResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksNetflowResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksNetflowRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksNetflowRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkNetflow(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkNetflow",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -281,9 +220,7 @@ func (r *NetworksNetflowResource) Update(ctx context.Context, req resource.Updat
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksNetflowResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -348,7 +285,12 @@ func (r *NetworksNetflowRs) toSdkApiRequestUpdate(ctx context.Context) *merakigo
 // From gosdk to TF Structs Schema
 func ResponseNetworksGetNetworkNetflowItemToBodyRs(state NetworksNetflowRs, response *merakigosdk.ResponseNetworksGetNetworkNetflow, is_read bool) NetworksNetflowRs {
 	itemState := NetworksNetflowRs{
-		CollectorIP: types.StringValue(response.CollectorIP),
+		CollectorIP: func() types.String {
+			if response.CollectorIP != "" {
+				return types.StringValue(response.CollectorIP)
+			}
+			return types.String{}
+		}(),
 		CollectorPort: func() types.Int64 {
 			if response.CollectorPort != nil {
 				return types.Int64Value(int64(*response.CollectorPort))

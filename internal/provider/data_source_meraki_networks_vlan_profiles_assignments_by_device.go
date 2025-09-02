@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -230,14 +229,39 @@ func ResponseNetworksGetNetworkVLANProfilesAssignmentsByDeviceItemsToBody(state 
 	var items []ResponseItemNetworksGetNetworkVlanProfilesAssignmentsByDevice
 	for _, item := range *response {
 		itemState := ResponseItemNetworksGetNetworkVlanProfilesAssignmentsByDevice{
-			Mac:         types.StringValue(item.Mac),
-			Name:        types.StringValue(item.Name),
-			ProductType: types.StringValue(item.ProductType),
-			Serial:      types.StringValue(item.Serial),
+			Mac: func() types.String {
+				if item.Mac != "" {
+					return types.StringValue(item.Mac)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			ProductType: func() types.String {
+				if item.ProductType != "" {
+					return types.StringValue(item.ProductType)
+				}
+				return types.String{}
+			}(),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
 			Stack: func() *ResponseItemNetworksGetNetworkVlanProfilesAssignmentsByDeviceStack {
 				if item.Stack != nil {
 					return &ResponseItemNetworksGetNetworkVlanProfilesAssignmentsByDeviceStack{
-						ID: types.StringValue(item.Stack.ID),
+						ID: func() types.String {
+							if item.Stack.ID != "" {
+								return types.StringValue(item.Stack.ID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -245,14 +269,24 @@ func ResponseNetworksGetNetworkVLANProfilesAssignmentsByDeviceItemsToBody(state 
 			VLANProfile: func() *ResponseItemNetworksGetNetworkVlanProfilesAssignmentsByDeviceVlanProfile {
 				if item.VLANProfile != nil {
 					return &ResponseItemNetworksGetNetworkVlanProfilesAssignmentsByDeviceVlanProfile{
-						Iname: types.StringValue(item.VLANProfile.Iname),
+						Iname: func() types.String {
+							if item.VLANProfile.Iname != "" {
+								return types.StringValue(item.VLANProfile.Iname)
+							}
+							return types.String{}
+						}(),
 						IsDefault: func() types.Bool {
 							if item.VLANProfile.IsDefault != nil {
 								return types.BoolValue(*item.VLANProfile.IsDefault)
 							}
 							return types.Bool{}
 						}(),
-						Name: types.StringValue(item.VLANProfile.Name),
+						Name: func() types.String {
+							if item.VLANProfile.Name != "" {
+								return types.StringValue(item.VLANProfile.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil

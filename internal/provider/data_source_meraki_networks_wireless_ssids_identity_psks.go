@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -208,6 +207,17 @@ func (d *NetworksWirelessSSIDsIDentityPsksDataSource) Read(ctx context.Context, 
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkWirelessSSIDIDentityPsk",
+				err.Error(),
+			)
+			return
+		}
+
 		networksWirelessSSIDsIDentityPsks = ResponseWirelessGetNetworkWirelessSSIDIDentityPskItemToBody(networksWirelessSSIDsIDentityPsks, response2)
 		diags = resp.State.Set(ctx, &networksWirelessSSIDsIDentityPsks)
 		resp.Diagnostics.Append(diags...)
@@ -252,13 +262,48 @@ func ResponseWirelessGetNetworkWirelessSSIDIDentityPsksItemsToBody(state Network
 	var items []ResponseItemWirelessGetNetworkWirelessSsidIdentityPsks
 	for _, item := range *response {
 		itemState := ResponseItemWirelessGetNetworkWirelessSsidIdentityPsks{
-			Email:                 types.StringValue(item.Email),
-			ExpiresAt:             types.StringValue(item.ExpiresAt),
-			GroupPolicyID:         types.StringValue(item.GroupPolicyID),
-			ID:                    types.StringValue(item.ID),
-			Name:                  types.StringValue(item.Name),
-			Passphrase:            types.StringValue(item.Passphrase),
-			WifiPersonalNetworkID: types.StringValue(item.WifiPersonalNetworkID),
+			Email: func() types.String {
+				if item.Email != "" {
+					return types.StringValue(item.Email)
+				}
+				return types.String{}
+			}(),
+			ExpiresAt: func() types.String {
+				if item.ExpiresAt != "" {
+					return types.StringValue(item.ExpiresAt)
+				}
+				return types.String{}
+			}(),
+			GroupPolicyID: func() types.String {
+				if item.GroupPolicyID != "" {
+					return types.StringValue(item.GroupPolicyID)
+				}
+				return types.String{}
+			}(),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			Passphrase: func() types.String {
+				if item.Passphrase != "" {
+					return types.StringValue(item.Passphrase)
+				}
+				return types.String{}
+			}(),
+			WifiPersonalNetworkID: func() types.String {
+				if item.WifiPersonalNetworkID != "" {
+					return types.StringValue(item.WifiPersonalNetworkID)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -268,13 +313,48 @@ func ResponseWirelessGetNetworkWirelessSSIDIDentityPsksItemsToBody(state Network
 
 func ResponseWirelessGetNetworkWirelessSSIDIDentityPskItemToBody(state NetworksWirelessSSIDsIDentityPsks, response *merakigosdk.ResponseWirelessGetNetworkWirelessSSIDIDentityPsk) NetworksWirelessSSIDsIDentityPsks {
 	itemState := ResponseWirelessGetNetworkWirelessSsidIdentityPsk{
-		Email:                 types.StringValue(response.Email),
-		ExpiresAt:             types.StringValue(response.ExpiresAt),
-		GroupPolicyID:         types.StringValue(response.GroupPolicyID),
-		ID:                    types.StringValue(response.ID),
-		Name:                  types.StringValue(response.Name),
-		Passphrase:            types.StringValue(response.Passphrase),
-		WifiPersonalNetworkID: types.StringValue(response.WifiPersonalNetworkID),
+		Email: func() types.String {
+			if response.Email != "" {
+				return types.StringValue(response.Email)
+			}
+			return types.String{}
+		}(),
+		ExpiresAt: func() types.String {
+			if response.ExpiresAt != "" {
+				return types.StringValue(response.ExpiresAt)
+			}
+			return types.String{}
+		}(),
+		GroupPolicyID: func() types.String {
+			if response.GroupPolicyID != "" {
+				return types.StringValue(response.GroupPolicyID)
+			}
+			return types.String{}
+		}(),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		Passphrase: func() types.String {
+			if response.Passphrase != "" {
+				return types.StringValue(response.Passphrase)
+			}
+			return types.String{}
+		}(),
+		WifiPersonalNetworkID: func() types.String {
+			if response.WifiPersonalNetworkID != "" {
+				return types.StringValue(response.WifiPersonalNetworkID)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

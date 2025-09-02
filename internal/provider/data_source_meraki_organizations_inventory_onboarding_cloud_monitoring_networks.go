@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -212,21 +211,56 @@ func ResponseOrganizationsGetOrganizationInventoryOnboardingCloudMonitoringNetwo
 	var items []ResponseItemOrganizationsGetOrganizationInventoryOnboardingCloudMonitoringNetworks
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationInventoryOnboardingCloudMonitoringNetworks{
-			EnrollmentString: types.StringValue(item.EnrollmentString),
-			ID:               types.StringValue(item.ID),
+			EnrollmentString: func() types.String {
+				if item.EnrollmentString != "" {
+					return types.StringValue(item.EnrollmentString)
+				}
+				return types.String{}
+			}(),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
 			IsBoundToConfigTemplate: func() types.Bool {
 				if item.IsBoundToConfigTemplate != nil {
 					return types.BoolValue(*item.IsBoundToConfigTemplate)
 				}
 				return types.Bool{}
 			}(),
-			Name:           types.StringValue(item.Name),
-			Notes:          types.StringValue(item.Notes),
-			OrganizationID: types.StringValue(item.OrganizationID),
-			ProductTypes:   StringSliceToList(item.ProductTypes),
-			Tags:           StringSliceToList(item.Tags),
-			TimeZone:       types.StringValue(item.TimeZone),
-			URL:            types.StringValue(item.URL),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			Notes: func() types.String {
+				if item.Notes != "" {
+					return types.StringValue(item.Notes)
+				}
+				return types.String{}
+			}(),
+			OrganizationID: func() types.String {
+				if item.OrganizationID != "" {
+					return types.StringValue(item.OrganizationID)
+				}
+				return types.String{}
+			}(),
+			ProductTypes: StringSliceToList(item.ProductTypes),
+			Tags:         StringSliceToList(item.Tags),
+			TimeZone: func() types.String {
+				if item.TimeZone != "" {
+					return types.StringValue(item.TimeZone)
+				}
+				return types.String{}
+			}(),
+			URL: func() types.String {
+				if item.URL != "" {
+					return types.StringValue(item.URL)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

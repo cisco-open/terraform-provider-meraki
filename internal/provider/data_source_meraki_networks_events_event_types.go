@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -142,9 +141,24 @@ func ResponseNetworksGetNetworkEventsEventTypesItemsToBody(state NetworksEventsE
 	var items []ResponseItemNetworksGetNetworkEventsEventTypes
 	for _, item := range *response {
 		itemState := ResponseItemNetworksGetNetworkEventsEventTypes{
-			Category:    types.StringValue(item.Category),
-			Description: types.StringValue(item.Description),
-			Type:        types.StringValue(item.Type),
+			Category: func() types.String {
+				if item.Category != "" {
+					return types.StringValue(item.Category)
+				}
+				return types.String{}
+			}(),
+			Description: func() types.String {
+				if item.Description != "" {
+					return types.StringValue(item.Description)
+				}
+				return types.String{}
+			}(),
+			Type: func() types.String {
+				if item.Type != "" {
+					return types.StringValue(item.Type)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

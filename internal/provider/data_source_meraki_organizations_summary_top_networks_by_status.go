@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -398,8 +397,18 @@ func ResponseOrganizationsGetOrganizationSummaryTopNetworksByStatusItemsToBody(s
 								result := make([]ResponseItemOrganizationsGetOrganizationSummaryTopNetworksByStatusDevicesByProductType, len(*item.Devices.ByProductType))
 								for i, byProductType := range *item.Devices.ByProductType {
 									result[i] = ResponseItemOrganizationsGetOrganizationSummaryTopNetworksByStatusDevicesByProductType{
-										ProductType: types.StringValue(byProductType.ProductType),
-										URL:         types.StringValue(byProductType.URL),
+										ProductType: func() types.String {
+											if byProductType.ProductType != "" {
+												return types.StringValue(byProductType.ProductType)
+											}
+											return types.String{}
+										}(),
+										URL: func() types.String {
+											if byProductType.URL != "" {
+												return types.StringValue(byProductType.URL)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -410,8 +419,18 @@ func ResponseOrganizationsGetOrganizationSummaryTopNetworksByStatusItemsToBody(s
 				}
 				return nil
 			}(),
-			Name:         types.StringValue(item.Name),
-			NetworkID:    types.StringValue(item.NetworkID),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			NetworkID: func() types.String {
+				if item.NetworkID != "" {
+					return types.StringValue(item.NetworkID)
+				}
+				return types.String{}
+			}(),
 			ProductTypes: StringSliceToList(item.ProductTypes),
 			Statuses: func() *ResponseItemOrganizationsGetOrganizationSummaryTopNetworksByStatusStatuses {
 				if item.Statuses != nil {
@@ -452,20 +471,35 @@ func ResponseOrganizationsGetOrganizationSummaryTopNetworksByStatusItemsToBody(s
 											}
 											return nil
 										}(),
-										ProductType: types.StringValue(byProductType.ProductType),
+										ProductType: func() types.String {
+											if byProductType.ProductType != "" {
+												return types.StringValue(byProductType.ProductType)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						Overall: types.StringValue(item.Statuses.Overall),
+						Overall: func() types.String {
+							if item.Statuses.Overall != "" {
+								return types.StringValue(item.Statuses.Overall)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
 			Tags: StringSliceToList(item.Tags),
-			URL:  types.StringValue(item.URL),
+			URL: func() types.String {
+				if item.URL != "" {
+					return types.StringValue(item.URL)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

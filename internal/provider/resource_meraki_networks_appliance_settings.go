@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -67,7 +68,6 @@ func (r *NetworksApplianceSettingsResource) Schema(_ context.Context, _ resource
 			"client_tracking_method": schema.StringAttribute{
 				MarkdownDescription: `Client tracking method of a network
                                   Allowed values: [IP address,MAC address,Unique client identifier]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -83,7 +83,6 @@ func (r *NetworksApplianceSettingsResource) Schema(_ context.Context, _ resource
 			"deployment_mode": schema.StringAttribute{
 				MarkdownDescription: `Deployment mode of a network
                                   Allowed values: [passthrough,routed]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -97,7 +96,6 @@ func (r *NetworksApplianceSettingsResource) Schema(_ context.Context, _ resource
 			},
 			"dynamic_dns": schema.SingleNestedAttribute{
 				MarkdownDescription: `Dynamic DNS settings for a network`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -106,7 +104,6 @@ func (r *NetworksApplianceSettingsResource) Schema(_ context.Context, _ resource
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Dynamic DNS enabled`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -114,7 +111,6 @@ func (r *NetworksApplianceSettingsResource) Schema(_ context.Context, _ resource
 					},
 					"prefix": schema.StringAttribute{
 						MarkdownDescription: `Dynamic DNS url prefix. DDNS must be enabled to update`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -156,27 +152,6 @@ func (r *NetworksApplianceSettingsResource) Create(ctx context.Context, req reso
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceSettings(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceSettings  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceSettings only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceSettings(vvNetworkID, dataRequest)
@@ -185,7 +160,7 @@ func (r *NetworksApplianceSettingsResource) Create(ctx context.Context, req reso
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -196,49 +171,19 @@ func (r *NetworksApplianceSettingsResource) Create(ctx context.Context, req reso
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceSettings(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceSettings",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkApplianceSettings",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseApplianceGetNetworkApplianceSettingsItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksApplianceSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksApplianceSettingsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -268,33 +213,28 @@ func (r *NetworksApplianceSettingsResource) Read(ctx context.Context, req resour
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceSettingsItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksApplianceSettingsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksApplianceSettingsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksApplianceSettingsRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksApplianceSettingsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceSettings(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -304,9 +244,7 @@ func (r *NetworksApplianceSettingsResource) Update(ctx context.Context, req reso
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksApplianceSettingsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -371,8 +309,18 @@ func (r *NetworksApplianceSettingsRs) toSdkApiRequestUpdate(ctx context.Context)
 // From gosdk to TF Structs Schema
 func ResponseApplianceGetNetworkApplianceSettingsItemToBodyRs(state NetworksApplianceSettingsRs, response *merakigosdk.ResponseApplianceGetNetworkApplianceSettings, is_read bool) NetworksApplianceSettingsRs {
 	itemState := NetworksApplianceSettingsRs{
-		ClientTrackingMethod: types.StringValue(response.ClientTrackingMethod),
-		DeploymentMode:       types.StringValue(response.DeploymentMode),
+		ClientTrackingMethod: func() types.String {
+			if response.ClientTrackingMethod != "" {
+				return types.StringValue(response.ClientTrackingMethod)
+			}
+			return types.String{}
+		}(),
+		DeploymentMode: func() types.String {
+			if response.DeploymentMode != "" {
+				return types.StringValue(response.DeploymentMode)
+			}
+			return types.String{}
+		}(),
 		DynamicDNS: func() *ResponseApplianceGetNetworkApplianceSettingsDynamicDnsRs {
 			if response.DynamicDNS != nil {
 				return &ResponseApplianceGetNetworkApplianceSettingsDynamicDnsRs{
@@ -382,8 +330,18 @@ func ResponseApplianceGetNetworkApplianceSettingsItemToBodyRs(state NetworksAppl
 						}
 						return types.Bool{}
 					}(),
-					Prefix: types.StringValue(response.DynamicDNS.Prefix),
-					URL:    types.StringValue(response.DynamicDNS.URL),
+					Prefix: func() types.String {
+						if response.DynamicDNS.Prefix != "" {
+							return types.StringValue(response.DynamicDNS.Prefix)
+						}
+						return types.String{}
+					}(),
+					URL: func() types.String {
+						if response.DynamicDNS.URL != "" {
+							return types.StringValue(response.DynamicDNS.URL)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -244,31 +243,60 @@ func ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersA
 	item := response
 	itemState := ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccounts{
 		Items: func() *[]ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItems {
-
 			if item.Items != nil {
 				result := make([]ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItems, len(*item.Items))
 				for i, items := range *item.Items {
 					result[i] = ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItems{
-						AccountID:     types.StringValue(items.AccountID),
-						LastUpdatedAt: types.StringValue(items.LastUpdatedAt),
+						AccountID: func() types.String {
+							if items.AccountID != "" {
+								return types.StringValue(items.AccountID)
+							}
+							return types.String{}
+						}(),
+						LastUpdatedAt: func() types.String {
+							if items.LastUpdatedAt != "" {
+								return types.StringValue(items.LastUpdatedAt)
+							}
+							return types.String{}
+						}(),
 						ServiceProvider: func() *ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItemsServiceProvider {
 							if items.ServiceProvider != nil {
 								return &ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItemsServiceProvider{
 									Logo: func() *ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItemsServiceProviderLogo {
 										if items.ServiceProvider.Logo != nil {
 											return &ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItemsServiceProviderLogo{
-												URL: types.StringValue(items.ServiceProvider.Logo.URL),
+												URL: func() types.String {
+													if items.ServiceProvider.Logo.URL != "" {
+														return types.StringValue(items.ServiceProvider.Logo.URL)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return nil
 									}(),
-									Name: types.StringValue(items.ServiceProvider.Name),
+									Name: func() types.String {
+										if items.ServiceProvider.Name != "" {
+											return types.StringValue(items.ServiceProvider.Name)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						Title:    types.StringValue(items.Title),
-						Username: types.StringValue(items.Username),
+						Title: func() types.String {
+							if items.Title != "" {
+								return types.StringValue(items.Title)
+							}
+							return types.String{}
+						}(),
+						Username: func() types.String {
+							if items.Username != "" {
+								return types.StringValue(items.Username)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

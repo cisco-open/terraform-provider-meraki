@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -142,9 +141,24 @@ type ResponseCameraGetOrganizationCameraPermission struct {
 // ToBody
 func ResponseCameraGetOrganizationCameraPermissionItemToBody(state OrganizationsCameraPermissions, response *merakigosdk.ResponseCameraGetOrganizationCameraPermission) OrganizationsCameraPermissions {
 	itemState := ResponseCameraGetOrganizationCameraPermission{
-		ID:    types.StringValue(response.ID),
-		Level: types.StringValue(response.Level),
-		Name:  types.StringValue(response.Name),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Level: func() types.String {
+			if response.Level != "" {
+				return types.StringValue(response.Level)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

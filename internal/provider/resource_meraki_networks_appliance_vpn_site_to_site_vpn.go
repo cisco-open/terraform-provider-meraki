@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -30,7 +31,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -68,7 +68,6 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Schema(_ context.Context, _ 
 		Attributes: map[string]schema.Attribute{
 			"hubs": schema.ListNestedAttribute{
 				MarkdownDescription: `The list of VPN hubs, in order of preference.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.List{
 					listplanmodifier.UseStateForUnknown(),
@@ -78,7 +77,6 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Schema(_ context.Context, _ 
 
 						"hub_id": schema.StringAttribute{
 							MarkdownDescription: `The network ID of the hub.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -86,7 +84,6 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Schema(_ context.Context, _ 
 						},
 						"use_default_route": schema.BoolAttribute{
 							MarkdownDescription: `Indicates whether default route traffic should be sent to this hub.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Bool{
 								boolplanmodifier.UseStateForUnknown(),
@@ -98,7 +95,6 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Schema(_ context.Context, _ 
 			"mode": schema.StringAttribute{
 				MarkdownDescription: `The site-to-site VPN mode.
                                   Allowed values: [hub,none,spoke]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -117,7 +113,6 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Schema(_ context.Context, _ 
 			},
 			"subnet": schema.SingleNestedAttribute{
 				MarkdownDescription: `Configuration of subnet features`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -126,7 +121,6 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Schema(_ context.Context, _ 
 
 					"nat": schema.SingleNestedAttribute{
 						MarkdownDescription: `Configuration of NAT for subnets`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -135,7 +129,6 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Schema(_ context.Context, _ 
 
 							"is_allowed": schema.BoolAttribute{
 								MarkdownDescription: `If enabled, VPN subnet translation can be used to translate any local subnets that are allowed to use the VPN into a new subnet with the same number of addresses.`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -145,19 +138,17 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Schema(_ context.Context, _ 
 					},
 				},
 			},
-			"subnets": schema.SetNestedAttribute{
+			"subnets": schema.ListNestedAttribute{
 				MarkdownDescription: `The list of subnets and their VPN presence.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"local_subnet": schema.StringAttribute{
 							MarkdownDescription: `The CIDR notation subnet used within the VPN`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -165,7 +156,6 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Schema(_ context.Context, _ 
 						},
 						"nat": schema.SingleNestedAttribute{
 							MarkdownDescription: `Configuration of NAT for the subnet`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Object{
 								objectplanmodifier.UseStateForUnknown(),
@@ -174,7 +164,6 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Schema(_ context.Context, _ 
 
 								"enabled": schema.BoolAttribute{
 									MarkdownDescription: `Whether or not VPN subnet translation is enabled for the subnet`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Bool{
 										boolplanmodifier.UseStateForUnknown(),
@@ -182,7 +171,6 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Schema(_ context.Context, _ 
 								},
 								"remote_subnet": schema.StringAttribute{
 									MarkdownDescription: `The translated subnet to be used in the VPN`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -192,7 +180,6 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Schema(_ context.Context, _ 
 						},
 						"use_vpn": schema.BoolAttribute{
 							MarkdownDescription: `Indicates the presence of the subnet in the VPN`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Bool{
 								boolplanmodifier.UseStateForUnknown(),
@@ -227,27 +214,6 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Create(ctx context.Context, 
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceVpnSiteToSiteVpn(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceVpnSiteToSiteVpn  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceVpnSiteToSiteVpn only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceVpnSiteToSiteVpn(vvNetworkID, dataRequest)
@@ -256,7 +222,7 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Create(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceVpnSiteToSiteVpn",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -267,49 +233,19 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Create(ctx context.Context, 
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceVpnSiteToSiteVpn(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceVpnSiteToSiteVpn",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkApplianceVpnSiteToSiteVpn",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksApplianceVpnSiteToSiteVpnResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksApplianceVpnSiteToSiteVpnRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -339,33 +275,28 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Read(ctx context.Context, re
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksApplianceVpnSiteToSiteVpnResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksApplianceVpnSiteToSiteVpnResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksApplianceVpnSiteToSiteVpnRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksApplianceVpnSiteToSiteVpnRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceVpnSiteToSiteVpn(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceVpnSiteToSiteVpn",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -375,9 +306,7 @@ func (r *NetworksApplianceVpnSiteToSiteVpnResource) Update(ctx context.Context, 
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksApplianceVpnSiteToSiteVpnResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -530,7 +459,12 @@ func ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnItemToBodyRs(state Netw
 				result := make([]ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnHubsRs, len(*response.Hubs))
 				for i, hubs := range *response.Hubs {
 					result[i] = ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnHubsRs{
-						HubID: types.StringValue(hubs.HubID),
+						HubID: func() types.String {
+							if hubs.HubID != "" {
+								return types.StringValue(hubs.HubID)
+							}
+							return types.String{}
+						}(),
 						UseDefaultRoute: func() types.Bool {
 							if hubs.UseDefaultRoute != nil {
 								return types.BoolValue(*hubs.UseDefaultRoute)
@@ -543,7 +477,12 @@ func ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnItemToBodyRs(state Netw
 			}
 			return nil
 		}(),
-		Mode: types.StringValue(response.Mode),
+		Mode: func() types.String {
+			if response.Mode != "" {
+				return types.StringValue(response.Mode)
+			}
+			return types.String{}
+		}(),
 		Subnet: func() *ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetRs {
 			if response.Subnet != nil {
 				return &ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetRs{
@@ -569,7 +508,12 @@ func ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnItemToBodyRs(state Netw
 				result := make([]ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetsRs, len(*response.Subnets))
 				for i, subnets := range *response.Subnets {
 					result[i] = ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetsRs{
-						LocalSubnet: types.StringValue(subnets.LocalSubnet),
+						LocalSubnet: func() types.String {
+							if subnets.LocalSubnet != "" {
+								return types.StringValue(subnets.LocalSubnet)
+							}
+							return types.String{}
+						}(),
 						Nat: func() *ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetsNatRs {
 							if subnets.Nat != nil {
 								return &ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetsNatRs{
@@ -579,7 +523,12 @@ func ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnItemToBodyRs(state Netw
 										}
 										return types.Bool{}
 									}(),
-									RemoteSubnet: types.StringValue(subnets.Nat.RemoteSubnet),
+									RemoteSubnet: func() types.String {
+										if subnets.Nat.RemoteSubnet != "" {
+											return types.StringValue(subnets.Nat.RemoteSubnet)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil

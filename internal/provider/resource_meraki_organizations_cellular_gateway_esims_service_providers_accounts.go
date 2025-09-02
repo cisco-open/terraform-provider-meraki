@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -201,7 +202,7 @@ func (r *OrganizationsCellularGatewayEsimsServiceProvidersAccountsResource) Crea
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationCellularGatewayEsimsServiceProvidersAccount",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -361,7 +362,7 @@ func (r *OrganizationsCellularGatewayEsimsServiceProvidersAccountsResource) Upda
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationCellularGatewayEsimsServiceProvidersAccount",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -410,7 +411,6 @@ func (r *OrganizationsCellularGatewayEsimsServiceProvidersAccountsResource) Dele
 type OrganizationsCellularGatewayEsimsServiceProvidersAccountsRs struct {
 	OrganizationID  types.String                                                                                                  `tfsdk:"organization_id"`
 	AccountID       types.String                                                                                                  `tfsdk:"account_id"`
-	LastUpdatedAt   types.String                                                                                                  `tfsdk:"last_updated_at"`
 	ServiceProvider *ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItemsServiceProviderRs `tfsdk:"service_provider"`
 	Title           types.String                                                                                                  `tfsdk:"title"`
 	Username        types.String                                                                                                  `tfsdk:"username"`
@@ -495,26 +495,50 @@ func (r *OrganizationsCellularGatewayEsimsServiceProvidersAccountsRs) toSdkApiRe
 // From gosdk to TF Structs Schema
 func ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItemToBodyRs(state OrganizationsCellularGatewayEsimsServiceProvidersAccountsRs, response *merakigosdk.ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItems, is_read bool) OrganizationsCellularGatewayEsimsServiceProvidersAccountsRs {
 	itemState := OrganizationsCellularGatewayEsimsServiceProvidersAccountsRs{
-		AccountID:     types.StringValue(response.AccountID),
-		LastUpdatedAt: types.StringValue(response.LastUpdatedAt),
+		AccountID: func() types.String {
+			if response.AccountID != "" {
+				return types.StringValue(response.AccountID)
+			}
+			return types.String{}
+		}(),
 		ServiceProvider: func() *ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItemsServiceProviderRs {
 			if response.ServiceProvider != nil {
 				return &ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItemsServiceProviderRs{
 					Logo: func() *ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItemsServiceProviderLogoRs {
 						if response.ServiceProvider.Logo != nil {
 							return &ResponseItemCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsItemsServiceProviderLogoRs{
-								URL: types.StringValue(response.ServiceProvider.Logo.URL),
+								URL: func() types.String {
+									if response.ServiceProvider.Logo.URL != "" {
+										return types.StringValue(response.ServiceProvider.Logo.URL)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
 					}(),
-					Name: types.StringValue(response.ServiceProvider.Name),
+					Name: func() types.String {
+						if response.ServiceProvider.Name != "" {
+							return types.StringValue(response.ServiceProvider.Name)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Title:    types.StringValue(response.Title),
-		Username: types.StringValue(response.Username),
+		Title: func() types.String {
+			if response.Title != "" {
+				return types.StringValue(response.Title)
+			}
+			return types.String{}
+		}(),
+		Username: func() types.String {
+			if response.Username != "" {
+				return types.StringValue(response.Username)
+			}
+			return types.String{}
+		}(),
 	}
 	state = itemState
 	return state

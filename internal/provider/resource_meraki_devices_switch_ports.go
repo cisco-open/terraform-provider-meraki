@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -30,9 +31,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -70,7 +72,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 		Attributes: map[string]schema.Attribute{
 			"access_policy_number": schema.Int64Attribute{
 				MarkdownDescription: `The number of a custom access policy to configure on the switch port. Only applicable when 'accessPolicyType' is 'Custom access policy'.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -79,7 +80,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			"access_policy_type": schema.StringAttribute{
 				MarkdownDescription: `The type of the access policy of the switch port. Only applicable to access ports. Can be one of 'Open', 'Custom access policy', 'MAC allow list' or 'Sticky MAC allow list'.
                                   Allowed values: [Custom access policy,MAC allow list,Open,Sticky MAC allow list]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -110,7 +110,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"adaptive_policy_group_id": schema.StringAttribute{
 				MarkdownDescription: `The adaptive policy group ID that will be used to tag traffic through this switch port. This ID must pre-exist during the configuration, else needs to be created using adaptivePolicy/groups API. Cannot be applied to a port on a switch bound to profile.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -118,7 +117,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"allowed_vlans": schema.StringAttribute{
 				MarkdownDescription: `The VLANs allowed on the switch port. Only applicable to trunk ports.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -126,7 +124,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"dai_trusted": schema.BoolAttribute{
 				MarkdownDescription: `If true, ARP packets for this port will be considered trusted, and Dynamic ARP Inspection will allow the traffic.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -134,7 +131,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"dot3az": schema.SingleNestedAttribute{
 				MarkdownDescription: `dot3az settings for the port`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -143,7 +139,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `The Energy Efficient Ethernet status of the switch port.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -153,7 +148,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: `The status of the switch port.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -161,7 +155,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"flexible_stacking_enabled": schema.BoolAttribute{
 				MarkdownDescription: `For supported switches (e.g. MS420/MS425), whether or not the port has flexible stacking enabled.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -169,7 +162,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"isolation_enabled": schema.BoolAttribute{
 				MarkdownDescription: `The isolation status of the switch port.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -177,26 +169,26 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"link_negotiation": schema.StringAttribute{
 				MarkdownDescription: `The link speed for the switch port.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"link_negotiation_capabilities": schema.SetAttribute{
+			"link_negotiation_capabilities": schema.ListAttribute{
 				MarkdownDescription: `Available link speeds for the switch port.`,
 				Computed:            true,
 				ElementType:         types.StringType,
 			},
-			"mac_allow_list": schema.SetAttribute{
+			"mac_allow_list": schema.ListAttribute{
 				MarkdownDescription: `Only devices with MAC addresses specified in this list will have access to this port. Up to 20 MAC addresses can be defined. Only applicable when 'accessPolicyType' is 'MAC allow list'.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"mirror": schema.SingleNestedAttribute{
 				MarkdownDescription: `Port mirror`,
@@ -223,7 +215,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name of the switch port.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -231,7 +222,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"peer_sgt_capable": schema.BoolAttribute{
 				MarkdownDescription: `If true, Peer SGT is enabled for traffic through this switch port. Applicable to trunk port only, not access port. Cannot be applied to a port on a switch bound to profile.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -239,7 +229,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"poe_enabled": schema.BoolAttribute{
 				MarkdownDescription: `The PoE status of the switch port.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -251,7 +240,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"port_schedule_id": schema.StringAttribute{
 				MarkdownDescription: `The ID of the port schedule. A value of null will clear the port schedule.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -259,7 +247,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"profile": schema.SingleNestedAttribute{
 				MarkdownDescription: `Profile attributes`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -268,7 +255,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `When enabled, override this port's configuration with a port profile.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -276,7 +262,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 					},
 					"id": schema.StringAttribute{
 						MarkdownDescription: `When enabled, the ID of the port profile used to override the port's configuration.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -284,7 +269,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 					},
 					"iname": schema.StringAttribute{
 						MarkdownDescription: `When enabled, the IName of the profile.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -294,7 +278,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"rstp_enabled": schema.BoolAttribute{
 				MarkdownDescription: `The rapid spanning tree protocol status.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -334,19 +317,19 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 					},
 				},
 			},
-			"sticky_mac_allow_list": schema.SetAttribute{
+			"sticky_mac_allow_list": schema.ListAttribute{
 				MarkdownDescription: `The initial list of MAC addresses for sticky Mac allow list. Only applicable when 'accessPolicyType' is 'Sticky MAC allow list'.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"sticky_mac_allow_list_limit": schema.Int64Attribute{
 				MarkdownDescription: `The maximum number of MAC addresses for sticky MAC allow list. Only applicable when 'accessPolicyType' is 'Sticky MAC allow list'.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -354,7 +337,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"storm_control_enabled": schema.BoolAttribute{
 				MarkdownDescription: `The storm control status of the switch port.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -363,7 +345,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			"stp_guard": schema.StringAttribute{
 				MarkdownDescription: `The state of the STP guard ('disabled', 'root guard', 'bpdu guard' or 'loop guard').
                                   Allowed values: [bpdu guard,disabled,loop guard,root guard]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -377,20 +358,20 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 					),
 				},
 			},
-			"tags": schema.SetAttribute{
+			"tags": schema.ListAttribute{
 				MarkdownDescription: `The list of tags of the switch port.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"type": schema.StringAttribute{
 				MarkdownDescription: `The type of the switch port ('trunk', 'access', 'stack' or 'routed').
                                   Allowed values: [access,routed,stack,trunk]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -407,7 +388,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			"udld": schema.StringAttribute{
 				MarkdownDescription: `The action to take when Unidirectional Link is detected (Alert only, Enforce). Default configuration is Alert only.
                                   Allowed values: [Alert only,Enforce]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -421,7 +401,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"vlan": schema.Int64Attribute{
 				MarkdownDescription: `The VLAN of the switch port. For a trunk port, this is the native VLAN. A null value will clear the value set for trunk ports.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -429,7 +408,6 @@ func (r *DevicesSwitchPortsResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"voice_vlan": schema.Int64Attribute{
 				MarkdownDescription: `The voice VLAN of the switch port. Only applicable to access ports.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -464,27 +442,6 @@ func (r *DevicesSwitchPortsResource) Create(ctx context.Context, req resource.Cr
 	vvPortID := data.PortID.ValueString()
 	//Has Item and has items and not post
 
-	if vvSerial != "" && vvPortID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Switch.GetDeviceSwitchPort(vvSerial, vvPortID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesSwitchPorts  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesSwitchPorts only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateDeviceSwitchPort(vvSerial, vvPortID, dataRequest)
@@ -493,7 +450,7 @@ func (r *DevicesSwitchPortsResource) Create(ctx context.Context, req resource.Cr
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceSwitchPort",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -504,49 +461,19 @@ func (r *DevicesSwitchPortsResource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Switch.GetDeviceSwitchPort(vvSerial, vvPortID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetDeviceSwitchPort",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetDeviceSwitchPort",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseSwitchGetDeviceSwitchPortItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *DevicesSwitchPortsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data DevicesSwitchPortsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -577,9 +504,7 @@ func (r *DevicesSwitchPortsResource) Read(ctx context.Context, req resource.Read
 	}
 	//entro aqui 2
 	data = ResponseSwitchGetDeviceSwitchPortItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *DevicesSwitchPortsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -587,35 +512,31 @@ func (r *DevicesSwitchPortsResource) ImportState(ctx context.Context, req resour
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: serial,portId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("serial"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("port_id"), idParts[1])...)
 }
 
 func (r *DevicesSwitchPortsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data DevicesSwitchPortsRs
-	merge(ctx, req, resp, &data)
+	var plan DevicesSwitchPortsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvSerial := data.Serial.ValueString()
-	vvPortID := data.PortID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvSerial := plan.Serial.ValueString()
+	vvPortID := plan.PortID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateDeviceSwitchPort(vvSerial, vvPortID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceSwitchPort",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -625,9 +546,7 @@ func (r *DevicesSwitchPortsResource) Update(ctx context.Context, req resource.Up
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *DevicesSwitchPortsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -651,8 +570,8 @@ type DevicesSwitchPortsRs struct {
 	FlexibleStackingEnabled     types.Bool                                              `tfsdk:"flexible_stacking_enabled"`
 	IsolationEnabled            types.Bool                                              `tfsdk:"isolation_enabled"`
 	LinkNegotiation             types.String                                            `tfsdk:"link_negotiation"`
-	LinkNegotiationCapabilities types.Set                                               `tfsdk:"link_negotiation_capabilities"`
-	MacAllowList                types.Set                                               `tfsdk:"mac_allow_list"`
+	LinkNegotiationCapabilities types.List                                              `tfsdk:"link_negotiation_capabilities"`
+	MacAllowList                types.List                                              `tfsdk:"mac_allow_list"`
 	Mirror                      *ResponseSwitchGetDeviceSwitchPortMirrorRs              `tfsdk:"mirror"`
 	Module                      *ResponseSwitchGetDeviceSwitchPortModuleRs              `tfsdk:"module"`
 	Name                        types.String                                            `tfsdk:"name"`
@@ -663,11 +582,11 @@ type DevicesSwitchPortsRs struct {
 	RstpEnabled                 types.Bool                                              `tfsdk:"rstp_enabled"`
 	Schedule                    *ResponseSwitchGetDeviceSwitchPortScheduleRs            `tfsdk:"schedule"`
 	StackwiseVirtual            *ResponseSwitchGetDeviceSwitchPortStackwiseVirtualRs    `tfsdk:"stackwise_virtual"`
-	StickyMacAllowList          types.Set                                               `tfsdk:"sticky_mac_allow_list"`
+	StickyMacAllowList          types.List                                              `tfsdk:"sticky_mac_allow_list"`
 	StickyMacAllowListLimit     types.Int64                                             `tfsdk:"sticky_mac_allow_list_limit"`
 	StormControlEnabled         types.Bool                                              `tfsdk:"storm_control_enabled"`
 	StpGuard                    types.String                                            `tfsdk:"stp_guard"`
-	Tags                        types.Set                                               `tfsdk:"tags"`
+	Tags                        types.List                                              `tfsdk:"tags"`
 	Type                        types.String                                            `tfsdk:"type"`
 	Udld                        types.String                                            `tfsdk:"udld"`
 	VLAN                        types.Int64                                             `tfsdk:"vlan"`
@@ -914,18 +833,43 @@ func ResponseSwitchGetDeviceSwitchPortItemToBodyRs(state DevicesSwitchPortsRs, r
 			}
 			return types.Int64{}
 		}(),
-		AccessPolicyType: types.StringValue(response.AccessPolicyType),
+		AccessPolicyType: func() types.String {
+			if response.AccessPolicyType != "" {
+				return types.StringValue(response.AccessPolicyType)
+			}
+			return types.String{}
+		}(),
 		AdaptivePolicyGroup: func() *ResponseSwitchGetDeviceSwitchPortAdaptivePolicyGroupRs {
 			if response.AdaptivePolicyGroup != nil {
 				return &ResponseSwitchGetDeviceSwitchPortAdaptivePolicyGroupRs{
-					ID:   types.StringValue(response.AdaptivePolicyGroup.ID),
-					Name: types.StringValue(response.AdaptivePolicyGroup.Name),
+					ID: func() types.String {
+						if response.AdaptivePolicyGroup.ID != "" {
+							return types.StringValue(response.AdaptivePolicyGroup.ID)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.AdaptivePolicyGroup.Name != "" {
+							return types.StringValue(response.AdaptivePolicyGroup.Name)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		AdaptivePolicyGroupID: types.StringValue(response.AdaptivePolicyGroupID),
-		AllowedVLANs:          types.StringValue(response.AllowedVLANs),
+		AdaptivePolicyGroupID: func() types.String {
+			if response.AdaptivePolicyGroupID != "" {
+				return types.StringValue(response.AdaptivePolicyGroupID)
+			}
+			return types.String{}
+		}(),
+		AllowedVLANs: func() types.String {
+			if response.AllowedVLANs != "" {
+				return types.StringValue(response.AllowedVLANs)
+			}
+			return types.String{}
+		}(),
 		DaiTrusted: func() types.Bool {
 			if response.DaiTrusted != nil {
 				return types.BoolValue(*response.DaiTrusted)
@@ -963,13 +907,23 @@ func ResponseSwitchGetDeviceSwitchPortItemToBodyRs(state DevicesSwitchPortsRs, r
 			}
 			return types.Bool{}
 		}(),
-		LinkNegotiation:             types.StringValue(response.LinkNegotiation),
-		LinkNegotiationCapabilities: StringSliceToSet(response.LinkNegotiationCapabilities),
-		MacAllowList:                StringSliceToSet(response.MacAllowList),
+		LinkNegotiation: func() types.String {
+			if response.LinkNegotiation != "" {
+				return types.StringValue(response.LinkNegotiation)
+			}
+			return types.String{}
+		}(),
+		LinkNegotiationCapabilities: StringSliceToList(response.LinkNegotiationCapabilities),
+		MacAllowList:                StringSliceToList(response.MacAllowList),
 		Mirror: func() *ResponseSwitchGetDeviceSwitchPortMirrorRs {
 			if response.Mirror != nil {
 				return &ResponseSwitchGetDeviceSwitchPortMirrorRs{
-					Mode: types.StringValue(response.Mirror.Mode),
+					Mode: func() types.String {
+						if response.Mirror.Mode != "" {
+							return types.StringValue(response.Mirror.Mode)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -977,12 +931,22 @@ func ResponseSwitchGetDeviceSwitchPortItemToBodyRs(state DevicesSwitchPortsRs, r
 		Module: func() *ResponseSwitchGetDeviceSwitchPortModuleRs {
 			if response.Module != nil {
 				return &ResponseSwitchGetDeviceSwitchPortModuleRs{
-					Model: types.StringValue(response.Module.Model),
+					Model: func() types.String {
+						if response.Module.Model != "" {
+							return types.StringValue(response.Module.Model)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		PeerSgtCapable: func() types.Bool {
 			if response.PeerSgtCapable != nil {
 				return types.BoolValue(*response.PeerSgtCapable)
@@ -995,8 +959,18 @@ func ResponseSwitchGetDeviceSwitchPortItemToBodyRs(state DevicesSwitchPortsRs, r
 			}
 			return types.Bool{}
 		}(),
-		PortID:         types.StringValue(response.PortID),
-		PortScheduleID: types.StringValue(response.PortScheduleID),
+		PortID: func() types.String {
+			if response.PortID != "" {
+				return types.StringValue(response.PortID)
+			}
+			return types.String{}
+		}(),
+		PortScheduleID: func() types.String {
+			if response.PortScheduleID != "" {
+				return types.StringValue(response.PortScheduleID)
+			}
+			return types.String{}
+		}(),
 		Profile: func() *ResponseSwitchGetDeviceSwitchPortProfileRs {
 			if response.Profile != nil {
 				return &ResponseSwitchGetDeviceSwitchPortProfileRs{
@@ -1006,8 +980,18 @@ func ResponseSwitchGetDeviceSwitchPortItemToBodyRs(state DevicesSwitchPortsRs, r
 						}
 						return types.Bool{}
 					}(),
-					ID:    types.StringValue(response.Profile.ID),
-					Iname: types.StringValue(response.Profile.Iname),
+					ID: func() types.String {
+						if response.Profile.ID != "" {
+							return types.StringValue(response.Profile.ID)
+						}
+						return types.String{}
+					}(),
+					Iname: func() types.String {
+						if response.Profile.Iname != "" {
+							return types.StringValue(response.Profile.Iname)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -1021,8 +1005,18 @@ func ResponseSwitchGetDeviceSwitchPortItemToBodyRs(state DevicesSwitchPortsRs, r
 		Schedule: func() *ResponseSwitchGetDeviceSwitchPortScheduleRs {
 			if response.Schedule != nil {
 				return &ResponseSwitchGetDeviceSwitchPortScheduleRs{
-					ID:   types.StringValue(response.Schedule.ID),
-					Name: types.StringValue(response.Schedule.Name),
+					ID: func() types.String {
+						if response.Schedule.ID != "" {
+							return types.StringValue(response.Schedule.ID)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.Schedule.Name != "" {
+							return types.StringValue(response.Schedule.Name)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -1046,7 +1040,7 @@ func ResponseSwitchGetDeviceSwitchPortItemToBodyRs(state DevicesSwitchPortsRs, r
 			}
 			return nil
 		}(),
-		StickyMacAllowList: StringSliceToSet(response.StickyMacAllowList),
+		StickyMacAllowList: StringSliceToList(response.StickyMacAllowList),
 		StickyMacAllowListLimit: func() types.Int64 {
 			if response.StickyMacAllowListLimit != nil {
 				return types.Int64Value(int64(*response.StickyMacAllowListLimit))
@@ -1059,10 +1053,25 @@ func ResponseSwitchGetDeviceSwitchPortItemToBodyRs(state DevicesSwitchPortsRs, r
 			}
 			return types.Bool{}
 		}(),
-		StpGuard: types.StringValue(response.StpGuard),
-		Tags:     StringSliceToSet(response.Tags),
-		Type:     types.StringValue(response.Type),
-		Udld:     types.StringValue(response.Udld),
+		StpGuard: func() types.String {
+			if response.StpGuard != "" {
+				return types.StringValue(response.StpGuard)
+			}
+			return types.String{}
+		}(),
+		Tags: StringSliceToList(response.Tags),
+		Type: func() types.String {
+			if response.Type != "" {
+				return types.StringValue(response.Type)
+			}
+			return types.String{}
+		}(),
+		Udld: func() types.String {
+			if response.Udld != "" {
+				return types.StringValue(response.Udld)
+			}
+			return types.String{}
+		}(),
 		VLAN: func() types.Int64 {
 			if response.VLAN != nil {
 				return types.Int64Value(int64(*response.VLAN))

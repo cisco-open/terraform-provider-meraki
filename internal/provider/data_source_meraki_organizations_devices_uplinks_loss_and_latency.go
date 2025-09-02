@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -207,9 +206,24 @@ func ResponseOrganizationsGetOrganizationDevicesUplinksLossAndLatencyItemsToBody
 	var items []ResponseItemOrganizationsGetOrganizationDevicesUplinksLossAndLatency
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationDevicesUplinksLossAndLatency{
-			IP:        types.StringValue(item.IP),
-			NetworkID: types.StringValue(item.NetworkID),
-			Serial:    types.StringValue(item.Serial),
+			IP: func() types.String {
+				if item.IP != "" {
+					return types.StringValue(item.IP)
+				}
+				return types.String{}
+			}(),
+			NetworkID: func() types.String {
+				if item.NetworkID != "" {
+					return types.StringValue(item.NetworkID)
+				}
+				return types.String{}
+			}(),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
 			TimeSeries: func() *[]ResponseItemOrganizationsGetOrganizationDevicesUplinksLossAndLatencyTimeSeries {
 				if item.TimeSeries != nil {
 					result := make([]ResponseItemOrganizationsGetOrganizationDevicesUplinksLossAndLatencyTimeSeries, len(*item.TimeSeries))
@@ -227,14 +241,24 @@ func ResponseOrganizationsGetOrganizationDevicesUplinksLossAndLatencyItemsToBody
 								}
 								return types.Float64{}
 							}(),
-							Ts: types.StringValue(timeSeries.Ts),
+							Ts: func() types.String {
+								if timeSeries.Ts != "" {
+									return types.StringValue(timeSeries.Ts)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
 				}
 				return nil
 			}(),
-			Uplink: types.StringValue(item.Uplink),
+			Uplink: func() types.String {
+				if item.Uplink != "" {
+					return types.StringValue(item.Uplink)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

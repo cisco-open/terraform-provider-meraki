@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -28,8 +29,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -66,7 +67,6 @@ func (r *DevicesCameraCustomAnalyticsResource) Schema(_ context.Context, _ resou
 		Attributes: map[string]schema.Attribute{
 			"artifact_id": schema.StringAttribute{
 				MarkdownDescription: `Custom analytics artifact ID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -74,25 +74,22 @@ func (r *DevicesCameraCustomAnalyticsResource) Schema(_ context.Context, _ resou
 			},
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: `Whether custom analytics is enabled`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"parameters": schema.SetNestedAttribute{
+			"parameters": schema.ListNestedAttribute{
 				MarkdownDescription: `Parameters for the custom analytics workload`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"name": schema.StringAttribute{
 							MarkdownDescription: `Name of the parameter`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -100,7 +97,6 @@ func (r *DevicesCameraCustomAnalyticsResource) Schema(_ context.Context, _ resou
 						},
 						"value": schema.Float64Attribute{
 							MarkdownDescription: `Value of the parameter`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Float64{
 								float64planmodifier.UseStateForUnknown(),
@@ -140,27 +136,6 @@ func (r *DevicesCameraCustomAnalyticsResource) Create(ctx context.Context, req r
 	vvSerial := data.Serial.ValueString()
 	//Has Item and not has items
 
-	if vvSerial != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Camera.GetDeviceCameraCustomAnalytics(vvSerial)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesCameraCustomAnalytics  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesCameraCustomAnalytics only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Camera.UpdateDeviceCameraCustomAnalytics(vvSerial, dataRequest)
@@ -169,7 +144,7 @@ func (r *DevicesCameraCustomAnalyticsResource) Create(ctx context.Context, req r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCameraCustomAnalytics",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -180,49 +155,19 @@ func (r *DevicesCameraCustomAnalyticsResource) Create(ctx context.Context, req r
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Camera.GetDeviceCameraCustomAnalytics(vvSerial)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetDeviceCameraCustomAnalytics",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetDeviceCameraCustomAnalytics",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseCameraGetDeviceCameraCustomAnalyticsItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *DevicesCameraCustomAnalyticsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data DevicesCameraCustomAnalyticsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -252,33 +197,28 @@ func (r *DevicesCameraCustomAnalyticsResource) Read(ctx context.Context, req res
 	}
 	//entro aqui 2
 	data = ResponseCameraGetDeviceCameraCustomAnalyticsItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *DevicesCameraCustomAnalyticsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("serial"), req.ID)...)
 }
 
 func (r *DevicesCameraCustomAnalyticsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data DevicesCameraCustomAnalyticsRs
-	merge(ctx, req, resp, &data)
+	var plan DevicesCameraCustomAnalyticsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvSerial := data.Serial.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvSerial := plan.Serial.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Camera.UpdateDeviceCameraCustomAnalytics(vvSerial, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCameraCustomAnalytics",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -288,9 +228,7 @@ func (r *DevicesCameraCustomAnalyticsResource) Update(ctx context.Context, req r
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *DevicesCameraCustomAnalyticsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -359,7 +297,12 @@ func (r *DevicesCameraCustomAnalyticsRs) toSdkApiRequestUpdate(ctx context.Conte
 // From gosdk to TF Structs Schema
 func ResponseCameraGetDeviceCameraCustomAnalyticsItemToBodyRs(state DevicesCameraCustomAnalyticsRs, response *merakigosdk.ResponseCameraGetDeviceCameraCustomAnalytics, is_read bool) DevicesCameraCustomAnalyticsRs {
 	itemState := DevicesCameraCustomAnalyticsRs{
-		ArtifactID: types.StringValue(response.ArtifactID),
+		ArtifactID: func() types.String {
+			if response.ArtifactID != "" {
+				return types.StringValue(response.ArtifactID)
+			}
+			return types.String{}
+		}(),
 		Enabled: func() types.Bool {
 			if response.Enabled != nil {
 				return types.BoolValue(*response.Enabled)
@@ -371,7 +314,12 @@ func ResponseCameraGetDeviceCameraCustomAnalyticsItemToBodyRs(state DevicesCamer
 				result := make([]ResponseCameraGetDeviceCameraCustomAnalyticsParametersRs, len(*response.Parameters))
 				for i, parameters := range *response.Parameters {
 					result[i] = ResponseCameraGetDeviceCameraCustomAnalyticsParametersRs{
-						Name: types.StringValue(parameters.Name),
+						Name: func() types.String {
+							if parameters.Name != "" {
+								return types.StringValue(parameters.Name)
+							}
+							return types.String{}
+						}(),
 						Value: func() types.Float64 {
 							if parameters.Value != nil {
 								return types.Float64Value(float64(*parameters.Value))

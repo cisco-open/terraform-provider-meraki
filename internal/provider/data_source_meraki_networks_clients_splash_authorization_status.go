@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -165,8 +164,18 @@ func ResponseNetworksGetNetworkClientSplashAuthorizationStatusItemToBody(state N
 					Status0: func() *ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids0 {
 						if response.SSIDs.Status0 != nil {
 							return &ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids0{
-								AuthorizedAt: types.StringValue(response.SSIDs.Status0.AuthorizedAt),
-								ExpiresAt:    types.StringValue(response.SSIDs.Status0.ExpiresAt),
+								AuthorizedAt: func() types.String {
+									if response.SSIDs.Status0.AuthorizedAt != "" {
+										return types.StringValue(response.SSIDs.Status0.AuthorizedAt)
+									}
+									return types.String{}
+								}(),
+								ExpiresAt: func() types.String {
+									if response.SSIDs.Status0.ExpiresAt != "" {
+										return types.StringValue(response.SSIDs.Status0.ExpiresAt)
+									}
+									return types.String{}
+								}(),
 								IsAuthorized: func() types.Bool {
 									if response.SSIDs.Status0.IsAuthorized != nil {
 										return types.BoolValue(*response.SSIDs.Status0.IsAuthorized)

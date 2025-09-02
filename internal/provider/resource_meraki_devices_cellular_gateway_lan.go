@@ -19,14 +19,15 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -73,19 +74,17 @@ func (r *DevicesCellularGatewayLanResource) Schema(_ context.Context, _ resource
 				MarkdownDescription: `Subnet configuration of the MG.`,
 				Computed:            true,
 			},
-			"fixed_ip_assignments": schema.SetNestedAttribute{
+			"fixed_ip_assignments": schema.ListNestedAttribute{
 				MarkdownDescription: `list of all fixed IP assignments for a single MG`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"ip": schema.StringAttribute{
 							MarkdownDescription: `The IP address you want to assign to a specific server or device`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -93,7 +92,6 @@ func (r *DevicesCellularGatewayLanResource) Schema(_ context.Context, _ resource
 						},
 						"mac": schema.StringAttribute{
 							MarkdownDescription: `The MAC address of the server or device that hosts the internal resource that you wish to receive the specified IP address`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -101,7 +99,6 @@ func (r *DevicesCellularGatewayLanResource) Schema(_ context.Context, _ resource
 						},
 						"name": schema.StringAttribute{
 							MarkdownDescription: `A descriptive name of the assignment`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -110,19 +107,17 @@ func (r *DevicesCellularGatewayLanResource) Schema(_ context.Context, _ resource
 					},
 				},
 			},
-			"reserved_ip_ranges": schema.SetNestedAttribute{
+			"reserved_ip_ranges": schema.ListNestedAttribute{
 				MarkdownDescription: `list of all reserved IP ranges for a single MG`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"comment": schema.StringAttribute{
 							MarkdownDescription: `Comment explaining the reserved IP range`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -130,7 +125,6 @@ func (r *DevicesCellularGatewayLanResource) Schema(_ context.Context, _ resource
 						},
 						"end": schema.StringAttribute{
 							MarkdownDescription: `Ending IP included in the reserved range of IPs`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -138,7 +132,6 @@ func (r *DevicesCellularGatewayLanResource) Schema(_ context.Context, _ resource
 						},
 						"start": schema.StringAttribute{
 							MarkdownDescription: `Starting IP included in the reserved range of IPs`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -177,27 +170,6 @@ func (r *DevicesCellularGatewayLanResource) Create(ctx context.Context, req reso
 	vvSerial := data.Serial.ValueString()
 	//Has Item and not has items
 
-	if vvSerial != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.CellularGateway.GetDeviceCellularGatewayLan(vvSerial)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesCellularGatewayLan  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesCellularGatewayLan only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.CellularGateway.UpdateDeviceCellularGatewayLan(vvSerial, dataRequest)
@@ -206,7 +178,7 @@ func (r *DevicesCellularGatewayLanResource) Create(ctx context.Context, req reso
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCellularGatewayLan",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -217,49 +189,19 @@ func (r *DevicesCellularGatewayLanResource) Create(ctx context.Context, req reso
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.CellularGateway.GetDeviceCellularGatewayLan(vvSerial)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetDeviceCellularGatewayLan",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetDeviceCellularGatewayLan",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseCellularGatewayGetDeviceCellularGatewayLanItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *DevicesCellularGatewayLanResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data DevicesCellularGatewayLanRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -289,33 +231,28 @@ func (r *DevicesCellularGatewayLanResource) Read(ctx context.Context, req resour
 	}
 	//entro aqui 2
 	data = ResponseCellularGatewayGetDeviceCellularGatewayLanItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *DevicesCellularGatewayLanResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("serial"), req.ID)...)
 }
 
 func (r *DevicesCellularGatewayLanResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data DevicesCellularGatewayLanRs
-	merge(ctx, req, resp, &data)
+	var plan DevicesCellularGatewayLanRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvSerial := data.Serial.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvSerial := plan.Serial.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.CellularGateway.UpdateDeviceCellularGatewayLan(vvSerial, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCellularGatewayLan",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -325,9 +262,7 @@ func (r *DevicesCellularGatewayLanResource) Update(ctx context.Context, req reso
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *DevicesCellularGatewayLanResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -410,17 +345,47 @@ func (r *DevicesCellularGatewayLanRs) toSdkApiRequestUpdate(ctx context.Context)
 // From gosdk to TF Structs Schema
 func ResponseCellularGatewayGetDeviceCellularGatewayLanItemToBodyRs(state DevicesCellularGatewayLanRs, response *merakigosdk.ResponseCellularGatewayGetDeviceCellularGatewayLan, is_read bool) DevicesCellularGatewayLanRs {
 	itemState := DevicesCellularGatewayLanRs{
-		DeviceLanIP:  types.StringValue(response.DeviceLanIP),
-		DeviceName:   types.StringValue(response.DeviceName),
-		DeviceSubnet: types.StringValue(response.DeviceSubnet),
+		DeviceLanIP: func() types.String {
+			if response.DeviceLanIP != "" {
+				return types.StringValue(response.DeviceLanIP)
+			}
+			return types.String{}
+		}(),
+		DeviceName: func() types.String {
+			if response.DeviceName != "" {
+				return types.StringValue(response.DeviceName)
+			}
+			return types.String{}
+		}(),
+		DeviceSubnet: func() types.String {
+			if response.DeviceSubnet != "" {
+				return types.StringValue(response.DeviceSubnet)
+			}
+			return types.String{}
+		}(),
 		FixedIPAssignments: func() *[]ResponseCellularGatewayGetDeviceCellularGatewayLanFixedIpAssignmentsRs {
 			if response.FixedIPAssignments != nil {
 				result := make([]ResponseCellularGatewayGetDeviceCellularGatewayLanFixedIpAssignmentsRs, len(*response.FixedIPAssignments))
 				for i, fixedIPAssignments := range *response.FixedIPAssignments {
 					result[i] = ResponseCellularGatewayGetDeviceCellularGatewayLanFixedIpAssignmentsRs{
-						IP:   types.StringValue(fixedIPAssignments.IP),
-						Mac:  types.StringValue(fixedIPAssignments.Mac),
-						Name: types.StringValue(fixedIPAssignments.Name),
+						IP: func() types.String {
+							if fixedIPAssignments.IP != "" {
+								return types.StringValue(fixedIPAssignments.IP)
+							}
+							return types.String{}
+						}(),
+						Mac: func() types.String {
+							if fixedIPAssignments.Mac != "" {
+								return types.StringValue(fixedIPAssignments.Mac)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if fixedIPAssignments.Name != "" {
+								return types.StringValue(fixedIPAssignments.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -432,9 +397,24 @@ func ResponseCellularGatewayGetDeviceCellularGatewayLanItemToBodyRs(state Device
 				result := make([]ResponseCellularGatewayGetDeviceCellularGatewayLanReservedIpRangesRs, len(*response.ReservedIPRanges))
 				for i, reservedIPRanges := range *response.ReservedIPRanges {
 					result[i] = ResponseCellularGatewayGetDeviceCellularGatewayLanReservedIpRangesRs{
-						Comment: types.StringValue(reservedIPRanges.Comment),
-						End:     types.StringValue(reservedIPRanges.End),
-						Start:   types.StringValue(reservedIPRanges.Start),
+						Comment: func() types.String {
+							if reservedIPRanges.Comment != "" {
+								return types.StringValue(reservedIPRanges.Comment)
+							}
+							return types.String{}
+						}(),
+						End: func() types.String {
+							if reservedIPRanges.End != "" {
+								return types.StringValue(reservedIPRanges.End)
+							}
+							return types.String{}
+						}(),
+						Start: func() types.String {
+							if reservedIPRanges.Start != "" {
+								return types.StringValue(reservedIPRanges.Start)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

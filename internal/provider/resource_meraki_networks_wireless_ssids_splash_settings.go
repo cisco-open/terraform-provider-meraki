@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -30,9 +31,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -70,7 +71,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 		Attributes: map[string]schema.Attribute{
 			"allow_simultaneous_logins": schema.BoolAttribute{
 				MarkdownDescription: `Whether or not to allow simultaneous logins from different devices.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -78,7 +78,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 			},
 			"billing": schema.SingleNestedAttribute{
 				MarkdownDescription: `Details associated with billing splash`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -87,7 +86,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 
 					"free_access": schema.SingleNestedAttribute{
 						MarkdownDescription: `Details associated with a free access plan with limits`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -96,7 +94,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 
 							"duration_in_minutes": schema.Int64Attribute{
 								MarkdownDescription: `How long a device can use a network for free.`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Int64{
 									int64planmodifier.UseStateForUnknown(),
@@ -104,7 +101,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 							},
 							"enabled": schema.BoolAttribute{
 								MarkdownDescription: `Whether or not free access is enabled.`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -114,7 +110,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 					},
 					"prepaid_access_fast_login_enabled": schema.BoolAttribute{
 						MarkdownDescription: `Whether or not billing uses the fast login prepaid access option.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -122,7 +117,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 					},
 					"reply_to_email_address": schema.StringAttribute{
 						MarkdownDescription: `The email address that reeceives replies from clients`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -132,7 +126,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 			},
 			"block_all_traffic_before_sign_on": schema.BoolAttribute{
 				MarkdownDescription: `How restricted allowing traffic should be. If true, all traffic types are blocked until the splash page is acknowledged. If false, all non-HTTP traffic is allowed before the splash page is acknowledged.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -141,7 +134,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 			"controller_disconnection_behavior": schema.StringAttribute{
 				MarkdownDescription: `How login attempts should be handled when the controller is unreachable.
                                   Allowed values: [default,open,restricted]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -156,7 +148,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 			},
 			"guest_sponsorship": schema.SingleNestedAttribute{
 				MarkdownDescription: `Details associated with guest sponsored splash`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -165,7 +156,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 
 					"duration_in_minutes": schema.Int64Attribute{
 						MarkdownDescription: `Duration in minutes of sponsored guest authorization.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -173,7 +163,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 					},
 					"guest_can_request_timeframe": schema.BoolAttribute{
 						MarkdownDescription: `Whether or not guests can specify how much time they are requesting.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -191,7 +180,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 			},
 			"redirect_url": schema.StringAttribute{
 				MarkdownDescription: `The custom redirect URL where the users will go after the splash page.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -199,7 +187,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 			},
 			"self_registration": schema.SingleNestedAttribute{
 				MarkdownDescription: `Self-registration for splash with Meraki authentication.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -209,7 +196,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 					"authorization_type": schema.StringAttribute{
 						MarkdownDescription: `How created user accounts should be authorized.
                                         Allowed values: [admin,auto,self_email]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -224,7 +210,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 					},
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Whether or not to allow users to create their own account on the network.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -234,19 +219,17 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 			},
 			"sentry_enrollment": schema.SingleNestedAttribute{
 				MarkdownDescription: `Systems Manager sentry enrollment splash settings.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
 				Attributes: map[string]schema.Attribute{
 
-					"enforced_systems": schema.SetAttribute{
+					"enforced_systems": schema.ListAttribute{
 						MarkdownDescription: `The system types that the Sentry enforces.`,
-						Computed:            true,
 						Optional:            true,
-						PlanModifiers: []planmodifier.Set{
-							setplanmodifier.UseStateForUnknown(),
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.UseStateForUnknown(),
 						},
 
 						ElementType: types.StringType,
@@ -254,7 +237,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 					"strength": schema.StringAttribute{
 						MarkdownDescription: `The strength of the enforcement of selected system types.
                                         Allowed values: [click-through,focused,strict]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -269,7 +251,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 					},
 					"systems_manager_network": schema.SingleNestedAttribute{
 						MarkdownDescription: `Systems Manager network targeted for sentry enrollment.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -278,7 +259,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 
 							"id": schema.StringAttribute{
 								MarkdownDescription: `The network ID of the Systems Manager network.`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -290,7 +270,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 			},
 			"splash_image": schema.SingleNestedAttribute{
 				MarkdownDescription: `The image used in the splash page.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -299,7 +278,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 
 					"extension": schema.StringAttribute{
 						MarkdownDescription: `The extension of the image file.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -307,7 +285,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 					},
 					"image": schema.SingleNestedAttribute{
 						MarkdownDescription: `Properties for setting a new image.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -316,7 +293,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 
 							"contents": schema.StringAttribute{
 								MarkdownDescription: `The file contents (a base 64 encoded string) of your new image.`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -325,7 +301,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 							"format": schema.StringAttribute{
 								MarkdownDescription: `The format of the encoded contents. Supported formats are 'png', 'gif', and jpg'.
                                               Allowed values: [gif,jpg,png]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -342,7 +317,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 					},
 					"md5": schema.StringAttribute{
 						MarkdownDescription: `The MD5 value of the image file.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -352,7 +326,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 			},
 			"splash_logo": schema.SingleNestedAttribute{
 				MarkdownDescription: `The logo used in the splash page.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -361,7 +334,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 
 					"extension": schema.StringAttribute{
 						MarkdownDescription: `The extension of the logo file.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -369,7 +341,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 					},
 					"image": schema.SingleNestedAttribute{
 						MarkdownDescription: `Properties for setting a new image.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -378,7 +349,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 
 							"contents": schema.StringAttribute{
 								MarkdownDescription: `The file contents (a base 64 encoded string) of your new logo.`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -387,7 +357,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 							"format": schema.StringAttribute{
 								MarkdownDescription: `The format of the encoded contents. Supported formats are 'png', 'gif', and jpg'.
                                               Allowed values: [gif,jpg,png]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -404,7 +373,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 					},
 					"md5": schema.StringAttribute{
 						MarkdownDescription: `The MD5 value of the logo file.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -418,7 +386,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 			},
 			"splash_prepaid_front": schema.SingleNestedAttribute{
 				MarkdownDescription: `The prepaid front image used in the splash page.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -427,7 +394,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 
 					"extension": schema.StringAttribute{
 						MarkdownDescription: `The extension of the prepaid front image file.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -435,7 +401,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 					},
 					"image": schema.SingleNestedAttribute{
 						MarkdownDescription: `Properties for setting a new image.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -444,7 +409,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 
 							"contents": schema.StringAttribute{
 								MarkdownDescription: `The file contents (a base 64 encoded string) of your new prepaid front.`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -453,7 +417,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 							"format": schema.StringAttribute{
 								MarkdownDescription: `The format of the encoded contents. Supported formats are 'png', 'gif', and jpg'.
                                               Allowed values: [gif,jpg,png]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -470,7 +433,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 					},
 					"md5": schema.StringAttribute{
 						MarkdownDescription: `The MD5 value of the prepaid front image file.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -481,7 +443,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 			"splash_timeout": schema.Int64Attribute{
 				MarkdownDescription: `Splash timeout in minutes.
                                   Allowed values: [30,60,120,240,480,720,1080,1440,2880,5760,7200,10080,20160,43200,86400,129600]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -489,7 +450,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 			},
 			"splash_url": schema.StringAttribute{
 				MarkdownDescription: `The custom splash URL of the click-through splash page.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -501,7 +461,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 			},
 			"theme_id": schema.StringAttribute{
 				MarkdownDescription: `The id of the selected splash theme.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -509,7 +468,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 			},
 			"use_redirect_url": schema.BoolAttribute{
 				MarkdownDescription: `The Boolean indicating whether the the user will be redirected to the custom redirect URL after the splash page.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -517,7 +475,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 			},
 			"use_splash_url": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating whether the users will be redirected to the custom splash url`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -525,7 +482,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Schema(_ context.Context, 
 			},
 			"welcome_message": schema.StringAttribute{
 				MarkdownDescription: `The welcome message for the users on the splash page.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -558,27 +514,6 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Create(ctx context.Context
 	vvNumber := data.Number.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" && vvNumber != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDSplashSettings(vvNetworkID, vvNumber)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessSsidsSplashSettings  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessSsidsSplashSettings only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDSplashSettings(vvNetworkID, vvNumber, dataRequest)
@@ -587,7 +522,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Create(ctx context.Context
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDSplashSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -598,49 +533,19 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Create(ctx context.Context
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDSplashSettings(vvNetworkID, vvNumber)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkWirelessSSIDSplashSettings",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkWirelessSSIDSplashSettings",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksWirelessSSIDsSplashSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksWirelessSSIDsSplashSettingsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -671,9 +576,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Read(ctx context.Context, 
 	}
 	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksWirelessSSIDsSplashSettingsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -681,35 +584,31 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) ImportState(ctx context.Co
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,number. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("number"), idParts[1])...)
 }
 
 func (r *NetworksWirelessSSIDsSplashSettingsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksWirelessSSIDsSplashSettingsRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksWirelessSSIDsSplashSettingsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvNumber := data.Number.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvNumber := plan.Number.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDSplashSettings(vvNetworkID, vvNumber, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDSplashSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -719,9 +618,7 @@ func (r *NetworksWirelessSSIDsSplashSettingsResource) Update(ctx context.Context
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksWirelessSSIDsSplashSettingsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -777,7 +674,7 @@ type ResponseWirelessGetNetworkWirelessSsidSplashSettingsSelfRegistrationRs stru
 }
 
 type ResponseWirelessGetNetworkWirelessSsidSplashSettingsSentryEnrollmentRs struct {
-	EnforcedSystems       types.Set                                                                                    `tfsdk:"enforced_systems"`
+	EnforcedSystems       types.List                                                                                   `tfsdk:"enforced_systems"`
 	Strength              types.String                                                                                 `tfsdk:"strength"`
 	SystemsManagerNetwork *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSentryEnrollmentSystemsManagerNetworkRs `tfsdk:"systems_manager_network"`
 }
@@ -1108,7 +1005,12 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(state Netw
 						}
 						return types.Bool{}
 					}(),
-					ReplyToEmailAddress: types.StringValue(response.Billing.ReplyToEmailAddress),
+					ReplyToEmailAddress: func() types.String {
+						if response.Billing.ReplyToEmailAddress != "" {
+							return types.StringValue(response.Billing.ReplyToEmailAddress)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -1119,7 +1021,12 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(state Netw
 			}
 			return types.Bool{}
 		}(),
-		ControllerDisconnectionBehavior: types.StringValue(response.ControllerDisconnectionBehavior),
+		ControllerDisconnectionBehavior: func() types.String {
+			if response.ControllerDisconnectionBehavior != "" {
+				return types.StringValue(response.ControllerDisconnectionBehavior)
+			}
+			return types.String{}
+		}(),
 		GuestSponsorship: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsGuestSponsorshipRs {
 			if response.GuestSponsorship != nil {
 				return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsGuestSponsorshipRs{
@@ -1139,11 +1046,21 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(state Netw
 			}
 			return nil
 		}(),
-		RedirectURL: types.StringValue(response.RedirectURL),
+		RedirectURL: func() types.String {
+			if response.RedirectURL != "" {
+				return types.StringValue(response.RedirectURL)
+			}
+			return types.String{}
+		}(),
 		SelfRegistration: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSelfRegistrationRs {
 			if response.SelfRegistration != nil {
 				return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSelfRegistrationRs{
-					AuthorizationType: types.StringValue(response.SelfRegistration.AuthorizationType),
+					AuthorizationType: func() types.String {
+						if response.SelfRegistration.AuthorizationType != "" {
+							return types.StringValue(response.SelfRegistration.AuthorizationType)
+						}
+						return types.String{}
+					}(),
 					Enabled: func() types.Bool {
 						if response.SelfRegistration.Enabled != nil {
 							return types.BoolValue(*response.SelfRegistration.Enabled)
@@ -1157,12 +1074,22 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(state Netw
 		SentryEnrollment: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSentryEnrollmentRs {
 			if response.SentryEnrollment != nil {
 				return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSentryEnrollmentRs{
-					EnforcedSystems: StringSliceToSet(response.SentryEnrollment.EnforcedSystems),
-					Strength:        types.StringValue(response.SentryEnrollment.Strength),
+					EnforcedSystems: StringSliceToList(response.SentryEnrollment.EnforcedSystems),
+					Strength: func() types.String {
+						if response.SentryEnrollment.Strength != "" {
+							return types.StringValue(response.SentryEnrollment.Strength)
+						}
+						return types.String{}
+					}(),
 					SystemsManagerNetwork: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSentryEnrollmentSystemsManagerNetworkRs {
 						if response.SentryEnrollment.SystemsManagerNetwork != nil {
 							return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSentryEnrollmentSystemsManagerNetworkRs{
-								ID: types.StringValue(response.SentryEnrollment.SystemsManagerNetwork.ID),
+								ID: func() types.String {
+									if response.SentryEnrollment.SystemsManagerNetwork.ID != "" {
+										return types.StringValue(response.SentryEnrollment.SystemsManagerNetwork.ID)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -1174,8 +1101,18 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(state Netw
 		SplashImage: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashImageRs {
 			if response.SplashImage != nil {
 				return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashImageRs{
-					Extension: types.StringValue(response.SplashImage.Extension),
-					Md5:       types.StringValue(response.SplashImage.Md5),
+					Extension: func() types.String {
+						if response.SplashImage.Extension != "" {
+							return types.StringValue(response.SplashImage.Extension)
+						}
+						return types.String{}
+					}(),
+					Md5: func() types.String {
+						if response.SplashImage.Md5 != "" {
+							return types.StringValue(response.SplashImage.Md5)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -1183,18 +1120,43 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(state Netw
 		SplashLogo: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashLogoRs {
 			if response.SplashLogo != nil {
 				return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashLogoRs{
-					Extension: types.StringValue(response.SplashLogo.Extension),
-					Md5:       types.StringValue(response.SplashLogo.Md5),
+					Extension: func() types.String {
+						if response.SplashLogo.Extension != "" {
+							return types.StringValue(response.SplashLogo.Extension)
+						}
+						return types.String{}
+					}(),
+					Md5: func() types.String {
+						if response.SplashLogo.Md5 != "" {
+							return types.StringValue(response.SplashLogo.Md5)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		SplashPage: types.StringValue(response.SplashPage),
+		SplashPage: func() types.String {
+			if response.SplashPage != "" {
+				return types.StringValue(response.SplashPage)
+			}
+			return types.String{}
+		}(),
 		SplashPrepaidFront: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashPrepaidFrontRs {
 			if response.SplashPrepaidFront != nil {
 				return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashPrepaidFrontRs{
-					Extension: types.StringValue(response.SplashPrepaidFront.Extension),
-					Md5:       types.StringValue(response.SplashPrepaidFront.Md5),
+					Extension: func() types.String {
+						if response.SplashPrepaidFront.Extension != "" {
+							return types.StringValue(response.SplashPrepaidFront.Extension)
+						}
+						return types.String{}
+					}(),
+					Md5: func() types.String {
+						if response.SplashPrepaidFront.Md5 != "" {
+							return types.StringValue(response.SplashPrepaidFront.Md5)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -1205,14 +1167,24 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(state Netw
 			}
 			return types.Int64{}
 		}(),
-		SplashURL: types.StringValue(response.SplashURL),
+		SplashURL: func() types.String {
+			if response.SplashURL != "" {
+				return types.StringValue(response.SplashURL)
+			}
+			return types.String{}
+		}(),
 		SSIDNumber: func() types.Int64 {
 			if response.SSIDNumber != nil {
 				return types.Int64Value(int64(*response.SSIDNumber))
 			}
 			return types.Int64{}
 		}(),
-		ThemeID: types.StringValue(response.ThemeID),
+		ThemeID: func() types.String {
+			if response.ThemeID != "" {
+				return types.StringValue(response.ThemeID)
+			}
+			return types.String{}
+		}(),
 		UseRedirectURL: func() types.Bool {
 			if response.UseRedirectURL != nil {
 				return types.BoolValue(*response.UseRedirectURL)
@@ -1225,7 +1197,12 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBodyRs(state Netw
 			}
 			return types.Bool{}
 		}(),
-		WelcomeMessage: types.StringValue(response.WelcomeMessage),
+		WelcomeMessage: func() types.String {
+			if response.WelcomeMessage != "" {
+				return types.StringValue(response.WelcomeMessage)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksWirelessSSIDsSplashSettingsRs)

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -462,6 +461,17 @@ func (d *OrganizationsBrandingPoliciesDataSource) Read(ctx context.Context, req 
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetOrganizationBrandingPolicy",
+				err.Error(),
+			)
+			return
+		}
+
 		organizationsBrandingPolicies = ResponseOrganizationsGetOrganizationBrandingPolicyItemToBody(organizationsBrandingPolicies, response2)
 		diags = resp.State.Set(ctx, &organizationsBrandingPolicies)
 		resp.Diagnostics.Append(diags...)
@@ -578,8 +588,13 @@ func ResponseOrganizationsGetOrganizationBrandingPoliciesItemsToBody(state Organ
 			AdminSettings: func() *ResponseItemOrganizationsGetOrganizationBrandingPoliciesAdminSettings {
 				if item.AdminSettings != nil {
 					return &ResponseItemOrganizationsGetOrganizationBrandingPoliciesAdminSettings{
-						AppliesTo: types.StringValue(item.AdminSettings.AppliesTo),
-						Values:    StringSliceToList(item.AdminSettings.Values),
+						AppliesTo: func() types.String {
+							if item.AdminSettings.AppliesTo != "" {
+								return types.StringValue(item.AdminSettings.AppliesTo)
+							}
+							return types.String{}
+						}(),
+						Values: StringSliceToList(item.AdminSettings.Values),
 					}
 				}
 				return nil
@@ -599,8 +614,18 @@ func ResponseOrganizationsGetOrganizationBrandingPoliciesItemsToBody(state Organ
 									Preview: func() *ResponseItemOrganizationsGetOrganizationBrandingPoliciesCustomLogoImagePreview {
 										if item.CustomLogo.Image.Preview != nil {
 											return &ResponseItemOrganizationsGetOrganizationBrandingPoliciesCustomLogoImagePreview{
-												ExpiresAt: types.StringValue(item.CustomLogo.Image.Preview.ExpiresAt),
-												URL:       types.StringValue(item.CustomLogo.Image.Preview.URL),
+												ExpiresAt: func() types.String {
+													if item.CustomLogo.Image.Preview.ExpiresAt != "" {
+														return types.StringValue(item.CustomLogo.Image.Preview.ExpiresAt)
+													}
+													return types.String{}
+												}(),
+												URL: func() types.String {
+													if item.CustomLogo.Image.Preview.URL != "" {
+														return types.StringValue(item.CustomLogo.Image.Preview.URL)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return nil
@@ -622,26 +647,106 @@ func ResponseOrganizationsGetOrganizationBrandingPoliciesItemsToBody(state Organ
 			HelpSettings: func() *ResponseItemOrganizationsGetOrganizationBrandingPoliciesHelpSettings {
 				if item.HelpSettings != nil {
 					return &ResponseItemOrganizationsGetOrganizationBrandingPoliciesHelpSettings{
-						APIDocsSubtab:                      types.StringValue(item.HelpSettings.APIDocsSubtab),
-						CasesSubtab:                        types.StringValue(item.HelpSettings.CasesSubtab),
-						CiscoMerakiProductDocumentation:    types.StringValue(item.HelpSettings.CiscoMerakiProductDocumentation),
-						CommunitySubtab:                    types.StringValue(item.HelpSettings.CommunitySubtab),
-						DataProtectionRequestsSubtab:       types.StringValue(item.HelpSettings.DataProtectionRequestsSubtab),
-						FirewallInfoSubtab:                 types.StringValue(item.HelpSettings.FirewallInfoSubtab),
-						GetHelpSubtab:                      types.StringValue(item.HelpSettings.GetHelpSubtab),
-						GetHelpSubtabKnowledgeBaseSearch:   types.StringValue(item.HelpSettings.GetHelpSubtabKnowledgeBaseSearch),
-						HardwareReplacementsSubtab:         types.StringValue(item.HelpSettings.HardwareReplacementsSubtab),
-						HelpTab:                            types.StringValue(item.HelpSettings.HelpTab),
-						HelpWidget:                         types.StringValue(item.HelpSettings.HelpWidget),
-						NewFeaturesSubtab:                  types.StringValue(item.HelpSettings.NewFeaturesSubtab),
-						SmForums:                           types.StringValue(item.HelpSettings.SmForums),
-						SupportContactInfo:                 types.StringValue(item.HelpSettings.SupportContactInfo),
-						UniversalSearchKnowledgeBaseSearch: types.StringValue(item.HelpSettings.UniversalSearchKnowledgeBaseSearch),
+						APIDocsSubtab: func() types.String {
+							if item.HelpSettings.APIDocsSubtab != "" {
+								return types.StringValue(item.HelpSettings.APIDocsSubtab)
+							}
+							return types.String{}
+						}(),
+						CasesSubtab: func() types.String {
+							if item.HelpSettings.CasesSubtab != "" {
+								return types.StringValue(item.HelpSettings.CasesSubtab)
+							}
+							return types.String{}
+						}(),
+						CiscoMerakiProductDocumentation: func() types.String {
+							if item.HelpSettings.CiscoMerakiProductDocumentation != "" {
+								return types.StringValue(item.HelpSettings.CiscoMerakiProductDocumentation)
+							}
+							return types.String{}
+						}(),
+						CommunitySubtab: func() types.String {
+							if item.HelpSettings.CommunitySubtab != "" {
+								return types.StringValue(item.HelpSettings.CommunitySubtab)
+							}
+							return types.String{}
+						}(),
+						DataProtectionRequestsSubtab: func() types.String {
+							if item.HelpSettings.DataProtectionRequestsSubtab != "" {
+								return types.StringValue(item.HelpSettings.DataProtectionRequestsSubtab)
+							}
+							return types.String{}
+						}(),
+						FirewallInfoSubtab: func() types.String {
+							if item.HelpSettings.FirewallInfoSubtab != "" {
+								return types.StringValue(item.HelpSettings.FirewallInfoSubtab)
+							}
+							return types.String{}
+						}(),
+						GetHelpSubtab: func() types.String {
+							if item.HelpSettings.GetHelpSubtab != "" {
+								return types.StringValue(item.HelpSettings.GetHelpSubtab)
+							}
+							return types.String{}
+						}(),
+						GetHelpSubtabKnowledgeBaseSearch: func() types.String {
+							if item.HelpSettings.GetHelpSubtabKnowledgeBaseSearch != "" {
+								return types.StringValue(item.HelpSettings.GetHelpSubtabKnowledgeBaseSearch)
+							}
+							return types.String{}
+						}(),
+						HardwareReplacementsSubtab: func() types.String {
+							if item.HelpSettings.HardwareReplacementsSubtab != "" {
+								return types.StringValue(item.HelpSettings.HardwareReplacementsSubtab)
+							}
+							return types.String{}
+						}(),
+						HelpTab: func() types.String {
+							if item.HelpSettings.HelpTab != "" {
+								return types.StringValue(item.HelpSettings.HelpTab)
+							}
+							return types.String{}
+						}(),
+						HelpWidget: func() types.String {
+							if item.HelpSettings.HelpWidget != "" {
+								return types.StringValue(item.HelpSettings.HelpWidget)
+							}
+							return types.String{}
+						}(),
+						NewFeaturesSubtab: func() types.String {
+							if item.HelpSettings.NewFeaturesSubtab != "" {
+								return types.StringValue(item.HelpSettings.NewFeaturesSubtab)
+							}
+							return types.String{}
+						}(),
+						SmForums: func() types.String {
+							if item.HelpSettings.SmForums != "" {
+								return types.StringValue(item.HelpSettings.SmForums)
+							}
+							return types.String{}
+						}(),
+						SupportContactInfo: func() types.String {
+							if item.HelpSettings.SupportContactInfo != "" {
+								return types.StringValue(item.HelpSettings.SupportContactInfo)
+							}
+							return types.String{}
+						}(),
+						UniversalSearchKnowledgeBaseSearch: func() types.String {
+							if item.HelpSettings.UniversalSearchKnowledgeBaseSearch != "" {
+								return types.StringValue(item.HelpSettings.UniversalSearchKnowledgeBaseSearch)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			Name: types.StringValue(item.Name),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -654,8 +759,13 @@ func ResponseOrganizationsGetOrganizationBrandingPolicyItemToBody(state Organiza
 		AdminSettings: func() *ResponseOrganizationsGetOrganizationBrandingPolicyAdminSettings {
 			if response.AdminSettings != nil {
 				return &ResponseOrganizationsGetOrganizationBrandingPolicyAdminSettings{
-					AppliesTo: types.StringValue(response.AdminSettings.AppliesTo),
-					Values:    StringSliceToList(response.AdminSettings.Values),
+					AppliesTo: func() types.String {
+						if response.AdminSettings.AppliesTo != "" {
+							return types.StringValue(response.AdminSettings.AppliesTo)
+						}
+						return types.String{}
+					}(),
+					Values: StringSliceToList(response.AdminSettings.Values),
 				}
 			}
 			return nil
@@ -675,8 +785,18 @@ func ResponseOrganizationsGetOrganizationBrandingPolicyItemToBody(state Organiza
 								Preview: func() *ResponseOrganizationsGetOrganizationBrandingPolicyCustomLogoImagePreview {
 									if response.CustomLogo.Image.Preview != nil {
 										return &ResponseOrganizationsGetOrganizationBrandingPolicyCustomLogoImagePreview{
-											ExpiresAt: types.StringValue(response.CustomLogo.Image.Preview.ExpiresAt),
-											URL:       types.StringValue(response.CustomLogo.Image.Preview.URL),
+											ExpiresAt: func() types.String {
+												if response.CustomLogo.Image.Preview.ExpiresAt != "" {
+													return types.StringValue(response.CustomLogo.Image.Preview.ExpiresAt)
+												}
+												return types.String{}
+											}(),
+											URL: func() types.String {
+												if response.CustomLogo.Image.Preview.URL != "" {
+													return types.StringValue(response.CustomLogo.Image.Preview.URL)
+												}
+												return types.String{}
+											}(),
 										}
 									}
 									return nil
@@ -698,26 +818,106 @@ func ResponseOrganizationsGetOrganizationBrandingPolicyItemToBody(state Organiza
 		HelpSettings: func() *ResponseOrganizationsGetOrganizationBrandingPolicyHelpSettings {
 			if response.HelpSettings != nil {
 				return &ResponseOrganizationsGetOrganizationBrandingPolicyHelpSettings{
-					APIDocsSubtab:                      types.StringValue(response.HelpSettings.APIDocsSubtab),
-					CasesSubtab:                        types.StringValue(response.HelpSettings.CasesSubtab),
-					CiscoMerakiProductDocumentation:    types.StringValue(response.HelpSettings.CiscoMerakiProductDocumentation),
-					CommunitySubtab:                    types.StringValue(response.HelpSettings.CommunitySubtab),
-					DataProtectionRequestsSubtab:       types.StringValue(response.HelpSettings.DataProtectionRequestsSubtab),
-					FirewallInfoSubtab:                 types.StringValue(response.HelpSettings.FirewallInfoSubtab),
-					GetHelpSubtab:                      types.StringValue(response.HelpSettings.GetHelpSubtab),
-					GetHelpSubtabKnowledgeBaseSearch:   types.StringValue(response.HelpSettings.GetHelpSubtabKnowledgeBaseSearch),
-					HardwareReplacementsSubtab:         types.StringValue(response.HelpSettings.HardwareReplacementsSubtab),
-					HelpTab:                            types.StringValue(response.HelpSettings.HelpTab),
-					HelpWidget:                         types.StringValue(response.HelpSettings.HelpWidget),
-					NewFeaturesSubtab:                  types.StringValue(response.HelpSettings.NewFeaturesSubtab),
-					SmForums:                           types.StringValue(response.HelpSettings.SmForums),
-					SupportContactInfo:                 types.StringValue(response.HelpSettings.SupportContactInfo),
-					UniversalSearchKnowledgeBaseSearch: types.StringValue(response.HelpSettings.UniversalSearchKnowledgeBaseSearch),
+					APIDocsSubtab: func() types.String {
+						if response.HelpSettings.APIDocsSubtab != "" {
+							return types.StringValue(response.HelpSettings.APIDocsSubtab)
+						}
+						return types.String{}
+					}(),
+					CasesSubtab: func() types.String {
+						if response.HelpSettings.CasesSubtab != "" {
+							return types.StringValue(response.HelpSettings.CasesSubtab)
+						}
+						return types.String{}
+					}(),
+					CiscoMerakiProductDocumentation: func() types.String {
+						if response.HelpSettings.CiscoMerakiProductDocumentation != "" {
+							return types.StringValue(response.HelpSettings.CiscoMerakiProductDocumentation)
+						}
+						return types.String{}
+					}(),
+					CommunitySubtab: func() types.String {
+						if response.HelpSettings.CommunitySubtab != "" {
+							return types.StringValue(response.HelpSettings.CommunitySubtab)
+						}
+						return types.String{}
+					}(),
+					DataProtectionRequestsSubtab: func() types.String {
+						if response.HelpSettings.DataProtectionRequestsSubtab != "" {
+							return types.StringValue(response.HelpSettings.DataProtectionRequestsSubtab)
+						}
+						return types.String{}
+					}(),
+					FirewallInfoSubtab: func() types.String {
+						if response.HelpSettings.FirewallInfoSubtab != "" {
+							return types.StringValue(response.HelpSettings.FirewallInfoSubtab)
+						}
+						return types.String{}
+					}(),
+					GetHelpSubtab: func() types.String {
+						if response.HelpSettings.GetHelpSubtab != "" {
+							return types.StringValue(response.HelpSettings.GetHelpSubtab)
+						}
+						return types.String{}
+					}(),
+					GetHelpSubtabKnowledgeBaseSearch: func() types.String {
+						if response.HelpSettings.GetHelpSubtabKnowledgeBaseSearch != "" {
+							return types.StringValue(response.HelpSettings.GetHelpSubtabKnowledgeBaseSearch)
+						}
+						return types.String{}
+					}(),
+					HardwareReplacementsSubtab: func() types.String {
+						if response.HelpSettings.HardwareReplacementsSubtab != "" {
+							return types.StringValue(response.HelpSettings.HardwareReplacementsSubtab)
+						}
+						return types.String{}
+					}(),
+					HelpTab: func() types.String {
+						if response.HelpSettings.HelpTab != "" {
+							return types.StringValue(response.HelpSettings.HelpTab)
+						}
+						return types.String{}
+					}(),
+					HelpWidget: func() types.String {
+						if response.HelpSettings.HelpWidget != "" {
+							return types.StringValue(response.HelpSettings.HelpWidget)
+						}
+						return types.String{}
+					}(),
+					NewFeaturesSubtab: func() types.String {
+						if response.HelpSettings.NewFeaturesSubtab != "" {
+							return types.StringValue(response.HelpSettings.NewFeaturesSubtab)
+						}
+						return types.String{}
+					}(),
+					SmForums: func() types.String {
+						if response.HelpSettings.SmForums != "" {
+							return types.StringValue(response.HelpSettings.SmForums)
+						}
+						return types.String{}
+					}(),
+					SupportContactInfo: func() types.String {
+						if response.HelpSettings.SupportContactInfo != "" {
+							return types.StringValue(response.HelpSettings.SupportContactInfo)
+						}
+						return types.String{}
+					}(),
+					UniversalSearchKnowledgeBaseSearch: func() types.String {
+						if response.HelpSettings.UniversalSearchKnowledgeBaseSearch != "" {
+							return types.StringValue(response.HelpSettings.UniversalSearchKnowledgeBaseSearch)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

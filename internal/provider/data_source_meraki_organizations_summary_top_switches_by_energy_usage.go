@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -229,14 +228,39 @@ func ResponseOrganizationsGetOrganizationSummaryTopSwitchesByEnergyUsageItemsToB
 	var items []ResponseItemOrganizationsGetOrganizationSummaryTopSwitchesByEnergyUsage
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationSummaryTopSwitchesByEnergyUsage{
-			Mac:   types.StringValue(item.Mac),
-			Model: types.StringValue(item.Model),
-			Name:  types.StringValue(item.Name),
+			Mac: func() types.String {
+				if item.Mac != "" {
+					return types.StringValue(item.Mac)
+				}
+				return types.String{}
+			}(),
+			Model: func() types.String {
+				if item.Model != "" {
+					return types.StringValue(item.Model)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			Network: func() *ResponseItemOrganizationsGetOrganizationSummaryTopSwitchesByEnergyUsageNetwork {
 				if item.Network != nil {
 					return &ResponseItemOrganizationsGetOrganizationSummaryTopSwitchesByEnergyUsageNetwork{
-						ID:   types.StringValue(item.Network.ID),
-						Name: types.StringValue(item.Network.Name),
+						ID: func() types.String {
+							if item.Network.ID != "" {
+								return types.StringValue(item.Network.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if item.Network.Name != "" {
+								return types.StringValue(item.Network.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil

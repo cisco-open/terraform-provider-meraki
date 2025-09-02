@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -29,8 +30,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -71,7 +72,6 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Schema(_ context.Context
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `AP port profile name`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -81,19 +81,17 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Schema(_ context.Context
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"ports": schema.SetNestedAttribute{
+			"ports": schema.ListNestedAttribute{
 				MarkdownDescription: `Ports config`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"enabled": schema.BoolAttribute{
 							MarkdownDescription: `Enabled`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Bool{
 								boolplanmodifier.UseStateForUnknown(),
@@ -101,7 +99,6 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Schema(_ context.Context
 						},
 						"name": schema.StringAttribute{
 							MarkdownDescription: `Name`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -113,7 +110,6 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Schema(_ context.Context
 						},
 						"psk_group_id": schema.StringAttribute{
 							MarkdownDescription: `PSK Group number`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -121,7 +117,6 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Schema(_ context.Context
 						},
 						"ssid": schema.Int64Attribute{
 							MarkdownDescription: `Ssid number`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -134,19 +129,17 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Schema(_ context.Context
 				MarkdownDescription: `AP port profile ID`,
 				Required:            true,
 			},
-			"usb_ports": schema.SetNestedAttribute{
+			"usb_ports": schema.ListNestedAttribute{
 				MarkdownDescription: `Usb ports config`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"enabled": schema.BoolAttribute{
 							MarkdownDescription: `Enabled`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Bool{
 								boolplanmodifier.UseStateForUnknown(),
@@ -154,7 +147,6 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Schema(_ context.Context
 						},
 						"name": schema.StringAttribute{
 							MarkdownDescription: `Name`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -162,7 +154,6 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Schema(_ context.Context
 						},
 						"ssid": schema.Int64Attribute{
 							MarkdownDescription: `Ssid number`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -198,27 +189,6 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Create(ctx context.Conte
 	vvProfileID := data.ProfileID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" && vvProfileID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessEthernetPortsProfile(vvNetworkID, vvProfileID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessEthernetPortsProfiles  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessEthernetPortsProfiles only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessEthernetPortsProfile(vvNetworkID, vvProfileID, dataRequest)
@@ -227,7 +197,7 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Create(ctx context.Conte
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessEthernetPortsProfile",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -238,49 +208,19 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Create(ctx context.Conte
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessEthernetPortsProfile(vvNetworkID, vvProfileID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkWirelessEthernetPortsProfile",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkWirelessEthernetPortsProfile",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseWirelessGetNetworkWirelessEthernetPortsProfileItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksWirelessEthernetPortsProfilesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksWirelessEthernetPortsProfilesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -311,46 +251,39 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Read(ctx context.Context
 	}
 	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessEthernetPortsProfileItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
-
 func (r *NetworksWirelessEthernetPortsProfilesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
 
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,profileId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("profile_id"), idParts[1])...)
 }
 
 func (r *NetworksWirelessEthernetPortsProfilesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksWirelessEthernetPortsProfilesRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksWirelessEthernetPortsProfilesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvProfileID := data.ProfileID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvProfileID := plan.ProfileID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessEthernetPortsProfile(vvNetworkID, vvProfileID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessEthernetPortsProfile",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -360,9 +293,7 @@ func (r *NetworksWirelessEthernetPortsProfilesResource) Update(ctx context.Conte
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksWirelessEthernetPortsProfilesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -507,7 +438,12 @@ func ResponseWirelessGetNetworkWirelessEthernetPortsProfileItemToBodyRs(state Ne
 			}
 			return types.Bool{}
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		Ports: func() *[]ResponseWirelessGetNetworkWirelessEthernetPortsProfilePortsRs {
 			if response.Ports != nil {
 				result := make([]ResponseWirelessGetNetworkWirelessEthernetPortsProfilePortsRs, len(*response.Ports))
@@ -519,14 +455,24 @@ func ResponseWirelessGetNetworkWirelessEthernetPortsProfileItemToBodyRs(state Ne
 							}
 							return types.Bool{}
 						}(),
-						Name: types.StringValue(ports.Name),
+						Name: func() types.String {
+							if ports.Name != "" {
+								return types.StringValue(ports.Name)
+							}
+							return types.String{}
+						}(),
 						Number: func() types.Int64 {
 							if ports.Number != nil {
 								return types.Int64Value(int64(*ports.Number))
 							}
 							return types.Int64{}
 						}(),
-						PskGroupID: types.StringValue(ports.PskGroupID),
+						PskGroupID: func() types.String {
+							if ports.PskGroupID != "" {
+								return types.StringValue(ports.PskGroupID)
+							}
+							return types.String{}
+						}(),
 						SSID: func() types.Int64 {
 							if ports.SSID != nil {
 								return types.Int64Value(int64(*ports.SSID))
@@ -539,7 +485,12 @@ func ResponseWirelessGetNetworkWirelessEthernetPortsProfileItemToBodyRs(state Ne
 			}
 			return nil
 		}(),
-		ProfileID: types.StringValue(response.ProfileID),
+		ProfileID: func() types.String {
+			if response.ProfileID != "" {
+				return types.StringValue(response.ProfileID)
+			}
+			return types.String{}
+		}(),
 		UsbPorts: func() *[]ResponseWirelessGetNetworkWirelessEthernetPortsProfileUsbPortsRs {
 			if response.UsbPorts != nil {
 				result := make([]ResponseWirelessGetNetworkWirelessEthernetPortsProfileUsbPortsRs, len(*response.UsbPorts))
@@ -551,7 +502,12 @@ func ResponseWirelessGetNetworkWirelessEthernetPortsProfileItemToBodyRs(state Ne
 							}
 							return types.Bool{}
 						}(),
-						Name: types.StringValue(usbPorts.Name),
+						Name: func() types.String {
+							if usbPorts.Name != "" {
+								return types.StringValue(usbPorts.Name)
+							}
+							return types.String{}
+						}(),
 						SSID: func() types.Int64 {
 							if usbPorts.SSID != nil {
 								return types.Int64Value(int64(*usbPorts.SSID))

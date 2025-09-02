@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "1.1.8-beta"
+      version = "1.2.0-beta"
       source  = "hashicorp.com/edu/meraki"
       # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
@@ -9,7 +9,7 @@ terraform {
 }
 provider "meraki" {
   meraki_debug    = "true"
-  meraki_base_url = "http://localhost:3000"
+
 }
 
 
@@ -86,11 +86,32 @@ resource "meraki_networks_group_policies" "example" {
         }
         settings = "custom"
       }
-      priority = "normal"
-    }]
+      priority = "low"
+    },
+    {
+
+      definitions = [{
+
+        type  = "host"
+        value = "google.com2"
+      }]
+      # dscp_tag_value = 1
+      pcp_tag_value = 1
+      per_client_bandwidth_limits = {
+
+        bandwidth_limits = {
+
+          limit_down = 1000000
+          limit_up   = 1000000
+        }
+        settings = "custom"
+      }
+      priority = "high"
+    }
+    ]
   }
   name       = "IOT"
-  network_id = "L_828099381482775375"
+  network_id = "L_828099381482777216"
   scheduling = {
 
     enabled = true

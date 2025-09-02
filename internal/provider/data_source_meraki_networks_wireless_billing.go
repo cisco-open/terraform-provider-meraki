@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -175,7 +174,12 @@ type ResponseWirelessGetNetworkWirelessBillingPlansBandwidthLimits struct {
 // ToBody
 func ResponseWirelessGetNetworkWirelessBillingItemToBody(state NetworksWirelessBilling, response *merakigosdk.ResponseWirelessGetNetworkWirelessBilling) NetworksWirelessBilling {
 	itemState := ResponseWirelessGetNetworkWirelessBilling{
-		Currency: types.StringValue(response.Currency),
+		Currency: func() types.String {
+			if response.Currency != "" {
+				return types.StringValue(response.Currency)
+			}
+			return types.String{}
+		}(),
 		Plans: func() *[]ResponseWirelessGetNetworkWirelessBillingPlans {
 			if response.Plans != nil {
 				result := make([]ResponseWirelessGetNetworkWirelessBillingPlans, len(*response.Plans))
@@ -200,14 +204,24 @@ func ResponseWirelessGetNetworkWirelessBillingItemToBody(state NetworksWirelessB
 							}
 							return nil
 						}(),
-						ID: types.StringValue(plans.ID),
+						ID: func() types.String {
+							if plans.ID != "" {
+								return types.StringValue(plans.ID)
+							}
+							return types.String{}
+						}(),
 						Price: func() types.Float64 {
 							if plans.Price != nil {
 								return types.Float64Value(float64(*plans.Price))
 							}
 							return types.Float64{}
 						}(),
-						TimeLimit: types.StringValue(plans.TimeLimit),
+						TimeLimit: func() types.String {
+							if plans.TimeLimit != "" {
+								return types.StringValue(plans.TimeLimit)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

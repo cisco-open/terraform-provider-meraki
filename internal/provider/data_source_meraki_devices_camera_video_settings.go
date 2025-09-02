@@ -136,7 +136,12 @@ func ResponseCameraGetDeviceCameraVideoSettingsItemToBody(state DevicesCameraVid
 			}
 			return types.Bool{}
 		}(),
-		RtspURL: types.StringValue(response.RtspURL),
+		RtspURL: func() types.String {
+			if response.RtspURL != "" {
+				return types.StringValue(response.RtspURL)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

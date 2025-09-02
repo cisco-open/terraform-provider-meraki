@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -222,7 +221,12 @@ func ResponseOrganizationsGetOrganizationAlertsProfilesItemsToBody(state Organiz
 							}
 							return types.Int64{}
 						}(),
-						Interface: types.StringValue(item.AlertCondition.Interface),
+						Interface: func() types.String {
+							if item.AlertCondition.Interface != "" {
+								return types.StringValue(item.AlertCondition.Interface)
+							}
+							return types.String{}
+						}(),
 						Window: func() types.Int64 {
 							if item.AlertCondition.Window != nil {
 								return types.Int64Value(int64(*item.AlertCondition.Window))
@@ -233,14 +237,24 @@ func ResponseOrganizationsGetOrganizationAlertsProfilesItemsToBody(state Organiz
 				}
 				return nil
 			}(),
-			Description: types.StringValue(item.Description),
+			Description: func() types.String {
+				if item.Description != "" {
+					return types.StringValue(item.Description)
+				}
+				return types.String{}
+			}(),
 			Enabled: func() types.Bool {
 				if item.Enabled != nil {
 					return types.BoolValue(*item.Enabled)
 				}
 				return types.Bool{}
 			}(),
-			ID:          types.StringValue(item.ID),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
 			NetworkTags: StringSliceToList(item.NetworkTags),
 			Recipients: func() *ResponseItemOrganizationsGetOrganizationAlertsProfilesRecipients {
 				if item.Recipients != nil {
@@ -251,7 +265,12 @@ func ResponseOrganizationsGetOrganizationAlertsProfilesItemsToBody(state Organiz
 				}
 				return nil
 			}(),
-			Type: types.StringValue(item.Type),
+			Type: func() types.String {
+				if item.Type != "" {
+					return types.StringValue(item.Type)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

@@ -216,7 +216,7 @@ type RequestOrganizationsDisableOrganizationIntegrationsXdrNetworksRs struct {
 
 type RequestOrganizationsDisableOrganizationIntegrationsXdrNetworksNetworksRs struct {
 	NetworkID    types.String `tfsdk:"network_id"`
-	ProductTypes types.Set    `tfsdk:"product_types"`
+	ProductTypes types.List   `tfsdk:"product_types"`
 }
 
 // FromBody
@@ -263,8 +263,18 @@ func ResponseOrganizationsDisableOrganizationIntegrationsXdrNetworksItemToBody(s
 							}
 							return types.Bool{}
 						}(),
-						Name:         types.StringValue(networks.Name),
-						NetworkID:    types.StringValue(networks.NetworkID),
+						Name: func() types.String {
+							if networks.Name != "" {
+								return types.StringValue(networks.Name)
+							}
+							return types.String{}
+						}(),
+						NetworkID: func() types.String {
+							if networks.NetworkID != "" {
+								return types.StringValue(networks.NetworkID)
+							}
+							return types.String{}
+						}(),
 						ProductTypes: StringSliceToList(networks.ProductTypes),
 					}
 				}

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -197,8 +196,18 @@ type ResponseNetworksGetNetworkBluetoothClient struct {
 // ToBody
 func ResponseNetworksGetNetworkBluetoothClientItemToBody(state NetworksBluetoothClients, response *merakigosdk.ResponseNetworksGetNetworkBluetoothClient) NetworksBluetoothClients {
 	itemState := ResponseNetworksGetNetworkBluetoothClient{
-		DeviceName: types.StringValue(response.DeviceName),
-		ID:         types.StringValue(response.ID),
+		DeviceName: func() types.String {
+			if response.DeviceName != "" {
+				return types.StringValue(response.DeviceName)
+			}
+			return types.String{}
+		}(),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		InSightAlert: func() types.Bool {
 			if response.InSightAlert != nil {
 				return types.BoolValue(*response.InSightAlert)
@@ -211,18 +220,43 @@ func ResponseNetworksGetNetworkBluetoothClientItemToBody(state NetworksBluetooth
 			}
 			return types.Int64{}
 		}(),
-		Mac:          types.StringValue(response.Mac),
-		Manufacturer: types.StringValue(response.Manufacturer),
-		Name:         types.StringValue(response.Name),
-		NetworkID:    types.StringValue(response.NetworkID),
+		Mac: func() types.String {
+			if response.Mac != "" {
+				return types.StringValue(response.Mac)
+			}
+			return types.String{}
+		}(),
+		Manufacturer: func() types.String {
+			if response.Manufacturer != "" {
+				return types.StringValue(response.Manufacturer)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
 		OutOfSightAlert: func() types.Bool {
 			if response.OutOfSightAlert != nil {
 				return types.BoolValue(*response.OutOfSightAlert)
 			}
 			return types.Bool{}
 		}(),
-		SeenByDeviceMac: types.StringValue(response.SeenByDeviceMac),
-		Tags:            StringSliceToList(response.Tags),
+		SeenByDeviceMac: func() types.String {
+			if response.SeenByDeviceMac != "" {
+				return types.StringValue(response.SeenByDeviceMac)
+			}
+			return types.String{}
+		}(),
+		Tags: StringSliceToList(response.Tags),
 	}
 	state.Item = &itemState
 	return state

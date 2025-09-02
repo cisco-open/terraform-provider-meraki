@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -203,7 +202,12 @@ func ResponseOrganizationsGetOrganizationClientsBandwidthUsageHistoryItemsToBody
 				}
 				return types.Int64{}
 			}(),
-			Ts: types.StringValue(item.Ts),
+			Ts: func() types.String {
+				if item.Ts != "" {
+					return types.StringValue(item.Ts)
+				}
+				return types.String{}
+			}(),
 			Upstream: func() types.Int64 {
 				if item.Upstream != nil {
 					return types.Int64Value(int64(*item.Upstream))

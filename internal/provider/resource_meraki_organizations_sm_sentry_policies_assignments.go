@@ -313,7 +313,7 @@ type RequestSmUpdateOrganizationSmSentryPoliciesAssignmentsItemsPoliciesRs struc
 	PolicyID      types.String `tfsdk:"policy_id"`
 	Scope         types.String `tfsdk:"scope"`
 	SmNetworkID   types.String `tfsdk:"sm_network_id"`
-	Tags          types.Set    `tfsdk:"tags"`
+	Tags          types.List   `tfsdk:"tags"`
 }
 
 // FromBody
@@ -360,12 +360,7 @@ func (r *OrganizationsSmSentryPoliciesAssignments) toSdkApiRequestUpdate(ctx con
 		}
 	}
 	out := merakigosdk.RequestSmUpdateOrganizationSmSentryPoliciesAssignments{
-		Items: func() *[]merakigosdk.RequestSmUpdateOrganizationSmSentryPoliciesAssignmentsItems {
-			if len(requestSmUpdateOrganizationSmSentryPoliciesAssignmentsItems) > 0 {
-				return &requestSmUpdateOrganizationSmSentryPoliciesAssignmentsItems
-			}
-			return nil
-		}(),
+		Items: &requestSmUpdateOrganizationSmSentryPoliciesAssignmentsItems,
 	}
 	return &out
 }
@@ -378,22 +373,72 @@ func ResponseSmUpdateOrganizationSmSentryPoliciesAssignmentsItemToBody(state Org
 				result := make([]ResponseSmUpdateOrganizationSmSentryPoliciesAssignmentsItems, len(*response.Items))
 				for i, items := range *response.Items {
 					result[i] = ResponseSmUpdateOrganizationSmSentryPoliciesAssignmentsItems{
-						NetworkID: types.StringValue(items.NetworkID),
+						NetworkID: func() types.String {
+							if items.NetworkID != "" {
+								return types.StringValue(items.NetworkID)
+							}
+							return types.String{}
+						}(),
 						Policies: func() *[]ResponseSmUpdateOrganizationSmSentryPoliciesAssignmentsItemsPolicies {
 							if items.Policies != nil {
 								result := make([]ResponseSmUpdateOrganizationSmSentryPoliciesAssignmentsItemsPolicies, len(*items.Policies))
 								for i, policies := range *items.Policies {
 									result[i] = ResponseSmUpdateOrganizationSmSentryPoliciesAssignmentsItemsPolicies{
-										CreatedAt:     types.StringValue(policies.CreatedAt),
-										GroupNumber:   types.StringValue(policies.GroupNumber),
-										GroupPolicyID: types.StringValue(policies.GroupPolicyID),
-										LastUpdatedAt: types.StringValue(policies.LastUpdatedAt),
-										NetworkID:     types.StringValue(policies.NetworkID),
-										PolicyID:      types.StringValue(policies.PolicyID),
-										Priority:      types.StringValue(policies.Priority),
-										Scope:         types.StringValue(policies.Scope),
-										SmNetworkID:   types.StringValue(policies.SmNetworkID),
-										Tags:          StringSliceToList(policies.Tags),
+										CreatedAt: func() types.String {
+											if policies.CreatedAt != "" {
+												return types.StringValue(policies.CreatedAt)
+											}
+											return types.String{}
+										}(),
+										GroupNumber: func() types.String {
+											if policies.GroupNumber != "" {
+												return types.StringValue(policies.GroupNumber)
+											}
+											return types.String{}
+										}(),
+										GroupPolicyID: func() types.String {
+											if policies.GroupPolicyID != "" {
+												return types.StringValue(policies.GroupPolicyID)
+											}
+											return types.String{}
+										}(),
+										LastUpdatedAt: func() types.String {
+											if policies.LastUpdatedAt != "" {
+												return types.StringValue(policies.LastUpdatedAt)
+											}
+											return types.String{}
+										}(),
+										NetworkID: func() types.String {
+											if policies.NetworkID != "" {
+												return types.StringValue(policies.NetworkID)
+											}
+											return types.String{}
+										}(),
+										PolicyID: func() types.String {
+											if policies.PolicyID != "" {
+												return types.StringValue(policies.PolicyID)
+											}
+											return types.String{}
+										}(),
+										Priority: func() types.String {
+											if policies.Priority != "" {
+												return types.StringValue(policies.Priority)
+											}
+											return types.String{}
+										}(),
+										Scope: func() types.String {
+											if policies.Scope != "" {
+												return types.StringValue(policies.Scope)
+											}
+											return types.String{}
+										}(),
+										SmNetworkID: func() types.String {
+											if policies.SmNetworkID != "" {
+												return types.StringValue(policies.SmNetworkID)
+											}
+											return types.String{}
+										}(),
+										Tags: StringSliceToList(policies.Tags),
 									}
 								}
 								return &result

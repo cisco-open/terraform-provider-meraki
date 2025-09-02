@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -67,7 +68,6 @@ func (r *DevicesWirelessElectronicShelfLabelResource) Schema(_ context.Context, 
 			},
 			"channel": schema.StringAttribute{
 				MarkdownDescription: `Desired ESL channel for the device, or 'Auto' (case insensitive) to use the recommended channel`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -75,7 +75,6 @@ func (r *DevicesWirelessElectronicShelfLabelResource) Schema(_ context.Context, 
 			},
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: `Turn ESL features on and off for this device`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -123,27 +122,6 @@ func (r *DevicesWirelessElectronicShelfLabelResource) Create(ctx context.Context
 	vvSerial := data.Serial.ValueString()
 	//Has Item and not has items
 
-	if vvSerial != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Wireless.GetDeviceWirelessElectronicShelfLabel(vvSerial)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesWirelessElectronicShelfLabel  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesWirelessElectronicShelfLabel only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateDeviceWirelessElectronicShelfLabel(vvSerial, dataRequest)
@@ -152,7 +130,7 @@ func (r *DevicesWirelessElectronicShelfLabelResource) Create(ctx context.Context
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceWirelessElectronicShelfLabel",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -163,49 +141,19 @@ func (r *DevicesWirelessElectronicShelfLabelResource) Create(ctx context.Context
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Wireless.GetDeviceWirelessElectronicShelfLabel(vvSerial)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetDeviceWirelessElectronicShelfLabel",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetDeviceWirelessElectronicShelfLabel",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseWirelessGetDeviceWirelessElectronicShelfLabelItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *DevicesWirelessElectronicShelfLabelResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data DevicesWirelessElectronicShelfLabelRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -235,33 +183,28 @@ func (r *DevicesWirelessElectronicShelfLabelResource) Read(ctx context.Context, 
 	}
 	//entro aqui 2
 	data = ResponseWirelessGetDeviceWirelessElectronicShelfLabelItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *DevicesWirelessElectronicShelfLabelResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("serial"), req.ID)...)
 }
 
 func (r *DevicesWirelessElectronicShelfLabelResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data DevicesWirelessElectronicShelfLabelRs
-	merge(ctx, req, resp, &data)
+	var plan DevicesWirelessElectronicShelfLabelRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvSerial := data.Serial.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvSerial := plan.Serial.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateDeviceWirelessElectronicShelfLabel(vvSerial, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceWirelessElectronicShelfLabel",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -271,9 +214,7 @@ func (r *DevicesWirelessElectronicShelfLabelResource) Update(ctx context.Context
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *DevicesWirelessElectronicShelfLabelResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -324,17 +265,42 @@ func ResponseWirelessGetDeviceWirelessElectronicShelfLabelItemToBodyRs(state Dev
 			}
 			return types.Int64{}
 		}(),
-		Channel: types.StringValue(response.Channel),
+		Channel: func() types.String {
+			if response.Channel != "" {
+				return types.StringValue(response.Channel)
+			}
+			return types.String{}
+		}(),
 		Enabled: func() types.Bool {
 			if response.Enabled != nil {
 				return types.BoolValue(*response.Enabled)
 			}
 			return types.Bool{}
 		}(),
-		Hostname:  types.StringValue(response.Hostname),
-		NetworkID: types.StringValue(response.NetworkID),
-		Provider:  types.StringValue(response.Provider),
-		Serial:    types.StringValue(response.Serial),
+		Hostname: func() types.String {
+			if response.Hostname != "" {
+				return types.StringValue(response.Hostname)
+			}
+			return types.String{}
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
+		Provider: func() types.String {
+			if response.Provider != "" {
+				return types.StringValue(response.Provider)
+			}
+			return types.String{}
+		}(),
+		Serial: func() types.String {
+			if response.Serial != "" {
+				return types.StringValue(response.Serial)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(DevicesWirelessElectronicShelfLabelRs)

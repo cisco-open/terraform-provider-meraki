@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -418,9 +417,19 @@ func ResponseOrganizationsGetOrganizationActionBatchesItemsToBody(state Organiza
 					result := make([]ResponseItemOrganizationsGetOrganizationActionBatchesActions, len(*item.Actions))
 					for i, actions := range *item.Actions {
 						result[i] = ResponseItemOrganizationsGetOrganizationActionBatchesActions{
-							// Body: types.StringValue(actions.Body),//TODO POSIBLE interface
-							Operation: types.StringValue(actions.Operation),
-							Resource:  types.StringValue(actions.Resource),
+							// Body: func() types.String {
+							Operation: func() types.String {
+								if actions.Operation != "" {
+									return types.StringValue(actions.Operation)
+								}
+								return types.String{}
+							}(),
+							Resource: func() types.String {
+								if actions.Resource != "" {
+									return types.StringValue(actions.Resource)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
@@ -433,8 +442,18 @@ func ResponseOrganizationsGetOrganizationActionBatchesItemsToBody(state Organiza
 				}
 				return types.Bool{}
 			}(),
-			ID:             types.StringValue(item.ID),
-			OrganizationID: types.StringValue(item.OrganizationID),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			OrganizationID: func() types.String {
+				if item.OrganizationID != "" {
+					return types.StringValue(item.OrganizationID)
+				}
+				return types.String{}
+			}(),
 			Status: func() *ResponseItemOrganizationsGetOrganizationActionBatchesStatus {
 				if item.Status != nil {
 					return &ResponseItemOrganizationsGetOrganizationActionBatchesStatus{
@@ -449,8 +468,18 @@ func ResponseOrganizationsGetOrganizationActionBatchesItemsToBody(state Organiza
 								result := make([]ResponseItemOrganizationsGetOrganizationActionBatchesStatusCreatedResources, len(*item.Status.CreatedResources))
 								for i, createdResources := range *item.Status.CreatedResources {
 									result[i] = ResponseItemOrganizationsGetOrganizationActionBatchesStatusCreatedResources{
-										ID:  types.StringValue(createdResources.ID),
-										URI: types.StringValue(createdResources.URI),
+										ID: func() types.String {
+											if createdResources.ID != "" {
+												return types.StringValue(createdResources.ID)
+											}
+											return types.String{}
+										}(),
+										URI: func() types.String {
+											if createdResources.URI != "" {
+												return types.StringValue(createdResources.URI)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -488,9 +517,20 @@ func ResponseOrganizationsGetOrganizationActionBatchItemToBody(state Organizatio
 				result := make([]ResponseOrganizationsGetOrganizationActionBatchActions, len(*response.Actions))
 				for i, actions := range *response.Actions {
 					result[i] = ResponseOrganizationsGetOrganizationActionBatchActions{
-						// Body:      types.StringValue(actions.Body), //TODO POSIBLE interface
-						Operation: types.StringValue(actions.Operation),
-						Resource:  types.StringValue(actions.Resource),
+						// Body: func() types.String {
+
+						Operation: func() types.String {
+							if actions.Operation != "" {
+								return types.StringValue(actions.Operation)
+							}
+							return types.String{}
+						}(),
+						Resource: func() types.String {
+							if actions.Resource != "" {
+								return types.StringValue(actions.Resource)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -500,9 +540,24 @@ func ResponseOrganizationsGetOrganizationActionBatchItemToBody(state Organizatio
 		Callback: func() *ResponseOrganizationsGetOrganizationActionBatchCallback {
 			if response.Callback != nil {
 				return &ResponseOrganizationsGetOrganizationActionBatchCallback{
-					ID:     types.StringValue(response.Callback.ID),
-					Status: types.StringValue(response.Callback.Status),
-					URL:    types.StringValue(response.Callback.URL),
+					ID: func() types.String {
+						if response.Callback.ID != "" {
+							return types.StringValue(response.Callback.ID)
+						}
+						return types.String{}
+					}(),
+					Status: func() types.String {
+						if response.Callback.Status != "" {
+							return types.StringValue(response.Callback.Status)
+						}
+						return types.String{}
+					}(),
+					URL: func() types.String {
+						if response.Callback.URL != "" {
+							return types.StringValue(response.Callback.URL)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -513,8 +568,18 @@ func ResponseOrganizationsGetOrganizationActionBatchItemToBody(state Organizatio
 			}
 			return types.Bool{}
 		}(),
-		ID:             types.StringValue(response.ID),
-		OrganizationID: types.StringValue(response.OrganizationID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		OrganizationID: func() types.String {
+			if response.OrganizationID != "" {
+				return types.StringValue(response.OrganizationID)
+			}
+			return types.String{}
+		}(),
 		Status: func() *ResponseOrganizationsGetOrganizationActionBatchStatus {
 			if response.Status != nil {
 				return &ResponseOrganizationsGetOrganizationActionBatchStatus{
@@ -529,8 +594,18 @@ func ResponseOrganizationsGetOrganizationActionBatchItemToBody(state Organizatio
 							result := make([]ResponseOrganizationsGetOrganizationActionBatchStatusCreatedResources, len(*response.Status.CreatedResources))
 							for i, createdResources := range *response.Status.CreatedResources {
 								result[i] = ResponseOrganizationsGetOrganizationActionBatchStatusCreatedResources{
-									ID:  types.StringValue(createdResources.ID),
-									URI: types.StringValue(createdResources.URI),
+									ID: func() types.String {
+										if createdResources.ID != "" {
+											return types.StringValue(createdResources.ID)
+										}
+										return types.String{}
+									}(),
+									URI: func() types.String {
+										if createdResources.URI != "" {
+											return types.StringValue(createdResources.URI)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return &result

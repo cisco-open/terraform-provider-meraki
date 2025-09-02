@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "1.1.8-beta"
+      version = "1.2.0-beta"
       source  = "hashicorp.com/edu/meraki"
       # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
@@ -38,6 +38,15 @@ output "meraki_networks_appliance_vlans_example" {
 }
 
 
+data "meraki_networks" "example" {
+organization_id = "828099381482762270"
+}
+
+output "meraki_networks_example" {
+  value = data.meraki_networks.example
+}
+
+
 resource "meraki_networks_appliance_ssids" "example" {
 
   auth_mode       = "8021x-radius"
@@ -45,7 +54,7 @@ resource "meraki_networks_appliance_ssids" "example" {
   enabled         = true
   #encryption_mode = "wep"
   name       = "My SSID 2"
-  network_id = "L_828099381482771185"
+  network_id = "L_828099381482777216"
   number     = 1
   radius_servers = [
     {
@@ -67,9 +76,7 @@ resource "meraki_networks_appliance_ssids" "example" {
   visible             = true
   wpa_encryption_mode = "WPA2 only"
   depends_on          = [meraki_networks_appliance_vlans_settings.example, meraki_networks_appliance_vlans.example]
-  lifecycle {
-    ignore_changes = [radius_servers]
-  }
+
 }
 
 output "meraki_networks_appliance_ssids_example" {

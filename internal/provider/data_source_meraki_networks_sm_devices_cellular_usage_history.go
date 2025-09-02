@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -160,7 +159,12 @@ func ResponseSmGetNetworkSmDeviceCellularUsageHistoryItemsToBody(state NetworksS
 				}
 				return types.Float64{}
 			}(),
-			Ts: types.StringValue(item.Ts),
+			Ts: func() types.String {
+				if item.Ts != "" {
+					return types.StringValue(item.Ts)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

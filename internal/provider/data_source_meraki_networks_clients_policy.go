@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -142,9 +141,24 @@ type ResponseNetworksGetNetworkClientPolicy struct {
 // ToBody
 func ResponseNetworksGetNetworkClientPolicyItemToBody(state NetworksClientsPolicy, response *merakigosdk.ResponseNetworksGetNetworkClientPolicy) NetworksClientsPolicy {
 	itemState := ResponseNetworksGetNetworkClientPolicy{
-		DevicePolicy:  types.StringValue(response.DevicePolicy),
-		GroupPolicyID: types.StringValue(response.GroupPolicyID),
-		Mac:           types.StringValue(response.Mac),
+		DevicePolicy: func() types.String {
+			if response.DevicePolicy != "" {
+				return types.StringValue(response.DevicePolicy)
+			}
+			return types.String{}
+		}(),
+		GroupPolicyID: func() types.String {
+			if response.GroupPolicyID != "" {
+				return types.StringValue(response.GroupPolicyID)
+			}
+			return types.String{}
+		}(),
+		Mac: func() types.String {
+			if response.Mac != "" {
+				return types.StringValue(response.Mac)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

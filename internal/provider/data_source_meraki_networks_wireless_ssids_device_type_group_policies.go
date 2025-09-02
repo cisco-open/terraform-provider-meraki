@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -156,8 +155,18 @@ func ResponseWirelessGetNetworkWirelessSSIDDeviceTypeGroupPoliciesItemToBody(sta
 				result := make([]ResponseWirelessGetNetworkWirelessSsidDeviceTypeGroupPoliciesDeviceTypePolicies, len(*response.DeviceTypePolicies))
 				for i, deviceTypePolicies := range *response.DeviceTypePolicies {
 					result[i] = ResponseWirelessGetNetworkWirelessSsidDeviceTypeGroupPoliciesDeviceTypePolicies{
-						DevicePolicy: types.StringValue(deviceTypePolicies.DevicePolicy),
-						DeviceType:   types.StringValue(deviceTypePolicies.DeviceType),
+						DevicePolicy: func() types.String {
+							if deviceTypePolicies.DevicePolicy != "" {
+								return types.StringValue(deviceTypePolicies.DevicePolicy)
+							}
+							return types.String{}
+						}(),
+						DeviceType: func() types.String {
+							if deviceTypePolicies.DeviceType != "" {
+								return types.StringValue(deviceTypePolicies.DeviceType)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

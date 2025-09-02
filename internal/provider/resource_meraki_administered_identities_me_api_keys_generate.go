@@ -140,7 +140,12 @@ type RequestAdministeredGenerateAdministeredIdentitiesMeApiKeysRs interface{}
 // ToBody
 func ResponseAdministeredGenerateAdministeredIDentitiesMeAPIKeysItemToBody(state AdministeredIDentitiesMeAPIKeysGenerate, response *merakigosdk.ResponseAdministeredGenerateAdministeredIDentitiesMeAPIKeys) AdministeredIDentitiesMeAPIKeysGenerate {
 	itemState := ResponseAdministeredGenerateAdministeredIdentitiesMeApiKeys{
-		Key: types.StringValue(response.Key),
+		Key: func() types.String {
+			if response.Key != "" {
+				return types.StringValue(response.Key)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

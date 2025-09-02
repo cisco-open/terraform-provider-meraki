@@ -353,15 +353,40 @@ func ResponseDevicesCreateDeviceLiveToolsLedsBlinkItemToBody(state DevicesLiveTo
 		Callback: func() *ResponseDevicesCreateDeviceLiveToolsLedsBlinkCallback {
 			if response.Callback != nil {
 				return &ResponseDevicesCreateDeviceLiveToolsLedsBlinkCallback{
-					ID:     types.StringValue(response.Callback.ID),
-					Status: types.StringValue(response.Callback.Status),
-					URL:    types.StringValue(response.Callback.URL),
+					ID: func() types.String {
+						if response.Callback.ID != "" {
+							return types.StringValue(response.Callback.ID)
+						}
+						return types.String{}
+					}(),
+					Status: func() types.String {
+						if response.Callback.Status != "" {
+							return types.StringValue(response.Callback.Status)
+						}
+						return types.String{}
+					}(),
+					URL: func() types.String {
+						if response.Callback.URL != "" {
+							return types.StringValue(response.Callback.URL)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Error:       types.StringValue(response.Error),
-		LedsBlinkID: types.StringValue(response.LedsBlinkID),
+		Error: func() types.String {
+			if response.Error != "" {
+				return types.StringValue(response.Error)
+			}
+			return types.String{}
+		}(),
+		LedsBlinkID: func() types.String {
+			if response.LedsBlinkID != "" {
+				return types.StringValue(response.LedsBlinkID)
+			}
+			return types.String{}
+		}(),
 		Request: func() *ResponseDevicesCreateDeviceLiveToolsLedsBlinkRequest {
 			if response.Request != nil {
 				return &ResponseDevicesCreateDeviceLiveToolsLedsBlinkRequest{
@@ -371,13 +396,28 @@ func ResponseDevicesCreateDeviceLiveToolsLedsBlinkItemToBody(state DevicesLiveTo
 						}
 						return types.Int64{}
 					}(),
-					Serial: types.StringValue(response.Request.Serial),
+					Serial: func() types.String {
+						if response.Request.Serial != "" {
+							return types.StringValue(response.Request.Serial)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Status: types.StringValue(response.Status),
-		URL:    types.StringValue(response.URL),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

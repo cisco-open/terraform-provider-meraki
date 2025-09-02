@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -641,26 +640,71 @@ func ResponseApplianceGetNetworkApplianceVLANsItemsToBody(state NetworksApplianc
 	var items []ResponseItemApplianceGetNetworkApplianceVlans
 	for _, item := range *response {
 		itemState := ResponseItemApplianceGetNetworkApplianceVlans{
-			ApplianceIP:        types.StringValue(item.ApplianceIP),
-			Cidr:               types.StringValue(item.Cidr),
-			DhcpBootFilename:   types.StringValue(item.DhcpBootFilename),
-			DhcpBootNextServer: types.StringValue(item.DhcpBootNextServer),
+			ApplianceIP: func() types.String {
+				if item.ApplianceIP != "" {
+					return types.StringValue(item.ApplianceIP)
+				}
+				return types.String{}
+			}(),
+			Cidr: func() types.String {
+				if item.Cidr != "" {
+					return types.StringValue(item.Cidr)
+				}
+				return types.String{}
+			}(),
+			DhcpBootFilename: func() types.String {
+				if item.DhcpBootFilename != "" {
+					return types.StringValue(item.DhcpBootFilename)
+				}
+				return types.String{}
+			}(),
+			DhcpBootNextServer: func() types.String {
+				if item.DhcpBootNextServer != "" {
+					return types.StringValue(item.DhcpBootNextServer)
+				}
+				return types.String{}
+			}(),
 			DhcpBootOptionsEnabled: func() types.Bool {
 				if item.DhcpBootOptionsEnabled != nil {
 					return types.BoolValue(*item.DhcpBootOptionsEnabled)
 				}
 				return types.Bool{}
 			}(),
-			DhcpHandling:  types.StringValue(item.DhcpHandling),
-			DhcpLeaseTime: types.StringValue(item.DhcpLeaseTime),
+			DhcpHandling: func() types.String {
+				if item.DhcpHandling != "" {
+					return types.StringValue(item.DhcpHandling)
+				}
+				return types.String{}
+			}(),
+			DhcpLeaseTime: func() types.String {
+				if item.DhcpLeaseTime != "" {
+					return types.StringValue(item.DhcpLeaseTime)
+				}
+				return types.String{}
+			}(),
 			DhcpOptions: func() *[]ResponseItemApplianceGetNetworkApplianceVlansDhcpOptions {
 				if item.DhcpOptions != nil {
 					result := make([]ResponseItemApplianceGetNetworkApplianceVlansDhcpOptions, len(*item.DhcpOptions))
 					for i, dhcpOptions := range *item.DhcpOptions {
 						result[i] = ResponseItemApplianceGetNetworkApplianceVlansDhcpOptions{
-							Code:  types.StringValue(dhcpOptions.Code),
-							Type:  types.StringValue(dhcpOptions.Type),
-							Value: types.StringValue(dhcpOptions.Value),
+							Code: func() types.String {
+								if dhcpOptions.Code != "" {
+									return types.StringValue(dhcpOptions.Code)
+								}
+								return types.String{}
+							}(),
+							Type: func() types.String {
+								if dhcpOptions.Type != "" {
+									return types.StringValue(dhcpOptions.Type)
+								}
+								return types.String{}
+							}(),
+							Value: func() types.String {
+								if dhcpOptions.Value != "" {
+									return types.StringValue(dhcpOptions.Value)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
@@ -668,16 +712,31 @@ func ResponseApplianceGetNetworkApplianceVLANsItemsToBody(state NetworksApplianc
 				return nil
 			}(),
 			DhcpRelayServerIPs: StringSliceToList(item.DhcpRelayServerIPs),
-			DNSNameservers:     types.StringValue(item.DNSNameservers),
-			// FixedIPAssignments: types.StringValue(fmt.Sprintf("%v", item.FixedIPAssignments)), //TODO POSIBLE interface
-			GroupPolicyID: types.StringValue(item.GroupPolicyID),
+			DNSNameservers: func() types.String {
+				if item.DNSNameservers != "" {
+					return types.StringValue(item.DNSNameservers)
+				}
+				return types.String{}
+			}(),
+			// FixedIPAssignments: func() types.String {
+			GroupPolicyID: func() types.String {
+				if item.GroupPolicyID != "" {
+					return types.StringValue(item.GroupPolicyID)
+				}
+				return types.String{}
+			}(),
 			ID: func() types.Int64 {
 				if item.ID != nil {
 					return types.Int64Value(int64(*item.ID))
 				}
 				return types.Int64{}
 			}(),
-			InterfaceID: types.StringValue(item.InterfaceID),
+			InterfaceID: func() types.String {
+				if item.InterfaceID != "" {
+					return types.StringValue(item.InterfaceID)
+				}
+				return types.String{}
+			}(),
 			IPv6: func() *ResponseItemApplianceGetNetworkApplianceVlansIpv6 {
 				if item.IPv6 != nil {
 					return &ResponseItemApplianceGetNetworkApplianceVlansIpv6{
@@ -702,13 +761,28 @@ func ResponseApplianceGetNetworkApplianceVLANsItemsToBody(state NetworksApplianc
 											if prefixAssignments.Origin != nil {
 												return &ResponseItemApplianceGetNetworkApplianceVlansIpv6PrefixAssignmentsOrigin{
 													Interfaces: StringSliceToList(prefixAssignments.Origin.Interfaces),
-													Type:       types.StringValue(prefixAssignments.Origin.Type),
+													Type: func() types.String {
+														if prefixAssignments.Origin.Type != "" {
+															return types.StringValue(prefixAssignments.Origin.Type)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return nil
 										}(),
-										StaticApplianceIP6: types.StringValue(prefixAssignments.StaticApplianceIP6),
-										StaticPrefix:       types.StringValue(prefixAssignments.StaticPrefix),
+										StaticApplianceIP6: func() types.String {
+											if prefixAssignments.StaticApplianceIP6 != "" {
+												return types.StringValue(prefixAssignments.StaticApplianceIP6)
+											}
+											return types.String{}
+										}(),
+										StaticPrefix: func() types.String {
+											if prefixAssignments.StaticPrefix != "" {
+												return types.StringValue(prefixAssignments.StaticPrefix)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -738,24 +812,59 @@ func ResponseApplianceGetNetworkApplianceVLANsItemsToBody(state NetworksApplianc
 				}
 				return types.Int64{}
 			}(),
-			Name: types.StringValue(item.Name),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			ReservedIPRanges: func() *[]ResponseItemApplianceGetNetworkApplianceVlansReservedIpRanges {
 				if item.ReservedIPRanges != nil {
 					result := make([]ResponseItemApplianceGetNetworkApplianceVlansReservedIpRanges, len(*item.ReservedIPRanges))
 					for i, reservedIPRanges := range *item.ReservedIPRanges {
 						result[i] = ResponseItemApplianceGetNetworkApplianceVlansReservedIpRanges{
-							Comment: types.StringValue(reservedIPRanges.Comment),
-							End:     types.StringValue(reservedIPRanges.End),
-							Start:   types.StringValue(reservedIPRanges.Start),
+							Comment: func() types.String {
+								if reservedIPRanges.Comment != "" {
+									return types.StringValue(reservedIPRanges.Comment)
+								}
+								return types.String{}
+							}(),
+							End: func() types.String {
+								if reservedIPRanges.End != "" {
+									return types.StringValue(reservedIPRanges.End)
+								}
+								return types.String{}
+							}(),
+							Start: func() types.String {
+								if reservedIPRanges.Start != "" {
+									return types.StringValue(reservedIPRanges.Start)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
 				}
 				return nil
 			}(),
-			Subnet:           types.StringValue(item.Subnet),
-			TemplateVLANType: types.StringValue(item.TemplateVLANType),
-			VpnNatSubnet:     types.StringValue(item.VpnNatSubnet),
+			Subnet: func() types.String {
+				if item.Subnet != "" {
+					return types.StringValue(item.Subnet)
+				}
+				return types.String{}
+			}(),
+			TemplateVLANType: func() types.String {
+				if item.TemplateVLANType != "" {
+					return types.StringValue(item.TemplateVLANType)
+				}
+				return types.String{}
+			}(),
+			VpnNatSubnet: func() types.String {
+				if item.VpnNatSubnet != "" {
+					return types.StringValue(item.VpnNatSubnet)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -765,26 +874,71 @@ func ResponseApplianceGetNetworkApplianceVLANsItemsToBody(state NetworksApplianc
 
 func ResponseApplianceGetNetworkApplianceVLANItemToBody(state NetworksApplianceVLANs, response *merakigosdk.ResponseApplianceGetNetworkApplianceVLAN) NetworksApplianceVLANs {
 	itemState := ResponseApplianceGetNetworkApplianceVlan{
-		ApplianceIP:        types.StringValue(response.ApplianceIP),
-		Cidr:               types.StringValue(response.Cidr),
-		DhcpBootFilename:   types.StringValue(response.DhcpBootFilename),
-		DhcpBootNextServer: types.StringValue(response.DhcpBootNextServer),
+		ApplianceIP: func() types.String {
+			if response.ApplianceIP != "" {
+				return types.StringValue(response.ApplianceIP)
+			}
+			return types.String{}
+		}(),
+		Cidr: func() types.String {
+			if response.Cidr != "" {
+				return types.StringValue(response.Cidr)
+			}
+			return types.String{}
+		}(),
+		DhcpBootFilename: func() types.String {
+			if response.DhcpBootFilename != "" {
+				return types.StringValue(response.DhcpBootFilename)
+			}
+			return types.String{}
+		}(),
+		DhcpBootNextServer: func() types.String {
+			if response.DhcpBootNextServer != "" {
+				return types.StringValue(response.DhcpBootNextServer)
+			}
+			return types.String{}
+		}(),
 		DhcpBootOptionsEnabled: func() types.Bool {
 			if response.DhcpBootOptionsEnabled != nil {
 				return types.BoolValue(*response.DhcpBootOptionsEnabled)
 			}
 			return types.Bool{}
 		}(),
-		DhcpHandling:  types.StringValue(response.DhcpHandling),
-		DhcpLeaseTime: types.StringValue(response.DhcpLeaseTime),
+		DhcpHandling: func() types.String {
+			if response.DhcpHandling != "" {
+				return types.StringValue(response.DhcpHandling)
+			}
+			return types.String{}
+		}(),
+		DhcpLeaseTime: func() types.String {
+			if response.DhcpLeaseTime != "" {
+				return types.StringValue(response.DhcpLeaseTime)
+			}
+			return types.String{}
+		}(),
 		DhcpOptions: func() *[]ResponseApplianceGetNetworkApplianceVlanDhcpOptions {
 			if response.DhcpOptions != nil {
 				result := make([]ResponseApplianceGetNetworkApplianceVlanDhcpOptions, len(*response.DhcpOptions))
 				for i, dhcpOptions := range *response.DhcpOptions {
 					result[i] = ResponseApplianceGetNetworkApplianceVlanDhcpOptions{
-						Code:  types.StringValue(dhcpOptions.Code),
-						Type:  types.StringValue(dhcpOptions.Type),
-						Value: types.StringValue(dhcpOptions.Value),
+						Code: func() types.String {
+							if dhcpOptions.Code != "" {
+								return types.StringValue(dhcpOptions.Code)
+							}
+							return types.String{}
+						}(),
+						Type: func() types.String {
+							if dhcpOptions.Type != "" {
+								return types.StringValue(dhcpOptions.Type)
+							}
+							return types.String{}
+						}(),
+						Value: func() types.String {
+							if dhcpOptions.Value != "" {
+								return types.StringValue(dhcpOptions.Value)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -792,16 +946,31 @@ func ResponseApplianceGetNetworkApplianceVLANItemToBody(state NetworksApplianceV
 			return nil
 		}(),
 		DhcpRelayServerIPs: StringSliceToList(response.DhcpRelayServerIPs),
-		DNSNameservers:     types.StringValue(response.DNSNameservers),
-		// FixedIPAssignments: types.StringValue(response.FixedIPAssignments), //TODO POSIBLE interface
-		GroupPolicyID: types.StringValue(response.GroupPolicyID),
+		DNSNameservers: func() types.String {
+			if response.DNSNameservers != "" {
+				return types.StringValue(response.DNSNameservers)
+			}
+			return types.String{}
+		}(),
+		// FixedIPAssignments: func() types.String {
+		GroupPolicyID: func() types.String {
+			if response.GroupPolicyID != "" {
+				return types.StringValue(response.GroupPolicyID)
+			}
+			return types.String{}
+		}(),
 		ID: func() types.Int64 {
 			if response.ID != nil {
 				return types.Int64Value(int64(*response.ID))
 			}
 			return types.Int64{}
 		}(),
-		InterfaceID: types.StringValue(response.InterfaceID),
+		InterfaceID: func() types.String {
+			if response.InterfaceID != "" {
+				return types.StringValue(response.InterfaceID)
+			}
+			return types.String{}
+		}(),
 		IPv6: func() *ResponseApplianceGetNetworkApplianceVlanIpv6 {
 			if response.IPv6 != nil {
 				return &ResponseApplianceGetNetworkApplianceVlanIpv6{
@@ -826,13 +995,28 @@ func ResponseApplianceGetNetworkApplianceVLANItemToBody(state NetworksApplianceV
 										if prefixAssignments.Origin != nil {
 											return &ResponseApplianceGetNetworkApplianceVlanIpv6PrefixAssignmentsOrigin{
 												Interfaces: StringSliceToList(prefixAssignments.Origin.Interfaces),
-												Type:       types.StringValue(prefixAssignments.Origin.Type),
+												Type: func() types.String {
+													if prefixAssignments.Origin.Type != "" {
+														return types.StringValue(prefixAssignments.Origin.Type)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return nil
 									}(),
-									StaticApplianceIP6: types.StringValue(prefixAssignments.StaticApplianceIP6),
-									StaticPrefix:       types.StringValue(prefixAssignments.StaticPrefix),
+									StaticApplianceIP6: func() types.String {
+										if prefixAssignments.StaticApplianceIP6 != "" {
+											return types.StringValue(prefixAssignments.StaticApplianceIP6)
+										}
+										return types.String{}
+									}(),
+									StaticPrefix: func() types.String {
+										if prefixAssignments.StaticPrefix != "" {
+											return types.StringValue(prefixAssignments.StaticPrefix)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return &result
@@ -862,24 +1046,59 @@ func ResponseApplianceGetNetworkApplianceVLANItemToBody(state NetworksApplianceV
 			}
 			return types.Int64{}
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		ReservedIPRanges: func() *[]ResponseApplianceGetNetworkApplianceVlanReservedIpRanges {
 			if response.ReservedIPRanges != nil {
 				result := make([]ResponseApplianceGetNetworkApplianceVlanReservedIpRanges, len(*response.ReservedIPRanges))
 				for i, reservedIPRanges := range *response.ReservedIPRanges {
 					result[i] = ResponseApplianceGetNetworkApplianceVlanReservedIpRanges{
-						Comment: types.StringValue(reservedIPRanges.Comment),
-						End:     types.StringValue(reservedIPRanges.End),
-						Start:   types.StringValue(reservedIPRanges.Start),
+						Comment: func() types.String {
+							if reservedIPRanges.Comment != "" {
+								return types.StringValue(reservedIPRanges.Comment)
+							}
+							return types.String{}
+						}(),
+						End: func() types.String {
+							if reservedIPRanges.End != "" {
+								return types.StringValue(reservedIPRanges.End)
+							}
+							return types.String{}
+						}(),
+						Start: func() types.String {
+							if reservedIPRanges.Start != "" {
+								return types.StringValue(reservedIPRanges.Start)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		Subnet:           types.StringValue(response.Subnet),
-		TemplateVLANType: types.StringValue(response.TemplateVLANType),
-		VpnNatSubnet:     types.StringValue(response.VpnNatSubnet),
+		Subnet: func() types.String {
+			if response.Subnet != "" {
+				return types.StringValue(response.Subnet)
+			}
+			return types.String{}
+		}(),
+		TemplateVLANType: func() types.String {
+			if response.TemplateVLANType != "" {
+				return types.StringValue(response.TemplateVLANType)
+			}
+			return types.String{}
+		}(),
+		VpnNatSubnet: func() types.String {
+			if response.VpnNatSubnet != "" {
+				return types.StringValue(response.VpnNatSubnet)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

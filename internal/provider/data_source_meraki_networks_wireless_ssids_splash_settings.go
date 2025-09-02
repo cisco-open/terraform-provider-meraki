@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -406,7 +405,12 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBody(state Networ
 						}
 						return types.Bool{}
 					}(),
-					ReplyToEmailAddress: types.StringValue(response.Billing.ReplyToEmailAddress),
+					ReplyToEmailAddress: func() types.String {
+						if response.Billing.ReplyToEmailAddress != "" {
+							return types.StringValue(response.Billing.ReplyToEmailAddress)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -417,7 +421,12 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBody(state Networ
 			}
 			return types.Bool{}
 		}(),
-		ControllerDisconnectionBehavior: types.StringValue(response.ControllerDisconnectionBehavior),
+		ControllerDisconnectionBehavior: func() types.String {
+			if response.ControllerDisconnectionBehavior != "" {
+				return types.StringValue(response.ControllerDisconnectionBehavior)
+			}
+			return types.String{}
+		}(),
 		GuestSponsorship: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsGuestSponsorship {
 			if response.GuestSponsorship != nil {
 				return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsGuestSponsorship{
@@ -437,11 +446,21 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBody(state Networ
 			}
 			return nil
 		}(),
-		RedirectURL: types.StringValue(response.RedirectURL),
+		RedirectURL: func() types.String {
+			if response.RedirectURL != "" {
+				return types.StringValue(response.RedirectURL)
+			}
+			return types.String{}
+		}(),
 		SelfRegistration: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSelfRegistration {
 			if response.SelfRegistration != nil {
 				return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSelfRegistration{
-					AuthorizationType: types.StringValue(response.SelfRegistration.AuthorizationType),
+					AuthorizationType: func() types.String {
+						if response.SelfRegistration.AuthorizationType != "" {
+							return types.StringValue(response.SelfRegistration.AuthorizationType)
+						}
+						return types.String{}
+					}(),
 					Enabled: func() types.Bool {
 						if response.SelfRegistration.Enabled != nil {
 							return types.BoolValue(*response.SelfRegistration.Enabled)
@@ -456,11 +475,21 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBody(state Networ
 			if response.SentryEnrollment != nil {
 				return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSentryEnrollment{
 					EnforcedSystems: StringSliceToList(response.SentryEnrollment.EnforcedSystems),
-					Strength:        types.StringValue(response.SentryEnrollment.Strength),
+					Strength: func() types.String {
+						if response.SentryEnrollment.Strength != "" {
+							return types.StringValue(response.SentryEnrollment.Strength)
+						}
+						return types.String{}
+					}(),
 					SystemsManagerNetwork: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSentryEnrollmentSystemsManagerNetwork {
 						if response.SentryEnrollment.SystemsManagerNetwork != nil {
 							return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSentryEnrollmentSystemsManagerNetwork{
-								ID: types.StringValue(response.SentryEnrollment.SystemsManagerNetwork.ID),
+								ID: func() types.String {
+									if response.SentryEnrollment.SystemsManagerNetwork.ID != "" {
+										return types.StringValue(response.SentryEnrollment.SystemsManagerNetwork.ID)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -472,8 +501,18 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBody(state Networ
 		SplashImage: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashImage {
 			if response.SplashImage != nil {
 				return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashImage{
-					Extension: types.StringValue(response.SplashImage.Extension),
-					Md5:       types.StringValue(response.SplashImage.Md5),
+					Extension: func() types.String {
+						if response.SplashImage.Extension != "" {
+							return types.StringValue(response.SplashImage.Extension)
+						}
+						return types.String{}
+					}(),
+					Md5: func() types.String {
+						if response.SplashImage.Md5 != "" {
+							return types.StringValue(response.SplashImage.Md5)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -481,18 +520,43 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBody(state Networ
 		SplashLogo: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashLogo {
 			if response.SplashLogo != nil {
 				return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashLogo{
-					Extension: types.StringValue(response.SplashLogo.Extension),
-					Md5:       types.StringValue(response.SplashLogo.Md5),
+					Extension: func() types.String {
+						if response.SplashLogo.Extension != "" {
+							return types.StringValue(response.SplashLogo.Extension)
+						}
+						return types.String{}
+					}(),
+					Md5: func() types.String {
+						if response.SplashLogo.Md5 != "" {
+							return types.StringValue(response.SplashLogo.Md5)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		SplashPage: types.StringValue(response.SplashPage),
+		SplashPage: func() types.String {
+			if response.SplashPage != "" {
+				return types.StringValue(response.SplashPage)
+			}
+			return types.String{}
+		}(),
 		SplashPrepaidFront: func() *ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashPrepaidFront {
 			if response.SplashPrepaidFront != nil {
 				return &ResponseWirelessGetNetworkWirelessSsidSplashSettingsSplashPrepaidFront{
-					Extension: types.StringValue(response.SplashPrepaidFront.Extension),
-					Md5:       types.StringValue(response.SplashPrepaidFront.Md5),
+					Extension: func() types.String {
+						if response.SplashPrepaidFront.Extension != "" {
+							return types.StringValue(response.SplashPrepaidFront.Extension)
+						}
+						return types.String{}
+					}(),
+					Md5: func() types.String {
+						if response.SplashPrepaidFront.Md5 != "" {
+							return types.StringValue(response.SplashPrepaidFront.Md5)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -503,14 +567,24 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBody(state Networ
 			}
 			return types.Int64{}
 		}(),
-		SplashURL: types.StringValue(response.SplashURL),
+		SplashURL: func() types.String {
+			if response.SplashURL != "" {
+				return types.StringValue(response.SplashURL)
+			}
+			return types.String{}
+		}(),
 		SSIDNumber: func() types.Int64 {
 			if response.SSIDNumber != nil {
 				return types.Int64Value(int64(*response.SSIDNumber))
 			}
 			return types.Int64{}
 		}(),
-		ThemeID: types.StringValue(response.ThemeID),
+		ThemeID: func() types.String {
+			if response.ThemeID != "" {
+				return types.StringValue(response.ThemeID)
+			}
+			return types.String{}
+		}(),
 		UseRedirectURL: func() types.Bool {
 			if response.UseRedirectURL != nil {
 				return types.BoolValue(*response.UseRedirectURL)
@@ -523,7 +597,12 @@ func ResponseWirelessGetNetworkWirelessSSIDSplashSettingsItemToBody(state Networ
 			}
 			return types.Bool{}
 		}(),
-		WelcomeMessage: types.StringValue(response.WelcomeMessage),
+		WelcomeMessage: func() types.String {
+			if response.WelcomeMessage != "" {
+				return types.StringValue(response.WelcomeMessage)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

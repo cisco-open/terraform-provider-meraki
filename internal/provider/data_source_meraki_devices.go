@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -475,23 +474,53 @@ func ResponseDevicesGetOrganizationDevicesItemsToBody(state Devices, response *m
 	var items []ResponseItemOrganizationsGetOrganizationDevices
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationDevices{
-			Address: types.StringValue(item.Address),
+			Address: func() types.String {
+				if item.Address != "" {
+					return types.StringValue(item.Address)
+				}
+				return types.String{}
+			}(),
 			Details: func() *[]ResponseItemOrganizationsGetOrganizationDevicesDetails {
 				if item.Details != nil {
 					result := make([]ResponseItemOrganizationsGetOrganizationDevicesDetails, len(*item.Details))
 					for i, details := range *item.Details {
 						result[i] = ResponseItemOrganizationsGetOrganizationDevicesDetails{
-							Name:  types.StringValue(details.Name),
-							Value: types.StringValue(details.Value),
+							Name: func() types.String {
+								if details.Name != "" {
+									return types.StringValue(details.Name)
+								}
+								return types.String{}
+							}(),
+							Value: func() types.String {
+								if details.Value != "" {
+									return types.StringValue(details.Value)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
 				}
-				return &[]ResponseItemOrganizationsGetOrganizationDevicesDetails{}
+				return nil
 			}(),
-			Firmware: types.StringValue(item.Firmware),
-			Imei:     types.StringValue(item.Imei),
-			LanIP:    types.StringValue(item.LanIP),
+			Firmware: func() types.String {
+				if item.Firmware != "" {
+					return types.StringValue(item.Firmware)
+				}
+				return types.String{}
+			}(),
+			Imei: func() types.String {
+				if item.Imei != "" {
+					return types.StringValue(item.Imei)
+				}
+				return types.String{}
+			}(),
+			LanIP: func() types.String {
+				if item.LanIP != "" {
+					return types.StringValue(item.LanIP)
+				}
+				return types.String{}
+			}(),
 			Lat: func() types.Float64 {
 				if item.Lat != nil {
 					return types.Float64Value(float64(*item.Lat))
@@ -504,14 +533,49 @@ func ResponseDevicesGetOrganizationDevicesItemsToBody(state Devices, response *m
 				}
 				return types.Float64{}
 			}(),
-			Mac:         types.StringValue(item.Mac),
-			Model:       types.StringValue(item.Model),
-			Name:        types.StringValue(item.Name),
-			NetworkID:   types.StringValue(item.NetworkID),
-			Notes:       types.StringValue(item.Notes),
-			ProductType: types.StringValue(item.ProductType),
-			Serial:      types.StringValue(item.Serial),
-			Tags:        StringSliceToList(item.Tags),
+			Mac: func() types.String {
+				if item.Mac != "" {
+					return types.StringValue(item.Mac)
+				}
+				return types.String{}
+			}(),
+			Model: func() types.String {
+				if item.Model != "" {
+					return types.StringValue(item.Model)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			NetworkID: func() types.String {
+				if item.NetworkID != "" {
+					return types.StringValue(item.NetworkID)
+				}
+				return types.String{}
+			}(),
+			Notes: func() types.String {
+				if item.Notes != "" {
+					return types.StringValue(item.Notes)
+				}
+				return types.String{}
+			}(),
+			ProductType: func() types.String {
+				if item.ProductType != "" {
+					return types.StringValue(item.ProductType)
+				}
+				return types.String{}
+			}(),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
+			Tags: StringSliceToList(item.Tags),
 		}
 		items = append(items, itemState)
 	}
@@ -521,22 +585,47 @@ func ResponseDevicesGetOrganizationDevicesItemsToBody(state Devices, response *m
 
 func ResponseDevicesGetDeviceItemToBody(state Devices, response *merakigosdk.ResponseDevicesGetDevice) Devices {
 	itemState := ResponseDevicesGetDevice{
-		Address: types.StringValue(response.Address),
+		Address: func() types.String {
+			if response.Address != "" {
+				return types.StringValue(response.Address)
+			}
+			return types.String{}
+		}(),
 		Details: func() *[]ResponseDevicesGetDeviceDetails {
 			if response.Details != nil {
 				result := make([]ResponseDevicesGetDeviceDetails, len(*response.Details))
 				for i, details := range *response.Details {
 					result[i] = ResponseDevicesGetDeviceDetails{
-						Name:  types.StringValue(details.Name),
-						Value: types.StringValue(details.Value),
+						Name: func() types.String {
+							if details.Name != "" {
+								return types.StringValue(details.Name)
+							}
+							return types.String{}
+						}(),
+						Value: func() types.String {
+							if details.Value != "" {
+								return types.StringValue(details.Value)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		Firmware: types.StringValue(response.Firmware),
-		LanIP:    types.StringValue(response.LanIP),
+		Firmware: func() types.String {
+			if response.Firmware != "" {
+				return types.StringValue(response.Firmware)
+			}
+			return types.String{}
+		}(),
+		LanIP: func() types.String {
+			if response.LanIP != "" {
+				return types.StringValue(response.LanIP)
+			}
+			return types.String{}
+		}(),
 		Lat: func() types.Float64 {
 			if response.Lat != nil {
 				return types.Float64Value(float64(*response.Lat))
@@ -549,14 +638,49 @@ func ResponseDevicesGetDeviceItemToBody(state Devices, response *merakigosdk.Res
 			}
 			return types.Float64{}
 		}(),
-		Mac:         types.StringValue(response.Mac),
-		Model:       types.StringValue(response.Model),
-		Name:        types.StringValue(response.Name),
-		NetworkID:   types.StringValue(response.NetworkID),
-		Notes:       types.StringValue(response.Notes),
-		ProductType: types.StringValue(response.ProductType),
-		Serial:      types.StringValue(response.Serial),
-		Tags:        StringSliceToList(response.Tags),
+		Mac: func() types.String {
+			if response.Mac != "" {
+				return types.StringValue(response.Mac)
+			}
+			return types.String{}
+		}(),
+		Model: func() types.String {
+			if response.Model != "" {
+				return types.StringValue(response.Model)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
+		Notes: func() types.String {
+			if response.Notes != "" {
+				return types.StringValue(response.Notes)
+			}
+			return types.String{}
+		}(),
+		ProductType: func() types.String {
+			if response.ProductType != "" {
+				return types.StringValue(response.ProductType)
+			}
+			return types.String{}
+		}(),
+		Serial: func() types.String {
+			if response.Serial != "" {
+				return types.StringValue(response.Serial)
+			}
+			return types.String{}
+		}(),
+		Tags: StringSliceToList(response.Tags),
 	}
 	state.Item = &itemState
 	return state

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -162,6 +161,17 @@ func (d *NetworksSensorMqttBrokersDataSource) Read(ctx context.Context, req data
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkSensorMqttBroker",
+				err.Error(),
+			)
+			return
+		}
+
 		networksSensorMqttBrokers = ResponseSensorGetNetworkSensorMqttBrokerItemToBody(networksSensorMqttBrokers, response2)
 		diags = resp.State.Set(ctx, &networksSensorMqttBrokers)
 		resp.Diagnostics.Append(diags...)
@@ -201,7 +211,12 @@ func ResponseSensorGetNetworkSensorMqttBrokersItemsToBody(state NetworksSensorMq
 				}
 				return types.Bool{}
 			}(),
-			MqttBrokerID: types.StringValue(item.MqttBrokerID),
+			MqttBrokerID: func() types.String {
+				if item.MqttBrokerID != "" {
+					return types.StringValue(item.MqttBrokerID)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -217,7 +232,12 @@ func ResponseSensorGetNetworkSensorMqttBrokerItemToBody(state NetworksSensorMqtt
 			}
 			return types.Bool{}
 		}(),
-		MqttBrokerID: types.StringValue(response.MqttBrokerID),
+		MqttBrokerID: func() types.String {
+			if response.MqttBrokerID != "" {
+				return types.StringValue(response.MqttBrokerID)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

@@ -174,7 +174,7 @@ type ResponseWirelessAssignNetworkWirelessEthernetPortsProfiles struct {
 
 type RequestWirelessAssignNetworkWirelessEthernetPortsProfilesRs struct {
 	ProfileID types.String `tfsdk:"profile_id"`
-	Serials   types.Set    `tfsdk:"serials"`
+	Serials   types.List   `tfsdk:"serials"`
 }
 
 // FromBody
@@ -199,8 +199,13 @@ func (r *NetworksWirelessEthernetPortsProfilesAssign) toSdkApiRequestCreate(ctx 
 // ToBody
 func ResponseWirelessAssignNetworkWirelessEthernetPortsProfilesItemToBody(state NetworksWirelessEthernetPortsProfilesAssign, response *merakigosdk.ResponseWirelessAssignNetworkWirelessEthernetPortsProfiles) NetworksWirelessEthernetPortsProfilesAssign {
 	itemState := ResponseWirelessAssignNetworkWirelessEthernetPortsProfiles{
-		ProfileID: types.StringValue(response.ProfileID),
-		Serials:   StringSliceToList(response.Serials),
+		ProfileID: func() types.String {
+			if response.ProfileID != "" {
+				return types.StringValue(response.ProfileID)
+			}
+			return types.String{}
+		}(),
+		Serials: StringSliceToList(response.Serials),
 	}
 	state.Item = &itemState
 	return state

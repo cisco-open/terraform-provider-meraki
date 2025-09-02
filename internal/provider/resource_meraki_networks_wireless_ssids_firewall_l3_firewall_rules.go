@@ -19,8 +19,9 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"log"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -30,8 +31,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -69,7 +70,6 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Schema(_ context.
 		Attributes: map[string]schema.Attribute{
 			"allow_lan_access": schema.BoolAttribute{
 				MarkdownDescription: `Allows wireless client access to local LAN (boolean value - true allows access and false denies access)`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -83,12 +83,11 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Schema(_ context.
 				MarkdownDescription: `number path parameter.`,
 				Required:            true,
 			},
-			"rules": schema.SetNestedAttribute{
+			"rules": schema.ListNestedAttribute{
 				MarkdownDescription: `An ordered array of the firewall rules for this SSID (not including the local LAN access rule or the default rule).`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -103,8 +102,10 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Schema(_ context.
 						"dest_cidr": schema.StringAttribute{
 							MarkdownDescription: `Comma-separated list of destination IP address(es) (in IP or CIDR notation), fully-qualified domain names (FQDN) or 'any'`,
 							Optional:            true,
+
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
+								&CaseInsensitiveStringPlanModifier{},
 							},
 						},
 						"dest_port": schema.StringAttribute{
@@ -112,13 +113,7 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Schema(_ context.
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"ip_ver": schema.StringAttribute{
-							MarkdownDescription: `Ip Ver`,
-							Optional:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+								&CaseInsensitiveStringPlanModifier{},
 							},
 						},
 						"policy": schema.StringAttribute{
@@ -141,81 +136,7 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Schema(_ context.
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
-							},
-							Validators: []validator.String{
-								stringvalidator.OneOf(
-									"any",
-									"icmp",
-									"icmp6",
-									"tcp",
-									"udp",
-								),
-							},
-						},
-					},
-				},
-			},
-			"rules_response": schema.SetNestedAttribute{
-				MarkdownDescription: `An ordered array of the firewall rules for this SSID (not including the local LAN access rule or the default rule).`,
-				Computed:            true,
-				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
-				},
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-
-						"comment": schema.StringAttribute{
-							MarkdownDescription: `Description of the rule (optional)`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"dest_cidr": schema.StringAttribute{
-							MarkdownDescription: `Comma-separated list of destination IP address(es) (in IP or CIDR notation), fully-qualified domain names (FQDN) or 'any'`,
-							Computed:            true,
-							// Optional:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"dest_port": schema.StringAttribute{
-							MarkdownDescription: `Comma-separated list of destination port(s) (integer in the range 1-65535), or 'any'`,
-							Computed:            true,
-							// Optional:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"ip_ver": schema.StringAttribute{
-							MarkdownDescription: `Ip Version`,
-							Computed:            true,
-							// Optional:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"policy": schema.StringAttribute{
-							MarkdownDescription: `'allow' or 'deny' traffic specified by this rule`,
-							Computed:            true,
-							// Optional:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-							Validators: []validator.String{
-								stringvalidator.OneOf(
-									"allow",
-									"deny",
-								),
-							},
-						},
-						"protocol": schema.StringAttribute{
-							MarkdownDescription: `The type of protocol (must be 'tcp', 'udp', 'icmp', 'icmp6' or 'any')`,
-							Computed:            true,
-							// Optional:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+								&CaseInsensitiveStringPlanModifier{},
 							},
 							Validators: []validator.String{
 								stringvalidator.OneOf(
@@ -255,31 +176,7 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Create(ctx contex
 	// Has Paths
 	vvNetworkID := data.NetworkID.ValueString()
 	vvNumber := data.Number.ValueString()
-	log.Println("vvNetworkID", vvNetworkID)
-	log.Println("vvNumber", vvNumber)
 	//Has Item and not has items
-
-	if vvNetworkID != "" && vvNumber != "" {
-		log.Println("dentro")
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDFirewallL3FirewallRules(vvNetworkID, vvNumber)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessSsidsFirewallL3FirewallRules  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessSsidsFirewallL3FirewallRules only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
 
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
@@ -289,7 +186,7 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Create(ctx contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDFirewallL3FirewallRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -300,49 +197,30 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Create(ctx contex
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDFirewallL3FirewallRules(vvNetworkID, vvNumber)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkWirelessSSIDFirewallL3FirewallRules",
-				restyResp1.String(),
-			)
-			return
-		}
+	// Update response to read Struct
+	var responseRead *merakigosdk.ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRules
+	err = json.Unmarshal(restyResp2.Body(), &responseRead)
+	if err != nil {
 		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkWirelessSSIDFirewallL3FirewallRules",
+			"Failure when unmarshalling response",
 			err.Error(),
 		)
-		return
 	}
+	data = ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRulesItemToBodyRs(data, responseRead, true)
 
-	data = ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRulesItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksWirelessSSIDsFirewallL3FirewallRulesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -373,9 +251,7 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Read(ctx context.
 	}
 	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRulesItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -383,35 +259,31 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) ImportState(ctx c
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,number. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("number"), idParts[1])...)
 }
 
 func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksWirelessSSIDsFirewallL3FirewallRulesRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksWirelessSSIDsFirewallL3FirewallRulesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvNumber := data.Number.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvNumber := plan.Number.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDFirewallL3FirewallRules(vvNetworkID, vvNumber, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDFirewallL3FirewallRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -421,9 +293,7 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Update(ctx contex
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -436,7 +306,6 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesResource) Delete(ctx contex
 type NetworksWirelessSSIDsFirewallL3FirewallRulesRs struct {
 	NetworkID      types.String                                                            `tfsdk:"network_id"`
 	Number         types.String                                                            `tfsdk:"number"`
-	RulesResponse  *[]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs `tfsdk:"rules_response"`
 	AllowLanAccess types.Bool                                                              `tfsdk:"allow_lan_access"`
 	Rules          *[]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs `tfsdk:"rules"`
 }
@@ -447,7 +316,6 @@ type ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs struct
 	DestPort types.String `tfsdk:"dest_port"`
 	Policy   types.String `tfsdk:"policy"`
 	Protocol types.String `tfsdk:"protocol"`
-	IpVer    types.String `tfsdk:"ip_ver"`
 }
 
 // FromBody
@@ -467,14 +335,12 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesRs) toSdkApiRequestUpdate(c
 			destPort := rItem1.DestPort.ValueString()
 			policy := rItem1.Policy.ValueString()
 			protocol := rItem1.Protocol.ValueString()
-			ipVer := rItem1.IpVer.ValueString()
 			requestWirelessUpdateNetworkWirelessSSIDFirewallL3FirewallRulesRules = append(requestWirelessUpdateNetworkWirelessSSIDFirewallL3FirewallRulesRules, merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDFirewallL3FirewallRulesRules{
 				Comment:  comment,
 				DestCidr: destCidr,
 				DestPort: destPort,
 				Policy:   policy,
 				Protocol: protocol,
-				IpVer:    ipVer,
 			})
 			//[debug] Is Array: True
 		}
@@ -482,7 +348,7 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesRs) toSdkApiRequestUpdate(c
 	out := merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDFirewallL3FirewallRules{
 		AllowLanAccess: allowLanAccess,
 		Rules: func() *[]merakigosdk.RequestWirelessUpdateNetworkWirelessSSIDFirewallL3FirewallRulesRules {
-			if len(requestWirelessUpdateNetworkWirelessSSIDFirewallL3FirewallRulesRules) > 0 || r.Rules != nil {
+			if len(requestWirelessUpdateNetworkWirelessSSIDFirewallL3FirewallRulesRules) > 0 {
 				return &requestWirelessUpdateNetworkWirelessSSIDFirewallL3FirewallRulesRules
 			}
 			return nil
@@ -493,6 +359,21 @@ func (r *NetworksWirelessSSIDsFirewallL3FirewallRulesRs) toSdkApiRequestUpdate(c
 
 // From gosdk to TF Structs Schema
 func ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRulesItemToBodyRs(state NetworksWirelessSSIDsFirewallL3FirewallRulesRs, response *merakigosdk.ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRules, is_read bool) NetworksWirelessSSIDsFirewallL3FirewallRulesRs {
+	if response.Rules != nil {
+		var filteredRules []merakigosdk.ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRulesRules
+
+		for _, rule := range *response.Rules {
+			// Skip the default rule since it's managed by the system
+			if rule.Comment != "Default rule" {
+				if rule.Comment == "Wireless clients accessing LAN" {
+					continue
+				}
+				filteredRules = append(filteredRules, rule)
+			}
+		}
+		// Update response with filtered rules, excluding default rule
+		response.Rules = &filteredRules
+	}
 	itemState := NetworksWirelessSSIDsFirewallL3FirewallRulesRs{
 		AllowLanAccess: func() types.Bool {
 			if response.AllowLanAccess != nil {
@@ -500,17 +381,41 @@ func ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRulesItemToBodyRs(s
 			}
 			return types.Bool{}
 		}(),
-		RulesResponse: func() *[]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs {
+		Rules: func() *[]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs {
 			if response.Rules != nil {
 				result := make([]ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs, len(*response.Rules))
 				for i, rules := range *response.Rules {
 					result[i] = ResponseWirelessGetNetworkWirelessSsidFirewallL3FirewallRulesRulesRs{
-						Comment:  types.StringValue(rules.Comment),
-						DestCidr: types.StringValue(rules.DestCidr),
-						DestPort: types.StringValue(rules.DestPort),
-						Policy:   types.StringValue(rules.Policy),
-						Protocol: types.StringValue(rules.Protocol),
-						IpVer:    types.StringValue(rules.IpVer),
+						Comment: func() types.String {
+							if rules.Comment != "" {
+								return types.StringValue(rules.Comment)
+							}
+							return types.StringNull()
+						}(),
+						DestCidr: func() types.String {
+							if rules.DestCidr != "" {
+								return types.StringValue(strings.ToLower(rules.DestCidr))
+							}
+							return types.String{}
+						}(),
+						DestPort: func() types.String {
+							if strings.ToLower(rules.DestPort) != "" {
+								return types.StringValue(strings.ToLower(rules.DestPort))
+							}
+							return types.String{}
+						}(),
+						Policy: func() types.String {
+							if rules.Policy != "" {
+								return types.StringValue(rules.Policy)
+							}
+							return types.String{}
+						}(),
+						Protocol: func() types.String {
+							if strings.ToLower(rules.Protocol) != "" {
+								return types.StringValue(strings.ToLower(rules.Protocol))
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -518,11 +423,41 @@ func ResponseWirelessGetNetworkWirelessSSIDFirewallL3FirewallRulesItemToBodyRs(s
 			return nil
 		}(),
 	}
-
-	itemState.Rules = state.Rules
-	itemState.AllowLanAccess = state.AllowLanAccess
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksWirelessSSIDsFirewallL3FirewallRulesRs)
 	}
 	return mergeInterfaces(state, itemState, true).(NetworksWirelessSSIDsFirewallL3FirewallRulesRs)
+}
+
+// CaseInsensitiveStringPlanModifier is a plan modifier that normalizes string values to lowercase
+// for case-insensitive comparison during plan operations
+type CaseInsensitiveStringPlanModifier struct{}
+
+func (m *CaseInsensitiveStringPlanModifier) Description(ctx context.Context) string {
+	return "Normalizes string values to lowercase for case-insensitive comparison"
+}
+
+func (m *CaseInsensitiveStringPlanModifier) MarkdownDescription(ctx context.Context) string {
+	return "Normalizes string values to lowercase for case-insensitive comparison"
+}
+
+func (m *CaseInsensitiveStringPlanModifier) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
+	// If the plan value is unknown, don't modify it
+	if req.PlanValue.IsUnknown() {
+		return
+	}
+
+	// If the state value is unknown, don't modify it
+	if req.StateValue.IsUnknown() {
+		return
+	}
+
+	// If both values are the same (case-insensitive), use the state value to avoid unnecessary changes
+	if strings.EqualFold(req.PlanValue.ValueString(), req.StateValue.ValueString()) {
+		resp.PlanValue = req.StateValue
+		return
+	}
+
+	// Otherwise, keep the plan value as is
+	resp.PlanValue = req.PlanValue
 }

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -272,6 +271,17 @@ func (d *OrganizationsSamlRolesDataSource) Read(ctx context.Context, req datasou
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetOrganizationSamlRole",
+				err.Error(),
+			)
+			return
+		}
+
 		organizationsSamlRoles = ResponseOrganizationsGetOrganizationSamlRoleItemToBody(organizationsSamlRoles, response2)
 		diags = resp.State.Set(ctx, &organizationsSamlRoles)
 		resp.Diagnostics.Append(diags...)
@@ -348,7 +358,12 @@ func ResponseOrganizationsGetOrganizationSamlRolesItemsToBody(state Organization
 					result := make([]ResponseItemOrganizationsGetOrganizationSamlRolesCamera, len(*item.Camera))
 					for i, camera := range *item.Camera {
 						result[i] = ResponseItemOrganizationsGetOrganizationSamlRolesCamera{
-							Access: types.StringValue(camera.Access),
+							Access: func() types.String {
+								if camera.Access != "" {
+									return types.StringValue(camera.Access)
+								}
+								return types.String{}
+							}(),
 							OrgWide: func() types.Bool {
 								if camera.OrgWide != nil {
 									return types.BoolValue(*camera.OrgWide)
@@ -361,29 +376,64 @@ func ResponseOrganizationsGetOrganizationSamlRolesItemsToBody(state Organization
 				}
 				return nil
 			}(),
-			ID: types.StringValue(item.ID),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
 			Networks: func() *[]ResponseItemOrganizationsGetOrganizationSamlRolesNetworks {
 				if item.Networks != nil {
 					result := make([]ResponseItemOrganizationsGetOrganizationSamlRolesNetworks, len(*item.Networks))
 					for i, networks := range *item.Networks {
 						result[i] = ResponseItemOrganizationsGetOrganizationSamlRolesNetworks{
-							Access: types.StringValue(networks.Access),
-							ID:     types.StringValue(networks.ID),
+							Access: func() types.String {
+								if networks.Access != "" {
+									return types.StringValue(networks.Access)
+								}
+								return types.String{}
+							}(),
+							ID: func() types.String {
+								if networks.ID != "" {
+									return types.StringValue(networks.ID)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
 				}
 				return nil
 			}(),
-			OrgAccess: types.StringValue(item.OrgAccess),
-			Role:      types.StringValue(item.Role),
+			OrgAccess: func() types.String {
+				if item.OrgAccess != "" {
+					return types.StringValue(item.OrgAccess)
+				}
+				return types.String{}
+			}(),
+			Role: func() types.String {
+				if item.Role != "" {
+					return types.StringValue(item.Role)
+				}
+				return types.String{}
+			}(),
 			Tags: func() *[]ResponseItemOrganizationsGetOrganizationSamlRolesTags {
 				if item.Tags != nil {
 					result := make([]ResponseItemOrganizationsGetOrganizationSamlRolesTags, len(*item.Tags))
 					for i, tags := range *item.Tags {
 						result[i] = ResponseItemOrganizationsGetOrganizationSamlRolesTags{
-							Access: types.StringValue(tags.Access),
-							Tag:    types.StringValue(tags.Tag),
+							Access: func() types.String {
+								if tags.Access != "" {
+									return types.StringValue(tags.Access)
+								}
+								return types.String{}
+							}(),
+							Tag: func() types.String {
+								if tags.Tag != "" {
+									return types.StringValue(tags.Tag)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
@@ -404,7 +454,12 @@ func ResponseOrganizationsGetOrganizationSamlRoleItemToBody(state OrganizationsS
 				result := make([]ResponseOrganizationsGetOrganizationSamlRoleCamera, len(*response.Camera))
 				for i, camera := range *response.Camera {
 					result[i] = ResponseOrganizationsGetOrganizationSamlRoleCamera{
-						Access: types.StringValue(camera.Access),
+						Access: func() types.String {
+							if camera.Access != "" {
+								return types.StringValue(camera.Access)
+							}
+							return types.String{}
+						}(),
 						OrgWide: func() types.Bool {
 							if camera.OrgWide != nil {
 								return types.BoolValue(*camera.OrgWide)
@@ -417,29 +472,64 @@ func ResponseOrganizationsGetOrganizationSamlRoleItemToBody(state OrganizationsS
 			}
 			return nil
 		}(),
-		ID: types.StringValue(response.ID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		Networks: func() *[]ResponseOrganizationsGetOrganizationSamlRoleNetworks {
 			if response.Networks != nil {
 				result := make([]ResponseOrganizationsGetOrganizationSamlRoleNetworks, len(*response.Networks))
 				for i, networks := range *response.Networks {
 					result[i] = ResponseOrganizationsGetOrganizationSamlRoleNetworks{
-						Access: types.StringValue(networks.Access),
-						ID:     types.StringValue(networks.ID),
+						Access: func() types.String {
+							if networks.Access != "" {
+								return types.StringValue(networks.Access)
+							}
+							return types.String{}
+						}(),
+						ID: func() types.String {
+							if networks.ID != "" {
+								return types.StringValue(networks.ID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		OrgAccess: types.StringValue(response.OrgAccess),
-		Role:      types.StringValue(response.Role),
+		OrgAccess: func() types.String {
+			if response.OrgAccess != "" {
+				return types.StringValue(response.OrgAccess)
+			}
+			return types.String{}
+		}(),
+		Role: func() types.String {
+			if response.Role != "" {
+				return types.StringValue(response.Role)
+			}
+			return types.String{}
+		}(),
 		Tags: func() *[]ResponseOrganizationsGetOrganizationSamlRoleTags {
 			if response.Tags != nil {
 				result := make([]ResponseOrganizationsGetOrganizationSamlRoleTags, len(*response.Tags))
 				for i, tags := range *response.Tags {
 					result[i] = ResponseOrganizationsGetOrganizationSamlRoleTags{
-						Access: types.StringValue(tags.Access),
-						Tag:    types.StringValue(tags.Tag),
+						Access: func() types.String {
+							if tags.Access != "" {
+								return types.StringValue(tags.Access)
+							}
+							return types.String{}
+						}(),
+						Tag: func() types.String {
+							if tags.Tag != "" {
+								return types.StringValue(tags.Tag)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "1.1.8-beta"
+      version = "1.2.0-beta"
       source  = "hashicorp.com/edu/meraki"
       # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
@@ -9,7 +9,6 @@ terraform {
 }
 provider "meraki" {
   meraki_debug    = "true"
-  meraki_base_url = "http://localhost:3002"
 }
 
 variable "ise_servers" {
@@ -33,7 +32,7 @@ variable "ise_servers" {
 
 resource "meraki_networks_switch_access_policies" "example" {
 
-  network_id         = "string"
+  network_id         = "L_828099381482775486"
   access_policy_type = "Hybrid authentication"
   dot1x = {
     control_direction = "both"
@@ -58,7 +57,7 @@ resource "meraki_networks_switch_access_policies" "example" {
       port   = 1813
       secret = server.ise_shared_secret
   }]
-  radius_coa_support_enabled = false
+  radius_coa_support_enabled = true
   radius_group_attribute     = ""
   radius_servers = [
     for server in var.ise_servers : {

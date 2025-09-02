@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -151,7 +150,12 @@ func ResponseApplianceGetNetworkApplianceFirewallSettingsItemToBody(state Networ
 					IPSourceGuard: func() *ResponseApplianceGetNetworkApplianceFirewallSettingsSpoofingProtectionIpSourceGuard {
 						if response.SpoofingProtection.IPSourceGuard != nil {
 							return &ResponseApplianceGetNetworkApplianceFirewallSettingsSpoofingProtectionIpSourceGuard{
-								Mode: types.StringValue(response.SpoofingProtection.IPSourceGuard.Mode),
+								Mode: func() types.String {
+									if response.SpoofingProtection.IPSourceGuard.Mode != "" {
+										return types.StringValue(response.SpoofingProtection.IPSourceGuard.Mode)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil

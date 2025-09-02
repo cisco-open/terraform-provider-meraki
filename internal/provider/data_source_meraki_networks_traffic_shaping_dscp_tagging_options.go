@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -135,7 +134,12 @@ func ResponseNetworksGetNetworkTrafficShapingDscpTaggingOptionsItemsToBody(state
 	var items []ResponseItemNetworksGetNetworkTrafficShapingDscpTaggingOptions
 	for _, item := range *response {
 		itemState := ResponseItemNetworksGetNetworkTrafficShapingDscpTaggingOptions{
-			Description: types.StringValue(item.Description),
+			Description: func() types.String {
+				if item.Description != "" {
+					return types.StringValue(item.Description)
+				}
+				return types.String{}
+			}(),
 			DscpTagValue: func() types.Int64 {
 				if item.DscpTagValue != nil {
 					return types.Int64Value(int64(*item.DscpTagValue))

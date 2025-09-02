@@ -257,12 +257,7 @@ func (r *OrganizationsCellularGatewayEsimsSwap) toSdkApiRequestCreate(ctx contex
 		}
 	}
 	out := merakigosdk.RequestCellularGatewayCreateOrganizationCellularGatewayEsimsSwap{
-		Swaps: func() *[]merakigosdk.RequestCellularGatewayCreateOrganizationCellularGatewayEsimsSwapSwaps {
-			if len(requestCellularGatewayCreateOrganizationCellularGatewayEsimsSwapSwaps) > 0 {
-				return &requestCellularGatewayCreateOrganizationCellularGatewayEsimsSwapSwaps
-			}
-			return nil
-		}(),
+		Swaps: &requestCellularGatewayCreateOrganizationCellularGatewayEsimsSwapSwaps,
 	}
 	return &out
 }
@@ -270,9 +265,24 @@ func (r *OrganizationsCellularGatewayEsimsSwap) toSdkApiRequestCreate(ctx contex
 // ToBody
 func ResponseCellularGatewayCreateOrganizationCellularGatewayEsimsSwapItemToBody(state OrganizationsCellularGatewayEsimsSwap, response *merakigosdk.ResponseCellularGatewayCreateOrganizationCellularGatewayEsimsSwap) OrganizationsCellularGatewayEsimsSwap {
 	itemState := ResponseCellularGatewayCreateOrganizationCellularGatewayEsimsSwap{
-		Eid:    types.StringValue(response.Eid),
-		Iccid:  types.StringValue(response.Iccid),
-		Status: types.StringValue(response.Status),
+		Eid: func() types.String {
+			if response.Eid != "" {
+				return types.StringValue(response.Eid)
+			}
+			return types.String{}
+		}(),
+		Iccid: func() types.String {
+			if response.Iccid != "" {
+				return types.StringValue(response.Iccid)
+			}
+			return types.String{}
+		}(),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -212,8 +211,18 @@ func ResponseSmGetNetworkSmBypassActivationLockAttemptItemToBody(state NetworksS
 			}
 			return nil
 		}(),
-		ID:     types.StringValue(response.ID),
-		Status: types.StringValue(response.Status),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

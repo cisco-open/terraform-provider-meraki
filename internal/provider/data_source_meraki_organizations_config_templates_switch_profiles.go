@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -148,9 +147,24 @@ func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilesItemsToBody(state 
 	var items []ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfiles
 	for _, item := range *response {
 		itemState := ResponseItemSwitchGetOrganizationConfigTemplateSwitchProfiles{
-			Model:           types.StringValue(item.Model),
-			Name:            types.StringValue(item.Name),
-			SwitchProfileID: types.StringValue(item.SwitchProfileID),
+			Model: func() types.String {
+				if item.Model != "" {
+					return types.StringValue(item.Model)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			SwitchProfileID: func() types.String {
+				if item.SwitchProfileID != "" {
+					return types.StringValue(item.SwitchProfileID)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

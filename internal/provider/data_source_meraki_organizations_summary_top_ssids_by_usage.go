@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -260,7 +259,12 @@ func ResponseOrganizationsGetOrganizationSummaryTopSSIDsByUsageItemsToBody(state
 				}
 				return nil
 			}(),
-			Name: types.StringValue(item.Name),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			Usage: func() *ResponseItemOrganizationsGetOrganizationSummaryTopSsidsByUsageUsage {
 				if item.Usage != nil {
 					return &ResponseItemOrganizationsGetOrganizationSummaryTopSsidsByUsageUsage{

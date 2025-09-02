@@ -683,12 +683,7 @@ func (r *NetworksApplianceSdwanInternetPolicies) toSdkApiRequestUpdate(ctx conte
 		}
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceSdwanInternetPolicies{
-		WanTrafficUplinkPreferences: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferences {
-			if len(requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferences) > 0 {
-				return &requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferences
-			}
-			return nil
-		}(),
+		WanTrafficUplinkPreferences: &requestApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferences,
 	}
 	return &out
 }
@@ -701,24 +696,54 @@ func ResponseApplianceUpdateNetworkApplianceSdwanInternetPoliciesItemToBody(stat
 				result := make([]ResponseApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferences, len(*response.WanTrafficUplinkPreferences))
 				for i, wanTrafficUplinkPreferences := range *response.WanTrafficUplinkPreferences {
 					result[i] = ResponseApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferences{
-						FailOverCriterion: types.StringValue(wanTrafficUplinkPreferences.FailOverCriterion),
+						FailOverCriterion: func() types.String {
+							if wanTrafficUplinkPreferences.FailOverCriterion != "" {
+								return types.StringValue(wanTrafficUplinkPreferences.FailOverCriterion)
+							}
+							return types.String{}
+						}(),
 						PerformanceClass: func() *ResponseApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesPerformanceClass {
 							if wanTrafficUplinkPreferences.PerformanceClass != nil {
 								return &ResponseApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesPerformanceClass{
-									BuiltinPerformanceClassName: types.StringValue(wanTrafficUplinkPreferences.PerformanceClass.BuiltinPerformanceClassName),
-									CustomPerformanceClassID:    types.StringValue(wanTrafficUplinkPreferences.PerformanceClass.CustomPerformanceClassID),
-									Type:                        types.StringValue(wanTrafficUplinkPreferences.PerformanceClass.Type),
+									BuiltinPerformanceClassName: func() types.String {
+										if wanTrafficUplinkPreferences.PerformanceClass.BuiltinPerformanceClassName != "" {
+											return types.StringValue(wanTrafficUplinkPreferences.PerformanceClass.BuiltinPerformanceClassName)
+										}
+										return types.String{}
+									}(),
+									CustomPerformanceClassID: func() types.String {
+										if wanTrafficUplinkPreferences.PerformanceClass.CustomPerformanceClassID != "" {
+											return types.StringValue(wanTrafficUplinkPreferences.PerformanceClass.CustomPerformanceClassID)
+										}
+										return types.String{}
+									}(),
+									Type: func() types.String {
+										if wanTrafficUplinkPreferences.PerformanceClass.Type != "" {
+											return types.StringValue(wanTrafficUplinkPreferences.PerformanceClass.Type)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						PreferredUplink: types.StringValue(wanTrafficUplinkPreferences.PreferredUplink),
+						PreferredUplink: func() types.String {
+							if wanTrafficUplinkPreferences.PreferredUplink != "" {
+								return types.StringValue(wanTrafficUplinkPreferences.PreferredUplink)
+							}
+							return types.String{}
+						}(),
 						TrafficFilters: func() *[]ResponseApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFilters {
 							if wanTrafficUplinkPreferences.TrafficFilters != nil {
 								result := make([]ResponseApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFilters, len(*wanTrafficUplinkPreferences.TrafficFilters))
 								for i, trafficFilters := range *wanTrafficUplinkPreferences.TrafficFilters {
 									result[i] = ResponseApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFilters{
-										Type: types.StringValue(trafficFilters.Type),
+										Type: func() types.String {
+											if trafficFilters.Type != "" {
+												return types.StringValue(trafficFilters.Type)
+											}
+											return types.String{}
+										}(),
 										Value: func() *ResponseApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValue {
 											if trafficFilters.Value != nil {
 												return &ResponseApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValue{
@@ -730,33 +755,73 @@ func ResponseApplianceUpdateNetworkApplianceSdwanInternetPoliciesItemToBody(stat
 																		result := make([]ResponseApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplications, len(*trafficFilters.Value.Destination.Applications))
 																		for i, applications := range *trafficFilters.Value.Destination.Applications {
 																			result[i] = ResponseApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplications{
-																				ID:   types.StringValue(applications.ID),
-																				Name: types.StringValue(applications.Name),
-																				Type: types.StringValue(applications.Type),
+																				ID: func() types.String {
+																					if applications.ID != "" {
+																						return types.StringValue(applications.ID)
+																					}
+																					return types.String{}
+																				}(),
+																				Name: func() types.String {
+																					if applications.Name != "" {
+																						return types.StringValue(applications.Name)
+																					}
+																					return types.String{}
+																				}(),
+																				Type: func() types.String {
+																					if applications.Type != "" {
+																						return types.StringValue(applications.Type)
+																					}
+																					return types.String{}
+																				}(),
 																			}
 																		}
 																		return &result
 																	}
 																	return nil
 																}(),
-																Cidr: types.StringValue(trafficFilters.Value.Destination.Cidr),
-																Port: types.StringValue(trafficFilters.Value.Destination.Port),
+																Cidr: func() types.String {
+																	if trafficFilters.Value.Destination.Cidr != "" {
+																		return types.StringValue(trafficFilters.Value.Destination.Cidr)
+																	}
+																	return types.String{}
+																}(),
+																Port: func() types.String {
+																	if trafficFilters.Value.Destination.Port != "" {
+																		return types.StringValue(trafficFilters.Value.Destination.Port)
+																	}
+																	return types.String{}
+																}(),
 															}
 														}
 														return nil
 													}(),
-													Protocol: types.StringValue(trafficFilters.Value.Protocol),
+													Protocol: func() types.String {
+														if trafficFilters.Value.Protocol != "" {
+															return types.StringValue(trafficFilters.Value.Protocol)
+														}
+														return types.String{}
+													}(),
 													Source: func() *ResponseApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValueSource {
 														if trafficFilters.Value.Source != nil {
 															return &ResponseApplianceUpdateNetworkApplianceSdwanInternetPoliciesWanTrafficUplinkPreferencesTrafficFiltersValueSource{
-																Cidr: types.StringValue(trafficFilters.Value.Source.Cidr),
+																Cidr: func() types.String {
+																	if trafficFilters.Value.Source.Cidr != "" {
+																		return types.StringValue(trafficFilters.Value.Source.Cidr)
+																	}
+																	return types.String{}
+																}(),
 																Host: func() types.Int64 {
 																	if trafficFilters.Value.Source.Host != nil {
 																		return types.Int64Value(int64(*trafficFilters.Value.Source.Host))
 																	}
 																	return types.Int64{}
 																}(),
-																Port: types.StringValue(trafficFilters.Value.Source.Port),
+																Port: func() types.String {
+																	if trafficFilters.Value.Source.Port != "" {
+																		return types.StringValue(trafficFilters.Value.Source.Port)
+																	}
+																	return types.String{}
+																}(),
 																VLAN: func() types.Int64 {
 																	if trafficFilters.Value.Source.VLAN != nil {
 																		return types.Int64Value(int64(*trafficFilters.Value.Source.VLAN))

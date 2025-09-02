@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -308,7 +307,12 @@ func ResponseOrganizationsGetOrganizationAssuranceAlertsOverviewHistoricalItemTo
 											}
 											return types.Int64{}
 										}(),
-										Type: types.StringValue(byAlertType.Type),
+										Type: func() types.String {
+											if byAlertType.Type != "" {
+												return types.StringValue(byAlertType.Type)
+											}
+											return types.String{}
+										}(),
 										Warning: func() types.Int64 {
 											if byAlertType.Warning != nil {
 												return types.Int64Value(int64(*byAlertType.Warning))
@@ -321,7 +325,12 @@ func ResponseOrganizationsGetOrganizationAssuranceAlertsOverviewHistoricalItemTo
 							}
 							return nil
 						}(),
-						SegmentStart: types.StringValue(items.SegmentStart),
+						SegmentStart: func() types.String {
+							if items.SegmentStart != "" {
+								return types.StringValue(items.SegmentStart)
+							}
+							return types.String{}
+						}(),
 						Totals: func() *ResponseOrganizationsGetOrganizationAssuranceAlertsOverviewHistoricalItemsTotals {
 							if items.Totals != nil {
 								return &ResponseOrganizationsGetOrganizationAssuranceAlertsOverviewHistoricalItemsTotals{

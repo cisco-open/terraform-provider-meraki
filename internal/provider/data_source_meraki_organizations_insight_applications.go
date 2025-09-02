@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -181,8 +180,18 @@ func ResponseInsightGetOrganizationInsightApplicationsItemsToBody(state Organiza
 	var items []ResponseItemInsightGetOrganizationInsightApplications
 	for _, item := range *response {
 		itemState := ResponseItemInsightGetOrganizationInsightApplications{
-			ApplicationID: types.StringValue(item.ApplicationID),
-			Name:          types.StringValue(item.Name),
+			ApplicationID: func() types.String {
+				if item.ApplicationID != "" {
+					return types.StringValue(item.ApplicationID)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			Thresholds: func() *ResponseItemInsightGetOrganizationInsightApplicationsThresholds {
 				if item.Thresholds != nil {
 					return &ResponseItemInsightGetOrganizationInsightApplicationsThresholds{
@@ -197,7 +206,12 @@ func ResponseInsightGetOrganizationInsightApplicationsItemsToBody(state Organiza
 											}
 											return types.Int64{}
 										}(),
-										NetworkID: types.StringValue(byNetwork.NetworkID),
+										NetworkID: func() types.String {
+											if byNetwork.NetworkID != "" {
+												return types.StringValue(byNetwork.NetworkID)
+											}
+											return types.String{}
+										}(),
 										ResponseDuration: func() types.Int64 {
 											if byNetwork.ResponseDuration != nil {
 												return types.Int64Value(int64(*byNetwork.ResponseDuration))
@@ -210,7 +224,12 @@ func ResponseInsightGetOrganizationInsightApplicationsItemsToBody(state Organiza
 							}
 							return nil
 						}(),
-						Type: types.StringValue(item.Thresholds.Type),
+						Type: func() types.String {
+							if item.Thresholds.Type != "" {
+								return types.StringValue(item.Thresholds.Type)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil

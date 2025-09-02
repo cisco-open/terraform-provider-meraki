@@ -155,7 +155,7 @@ type NetworksSmDevicesUninstallApps struct {
 }
 
 type RequestSmUninstallNetworkSmDeviceAppsRs struct {
-	AppIDs types.Set `tfsdk:"app_ids"`
+	AppIDs types.List `tfsdk:"app_ids"`
 }
 
 // FromBody

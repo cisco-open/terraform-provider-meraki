@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -27,6 +28,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -72,6 +74,7 @@ func (r *NetworksApplianceContentFilteringResource) Schema(_ context.Context, _ 
 				},
 
 				ElementType: types.StringType,
+				Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
 			},
 			"blocked_url_categories_response": schema.SetNestedAttribute{
 				PlanModifiers: []planmodifier.Set{
@@ -99,11 +102,13 @@ func (r *NetworksApplianceContentFilteringResource) Schema(_ context.Context, _ 
 			"blocked_url_categories": schema.SetAttribute{
 				MarkdownDescription: `A list of URL categories to block`,
 				Optional:            true,
+				Computed:            true,
 				PlanModifiers: []planmodifier.Set{
 					setplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
 			},
 			"blocked_url_patterns": schema.SetAttribute{
 				MarkdownDescription: `A list of URL patterns that are blocked`,
@@ -114,6 +119,7 @@ func (r *NetworksApplianceContentFilteringResource) Schema(_ context.Context, _ 
 				},
 
 				ElementType: types.StringType,
+				Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
 			},
 			"network_id": schema.StringAttribute{
 				PlanModifiers: []planmodifier.String{
@@ -192,7 +198,7 @@ func (r *NetworksApplianceContentFilteringResource) Create(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceContentFiltering",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -301,7 +307,7 @@ func (r *NetworksApplianceContentFilteringResource) Update(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceContentFiltering",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}

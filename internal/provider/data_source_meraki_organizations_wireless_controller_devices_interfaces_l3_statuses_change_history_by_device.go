@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -306,9 +305,19 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 												result := make([]ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL3StatusesChangeHistoryByDeviceItemsInterfacesChanges, len(*interfaces.Changes))
 												for i, changes := range *interfaces.Changes {
 													result[i] = ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL3StatusesChangeHistoryByDeviceItemsInterfacesChanges{
-														Errors:   StringSliceToList(changes.Errors),
-														Status:   types.StringValue(changes.Status),
-														Ts:       types.StringValue(changes.Ts),
+														Errors: StringSliceToList(changes.Errors),
+														Status: func() types.String {
+															if changes.Status != "" {
+																return types.StringValue(changes.Status)
+															}
+															return types.String{}
+														}(),
+														Ts: func() types.String {
+															if changes.Ts != "" {
+																return types.StringValue(changes.Ts)
+															}
+															return types.String{}
+														}(),
 														Warnings: StringSliceToList(changes.Warnings),
 													}
 												}
@@ -316,15 +325,30 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 											}
 											return nil
 										}(),
-										Mac:  types.StringValue(interfaces.Mac),
-										Name: types.StringValue(interfaces.Name),
+										Mac: func() types.String {
+											if interfaces.Mac != "" {
+												return types.StringValue(interfaces.Mac)
+											}
+											return types.String{}
+										}(),
+										Name: func() types.String {
+											if interfaces.Name != "" {
+												return types.StringValue(interfaces.Name)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						Serial: types.StringValue(items.Serial),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

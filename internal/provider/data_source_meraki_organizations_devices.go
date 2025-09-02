@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -333,23 +332,53 @@ func ResponseOrganizationsGetOrganizationDevicesItemsToBody(state OrganizationsD
 	var items []ResponseItemOrganizationsGetOrganizationDevices
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationDevices{
-			Address: types.StringValue(item.Address),
+			Address: func() types.String {
+				if item.Address != "" {
+					return types.StringValue(item.Address)
+				}
+				return types.String{}
+			}(),
 			Details: func() *[]ResponseItemOrganizationsGetOrganizationDevicesDetails {
 				if item.Details != nil {
 					result := make([]ResponseItemOrganizationsGetOrganizationDevicesDetails, len(*item.Details))
 					for i, details := range *item.Details {
 						result[i] = ResponseItemOrganizationsGetOrganizationDevicesDetails{
-							Name:  types.StringValue(details.Name),
-							Value: types.StringValue(details.Value),
+							Name: func() types.String {
+								if details.Name != "" {
+									return types.StringValue(details.Name)
+								}
+								return types.String{}
+							}(),
+							Value: func() types.String {
+								if details.Value != "" {
+									return types.StringValue(details.Value)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
 				}
 				return nil
 			}(),
-			Firmware: types.StringValue(item.Firmware),
-			Imei:     types.StringValue(item.Imei),
-			LanIP:    types.StringValue(item.LanIP),
+			Firmware: func() types.String {
+				if item.Firmware != "" {
+					return types.StringValue(item.Firmware)
+				}
+				return types.String{}
+			}(),
+			Imei: func() types.String {
+				if item.Imei != "" {
+					return types.StringValue(item.Imei)
+				}
+				return types.String{}
+			}(),
+			LanIP: func() types.String {
+				if item.LanIP != "" {
+					return types.StringValue(item.LanIP)
+				}
+				return types.String{}
+			}(),
 			Lat: func() types.Float64 {
 				if item.Lat != nil {
 					return types.Float64Value(float64(*item.Lat))
@@ -362,14 +391,49 @@ func ResponseOrganizationsGetOrganizationDevicesItemsToBody(state OrganizationsD
 				}
 				return types.Float64{}
 			}(),
-			Mac:         types.StringValue(item.Mac),
-			Model:       types.StringValue(item.Model),
-			Name:        types.StringValue(item.Name),
-			NetworkID:   types.StringValue(item.NetworkID),
-			Notes:       types.StringValue(item.Notes),
-			ProductType: types.StringValue(item.ProductType),
-			Serial:      types.StringValue(item.Serial),
-			Tags:        StringSliceToList(item.Tags),
+			Mac: func() types.String {
+				if item.Mac != "" {
+					return types.StringValue(item.Mac)
+				}
+				return types.String{}
+			}(),
+			Model: func() types.String {
+				if item.Model != "" {
+					return types.StringValue(item.Model)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			NetworkID: func() types.String {
+				if item.NetworkID != "" {
+					return types.StringValue(item.NetworkID)
+				}
+				return types.String{}
+			}(),
+			Notes: func() types.String {
+				if item.Notes != "" {
+					return types.StringValue(item.Notes)
+				}
+				return types.String{}
+			}(),
+			ProductType: func() types.String {
+				if item.ProductType != "" {
+					return types.StringValue(item.ProductType)
+				}
+				return types.String{}
+			}(),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
+			Tags: StringSliceToList(item.Tags),
 		}
 		items = append(items, itemState)
 	}

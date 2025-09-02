@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -540,8 +539,18 @@ func ResponseSensorGetOrganizationSensorReadingsLatestItemsToBody(state Organiza
 			Network: func() *ResponseItemSensorGetOrganizationSensorReadingsLatestNetwork {
 				if item.Network != nil {
 					return &ResponseItemSensorGetOrganizationSensorReadingsLatestNetwork{
-						ID:   types.StringValue(item.Network.ID),
-						Name: types.StringValue(item.Network.Name),
+						ID: func() types.String {
+							if item.Network.ID != "" {
+								return types.StringValue(item.Network.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if item.Network.Name != "" {
+								return types.StringValue(item.Network.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -580,7 +589,12 @@ func ResponseSensorGetOrganizationSensorReadingsLatestItemsToBody(state Organiza
 							Button: func() *ResponseItemSensorGetOrganizationSensorReadingsLatestReadingsButton {
 								if readings.Button != nil {
 									return &ResponseItemSensorGetOrganizationSensorReadingsLatestReadingsButton{
-										PressType: types.StringValue(readings.Button.PressType),
+										PressType: func() types.String {
+											if readings.Button.PressType != "" {
+												return types.StringValue(readings.Button.PressType)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return nil
@@ -676,7 +690,12 @@ func ResponseSensorGetOrganizationSensorReadingsLatestItemsToBody(state Organiza
 								}
 								return nil
 							}(),
-							Metric: types.StringValue(readings.Metric),
+							Metric: func() types.String {
+								if readings.Metric != "" {
+									return types.StringValue(readings.Metric)
+								}
+								return types.String{}
+							}(),
 							Noise: func() *ResponseItemSensorGetOrganizationSensorReadingsLatestReadingsNoise {
 								if readings.Noise != nil {
 									return &ResponseItemSensorGetOrganizationSensorReadingsLatestReadingsNoise{
@@ -768,7 +787,12 @@ func ResponseSensorGetOrganizationSensorReadingsLatestItemsToBody(state Organiza
 								}
 								return nil
 							}(),
-							Ts: types.StringValue(readings.Ts),
+							Ts: func() types.String {
+								if readings.Ts != "" {
+									return types.StringValue(readings.Ts)
+								}
+								return types.String{}
+							}(),
 							Tvoc: func() *ResponseItemSensorGetOrganizationSensorReadingsLatestReadingsTvoc {
 								if readings.Tvoc != nil {
 									return &ResponseItemSensorGetOrganizationSensorReadingsLatestReadingsTvoc{
@@ -814,7 +838,12 @@ func ResponseSensorGetOrganizationSensorReadingsLatestItemsToBody(state Organiza
 				}
 				return nil
 			}(),
-			Serial: types.StringValue(item.Serial),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

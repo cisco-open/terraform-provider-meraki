@@ -326,7 +326,7 @@ type RequestNetworksBatchNetworkFloorPlansAutoLocateJobsRs struct {
 
 type RequestNetworksBatchNetworkFloorPlansAutoLocateJobsJobsRs struct {
 	FloorPlanID types.String `tfsdk:"floor_plan_id"`
-	Refresh     types.Set    `tfsdk:"refresh"`
+	Refresh     types.List   `tfsdk:"refresh"`
 	ScheduledAt types.String `tfsdk:"scheduled_at"`
 }
 
@@ -382,15 +382,30 @@ func ResponseNetworksBatchNetworkFloorPlansAutoLocateJobsItemToBody(state Networ
 								result := make([]ResponseNetworksBatchNetworkFloorPlansAutoLocateJobsJobsErrors, len(*jobs.Errors))
 								for i, errors := range *jobs.Errors {
 									result[i] = ResponseNetworksBatchNetworkFloorPlansAutoLocateJobsJobsErrors{
-										Source: types.StringValue(errors.Source),
-										Type:   types.StringValue(errors.Type),
+										Source: func() types.String {
+											if errors.Source != "" {
+												return types.StringValue(errors.Source)
+											}
+											return types.String{}
+										}(),
+										Type: func() types.String {
+											if errors.Type != "" {
+												return types.StringValue(errors.Type)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						FloorPlanID: types.StringValue(jobs.FloorPlanID),
+						FloorPlanID: func() types.String {
+							if jobs.FloorPlanID != "" {
+								return types.StringValue(jobs.FloorPlanID)
+							}
+							return types.String{}
+						}(),
 						Gnss: func() *ResponseNetworksBatchNetworkFloorPlansAutoLocateJobsJobsGnss {
 							if jobs.Gnss != nil {
 								return &ResponseNetworksBatchNetworkFloorPlansAutoLocateJobsJobsGnss{
@@ -407,13 +422,28 @@ func ResponseNetworksBatchNetworkFloorPlansAutoLocateJobsItemToBody(state Networ
 										}
 										return nil
 									}(),
-									Status: types.StringValue(jobs.Gnss.Status),
+									Status: func() types.String {
+										if jobs.Gnss.Status != "" {
+											return types.StringValue(jobs.Gnss.Status)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						ID:        types.StringValue(jobs.ID),
-						NetworkID: types.StringValue(jobs.NetworkID),
+						ID: func() types.String {
+							if jobs.ID != "" {
+								return types.StringValue(jobs.ID)
+							}
+							return types.String{}
+						}(),
+						NetworkID: func() types.String {
+							if jobs.NetworkID != "" {
+								return types.StringValue(jobs.NetworkID)
+							}
+							return types.String{}
+						}(),
 						Ranging: func() *ResponseNetworksBatchNetworkFloorPlansAutoLocateJobsJobsRanging {
 							if jobs.Ranging != nil {
 								return &ResponseNetworksBatchNetworkFloorPlansAutoLocateJobsJobsRanging{
@@ -430,13 +460,28 @@ func ResponseNetworksBatchNetworkFloorPlansAutoLocateJobsItemToBody(state Networ
 										}
 										return nil
 									}(),
-									Status: types.StringValue(jobs.Ranging.Status),
+									Status: func() types.String {
+										if jobs.Ranging.Status != "" {
+											return types.StringValue(jobs.Ranging.Status)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						ScheduledAt: types.StringValue(jobs.ScheduledAt),
-						Status:      types.StringValue(jobs.Status),
+						ScheduledAt: func() types.String {
+							if jobs.ScheduledAt != "" {
+								return types.StringValue(jobs.ScheduledAt)
+							}
+							return types.String{}
+						}(),
+						Status: func() types.String {
+							if jobs.Status != "" {
+								return types.StringValue(jobs.Status)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

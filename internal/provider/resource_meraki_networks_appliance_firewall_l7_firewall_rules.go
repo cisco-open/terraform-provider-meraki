@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"slices"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -27,6 +28,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
@@ -70,12 +72,11 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Schema(_ context.Cont
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"rules": schema.SetNestedAttribute{
+			"rules": schema.ListNestedAttribute{
 				MarkdownDescription: `An ordered array of the MX L7 firewall rules`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -120,83 +121,8 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Schema(_ context.Cont
 						},
 						"value_list": schema.SetAttribute{
 							MarkdownDescription: `The 'value_list' of what you want to block. Send a list in request`,
+							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
-							},
-							ElementType: types.StringType,
-						},
-						"value_obj": schema.SingleNestedAttribute{
-							MarkdownDescription: `The 'value_obj' of what you want to block. Send a dict in request`,
-							Optional:            true,
-							PlanModifiers: []planmodifier.Object{
-								objectplanmodifier.UseStateForUnknown(),
-							},
-							Attributes: map[string]schema.Attribute{
-								"id": schema.StringAttribute{
-									Optional: true,
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.UseStateForUnknown(),
-									},
-								},
-								"name": schema.StringAttribute{
-									Optional: true,
-									PlanModifiers: []planmodifier.String{
-										stringplanmodifier.UseStateForUnknown(),
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			"rules_response": schema.SetNestedAttribute{
-				MarkdownDescription: `An ordered array of the MX L7 firewall rules`,
-				Computed:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
-				},
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-
-						"policy": schema.StringAttribute{
-							MarkdownDescription: `'Deny' traffic specified by this rule`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-							Validators: []validator.String{
-								stringvalidator.OneOf(
-									"deny",
-								),
-							},
-						},
-						"type": schema.StringAttribute{
-							MarkdownDescription: `Type of the L7 rule. One of: 'application', 'applicationCategory', 'host', 'port', 'ipRange'`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-							Validators: []validator.String{
-								stringvalidator.OneOf(
-									"application",
-									"applicationCategory",
-									"host",
-									"ipRange",
-									"port",
-								),
-							},
-						},
-						"value": schema.StringAttribute{
-							MarkdownDescription: `The 'value' of what you want to block. Format of 'value' varies depending on type of the rule. The application categories and application ids can be retrieved from the the 'MX L7 application categories' endpoint. The countries follow the two-letter ISO 3166-1 alpha-2 format.`,
-							Computed:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"value_list": schema.SetAttribute{
-							MarkdownDescription: `The 'value_list' of what you want to block. Send a list in request`,
-							Computed:            true,
 							PlanModifiers: []planmodifier.Set{
 								setplanmodifier.UseStateForUnknown(),
 							},
@@ -206,6 +132,7 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Schema(_ context.Cont
 						"value_obj": schema.SingleNestedAttribute{
 							MarkdownDescription: `The 'value_obj' of what you want to block. Send a dict in request`,
 							Computed:            true,
+							Optional:            true,
 							PlanModifiers: []planmodifier.Object{
 								objectplanmodifier.UseStateForUnknown(),
 							},
@@ -253,27 +180,6 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Create(ctx context.Co
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallL7FirewallRules(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceFirewallL7FirewallRules  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceFirewallL7FirewallRules only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallL7FirewallRules(vvNetworkID, dataRequest)
@@ -282,7 +188,7 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Create(ctx context.Co
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallL7FirewallRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -293,49 +199,19 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Create(ctx context.Co
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallL7FirewallRules(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceFirewallL7FirewallRules",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkApplianceFirewallL7FirewallRules",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksApplianceFirewallL7FirewallRulesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksApplianceFirewallL7FirewallRulesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -365,33 +241,28 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Read(ctx context.Cont
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksApplianceFirewallL7FirewallRulesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksApplianceFirewallL7FirewallRulesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksApplianceFirewallL7FirewallRulesRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksApplianceFirewallL7FirewallRulesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallL7FirewallRules(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallL7FirewallRules",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -401,9 +272,7 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Update(ctx context.Co
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksApplianceFirewallL7FirewallRulesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -414,27 +283,22 @@ func (r *NetworksApplianceFirewallL7FirewallRulesResource) Delete(ctx context.Co
 
 // TF Structs Schema
 type NetworksApplianceFirewallL7FirewallRulesRs struct {
-	NetworkID     types.String                                                          `tfsdk:"network_id"`
-	Rules         *[]ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesRs `tfsdk:"rules"`
-	RulesResponse *[]ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesRs `tfsdk:"rules_response"`
+	NetworkID types.String                                                          `tfsdk:"network_id"`
+	Rules     *[]ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesRs `tfsdk:"rules"`
 }
 
 type ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesRs struct {
-	Policy    types.String                                                              `tfsdk:"policy"`
-	Type      types.String                                                              `tfsdk:"type"`
-	Value     types.String                                                              `tfsdk:"value"`
-	ValueList types.Set                                                                 `tfsdk:"value_list"`
-	ValueObj  *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj `tfsdk:"value_obj"`
-}
-
-type ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj struct {
-	ID   types.String `tfsdk:"id"`
-	Name types.String `tfsdk:"name"`
+	Policy    types.String                                                                `tfsdk:"policy"`
+	Type      types.String                                                                `tfsdk:"type"`
+	Value     types.String                                                                `tfsdk:"value"`
+	ValueList types.Set                                                                   `tfsdk:"value_list"`
+	ValueObj  *ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesValueObj `tfsdk:"value_obj"`
 }
 
 // FromBody
 func (r *NetworksApplianceFirewallL7FirewallRulesRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL7FirewallRules {
 	var requestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRules []merakigosdk.RequestApplianceUpdateNetworkApplianceFirewallL7FirewallRulesRules
+
 	if r.Rules != nil {
 		for _, rItem1 := range *r.Rules {
 			var valueR interface{}
@@ -485,13 +349,23 @@ func (r *NetworksApplianceFirewallL7FirewallRulesRs) toSdkApiRequestUpdate(ctx c
 // From gosdk to TF Structs Schema
 func ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesItemToBodyRs(state NetworksApplianceFirewallL7FirewallRulesRs, response *merakigosdk.ResponseApplianceGetNetworkApplianceFirewallL7FirewallRules, is_read bool) NetworksApplianceFirewallL7FirewallRulesRs {
 	itemState := NetworksApplianceFirewallL7FirewallRulesRs{
-		RulesResponse: func() *[]ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesRs {
+		Rules: func() *[]ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesRs {
 			if response.Rules != nil {
 				result := make([]ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesRs, len(*response.Rules))
 				for i, rules := range *response.Rules {
 					result[i] = ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesRs{
-						Policy: types.StringValue(rules.Policy),
-						Type:   types.StringValue(rules.Type),
+						Policy: func() types.String {
+							if rules.Policy != "" {
+								return types.StringValue(rules.Policy)
+							}
+							return types.String{}
+						}(),
+						Type: func() types.String {
+							if rules.Type != "" {
+								return types.StringValue(rules.Type)
+							}
+							return types.String{}
+						}(),
 						Value: func() types.String {
 							if rules.Value == nil {
 								return types.StringNull()
@@ -504,13 +378,23 @@ func ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesItemToBodyRs(sta
 							}
 							return StringSliceToSet(*rules.ValueList)
 						}(),
-						ValueObj: func() *ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj {
+						ValueObj: func() *ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesValueObj {
 							if rules.ValueObj == nil {
 								return nil
 							}
-							return &ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesRulesValueObj{
-								ID:   types.StringValue(rules.ValueObj.ID),
-								Name: types.StringValue(rules.ValueObj.Name),
+							return &ResponseWirelessGetNetworkWirelessSsidFirewallL7FirewallRulesRulesValueObj{
+								ID: func() types.String {
+									if rules.ValueObj.ID != "" {
+										return types.StringValue(rules.ValueObj.ID)
+									}
+									return types.String{}
+								}(),
+								Name: func() types.String {
+									if rules.ValueObj.Name != "" {
+										return types.StringValue(rules.ValueObj.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}(),
 					}
@@ -519,7 +403,6 @@ func ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesItemToBodyRs(sta
 			}
 			return nil
 		}(),
-		Rules: state.Rules,
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksApplianceFirewallL7FirewallRulesRs)

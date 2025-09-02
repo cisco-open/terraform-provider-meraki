@@ -159,7 +159,7 @@ type ResponseWirelessRecalculateOrganizationWirelessRadioAutoRfChannels struct {
 }
 
 type RequestWirelessRecalculateOrganizationWirelessRadioAutoRfChannelsRs struct {
-	NetworkIDs types.Set `tfsdk:"network_ids"`
+	NetworkIDs types.List `tfsdk:"network_ids"`
 }
 
 // FromBody
@@ -176,7 +176,12 @@ func (r *OrganizationsWirelessRadioAutoRfChannelsRecalculate) toSdkApiRequestCre
 // ToBody
 func ResponseWirelessRecalculateOrganizationWirelessRadioAutoRfChannelsItemToBody(state OrganizationsWirelessRadioAutoRfChannelsRecalculate, response *merakigosdk.ResponseWirelessRecalculateOrganizationWirelessRadioAutoRfChannels) OrganizationsWirelessRadioAutoRfChannelsRecalculate {
 	itemState := ResponseWirelessRecalculateOrganizationWirelessRadioAutoRfChannels{
-		EstimatedCompletedAt: types.StringValue(response.EstimatedCompletedAt),
+		EstimatedCompletedAt: func() types.String {
+			if response.EstimatedCompletedAt != "" {
+				return types.StringValue(response.EstimatedCompletedAt)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

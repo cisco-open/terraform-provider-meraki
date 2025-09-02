@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -161,16 +160,31 @@ func ResponseApplianceGetNetworkApplianceContentFilteringItemToBody(state Networ
 				result := make([]ResponseApplianceGetNetworkApplianceContentFilteringBlockedUrlCategories, len(*response.BlockedURLCategories))
 				for i, blockedURLCategories := range *response.BlockedURLCategories {
 					result[i] = ResponseApplianceGetNetworkApplianceContentFilteringBlockedUrlCategories{
-						ID:   types.StringValue(blockedURLCategories.ID),
-						Name: types.StringValue(blockedURLCategories.Name),
+						ID: func() types.String {
+							if blockedURLCategories.ID != "" {
+								return types.StringValue(blockedURLCategories.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if blockedURLCategories.Name != "" {
+								return types.StringValue(blockedURLCategories.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		BlockedURLPatterns:  StringSliceToList(response.BlockedURLPatterns),
-		URLCategoryListSize: types.StringValue(response.URLCategoryListSize),
+		BlockedURLPatterns: StringSliceToList(response.BlockedURLPatterns),
+		URLCategoryListSize: func() types.String {
+			if response.URLCategoryListSize != "" {
+				return types.StringValue(response.URLCategoryListSize)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

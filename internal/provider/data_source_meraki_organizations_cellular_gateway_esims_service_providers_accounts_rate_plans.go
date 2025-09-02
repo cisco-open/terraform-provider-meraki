@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -201,8 +200,18 @@ func ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersA
 				result := make([]ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsRatePlansItems, len(*response.Items))
 				for i, items := range *response.Items {
 					result[i] = ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsRatePlansItems{
-						AccountID: types.StringValue(items.AccountID),
-						Name:      types.StringValue(items.Name),
+						AccountID: func() types.String {
+							if items.AccountID != "" {
+								return types.StringValue(items.AccountID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if items.Name != "" {
+								return types.StringValue(items.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

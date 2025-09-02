@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -178,15 +177,30 @@ func ResponseSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionWarningsByDevice
 				}
 				return types.Bool{}
 			}(),
-			Name:   types.StringValue(item.Name),
-			Serial: types.StringValue(item.Serial),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
 			SupportsInspection: func() types.Bool {
 				if item.SupportsInspection != nil {
 					return types.BoolValue(*item.SupportsInspection)
 				}
 				return types.Bool{}
 			}(),
-			URL: types.StringValue(item.URL),
+			URL: func() types.String {
+				if item.URL != "" {
+					return types.StringValue(item.URL)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

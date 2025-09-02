@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -28,8 +29,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -65,7 +66,7 @@ func (r *OrganizationsSamlRolesResource) Metadata(_ context.Context, req resourc
 func (r *OrganizationsSamlRolesResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"camera": schema.SetNestedAttribute{
+			"camera": schema.ListNestedAttribute{
 				MarkdownDescription: `The list of camera access privileges for SAML administrator`,
 				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
@@ -86,12 +87,11 @@ func (r *OrganizationsSamlRolesResource) Schema(_ context.Context, _ resource.Sc
 				MarkdownDescription: `ID associated with the SAML role`,
 				Computed:            true,
 			},
-			"networks": schema.SetNestedAttribute{
+			"networks": schema.ListNestedAttribute{
 				MarkdownDescription: `The list of networks that the SAML administrator has privileges on`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -99,7 +99,6 @@ func (r *OrganizationsSamlRolesResource) Schema(_ context.Context, _ resource.Sc
 						"access": schema.StringAttribute{
 							MarkdownDescription: `The privilege of the SAML administrator on the network
                                         Allowed values: [full,guest-ambassador,monitor-only,port-tags,read-only,ssid-admin]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -117,7 +116,6 @@ func (r *OrganizationsSamlRolesResource) Schema(_ context.Context, _ resource.Sc
 						},
 						"id": schema.StringAttribute{
 							MarkdownDescription: `The network ID`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -129,7 +127,6 @@ func (r *OrganizationsSamlRolesResource) Schema(_ context.Context, _ resource.Sc
 			"org_access": schema.StringAttribute{
 				MarkdownDescription: `The privilege of the SAML administrator on the organization
                                   Allowed values: [enterprise,full,none,read-only]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -149,7 +146,6 @@ func (r *OrganizationsSamlRolesResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"role": schema.StringAttribute{
 				MarkdownDescription: `The role of the SAML administrator`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -163,12 +159,11 @@ func (r *OrganizationsSamlRolesResource) Schema(_ context.Context, _ resource.Sc
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"tags": schema.SetNestedAttribute{
+			"tags": schema.ListNestedAttribute{
 				MarkdownDescription: `The list of tags that the SAML administrator has privleges on`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -176,7 +171,6 @@ func (r *OrganizationsSamlRolesResource) Schema(_ context.Context, _ resource.Sc
 						"access": schema.StringAttribute{
 							MarkdownDescription: `The privilege of the SAML administrator on the tag
                                         Allowed values: [full,guest-ambassador,monitor-only,read-only]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -192,7 +186,6 @@ func (r *OrganizationsSamlRolesResource) Schema(_ context.Context, _ resource.Sc
 						},
 						"tag": schema.StringAttribute{
 							MarkdownDescription: `The name of the tag`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -276,7 +269,7 @@ func (r *OrganizationsSamlRolesResource) Create(ctx context.Context, req resourc
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationSamlRole",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -348,21 +341,11 @@ func (r *OrganizationsSamlRolesResource) Create(ctx context.Context, req resourc
 func (r *OrganizationsSamlRolesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data OrganizationsSamlRolesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -393,9 +376,7 @@ func (r *OrganizationsSamlRolesResource) Read(ctx context.Context, req resource.
 	}
 	//entro aqui 2
 	data = ResponseOrganizationsGetOrganizationSamlRoleItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *OrganizationsSamlRolesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -403,35 +384,31 @@ func (r *OrganizationsSamlRolesResource) ImportState(ctx context.Context, req re
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: organizationId,samlRoleId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("saml_role_id"), idParts[1])...)
 }
 
 func (r *OrganizationsSamlRolesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data OrganizationsSamlRolesRs
-	merge(ctx, req, resp, &data)
+	var plan OrganizationsSamlRolesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvOrganizationID := data.OrganizationID.ValueString()
-	vvSamlRoleID := data.SamlRoleID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvOrganizationID := plan.OrganizationID.ValueString()
+	vvSamlRoleID := plan.SamlRoleID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationSamlRole(vvOrganizationID, vvSamlRoleID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationSamlRole",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -441,9 +418,7 @@ func (r *OrganizationsSamlRolesResource) Update(ctx context.Context, req resourc
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *OrganizationsSamlRolesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -629,7 +604,12 @@ func ResponseOrganizationsGetOrganizationSamlRoleItemToBodyRs(state Organization
 				result := make([]ResponseOrganizationsGetOrganizationSamlRoleCameraRs, len(*response.Camera))
 				for i, camera := range *response.Camera {
 					result[i] = ResponseOrganizationsGetOrganizationSamlRoleCameraRs{
-						Access: types.StringValue(camera.Access),
+						Access: func() types.String {
+							if camera.Access != "" {
+								return types.StringValue(camera.Access)
+							}
+							return types.String{}
+						}(),
 						OrgWide: func() types.Bool {
 							if camera.OrgWide != nil {
 								return types.BoolValue(*camera.OrgWide)
@@ -642,30 +622,64 @@ func ResponseOrganizationsGetOrganizationSamlRoleItemToBodyRs(state Organization
 			}
 			return nil
 		}(),
-		ID: types.StringValue(response.ID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		Networks: func() *[]ResponseOrganizationsGetOrganizationSamlRoleNetworksRs {
 			if response.Networks != nil {
 				result := make([]ResponseOrganizationsGetOrganizationSamlRoleNetworksRs, len(*response.Networks))
 				for i, networks := range *response.Networks {
 					result[i] = ResponseOrganizationsGetOrganizationSamlRoleNetworksRs{
-						Access: types.StringValue(networks.Access),
-						ID:     types.StringValue(networks.ID),
+						Access: func() types.String {
+							if networks.Access != "" {
+								return types.StringValue(networks.Access)
+							}
+							return types.String{}
+						}(),
+						ID: func() types.String {
+							if networks.ID != "" {
+								return types.StringValue(networks.ID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		OrgAccess:  types.StringValue(response.OrgAccess),
-		Role:       types.StringValue(response.Role),
-		SamlRoleID: types.StringValue(response.ID),
+		OrgAccess: func() types.String {
+			if response.OrgAccess != "" {
+				return types.StringValue(response.OrgAccess)
+			}
+			return types.String{}
+		}(),
+		Role: func() types.String {
+			if response.Role != "" {
+				return types.StringValue(response.Role)
+			}
+			return types.String{}
+		}(),
 		Tags: func() *[]ResponseOrganizationsGetOrganizationSamlRoleTagsRs {
 			if response.Tags != nil {
 				result := make([]ResponseOrganizationsGetOrganizationSamlRoleTagsRs, len(*response.Tags))
 				for i, tags := range *response.Tags {
 					result[i] = ResponseOrganizationsGetOrganizationSamlRoleTagsRs{
-						Access: types.StringValue(tags.Access),
-						Tag:    types.StringValue(tags.Tag),
+						Access: func() types.String {
+							if tags.Access != "" {
+								return types.StringValue(tags.Access)
+							}
+							return types.String{}
+						}(),
+						Tag: func() types.String {
+							if tags.Tag != "" {
+								return types.StringValue(tags.Tag)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

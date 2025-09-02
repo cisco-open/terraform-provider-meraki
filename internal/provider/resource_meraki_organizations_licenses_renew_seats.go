@@ -321,22 +321,72 @@ func ResponseOrganizationsRenewOrganizationLicensesSeatsItemToBody(state Organiz
 				result := make([]ResponseOrganizationsRenewOrganizationLicensesSeatsResultingLicenses, len(*response.ResultingLicenses))
 				for i, resultingLicenses := range *response.ResultingLicenses {
 					result[i] = ResponseOrganizationsRenewOrganizationLicensesSeatsResultingLicenses{
-						ActivationDate: types.StringValue(resultingLicenses.ActivationDate),
-						ClaimDate:      types.StringValue(resultingLicenses.ClaimDate),
-						DeviceSerial:   types.StringValue(resultingLicenses.DeviceSerial),
+						ActivationDate: func() types.String {
+							if resultingLicenses.ActivationDate != "" {
+								return types.StringValue(resultingLicenses.ActivationDate)
+							}
+							return types.String{}
+						}(),
+						ClaimDate: func() types.String {
+							if resultingLicenses.ClaimDate != "" {
+								return types.StringValue(resultingLicenses.ClaimDate)
+							}
+							return types.String{}
+						}(),
+						DeviceSerial: func() types.String {
+							if resultingLicenses.DeviceSerial != "" {
+								return types.StringValue(resultingLicenses.DeviceSerial)
+							}
+							return types.String{}
+						}(),
 						DurationInDays: func() types.Int64 {
 							if resultingLicenses.DurationInDays != nil {
 								return types.Int64Value(int64(*resultingLicenses.DurationInDays))
 							}
 							return types.Int64{}
 						}(),
-						ExpirationDate: types.StringValue(resultingLicenses.ExpirationDate),
-						HeadLicenseID:  types.StringValue(resultingLicenses.HeadLicenseID),
-						ID:             types.StringValue(resultingLicenses.ID),
-						LicenseKey:     types.StringValue(resultingLicenses.LicenseKey),
-						LicenseType:    types.StringValue(resultingLicenses.LicenseType),
-						NetworkID:      types.StringValue(resultingLicenses.NetworkID),
-						OrderNumber:    types.StringValue(resultingLicenses.OrderNumber),
+						ExpirationDate: func() types.String {
+							if resultingLicenses.ExpirationDate != "" {
+								return types.StringValue(resultingLicenses.ExpirationDate)
+							}
+							return types.String{}
+						}(),
+						HeadLicenseID: func() types.String {
+							if resultingLicenses.HeadLicenseID != "" {
+								return types.StringValue(resultingLicenses.HeadLicenseID)
+							}
+							return types.String{}
+						}(),
+						ID: func() types.String {
+							if resultingLicenses.ID != "" {
+								return types.StringValue(resultingLicenses.ID)
+							}
+							return types.String{}
+						}(),
+						LicenseKey: func() types.String {
+							if resultingLicenses.LicenseKey != "" {
+								return types.StringValue(resultingLicenses.LicenseKey)
+							}
+							return types.String{}
+						}(),
+						LicenseType: func() types.String {
+							if resultingLicenses.LicenseType != "" {
+								return types.StringValue(resultingLicenses.LicenseType)
+							}
+							return types.String{}
+						}(),
+						NetworkID: func() types.String {
+							if resultingLicenses.NetworkID != "" {
+								return types.StringValue(resultingLicenses.NetworkID)
+							}
+							return types.String{}
+						}(),
+						OrderNumber: func() types.String {
+							if resultingLicenses.OrderNumber != "" {
+								return types.StringValue(resultingLicenses.OrderNumber)
+							}
+							return types.String{}
+						}(),
 						PermanentlyQueuedLicenses: func() *[]ResponseOrganizationsRenewOrganizationLicensesSeatsResultingLicensesPermanentlyQueuedLicenses {
 							if resultingLicenses.PermanentlyQueuedLicenses != nil {
 								result := make([]ResponseOrganizationsRenewOrganizationLicensesSeatsResultingLicensesPermanentlyQueuedLicenses, len(*resultingLicenses.PermanentlyQueuedLicenses))
@@ -348,10 +398,30 @@ func ResponseOrganizationsRenewOrganizationLicensesSeatsItemToBody(state Organiz
 											}
 											return types.Int64{}
 										}(),
-										ID:          types.StringValue(permanentlyQueuedLicenses.ID),
-										LicenseKey:  types.StringValue(permanentlyQueuedLicenses.LicenseKey),
-										LicenseType: types.StringValue(permanentlyQueuedLicenses.LicenseType),
-										OrderNumber: types.StringValue(permanentlyQueuedLicenses.OrderNumber),
+										ID: func() types.String {
+											if permanentlyQueuedLicenses.ID != "" {
+												return types.StringValue(permanentlyQueuedLicenses.ID)
+											}
+											return types.String{}
+										}(),
+										LicenseKey: func() types.String {
+											if permanentlyQueuedLicenses.LicenseKey != "" {
+												return types.StringValue(permanentlyQueuedLicenses.LicenseKey)
+											}
+											return types.String{}
+										}(),
+										LicenseType: func() types.String {
+											if permanentlyQueuedLicenses.LicenseType != "" {
+												return types.StringValue(permanentlyQueuedLicenses.LicenseType)
+											}
+											return types.String{}
+										}(),
+										OrderNumber: func() types.String {
+											if permanentlyQueuedLicenses.OrderNumber != "" {
+												return types.StringValue(permanentlyQueuedLicenses.OrderNumber)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -364,7 +434,12 @@ func ResponseOrganizationsRenewOrganizationLicensesSeatsItemToBody(state Organiz
 							}
 							return types.Int64{}
 						}(),
-						State: types.StringValue(resultingLicenses.State),
+						State: func() types.String {
+							if resultingLicenses.State != "" {
+								return types.StringValue(resultingLicenses.State)
+							}
+							return types.String{}
+						}(),
 						TotalDurationInDays: func() types.Int64 {
 							if resultingLicenses.TotalDurationInDays != nil {
 								return types.Int64Value(int64(*resultingLicenses.TotalDurationInDays))

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -292,8 +291,18 @@ func ResponseNetworksGetNetworkHealthAlertsItemsToBody(state NetworksHealthAlert
 	var items []ResponseItemNetworksGetNetworkHealthAlerts
 	for _, item := range *response {
 		itemState := ResponseItemNetworksGetNetworkHealthAlerts{
-			Category: types.StringValue(item.Category),
-			ID:       types.StringValue(item.ID),
+			Category: func() types.String {
+				if item.Category != "" {
+					return types.StringValue(item.Category)
+				}
+				return types.String{}
+			}(),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
 			Scope: func() *ResponseItemNetworksGetNetworkHealthAlertsScope {
 				if item.Scope != nil {
 					return &ResponseItemNetworksGetNetworkHealthAlertsScope{
@@ -302,8 +311,18 @@ func ResponseNetworksGetNetworkHealthAlertsItemsToBody(state NetworksHealthAlert
 								result := make([]ResponseItemNetworksGetNetworkHealthAlertsScopeApplications, len(*item.Scope.Applications))
 								for i, applications := range *item.Scope.Applications {
 									result[i] = ResponseItemNetworksGetNetworkHealthAlertsScopeApplications{
-										Name: types.StringValue(applications.Name),
-										URL:  types.StringValue(applications.URL),
+										Name: func() types.String {
+											if applications.Name != "" {
+												return types.StringValue(applications.Name)
+											}
+											return types.String{}
+										}(),
+										URL: func() types.String {
+											if applications.URL != "" {
+												return types.StringValue(applications.URL)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -320,7 +339,12 @@ func ResponseNetworksGetNetworkHealthAlertsItemsToBody(state NetworksHealthAlert
 												result := make([]ResponseItemNetworksGetNetworkHealthAlertsScopeDevicesClients, len(*devices.Clients))
 												for i, clients := range *devices.Clients {
 													result[i] = ResponseItemNetworksGetNetworkHealthAlertsScopeDevicesClients{
-														Mac: types.StringValue(clients.Mac),
+														Mac: func() types.String {
+															if clients.Mac != "" {
+																return types.StringValue(clients.Mac)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return &result
@@ -330,16 +354,46 @@ func ResponseNetworksGetNetworkHealthAlertsItemsToBody(state NetworksHealthAlert
 										Lldp: func() *ResponseItemNetworksGetNetworkHealthAlertsScopeDevicesLldp {
 											if devices.Lldp != nil {
 												return &ResponseItemNetworksGetNetworkHealthAlertsScopeDevicesLldp{
-													PortID: types.StringValue(devices.Lldp.PortID),
+													PortID: func() types.String {
+														if devices.Lldp.PortID != "" {
+															return types.StringValue(devices.Lldp.PortID)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return nil
 										}(),
-										Mac:         types.StringValue(devices.Mac),
-										Name:        types.StringValue(devices.Name),
-										ProductType: types.StringValue(devices.ProductType),
-										Serial:      types.StringValue(devices.Serial),
-										URL:         types.StringValue(devices.URL),
+										Mac: func() types.String {
+											if devices.Mac != "" {
+												return types.StringValue(devices.Mac)
+											}
+											return types.String{}
+										}(),
+										Name: func() types.String {
+											if devices.Name != "" {
+												return types.StringValue(devices.Name)
+											}
+											return types.String{}
+										}(),
+										ProductType: func() types.String {
+											if devices.ProductType != "" {
+												return types.StringValue(devices.ProductType)
+											}
+											return types.String{}
+										}(),
+										Serial: func() types.String {
+											if devices.Serial != "" {
+												return types.StringValue(devices.Serial)
+											}
+											return types.String{}
+										}(),
+										URL: func() types.String {
+											if devices.URL != "" {
+												return types.StringValue(devices.URL)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -354,13 +408,28 @@ func ResponseNetworksGetNetworkHealthAlertsItemsToBody(state NetworksHealthAlert
 										Network: func() *ResponseItemNetworksGetNetworkHealthAlertsScopePeersNetwork {
 											if peers.Network != nil {
 												return &ResponseItemNetworksGetNetworkHealthAlertsScopePeersNetwork{
-													ID:   types.StringValue(peers.Network.ID),
-													Name: types.StringValue(peers.Network.Name),
+													ID: func() types.String {
+														if peers.Network.ID != "" {
+															return types.StringValue(peers.Network.ID)
+														}
+														return types.String{}
+													}(),
+													Name: func() types.String {
+														if peers.Network.Name != "" {
+															return types.StringValue(peers.Network.Name)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return nil
 										}(),
-										URL: types.StringValue(peers.URL),
+										URL: func() types.String {
+											if peers.URL != "" {
+												return types.StringValue(peers.URL)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -371,8 +440,18 @@ func ResponseNetworksGetNetworkHealthAlertsItemsToBody(state NetworksHealthAlert
 				}
 				return nil
 			}(),
-			Severity: types.StringValue(item.Severity),
-			Type:     types.StringValue(item.Type),
+			Severity: func() types.String {
+				if item.Severity != "" {
+					return types.StringValue(item.Severity)
+				}
+				return types.String{}
+			}(),
+			Type: func() types.String {
+				if item.Type != "" {
+					return types.StringValue(item.Type)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

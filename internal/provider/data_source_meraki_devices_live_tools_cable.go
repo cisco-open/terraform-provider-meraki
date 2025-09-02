@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -230,13 +229,28 @@ type ResponseDevicesGetDeviceLiveToolsCableTestResultsPairs struct {
 // ToBody
 func ResponseDevicesGetDeviceLiveToolsCableTestItemToBody(state DevicesLiveToolsCable, response *merakigosdk.ResponseDevicesGetDeviceLiveToolsCableTest) DevicesLiveToolsCable {
 	itemState := ResponseDevicesGetDeviceLiveToolsCableTest{
-		CableTestID: types.StringValue(response.CableTestID),
-		Error:       types.StringValue(response.Error),
+		CableTestID: func() types.String {
+			if response.CableTestID != "" {
+				return types.StringValue(response.CableTestID)
+			}
+			return types.String{}
+		}(),
+		Error: func() types.String {
+			if response.Error != "" {
+				return types.StringValue(response.Error)
+			}
+			return types.String{}
+		}(),
 		Request: func() *ResponseDevicesGetDeviceLiveToolsCableTestRequest {
 			if response.Request != nil {
 				return &ResponseDevicesGetDeviceLiveToolsCableTestRequest{
-					Ports:  StringSliceToList(response.Request.Ports),
-					Serial: types.StringValue(response.Request.Serial),
+					Ports: StringSliceToList(response.Request.Ports),
+					Serial: func() types.String {
+						if response.Request.Serial != "" {
+							return types.StringValue(response.Request.Serial)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -246,7 +260,12 @@ func ResponseDevicesGetDeviceLiveToolsCableTestItemToBody(state DevicesLiveTools
 				result := make([]ResponseDevicesGetDeviceLiveToolsCableTestResults, len(*response.Results))
 				for i, results := range *response.Results {
 					result[i] = ResponseDevicesGetDeviceLiveToolsCableTestResults{
-						Error: types.StringValue(results.Error),
+						Error: func() types.String {
+							if results.Error != "" {
+								return types.StringValue(results.Error)
+							}
+							return types.String{}
+						}(),
 						Pairs: func() *[]ResponseDevicesGetDeviceLiveToolsCableTestResultsPairs {
 							if results.Pairs != nil {
 								result := make([]ResponseDevicesGetDeviceLiveToolsCableTestResultsPairs, len(*results.Pairs))
@@ -264,29 +283,54 @@ func ResponseDevicesGetDeviceLiveToolsCableTestItemToBody(state DevicesLiveTools
 											}
 											return types.Int64{}
 										}(),
-										Status: types.StringValue(pairs.Status),
+										Status: func() types.String {
+											if pairs.Status != "" {
+												return types.StringValue(pairs.Status)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						Port: types.StringValue(results.Port),
+						Port: func() types.String {
+							if results.Port != "" {
+								return types.StringValue(results.Port)
+							}
+							return types.String{}
+						}(),
 						SpeedMbps: func() types.Int64 {
 							if results.SpeedMbps != nil {
 								return types.Int64Value(int64(*results.SpeedMbps))
 							}
 							return types.Int64{}
 						}(),
-						Status: types.StringValue(results.Status),
+						Status: func() types.String {
+							if results.Status != "" {
+								return types.StringValue(results.Status)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		Status: types.StringValue(response.Status),
-		URL:    types.StringValue(response.URL),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

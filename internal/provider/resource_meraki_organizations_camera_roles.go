@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -27,8 +28,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -63,19 +64,17 @@ func (r *OrganizationsCameraRolesResource) Metadata(_ context.Context, req resou
 func (r *OrganizationsCameraRolesResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"applied_on_devices": schema.SetNestedAttribute{
+			"applied_on_devices": schema.ListNestedAttribute{
 				MarkdownDescription: `Device tag on which this specified permission is applied.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"id": schema.StringAttribute{
 							MarkdownDescription: `Device id.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -83,7 +82,6 @@ func (r *OrganizationsCameraRolesResource) Schema(_ context.Context, _ resource.
 						},
 						"in_networks_with_id": schema.StringAttribute{
 							MarkdownDescription: `Network id scope`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -91,7 +89,6 @@ func (r *OrganizationsCameraRolesResource) Schema(_ context.Context, _ resource.
 						},
 						"in_networks_with_tag": schema.StringAttribute{
 							MarkdownDescription: `Network tag scope`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -105,7 +102,6 @@ func (r *OrganizationsCameraRolesResource) Schema(_ context.Context, _ resource.
 						},
 						"permission_scope_id": schema.StringAttribute{
 							MarkdownDescription: `Permission scope id`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -113,7 +109,6 @@ func (r *OrganizationsCameraRolesResource) Schema(_ context.Context, _ resource.
 						},
 						"tag": schema.StringAttribute{
 							MarkdownDescription: `Device tag.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -122,19 +117,17 @@ func (r *OrganizationsCameraRolesResource) Schema(_ context.Context, _ resource.
 					},
 				},
 			},
-			"applied_on_networks": schema.SetNestedAttribute{
+			"applied_on_networks": schema.ListNestedAttribute{
 				MarkdownDescription: `Network tag on which this specified permission is applied.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"id": schema.StringAttribute{
 							MarkdownDescription: `Network id.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -148,7 +141,6 @@ func (r *OrganizationsCameraRolesResource) Schema(_ context.Context, _ resource.
 						},
 						"permission_scope_id": schema.StringAttribute{
 							MarkdownDescription: `Permission scope id`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -156,7 +148,6 @@ func (r *OrganizationsCameraRolesResource) Schema(_ context.Context, _ resource.
 						},
 						"tag": schema.StringAttribute{
 							MarkdownDescription: `Network tag`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -165,12 +156,11 @@ func (r *OrganizationsCameraRolesResource) Schema(_ context.Context, _ resource.
 					},
 				},
 			},
-			"applied_org_wide": schema.SetNestedAttribute{
+			"applied_org_wide": schema.ListNestedAttribute{
 				MarkdownDescription: `Permissions to be applied org wide.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -183,7 +173,6 @@ func (r *OrganizationsCameraRolesResource) Schema(_ context.Context, _ resource.
 						},
 						"permission_scope_id": schema.StringAttribute{
 							MarkdownDescription: `Permission scope id`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -197,7 +186,6 @@ func (r *OrganizationsCameraRolesResource) Schema(_ context.Context, _ resource.
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name of the new role. Must be unique. This parameter is required.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -210,14 +198,6 @@ func (r *OrganizationsCameraRolesResource) Schema(_ context.Context, _ resource.
 			"role_id": schema.StringAttribute{
 				MarkdownDescription: `roleId path parameter. Role ID`,
 				Optional:            true,
-				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
-			"id": schema.StringAttribute{
-				MarkdownDescription: `ID of the camera role`,
-				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -297,7 +277,7 @@ func (r *OrganizationsCameraRolesResource) Create(ctx context.Context, req resou
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationCameraRole",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -369,21 +349,11 @@ func (r *OrganizationsCameraRolesResource) Create(ctx context.Context, req resou
 func (r *OrganizationsCameraRolesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data OrganizationsCameraRolesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -414,46 +384,39 @@ func (r *OrganizationsCameraRolesResource) Read(ctx context.Context, req resourc
 	}
 	//entro aqui 2
 	data = ResponseCameraGetOrganizationCameraRoleItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
-
 func (r *OrganizationsCameraRolesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
 
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: organizationId,roleId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("role_id"), idParts[1])...)
 }
 
 func (r *OrganizationsCameraRolesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data OrganizationsCameraRolesRs
-	merge(ctx, req, resp, &data)
+	var plan OrganizationsCameraRolesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvOrganizationID := data.OrganizationID.ValueString()
-	vvRoleID := data.RoleID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvOrganizationID := plan.OrganizationID.ValueString()
+	vvRoleID := plan.RoleID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Camera.UpdateOrganizationCameraRole(vvOrganizationID, vvRoleID, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationCameraRole",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -463,9 +426,7 @@ func (r *OrganizationsCameraRolesResource) Update(ctx context.Context, req resou
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *OrganizationsCameraRolesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -506,7 +467,6 @@ type OrganizationsCameraRolesRs struct {
 	AppliedOnNetworks *[]ResponseCameraGetOrganizationCameraRoleAppliedOnNetworksRs `tfsdk:"applied_on_networks"`
 	AppliedOrgWide    *[]ResponseCameraGetOrganizationCameraRoleAppliedOrgWideRs    `tfsdk:"applied_org_wide"`
 	Name              types.String                                                  `tfsdk:"name"`
-	ID                types.String                                                  `tfsdk:"id"`
 }
 
 type ResponseCameraGetOrganizationCameraRoleAppliedOnDevicesRs struct {
@@ -696,11 +656,36 @@ func ResponseCameraGetOrganizationCameraRoleItemToBodyRs(state OrganizationsCame
 				result := make([]ResponseCameraGetOrganizationCameraRoleAppliedOnDevicesRs, len(*response.AppliedOnDevices))
 				for i, appliedOnDevices := range *response.AppliedOnDevices {
 					result[i] = ResponseCameraGetOrganizationCameraRoleAppliedOnDevicesRs{
-						ID:                types.StringValue(appliedOnDevices.ID),
-						PermissionLevel:   types.StringValue(appliedOnDevices.PermissionLevel),
-						PermissionScope:   types.StringValue(appliedOnDevices.PermissionScope),
-						PermissionScopeID: types.StringValue(appliedOnDevices.PermissionScopeID),
-						Tag:               types.StringValue(appliedOnDevices.Tag),
+						ID: func() types.String {
+							if appliedOnDevices.ID != "" {
+								return types.StringValue(appliedOnDevices.ID)
+							}
+							return types.String{}
+						}(),
+						PermissionLevel: func() types.String {
+							if appliedOnDevices.PermissionLevel != "" {
+								return types.StringValue(appliedOnDevices.PermissionLevel)
+							}
+							return types.String{}
+						}(),
+						PermissionScope: func() types.String {
+							if appliedOnDevices.PermissionScope != "" {
+								return types.StringValue(appliedOnDevices.PermissionScope)
+							}
+							return types.String{}
+						}(),
+						PermissionScopeID: func() types.String {
+							if appliedOnDevices.PermissionScopeID != "" {
+								return types.StringValue(appliedOnDevices.PermissionScopeID)
+							}
+							return types.String{}
+						}(),
+						Tag: func() types.String {
+							if appliedOnDevices.Tag != "" {
+								return types.StringValue(appliedOnDevices.Tag)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -712,11 +697,36 @@ func ResponseCameraGetOrganizationCameraRoleItemToBodyRs(state OrganizationsCame
 				result := make([]ResponseCameraGetOrganizationCameraRoleAppliedOnNetworksRs, len(*response.AppliedOnNetworks))
 				for i, appliedOnNetworks := range *response.AppliedOnNetworks {
 					result[i] = ResponseCameraGetOrganizationCameraRoleAppliedOnNetworksRs{
-						ID:                types.StringValue(appliedOnNetworks.ID),
-						PermissionLevel:   types.StringValue(appliedOnNetworks.PermissionLevel),
-						PermissionScope:   types.StringValue(appliedOnNetworks.PermissionScope),
-						PermissionScopeID: types.StringValue(appliedOnNetworks.PermissionScopeID),
-						Tag:               types.StringValue(appliedOnNetworks.Tag),
+						ID: func() types.String {
+							if appliedOnNetworks.ID != "" {
+								return types.StringValue(appliedOnNetworks.ID)
+							}
+							return types.String{}
+						}(),
+						PermissionLevel: func() types.String {
+							if appliedOnNetworks.PermissionLevel != "" {
+								return types.StringValue(appliedOnNetworks.PermissionLevel)
+							}
+							return types.String{}
+						}(),
+						PermissionScope: func() types.String {
+							if appliedOnNetworks.PermissionScope != "" {
+								return types.StringValue(appliedOnNetworks.PermissionScope)
+							}
+							return types.String{}
+						}(),
+						PermissionScopeID: func() types.String {
+							if appliedOnNetworks.PermissionScopeID != "" {
+								return types.StringValue(appliedOnNetworks.PermissionScopeID)
+							}
+							return types.String{}
+						}(),
+						Tag: func() types.String {
+							if appliedOnNetworks.Tag != "" {
+								return types.StringValue(appliedOnNetworks.Tag)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -728,19 +738,42 @@ func ResponseCameraGetOrganizationCameraRoleItemToBodyRs(state OrganizationsCame
 				result := make([]ResponseCameraGetOrganizationCameraRoleAppliedOrgWideRs, len(*response.AppliedOrgWide))
 				for i, appliedOrgWide := range *response.AppliedOrgWide {
 					result[i] = ResponseCameraGetOrganizationCameraRoleAppliedOrgWideRs{
-						PermissionLevel:   types.StringValue(appliedOrgWide.PermissionLevel),
-						PermissionScope:   types.StringValue(appliedOrgWide.PermissionScope),
-						PermissionScopeID: types.StringValue(appliedOrgWide.PermissionScopeID),
-						Tag:               types.StringValue(appliedOrgWide.Tag),
+						PermissionLevel: func() types.String {
+							if appliedOrgWide.PermissionLevel != "" {
+								return types.StringValue(appliedOrgWide.PermissionLevel)
+							}
+							return types.String{}
+						}(),
+						PermissionScope: func() types.String {
+							if appliedOrgWide.PermissionScope != "" {
+								return types.StringValue(appliedOrgWide.PermissionScope)
+							}
+							return types.String{}
+						}(),
+						PermissionScopeID: func() types.String {
+							if appliedOrgWide.PermissionScopeID != "" {
+								return types.StringValue(appliedOrgWide.PermissionScopeID)
+							}
+							return types.String{}
+						}(),
+						Tag: func() types.String {
+							if appliedOrgWide.Tag != "" {
+								return types.StringValue(appliedOrgWide.Tag)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		Name:   types.StringValue(response.Name),
-		RoleID: types.StringValue(response.ID),
-		ID:     types.StringValue(response.ID),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsCameraRolesRs)

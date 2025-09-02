@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -2009,11 +2008,36 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 										result := make([]ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceAvailableVersions, len(*response.Products.Appliance.AvailableVersions))
 										for i, availableVersions := range *response.Products.Appliance.AvailableVersions {
 											result[i] = ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceAvailableVersions{
-												Firmware:    types.StringValue(availableVersions.Firmware),
-												ID:          types.StringValue(availableVersions.ID),
-												ReleaseDate: types.StringValue(availableVersions.ReleaseDate),
-												ReleaseType: types.StringValue(availableVersions.ReleaseType),
-												ShortName:   types.StringValue(availableVersions.ShortName),
+												Firmware: func() types.String {
+													if availableVersions.Firmware != "" {
+														return types.StringValue(availableVersions.Firmware)
+													}
+													return types.String{}
+												}(),
+												ID: func() types.String {
+													if availableVersions.ID != "" {
+														return types.StringValue(availableVersions.ID)
+													}
+													return types.String{}
+												}(),
+												ReleaseDate: func() types.String {
+													if availableVersions.ReleaseDate != "" {
+														return types.StringValue(availableVersions.ReleaseDate)
+													}
+													return types.String{}
+												}(),
+												ReleaseType: func() types.String {
+													if availableVersions.ReleaseType != "" {
+														return types.StringValue(availableVersions.ReleaseType)
+													}
+													return types.String{}
+												}(),
+												ShortName: func() types.String {
+													if availableVersions.ShortName != "" {
+														return types.StringValue(availableVersions.ShortName)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return &result
@@ -2023,11 +2047,36 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 								CurrentVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceCurrentVersion {
 									if response.Products.Appliance.CurrentVersion != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceCurrentVersion{
-											Firmware:    types.StringValue(response.Products.Appliance.CurrentVersion.Firmware),
-											ID:          types.StringValue(response.Products.Appliance.CurrentVersion.ID),
-											ReleaseDate: types.StringValue(response.Products.Appliance.CurrentVersion.ReleaseDate),
-											ReleaseType: types.StringValue(response.Products.Appliance.CurrentVersion.ReleaseType),
-											ShortName:   types.StringValue(response.Products.Appliance.CurrentVersion.ShortName),
+											Firmware: func() types.String {
+												if response.Products.Appliance.CurrentVersion.Firmware != "" {
+													return types.StringValue(response.Products.Appliance.CurrentVersion.Firmware)
+												}
+												return types.String{}
+											}(),
+											ID: func() types.String {
+												if response.Products.Appliance.CurrentVersion.ID != "" {
+													return types.StringValue(response.Products.Appliance.CurrentVersion.ID)
+												}
+												return types.String{}
+											}(),
+											ReleaseDate: func() types.String {
+												if response.Products.Appliance.CurrentVersion.ReleaseDate != "" {
+													return types.StringValue(response.Products.Appliance.CurrentVersion.ReleaseDate)
+												}
+												return types.String{}
+											}(),
+											ReleaseType: func() types.String {
+												if response.Products.Appliance.CurrentVersion.ReleaseType != "" {
+													return types.StringValue(response.Products.Appliance.CurrentVersion.ReleaseType)
+												}
+												return types.String{}
+											}(),
+											ShortName: func() types.String {
+												if response.Products.Appliance.CurrentVersion.ShortName != "" {
+													return types.StringValue(response.Products.Appliance.CurrentVersion.ShortName)
+												}
+												return types.String{}
+											}(),
 										}
 									}
 									return nil
@@ -2038,24 +2087,79 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 											FromVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceLastUpgradeFromVersion {
 												if response.Products.Appliance.LastUpgrade.FromVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceLastUpgradeFromVersion{
-														Firmware:    types.StringValue(response.Products.Appliance.LastUpgrade.FromVersion.Firmware),
-														ID:          types.StringValue(response.Products.Appliance.LastUpgrade.FromVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Appliance.LastUpgrade.FromVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Appliance.LastUpgrade.FromVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Appliance.LastUpgrade.FromVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Appliance.LastUpgrade.FromVersion.Firmware != "" {
+																return types.StringValue(response.Products.Appliance.LastUpgrade.FromVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Appliance.LastUpgrade.FromVersion.ID != "" {
+																return types.StringValue(response.Products.Appliance.LastUpgrade.FromVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Appliance.LastUpgrade.FromVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Appliance.LastUpgrade.FromVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Appliance.LastUpgrade.FromVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Appliance.LastUpgrade.FromVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Appliance.LastUpgrade.FromVersion.ShortName != "" {
+																return types.StringValue(response.Products.Appliance.LastUpgrade.FromVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
 											}(),
-											Time: types.StringValue(response.Products.Appliance.LastUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.Appliance.LastUpgrade.Time != "" {
+													return types.StringValue(response.Products.Appliance.LastUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceLastUpgradeToVersion {
 												if response.Products.Appliance.LastUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceLastUpgradeToVersion{
-														Firmware:    types.StringValue(response.Products.Appliance.LastUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Appliance.LastUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Appliance.LastUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Appliance.LastUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Appliance.LastUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Appliance.LastUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.Appliance.LastUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Appliance.LastUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.Appliance.LastUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Appliance.LastUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Appliance.LastUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Appliance.LastUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Appliance.LastUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Appliance.LastUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.Appliance.LastUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -2067,15 +2171,45 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 								NextUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceNextUpgrade {
 									if response.Products.Appliance.NextUpgrade != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceNextUpgrade{
-											Time: types.StringValue(response.Products.Appliance.NextUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.Appliance.NextUpgrade.Time != "" {
+													return types.StringValue(response.Products.Appliance.NextUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceNextUpgradeToVersion {
 												if response.Products.Appliance.NextUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceNextUpgradeToVersion{
-														Firmware:    types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Appliance.NextUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Appliance.NextUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Appliance.NextUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Appliance.NextUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Appliance.NextUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -2102,11 +2236,36 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 										result := make([]ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraAvailableVersions, len(*response.Products.Camera.AvailableVersions))
 										for i, availableVersions := range *response.Products.Camera.AvailableVersions {
 											result[i] = ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraAvailableVersions{
-												Firmware:    types.StringValue(availableVersions.Firmware),
-												ID:          types.StringValue(availableVersions.ID),
-												ReleaseDate: types.StringValue(availableVersions.ReleaseDate),
-												ReleaseType: types.StringValue(availableVersions.ReleaseType),
-												ShortName:   types.StringValue(availableVersions.ShortName),
+												Firmware: func() types.String {
+													if availableVersions.Firmware != "" {
+														return types.StringValue(availableVersions.Firmware)
+													}
+													return types.String{}
+												}(),
+												ID: func() types.String {
+													if availableVersions.ID != "" {
+														return types.StringValue(availableVersions.ID)
+													}
+													return types.String{}
+												}(),
+												ReleaseDate: func() types.String {
+													if availableVersions.ReleaseDate != "" {
+														return types.StringValue(availableVersions.ReleaseDate)
+													}
+													return types.String{}
+												}(),
+												ReleaseType: func() types.String {
+													if availableVersions.ReleaseType != "" {
+														return types.StringValue(availableVersions.ReleaseType)
+													}
+													return types.String{}
+												}(),
+												ShortName: func() types.String {
+													if availableVersions.ShortName != "" {
+														return types.StringValue(availableVersions.ShortName)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return &result
@@ -2116,11 +2275,36 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 								CurrentVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraCurrentVersion {
 									if response.Products.Camera.CurrentVersion != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraCurrentVersion{
-											Firmware:    types.StringValue(response.Products.Camera.CurrentVersion.Firmware),
-											ID:          types.StringValue(response.Products.Camera.CurrentVersion.ID),
-											ReleaseDate: types.StringValue(response.Products.Camera.CurrentVersion.ReleaseDate),
-											ReleaseType: types.StringValue(response.Products.Camera.CurrentVersion.ReleaseType),
-											ShortName:   types.StringValue(response.Products.Camera.CurrentVersion.ShortName),
+											Firmware: func() types.String {
+												if response.Products.Camera.CurrentVersion.Firmware != "" {
+													return types.StringValue(response.Products.Camera.CurrentVersion.Firmware)
+												}
+												return types.String{}
+											}(),
+											ID: func() types.String {
+												if response.Products.Camera.CurrentVersion.ID != "" {
+													return types.StringValue(response.Products.Camera.CurrentVersion.ID)
+												}
+												return types.String{}
+											}(),
+											ReleaseDate: func() types.String {
+												if response.Products.Camera.CurrentVersion.ReleaseDate != "" {
+													return types.StringValue(response.Products.Camera.CurrentVersion.ReleaseDate)
+												}
+												return types.String{}
+											}(),
+											ReleaseType: func() types.String {
+												if response.Products.Camera.CurrentVersion.ReleaseType != "" {
+													return types.StringValue(response.Products.Camera.CurrentVersion.ReleaseType)
+												}
+												return types.String{}
+											}(),
+											ShortName: func() types.String {
+												if response.Products.Camera.CurrentVersion.ShortName != "" {
+													return types.StringValue(response.Products.Camera.CurrentVersion.ShortName)
+												}
+												return types.String{}
+											}(),
 										}
 									}
 									return nil
@@ -2131,24 +2315,79 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 											FromVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraLastUpgradeFromVersion {
 												if response.Products.Camera.LastUpgrade.FromVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraLastUpgradeFromVersion{
-														Firmware:    types.StringValue(response.Products.Camera.LastUpgrade.FromVersion.Firmware),
-														ID:          types.StringValue(response.Products.Camera.LastUpgrade.FromVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Camera.LastUpgrade.FromVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Camera.LastUpgrade.FromVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Camera.LastUpgrade.FromVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Camera.LastUpgrade.FromVersion.Firmware != "" {
+																return types.StringValue(response.Products.Camera.LastUpgrade.FromVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Camera.LastUpgrade.FromVersion.ID != "" {
+																return types.StringValue(response.Products.Camera.LastUpgrade.FromVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Camera.LastUpgrade.FromVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Camera.LastUpgrade.FromVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Camera.LastUpgrade.FromVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Camera.LastUpgrade.FromVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Camera.LastUpgrade.FromVersion.ShortName != "" {
+																return types.StringValue(response.Products.Camera.LastUpgrade.FromVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
 											}(),
-											Time: types.StringValue(response.Products.Camera.LastUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.Camera.LastUpgrade.Time != "" {
+													return types.StringValue(response.Products.Camera.LastUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraLastUpgradeToVersion {
 												if response.Products.Camera.LastUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraLastUpgradeToVersion{
-														Firmware:    types.StringValue(response.Products.Camera.LastUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Camera.LastUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Camera.LastUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Camera.LastUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Camera.LastUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Camera.LastUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.Camera.LastUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Camera.LastUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.Camera.LastUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Camera.LastUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Camera.LastUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Camera.LastUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Camera.LastUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Camera.LastUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.Camera.LastUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -2160,15 +2399,45 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 								NextUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraNextUpgrade {
 									if response.Products.Camera.NextUpgrade != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraNextUpgrade{
-											Time: types.StringValue(response.Products.Camera.NextUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.Camera.NextUpgrade.Time != "" {
+													return types.StringValue(response.Products.Camera.NextUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraNextUpgradeToVersion {
 												if response.Products.Camera.NextUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraNextUpgradeToVersion{
-														Firmware:    types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Camera.NextUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Camera.NextUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Camera.NextUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Camera.NextUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Camera.NextUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -2195,11 +2464,36 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 										result := make([]ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayAvailableVersions, len(*response.Products.CellularGateway.AvailableVersions))
 										for i, availableVersions := range *response.Products.CellularGateway.AvailableVersions {
 											result[i] = ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayAvailableVersions{
-												Firmware:    types.StringValue(availableVersions.Firmware),
-												ID:          types.StringValue(availableVersions.ID),
-												ReleaseDate: types.StringValue(availableVersions.ReleaseDate),
-												ReleaseType: types.StringValue(availableVersions.ReleaseType),
-												ShortName:   types.StringValue(availableVersions.ShortName),
+												Firmware: func() types.String {
+													if availableVersions.Firmware != "" {
+														return types.StringValue(availableVersions.Firmware)
+													}
+													return types.String{}
+												}(),
+												ID: func() types.String {
+													if availableVersions.ID != "" {
+														return types.StringValue(availableVersions.ID)
+													}
+													return types.String{}
+												}(),
+												ReleaseDate: func() types.String {
+													if availableVersions.ReleaseDate != "" {
+														return types.StringValue(availableVersions.ReleaseDate)
+													}
+													return types.String{}
+												}(),
+												ReleaseType: func() types.String {
+													if availableVersions.ReleaseType != "" {
+														return types.StringValue(availableVersions.ReleaseType)
+													}
+													return types.String{}
+												}(),
+												ShortName: func() types.String {
+													if availableVersions.ShortName != "" {
+														return types.StringValue(availableVersions.ShortName)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return &result
@@ -2209,11 +2503,36 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 								CurrentVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayCurrentVersion {
 									if response.Products.CellularGateway.CurrentVersion != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayCurrentVersion{
-											Firmware:    types.StringValue(response.Products.CellularGateway.CurrentVersion.Firmware),
-											ID:          types.StringValue(response.Products.CellularGateway.CurrentVersion.ID),
-											ReleaseDate: types.StringValue(response.Products.CellularGateway.CurrentVersion.ReleaseDate),
-											ReleaseType: types.StringValue(response.Products.CellularGateway.CurrentVersion.ReleaseType),
-											ShortName:   types.StringValue(response.Products.CellularGateway.CurrentVersion.ShortName),
+											Firmware: func() types.String {
+												if response.Products.CellularGateway.CurrentVersion.Firmware != "" {
+													return types.StringValue(response.Products.CellularGateway.CurrentVersion.Firmware)
+												}
+												return types.String{}
+											}(),
+											ID: func() types.String {
+												if response.Products.CellularGateway.CurrentVersion.ID != "" {
+													return types.StringValue(response.Products.CellularGateway.CurrentVersion.ID)
+												}
+												return types.String{}
+											}(),
+											ReleaseDate: func() types.String {
+												if response.Products.CellularGateway.CurrentVersion.ReleaseDate != "" {
+													return types.StringValue(response.Products.CellularGateway.CurrentVersion.ReleaseDate)
+												}
+												return types.String{}
+											}(),
+											ReleaseType: func() types.String {
+												if response.Products.CellularGateway.CurrentVersion.ReleaseType != "" {
+													return types.StringValue(response.Products.CellularGateway.CurrentVersion.ReleaseType)
+												}
+												return types.String{}
+											}(),
+											ShortName: func() types.String {
+												if response.Products.CellularGateway.CurrentVersion.ShortName != "" {
+													return types.StringValue(response.Products.CellularGateway.CurrentVersion.ShortName)
+												}
+												return types.String{}
+											}(),
 										}
 									}
 									return nil
@@ -2224,24 +2543,79 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 											FromVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayLastUpgradeFromVersion {
 												if response.Products.CellularGateway.LastUpgrade.FromVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayLastUpgradeFromVersion{
-														Firmware:    types.StringValue(response.Products.CellularGateway.LastUpgrade.FromVersion.Firmware),
-														ID:          types.StringValue(response.Products.CellularGateway.LastUpgrade.FromVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.CellularGateway.LastUpgrade.FromVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.CellularGateway.LastUpgrade.FromVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.CellularGateway.LastUpgrade.FromVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.CellularGateway.LastUpgrade.FromVersion.Firmware != "" {
+																return types.StringValue(response.Products.CellularGateway.LastUpgrade.FromVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.CellularGateway.LastUpgrade.FromVersion.ID != "" {
+																return types.StringValue(response.Products.CellularGateway.LastUpgrade.FromVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.CellularGateway.LastUpgrade.FromVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.CellularGateway.LastUpgrade.FromVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.CellularGateway.LastUpgrade.FromVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.CellularGateway.LastUpgrade.FromVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.CellularGateway.LastUpgrade.FromVersion.ShortName != "" {
+																return types.StringValue(response.Products.CellularGateway.LastUpgrade.FromVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
 											}(),
-											Time: types.StringValue(response.Products.CellularGateway.LastUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.CellularGateway.LastUpgrade.Time != "" {
+													return types.StringValue(response.Products.CellularGateway.LastUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayLastUpgradeToVersion {
 												if response.Products.CellularGateway.LastUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayLastUpgradeToVersion{
-														Firmware:    types.StringValue(response.Products.CellularGateway.LastUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.CellularGateway.LastUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.CellularGateway.LastUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.CellularGateway.LastUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.CellularGateway.LastUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.CellularGateway.LastUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.CellularGateway.LastUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.CellularGateway.LastUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.CellularGateway.LastUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.CellularGateway.LastUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.CellularGateway.LastUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.CellularGateway.LastUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.CellularGateway.LastUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.CellularGateway.LastUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.CellularGateway.LastUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -2253,15 +2627,45 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 								NextUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayNextUpgrade {
 									if response.Products.CellularGateway.NextUpgrade != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayNextUpgrade{
-											Time: types.StringValue(response.Products.CellularGateway.NextUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.CellularGateway.NextUpgrade.Time != "" {
+													return types.StringValue(response.Products.CellularGateway.NextUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayNextUpgradeToVersion {
 												if response.Products.CellularGateway.NextUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayNextUpgradeToVersion{
-														Firmware:    types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.CellularGateway.NextUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.CellularGateway.NextUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.CellularGateway.NextUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.CellularGateway.NextUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.CellularGateway.NextUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -2288,11 +2692,36 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 										result := make([]ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectAvailableVersions, len(*response.Products.SecureConnect.AvailableVersions))
 										for i, availableVersions := range *response.Products.SecureConnect.AvailableVersions {
 											result[i] = ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectAvailableVersions{
-												Firmware:    types.StringValue(availableVersions.Firmware),
-												ID:          types.StringValue(availableVersions.ID),
-												ReleaseDate: types.StringValue(availableVersions.ReleaseDate),
-												ReleaseType: types.StringValue(availableVersions.ReleaseType),
-												ShortName:   types.StringValue(availableVersions.ShortName),
+												Firmware: func() types.String {
+													if availableVersions.Firmware != "" {
+														return types.StringValue(availableVersions.Firmware)
+													}
+													return types.String{}
+												}(),
+												ID: func() types.String {
+													if availableVersions.ID != "" {
+														return types.StringValue(availableVersions.ID)
+													}
+													return types.String{}
+												}(),
+												ReleaseDate: func() types.String {
+													if availableVersions.ReleaseDate != "" {
+														return types.StringValue(availableVersions.ReleaseDate)
+													}
+													return types.String{}
+												}(),
+												ReleaseType: func() types.String {
+													if availableVersions.ReleaseType != "" {
+														return types.StringValue(availableVersions.ReleaseType)
+													}
+													return types.String{}
+												}(),
+												ShortName: func() types.String {
+													if availableVersions.ShortName != "" {
+														return types.StringValue(availableVersions.ShortName)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return &result
@@ -2302,11 +2731,36 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 								CurrentVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectCurrentVersion {
 									if response.Products.SecureConnect.CurrentVersion != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectCurrentVersion{
-											Firmware:    types.StringValue(response.Products.SecureConnect.CurrentVersion.Firmware),
-											ID:          types.StringValue(response.Products.SecureConnect.CurrentVersion.ID),
-											ReleaseDate: types.StringValue(response.Products.SecureConnect.CurrentVersion.ReleaseDate),
-											ReleaseType: types.StringValue(response.Products.SecureConnect.CurrentVersion.ReleaseType),
-											ShortName:   types.StringValue(response.Products.SecureConnect.CurrentVersion.ShortName),
+											Firmware: func() types.String {
+												if response.Products.SecureConnect.CurrentVersion.Firmware != "" {
+													return types.StringValue(response.Products.SecureConnect.CurrentVersion.Firmware)
+												}
+												return types.String{}
+											}(),
+											ID: func() types.String {
+												if response.Products.SecureConnect.CurrentVersion.ID != "" {
+													return types.StringValue(response.Products.SecureConnect.CurrentVersion.ID)
+												}
+												return types.String{}
+											}(),
+											ReleaseDate: func() types.String {
+												if response.Products.SecureConnect.CurrentVersion.ReleaseDate != "" {
+													return types.StringValue(response.Products.SecureConnect.CurrentVersion.ReleaseDate)
+												}
+												return types.String{}
+											}(),
+											ReleaseType: func() types.String {
+												if response.Products.SecureConnect.CurrentVersion.ReleaseType != "" {
+													return types.StringValue(response.Products.SecureConnect.CurrentVersion.ReleaseType)
+												}
+												return types.String{}
+											}(),
+											ShortName: func() types.String {
+												if response.Products.SecureConnect.CurrentVersion.ShortName != "" {
+													return types.StringValue(response.Products.SecureConnect.CurrentVersion.ShortName)
+												}
+												return types.String{}
+											}(),
 										}
 									}
 									return nil
@@ -2317,24 +2771,79 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 											FromVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectLastUpgradeFromVersion {
 												if response.Products.SecureConnect.LastUpgrade.FromVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectLastUpgradeFromVersion{
-														Firmware:    types.StringValue(response.Products.SecureConnect.LastUpgrade.FromVersion.Firmware),
-														ID:          types.StringValue(response.Products.SecureConnect.LastUpgrade.FromVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.SecureConnect.LastUpgrade.FromVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.SecureConnect.LastUpgrade.FromVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.SecureConnect.LastUpgrade.FromVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.SecureConnect.LastUpgrade.FromVersion.Firmware != "" {
+																return types.StringValue(response.Products.SecureConnect.LastUpgrade.FromVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.SecureConnect.LastUpgrade.FromVersion.ID != "" {
+																return types.StringValue(response.Products.SecureConnect.LastUpgrade.FromVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.SecureConnect.LastUpgrade.FromVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.SecureConnect.LastUpgrade.FromVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.SecureConnect.LastUpgrade.FromVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.SecureConnect.LastUpgrade.FromVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.SecureConnect.LastUpgrade.FromVersion.ShortName != "" {
+																return types.StringValue(response.Products.SecureConnect.LastUpgrade.FromVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
 											}(),
-											Time: types.StringValue(response.Products.SecureConnect.LastUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.SecureConnect.LastUpgrade.Time != "" {
+													return types.StringValue(response.Products.SecureConnect.LastUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectLastUpgradeToVersion {
 												if response.Products.SecureConnect.LastUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectLastUpgradeToVersion{
-														Firmware:    types.StringValue(response.Products.SecureConnect.LastUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.SecureConnect.LastUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.SecureConnect.LastUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.SecureConnect.LastUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.SecureConnect.LastUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.SecureConnect.LastUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.SecureConnect.LastUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.SecureConnect.LastUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.SecureConnect.LastUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.SecureConnect.LastUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.SecureConnect.LastUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.SecureConnect.LastUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.SecureConnect.LastUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.SecureConnect.LastUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.SecureConnect.LastUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -2346,15 +2855,45 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 								NextUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectNextUpgrade {
 									if response.Products.SecureConnect.NextUpgrade != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectNextUpgrade{
-											Time: types.StringValue(response.Products.SecureConnect.NextUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.SecureConnect.NextUpgrade.Time != "" {
+													return types.StringValue(response.Products.SecureConnect.NextUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectNextUpgradeToVersion {
 												if response.Products.SecureConnect.NextUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectNextUpgradeToVersion{
-														Firmware:    types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.SecureConnect.NextUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.SecureConnect.NextUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.SecureConnect.NextUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.SecureConnect.NextUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.SecureConnect.NextUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -2381,11 +2920,36 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 										result := make([]ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorAvailableVersions, len(*response.Products.Sensor.AvailableVersions))
 										for i, availableVersions := range *response.Products.Sensor.AvailableVersions {
 											result[i] = ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorAvailableVersions{
-												Firmware:    types.StringValue(availableVersions.Firmware),
-												ID:          types.StringValue(availableVersions.ID),
-												ReleaseDate: types.StringValue(availableVersions.ReleaseDate),
-												ReleaseType: types.StringValue(availableVersions.ReleaseType),
-												ShortName:   types.StringValue(availableVersions.ShortName),
+												Firmware: func() types.String {
+													if availableVersions.Firmware != "" {
+														return types.StringValue(availableVersions.Firmware)
+													}
+													return types.String{}
+												}(),
+												ID: func() types.String {
+													if availableVersions.ID != "" {
+														return types.StringValue(availableVersions.ID)
+													}
+													return types.String{}
+												}(),
+												ReleaseDate: func() types.String {
+													if availableVersions.ReleaseDate != "" {
+														return types.StringValue(availableVersions.ReleaseDate)
+													}
+													return types.String{}
+												}(),
+												ReleaseType: func() types.String {
+													if availableVersions.ReleaseType != "" {
+														return types.StringValue(availableVersions.ReleaseType)
+													}
+													return types.String{}
+												}(),
+												ShortName: func() types.String {
+													if availableVersions.ShortName != "" {
+														return types.StringValue(availableVersions.ShortName)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return &result
@@ -2395,11 +2959,36 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 								CurrentVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorCurrentVersion {
 									if response.Products.Sensor.CurrentVersion != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorCurrentVersion{
-											Firmware:    types.StringValue(response.Products.Sensor.CurrentVersion.Firmware),
-											ID:          types.StringValue(response.Products.Sensor.CurrentVersion.ID),
-											ReleaseDate: types.StringValue(response.Products.Sensor.CurrentVersion.ReleaseDate),
-											ReleaseType: types.StringValue(response.Products.Sensor.CurrentVersion.ReleaseType),
-											ShortName:   types.StringValue(response.Products.Sensor.CurrentVersion.ShortName),
+											Firmware: func() types.String {
+												if response.Products.Sensor.CurrentVersion.Firmware != "" {
+													return types.StringValue(response.Products.Sensor.CurrentVersion.Firmware)
+												}
+												return types.String{}
+											}(),
+											ID: func() types.String {
+												if response.Products.Sensor.CurrentVersion.ID != "" {
+													return types.StringValue(response.Products.Sensor.CurrentVersion.ID)
+												}
+												return types.String{}
+											}(),
+											ReleaseDate: func() types.String {
+												if response.Products.Sensor.CurrentVersion.ReleaseDate != "" {
+													return types.StringValue(response.Products.Sensor.CurrentVersion.ReleaseDate)
+												}
+												return types.String{}
+											}(),
+											ReleaseType: func() types.String {
+												if response.Products.Sensor.CurrentVersion.ReleaseType != "" {
+													return types.StringValue(response.Products.Sensor.CurrentVersion.ReleaseType)
+												}
+												return types.String{}
+											}(),
+											ShortName: func() types.String {
+												if response.Products.Sensor.CurrentVersion.ShortName != "" {
+													return types.StringValue(response.Products.Sensor.CurrentVersion.ShortName)
+												}
+												return types.String{}
+											}(),
 										}
 									}
 									return nil
@@ -2410,24 +2999,79 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 											FromVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorLastUpgradeFromVersion {
 												if response.Products.Sensor.LastUpgrade.FromVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorLastUpgradeFromVersion{
-														Firmware:    types.StringValue(response.Products.Sensor.LastUpgrade.FromVersion.Firmware),
-														ID:          types.StringValue(response.Products.Sensor.LastUpgrade.FromVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Sensor.LastUpgrade.FromVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Sensor.LastUpgrade.FromVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Sensor.LastUpgrade.FromVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Sensor.LastUpgrade.FromVersion.Firmware != "" {
+																return types.StringValue(response.Products.Sensor.LastUpgrade.FromVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Sensor.LastUpgrade.FromVersion.ID != "" {
+																return types.StringValue(response.Products.Sensor.LastUpgrade.FromVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Sensor.LastUpgrade.FromVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Sensor.LastUpgrade.FromVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Sensor.LastUpgrade.FromVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Sensor.LastUpgrade.FromVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Sensor.LastUpgrade.FromVersion.ShortName != "" {
+																return types.StringValue(response.Products.Sensor.LastUpgrade.FromVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
 											}(),
-											Time: types.StringValue(response.Products.Sensor.LastUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.Sensor.LastUpgrade.Time != "" {
+													return types.StringValue(response.Products.Sensor.LastUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorLastUpgradeToVersion {
 												if response.Products.Sensor.LastUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorLastUpgradeToVersion{
-														Firmware:    types.StringValue(response.Products.Sensor.LastUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Sensor.LastUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Sensor.LastUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Sensor.LastUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Sensor.LastUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Sensor.LastUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.Sensor.LastUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Sensor.LastUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.Sensor.LastUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Sensor.LastUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Sensor.LastUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Sensor.LastUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Sensor.LastUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Sensor.LastUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.Sensor.LastUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -2439,15 +3083,45 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 								NextUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorNextUpgrade {
 									if response.Products.Sensor.NextUpgrade != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorNextUpgrade{
-											Time: types.StringValue(response.Products.Sensor.NextUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.Sensor.NextUpgrade.Time != "" {
+													return types.StringValue(response.Products.Sensor.NextUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorNextUpgradeToVersion {
 												if response.Products.Sensor.NextUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorNextUpgradeToVersion{
-														Firmware:    types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Sensor.NextUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Sensor.NextUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Sensor.NextUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Sensor.NextUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Sensor.NextUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -2474,11 +3148,36 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 										result := make([]ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchAvailableVersions, len(*response.Products.Switch.AvailableVersions))
 										for i, availableVersions := range *response.Products.Switch.AvailableVersions {
 											result[i] = ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchAvailableVersions{
-												Firmware:    types.StringValue(availableVersions.Firmware),
-												ID:          types.StringValue(availableVersions.ID),
-												ReleaseDate: types.StringValue(availableVersions.ReleaseDate),
-												ReleaseType: types.StringValue(availableVersions.ReleaseType),
-												ShortName:   types.StringValue(availableVersions.ShortName),
+												Firmware: func() types.String {
+													if availableVersions.Firmware != "" {
+														return types.StringValue(availableVersions.Firmware)
+													}
+													return types.String{}
+												}(),
+												ID: func() types.String {
+													if availableVersions.ID != "" {
+														return types.StringValue(availableVersions.ID)
+													}
+													return types.String{}
+												}(),
+												ReleaseDate: func() types.String {
+													if availableVersions.ReleaseDate != "" {
+														return types.StringValue(availableVersions.ReleaseDate)
+													}
+													return types.String{}
+												}(),
+												ReleaseType: func() types.String {
+													if availableVersions.ReleaseType != "" {
+														return types.StringValue(availableVersions.ReleaseType)
+													}
+													return types.String{}
+												}(),
+												ShortName: func() types.String {
+													if availableVersions.ShortName != "" {
+														return types.StringValue(availableVersions.ShortName)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return &result
@@ -2488,11 +3187,36 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 								CurrentVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchCurrentVersion {
 									if response.Products.Switch.CurrentVersion != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchCurrentVersion{
-											Firmware:    types.StringValue(response.Products.Switch.CurrentVersion.Firmware),
-											ID:          types.StringValue(response.Products.Switch.CurrentVersion.ID),
-											ReleaseDate: types.StringValue(response.Products.Switch.CurrentVersion.ReleaseDate),
-											ReleaseType: types.StringValue(response.Products.Switch.CurrentVersion.ReleaseType),
-											ShortName:   types.StringValue(response.Products.Switch.CurrentVersion.ShortName),
+											Firmware: func() types.String {
+												if response.Products.Switch.CurrentVersion.Firmware != "" {
+													return types.StringValue(response.Products.Switch.CurrentVersion.Firmware)
+												}
+												return types.String{}
+											}(),
+											ID: func() types.String {
+												if response.Products.Switch.CurrentVersion.ID != "" {
+													return types.StringValue(response.Products.Switch.CurrentVersion.ID)
+												}
+												return types.String{}
+											}(),
+											ReleaseDate: func() types.String {
+												if response.Products.Switch.CurrentVersion.ReleaseDate != "" {
+													return types.StringValue(response.Products.Switch.CurrentVersion.ReleaseDate)
+												}
+												return types.String{}
+											}(),
+											ReleaseType: func() types.String {
+												if response.Products.Switch.CurrentVersion.ReleaseType != "" {
+													return types.StringValue(response.Products.Switch.CurrentVersion.ReleaseType)
+												}
+												return types.String{}
+											}(),
+											ShortName: func() types.String {
+												if response.Products.Switch.CurrentVersion.ShortName != "" {
+													return types.StringValue(response.Products.Switch.CurrentVersion.ShortName)
+												}
+												return types.String{}
+											}(),
 										}
 									}
 									return nil
@@ -2503,24 +3227,79 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 											FromVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchLastUpgradeFromVersion {
 												if response.Products.Switch.LastUpgrade.FromVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchLastUpgradeFromVersion{
-														Firmware:    types.StringValue(response.Products.Switch.LastUpgrade.FromVersion.Firmware),
-														ID:          types.StringValue(response.Products.Switch.LastUpgrade.FromVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Switch.LastUpgrade.FromVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Switch.LastUpgrade.FromVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Switch.LastUpgrade.FromVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Switch.LastUpgrade.FromVersion.Firmware != "" {
+																return types.StringValue(response.Products.Switch.LastUpgrade.FromVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Switch.LastUpgrade.FromVersion.ID != "" {
+																return types.StringValue(response.Products.Switch.LastUpgrade.FromVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Switch.LastUpgrade.FromVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Switch.LastUpgrade.FromVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Switch.LastUpgrade.FromVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Switch.LastUpgrade.FromVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Switch.LastUpgrade.FromVersion.ShortName != "" {
+																return types.StringValue(response.Products.Switch.LastUpgrade.FromVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
 											}(),
-											Time: types.StringValue(response.Products.Switch.LastUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.Switch.LastUpgrade.Time != "" {
+													return types.StringValue(response.Products.Switch.LastUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchLastUpgradeToVersion {
 												if response.Products.Switch.LastUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchLastUpgradeToVersion{
-														Firmware:    types.StringValue(response.Products.Switch.LastUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Switch.LastUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Switch.LastUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Switch.LastUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Switch.LastUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Switch.LastUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.Switch.LastUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Switch.LastUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.Switch.LastUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Switch.LastUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Switch.LastUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Switch.LastUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Switch.LastUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Switch.LastUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.Switch.LastUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -2532,15 +3311,45 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 								NextUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchNextUpgrade {
 									if response.Products.Switch.NextUpgrade != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchNextUpgrade{
-											Time: types.StringValue(response.Products.Switch.NextUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.Switch.NextUpgrade.Time != "" {
+													return types.StringValue(response.Products.Switch.NextUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchNextUpgradeToVersion {
 												if response.Products.Switch.NextUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchNextUpgradeToVersion{
-														Firmware:    types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Switch.NextUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Switch.NextUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Switch.NextUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Switch.NextUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Switch.NextUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -2567,11 +3376,36 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 										result := make([]ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessAvailableVersions, len(*response.Products.Wireless.AvailableVersions))
 										for i, availableVersions := range *response.Products.Wireless.AvailableVersions {
 											result[i] = ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessAvailableVersions{
-												Firmware:    types.StringValue(availableVersions.Firmware),
-												ID:          types.StringValue(availableVersions.ID),
-												ReleaseDate: types.StringValue(availableVersions.ReleaseDate),
-												ReleaseType: types.StringValue(availableVersions.ReleaseType),
-												ShortName:   types.StringValue(availableVersions.ShortName),
+												Firmware: func() types.String {
+													if availableVersions.Firmware != "" {
+														return types.StringValue(availableVersions.Firmware)
+													}
+													return types.String{}
+												}(),
+												ID: func() types.String {
+													if availableVersions.ID != "" {
+														return types.StringValue(availableVersions.ID)
+													}
+													return types.String{}
+												}(),
+												ReleaseDate: func() types.String {
+													if availableVersions.ReleaseDate != "" {
+														return types.StringValue(availableVersions.ReleaseDate)
+													}
+													return types.String{}
+												}(),
+												ReleaseType: func() types.String {
+													if availableVersions.ReleaseType != "" {
+														return types.StringValue(availableVersions.ReleaseType)
+													}
+													return types.String{}
+												}(),
+												ShortName: func() types.String {
+													if availableVersions.ShortName != "" {
+														return types.StringValue(availableVersions.ShortName)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return &result
@@ -2581,11 +3415,36 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 								CurrentVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessCurrentVersion {
 									if response.Products.Wireless.CurrentVersion != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessCurrentVersion{
-											Firmware:    types.StringValue(response.Products.Wireless.CurrentVersion.Firmware),
-											ID:          types.StringValue(response.Products.Wireless.CurrentVersion.ID),
-											ReleaseDate: types.StringValue(response.Products.Wireless.CurrentVersion.ReleaseDate),
-											ReleaseType: types.StringValue(response.Products.Wireless.CurrentVersion.ReleaseType),
-											ShortName:   types.StringValue(response.Products.Wireless.CurrentVersion.ShortName),
+											Firmware: func() types.String {
+												if response.Products.Wireless.CurrentVersion.Firmware != "" {
+													return types.StringValue(response.Products.Wireless.CurrentVersion.Firmware)
+												}
+												return types.String{}
+											}(),
+											ID: func() types.String {
+												if response.Products.Wireless.CurrentVersion.ID != "" {
+													return types.StringValue(response.Products.Wireless.CurrentVersion.ID)
+												}
+												return types.String{}
+											}(),
+											ReleaseDate: func() types.String {
+												if response.Products.Wireless.CurrentVersion.ReleaseDate != "" {
+													return types.StringValue(response.Products.Wireless.CurrentVersion.ReleaseDate)
+												}
+												return types.String{}
+											}(),
+											ReleaseType: func() types.String {
+												if response.Products.Wireless.CurrentVersion.ReleaseType != "" {
+													return types.StringValue(response.Products.Wireless.CurrentVersion.ReleaseType)
+												}
+												return types.String{}
+											}(),
+											ShortName: func() types.String {
+												if response.Products.Wireless.CurrentVersion.ShortName != "" {
+													return types.StringValue(response.Products.Wireless.CurrentVersion.ShortName)
+												}
+												return types.String{}
+											}(),
 										}
 									}
 									return nil
@@ -2596,24 +3455,79 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 											FromVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessLastUpgradeFromVersion {
 												if response.Products.Wireless.LastUpgrade.FromVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessLastUpgradeFromVersion{
-														Firmware:    types.StringValue(response.Products.Wireless.LastUpgrade.FromVersion.Firmware),
-														ID:          types.StringValue(response.Products.Wireless.LastUpgrade.FromVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Wireless.LastUpgrade.FromVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Wireless.LastUpgrade.FromVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Wireless.LastUpgrade.FromVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Wireless.LastUpgrade.FromVersion.Firmware != "" {
+																return types.StringValue(response.Products.Wireless.LastUpgrade.FromVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Wireless.LastUpgrade.FromVersion.ID != "" {
+																return types.StringValue(response.Products.Wireless.LastUpgrade.FromVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Wireless.LastUpgrade.FromVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Wireless.LastUpgrade.FromVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Wireless.LastUpgrade.FromVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Wireless.LastUpgrade.FromVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Wireless.LastUpgrade.FromVersion.ShortName != "" {
+																return types.StringValue(response.Products.Wireless.LastUpgrade.FromVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
 											}(),
-											Time: types.StringValue(response.Products.Wireless.LastUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.Wireless.LastUpgrade.Time != "" {
+													return types.StringValue(response.Products.Wireless.LastUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessLastUpgradeToVersion {
 												if response.Products.Wireless.LastUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessLastUpgradeToVersion{
-														Firmware:    types.StringValue(response.Products.Wireless.LastUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Wireless.LastUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Wireless.LastUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Wireless.LastUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Wireless.LastUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Wireless.LastUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.Wireless.LastUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Wireless.LastUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.Wireless.LastUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Wireless.LastUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Wireless.LastUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Wireless.LastUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Wireless.LastUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Wireless.LastUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.Wireless.LastUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -2625,15 +3539,45 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 								NextUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessNextUpgrade {
 									if response.Products.Wireless.NextUpgrade != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessNextUpgrade{
-											Time: types.StringValue(response.Products.Wireless.NextUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.Wireless.NextUpgrade.Time != "" {
+													return types.StringValue(response.Products.Wireless.NextUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessNextUpgradeToVersion {
 												if response.Products.Wireless.NextUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessNextUpgradeToVersion{
-														Firmware:    types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Wireless.NextUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Wireless.NextUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Wireless.NextUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Wireless.NextUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Wireless.NextUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -2660,11 +3604,36 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 										result := make([]ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerAvailableVersions, len(*response.Products.WirelessController.AvailableVersions))
 										for i, availableVersions := range *response.Products.WirelessController.AvailableVersions {
 											result[i] = ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerAvailableVersions{
-												Firmware:    types.StringValue(availableVersions.Firmware),
-												ID:          types.StringValue(availableVersions.ID),
-												ReleaseDate: types.StringValue(availableVersions.ReleaseDate),
-												ReleaseType: types.StringValue(availableVersions.ReleaseType),
-												ShortName:   types.StringValue(availableVersions.ShortName),
+												Firmware: func() types.String {
+													if availableVersions.Firmware != "" {
+														return types.StringValue(availableVersions.Firmware)
+													}
+													return types.String{}
+												}(),
+												ID: func() types.String {
+													if availableVersions.ID != "" {
+														return types.StringValue(availableVersions.ID)
+													}
+													return types.String{}
+												}(),
+												ReleaseDate: func() types.String {
+													if availableVersions.ReleaseDate != "" {
+														return types.StringValue(availableVersions.ReleaseDate)
+													}
+													return types.String{}
+												}(),
+												ReleaseType: func() types.String {
+													if availableVersions.ReleaseType != "" {
+														return types.StringValue(availableVersions.ReleaseType)
+													}
+													return types.String{}
+												}(),
+												ShortName: func() types.String {
+													if availableVersions.ShortName != "" {
+														return types.StringValue(availableVersions.ShortName)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return &result
@@ -2674,11 +3643,36 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 								CurrentVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerCurrentVersion {
 									if response.Products.WirelessController.CurrentVersion != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerCurrentVersion{
-											Firmware:    types.StringValue(response.Products.WirelessController.CurrentVersion.Firmware),
-											ID:          types.StringValue(response.Products.WirelessController.CurrentVersion.ID),
-											ReleaseDate: types.StringValue(response.Products.WirelessController.CurrentVersion.ReleaseDate),
-											ReleaseType: types.StringValue(response.Products.WirelessController.CurrentVersion.ReleaseType),
-											ShortName:   types.StringValue(response.Products.WirelessController.CurrentVersion.ShortName),
+											Firmware: func() types.String {
+												if response.Products.WirelessController.CurrentVersion.Firmware != "" {
+													return types.StringValue(response.Products.WirelessController.CurrentVersion.Firmware)
+												}
+												return types.String{}
+											}(),
+											ID: func() types.String {
+												if response.Products.WirelessController.CurrentVersion.ID != "" {
+													return types.StringValue(response.Products.WirelessController.CurrentVersion.ID)
+												}
+												return types.String{}
+											}(),
+											ReleaseDate: func() types.String {
+												if response.Products.WirelessController.CurrentVersion.ReleaseDate != "" {
+													return types.StringValue(response.Products.WirelessController.CurrentVersion.ReleaseDate)
+												}
+												return types.String{}
+											}(),
+											ReleaseType: func() types.String {
+												if response.Products.WirelessController.CurrentVersion.ReleaseType != "" {
+													return types.StringValue(response.Products.WirelessController.CurrentVersion.ReleaseType)
+												}
+												return types.String{}
+											}(),
+											ShortName: func() types.String {
+												if response.Products.WirelessController.CurrentVersion.ShortName != "" {
+													return types.StringValue(response.Products.WirelessController.CurrentVersion.ShortName)
+												}
+												return types.String{}
+											}(),
 										}
 									}
 									return nil
@@ -2689,24 +3683,79 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 											FromVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerLastUpgradeFromVersion {
 												if response.Products.WirelessController.LastUpgrade.FromVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerLastUpgradeFromVersion{
-														Firmware:    types.StringValue(response.Products.WirelessController.LastUpgrade.FromVersion.Firmware),
-														ID:          types.StringValue(response.Products.WirelessController.LastUpgrade.FromVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.WirelessController.LastUpgrade.FromVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.WirelessController.LastUpgrade.FromVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.WirelessController.LastUpgrade.FromVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.WirelessController.LastUpgrade.FromVersion.Firmware != "" {
+																return types.StringValue(response.Products.WirelessController.LastUpgrade.FromVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.WirelessController.LastUpgrade.FromVersion.ID != "" {
+																return types.StringValue(response.Products.WirelessController.LastUpgrade.FromVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.WirelessController.LastUpgrade.FromVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.WirelessController.LastUpgrade.FromVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.WirelessController.LastUpgrade.FromVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.WirelessController.LastUpgrade.FromVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.WirelessController.LastUpgrade.FromVersion.ShortName != "" {
+																return types.StringValue(response.Products.WirelessController.LastUpgrade.FromVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
 											}(),
-											Time: types.StringValue(response.Products.WirelessController.LastUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.WirelessController.LastUpgrade.Time != "" {
+													return types.StringValue(response.Products.WirelessController.LastUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerLastUpgradeToVersion {
 												if response.Products.WirelessController.LastUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerLastUpgradeToVersion{
-														Firmware:    types.StringValue(response.Products.WirelessController.LastUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.WirelessController.LastUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.WirelessController.LastUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.WirelessController.LastUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.WirelessController.LastUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.WirelessController.LastUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.WirelessController.LastUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.WirelessController.LastUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.WirelessController.LastUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.WirelessController.LastUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.WirelessController.LastUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.WirelessController.LastUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.WirelessController.LastUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.WirelessController.LastUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.WirelessController.LastUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -2718,15 +3767,45 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 								NextUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerNextUpgrade {
 									if response.Products.WirelessController.NextUpgrade != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerNextUpgrade{
-											Time: types.StringValue(response.Products.WirelessController.NextUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.WirelessController.NextUpgrade.Time != "" {
+													return types.StringValue(response.Products.WirelessController.NextUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerNextUpgradeToVersion {
 												if response.Products.WirelessController.NextUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerNextUpgradeToVersion{
-														Firmware:    types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.WirelessController.NextUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.WirelessController.NextUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.WirelessController.NextUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.WirelessController.NextUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.WirelessController.NextUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -2749,12 +3828,27 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBody(state NetworksFirmware
 			}
 			return nil
 		}(),
-		Timezone: types.StringValue(response.Timezone),
+		Timezone: func() types.String {
+			if response.Timezone != "" {
+				return types.StringValue(response.Timezone)
+			}
+			return types.String{}
+		}(),
 		UpgradeWindow: func() *ResponseNetworksGetNetworkFirmwareUpgradesUpgradeWindow {
 			if response.UpgradeWindow != nil {
 				return &ResponseNetworksGetNetworkFirmwareUpgradesUpgradeWindow{
-					DayOfWeek: types.StringValue(response.UpgradeWindow.DayOfWeek),
-					HourOfDay: types.StringValue(response.UpgradeWindow.HourOfDay),
+					DayOfWeek: func() types.String {
+						if response.UpgradeWindow.DayOfWeek != "" {
+							return types.StringValue(response.UpgradeWindow.DayOfWeek)
+						}
+						return types.String{}
+					}(),
+					HourOfDay: func() types.String {
+						if response.UpgradeWindow.HourOfDay != "" {
+							return types.StringValue(response.UpgradeWindow.HourOfDay)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil

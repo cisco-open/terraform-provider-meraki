@@ -26,8 +26,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -66,38 +67,34 @@ func (r *NetworksSyslogServersResource) Schema(_ context.Context, _ resource.Sch
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"servers": schema.SetNestedAttribute{
+			"servers": schema.ListNestedAttribute{
 				MarkdownDescription: `List of the syslog servers for this network`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"host": schema.StringAttribute{
 							MarkdownDescription: `The IP address or FQDN of the syslog server`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
-						"port": schema.StringAttribute{
+						"port": schema.Int64Attribute{
 							MarkdownDescription: `The port of the syslog server`,
-							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.Int64{
+								int64planmodifier.UseStateForUnknown(),
 							},
 						},
-						"roles": schema.SetAttribute{
+						"roles": schema.ListAttribute{
 							MarkdownDescription: `A list of roles for the syslog server. Options (case-insensitive): 'Wireless event log', 'Appliance event log', 'Switch event log', 'Air Marshal events', 'Flows', 'URLs', 'IDS alerts', 'Security events'`,
-							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
 
 							ElementType: types.StringType,
@@ -131,20 +128,6 @@ func (r *NetworksSyslogServersResource) Create(ctx context.Context, req resource
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkSyslogServers(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSyslogServers  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkSyslogServers(vvNetworkID, dataRequest)
@@ -153,7 +136,7 @@ func (r *NetworksSyslogServersResource) Create(ctx context.Context, req resource
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSyslogServers",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -164,48 +147,19 @@ func (r *NetworksSyslogServersResource) Create(ctx context.Context, req resource
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Networks.GetNetworkSyslogServers(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkSyslogServers",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkSyslogServers",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseNetworksGetNetworkSyslogServersItemToBodyRs(data, responseGet, false)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksSyslogServersResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksSyslogServersRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -235,33 +189,28 @@ func (r *NetworksSyslogServersResource) Read(ctx context.Context, req resource.R
 	}
 	//entro aqui 2
 	data = ResponseNetworksGetNetworkSyslogServersItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksSyslogServersResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksSyslogServersResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksSyslogServersRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksSyslogServersRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkSyslogServers(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSyslogServers",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -271,9 +220,7 @@ func (r *NetworksSyslogServersResource) Update(ctx context.Context, req resource
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksSyslogServersResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -290,8 +237,8 @@ type NetworksSyslogServersRs struct {
 
 type ResponseNetworksGetNetworkSyslogServersServersRs struct {
 	Host  types.String `tfsdk:"host"`
-	Port  types.String `tfsdk:"port"`
-	Roles types.Set    `tfsdk:"roles"`
+	Port  types.Int64  `tfsdk:"port"`
+	Roles types.List   `tfsdk:"roles"`
 }
 
 // FromBody
@@ -301,16 +248,18 @@ func (r *NetworksSyslogServersRs) toSdkApiRequestUpdate(ctx context.Context) *me
 	if r.Servers != nil {
 		for _, rItem1 := range *r.Servers {
 			host := rItem1.Host.ValueString()
-			port := rItem1.Port.ValueString()
-			portInt, err := strconv.Atoi(port)
-			if err != nil {
-				portInt = 443
-			}
+			port := func() *int64 {
+				if !rItem1.Port.IsUnknown() && !rItem1.Port.IsNull() {
+					return rItem1.Port.ValueInt64Pointer()
+				}
+				return nil
+			}()
+
 			var roles []string = nil
 			rItem1.Roles.ElementsAs(ctx, &roles, false)
 			requestNetworksUpdateNetworkSyslogServersServers = append(requestNetworksUpdateNetworkSyslogServersServers, merakigosdk.RequestNetworksUpdateNetworkSyslogServersServers{
 				Host:  host,
-				Port:  &portInt,
+				Port:  int64ToIntPointer(port),
 				Roles: roles,
 			})
 			//[debug] Is Array: True
@@ -335,9 +284,23 @@ func ResponseNetworksGetNetworkSyslogServersItemToBodyRs(state NetworksSyslogSer
 				result := make([]ResponseNetworksGetNetworkSyslogServersServersRs, len(*response.Servers))
 				for i, servers := range *response.Servers {
 					result[i] = ResponseNetworksGetNetworkSyslogServersServersRs{
-						Host:  types.StringValue(servers.Host),
-						Port:  types.StringValue(servers.Port),
-						Roles: StringSliceToSet(servers.Roles),
+						Host: func() types.String {
+							if servers.Host != "" {
+								return types.StringValue(servers.Host)
+							}
+							return types.String{}
+						}(),
+						Port: func() types.Int64 {
+							if servers.Port != "" {
+								port, err := strconv.Atoi(servers.Port)
+								if err != nil {
+									return types.Int64{}
+								}
+								return types.Int64Value(int64(port))
+							}
+							return types.Int64{}
+						}(),
+						Roles: StringSliceToList(servers.Roles),
 					}
 				}
 				return &result

@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -26,8 +27,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -66,7 +68,6 @@ func (r *NetworksCellularGatewayDhcpResource) Schema(_ context.Context, _ resour
 			"dhcp_lease_time": schema.StringAttribute{
 				MarkdownDescription: `DHCP Lease time for all MG in the network.
                                   Allowed values: [1 day,1 hour,1 week,12 hours,30 minutes,4 hours]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -82,20 +83,20 @@ func (r *NetworksCellularGatewayDhcpResource) Schema(_ context.Context, _ resour
 					),
 				},
 			},
-			"dns_custom_nameservers": schema.SetAttribute{
+			"dns_custom_nameservers": schema.ListAttribute{
 				MarkdownDescription: `List of fixed IPs representing the the DNS Name servers when the mode is 'custom'.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"dns_nameservers": schema.StringAttribute{
 				MarkdownDescription: `DNS name servers mode for all MG in the network.
                                   Allowed values: [custom,google_dns,opendns,upstream_dns]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -139,27 +140,6 @@ func (r *NetworksCellularGatewayDhcpResource) Create(ctx context.Context, req re
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.CellularGateway.GetNetworkCellularGatewayDhcp(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksCellularGatewayDhcp  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksCellularGatewayDhcp only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.CellularGateway.UpdateNetworkCellularGatewayDhcp(vvNetworkID, dataRequest)
@@ -168,7 +148,7 @@ func (r *NetworksCellularGatewayDhcpResource) Create(ctx context.Context, req re
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCellularGatewayDhcp",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -179,49 +159,19 @@ func (r *NetworksCellularGatewayDhcpResource) Create(ctx context.Context, req re
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.CellularGateway.GetNetworkCellularGatewayDhcp(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkCellularGatewayDhcp",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkCellularGatewayDhcp",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseCellularGatewayGetNetworkCellularGatewayDhcpItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksCellularGatewayDhcpResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksCellularGatewayDhcpRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -251,33 +201,28 @@ func (r *NetworksCellularGatewayDhcpResource) Read(ctx context.Context, req reso
 	}
 	//entro aqui 2
 	data = ResponseCellularGatewayGetNetworkCellularGatewayDhcpItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksCellularGatewayDhcpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksCellularGatewayDhcpResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksCellularGatewayDhcpRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksCellularGatewayDhcpRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.CellularGateway.UpdateNetworkCellularGatewayDhcp(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCellularGatewayDhcp",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -287,9 +232,7 @@ func (r *NetworksCellularGatewayDhcpResource) Update(ctx context.Context, req re
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksCellularGatewayDhcpResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -302,7 +245,7 @@ func (r *NetworksCellularGatewayDhcpResource) Delete(ctx context.Context, req re
 type NetworksCellularGatewayDhcpRs struct {
 	NetworkID            types.String `tfsdk:"network_id"`
 	DhcpLeaseTime        types.String `tfsdk:"dhcp_lease_time"`
-	DNSCustomNameservers types.Set    `tfsdk:"dns_custom_nameservers"`
+	DNSCustomNameservers types.List   `tfsdk:"dns_custom_nameservers"`
 	DNSNameservers       types.String `tfsdk:"dns_nameservers"`
 }
 
@@ -334,9 +277,19 @@ func (r *NetworksCellularGatewayDhcpRs) toSdkApiRequestUpdate(ctx context.Contex
 // From gosdk to TF Structs Schema
 func ResponseCellularGatewayGetNetworkCellularGatewayDhcpItemToBodyRs(state NetworksCellularGatewayDhcpRs, response *merakigosdk.ResponseCellularGatewayGetNetworkCellularGatewayDhcp, is_read bool) NetworksCellularGatewayDhcpRs {
 	itemState := NetworksCellularGatewayDhcpRs{
-		DhcpLeaseTime:        types.StringValue(response.DhcpLeaseTime),
-		DNSCustomNameservers: StringSliceToSet(response.DNSCustomNameservers),
-		DNSNameservers:       types.StringValue(response.DNSNameservers),
+		DhcpLeaseTime: func() types.String {
+			if response.DhcpLeaseTime != "" {
+				return types.StringValue(response.DhcpLeaseTime)
+			}
+			return types.String{}
+		}(),
+		DNSCustomNameservers: StringSliceToList(response.DNSCustomNameservers),
+		DNSNameservers: func() types.String {
+			if response.DNSNameservers != "" {
+				return types.StringValue(response.DNSNameservers)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksCellularGatewayDhcpRs)

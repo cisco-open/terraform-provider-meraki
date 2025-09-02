@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	"log"
 
@@ -30,9 +31,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -70,7 +71,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 		Attributes: map[string]schema.Attribute{
 			"active_active_auto_vpn_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Whether active-active AutoVPN is enabled`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -79,7 +79,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 			"default_uplink": schema.StringAttribute{
 				MarkdownDescription: `The default uplink. Must be one of: 'wan1' or 'wan2'
                                   Allowed values: [wan1,wan2]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -93,7 +92,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 			},
 			"failover_and_failback": schema.SingleNestedAttribute{
 				MarkdownDescription: `WAN failover and failback`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -102,7 +100,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 
 					"immediate": schema.SingleNestedAttribute{
 						MarkdownDescription: `Immediate WAN failover and failback`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -111,7 +108,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 
 							"enabled": schema.BoolAttribute{
 								MarkdownDescription: `Whether immediate WAN failover and failback is enabled`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -123,7 +119,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 			},
 			"load_balancing_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Whether load balancing is enabled`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -133,12 +128,11 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"vpn_traffic_uplink_preferences": schema.SetNestedAttribute{
+			"vpn_traffic_uplink_preferences": schema.ListNestedAttribute{
 				MarkdownDescription: `Uplink preference rules for VPN traffic`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -146,7 +140,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 						"fail_over_criterion": schema.StringAttribute{
 							MarkdownDescription: `Fail over criterion for uplink preference rule. Must be one of: 'poorPerformance' or 'uplinkDown'
                                         Allowed values: [poorPerformance,uplinkDown]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -160,7 +153,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 						},
 						"performance_class": schema.SingleNestedAttribute{
 							MarkdownDescription: `Performance class setting for uplink preference rule`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Object{
 								objectplanmodifier.UseStateForUnknown(),
@@ -170,7 +162,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 								"builtin_performance_class_name": schema.StringAttribute{
 									MarkdownDescription: `Name of builtin performance class. Must be present when performanceClass type is 'builtin' and value must be one of: 'VoIP'
                                               Allowed values: [VoIP]`,
-									Computed: true,
 									Optional: true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -183,7 +174,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 								},
 								"custom_performance_class_id": schema.StringAttribute{
 									MarkdownDescription: `ID of created custom performance class, must be present when performanceClass type is "custom"`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -192,7 +182,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 								"type": schema.StringAttribute{
 									MarkdownDescription: `Type of this performance class. Must be one of: 'builtin' or 'custom'
                                               Allowed values: [builtin,custom]`,
-									Computed: true,
 									Optional: true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -209,7 +198,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 						"preferred_uplink": schema.StringAttribute{
 							MarkdownDescription: `Preferred uplink for uplink preference rule. Must be one of: 'wan1', 'wan2', 'bestForVoIP', 'loadBalancing' or 'defaultUplink'
                                         Allowed values: [bestForVoIP,defaultUplink,loadBalancing,wan1,wan2]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -224,12 +212,11 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 								),
 							},
 						},
-						"traffic_filters": schema.SetNestedAttribute{
+						"traffic_filters": schema.ListNestedAttribute{
 							MarkdownDescription: `Traffic filters`,
-							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
@@ -237,7 +224,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 									"type": schema.StringAttribute{
 										MarkdownDescription: `Traffic filter type. Must be one of: 'applicationCategory', 'application' or 'custom'
                                               Allowed values: [application,applicationCategory,custom]`,
-										Computed: true,
 										Optional: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -252,7 +238,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 									},
 									"value": schema.SingleNestedAttribute{
 										MarkdownDescription: `Value of traffic filter`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Object{
 											objectplanmodifier.UseStateForUnknown(),
@@ -261,7 +246,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 
 											"destination": schema.SingleNestedAttribute{
 												MarkdownDescription: `Destination of 'custom' type traffic filter`,
-												Computed:            true,
 												Optional:            true,
 												PlanModifiers: []planmodifier.Object{
 													objectplanmodifier.UseStateForUnknown(),
@@ -270,7 +254,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 
 													"cidr": schema.StringAttribute{
 														MarkdownDescription: `CIDR format address (e.g."192.168.10.1", which is the same as "192.168.10.1/32"), or "any". Cannot be used in combination with the "vlan" or "fqdn" property`,
-														Computed:            true,
 														Optional:            true,
 														PlanModifiers: []planmodifier.String{
 															stringplanmodifier.UseStateForUnknown(),
@@ -278,7 +261,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 													},
 													"fqdn": schema.StringAttribute{
 														MarkdownDescription: `FQDN format address. Cannot be used in combination with the "cidr" or "fqdn" property and is currently only available in the "destination" object of the "vpnTrafficUplinkPreference" object. E.g.: "www.google.com"`,
-														Computed:            true,
 														Optional:            true,
 														PlanModifiers: []planmodifier.String{
 															stringplanmodifier.UseStateForUnknown(),
@@ -286,7 +268,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 													},
 													"host": schema.Int64Attribute{
 														MarkdownDescription: `Host ID in the VLAN. Should not exceed the VLAN subnet capacity. Must be used along with the "vlan" property and is currently only available under a template network.`,
-														Computed:            true,
 														Optional:            true,
 														PlanModifiers: []planmodifier.Int64{
 															int64planmodifier.UseStateForUnknown(),
@@ -294,7 +275,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 													},
 													"network": schema.StringAttribute{
 														MarkdownDescription: `Meraki network ID. Currently only available under a template network, and the value should be ID of either same template network, or another template network currently. E.g.: "L_12345678".`,
-														Computed:            true,
 														Optional:            true,
 														PlanModifiers: []planmodifier.String{
 															stringplanmodifier.UseStateForUnknown(),
@@ -302,7 +282,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 													},
 													"port": schema.StringAttribute{
 														MarkdownDescription: `E.g.: "any", "0" (also means "any"), "8080", "1-1024"`,
-														Computed:            true,
 														Optional:            true,
 														PlanModifiers: []planmodifier.String{
 															stringplanmodifier.UseStateForUnknown(),
@@ -310,7 +289,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 													},
 													"vlan": schema.Int64Attribute{
 														MarkdownDescription: `VLAN ID of the configured VLAN in the Meraki network. Cannot be used in combination with the "cidr" or "fqdn" property and is currently only available under a template network.`,
-														Computed:            true,
 														Optional:            true,
 														PlanModifiers: []planmodifier.Int64{
 															int64planmodifier.UseStateForUnknown(),
@@ -320,7 +298,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 											},
 											"id": schema.StringAttribute{
 												MarkdownDescription: `ID of 'applicationCategory' or 'application' type traffic filter`,
-												Computed:            true,
 												Optional:            true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
@@ -329,7 +306,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 											"protocol": schema.StringAttribute{
 												MarkdownDescription: `Protocol of 'custom' type traffic filter. Must be one of: 'tcp', 'udp', 'icmp', 'icmp6' or 'any'
                                                     Allowed values: [any,icmp,icmp6,tcp,udp]`,
-												Computed: true,
 												Optional: true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
@@ -346,7 +322,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 											},
 											"source": schema.SingleNestedAttribute{
 												MarkdownDescription: `Source of 'custom' type traffic filter`,
-												Computed:            true,
 												Optional:            true,
 												PlanModifiers: []planmodifier.Object{
 													objectplanmodifier.UseStateForUnknown(),
@@ -355,7 +330,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 
 													"cidr": schema.StringAttribute{
 														MarkdownDescription: `CIDR format address (e.g."192.168.10.1", which is the same as "192.168.10.1/32"), or "any". Cannot be used in combination with the "vlan" property`,
-														Computed:            true,
 														Optional:            true,
 														PlanModifiers: []planmodifier.String{
 															stringplanmodifier.UseStateForUnknown(),
@@ -363,7 +337,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 													},
 													"host": schema.Int64Attribute{
 														MarkdownDescription: `Host ID in the VLAN. Should not exceed the VLAN subnet capacity. Must be used along with the "vlan" property and is currently only available under a template network.`,
-														Computed:            true,
 														Optional:            true,
 														PlanModifiers: []planmodifier.Int64{
 															int64planmodifier.UseStateForUnknown(),
@@ -371,7 +344,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 													},
 													"network": schema.StringAttribute{
 														MarkdownDescription: `Meraki network ID. Currently only available under a template network, and the value should be ID of either same template network, or another template network currently. E.g.: "L_12345678".`,
-														Computed:            true,
 														Optional:            true,
 														PlanModifiers: []planmodifier.String{
 															stringplanmodifier.UseStateForUnknown(),
@@ -379,7 +351,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 													},
 													"port": schema.StringAttribute{
 														MarkdownDescription: `E.g.: "any", "0" (also means "any"), "8080", "1-1024"`,
-														Computed:            true,
 														Optional:            true,
 														PlanModifiers: []planmodifier.String{
 															stringplanmodifier.UseStateForUnknown(),
@@ -387,7 +358,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 													},
 													"vlan": schema.Int64Attribute{
 														MarkdownDescription: `VLAN ID of the configured VLAN in the Meraki network. Cannot be used in combination with the "cidr" property and is currently only available under a template network.`,
-														Computed:            true,
 														Optional:            true,
 														PlanModifiers: []planmodifier.Int64{
 															int64planmodifier.UseStateForUnknown(),
@@ -403,12 +373,11 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 					},
 				},
 			},
-			"wan_traffic_uplink_preferences": schema.SetNestedAttribute{
+			"wan_traffic_uplink_preferences": schema.ListNestedAttribute{
 				MarkdownDescription: `Uplink preference rules for WAN traffic`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -416,7 +385,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 						"preferred_uplink": schema.StringAttribute{
 							MarkdownDescription: `Preferred uplink for uplink preference rule. Must be one of: 'wan1' or 'wan2'
                                         Allowed values: [wan1,wan2]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -428,12 +396,11 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 								),
 							},
 						},
-						"traffic_filters": schema.SetNestedAttribute{
+						"traffic_filters": schema.ListNestedAttribute{
 							MarkdownDescription: `Traffic filters`,
-							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
@@ -441,7 +408,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 									"type": schema.StringAttribute{
 										MarkdownDescription: `Traffic filter type. Must be "custom"
                                               Allowed values: [custom]`,
-										Computed: true,
 										Optional: true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -454,7 +420,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 									},
 									"value": schema.SingleNestedAttribute{
 										MarkdownDescription: `Value of traffic filter`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Object{
 											objectplanmodifier.UseStateForUnknown(),
@@ -463,14 +428,13 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 
 											"destination": schema.SingleNestedAttribute{
 												MarkdownDescription: `Destination of 'custom' type traffic filter`,
-												Computed:            true,
 												Optional:            true,
 												PlanModifiers: []planmodifier.Object{
 													objectplanmodifier.UseStateForUnknown(),
 												},
 												Attributes: map[string]schema.Attribute{
 
-													"applications": schema.SetNestedAttribute{
+													"applications": schema.ListNestedAttribute{
 														MarkdownDescription: `list of application objects (either majorApplication or nbar)`,
 														Computed:            true,
 														NestedObject: schema.NestedAttributeObject{
@@ -493,7 +457,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 													},
 													"cidr": schema.StringAttribute{
 														MarkdownDescription: `CIDR format address (e.g."192.168.10.1", which is the same as "192.168.10.1/32"), or "any"`,
-														Computed:            true,
 														Optional:            true,
 														PlanModifiers: []planmodifier.String{
 															stringplanmodifier.UseStateForUnknown(),
@@ -501,7 +464,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 													},
 													"port": schema.StringAttribute{
 														MarkdownDescription: `E.g.: "any", "0" (also means "any"), "8080", "1-1024"`,
-														Computed:            true,
 														Optional:            true,
 														PlanModifiers: []planmodifier.String{
 															stringplanmodifier.UseStateForUnknown(),
@@ -512,7 +474,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 											"protocol": schema.StringAttribute{
 												MarkdownDescription: `Protocol of 'custom' type traffic filter. Must be one of: 'tcp', 'udp', 'icmp6' or 'any'
                                                     Allowed values: [any,icmp6,tcp,udp]`,
-												Computed: true,
 												Optional: true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
@@ -528,7 +489,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 											},
 											"source": schema.SingleNestedAttribute{
 												MarkdownDescription: `Source of 'custom' type traffic filter`,
-												Computed:            true,
 												Optional:            true,
 												PlanModifiers: []planmodifier.Object{
 													objectplanmodifier.UseStateForUnknown(),
@@ -537,7 +497,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 
 													"cidr": schema.StringAttribute{
 														MarkdownDescription: `CIDR format address (e.g."192.168.10.1", which is the same as "192.168.10.1/32"), or "any". Cannot be used in combination with the "vlan" property`,
-														Computed:            true,
 														Optional:            true,
 														PlanModifiers: []planmodifier.String{
 															stringplanmodifier.UseStateForUnknown(),
@@ -545,7 +504,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 													},
 													"host": schema.Int64Attribute{
 														MarkdownDescription: `Host ID in the VLAN. Should not exceed the VLAN subnet capacity. Must be used along with the "vlan" property and is currently only available under a template network.`,
-														Computed:            true,
 														Optional:            true,
 														PlanModifiers: []planmodifier.Int64{
 															int64planmodifier.UseStateForUnknown(),
@@ -553,7 +511,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 													},
 													"port": schema.StringAttribute{
 														MarkdownDescription: `E.g.: "any", "0" (also means "any"), "8080", "1-1024"`,
-														Computed:            true,
 														Optional:            true,
 														PlanModifiers: []planmodifier.String{
 															stringplanmodifier.UseStateForUnknown(),
@@ -561,7 +518,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Schema(_ contex
 													},
 													"vlan": schema.Int64Attribute{
 														MarkdownDescription: `VLAN ID of the configured VLAN in the Meraki network. Cannot be used in combination with the "cidr" property and is currently only available under a template network.`,
-														Computed:            true,
 														Optional:            true,
 														PlanModifiers: []planmodifier.Int64{
 															int64planmodifier.UseStateForUnknown(),
@@ -603,27 +559,6 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Create(ctx cont
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceTrafficShapingUplinkSelection(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceTrafficShapingUplinkSelection  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceTrafficShapingUplinkSelection only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceTrafficShapingUplinkSelection(vvNetworkID, dataRequest)
@@ -632,7 +567,7 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Create(ctx cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceTrafficShapingUplinkSelection",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -643,49 +578,19 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Create(ctx cont
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceTrafficShapingUplinkSelection(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceTrafficShapingUplinkSelection",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkApplianceTrafficShapingUplinkSelection",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksApplianceTrafficShapingUplinkSelectionRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -715,33 +620,28 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Read(ctx contex
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksApplianceTrafficShapingUplinkSelectionRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksApplianceTrafficShapingUplinkSelectionRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceTrafficShapingUplinkSelection(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceTrafficShapingUplinkSelection",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -751,9 +651,7 @@ func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Update(ctx cont
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksApplianceTrafficShapingUplinkSelectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -1123,12 +1021,14 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 			if response.ActiveActiveAutoVpnEnabled != nil {
 				return types.BoolValue(*response.ActiveActiveAutoVpnEnabled)
 			}
-			if !state.ActiveActiveAutoVpnEnabled.IsNull() {
-				return state.ActiveActiveAutoVpnEnabled
-			}
 			return types.Bool{}
 		}(),
-		DefaultUplink: types.StringValue(response.DefaultUplink),
+		DefaultUplink: func() types.String {
+			if response.DefaultUplink != "" {
+				return types.StringValue(response.DefaultUplink)
+			}
+			return types.String{}
+		}(),
 		FailoverAndFailback: func() *ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionFailoverAndFailbackRs {
 			if response.FailoverAndFailback != nil {
 				return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionFailoverAndFailbackRs{
@@ -1160,40 +1060,90 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 				result := make([]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesRs, len(*response.VpnTrafficUplinkPreferences))
 				for i, vpnTrafficUplinkPreferences := range *response.VpnTrafficUplinkPreferences {
 					result[i] = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesRs{
-						FailOverCriterion: types.StringValue(vpnTrafficUplinkPreferences.FailOverCriterion),
+						FailOverCriterion: func() types.String {
+							if vpnTrafficUplinkPreferences.FailOverCriterion != "" {
+								return types.StringValue(vpnTrafficUplinkPreferences.FailOverCriterion)
+							}
+							return types.String{}
+						}(),
 						PerformanceClass: func() *ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesPerformanceClassRs {
 							if vpnTrafficUplinkPreferences.PerformanceClass != nil {
 								return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesPerformanceClassRs{
-									BuiltinPerformanceClassName: types.StringValue(vpnTrafficUplinkPreferences.PerformanceClass.BuiltinPerformanceClassName),
-									CustomPerformanceClassID:    types.StringValue(vpnTrafficUplinkPreferences.PerformanceClass.CustomPerformanceClassID),
-									Type:                        types.StringValue(vpnTrafficUplinkPreferences.PerformanceClass.Type),
+									BuiltinPerformanceClassName: func() types.String {
+										if vpnTrafficUplinkPreferences.PerformanceClass.BuiltinPerformanceClassName != "" {
+											return types.StringValue(vpnTrafficUplinkPreferences.PerformanceClass.BuiltinPerformanceClassName)
+										}
+										return types.String{}
+									}(),
+									CustomPerformanceClassID: func() types.String {
+										if vpnTrafficUplinkPreferences.PerformanceClass.CustomPerformanceClassID != "" {
+											return types.StringValue(vpnTrafficUplinkPreferences.PerformanceClass.CustomPerformanceClassID)
+										}
+										return types.String{}
+									}(),
+									Type: func() types.String {
+										if vpnTrafficUplinkPreferences.PerformanceClass.Type != "" {
+											return types.StringValue(vpnTrafficUplinkPreferences.PerformanceClass.Type)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						PreferredUplink: types.StringValue(vpnTrafficUplinkPreferences.PreferredUplink),
+						PreferredUplink: func() types.String {
+							if vpnTrafficUplinkPreferences.PreferredUplink != "" {
+								return types.StringValue(vpnTrafficUplinkPreferences.PreferredUplink)
+							}
+							return types.String{}
+						}(),
 						TrafficFilters: func() *[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersRs {
 							if vpnTrafficUplinkPreferences.TrafficFilters != nil {
 								result := make([]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersRs, len(*vpnTrafficUplinkPreferences.TrafficFilters))
 								for i, trafficFilters := range *vpnTrafficUplinkPreferences.TrafficFilters {
 									result[i] = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersRs{
-										Type: types.StringValue(trafficFilters.Type),
+										Type: func() types.String {
+											if trafficFilters.Type != "" {
+												return types.StringValue(trafficFilters.Type)
+											}
+											return types.String{}
+										}(),
 										Value: func() *ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueRs {
 											if trafficFilters.Value != nil {
 												return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueRs{
 													Destination: func() *ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueDestinationRs {
 														if trafficFilters.Value.Destination != nil {
 															return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueDestinationRs{
-																Cidr: types.StringValue(trafficFilters.Value.Destination.Cidr),
-																Fqdn: types.StringValue(trafficFilters.Value.Destination.Fqdn),
+																Cidr: func() types.String {
+																	if trafficFilters.Value.Destination.Cidr != "" {
+																		return types.StringValue(trafficFilters.Value.Destination.Cidr)
+																	}
+																	return types.String{}
+																}(),
+																Fqdn: func() types.String {
+																	if trafficFilters.Value.Destination.Fqdn != "" {
+																		return types.StringValue(trafficFilters.Value.Destination.Fqdn)
+																	}
+																	return types.String{}
+																}(),
 																Host: func() types.Int64 {
 																	if trafficFilters.Value.Destination.Host != nil {
 																		return types.Int64Value(int64(*trafficFilters.Value.Destination.Host))
 																	}
 																	return types.Int64{}
 																}(),
-																Network: types.StringValue(trafficFilters.Value.Destination.Network),
-																Port:    types.StringValue(trafficFilters.Value.Destination.Port),
+																Network: func() types.String {
+																	if trafficFilters.Value.Destination.Network != "" {
+																		return types.StringValue(trafficFilters.Value.Destination.Network)
+																	}
+																	return types.String{}
+																}(),
+																Port: func() types.String {
+																	if trafficFilters.Value.Destination.Port != "" {
+																		return types.StringValue(trafficFilters.Value.Destination.Port)
+																	}
+																	return types.String{}
+																}(),
 																VLAN: func() types.Int64 {
 																	if trafficFilters.Value.Destination.VLAN != nil {
 																		return types.Int64Value(int64(*trafficFilters.Value.Destination.VLAN))
@@ -1204,20 +1154,45 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 														}
 														return nil
 													}(),
-													ID:       types.StringValue(trafficFilters.Value.ID),
-													Protocol: types.StringValue(trafficFilters.Value.Protocol),
+													ID: func() types.String {
+														if trafficFilters.Value.ID != "" {
+															return types.StringValue(trafficFilters.Value.ID)
+														}
+														return types.String{}
+													}(),
+													Protocol: func() types.String {
+														if trafficFilters.Value.Protocol != "" {
+															return types.StringValue(trafficFilters.Value.Protocol)
+														}
+														return types.String{}
+													}(),
 													Source: func() *ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueSourceRs {
 														if trafficFilters.Value.Source != nil {
 															return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionVpnTrafficUplinkPreferencesTrafficFiltersValueSourceRs{
-																Cidr: types.StringValue(trafficFilters.Value.Source.Cidr),
+																Cidr: func() types.String {
+																	if trafficFilters.Value.Source.Cidr != "" {
+																		return types.StringValue(trafficFilters.Value.Source.Cidr)
+																	}
+																	return types.String{}
+																}(),
 																Host: func() types.Int64 {
 																	if trafficFilters.Value.Source.Host != nil {
 																		return types.Int64Value(int64(*trafficFilters.Value.Source.Host))
 																	}
 																	return types.Int64{}
 																}(),
-																Network: types.StringValue(trafficFilters.Value.Source.Network),
-																Port:    types.StringValue(trafficFilters.Value.Source.Port),
+																Network: func() types.String {
+																	if trafficFilters.Value.Source.Network != "" {
+																		return types.StringValue(trafficFilters.Value.Source.Network)
+																	}
+																	return types.String{}
+																}(),
+																Port: func() types.String {
+																	if trafficFilters.Value.Source.Port != "" {
+																		return types.StringValue(trafficFilters.Value.Source.Port)
+																	}
+																	return types.String{}
+																}(),
 																VLAN: func() types.Int64 {
 																	if trafficFilters.Value.Source.VLAN != nil {
 																		return types.Int64Value(int64(*trafficFilters.Value.Source.VLAN))
@@ -1249,13 +1224,23 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 				result := make([]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesRs, len(*response.WanTrafficUplinkPreferences))
 				for i, wanTrafficUplinkPreferences := range *response.WanTrafficUplinkPreferences {
 					result[i] = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesRs{
-						PreferredUplink: types.StringValue(wanTrafficUplinkPreferences.PreferredUplink),
+						PreferredUplink: func() types.String {
+							if wanTrafficUplinkPreferences.PreferredUplink != "" {
+								return types.StringValue(wanTrafficUplinkPreferences.PreferredUplink)
+							}
+							return types.String{}
+						}(),
 						TrafficFilters: func() *[]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersRs {
 							if wanTrafficUplinkPreferences.TrafficFilters != nil {
 								result := make([]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersRs, len(*wanTrafficUplinkPreferences.TrafficFilters))
 								for i, trafficFilters := range *wanTrafficUplinkPreferences.TrafficFilters {
 									result[i] = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersRs{
-										Type: types.StringValue(trafficFilters.Type),
+										Type: func() types.String {
+											if trafficFilters.Type != "" {
+												return types.StringValue(trafficFilters.Type)
+											}
+											return types.String{}
+										}(),
 										Value: func() *ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueRs {
 											if trafficFilters.Value != nil {
 												return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueRs{
@@ -1267,33 +1252,73 @@ func ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionItemToBody
 																		result := make([]ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplicationsRs, len(*trafficFilters.Value.Destination.Applications))
 																		for i, applications := range *trafficFilters.Value.Destination.Applications {
 																			result[i] = ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueDestinationApplicationsRs{
-																				ID:   types.StringValue(applications.ID),
-																				Name: types.StringValue(applications.Name),
-																				Type: types.StringValue(applications.Type),
+																				ID: func() types.String {
+																					if applications.ID != "" {
+																						return types.StringValue(applications.ID)
+																					}
+																					return types.String{}
+																				}(),
+																				Name: func() types.String {
+																					if applications.Name != "" {
+																						return types.StringValue(applications.Name)
+																					}
+																					return types.String{}
+																				}(),
+																				Type: func() types.String {
+																					if applications.Type != "" {
+																						return types.StringValue(applications.Type)
+																					}
+																					return types.String{}
+																				}(),
 																			}
 																		}
 																		return &result
 																	}
 																	return nil
 																}(),
-																Cidr: types.StringValue(trafficFilters.Value.Destination.Cidr),
-																Port: types.StringValue(trafficFilters.Value.Destination.Port),
+																Cidr: func() types.String {
+																	if trafficFilters.Value.Destination.Cidr != "" {
+																		return types.StringValue(trafficFilters.Value.Destination.Cidr)
+																	}
+																	return types.String{}
+																}(),
+																Port: func() types.String {
+																	if trafficFilters.Value.Destination.Port != "" {
+																		return types.StringValue(trafficFilters.Value.Destination.Port)
+																	}
+																	return types.String{}
+																}(),
 															}
 														}
 														return nil
 													}(),
-													Protocol: types.StringValue(trafficFilters.Value.Protocol),
+													Protocol: func() types.String {
+														if trafficFilters.Value.Protocol != "" {
+															return types.StringValue(trafficFilters.Value.Protocol)
+														}
+														return types.String{}
+													}(),
 													Source: func() *ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueSourceRs {
 														if trafficFilters.Value.Source != nil {
 															return &ResponseApplianceGetNetworkApplianceTrafficShapingUplinkSelectionWanTrafficUplinkPreferencesTrafficFiltersValueSourceRs{
-																Cidr: types.StringValue(trafficFilters.Value.Source.Cidr),
+																Cidr: func() types.String {
+																	if trafficFilters.Value.Source.Cidr != "" {
+																		return types.StringValue(trafficFilters.Value.Source.Cidr)
+																	}
+																	return types.String{}
+																}(),
 																Host: func() types.Int64 {
 																	if trafficFilters.Value.Source.Host != nil {
 																		return types.Int64Value(int64(*trafficFilters.Value.Source.Host))
 																	}
 																	return types.Int64{}
 																}(),
-																Port: types.StringValue(trafficFilters.Value.Source.Port),
+																Port: func() types.String {
+																	if trafficFilters.Value.Source.Port != "" {
+																		return types.StringValue(trafficFilters.Value.Source.Port)
+																	}
+																	return types.String{}
+																}(),
 																VLAN: func() types.Int64 {
 																	if trafficFilters.Value.Source.VLAN != nil {
 																		return types.Int64Value(int64(*trafficFilters.Value.Source.VLAN))

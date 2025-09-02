@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -326,8 +325,18 @@ func ResponseOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryItems
 								result := make([]ResponseItemOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryDetailsNew, len(*item.Details.New))
 								for i, new := range *item.Details.New {
 									result[i] = ResponseItemOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryDetailsNew{
-										Name:  types.StringValue(new.Name),
-										Value: types.StringValue(new.Value),
+										Name: func() types.String {
+											if new.Name != "" {
+												return types.StringValue(new.Name)
+											}
+											return types.String{}
+										}(),
+										Value: func() types.String {
+											if new.Value != "" {
+												return types.StringValue(new.Value)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -339,8 +348,18 @@ func ResponseOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryItems
 								result := make([]ResponseItemOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryDetailsOld, len(*item.Details.Old))
 								for i, old := range *item.Details.Old {
 									result[i] = ResponseItemOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryDetailsOld{
-										Name:  types.StringValue(old.Name),
-										Value: types.StringValue(old.Value),
+										Name: func() types.String {
+											if old.Name != "" {
+												return types.StringValue(old.Name)
+											}
+											return types.String{}
+										}(),
+										Value: func() types.String {
+											if old.Value != "" {
+												return types.StringValue(old.Value)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -354,10 +373,30 @@ func ResponseOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryItems
 			Device: func() *ResponseItemOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryDevice {
 				if item.Device != nil {
 					return &ResponseItemOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryDevice{
-						Model:       types.StringValue(item.Device.Model),
-						Name:        types.StringValue(item.Device.Name),
-						ProductType: types.StringValue(item.Device.ProductType),
-						Serial:      types.StringValue(item.Device.Serial),
+						Model: func() types.String {
+							if item.Device.Model != "" {
+								return types.StringValue(item.Device.Model)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if item.Device.Name != "" {
+								return types.StringValue(item.Device.Name)
+							}
+							return types.String{}
+						}(),
+						ProductType: func() types.String {
+							if item.Device.ProductType != "" {
+								return types.StringValue(item.Device.ProductType)
+							}
+							return types.String{}
+						}(),
+						Serial: func() types.String {
+							if item.Device.Serial != "" {
+								return types.StringValue(item.Device.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -365,15 +404,35 @@ func ResponseOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryItems
 			Network: func() *ResponseItemOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryNetwork {
 				if item.Network != nil {
 					return &ResponseItemOrganizationsGetOrganizationDevicesAvailabilitiesChangeHistoryNetwork{
-						ID:   types.StringValue(item.Network.ID),
-						Name: types.StringValue(item.Network.Name),
+						ID: func() types.String {
+							if item.Network.ID != "" {
+								return types.StringValue(item.Network.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if item.Network.Name != "" {
+								return types.StringValue(item.Network.Name)
+							}
+							return types.String{}
+						}(),
 						Tags: StringSliceToList(item.Network.Tags),
-						URL:  types.StringValue(item.Network.URL),
+						URL: func() types.String {
+							if item.Network.URL != "" {
+								return types.StringValue(item.Network.URL)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			Ts: types.StringValue(item.Ts),
+			Ts: func() types.String {
+				if item.Ts != "" {
+					return types.StringValue(item.Ts)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

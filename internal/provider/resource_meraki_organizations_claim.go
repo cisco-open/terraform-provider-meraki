@@ -223,8 +223,8 @@ type ResponseOrganizationsClaimIntoOrganizationLicenses struct {
 
 type RequestOrganizationsClaimIntoOrganizationRs struct {
 	Licenses *[]RequestOrganizationsClaimIntoOrganizationLicensesRs `tfsdk:"licenses"`
-	Orders   types.Set                                              `tfsdk:"orders"`
-	Serials  types.Set                                              `tfsdk:"serials"`
+	Orders   types.List                                             `tfsdk:"orders"`
+	Serials  types.List                                             `tfsdk:"serials"`
 }
 
 type RequestOrganizationsClaimIntoOrganizationLicensesRs struct {
@@ -253,14 +253,9 @@ func (r *OrganizationsClaim) toSdkApiRequestCreate(ctx context.Context) *merakig
 	var serials []string = nil
 	re.Serials.ElementsAs(ctx, &serials, false)
 	out := merakigosdk.RequestOrganizationsClaimIntoOrganization{
-		Licenses: func() *[]merakigosdk.RequestOrganizationsClaimIntoOrganizationLicenses {
-			if len(requestOrganizationsClaimIntoOrganizationLicenses) > 0 {
-				return &requestOrganizationsClaimIntoOrganizationLicenses
-			}
-			return nil
-		}(),
-		Orders:  orders,
-		Serials: serials,
+		Licenses: &requestOrganizationsClaimIntoOrganizationLicenses,
+		Orders:   orders,
+		Serials:  serials,
 	}
 	return &out
 }
@@ -273,8 +268,18 @@ func ResponseOrganizationsClaimIntoOrganizationItemToBody(state OrganizationsCla
 				result := make([]ResponseOrganizationsClaimIntoOrganizationLicenses, len(*response.Licenses))
 				for i, licenses := range *response.Licenses {
 					result[i] = ResponseOrganizationsClaimIntoOrganizationLicenses{
-						Key:  types.StringValue(licenses.Key),
-						Mode: types.StringValue(licenses.Mode),
+						Key: func() types.String {
+							if licenses.Key != "" {
+								return types.StringValue(licenses.Key)
+							}
+							return types.String{}
+						}(),
+						Mode: func() types.String {
+							if licenses.Mode != "" {
+								return types.StringValue(licenses.Mode)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

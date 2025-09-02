@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -151,7 +150,12 @@ func ResponseWirelessGetDeviceWirelessBluetoothSettingsItemToBody(state DevicesW
 			}
 			return types.Int64{}
 		}(),
-		UUID: types.StringValue(response.UUID),
+		UUID: func() types.String {
+			if response.UUID != "" {
+				return types.StringValue(response.UUID)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

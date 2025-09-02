@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -178,11 +177,36 @@ func ResponseSmGetNetworkSmDeviceDeviceCommandLogsItemsToBody(state NetworksSmDe
 	var items []ResponseItemSmGetNetworkSmDeviceDeviceCommandLogs
 	for _, item := range *response {
 		itemState := ResponseItemSmGetNetworkSmDeviceDeviceCommandLogs{
-			Action:        types.StringValue(item.Action),
-			DashboardUser: types.StringValue(item.DashboardUser),
-			Details:       types.StringValue(item.Details),
-			Name:          types.StringValue(item.Name),
-			Ts:            types.StringValue(item.Ts),
+			Action: func() types.String {
+				if item.Action != "" {
+					return types.StringValue(item.Action)
+				}
+				return types.String{}
+			}(),
+			DashboardUser: func() types.String {
+				if item.DashboardUser != "" {
+					return types.StringValue(item.DashboardUser)
+				}
+				return types.String{}
+			}(),
+			Details: func() types.String {
+				if item.Details != "" {
+					return types.StringValue(item.Details)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			Ts: func() types.String {
+				if item.Ts != "" {
+					return types.StringValue(item.Ts)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

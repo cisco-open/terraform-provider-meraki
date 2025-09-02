@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -170,7 +171,7 @@ func (r *OrganizationsSplashThemesResource) Create(ctx context.Context, req reso
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationSplashTheme",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -387,15 +388,35 @@ func (r *OrganizationsSplashThemesRs) toSdkApiRequestCreate(ctx context.Context)
 // From gosdk to TF Structs Schema
 func ResponseOrganizationsGetOrganizationSplashThemesItemToBodyRs(state OrganizationsSplashThemesRs, response *merakigosdk.ResponseItemOrganizationsGetOrganizationSplashThemes, is_read bool) OrganizationsSplashThemesRs {
 	itemState := OrganizationsSplashThemesRs{
-		ID:   types.StringValue(response.ID),
-		Name: types.StringValue(response.Name),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		ThemeAssets: func() *[]ResponseItemOrganizationsGetOrganizationSplashThemesThemeAssetsRs {
 			if response.ThemeAssets != nil {
 				result := make([]ResponseItemOrganizationsGetOrganizationSplashThemesThemeAssetsRs, len(*response.ThemeAssets))
 				for i, themeAssets := range *response.ThemeAssets {
 					result[i] = ResponseItemOrganizationsGetOrganizationSplashThemesThemeAssetsRs{
-						ID:   types.StringValue(themeAssets.ID),
-						Name: types.StringValue(themeAssets.Name),
+						ID: func() types.String {
+							if themeAssets.ID != "" {
+								return types.StringValue(themeAssets.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if themeAssets.Name != "" {
+								return types.StringValue(themeAssets.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

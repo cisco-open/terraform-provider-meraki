@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "1.1.8-beta"
+      version = "1.2.0-beta"
       source  = "hashicorp.com/edu/meraki"
       # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
@@ -45,5 +45,6 @@ resource "meraki_networks_wireless_ssids" "my_8021x_ssid" {
     port   = 1812
     secret = "SuperSecretPassword"
   }]
+  splash_page = "Click-through splash page"
 
 } 

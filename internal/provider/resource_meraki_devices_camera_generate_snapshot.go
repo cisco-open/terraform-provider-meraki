@@ -205,8 +205,18 @@ func (r *DevicesCameraGenerateSnapshot) toSdkApiRequestCreate(ctx context.Contex
 // ToBody
 func ResponseCameraGenerateDeviceCameraSnapshotItemToBody(state DevicesCameraGenerateSnapshot, response *merakigosdk.ResponseCameraGenerateDeviceCameraSnapshot) DevicesCameraGenerateSnapshot {
 	itemState := ResponseCameraGenerateDeviceCameraSnapshot{
-		Expiry: types.StringValue(response.Expiry),
-		URL:    types.StringValue(response.URL),
+		Expiry: func() types.String {
+			if response.Expiry != "" {
+				return types.StringValue(response.Expiry)
+			}
+			return types.String{}
+		}(),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

@@ -19,14 +19,16 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -60,16 +62,17 @@ func (r *OrganizationsBrandingPoliciesPrioritiesResource) Metadata(_ context.Con
 func (r *OrganizationsBrandingPoliciesPrioritiesResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"branding_policy_ids": schema.SetAttribute{
+			"branding_policy_ids": schema.ListAttribute{
 				MarkdownDescription: `      An ordered list of branding policy IDs that determines the priority order of how to apply the policies
 `,
-				Computed: true,
 				Optional: true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed: true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
@@ -101,27 +104,6 @@ func (r *OrganizationsBrandingPoliciesPrioritiesResource) Create(ctx context.Con
 	vvOrganizationID := data.OrganizationID.ValueString()
 	//Has Item and not has items
 
-	if vvOrganizationID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationBrandingPoliciesPriorities(vvOrganizationID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource OrganizationsBrandingPoliciesPriorities  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource OrganizationsBrandingPoliciesPriorities only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationBrandingPoliciesPriorities(vvOrganizationID, dataRequest)
@@ -130,7 +112,7 @@ func (r *OrganizationsBrandingPoliciesPrioritiesResource) Create(ctx context.Con
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationBrandingPoliciesPriorities",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -141,49 +123,19 @@ func (r *OrganizationsBrandingPoliciesPrioritiesResource) Create(ctx context.Con
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationBrandingPoliciesPriorities(vvOrganizationID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizationBrandingPoliciesPriorities",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetOrganizationBrandingPoliciesPriorities",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseOrganizationsGetOrganizationBrandingPoliciesPrioritiesItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *OrganizationsBrandingPoliciesPrioritiesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data OrganizationsBrandingPoliciesPrioritiesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -213,33 +165,28 @@ func (r *OrganizationsBrandingPoliciesPrioritiesResource) Read(ctx context.Conte
 	}
 	//entro aqui 2
 	data = ResponseOrganizationsGetOrganizationBrandingPoliciesPrioritiesItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *OrganizationsBrandingPoliciesPrioritiesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), req.ID)...)
 }
 
 func (r *OrganizationsBrandingPoliciesPrioritiesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data OrganizationsBrandingPoliciesPrioritiesRs
-	merge(ctx, req, resp, &data)
+	var plan OrganizationsBrandingPoliciesPrioritiesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvOrganizationID := data.OrganizationID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvOrganizationID := plan.OrganizationID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationBrandingPoliciesPriorities(vvOrganizationID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationBrandingPoliciesPriorities",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -249,9 +196,7 @@ func (r *OrganizationsBrandingPoliciesPrioritiesResource) Update(ctx context.Con
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *OrganizationsBrandingPoliciesPrioritiesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -263,7 +208,7 @@ func (r *OrganizationsBrandingPoliciesPrioritiesResource) Delete(ctx context.Con
 // TF Structs Schema
 type OrganizationsBrandingPoliciesPrioritiesRs struct {
 	OrganizationID    types.String `tfsdk:"organization_id"`
-	BrandingPolicyIDs types.Set    `tfsdk:"branding_policy_ids"`
+	BrandingPolicyIDs types.List   `tfsdk:"branding_policy_ids"`
 }
 
 // FromBody
@@ -279,7 +224,7 @@ func (r *OrganizationsBrandingPoliciesPrioritiesRs) toSdkApiRequestUpdate(ctx co
 // From gosdk to TF Structs Schema
 func ResponseOrganizationsGetOrganizationBrandingPoliciesPrioritiesItemToBodyRs(state OrganizationsBrandingPoliciesPrioritiesRs, response *merakigosdk.ResponseOrganizationsGetOrganizationBrandingPoliciesPriorities, is_read bool) OrganizationsBrandingPoliciesPrioritiesRs {
 	itemState := OrganizationsBrandingPoliciesPrioritiesRs{
-		BrandingPolicyIDs: StringSliceToSet(response.BrandingPolicyIDs),
+		BrandingPolicyIDs: StringSliceToList(response.BrandingPolicyIDs),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsBrandingPoliciesPrioritiesRs)

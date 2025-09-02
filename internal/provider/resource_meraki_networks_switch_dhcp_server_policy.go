@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -27,9 +28,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -67,7 +69,6 @@ func (r *NetworksSwitchDhcpServerPolicyResource) Schema(_ context.Context, _ res
 		Attributes: map[string]schema.Attribute{
 			"alerts": schema.SingleNestedAttribute{
 				MarkdownDescription: `Email alert settings for DHCP servers`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -76,7 +77,6 @@ func (r *NetworksSwitchDhcpServerPolicyResource) Schema(_ context.Context, _ res
 
 					"email": schema.SingleNestedAttribute{
 						MarkdownDescription: `Alert settings for DHCP servers`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -85,7 +85,6 @@ func (r *NetworksSwitchDhcpServerPolicyResource) Schema(_ context.Context, _ res
 
 							"enabled": schema.BoolAttribute{
 								MarkdownDescription: `When enabled, send an email if a new DHCP server is seen. Default value is false.`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -95,20 +94,20 @@ func (r *NetworksSwitchDhcpServerPolicyResource) Schema(_ context.Context, _ res
 					},
 				},
 			},
-			"allowed_servers": schema.SetAttribute{
+			"allowed_servers": schema.ListAttribute{
 				MarkdownDescription: `List the MAC addresses of DHCP servers to permit on the network when defaultPolicy is set
       to block.An empty array will clear the entries.`,
-				Computed: true,
 				Optional: true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed: true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"arp_inspection": schema.SingleNestedAttribute{
 				MarkdownDescription: `Dynamic ARP Inspection settings`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -117,34 +116,33 @@ func (r *NetworksSwitchDhcpServerPolicyResource) Schema(_ context.Context, _ res
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Enable or disable Dynamic ARP Inspection on the network. Default value is false.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
 						},
 					},
-					"unsupported_models": schema.SetAttribute{
+					"unsupported_models": schema.ListAttribute{
 						MarkdownDescription: `List of switch models that does not support dynamic ARP inspection`,
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
 				},
 			},
-			"blocked_servers": schema.SetAttribute{
+			"blocked_servers": schema.ListAttribute{
 				MarkdownDescription: `List the MAC addresses of DHCP servers to block on the network when defaultPolicy is set
       to allow.An empty array will clear the entries.`,
-				Computed: true,
 				Optional: true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed: true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"default_policy": schema.StringAttribute{
 				MarkdownDescription: `'allow' or 'block' new DHCP servers. Default value is 'allow'.
                                   Allowed values: [allow,block]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -186,27 +184,6 @@ func (r *NetworksSwitchDhcpServerPolicyResource) Create(ctx context.Context, req
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchDhcpServerPolicy(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSwitchDhcpServerPolicy  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSwitchDhcpServerPolicy only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchDhcpServerPolicy(vvNetworkID, dataRequest)
@@ -215,7 +192,7 @@ func (r *NetworksSwitchDhcpServerPolicyResource) Create(ctx context.Context, req
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchDhcpServerPolicy",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -226,49 +203,19 @@ func (r *NetworksSwitchDhcpServerPolicyResource) Create(ctx context.Context, req
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchDhcpServerPolicy(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkSwitchDhcpServerPolicy",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkSwitchDhcpServerPolicy",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseSwitchGetNetworkSwitchDhcpServerPolicyItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksSwitchDhcpServerPolicyResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksSwitchDhcpServerPolicyRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -298,33 +245,28 @@ func (r *NetworksSwitchDhcpServerPolicyResource) Read(ctx context.Context, req r
 	}
 	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchDhcpServerPolicyItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksSwitchDhcpServerPolicyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksSwitchDhcpServerPolicyResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksSwitchDhcpServerPolicyRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksSwitchDhcpServerPolicyRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchDhcpServerPolicy(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchDhcpServerPolicy",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -334,9 +276,7 @@ func (r *NetworksSwitchDhcpServerPolicyResource) Update(ctx context.Context, req
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksSwitchDhcpServerPolicyResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -349,9 +289,9 @@ func (r *NetworksSwitchDhcpServerPolicyResource) Delete(ctx context.Context, req
 type NetworksSwitchDhcpServerPolicyRs struct {
 	NetworkID      types.String                                                   `tfsdk:"network_id"`
 	Alerts         *ResponseSwitchGetNetworkSwitchDhcpServerPolicyAlertsRs        `tfsdk:"alerts"`
-	AllowedServers types.Set                                                      `tfsdk:"allowed_servers"`
+	AllowedServers types.List                                                     `tfsdk:"allowed_servers"`
 	ArpInspection  *ResponseSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionRs `tfsdk:"arp_inspection"`
-	BlockedServers types.Set                                                      `tfsdk:"blocked_servers"`
+	BlockedServers types.List                                                     `tfsdk:"blocked_servers"`
 	DefaultPolicy  types.String                                                   `tfsdk:"default_policy"`
 }
 
@@ -365,7 +305,7 @@ type ResponseSwitchGetNetworkSwitchDhcpServerPolicyAlertsEmailRs struct {
 
 type ResponseSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionRs struct {
 	Enabled           types.Bool `tfsdk:"enabled"`
-	UnsupportedModels types.Set  `tfsdk:"unsupported_models"`
+	UnsupportedModels types.List `tfsdk:"unsupported_models"`
 }
 
 // FromBody
@@ -450,7 +390,7 @@ func ResponseSwitchGetNetworkSwitchDhcpServerPolicyItemToBodyRs(state NetworksSw
 			}
 			return nil
 		}(),
-		AllowedServers: StringSliceToSet(response.AllowedServers),
+		AllowedServers: StringSliceToList(response.AllowedServers),
 		ArpInspection: func() *ResponseSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionRs {
 			if response.ArpInspection != nil {
 				return &ResponseSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionRs{
@@ -460,13 +400,18 @@ func ResponseSwitchGetNetworkSwitchDhcpServerPolicyItemToBodyRs(state NetworksSw
 						}
 						return types.Bool{}
 					}(),
-					UnsupportedModels: StringSliceToSet(response.ArpInspection.UnsupportedModels),
+					UnsupportedModels: StringSliceToList(response.ArpInspection.UnsupportedModels),
 				}
 			}
 			return nil
 		}(),
-		BlockedServers: StringSliceToSet(response.BlockedServers),
-		DefaultPolicy:  types.StringValue(response.DefaultPolicy),
+		BlockedServers: StringSliceToList(response.BlockedServers),
+		DefaultPolicy: func() types.String {
+			if response.DefaultPolicy != "" {
+				return types.StringValue(response.DefaultPolicy)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksSwitchDhcpServerPolicyRs)

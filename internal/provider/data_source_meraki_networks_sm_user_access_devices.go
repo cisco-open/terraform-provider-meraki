@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -216,28 +215,78 @@ func ResponseSmGetNetworkSmUserAccessDevicesItemsToBody(state NetworksSmUserAcce
 	var items []ResponseItemSmGetNetworkSmUserAccessDevices
 	for _, item := range *response {
 		itemState := ResponseItemSmGetNetworkSmUserAccessDevices{
-			Email:      types.StringValue(item.Email),
-			ID:         types.StringValue(item.ID),
-			Mac:        types.StringValue(item.Mac),
-			Name:       types.StringValue(item.Name),
-			SystemType: types.StringValue(item.SystemType),
-			Tags:       StringSliceToList(item.Tags),
+			Email: func() types.String {
+				if item.Email != "" {
+					return types.StringValue(item.Email)
+				}
+				return types.String{}
+			}(),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			Mac: func() types.String {
+				if item.Mac != "" {
+					return types.StringValue(item.Mac)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			SystemType: func() types.String {
+				if item.SystemType != "" {
+					return types.StringValue(item.SystemType)
+				}
+				return types.String{}
+			}(),
+			Tags: StringSliceToList(item.Tags),
 			TrustedAccessConnections: func() *[]ResponseItemSmGetNetworkSmUserAccessDevicesTrustedAccessConnections {
 				if item.TrustedAccessConnections != nil {
 					result := make([]ResponseItemSmGetNetworkSmUserAccessDevicesTrustedAccessConnections, len(*item.TrustedAccessConnections))
 					for i, trustedAccessConnections := range *item.TrustedAccessConnections {
 						result[i] = ResponseItemSmGetNetworkSmUserAccessDevicesTrustedAccessConnections{
-							DownloadedAt:          types.StringValue(trustedAccessConnections.DownloadedAt),
-							LastConnectedAt:       types.StringValue(trustedAccessConnections.LastConnectedAt),
-							ScepCompletedAt:       types.StringValue(trustedAccessConnections.ScepCompletedAt),
-							TrustedAccessConfigID: types.StringValue(trustedAccessConnections.TrustedAccessConfigID),
+							DownloadedAt: func() types.String {
+								if trustedAccessConnections.DownloadedAt != "" {
+									return types.StringValue(trustedAccessConnections.DownloadedAt)
+								}
+								return types.String{}
+							}(),
+							LastConnectedAt: func() types.String {
+								if trustedAccessConnections.LastConnectedAt != "" {
+									return types.StringValue(trustedAccessConnections.LastConnectedAt)
+								}
+								return types.String{}
+							}(),
+							ScepCompletedAt: func() types.String {
+								if trustedAccessConnections.ScepCompletedAt != "" {
+									return types.StringValue(trustedAccessConnections.ScepCompletedAt)
+								}
+								return types.String{}
+							}(),
+							TrustedAccessConfigID: func() types.String {
+								if trustedAccessConnections.TrustedAccessConfigID != "" {
+									return types.StringValue(trustedAccessConnections.TrustedAccessConfigID)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
 				}
 				return nil
 			}(),
-			Username: types.StringValue(item.Username),
+			Username: func() types.String {
+				if item.Username != "" {
+					return types.StringValue(item.Username)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

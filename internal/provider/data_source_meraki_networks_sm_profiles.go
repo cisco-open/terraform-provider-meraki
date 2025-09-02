@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -168,12 +167,32 @@ func ResponseSmGetNetworkSmProfilesItemsToBody(state NetworksSmProfiles, respons
 	var items []ResponseItemSmGetNetworkSmProfiles
 	for _, item := range *response {
 		itemState := ResponseItemSmGetNetworkSmProfiles{
-			Description:  types.StringValue(item.Description),
-			ID:           types.StringValue(item.ID),
-			Name:         types.StringValue(item.Name),
+			Description: func() types.String {
+				if item.Description != "" {
+					return types.StringValue(item.Description)
+				}
+				return types.String{}
+			}(),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			PayloadTypes: StringSliceToList(item.PayloadTypes),
-			Scope:        types.StringValue(item.Scope),
-			Tags:         StringSliceToList(item.Tags),
+			Scope: func() types.String {
+				if item.Scope != "" {
+					return types.StringValue(item.Scope)
+				}
+				return types.String{}
+			}(),
+			Tags: StringSliceToList(item.Tags),
 		}
 		items = append(items, itemState)
 	}

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -73,7 +72,7 @@ func (d *DevicesCellularGatewayPortForwardingRulesDataSource) Schema(_ context.C
 							Attributes: map[string]schema.Attribute{
 
 								"access": schema.StringAttribute{
-									MarkdownDescription: `*any* or **restricted**. Specify the right to make inbound connections on the specified ports or port ranges. If **restricted**, a list of allowed IPs is mandatory.`,
+									MarkdownDescription: `**any** or **restricted**. Specify the right to make inbound connections on the specified ports or port ranges. If **restricted**, a list of allowed IPs is mandatory.`,
 									Computed:            true,
 								},
 								"allowed_ips": schema.ListAttribute{
@@ -175,13 +174,43 @@ func ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRulesItemToBod
 				result := make([]ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRulesRules, len(*response.Rules))
 				for i, rules := range *response.Rules {
 					result[i] = ResponseCellularGatewayGetDeviceCellularGatewayPortForwardingRulesRules{
-						Access:     types.StringValue(rules.Access),
+						Access: func() types.String {
+							if rules.Access != "" {
+								return types.StringValue(rules.Access)
+							}
+							return types.String{}
+						}(),
 						AllowedIPs: StringSliceToList(rules.AllowedIPs),
-						LanIP:      types.StringValue(rules.LanIP),
-						LocalPort:  types.StringValue(rules.LocalPort),
-						Name:       types.StringValue(rules.Name),
-						Protocol:   types.StringValue(rules.Protocol),
-						PublicPort: types.StringValue(rules.PublicPort),
+						LanIP: func() types.String {
+							if rules.LanIP != "" {
+								return types.StringValue(rules.LanIP)
+							}
+							return types.String{}
+						}(),
+						LocalPort: func() types.String {
+							if rules.LocalPort != "" {
+								return types.StringValue(rules.LocalPort)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if rules.Name != "" {
+								return types.StringValue(rules.Name)
+							}
+							return types.String{}
+						}(),
+						Protocol: func() types.String {
+							if rules.Protocol != "" {
+								return types.StringValue(rules.Protocol)
+							}
+							return types.String{}
+						}(),
+						PublicPort: func() types.String {
+							if rules.PublicPort != "" {
+								return types.StringValue(rules.PublicPort)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

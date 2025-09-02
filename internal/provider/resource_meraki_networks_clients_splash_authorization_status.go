@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -73,7 +74,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 			},
 			"ssids": schema.SingleNestedAttribute{
 				MarkdownDescription: `The target SSIDs. Each SSID must be enabled and must have Click-through splash enabled. For each SSID where isAuthorized is true, the expiration time will automatically be set according to the SSID's splash frequency. Not all networks support configuring all SSIDs`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -82,7 +82,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 
 					"status_0": schema.SingleNestedAttribute{
 						MarkdownDescription: `Splash authorization for SSID 0`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -97,7 +96,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 							},
 							"is_authorized": schema.BoolAttribute{
 								MarkdownDescription: `New authorization status for the SSID (true, false).`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -107,7 +105,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 					},
 					"status_1": schema.SingleNestedAttribute{
 						MarkdownDescription: `Splash authorization for SSID 1`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -116,7 +113,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 
 							"is_authorized": schema.BoolAttribute{
 								MarkdownDescription: `New authorization status for the SSID (true, false).`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -126,7 +122,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 					},
 					"status_10": schema.SingleNestedAttribute{
 						MarkdownDescription: `Splash authorization for SSID 10`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -135,7 +130,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 
 							"is_authorized": schema.BoolAttribute{
 								MarkdownDescription: `New authorization status for the SSID (true, false).`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -145,7 +139,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 					},
 					"status_11": schema.SingleNestedAttribute{
 						MarkdownDescription: `Splash authorization for SSID 11`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -154,7 +147,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 
 							"is_authorized": schema.BoolAttribute{
 								MarkdownDescription: `New authorization status for the SSID (true, false).`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -164,7 +156,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 					},
 					"status_12": schema.SingleNestedAttribute{
 						MarkdownDescription: `Splash authorization for SSID 12`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -173,7 +164,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 
 							"is_authorized": schema.BoolAttribute{
 								MarkdownDescription: `New authorization status for the SSID (true, false).`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -183,7 +173,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 					},
 					"status_13": schema.SingleNestedAttribute{
 						MarkdownDescription: `Splash authorization for SSID 13`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -192,7 +181,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 
 							"is_authorized": schema.BoolAttribute{
 								MarkdownDescription: `New authorization status for the SSID (true, false).`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -202,7 +190,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 					},
 					"status_14": schema.SingleNestedAttribute{
 						MarkdownDescription: `Splash authorization for SSID 14`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -211,7 +198,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 
 							"is_authorized": schema.BoolAttribute{
 								MarkdownDescription: `New authorization status for the SSID (true, false).`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -221,7 +207,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 					},
 					"status_2": schema.SingleNestedAttribute{
 						MarkdownDescription: `Splash authorization for SSID 2`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -230,7 +215,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 
 							"is_authorized": schema.BoolAttribute{
 								MarkdownDescription: `New authorization status for the SSID (true, false).`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -240,7 +224,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 					},
 					"status_3": schema.SingleNestedAttribute{
 						MarkdownDescription: `Splash authorization for SSID 3`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -249,7 +232,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 
 							"is_authorized": schema.BoolAttribute{
 								MarkdownDescription: `New authorization status for the SSID (true, false).`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -259,7 +241,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 					},
 					"status_4": schema.SingleNestedAttribute{
 						MarkdownDescription: `Splash authorization for SSID 4`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -268,7 +249,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 
 							"is_authorized": schema.BoolAttribute{
 								MarkdownDescription: `New authorization status for the SSID (true, false).`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -278,7 +258,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 					},
 					"status_5": schema.SingleNestedAttribute{
 						MarkdownDescription: `Splash authorization for SSID 5`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -287,7 +266,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 
 							"is_authorized": schema.BoolAttribute{
 								MarkdownDescription: `New authorization status for the SSID (true, false).`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -297,7 +275,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 					},
 					"status_6": schema.SingleNestedAttribute{
 						MarkdownDescription: `Splash authorization for SSID 6`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -306,7 +283,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 
 							"is_authorized": schema.BoolAttribute{
 								MarkdownDescription: `New authorization status for the SSID (true, false).`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -316,7 +292,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 					},
 					"status_7": schema.SingleNestedAttribute{
 						MarkdownDescription: `Splash authorization for SSID 7`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -325,7 +300,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 
 							"is_authorized": schema.BoolAttribute{
 								MarkdownDescription: `New authorization status for the SSID (true, false).`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -335,7 +309,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 					},
 					"status_8": schema.SingleNestedAttribute{
 						MarkdownDescription: `Splash authorization for SSID 8`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -344,7 +317,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 
 							"is_authorized": schema.BoolAttribute{
 								MarkdownDescription: `New authorization status for the SSID (true, false).`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -354,7 +326,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 					},
 					"status_9": schema.SingleNestedAttribute{
 						MarkdownDescription: `Splash authorization for SSID 9`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -363,7 +334,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Schema(_ context.Cont
 
 							"is_authorized": schema.BoolAttribute{
 								MarkdownDescription: `New authorization status for the SSID (true, false).`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -400,27 +370,6 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Create(ctx context.Co
 	vvClientID := data.ClientID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" && vvClientID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkClientSplashAuthorizationStatus(vvNetworkID, vvClientID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksClientsSplashAuthorizationStatus  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksClientsSplashAuthorizationStatus only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Networks.UpdateNetworkClientSplashAuthorizationStatus(vvNetworkID, vvClientID, dataRequest)
@@ -429,7 +378,7 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Create(ctx context.Co
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkClientSplashAuthorizationStatus",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -440,49 +389,19 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Create(ctx context.Co
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Networks.GetNetworkClientSplashAuthorizationStatus(vvNetworkID, vvClientID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkClientSplashAuthorizationStatus",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkClientSplashAuthorizationStatus",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseNetworksGetNetworkClientSplashAuthorizationStatusItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksClientsSplashAuthorizationStatusResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksClientsSplashAuthorizationStatusRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -513,9 +432,7 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Read(ctx context.Cont
 	}
 	//entro aqui 2
 	data = ResponseNetworksGetNetworkClientSplashAuthorizationStatusItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksClientsSplashAuthorizationStatusResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -523,35 +440,31 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) ImportState(ctx conte
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,clientId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("client_id"), idParts[1])...)
 }
 
 func (r *NetworksClientsSplashAuthorizationStatusResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksClientsSplashAuthorizationStatusRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksClientsSplashAuthorizationStatusRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvClientID := data.ClientID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvClientID := plan.ClientID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Networks.UpdateNetworkClientSplashAuthorizationStatus(vvNetworkID, vvClientID, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkClientSplashAuthorizationStatus",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -561,9 +474,7 @@ func (r *NetworksClientsSplashAuthorizationStatusResource) Update(ctx context.Co
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksClientsSplashAuthorizationStatusResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -908,8 +819,18 @@ func ResponseNetworksGetNetworkClientSplashAuthorizationStatusItemToBodyRs(state
 					Status0: func() *ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids0Rs {
 						if response.SSIDs.Status0 != nil {
 							return &ResponseNetworksGetNetworkClientSplashAuthorizationStatusSsids0Rs{
-								AuthorizedAt: types.StringValue(response.SSIDs.Status0.AuthorizedAt),
-								ExpiresAt:    types.StringValue(response.SSIDs.Status0.ExpiresAt),
+								AuthorizedAt: func() types.String {
+									if response.SSIDs.Status0.AuthorizedAt != "" {
+										return types.StringValue(response.SSIDs.Status0.AuthorizedAt)
+									}
+									return types.String{}
+								}(),
+								ExpiresAt: func() types.String {
+									if response.SSIDs.Status0.ExpiresAt != "" {
+										return types.StringValue(response.SSIDs.Status0.ExpiresAt)
+									}
+									return types.String{}
+								}(),
 								IsAuthorized: func() types.Bool {
 									if response.SSIDs.Status0.IsAuthorized != nil {
 										return types.BoolValue(*response.SSIDs.Status0.IsAuthorized)

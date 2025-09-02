@@ -459,8 +459,18 @@ func ResponseNetworksRollbacksNetworkFirmwareUpgradesStagedEventsItemToBody(stat
 											ToVersion: func() *ResponseNetworksRollbacksNetworkFirmwareUpgradesStagedEventsProductsSwitchNextUpgradeToVersion {
 												if response.Products.Switch.NextUpgrade.ToVersion != nil {
 													return &ResponseNetworksRollbacksNetworkFirmwareUpgradesStagedEventsProductsSwitchNextUpgradeToVersion{
-														ID:        types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ID),
-														ShortName: types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ShortName),
+														ID: func() types.String {
+															if response.Products.Switch.NextUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Switch.NextUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -482,8 +492,18 @@ func ResponseNetworksRollbacksNetworkFirmwareUpgradesStagedEventsItemToBody(stat
 				result := make([]ResponseNetworksRollbacksNetworkFirmwareUpgradesStagedEventsReasons, len(*response.Reasons))
 				for i, reasons := range *response.Reasons {
 					result[i] = ResponseNetworksRollbacksNetworkFirmwareUpgradesStagedEventsReasons{
-						Category: types.StringValue(reasons.Category),
-						Comment:  types.StringValue(reasons.Comment),
+						Category: func() types.String {
+							if reasons.Category != "" {
+								return types.StringValue(reasons.Category)
+							}
+							return types.String{}
+						}(),
+						Comment: func() types.String {
+							if reasons.Comment != "" {
+								return types.StringValue(reasons.Comment)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -498,9 +518,24 @@ func ResponseNetworksRollbacksNetworkFirmwareUpgradesStagedEventsItemToBody(stat
 						Group: func() *ResponseNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStagesGroup {
 							if stages.Group != nil {
 								return &ResponseNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStagesGroup{
-									Description: types.StringValue(stages.Group.Description),
-									ID:          types.StringValue(stages.Group.ID),
-									Name:        types.StringValue(stages.Group.Name),
+									Description: func() types.String {
+										if stages.Group.Description != "" {
+											return types.StringValue(stages.Group.Description)
+										}
+										return types.String{}
+									}(),
+									ID: func() types.String {
+										if stages.Group.ID != "" {
+											return types.StringValue(stages.Group.ID)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if stages.Group.Name != "" {
+											return types.StringValue(stages.Group.Name)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -508,15 +543,40 @@ func ResponseNetworksRollbacksNetworkFirmwareUpgradesStagedEventsItemToBody(stat
 						Milestones: func() *ResponseNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStagesMilestones {
 							if stages.Milestones != nil {
 								return &ResponseNetworksRollbacksNetworkFirmwareUpgradesStagedEventsStagesMilestones{
-									CanceledAt:   types.StringValue(stages.Milestones.CanceledAt),
-									CompletedAt:  types.StringValue(stages.Milestones.CompletedAt),
-									ScheduledFor: types.StringValue(stages.Milestones.ScheduledFor),
-									StartedAt:    types.StringValue(stages.Milestones.StartedAt),
+									CanceledAt: func() types.String {
+										if stages.Milestones.CanceledAt != "" {
+											return types.StringValue(stages.Milestones.CanceledAt)
+										}
+										return types.String{}
+									}(),
+									CompletedAt: func() types.String {
+										if stages.Milestones.CompletedAt != "" {
+											return types.StringValue(stages.Milestones.CompletedAt)
+										}
+										return types.String{}
+									}(),
+									ScheduledFor: func() types.String {
+										if stages.Milestones.ScheduledFor != "" {
+											return types.StringValue(stages.Milestones.ScheduledFor)
+										}
+										return types.String{}
+									}(),
+									StartedAt: func() types.String {
+										if stages.Milestones.StartedAt != "" {
+											return types.StringValue(stages.Milestones.StartedAt)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						Status: types.StringValue(stages.Status),
+						Status: func() types.String {
+							if stages.Status != "" {
+								return types.StringValue(stages.Status)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

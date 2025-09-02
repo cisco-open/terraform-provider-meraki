@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "1.1.8-beta"
+      version = "1.2.0-beta"
       source  = "hashicorp.com/edu/meraki"
       # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
@@ -13,8 +13,8 @@ provider "meraki" {
 }
 
 resource "meraki_networks_appliance_firewall_l3_firewall_rules" "this" {
-  network_id          = "L_828099381482771185"
+  network_id          = "L_828099381482775471"
   rules               = []
-  syslog_default_rule = true
+  syslog_default_rule = false
 }
 

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -323,8 +322,18 @@ func ResponseNetworksGetNetworkTopologyLinkLayerItemToBody(state NetworksTopolog
 										Device: func() *ResponseNetworksGetNetworkTopologyLinkLayerLinksEndsDevice {
 											if ends.Device != nil {
 												return &ResponseNetworksGetNetworkTopologyLinkLayerLinksEndsDevice{
-													Name:   types.StringValue(ends.Device.Name),
-													Serial: types.StringValue(ends.Device.Serial),
+													Name: func() types.String {
+														if ends.Device.Name != "" {
+															return types.StringValue(ends.Device.Name)
+														}
+														return types.String{}
+													}(),
+													Serial: func() types.String {
+														if ends.Device.Serial != "" {
+															return types.StringValue(ends.Device.Serial)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return nil
@@ -341,7 +350,12 @@ func ResponseNetworksGetNetworkTopologyLinkLayerItemToBody(state NetworksTopolog
 																	}
 																	return types.Int64{}
 																}(),
-																PortID: types.StringValue(ends.Discovered.Cdp.PortID),
+																PortID: func() types.String {
+																	if ends.Discovered.Cdp.PortID != "" {
+																		return types.StringValue(ends.Discovered.Cdp.PortID)
+																	}
+																	return types.String{}
+																}(),
 															}
 														}
 														return nil
@@ -349,8 +363,18 @@ func ResponseNetworksGetNetworkTopologyLinkLayerItemToBody(state NetworksTopolog
 													Lldp: func() *ResponseNetworksGetNetworkTopologyLinkLayerLinksEndsDiscoveredLldp {
 														if ends.Discovered.Lldp != nil {
 															return &ResponseNetworksGetNetworkTopologyLinkLayerLinksEndsDiscoveredLldp{
-																PortDescription: types.StringValue(ends.Discovered.Lldp.PortDescription),
-																PortID:          types.StringValue(ends.Discovered.Lldp.PortID),
+																PortDescription: func() types.String {
+																	if ends.Discovered.Lldp.PortDescription != "" {
+																		return types.StringValue(ends.Discovered.Lldp.PortDescription)
+																	}
+																	return types.String{}
+																}(),
+																PortID: func() types.String {
+																	if ends.Discovered.Lldp.PortID != "" {
+																		return types.StringValue(ends.Discovered.Lldp.PortID)
+																	}
+																	return types.String{}
+																}(),
 															}
 														}
 														return nil
@@ -362,8 +386,18 @@ func ResponseNetworksGetNetworkTopologyLinkLayerItemToBody(state NetworksTopolog
 										Node: func() *ResponseNetworksGetNetworkTopologyLinkLayerLinksEndsNode {
 											if ends.Node != nil {
 												return &ResponseNetworksGetNetworkTopologyLinkLayerLinksEndsNode{
-													DerivedID: types.StringValue(ends.Node.DerivedID),
-													Type:      types.StringValue(ends.Node.Type),
+													DerivedID: func() types.String {
+														if ends.Node.DerivedID != "" {
+															return types.StringValue(ends.Node.DerivedID)
+														}
+														return types.String{}
+													}(),
+													Type: func() types.String {
+														if ends.Node.Type != "" {
+															return types.StringValue(ends.Node.Type)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return nil
@@ -374,7 +408,12 @@ func ResponseNetworksGetNetworkTopologyLinkLayerItemToBody(state NetworksTopolog
 							}
 							return nil
 						}(),
-						LastReportedAt: types.StringValue(links.LastReportedAt),
+						LastReportedAt: func() types.String {
+							if links.LastReportedAt != "" {
+								return types.StringValue(links.LastReportedAt)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -386,19 +425,49 @@ func ResponseNetworksGetNetworkTopologyLinkLayerItemToBody(state NetworksTopolog
 				result := make([]ResponseNetworksGetNetworkTopologyLinkLayerNodes, len(*response.Nodes))
 				for i, nodes := range *response.Nodes {
 					result[i] = ResponseNetworksGetNetworkTopologyLinkLayerNodes{
-						DerivedID: types.StringValue(nodes.DerivedID),
+						DerivedID: func() types.String {
+							if nodes.DerivedID != "" {
+								return types.StringValue(nodes.DerivedID)
+							}
+							return types.String{}
+						}(),
 						Discovered: func() *ResponseNetworksGetNetworkTopologyLinkLayerNodesDiscovered {
 							if nodes.Discovered != nil {
 								return &ResponseNetworksGetNetworkTopologyLinkLayerNodesDiscovered{
-									Cdp: types.StringValue(nodes.Discovered.Cdp),
+									Cdp: func() types.String {
+										if nodes.Discovered.Cdp != "" {
+											return types.StringValue(nodes.Discovered.Cdp)
+										}
+										return types.String{}
+									}(),
 									Lldp: func() *ResponseNetworksGetNetworkTopologyLinkLayerNodesDiscoveredLldp {
 										if nodes.Discovered.Lldp != nil {
 											return &ResponseNetworksGetNetworkTopologyLinkLayerNodesDiscoveredLldp{
-												ChassisID:          types.StringValue(nodes.Discovered.Lldp.ChassisID),
-												ManagementAddress:  types.StringValue(nodes.Discovered.Lldp.ManagementAddress),
+												ChassisID: func() types.String {
+													if nodes.Discovered.Lldp.ChassisID != "" {
+														return types.StringValue(nodes.Discovered.Lldp.ChassisID)
+													}
+													return types.String{}
+												}(),
+												ManagementAddress: func() types.String {
+													if nodes.Discovered.Lldp.ManagementAddress != "" {
+														return types.StringValue(nodes.Discovered.Lldp.ManagementAddress)
+													}
+													return types.String{}
+												}(),
 												SystemCapabilities: StringSliceToList(nodes.Discovered.Lldp.SystemCapabilities),
-												SystemDescription:  types.StringValue(nodes.Discovered.Lldp.SystemDescription),
-												SystemName:         types.StringValue(nodes.Discovered.Lldp.SystemName),
+												SystemDescription: func() types.String {
+													if nodes.Discovered.Lldp.SystemDescription != "" {
+														return types.StringValue(nodes.Discovered.Lldp.SystemDescription)
+													}
+													return types.String{}
+												}(),
+												SystemName: func() types.String {
+													if nodes.Discovered.Lldp.SystemName != "" {
+														return types.StringValue(nodes.Discovered.Lldp.SystemName)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return nil
@@ -407,14 +476,24 @@ func ResponseNetworksGetNetworkTopologyLinkLayerItemToBody(state NetworksTopolog
 							}
 							return nil
 						}(),
-						Mac: types.StringValue(nodes.Mac),
+						Mac: func() types.String {
+							if nodes.Mac != "" {
+								return types.StringValue(nodes.Mac)
+							}
+							return types.String{}
+						}(),
 						Root: func() types.Bool {
 							if nodes.Root != nil {
 								return types.BoolValue(*nodes.Root)
 							}
 							return types.Bool{}
 						}(),
-						Type: types.StringValue(nodes.Type),
+						Type: func() types.String {
+							if nodes.Type != "" {
+								return types.StringValue(nodes.Type)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

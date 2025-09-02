@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "1.1.8-beta"
+      version = "1.2.0-beta"
       source  = "hashicorp.com/edu/meraki"
     }
   }
@@ -23,4 +23,5 @@ resource "meraki_organizations_cellular_gateway_esims_service_providers_accounts
 
 output "meraki_organizations_cellular_gateway_esims_service_providers_accounts_example" {
   value = meraki_organizations_cellular_gateway_esims_service_providers_accounts.example
+  sensitive = true
 }

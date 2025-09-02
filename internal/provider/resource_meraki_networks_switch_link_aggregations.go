@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -207,7 +208,7 @@ func (r *NetworksSwitchLinkAggregationsResource) Create(ctx context.Context, req
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchLinkAggregation",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -369,7 +370,7 @@ func (r *NetworksSwitchLinkAggregationsResource) Update(ctx context.Context, req
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchLinkAggregation",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -525,14 +526,29 @@ func (r *NetworksSwitchLinkAggregationsRs) toSdkApiRequestUpdate(ctx context.Con
 // From gosdk to TF Structs Schema
 func ResponseSwitchGetNetworkSwitchLinkAggregationsItemToBodyRs(state NetworksSwitchLinkAggregationsRs, response *merakigosdk.ResponseItemSwitchGetNetworkSwitchLinkAggregations, is_read bool) NetworksSwitchLinkAggregationsRs {
 	itemState := NetworksSwitchLinkAggregationsRs{
-		ID: types.StringValue(response.ID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		SwitchPorts: func() *[]ResponseItemSwitchGetNetworkSwitchLinkAggregationsSwitchPortsRs {
 			if response.SwitchPorts != nil {
 				result := make([]ResponseItemSwitchGetNetworkSwitchLinkAggregationsSwitchPortsRs, len(*response.SwitchPorts))
 				for i, switchPorts := range *response.SwitchPorts {
 					result[i] = ResponseItemSwitchGetNetworkSwitchLinkAggregationsSwitchPortsRs{
-						PortID: types.StringValue(switchPorts.PortID),
-						Serial: types.StringValue(switchPorts.Serial),
+						PortID: func() types.String {
+							if switchPorts.PortID != "" {
+								return types.StringValue(switchPorts.PortID)
+							}
+							return types.String{}
+						}(),
+						Serial: func() types.String {
+							if switchPorts.Serial != "" {
+								return types.StringValue(switchPorts.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

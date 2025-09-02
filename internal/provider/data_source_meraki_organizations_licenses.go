@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -235,22 +234,72 @@ type ResponseOrganizationsGetOrganizationLicensePermanentlyQueuedLicenses struct
 // ToBody
 func ResponseOrganizationsGetOrganizationLicenseItemToBody(state OrganizationsLicenses, response *merakigosdk.ResponseOrganizationsGetOrganizationLicense) OrganizationsLicenses {
 	itemState := ResponseOrganizationsGetOrganizationLicense{
-		ActivationDate: types.StringValue(response.ActivationDate),
-		ClaimDate:      types.StringValue(response.ClaimDate),
-		DeviceSerial:   types.StringValue(response.DeviceSerial),
+		ActivationDate: func() types.String {
+			if response.ActivationDate != "" {
+				return types.StringValue(response.ActivationDate)
+			}
+			return types.String{}
+		}(),
+		ClaimDate: func() types.String {
+			if response.ClaimDate != "" {
+				return types.StringValue(response.ClaimDate)
+			}
+			return types.String{}
+		}(),
+		DeviceSerial: func() types.String {
+			if response.DeviceSerial != "" {
+				return types.StringValue(response.DeviceSerial)
+			}
+			return types.String{}
+		}(),
 		DurationInDays: func() types.Int64 {
 			if response.DurationInDays != nil {
 				return types.Int64Value(int64(*response.DurationInDays))
 			}
 			return types.Int64{}
 		}(),
-		ExpirationDate: types.StringValue(response.ExpirationDate),
-		HeadLicenseID:  types.StringValue(response.HeadLicenseID),
-		ID:             types.StringValue(response.ID),
-		LicenseKey:     types.StringValue(response.LicenseKey),
-		LicenseType:    types.StringValue(response.LicenseType),
-		NetworkID:      types.StringValue(response.NetworkID),
-		OrderNumber:    types.StringValue(response.OrderNumber),
+		ExpirationDate: func() types.String {
+			if response.ExpirationDate != "" {
+				return types.StringValue(response.ExpirationDate)
+			}
+			return types.String{}
+		}(),
+		HeadLicenseID: func() types.String {
+			if response.HeadLicenseID != "" {
+				return types.StringValue(response.HeadLicenseID)
+			}
+			return types.String{}
+		}(),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		LicenseKey: func() types.String {
+			if response.LicenseKey != "" {
+				return types.StringValue(response.LicenseKey)
+			}
+			return types.String{}
+		}(),
+		LicenseType: func() types.String {
+			if response.LicenseType != "" {
+				return types.StringValue(response.LicenseType)
+			}
+			return types.String{}
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
+		OrderNumber: func() types.String {
+			if response.OrderNumber != "" {
+				return types.StringValue(response.OrderNumber)
+			}
+			return types.String{}
+		}(),
 		PermanentlyQueuedLicenses: func() *[]ResponseOrganizationsGetOrganizationLicensePermanentlyQueuedLicenses {
 			if response.PermanentlyQueuedLicenses != nil {
 				result := make([]ResponseOrganizationsGetOrganizationLicensePermanentlyQueuedLicenses, len(*response.PermanentlyQueuedLicenses))
@@ -262,10 +311,30 @@ func ResponseOrganizationsGetOrganizationLicenseItemToBody(state OrganizationsLi
 							}
 							return types.Int64{}
 						}(),
-						ID:          types.StringValue(permanentlyQueuedLicenses.ID),
-						LicenseKey:  types.StringValue(permanentlyQueuedLicenses.LicenseKey),
-						LicenseType: types.StringValue(permanentlyQueuedLicenses.LicenseType),
-						OrderNumber: types.StringValue(permanentlyQueuedLicenses.OrderNumber),
+						ID: func() types.String {
+							if permanentlyQueuedLicenses.ID != "" {
+								return types.StringValue(permanentlyQueuedLicenses.ID)
+							}
+							return types.String{}
+						}(),
+						LicenseKey: func() types.String {
+							if permanentlyQueuedLicenses.LicenseKey != "" {
+								return types.StringValue(permanentlyQueuedLicenses.LicenseKey)
+							}
+							return types.String{}
+						}(),
+						LicenseType: func() types.String {
+							if permanentlyQueuedLicenses.LicenseType != "" {
+								return types.StringValue(permanentlyQueuedLicenses.LicenseType)
+							}
+							return types.String{}
+						}(),
+						OrderNumber: func() types.String {
+							if permanentlyQueuedLicenses.OrderNumber != "" {
+								return types.StringValue(permanentlyQueuedLicenses.OrderNumber)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -278,7 +347,12 @@ func ResponseOrganizationsGetOrganizationLicenseItemToBody(state OrganizationsLi
 			}
 			return types.Int64{}
 		}(),
-		State: types.StringValue(response.State),
+		State: func() types.String {
+			if response.State != "" {
+				return types.StringValue(response.State)
+			}
+			return types.String{}
+		}(),
 		TotalDurationInDays: func() types.Int64 {
 			if response.TotalDurationInDays != nil {
 				return types.Int64Value(int64(*response.TotalDurationInDays))

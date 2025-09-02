@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -288,6 +287,17 @@ func (d *OrganizationsAdaptivePolicyPoliciesDataSource) Read(ctx context.Context
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetOrganizationAdaptivePolicyPolicy",
+				err.Error(),
+			)
+			return
+		}
+
 		organizationsAdaptivePolicyPolicies = ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyItemToBody(organizationsAdaptivePolicyPolicies, response2)
 		diags = resp.State.Set(ctx, &organizationsAdaptivePolicyPolicies)
 		resp.Diagnostics.Append(diags...)
@@ -370,21 +380,51 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyPoliciesItemsToBody(state
 					result := make([]ResponseItemOrganizationsGetOrganizationAdaptivePolicyPoliciesAcls, len(*item.ACLs))
 					for i, aCLs := range *item.ACLs {
 						result[i] = ResponseItemOrganizationsGetOrganizationAdaptivePolicyPoliciesAcls{
-							ID:   types.StringValue(aCLs.ID),
-							Name: types.StringValue(aCLs.Name),
+							ID: func() types.String {
+								if aCLs.ID != "" {
+									return types.StringValue(aCLs.ID)
+								}
+								return types.String{}
+							}(),
+							Name: func() types.String {
+								if aCLs.Name != "" {
+									return types.StringValue(aCLs.Name)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
 				}
 				return nil
 			}(),
-			AdaptivePolicyID: types.StringValue(item.AdaptivePolicyID),
-			CreatedAt:        types.StringValue(item.CreatedAt),
+			AdaptivePolicyID: func() types.String {
+				if item.AdaptivePolicyID != "" {
+					return types.StringValue(item.AdaptivePolicyID)
+				}
+				return types.String{}
+			}(),
+			CreatedAt: func() types.String {
+				if item.CreatedAt != "" {
+					return types.StringValue(item.CreatedAt)
+				}
+				return types.String{}
+			}(),
 			DestinationGroup: func() *ResponseItemOrganizationsGetOrganizationAdaptivePolicyPoliciesDestinationGroup {
 				if item.DestinationGroup != nil {
 					return &ResponseItemOrganizationsGetOrganizationAdaptivePolicyPoliciesDestinationGroup{
-						ID:   types.StringValue(item.DestinationGroup.ID),
-						Name: types.StringValue(item.DestinationGroup.Name),
+						ID: func() types.String {
+							if item.DestinationGroup.ID != "" {
+								return types.StringValue(item.DestinationGroup.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if item.DestinationGroup.Name != "" {
+								return types.StringValue(item.DestinationGroup.Name)
+							}
+							return types.String{}
+						}(),
 						Sgt: func() types.Int64 {
 							if item.DestinationGroup.Sgt != nil {
 								return types.Int64Value(int64(*item.DestinationGroup.Sgt))
@@ -395,12 +435,27 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyPoliciesItemsToBody(state
 				}
 				return nil
 			}(),
-			LastEntryRule: types.StringValue(item.LastEntryRule),
+			LastEntryRule: func() types.String {
+				if item.LastEntryRule != "" {
+					return types.StringValue(item.LastEntryRule)
+				}
+				return types.String{}
+			}(),
 			SourceGroup: func() *ResponseItemOrganizationsGetOrganizationAdaptivePolicyPoliciesSourceGroup {
 				if item.SourceGroup != nil {
 					return &ResponseItemOrganizationsGetOrganizationAdaptivePolicyPoliciesSourceGroup{
-						ID:   types.StringValue(item.SourceGroup.ID),
-						Name: types.StringValue(item.SourceGroup.Name),
+						ID: func() types.String {
+							if item.SourceGroup.ID != "" {
+								return types.StringValue(item.SourceGroup.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if item.SourceGroup.Name != "" {
+								return types.StringValue(item.SourceGroup.Name)
+							}
+							return types.String{}
+						}(),
 						Sgt: func() types.Int64 {
 							if item.SourceGroup.Sgt != nil {
 								return types.Int64Value(int64(*item.SourceGroup.Sgt))
@@ -411,7 +466,12 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyPoliciesItemsToBody(state
 				}
 				return nil
 			}(),
-			UpdatedAt: types.StringValue(item.UpdatedAt),
+			UpdatedAt: func() types.String {
+				if item.UpdatedAt != "" {
+					return types.StringValue(item.UpdatedAt)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -426,21 +486,51 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyItemToBody(state Or
 				result := make([]ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyAcls, len(*response.ACLs))
 				for i, aCLs := range *response.ACLs {
 					result[i] = ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyAcls{
-						ID:   types.StringValue(aCLs.ID),
-						Name: types.StringValue(aCLs.Name),
+						ID: func() types.String {
+							if aCLs.ID != "" {
+								return types.StringValue(aCLs.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if aCLs.Name != "" {
+								return types.StringValue(aCLs.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		AdaptivePolicyID: types.StringValue(response.AdaptivePolicyID),
-		CreatedAt:        types.StringValue(response.CreatedAt),
+		AdaptivePolicyID: func() types.String {
+			if response.AdaptivePolicyID != "" {
+				return types.StringValue(response.AdaptivePolicyID)
+			}
+			return types.String{}
+		}(),
+		CreatedAt: func() types.String {
+			if response.CreatedAt != "" {
+				return types.StringValue(response.CreatedAt)
+			}
+			return types.String{}
+		}(),
 		DestinationGroup: func() *ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyDestinationGroup {
 			if response.DestinationGroup != nil {
 				return &ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyDestinationGroup{
-					ID:   types.StringValue(response.DestinationGroup.ID),
-					Name: types.StringValue(response.DestinationGroup.Name),
+					ID: func() types.String {
+						if response.DestinationGroup.ID != "" {
+							return types.StringValue(response.DestinationGroup.ID)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.DestinationGroup.Name != "" {
+							return types.StringValue(response.DestinationGroup.Name)
+						}
+						return types.String{}
+					}(),
 					Sgt: func() types.Int64 {
 						if response.DestinationGroup.Sgt != nil {
 							return types.Int64Value(int64(*response.DestinationGroup.Sgt))
@@ -451,12 +541,27 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyItemToBody(state Or
 			}
 			return nil
 		}(),
-		LastEntryRule: types.StringValue(response.LastEntryRule),
+		LastEntryRule: func() types.String {
+			if response.LastEntryRule != "" {
+				return types.StringValue(response.LastEntryRule)
+			}
+			return types.String{}
+		}(),
 		SourceGroup: func() *ResponseOrganizationsGetOrganizationAdaptivePolicyPolicySourceGroup {
 			if response.SourceGroup != nil {
 				return &ResponseOrganizationsGetOrganizationAdaptivePolicyPolicySourceGroup{
-					ID:   types.StringValue(response.SourceGroup.ID),
-					Name: types.StringValue(response.SourceGroup.Name),
+					ID: func() types.String {
+						if response.SourceGroup.ID != "" {
+							return types.StringValue(response.SourceGroup.ID)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.SourceGroup.Name != "" {
+							return types.StringValue(response.SourceGroup.Name)
+						}
+						return types.String{}
+					}(),
 					Sgt: func() types.Int64 {
 						if response.SourceGroup.Sgt != nil {
 							return types.Int64Value(int64(*response.SourceGroup.Sgt))
@@ -467,7 +572,12 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyPolicyItemToBody(state Or
 			}
 			return nil
 		}(),
-		UpdatedAt: types.StringValue(response.UpdatedAt),
+		UpdatedAt: func() types.String {
+			if response.UpdatedAt != "" {
+				return types.StringValue(response.UpdatedAt)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

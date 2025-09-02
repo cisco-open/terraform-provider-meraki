@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -155,14 +154,29 @@ func ResponseSwitchGetNetworkSwitchLinkAggregationsItemsToBody(state NetworksSwi
 	var items []ResponseItemSwitchGetNetworkSwitchLinkAggregations
 	for _, item := range *response {
 		itemState := ResponseItemSwitchGetNetworkSwitchLinkAggregations{
-			ID: types.StringValue(item.ID),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
 			SwitchPorts: func() *[]ResponseItemSwitchGetNetworkSwitchLinkAggregationsSwitchPorts {
 				if item.SwitchPorts != nil {
 					result := make([]ResponseItemSwitchGetNetworkSwitchLinkAggregationsSwitchPorts, len(*item.SwitchPorts))
 					for i, switchPorts := range *item.SwitchPorts {
 						result[i] = ResponseItemSwitchGetNetworkSwitchLinkAggregationsSwitchPorts{
-							PortID: types.StringValue(switchPorts.PortID),
-							Serial: types.StringValue(switchPorts.Serial),
+							PortID: func() types.String {
+								if switchPorts.PortID != "" {
+									return types.StringValue(switchPorts.PortID)
+								}
+								return types.String{}
+							}(),
+							Serial: func() types.String {
+								if switchPorts.Serial != "" {
+									return types.StringValue(switchPorts.Serial)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result

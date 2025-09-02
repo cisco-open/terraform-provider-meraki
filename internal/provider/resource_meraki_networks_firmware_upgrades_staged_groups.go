@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"log"
@@ -30,9 +31,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -69,26 +70,23 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Schema(_ context.Context,
 		Attributes: map[string]schema.Attribute{
 			"assigned_devices": schema.SingleNestedAttribute{
 				MarkdownDescription: `The devices and Switch Stacks assigned to the Group`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
 				Attributes: map[string]schema.Attribute{
 
-					"devices": schema.SetNestedAttribute{
+					"devices": schema.ListNestedAttribute{
 						MarkdownDescription: `Data Array of Devices containing the name and serial`,
-						Computed:            true,
 						Optional:            true,
-						PlanModifiers: []planmodifier.Set{
-							setplanmodifier.UseStateForUnknown(),
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.UseStateForUnknown(),
 						},
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"name": schema.StringAttribute{
 									MarkdownDescription: `Name of the device`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -96,7 +94,6 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Schema(_ context.Context,
 								},
 								"serial": schema.StringAttribute{
 									MarkdownDescription: `Serial of the device`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -105,19 +102,17 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Schema(_ context.Context,
 							},
 						},
 					},
-					"switch_stacks": schema.SetNestedAttribute{
+					"switch_stacks": schema.ListNestedAttribute{
 						MarkdownDescription: `Data Array of Switch Stacks containing the name and id`,
-						Computed:            true,
 						Optional:            true,
-						PlanModifiers: []planmodifier.Set{
-							setplanmodifier.UseStateForUnknown(),
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.UseStateForUnknown(),
 						},
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"id": schema.StringAttribute{
 									MarkdownDescription: `ID of the Switch Stack`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -125,7 +120,6 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Schema(_ context.Context,
 								},
 								"name": schema.StringAttribute{
 									MarkdownDescription: `Name of the Switch Stack`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -138,7 +132,6 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Schema(_ context.Context,
 			},
 			"description": schema.StringAttribute{
 				MarkdownDescription: `Description of the Staged Upgrade Group`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -146,7 +139,6 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Schema(_ context.Context,
 			},
 			"group_id": schema.StringAttribute{
 				MarkdownDescription: `Id of staged upgrade group`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -154,7 +146,6 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Schema(_ context.Context,
 			},
 			"is_default": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating the default Group. Any device that does not have a group explicitly assigned will upgrade with this group`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -162,7 +153,6 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Schema(_ context.Context,
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `Name of the Staged Upgrade Group`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -247,7 +237,7 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Create(ctx context.Contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkFirmwareUpgradesStagedGroup",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -319,21 +309,11 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Create(ctx context.Contex
 func (r *NetworksFirmwareUpgradesStagedGroupsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksFirmwareUpgradesStagedGroupsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -364,9 +344,7 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Read(ctx context.Context,
 	}
 	//entro aqui 2
 	data = ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksFirmwareUpgradesStagedGroupsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -374,35 +352,31 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) ImportState(ctx context.C
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,groupId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("group_id"), idParts[1])...)
 }
 
 func (r *NetworksFirmwareUpgradesStagedGroupsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksFirmwareUpgradesStagedGroupsRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksFirmwareUpgradesStagedGroupsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvGroupID := data.GroupID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvGroupID := plan.GroupID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkFirmwareUpgradesStagedGroup(vvNetworkID, vvGroupID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkFirmwareUpgradesStagedGroup",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -412,9 +386,7 @@ func (r *NetworksFirmwareUpgradesStagedGroupsResource) Update(ctx context.Contex
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksFirmwareUpgradesStagedGroupsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -639,8 +611,18 @@ func ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupItemToBodyRs(state Net
 							result := make([]ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupAssignedDevicesDevicesRs, len(*response.AssignedDevices.Devices))
 							for i, devices := range *response.AssignedDevices.Devices {
 								result[i] = ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupAssignedDevicesDevicesRs{
-									Name:   types.StringValue(devices.Name),
-									Serial: types.StringValue(devices.Serial),
+									Name: func() types.String {
+										if devices.Name != "" {
+											return types.StringValue(devices.Name)
+										}
+										return types.String{}
+									}(),
+									Serial: func() types.String {
+										if devices.Serial != "" {
+											return types.StringValue(devices.Serial)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return &result
@@ -652,8 +634,18 @@ func ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupItemToBodyRs(state Net
 							result := make([]ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupAssignedDevicesSwitchStacksRs, len(*response.AssignedDevices.SwitchStacks))
 							for i, switchStacks := range *response.AssignedDevices.SwitchStacks {
 								result[i] = ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupAssignedDevicesSwitchStacksRs{
-									ID:   types.StringValue(switchStacks.ID),
-									Name: types.StringValue(switchStacks.Name),
+									ID: func() types.String {
+										if switchStacks.ID != "" {
+											return types.StringValue(switchStacks.ID)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if switchStacks.Name != "" {
+											return types.StringValue(switchStacks.Name)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return &result
@@ -664,15 +656,30 @@ func ResponseNetworksGetNetworkFirmwareUpgradesStagedGroupItemToBodyRs(state Net
 			}
 			return nil
 		}(),
-		Description: types.StringValue(response.Description),
-		GroupID:     types.StringValue(response.GroupID),
+		Description: func() types.String {
+			if response.Description != "" {
+				return types.StringValue(response.Description)
+			}
+			return types.String{}
+		}(),
+		GroupID: func() types.String {
+			if response.GroupID != "" {
+				return types.StringValue(response.GroupID)
+			}
+			return types.String{}
+		}(),
 		IsDefault: func() types.Bool {
 			if response.IsDefault != nil {
 				return types.BoolValue(*response.IsDefault)
 			}
 			return types.Bool{}
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksFirmwareUpgradesStagedGroupsRs)

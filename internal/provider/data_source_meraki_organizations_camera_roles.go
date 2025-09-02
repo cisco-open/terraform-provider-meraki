@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -284,6 +283,17 @@ func (d *OrganizationsCameraRolesDataSource) Read(ctx context.Context, req datas
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetOrganizationCameraRole",
+				err.Error(),
+			)
+			return
+		}
+
 		organizationsCameraRoles = ResponseCameraGetOrganizationCameraRoleItemToBody(organizationsCameraRoles, response2)
 		diags = resp.State.Set(ctx, &organizationsCameraRoles)
 		resp.Diagnostics.Append(diags...)
@@ -372,11 +382,36 @@ func ResponseCameraGetOrganizationCameraRolesItemsToBody(state OrganizationsCame
 					result := make([]ResponseItemCameraGetOrganizationCameraRolesAppliedOnDevices, len(*item.AppliedOnDevices))
 					for i, appliedOnDevices := range *item.AppliedOnDevices {
 						result[i] = ResponseItemCameraGetOrganizationCameraRolesAppliedOnDevices{
-							ID:                types.StringValue(appliedOnDevices.ID),
-							PermissionLevel:   types.StringValue(appliedOnDevices.PermissionLevel),
-							PermissionScope:   types.StringValue(appliedOnDevices.PermissionScope),
-							PermissionScopeID: types.StringValue(appliedOnDevices.PermissionScopeID),
-							Tag:               types.StringValue(appliedOnDevices.Tag),
+							ID: func() types.String {
+								if appliedOnDevices.ID != "" {
+									return types.StringValue(appliedOnDevices.ID)
+								}
+								return types.String{}
+							}(),
+							PermissionLevel: func() types.String {
+								if appliedOnDevices.PermissionLevel != "" {
+									return types.StringValue(appliedOnDevices.PermissionLevel)
+								}
+								return types.String{}
+							}(),
+							PermissionScope: func() types.String {
+								if appliedOnDevices.PermissionScope != "" {
+									return types.StringValue(appliedOnDevices.PermissionScope)
+								}
+								return types.String{}
+							}(),
+							PermissionScopeID: func() types.String {
+								if appliedOnDevices.PermissionScopeID != "" {
+									return types.StringValue(appliedOnDevices.PermissionScopeID)
+								}
+								return types.String{}
+							}(),
+							Tag: func() types.String {
+								if appliedOnDevices.Tag != "" {
+									return types.StringValue(appliedOnDevices.Tag)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
@@ -388,11 +423,36 @@ func ResponseCameraGetOrganizationCameraRolesItemsToBody(state OrganizationsCame
 					result := make([]ResponseItemCameraGetOrganizationCameraRolesAppliedOnNetworks, len(*item.AppliedOnNetworks))
 					for i, appliedOnNetworks := range *item.AppliedOnNetworks {
 						result[i] = ResponseItemCameraGetOrganizationCameraRolesAppliedOnNetworks{
-							ID:                types.StringValue(appliedOnNetworks.ID),
-							PermissionLevel:   types.StringValue(appliedOnNetworks.PermissionLevel),
-							PermissionScope:   types.StringValue(appliedOnNetworks.PermissionScope),
-							PermissionScopeID: types.StringValue(appliedOnNetworks.PermissionScopeID),
-							Tag:               types.StringValue(appliedOnNetworks.Tag),
+							ID: func() types.String {
+								if appliedOnNetworks.ID != "" {
+									return types.StringValue(appliedOnNetworks.ID)
+								}
+								return types.String{}
+							}(),
+							PermissionLevel: func() types.String {
+								if appliedOnNetworks.PermissionLevel != "" {
+									return types.StringValue(appliedOnNetworks.PermissionLevel)
+								}
+								return types.String{}
+							}(),
+							PermissionScope: func() types.String {
+								if appliedOnNetworks.PermissionScope != "" {
+									return types.StringValue(appliedOnNetworks.PermissionScope)
+								}
+								return types.String{}
+							}(),
+							PermissionScopeID: func() types.String {
+								if appliedOnNetworks.PermissionScopeID != "" {
+									return types.StringValue(appliedOnNetworks.PermissionScopeID)
+								}
+								return types.String{}
+							}(),
+							Tag: func() types.String {
+								if appliedOnNetworks.Tag != "" {
+									return types.StringValue(appliedOnNetworks.Tag)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
@@ -404,17 +464,42 @@ func ResponseCameraGetOrganizationCameraRolesItemsToBody(state OrganizationsCame
 					result := make([]ResponseItemCameraGetOrganizationCameraRolesAppliedOrgWide, len(*item.AppliedOrgWide))
 					for i, appliedOrgWide := range *item.AppliedOrgWide {
 						result[i] = ResponseItemCameraGetOrganizationCameraRolesAppliedOrgWide{
-							PermissionLevel:   types.StringValue(appliedOrgWide.PermissionLevel),
-							PermissionScope:   types.StringValue(appliedOrgWide.PermissionScope),
-							PermissionScopeID: types.StringValue(appliedOrgWide.PermissionScopeID),
-							Tag:               types.StringValue(appliedOrgWide.Tag),
+							PermissionLevel: func() types.String {
+								if appliedOrgWide.PermissionLevel != "" {
+									return types.StringValue(appliedOrgWide.PermissionLevel)
+								}
+								return types.String{}
+							}(),
+							PermissionScope: func() types.String {
+								if appliedOrgWide.PermissionScope != "" {
+									return types.StringValue(appliedOrgWide.PermissionScope)
+								}
+								return types.String{}
+							}(),
+							PermissionScopeID: func() types.String {
+								if appliedOrgWide.PermissionScopeID != "" {
+									return types.StringValue(appliedOrgWide.PermissionScopeID)
+								}
+								return types.String{}
+							}(),
+							Tag: func() types.String {
+								if appliedOrgWide.Tag != "" {
+									return types.StringValue(appliedOrgWide.Tag)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
 				}
 				return nil
 			}(),
-			Name: types.StringValue(item.Name),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -429,11 +514,36 @@ func ResponseCameraGetOrganizationCameraRoleItemToBody(state OrganizationsCamera
 				result := make([]ResponseCameraGetOrganizationCameraRoleAppliedOnDevices, len(*response.AppliedOnDevices))
 				for i, appliedOnDevices := range *response.AppliedOnDevices {
 					result[i] = ResponseCameraGetOrganizationCameraRoleAppliedOnDevices{
-						ID:                types.StringValue(appliedOnDevices.ID),
-						PermissionLevel:   types.StringValue(appliedOnDevices.PermissionLevel),
-						PermissionScope:   types.StringValue(appliedOnDevices.PermissionScope),
-						PermissionScopeID: types.StringValue(appliedOnDevices.PermissionScopeID),
-						Tag:               types.StringValue(appliedOnDevices.Tag),
+						ID: func() types.String {
+							if appliedOnDevices.ID != "" {
+								return types.StringValue(appliedOnDevices.ID)
+							}
+							return types.String{}
+						}(),
+						PermissionLevel: func() types.String {
+							if appliedOnDevices.PermissionLevel != "" {
+								return types.StringValue(appliedOnDevices.PermissionLevel)
+							}
+							return types.String{}
+						}(),
+						PermissionScope: func() types.String {
+							if appliedOnDevices.PermissionScope != "" {
+								return types.StringValue(appliedOnDevices.PermissionScope)
+							}
+							return types.String{}
+						}(),
+						PermissionScopeID: func() types.String {
+							if appliedOnDevices.PermissionScopeID != "" {
+								return types.StringValue(appliedOnDevices.PermissionScopeID)
+							}
+							return types.String{}
+						}(),
+						Tag: func() types.String {
+							if appliedOnDevices.Tag != "" {
+								return types.StringValue(appliedOnDevices.Tag)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -445,11 +555,36 @@ func ResponseCameraGetOrganizationCameraRoleItemToBody(state OrganizationsCamera
 				result := make([]ResponseCameraGetOrganizationCameraRoleAppliedOnNetworks, len(*response.AppliedOnNetworks))
 				for i, appliedOnNetworks := range *response.AppliedOnNetworks {
 					result[i] = ResponseCameraGetOrganizationCameraRoleAppliedOnNetworks{
-						ID:                types.StringValue(appliedOnNetworks.ID),
-						PermissionLevel:   types.StringValue(appliedOnNetworks.PermissionLevel),
-						PermissionScope:   types.StringValue(appliedOnNetworks.PermissionScope),
-						PermissionScopeID: types.StringValue(appliedOnNetworks.PermissionScopeID),
-						Tag:               types.StringValue(appliedOnNetworks.Tag),
+						ID: func() types.String {
+							if appliedOnNetworks.ID != "" {
+								return types.StringValue(appliedOnNetworks.ID)
+							}
+							return types.String{}
+						}(),
+						PermissionLevel: func() types.String {
+							if appliedOnNetworks.PermissionLevel != "" {
+								return types.StringValue(appliedOnNetworks.PermissionLevel)
+							}
+							return types.String{}
+						}(),
+						PermissionScope: func() types.String {
+							if appliedOnNetworks.PermissionScope != "" {
+								return types.StringValue(appliedOnNetworks.PermissionScope)
+							}
+							return types.String{}
+						}(),
+						PermissionScopeID: func() types.String {
+							if appliedOnNetworks.PermissionScopeID != "" {
+								return types.StringValue(appliedOnNetworks.PermissionScopeID)
+							}
+							return types.String{}
+						}(),
+						Tag: func() types.String {
+							if appliedOnNetworks.Tag != "" {
+								return types.StringValue(appliedOnNetworks.Tag)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -461,17 +596,42 @@ func ResponseCameraGetOrganizationCameraRoleItemToBody(state OrganizationsCamera
 				result := make([]ResponseCameraGetOrganizationCameraRoleAppliedOrgWide, len(*response.AppliedOrgWide))
 				for i, appliedOrgWide := range *response.AppliedOrgWide {
 					result[i] = ResponseCameraGetOrganizationCameraRoleAppliedOrgWide{
-						PermissionLevel:   types.StringValue(appliedOrgWide.PermissionLevel),
-						PermissionScope:   types.StringValue(appliedOrgWide.PermissionScope),
-						PermissionScopeID: types.StringValue(appliedOrgWide.PermissionScopeID),
-						Tag:               types.StringValue(appliedOrgWide.Tag),
+						PermissionLevel: func() types.String {
+							if appliedOrgWide.PermissionLevel != "" {
+								return types.StringValue(appliedOrgWide.PermissionLevel)
+							}
+							return types.String{}
+						}(),
+						PermissionScope: func() types.String {
+							if appliedOrgWide.PermissionScope != "" {
+								return types.StringValue(appliedOrgWide.PermissionScope)
+							}
+							return types.String{}
+						}(),
+						PermissionScopeID: func() types.String {
+							if appliedOrgWide.PermissionScopeID != "" {
+								return types.StringValue(appliedOrgWide.PermissionScopeID)
+							}
+							return types.String{}
+						}(),
+						Tag: func() types.String {
+							if appliedOrgWide.Tag != "" {
+								return types.StringValue(appliedOrgWide.Tag)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

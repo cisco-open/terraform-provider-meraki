@@ -6,7 +6,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "1.1.8-beta"
+      version = "1.2.0-beta"
       source  = "hashicorp.com/edu/meraki"
     }
   }
@@ -67,6 +67,7 @@ resource "meraki_networks_wireless_ssids" "my_wpa_psk_ssid" {
   name                = "Somewhat secure"
   ip_assignment_mode  = "Bridge mode"
   default_vlan_id     = "200"
+  splash_page         = "Click-through splash page"
 }
 
 # #

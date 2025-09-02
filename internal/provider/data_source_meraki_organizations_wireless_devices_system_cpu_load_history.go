@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -278,20 +277,50 @@ func ResponseWirelessGetOrganizationWirelessDevicesSystemCPULoadHistoryItemToBod
 							}
 							return types.Int64{}
 						}(),
-						Mac:   types.StringValue(items.Mac),
-						Model: types.StringValue(items.Model),
-						Name:  types.StringValue(items.Name),
+						Mac: func() types.String {
+							if items.Mac != "" {
+								return types.StringValue(items.Mac)
+							}
+							return types.String{}
+						}(),
+						Model: func() types.String {
+							if items.Model != "" {
+								return types.StringValue(items.Model)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if items.Name != "" {
+								return types.StringValue(items.Name)
+							}
+							return types.String{}
+						}(),
 						Network: func() *ResponseWirelessGetOrganizationWirelessDevicesSystemCpuLoadHistoryItemsNetwork {
 							if items.Network != nil {
 								return &ResponseWirelessGetOrganizationWirelessDevicesSystemCpuLoadHistoryItemsNetwork{
-									ID:   types.StringValue(items.Network.ID),
-									Name: types.StringValue(items.Network.Name),
+									ID: func() types.String {
+										if items.Network.ID != "" {
+											return types.StringValue(items.Network.ID)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if items.Network.Name != "" {
+											return types.StringValue(items.Network.Name)
+										}
+										return types.String{}
+									}(),
 									Tags: StringSliceToList(items.Network.Tags),
 								}
 							}
 							return nil
 						}(),
-						Serial: types.StringValue(items.Serial),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
 						Series: func() *[]ResponseWirelessGetOrganizationWirelessDevicesSystemCpuLoadHistoryItemsSeries {
 							if items.Series != nil {
 								result := make([]ResponseWirelessGetOrganizationWirelessDevicesSystemCpuLoadHistoryItemsSeries, len(*items.Series))
@@ -303,7 +332,12 @@ func ResponseWirelessGetOrganizationWirelessDevicesSystemCPULoadHistoryItemToBod
 											}
 											return types.Int64{}
 										}(),
-										Ts: types.StringValue(series.Ts),
+										Ts: func() types.String {
+											if series.Ts != "" {
+												return types.StringValue(series.Ts)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result

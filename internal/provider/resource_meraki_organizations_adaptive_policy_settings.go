@@ -19,14 +19,16 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -60,15 +62,16 @@ func (r *OrganizationsAdaptivePolicySettingsResource) Metadata(_ context.Context
 func (r *OrganizationsAdaptivePolicySettingsResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"enabled_networks": schema.SetAttribute{
+			"enabled_networks": schema.ListAttribute{
 				MarkdownDescription: `List of network IDs with adaptive policy enabled`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
@@ -100,27 +103,6 @@ func (r *OrganizationsAdaptivePolicySettingsResource) Create(ctx context.Context
 	vvOrganizationID := data.OrganizationID.ValueString()
 	//Has Item and not has items
 
-	if vvOrganizationID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationAdaptivePolicySettings(vvOrganizationID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource OrganizationsAdaptivePolicySettings  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource OrganizationsAdaptivePolicySettings only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationAdaptivePolicySettings(vvOrganizationID, dataRequest)
@@ -129,7 +111,7 @@ func (r *OrganizationsAdaptivePolicySettingsResource) Create(ctx context.Context
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationAdaptivePolicySettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -140,49 +122,19 @@ func (r *OrganizationsAdaptivePolicySettingsResource) Create(ctx context.Context
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationAdaptivePolicySettings(vvOrganizationID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizationAdaptivePolicySettings",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetOrganizationAdaptivePolicySettings",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseOrganizationsGetOrganizationAdaptivePolicySettingsItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *OrganizationsAdaptivePolicySettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data OrganizationsAdaptivePolicySettingsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -212,33 +164,28 @@ func (r *OrganizationsAdaptivePolicySettingsResource) Read(ctx context.Context, 
 	}
 	//entro aqui 2
 	data = ResponseOrganizationsGetOrganizationAdaptivePolicySettingsItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *OrganizationsAdaptivePolicySettingsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), req.ID)...)
 }
 
 func (r *OrganizationsAdaptivePolicySettingsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data OrganizationsAdaptivePolicySettingsRs
-	merge(ctx, req, resp, &data)
+	var plan OrganizationsAdaptivePolicySettingsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvOrganizationID := data.OrganizationID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvOrganizationID := plan.OrganizationID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationAdaptivePolicySettings(vvOrganizationID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationAdaptivePolicySettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -248,9 +195,7 @@ func (r *OrganizationsAdaptivePolicySettingsResource) Update(ctx context.Context
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *OrganizationsAdaptivePolicySettingsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -262,7 +207,7 @@ func (r *OrganizationsAdaptivePolicySettingsResource) Delete(ctx context.Context
 // TF Structs Schema
 type OrganizationsAdaptivePolicySettingsRs struct {
 	OrganizationID  types.String `tfsdk:"organization_id"`
-	EnabledNetworks types.Set    `tfsdk:"enabled_networks"`
+	EnabledNetworks types.List   `tfsdk:"enabled_networks"`
 }
 
 // FromBody
@@ -278,7 +223,7 @@ func (r *OrganizationsAdaptivePolicySettingsRs) toSdkApiRequestUpdate(ctx contex
 // From gosdk to TF Structs Schema
 func ResponseOrganizationsGetOrganizationAdaptivePolicySettingsItemToBodyRs(state OrganizationsAdaptivePolicySettingsRs, response *merakigosdk.ResponseOrganizationsGetOrganizationAdaptivePolicySettings, is_read bool) OrganizationsAdaptivePolicySettingsRs {
 	itemState := OrganizationsAdaptivePolicySettingsRs{
-		EnabledNetworks: StringSliceToSet(response.EnabledNetworks),
+		EnabledNetworks: StringSliceToList(response.EnabledNetworks),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsAdaptivePolicySettingsRs)

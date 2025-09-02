@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -235,9 +234,24 @@ func ResponseLicensingGetAdministeredLicensingSubscriptionSubscriptionsComplianc
 			Subscription: func() *ResponseItemLicensingGetAdministeredLicensingSubscriptionSubscriptionsComplianceStatusesSubscription {
 				if item.Subscription != nil {
 					return &ResponseItemLicensingGetAdministeredLicensingSubscriptionSubscriptionsComplianceStatusesSubscription{
-						ID:     types.StringValue(item.Subscription.ID),
-						Name:   types.StringValue(item.Subscription.Name),
-						Status: types.StringValue(item.Subscription.Status),
+						ID: func() types.String {
+							if item.Subscription.ID != "" {
+								return types.StringValue(item.Subscription.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if item.Subscription.Name != "" {
+								return types.StringValue(item.Subscription.Name)
+							}
+							return types.String{}
+						}(),
+						Status: func() types.String {
+							if item.Subscription.Status != "" {
+								return types.StringValue(item.Subscription.Status)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -250,7 +264,12 @@ func ResponseLicensingGetAdministeredLicensingSubscriptionSubscriptionsComplianc
 								result := make([]ResponseItemLicensingGetAdministeredLicensingSubscriptionSubscriptionsComplianceStatusesViolationsByProductClass, len(*item.Violations.ByProductClass))
 								for i, byProductClass := range *item.Violations.ByProductClass {
 									result[i] = ResponseItemLicensingGetAdministeredLicensingSubscriptionSubscriptionsComplianceStatusesViolationsByProductClass{
-										GracePeriodEndsAt: types.StringValue(byProductClass.GracePeriodEndsAt),
+										GracePeriodEndsAt: func() types.String {
+											if byProductClass.GracePeriodEndsAt != "" {
+												return types.StringValue(byProductClass.GracePeriodEndsAt)
+											}
+											return types.String{}
+										}(),
 										Missing: func() *ResponseItemLicensingGetAdministeredLicensingSubscriptionSubscriptionsComplianceStatusesViolationsByProductClassMissing {
 											if byProductClass.Missing != nil {
 												return &ResponseItemLicensingGetAdministeredLicensingSubscriptionSubscriptionsComplianceStatusesViolationsByProductClassMissing{
@@ -265,7 +284,12 @@ func ResponseLicensingGetAdministeredLicensingSubscriptionSubscriptionsComplianc
 																		}
 																		return types.Int64{}
 																	}(),
-																	Sku: types.StringValue(entitlements.Sku),
+																	Sku: func() types.String {
+																		if entitlements.Sku != "" {
+																			return types.StringValue(entitlements.Sku)
+																		}
+																		return types.String{}
+																	}(),
 																}
 															}
 															return &result
@@ -276,7 +300,12 @@ func ResponseLicensingGetAdministeredLicensingSubscriptionSubscriptionsComplianc
 											}
 											return nil
 										}(),
-										ProductClass: types.StringValue(byProductClass.ProductClass),
+										ProductClass: func() types.String {
+											if byProductClass.ProductClass != "" {
+												return types.StringValue(byProductClass.ProductClass)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result

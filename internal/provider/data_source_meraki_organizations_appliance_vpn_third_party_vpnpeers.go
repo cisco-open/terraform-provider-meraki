@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -249,7 +248,12 @@ func ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersItemToBody(st
 				result := make([]ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersPeers, len(*response.Peers))
 				for i, peers := range *response.Peers {
 					result[i] = ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersPeers{
-						IkeVersion: types.StringValue(peers.IkeVersion),
+						IkeVersion: func() types.String {
+							if peers.IkeVersion != "" {
+								return types.StringValue(peers.IkeVersion)
+							}
+							return types.String{}
+						}(),
 						IPsecPolicies: func() *ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersPeersIpsecPolicies {
 							if peers.IPsecPolicies != nil {
 								return &ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersPeersIpsecPolicies{
@@ -276,14 +280,44 @@ func ResponseApplianceGetOrganizationApplianceVpnThirdPartyVpnpeersItemToBody(st
 							}
 							return nil
 						}(),
-						IPsecPoliciesPreset: types.StringValue(peers.IPsecPoliciesPreset),
-						LocalID:             types.StringValue(peers.LocalID),
-						Name:                types.StringValue(peers.Name),
-						NetworkTags:         StringSliceToList(peers.NetworkTags),
-						PrivateSubnets:      StringSliceToList(peers.PrivateSubnets),
-						PublicIP:            types.StringValue(peers.PublicIP),
-						RemoteID:            types.StringValue(peers.RemoteID),
-						Secret:              types.StringValue(peers.Secret),
+						IPsecPoliciesPreset: func() types.String {
+							if peers.IPsecPoliciesPreset != "" {
+								return types.StringValue(peers.IPsecPoliciesPreset)
+							}
+							return types.String{}
+						}(),
+						LocalID: func() types.String {
+							if peers.LocalID != "" {
+								return types.StringValue(peers.LocalID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if peers.Name != "" {
+								return types.StringValue(peers.Name)
+							}
+							return types.String{}
+						}(),
+						NetworkTags:    StringSliceToList(peers.NetworkTags),
+						PrivateSubnets: StringSliceToList(peers.PrivateSubnets),
+						PublicIP: func() types.String {
+							if peers.PublicIP != "" {
+								return types.StringValue(peers.PublicIP)
+							}
+							return types.String{}
+						}(),
+						RemoteID: func() types.String {
+							if peers.RemoteID != "" {
+								return types.StringValue(peers.RemoteID)
+							}
+							return types.String{}
+						}(),
+						Secret: func() types.String {
+							if peers.Secret != "" {
+								return types.StringValue(peers.Secret)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

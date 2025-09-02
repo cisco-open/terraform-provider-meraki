@@ -156,8 +156,18 @@ type RequestApplianceCreateDeviceApplianceVmxAuthenticationTokenRs interface{}
 // ToBody
 func ResponseApplianceCreateDeviceApplianceVmxAuthenticationTokenItemToBody(state DevicesApplianceVmxAuthenticationToken, response *merakigosdk.ResponseApplianceCreateDeviceApplianceVmxAuthenticationToken) DevicesApplianceVmxAuthenticationToken {
 	itemState := ResponseApplianceCreateDeviceApplianceVmxAuthenticationToken{
-		ExpiresAt: types.StringValue(response.ExpiresAt),
-		Token:     types.StringValue(response.Token),
+		ExpiresAt: func() types.String {
+			if response.ExpiresAt != "" {
+				return types.StringValue(response.ExpiresAt)
+			}
+			return types.String{}
+		}(),
+		Token: func() types.String {
+			if response.Token != "" {
+				return types.StringValue(response.Token)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

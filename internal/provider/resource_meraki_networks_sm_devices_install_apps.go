@@ -164,7 +164,7 @@ type NetworksSmDevicesInstallApps struct {
 }
 
 type RequestSmInstallNetworkSmDeviceAppsRs struct {
-	AppIDs types.Set  `tfsdk:"app_ids"`
+	AppIDs types.List `tfsdk:"app_ids"`
 	Force  types.Bool `tfsdk:"force"`
 }
 

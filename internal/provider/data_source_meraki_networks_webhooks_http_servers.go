@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -208,6 +207,17 @@ func (d *NetworksWebhooksHTTPServersDataSource) Read(ctx context.Context, req da
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkWebhooksHTTPServer",
+				err.Error(),
+			)
+			return
+		}
+
 		networksWebhooksHTTPServers = ResponseNetworksGetNetworkWebhooksHTTPServerItemToBody(networksWebhooksHTTPServers, response2)
 		diags = resp.State.Set(ctx, &networksWebhooksHTTPServers)
 		resp.Diagnostics.Append(diags...)
@@ -257,19 +267,49 @@ func ResponseNetworksGetNetworkWebhooksHTTPServersItemsToBody(state NetworksWebh
 	var items []ResponseItemNetworksGetNetworkWebhooksHttpServers
 	for _, item := range *response {
 		itemState := ResponseItemNetworksGetNetworkWebhooksHttpServers{
-			ID:        types.StringValue(item.ID),
-			Name:      types.StringValue(item.Name),
-			NetworkID: types.StringValue(item.NetworkID),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			NetworkID: func() types.String {
+				if item.NetworkID != "" {
+					return types.StringValue(item.NetworkID)
+				}
+				return types.String{}
+			}(),
 			PayloadTemplate: func() *ResponseItemNetworksGetNetworkWebhooksHttpServersPayloadTemplate {
 				if item.PayloadTemplate != nil {
 					return &ResponseItemNetworksGetNetworkWebhooksHttpServersPayloadTemplate{
-						Name:              types.StringValue(item.PayloadTemplate.Name),
-						PayloadTemplateID: types.StringValue(item.PayloadTemplate.PayloadTemplateID),
+						Name: func() types.String {
+							if item.PayloadTemplate.Name != "" {
+								return types.StringValue(item.PayloadTemplate.Name)
+							}
+							return types.String{}
+						}(),
+						PayloadTemplateID: func() types.String {
+							if item.PayloadTemplate.PayloadTemplateID != "" {
+								return types.StringValue(item.PayloadTemplate.PayloadTemplateID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			URL: types.StringValue(item.URL),
+			URL: func() types.String {
+				if item.URL != "" {
+					return types.StringValue(item.URL)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -279,19 +319,49 @@ func ResponseNetworksGetNetworkWebhooksHTTPServersItemsToBody(state NetworksWebh
 
 func ResponseNetworksGetNetworkWebhooksHTTPServerItemToBody(state NetworksWebhooksHTTPServers, response *merakigosdk.ResponseNetworksGetNetworkWebhooksHTTPServer) NetworksWebhooksHTTPServers {
 	itemState := ResponseNetworksGetNetworkWebhooksHttpServer{
-		ID:        types.StringValue(response.ID),
-		Name:      types.StringValue(response.Name),
-		NetworkID: types.StringValue(response.NetworkID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
 		PayloadTemplate: func() *ResponseNetworksGetNetworkWebhooksHttpServerPayloadTemplate {
 			if response.PayloadTemplate != nil {
 				return &ResponseNetworksGetNetworkWebhooksHttpServerPayloadTemplate{
-					Name:              types.StringValue(response.PayloadTemplate.Name),
-					PayloadTemplateID: types.StringValue(response.PayloadTemplate.PayloadTemplateID),
+					Name: func() types.String {
+						if response.PayloadTemplate.Name != "" {
+							return types.StringValue(response.PayloadTemplate.Name)
+						}
+						return types.String{}
+					}(),
+					PayloadTemplateID: func() types.String {
+						if response.PayloadTemplate.PayloadTemplateID != "" {
+							return types.StringValue(response.PayloadTemplate.PayloadTemplateID)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		URL: types.StringValue(response.URL),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

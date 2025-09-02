@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -198,9 +197,24 @@ func ResponseCameraGetOrganizationCameraBoundariesAreasByDeviceItemsToBody(state
 			Boundaries: func() *ResponseItemCameraGetOrganizationCameraBoundariesAreasByDeviceBoundaries {
 				if item.Boundaries != nil {
 					return &ResponseItemCameraGetOrganizationCameraBoundariesAreasByDeviceBoundaries{
-						ID:   types.StringValue(item.Boundaries.ID),
-						Name: types.StringValue(item.Boundaries.Name),
-						Type: types.StringValue(item.Boundaries.Type),
+						ID: func() types.String {
+							if item.Boundaries.ID != "" {
+								return types.StringValue(item.Boundaries.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if item.Boundaries.Name != "" {
+								return types.StringValue(item.Boundaries.Name)
+							}
+							return types.String{}
+						}(),
+						Type: func() types.String {
+							if item.Boundaries.Type != "" {
+								return types.StringValue(item.Boundaries.Type)
+							}
+							return types.String{}
+						}(),
 						Vertices: func() *[]ResponseItemCameraGetOrganizationCameraBoundariesAreasByDeviceBoundariesVertices {
 							if item.Boundaries.Vertices != nil {
 								result := make([]ResponseItemCameraGetOrganizationCameraBoundariesAreasByDeviceBoundariesVertices, len(*item.Boundaries.Vertices))
@@ -228,8 +242,18 @@ func ResponseCameraGetOrganizationCameraBoundariesAreasByDeviceItemsToBody(state
 				}
 				return nil
 			}(),
-			NetworkID: types.StringValue(item.NetworkID),
-			Serial:    types.StringValue(item.Serial),
+			NetworkID: func() types.String {
+				if item.NetworkID != "" {
+					return types.StringValue(item.NetworkID)
+				}
+				return types.String{}
+			}(),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

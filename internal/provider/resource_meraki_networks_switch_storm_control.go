@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -26,8 +27,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -63,7 +65,6 @@ func (r *NetworksSwitchStormControlResource) Schema(_ context.Context, _ resourc
 		Attributes: map[string]schema.Attribute{
 			"broadcast_threshold": schema.Int64Attribute{
 				MarkdownDescription: `Broadcast threshold.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -71,7 +72,6 @@ func (r *NetworksSwitchStormControlResource) Schema(_ context.Context, _ resourc
 			},
 			"multicast_threshold": schema.Int64Attribute{
 				MarkdownDescription: `Multicast threshold.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -81,19 +81,19 @@ func (r *NetworksSwitchStormControlResource) Schema(_ context.Context, _ resourc
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"treat_these_traffic_types_as_one_threshold": schema.SetAttribute{
+			"treat_these_traffic_types_as_one_threshold": schema.ListAttribute{
 				MarkdownDescription: `Grouped traffic types`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"unknown_unicast_threshold": schema.Int64Attribute{
 				MarkdownDescription: `Unknown Unicast threshold.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -125,27 +125,6 @@ func (r *NetworksSwitchStormControlResource) Create(ctx context.Context, req res
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchStormControl(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSwitchStormControl  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSwitchStormControl only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchStormControl(vvNetworkID, dataRequest)
@@ -154,7 +133,7 @@ func (r *NetworksSwitchStormControlResource) Create(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStormControl",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -165,49 +144,19 @@ func (r *NetworksSwitchStormControlResource) Create(ctx context.Context, req res
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchStormControl(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkSwitchStormControl",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkSwitchStormControl",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseSwitchGetNetworkSwitchStormControlItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksSwitchStormControlResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksSwitchStormControlRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -237,33 +186,28 @@ func (r *NetworksSwitchStormControlResource) Read(ctx context.Context, req resou
 	}
 	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchStormControlItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksSwitchStormControlResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksSwitchStormControlResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksSwitchStormControlRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksSwitchStormControlRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchStormControl(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchStormControl",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -273,9 +217,7 @@ func (r *NetworksSwitchStormControlResource) Update(ctx context.Context, req res
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksSwitchStormControlResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -289,7 +231,7 @@ type NetworksSwitchStormControlRs struct {
 	NetworkID                            types.String `tfsdk:"network_id"`
 	BroadcastThreshold                   types.Int64  `tfsdk:"broadcast_threshold"`
 	MulticastThreshold                   types.Int64  `tfsdk:"multicast_threshold"`
-	TreatTheseTrafficTypesAsOneThreshold types.Set    `tfsdk:"treat_these_traffic_types_as_one_threshold"`
+	TreatTheseTrafficTypesAsOneThreshold types.List   `tfsdk:"treat_these_traffic_types_as_one_threshold"`
 	UnknownUnicastThreshold              types.Int64  `tfsdk:"unknown_unicast_threshold"`
 }
 
@@ -339,7 +281,7 @@ func ResponseSwitchGetNetworkSwitchStormControlItemToBodyRs(state NetworksSwitch
 			}
 			return types.Int64{}
 		}(),
-		TreatTheseTrafficTypesAsOneThreshold: StringSliceToSet(response.TreatTheseTrafficTypesAsOneThreshold),
+		TreatTheseTrafficTypesAsOneThreshold: StringSliceToList(response.TreatTheseTrafficTypesAsOneThreshold),
 		UnknownUnicastThreshold: func() types.Int64 {
 			if response.UnknownUnicastThreshold != nil {
 				return types.Int64Value(int64(*response.UnknownUnicastThreshold))

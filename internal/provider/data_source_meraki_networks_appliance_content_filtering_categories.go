@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -146,8 +145,18 @@ func ResponseApplianceGetNetworkApplianceContentFilteringCategoriesItemToBody(st
 				result := make([]ResponseApplianceGetNetworkApplianceContentFilteringCategoriesCategories, len(*response.Categories))
 				for i, categories := range *response.Categories {
 					result[i] = ResponseApplianceGetNetworkApplianceContentFilteringCategoriesCategories{
-						ID:   types.StringValue(categories.ID),
-						Name: types.StringValue(categories.Name),
+						ID: func() types.String {
+							if categories.ID != "" {
+								return types.StringValue(categories.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if categories.Name != "" {
+								return types.StringValue(categories.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -29,8 +30,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -68,7 +70,6 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Schema(_ context.Context, _
 		Attributes: map[string]schema.Attribute{
 			"boot_file_name": schema.StringAttribute{
 				MarkdownDescription: `The PXE boot server file name for the DHCP server running on the switch stack interface`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -76,7 +77,6 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Schema(_ context.Context, _
 			},
 			"boot_next_server": schema.StringAttribute{
 				MarkdownDescription: `The PXE boot server IP for the DHCP server running on the switch stack interface`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -84,7 +84,6 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Schema(_ context.Context, _
 			},
 			"boot_options_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Enable DHCP boot options to provide PXE boot options configs for the dhcp server running on the switch stack interface`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -93,7 +92,6 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Schema(_ context.Context, _
 			"dhcp_lease_time": schema.StringAttribute{
 				MarkdownDescription: `The DHCP lease time config for the dhcp server running on the switch stack interface ('30 minutes', '1 hour', '4 hours', '12 hours', '1 day' or '1 week')
                                   Allowed values: [1 day,1 hour,1 week,12 hours,30 minutes,4 hours]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -112,7 +110,6 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Schema(_ context.Context, _
 			"dhcp_mode": schema.StringAttribute{
 				MarkdownDescription: `The DHCP mode options for the switch stack interface ('dhcpDisabled', 'dhcpRelay' or 'dhcpServer')
                                   Allowed values: [dhcpDisabled,dhcpRelay,dhcpServer]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -125,19 +122,17 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Schema(_ context.Context, _
 					),
 				},
 			},
-			"dhcp_options": schema.SetNestedAttribute{
+			"dhcp_options": schema.ListNestedAttribute{
 				MarkdownDescription: `Array of DHCP options consisting of code, type and value for the DHCP server running on the switch stack interface`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"code": schema.StringAttribute{
 							MarkdownDescription: `The code for DHCP option which should be from 2 to 254`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -146,7 +141,6 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Schema(_ context.Context, _
 						"type": schema.StringAttribute{
 							MarkdownDescription: `The type of the DHCP option which should be one of ('text', 'ip', 'integer' or 'hex')
                                         Allowed values: [hex,integer,ip,text]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -162,7 +156,6 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Schema(_ context.Context, _
 						},
 						"value": schema.StringAttribute{
 							MarkdownDescription: `The value of the DHCP option`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -171,30 +164,31 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Schema(_ context.Context, _
 					},
 				},
 			},
-			"dhcp_relay_server_ips": schema.SetAttribute{
+			"dhcp_relay_server_ips": schema.ListAttribute{
 				MarkdownDescription: `The DHCP relay server IPs to which DHCP packets would get relayed for the switch stack interface`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
-			"dns_custom_nameservers": schema.SetAttribute{
+			"dns_custom_nameservers": schema.ListAttribute{
 				MarkdownDescription: `The DHCP name server IPs when DHCP name server option is 'custom'`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"dns_nameservers_option": schema.StringAttribute{
 				MarkdownDescription: `The DHCP name server option for the dhcp server running on the switch stack interface ('googlePublicDns', 'openDns' or 'custom')
                                   Allowed values: [custom,googlePublicDns,openDns]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -207,19 +201,17 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Schema(_ context.Context, _
 					),
 				},
 			},
-			"fixed_ip_assignments": schema.SetNestedAttribute{
+			"fixed_ip_assignments": schema.ListNestedAttribute{
 				MarkdownDescription: `Array of DHCP reserved IP assignments for the DHCP server running on the switch stack interface`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"ip": schema.StringAttribute{
 							MarkdownDescription: `The IP address of the client which has fixed IP address assigned to it`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -227,7 +219,6 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Schema(_ context.Context, _
 						},
 						"mac": schema.StringAttribute{
 							MarkdownDescription: `The MAC address of the client which has fixed IP address`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -235,7 +226,6 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Schema(_ context.Context, _
 						},
 						"name": schema.StringAttribute{
 							MarkdownDescription: `The name of the client which has fixed IP address`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -248,19 +238,17 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Schema(_ context.Context, _
 				MarkdownDescription: `interfaceId path parameter. Interface ID`,
 				Required:            true,
 			},
-			"reserved_ip_ranges": schema.SetNestedAttribute{
+			"reserved_ip_ranges": schema.ListNestedAttribute{
 				MarkdownDescription: `Array of DHCP reserved IP assignments for the DHCP server running on the switch stack interface`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"comment": schema.StringAttribute{
 							MarkdownDescription: `The comment for the reserved IP range`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -268,7 +256,6 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Schema(_ context.Context, _
 						},
 						"end": schema.StringAttribute{
 							MarkdownDescription: `The ending IP address of the reserved IP range`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -276,7 +263,6 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Schema(_ context.Context, _
 						},
 						"start": schema.StringAttribute{
 							MarkdownDescription: `The starting IP address of the reserved IP range`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -316,19 +302,6 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Create(ctx context.Context,
 	vvInterfaceID := data.InterfaceID.ValueString()
 	//Has Item and not has items
 
-	if vvSerial != "" && vvInterfaceID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Switch.GetDeviceSwitchRoutingInterfaceDhcp(vvSerial, vvInterfaceID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesSwitchRoutingInterfacesDhcp  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateDeviceSwitchRoutingInterfaceDhcp(vvSerial, vvInterfaceID, dataRequest)
@@ -337,7 +310,7 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Create(ctx context.Context,
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceSwitchRoutingInterfaceDhcp",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -348,49 +321,19 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Create(ctx context.Context,
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Switch.GetDeviceSwitchRoutingInterfaceDhcp(vvSerial, vvInterfaceID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetDeviceSwitchRoutingInterfaceDhcp",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetDeviceSwitchRoutingInterfaceDhcp",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *DevicesSwitchRoutingInterfacesDhcpResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data DevicesSwitchRoutingInterfacesDhcpRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -421,9 +364,7 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Read(ctx context.Context, r
 	}
 	//entro aqui 2
 	data = ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *DevicesSwitchRoutingInterfacesDhcpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -431,35 +372,31 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) ImportState(ctx context.Con
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: serial,interfaceId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("serial"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("interface_id"), idParts[1])...)
 }
 
 func (r *DevicesSwitchRoutingInterfacesDhcpResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data DevicesSwitchRoutingInterfacesDhcpRs
-	merge(ctx, req, resp, &data)
+	var plan DevicesSwitchRoutingInterfacesDhcpRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvSerial := data.Serial.ValueString()
-	vvInterfaceID := data.InterfaceID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvSerial := plan.Serial.ValueString()
+	vvInterfaceID := plan.InterfaceID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateDeviceSwitchRoutingInterfaceDhcp(vvSerial, vvInterfaceID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceSwitchRoutingInterfaceDhcp",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -469,9 +406,7 @@ func (r *DevicesSwitchRoutingInterfacesDhcpResource) Update(ctx context.Context,
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *DevicesSwitchRoutingInterfacesDhcpResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -490,8 +425,8 @@ type DevicesSwitchRoutingInterfacesDhcpRs struct {
 	DhcpLeaseTime        types.String                                                             `tfsdk:"dhcp_lease_time"`
 	DhcpMode             types.String                                                             `tfsdk:"dhcp_mode"`
 	DhcpOptions          *[]ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpDhcpOptionsRs        `tfsdk:"dhcp_options"`
-	DhcpRelayServerIPs   types.Set                                                                `tfsdk:"dhcp_relay_server_ips"`
-	DNSCustomNameservers types.Set                                                                `tfsdk:"dns_custom_nameservers"`
+	DhcpRelayServerIPs   types.List                                                               `tfsdk:"dhcp_relay_server_ips"`
+	DNSCustomNameservers types.List                                                               `tfsdk:"dns_custom_nameservers"`
 	DNSNameserversOption types.String                                                             `tfsdk:"dns_nameservers_option"`
 	FixedIPAssignments   *[]ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpFixedIpAssignmentsRs `tfsdk:"fixed_ip_assignments"`
 	ReservedIPRanges     *[]ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpReservedIpRangesRs   `tfsdk:"reserved_ip_ranges"`
@@ -637,41 +572,96 @@ func (r *DevicesSwitchRoutingInterfacesDhcpRs) toSdkApiRequestUpdate(ctx context
 // From gosdk to TF Structs Schema
 func ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpItemToBodyRs(state DevicesSwitchRoutingInterfacesDhcpRs, response *merakigosdk.ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcp, is_read bool) DevicesSwitchRoutingInterfacesDhcpRs {
 	itemState := DevicesSwitchRoutingInterfacesDhcpRs{
-		BootFileName:   types.StringValue(response.BootFileName),
-		BootNextServer: types.StringValue(response.BootNextServer),
+		BootFileName: func() types.String {
+			if response.BootFileName != "" {
+				return types.StringValue(response.BootFileName)
+			}
+			return types.String{}
+		}(),
+		BootNextServer: func() types.String {
+			if response.BootNextServer != "" {
+				return types.StringValue(response.BootNextServer)
+			}
+			return types.String{}
+		}(),
 		BootOptionsEnabled: func() types.Bool {
 			if response.BootOptionsEnabled != nil {
 				return types.BoolValue(*response.BootOptionsEnabled)
 			}
 			return types.Bool{}
 		}(),
-		DhcpLeaseTime: types.StringValue(response.DhcpLeaseTime),
-		DhcpMode:      types.StringValue(response.DhcpMode),
+		DhcpLeaseTime: func() types.String {
+			if response.DhcpLeaseTime != "" {
+				return types.StringValue(response.DhcpLeaseTime)
+			}
+			return types.String{}
+		}(),
+		DhcpMode: func() types.String {
+			if response.DhcpMode != "" {
+				return types.StringValue(response.DhcpMode)
+			}
+			return types.String{}
+		}(),
 		DhcpOptions: func() *[]ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpDhcpOptionsRs {
 			if response.DhcpOptions != nil {
 				result := make([]ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpDhcpOptionsRs, len(*response.DhcpOptions))
 				for i, dhcpOptions := range *response.DhcpOptions {
 					result[i] = ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpDhcpOptionsRs{
-						Code:  types.StringValue(dhcpOptions.Code),
-						Type:  types.StringValue(dhcpOptions.Type),
-						Value: types.StringValue(dhcpOptions.Value),
+						Code: func() types.String {
+							if dhcpOptions.Code != "" {
+								return types.StringValue(dhcpOptions.Code)
+							}
+							return types.String{}
+						}(),
+						Type: func() types.String {
+							if dhcpOptions.Type != "" {
+								return types.StringValue(dhcpOptions.Type)
+							}
+							return types.String{}
+						}(),
+						Value: func() types.String {
+							if dhcpOptions.Value != "" {
+								return types.StringValue(dhcpOptions.Value)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		DhcpRelayServerIPs:   StringSliceToSet(response.DhcpRelayServerIPs),
-		DNSCustomNameservers: StringSliceToSet(response.DNSCustomNameservers),
-		DNSNameserversOption: types.StringValue(response.DNSNameserversOption),
+		DhcpRelayServerIPs:   StringSliceToList(response.DhcpRelayServerIPs),
+		DNSCustomNameservers: StringSliceToList(response.DNSCustomNameservers),
+		DNSNameserversOption: func() types.String {
+			if response.DNSNameserversOption != "" {
+				return types.StringValue(response.DNSNameserversOption)
+			}
+			return types.String{}
+		}(),
 		FixedIPAssignments: func() *[]ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpFixedIpAssignmentsRs {
 			if response.FixedIPAssignments != nil {
 				result := make([]ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpFixedIpAssignmentsRs, len(*response.FixedIPAssignments))
 				for i, fixedIPAssignments := range *response.FixedIPAssignments {
 					result[i] = ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpFixedIpAssignmentsRs{
-						IP:   types.StringValue(fixedIPAssignments.IP),
-						Mac:  types.StringValue(fixedIPAssignments.Mac),
-						Name: types.StringValue(fixedIPAssignments.Name),
+						IP: func() types.String {
+							if fixedIPAssignments.IP != "" {
+								return types.StringValue(fixedIPAssignments.IP)
+							}
+							return types.String{}
+						}(),
+						Mac: func() types.String {
+							if fixedIPAssignments.Mac != "" {
+								return types.StringValue(fixedIPAssignments.Mac)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if fixedIPAssignments.Name != "" {
+								return types.StringValue(fixedIPAssignments.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -683,20 +673,30 @@ func ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpItemToBodyRs(state Devices
 				result := make([]ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpReservedIpRangesRs, len(*response.ReservedIPRanges))
 				for i, reservedIPRanges := range *response.ReservedIPRanges {
 					result[i] = ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpReservedIpRangesRs{
-						Comment: types.StringValue(reservedIPRanges.Comment),
-						End:     types.StringValue(reservedIPRanges.End),
-						Start:   types.StringValue(reservedIPRanges.Start),
+						Comment: func() types.String {
+							if reservedIPRanges.Comment != "" {
+								return types.StringValue(reservedIPRanges.Comment)
+							}
+							return types.String{}
+						}(),
+						End: func() types.String {
+							if reservedIPRanges.End != "" {
+								return types.StringValue(reservedIPRanges.End)
+							}
+							return types.String{}
+						}(),
+						Start: func() types.String {
+							if reservedIPRanges.Start != "" {
+								return types.StringValue(reservedIPRanges.Start)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-	}
-	if !state.DhcpRelayServerIPs.IsUnknown() {
-		itemState.DhcpRelayServerIPs = state.DhcpRelayServerIPs
-	} else {
-		itemState.DhcpRelayServerIPs = types.SetNull(types.StringType)
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(DevicesSwitchRoutingInterfacesDhcpRs)

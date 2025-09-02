@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -72,7 +73,6 @@ func (r *OrganizationsLicensesResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"device_serial": schema.StringAttribute{
 				MarkdownDescription: `Serial number of the device the license is assigned to`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -118,7 +118,7 @@ func (r *OrganizationsLicensesResource) Schema(_ context.Context, _ resource.Sch
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
 				Required:            true,
 			},
-			"permanently_queued_licenses": schema.SetNestedAttribute{
+			"permanently_queued_licenses": schema.ListNestedAttribute{
 				MarkdownDescription: `DEPRECATED List of permanently queued licenses attached to the license. Instead, use /organizations/{organizationId}/licenses?deviceSerial= to retrieved queued licenses for a given device.`,
 				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
@@ -187,27 +187,6 @@ func (r *OrganizationsLicensesResource) Create(ctx context.Context, req resource
 	vvLicenseID := data.LicenseID.ValueString()
 	//Has Item and not has items
 
-	if vvOrganizationID != "" && vvLicenseID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationLicense(vvOrganizationID, vvLicenseID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource OrganizationsLicenses  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource OrganizationsLicenses only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationLicense(vvOrganizationID, vvLicenseID, dataRequest)
@@ -216,7 +195,7 @@ func (r *OrganizationsLicensesResource) Create(ctx context.Context, req resource
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationLicense",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -227,49 +206,19 @@ func (r *OrganizationsLicensesResource) Create(ctx context.Context, req resource
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationLicense(vvOrganizationID, vvLicenseID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizationLicense",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetOrganizationLicense",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseOrganizationsGetOrganizationLicenseItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *OrganizationsLicensesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data OrganizationsLicensesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -300,9 +249,7 @@ func (r *OrganizationsLicensesResource) Read(ctx context.Context, req resource.R
 	}
 	//entro aqui 2
 	data = ResponseOrganizationsGetOrganizationLicenseItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *OrganizationsLicensesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -310,35 +257,31 @@ func (r *OrganizationsLicensesResource) ImportState(ctx context.Context, req res
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: organizationId,licenseId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("license_id"), idParts[1])...)
 }
 
 func (r *OrganizationsLicensesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data OrganizationsLicensesRs
-	merge(ctx, req, resp, &data)
+	var plan OrganizationsLicensesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvOrganizationID := data.OrganizationID.ValueString()
-	vvLicenseID := data.LicenseID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvOrganizationID := plan.OrganizationID.ValueString()
+	vvLicenseID := plan.LicenseID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationLicense(vvOrganizationID, vvLicenseID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationLicense",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -348,9 +291,7 @@ func (r *OrganizationsLicensesResource) Update(ctx context.Context, req resource
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *OrganizationsLicensesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -406,22 +347,72 @@ func (r *OrganizationsLicensesRs) toSdkApiRequestUpdate(ctx context.Context) *me
 // From gosdk to TF Structs Schema
 func ResponseOrganizationsGetOrganizationLicenseItemToBodyRs(state OrganizationsLicensesRs, response *merakigosdk.ResponseOrganizationsGetOrganizationLicense, is_read bool) OrganizationsLicensesRs {
 	itemState := OrganizationsLicensesRs{
-		ActivationDate: types.StringValue(response.ActivationDate),
-		ClaimDate:      types.StringValue(response.ClaimDate),
-		DeviceSerial:   types.StringValue(response.DeviceSerial),
+		ActivationDate: func() types.String {
+			if response.ActivationDate != "" {
+				return types.StringValue(response.ActivationDate)
+			}
+			return types.String{}
+		}(),
+		ClaimDate: func() types.String {
+			if response.ClaimDate != "" {
+				return types.StringValue(response.ClaimDate)
+			}
+			return types.String{}
+		}(),
+		DeviceSerial: func() types.String {
+			if response.DeviceSerial != "" {
+				return types.StringValue(response.DeviceSerial)
+			}
+			return types.String{}
+		}(),
 		DurationInDays: func() types.Int64 {
 			if response.DurationInDays != nil {
 				return types.Int64Value(int64(*response.DurationInDays))
 			}
 			return types.Int64{}
 		}(),
-		ExpirationDate: types.StringValue(response.ExpirationDate),
-		HeadLicenseID:  types.StringValue(response.HeadLicenseID),
-		ID:             types.StringValue(response.ID),
-		LicenseKey:     types.StringValue(response.LicenseKey),
-		LicenseType:    types.StringValue(response.LicenseType),
-		NetworkID:      types.StringValue(response.NetworkID),
-		OrderNumber:    types.StringValue(response.OrderNumber),
+		ExpirationDate: func() types.String {
+			if response.ExpirationDate != "" {
+				return types.StringValue(response.ExpirationDate)
+			}
+			return types.String{}
+		}(),
+		HeadLicenseID: func() types.String {
+			if response.HeadLicenseID != "" {
+				return types.StringValue(response.HeadLicenseID)
+			}
+			return types.String{}
+		}(),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		LicenseKey: func() types.String {
+			if response.LicenseKey != "" {
+				return types.StringValue(response.LicenseKey)
+			}
+			return types.String{}
+		}(),
+		LicenseType: func() types.String {
+			if response.LicenseType != "" {
+				return types.StringValue(response.LicenseType)
+			}
+			return types.String{}
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
+		OrderNumber: func() types.String {
+			if response.OrderNumber != "" {
+				return types.StringValue(response.OrderNumber)
+			}
+			return types.String{}
+		}(),
 		PermanentlyQueuedLicenses: func() *[]ResponseOrganizationsGetOrganizationLicensePermanentlyQueuedLicensesRs {
 			if response.PermanentlyQueuedLicenses != nil {
 				result := make([]ResponseOrganizationsGetOrganizationLicensePermanentlyQueuedLicensesRs, len(*response.PermanentlyQueuedLicenses))
@@ -433,10 +424,30 @@ func ResponseOrganizationsGetOrganizationLicenseItemToBodyRs(state Organizations
 							}
 							return types.Int64{}
 						}(),
-						ID:          types.StringValue(permanentlyQueuedLicenses.ID),
-						LicenseKey:  types.StringValue(permanentlyQueuedLicenses.LicenseKey),
-						LicenseType: types.StringValue(permanentlyQueuedLicenses.LicenseType),
-						OrderNumber: types.StringValue(permanentlyQueuedLicenses.OrderNumber),
+						ID: func() types.String {
+							if permanentlyQueuedLicenses.ID != "" {
+								return types.StringValue(permanentlyQueuedLicenses.ID)
+							}
+							return types.String{}
+						}(),
+						LicenseKey: func() types.String {
+							if permanentlyQueuedLicenses.LicenseKey != "" {
+								return types.StringValue(permanentlyQueuedLicenses.LicenseKey)
+							}
+							return types.String{}
+						}(),
+						LicenseType: func() types.String {
+							if permanentlyQueuedLicenses.LicenseType != "" {
+								return types.StringValue(permanentlyQueuedLicenses.LicenseType)
+							}
+							return types.String{}
+						}(),
+						OrderNumber: func() types.String {
+							if permanentlyQueuedLicenses.OrderNumber != "" {
+								return types.StringValue(permanentlyQueuedLicenses.OrderNumber)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -449,7 +460,12 @@ func ResponseOrganizationsGetOrganizationLicenseItemToBodyRs(state Organizations
 			}
 			return types.Int64{}
 		}(),
-		State: types.StringValue(response.State),
+		State: func() types.String {
+			if response.State != "" {
+				return types.StringValue(response.State)
+			}
+			return types.String{}
+		}(),
 		TotalDurationInDays: func() types.Int64 {
 			if response.TotalDurationInDays != nil {
 				return types.Int64Value(int64(*response.TotalDurationInDays))

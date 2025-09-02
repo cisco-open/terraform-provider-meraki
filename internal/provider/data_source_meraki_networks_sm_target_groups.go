@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -190,6 +189,17 @@ func (d *NetworksSmTargetGroupsDataSource) Read(ctx context.Context, req datasou
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkSmTargetGroup",
+				err.Error(),
+			)
+			return
+		}
+
 		networksSmTargetGroups = ResponseSmGetNetworkSmTargetGroupItemToBody(networksSmTargetGroups, response2)
 		diags = resp.State.Set(ctx, &networksSmTargetGroups)
 		resp.Diagnostics.Append(diags...)
@@ -228,10 +238,25 @@ func ResponseSmGetNetworkSmTargetGroupsItemsToBody(state NetworksSmTargetGroups,
 	var items []ResponseItemSmGetNetworkSmTargetGroups
 	for _, item := range *response {
 		itemState := ResponseItemSmGetNetworkSmTargetGroups{
-			ID:    types.StringValue(item.ID),
-			Name:  types.StringValue(item.Name),
-			Scope: types.StringValue(item.Scope),
-			Tags:  StringSliceToList(item.Tags),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			Scope: func() types.String {
+				if item.Scope != "" {
+					return types.StringValue(item.Scope)
+				}
+				return types.String{}
+			}(),
+			Tags: StringSliceToList(item.Tags),
 		}
 		items = append(items, itemState)
 	}
@@ -241,10 +266,25 @@ func ResponseSmGetNetworkSmTargetGroupsItemsToBody(state NetworksSmTargetGroups,
 
 func ResponseSmGetNetworkSmTargetGroupItemToBody(state NetworksSmTargetGroups, response *merakigosdk.ResponseSmGetNetworkSmTargetGroup) NetworksSmTargetGroups {
 	itemState := ResponseSmGetNetworkSmTargetGroup{
-		ID:    types.StringValue(response.ID),
-		Name:  types.StringValue(response.Name),
-		Scope: types.StringValue(response.Scope),
-		Tags:  StringSliceToList(response.Tags),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		Scope: func() types.String {
+			if response.Scope != "" {
+				return types.StringValue(response.Scope)
+			}
+			return types.String{}
+		}(),
+		Tags: StringSliceToList(response.Tags),
 	}
 	state.Item = &itemState
 	return state

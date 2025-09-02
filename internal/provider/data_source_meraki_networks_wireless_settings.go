@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -257,8 +256,18 @@ func ResponseWirelessGetNetworkWirelessSettingsItemToBody(state NetworksWireless
 		RegulatoryDomain: func() *ResponseWirelessGetNetworkWirelessSettingsRegulatoryDomain {
 			if response.RegulatoryDomain != nil {
 				return &ResponseWirelessGetNetworkWirelessSettingsRegulatoryDomain{
-					CountryCode: types.StringValue(response.RegulatoryDomain.CountryCode),
-					Name:        types.StringValue(response.RegulatoryDomain.Name),
+					CountryCode: func() types.String {
+						if response.RegulatoryDomain.CountryCode != "" {
+							return types.StringValue(response.RegulatoryDomain.CountryCode)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.RegulatoryDomain.Name != "" {
+							return types.StringValue(response.RegulatoryDomain.Name)
+						}
+						return types.String{}
+					}(),
 					Permits6E: func() types.Bool {
 						if response.RegulatoryDomain.Permits6E != nil {
 							return types.BoolValue(*response.RegulatoryDomain.Permits6E)
@@ -269,7 +278,12 @@ func ResponseWirelessGetNetworkWirelessSettingsItemToBody(state NetworksWireless
 			}
 			return nil
 		}(),
-		Upgradestrategy: types.StringValue(response.Upgradestrategy),
+		Upgradestrategy: func() types.String {
+			if response.Upgradestrategy != "" {
+				return types.StringValue(response.Upgradestrategy)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

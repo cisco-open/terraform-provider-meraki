@@ -209,8 +209,8 @@ type ResponseNetworksReassignNetworkVlanProfilesAssignmentsVlanProfile struct {
 }
 
 type RequestNetworksReassignNetworkVlanProfilesAssignmentsRs struct {
-	Serials     types.Set                                                           `tfsdk:"serials"`
-	StackIDs    types.Set                                                           `tfsdk:"stack_ids"`
+	Serials     types.List                                                          `tfsdk:"serials"`
+	StackIDs    types.List                                                          `tfsdk:"stack_ids"`
 	VLANProfile *RequestNetworksReassignNetworkVlanProfilesAssignmentsVlanProfileRs `tfsdk:"vlan_profile"`
 }
 
@@ -250,8 +250,18 @@ func ResponseNetworksReassignNetworkVLANProfilesAssignmentsItemToBody(state Netw
 		VLANProfile: func() *ResponseNetworksReassignNetworkVlanProfilesAssignmentsVlanProfile {
 			if response.VLANProfile != nil {
 				return &ResponseNetworksReassignNetworkVlanProfilesAssignmentsVlanProfile{
-					Iname: types.StringValue(response.VLANProfile.Iname),
-					Name:  types.StringValue(response.VLANProfile.Name),
+					Iname: func() types.String {
+						if response.VLANProfile.Iname != "" {
+							return types.StringValue(response.VLANProfile.Iname)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.VLANProfile.Name != "" {
+							return types.StringValue(response.VLANProfile.Name)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil

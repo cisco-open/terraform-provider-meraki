@@ -174,7 +174,7 @@ type ResponseOrganizationsMoveOrganizationLicenses struct {
 
 type RequestOrganizationsMoveOrganizationLicensesRs struct {
 	DestOrganizationID types.String `tfsdk:"dest_organization_id"`
-	LicenseIDs         types.Set    `tfsdk:"license_ids"`
+	LicenseIDs         types.List   `tfsdk:"license_ids"`
 }
 
 // FromBody
@@ -199,8 +199,13 @@ func (r *OrganizationsLicensesMove) toSdkApiRequestCreate(ctx context.Context) *
 // ToBody
 func ResponseOrganizationsMoveOrganizationLicensesItemToBody(state OrganizationsLicensesMove, response *merakigosdk.ResponseOrganizationsMoveOrganizationLicenses) OrganizationsLicensesMove {
 	itemState := ResponseOrganizationsMoveOrganizationLicenses{
-		DestOrganizationID: types.StringValue(response.DestOrganizationID),
-		LicenseIDs:         StringSliceToList(response.LicenseIDs),
+		DestOrganizationID: func() types.String {
+			if response.DestOrganizationID != "" {
+				return types.StringValue(response.DestOrganizationID)
+			}
+			return types.String{}
+		}(),
+		LicenseIDs: StringSliceToList(response.LicenseIDs),
 	}
 	state.Item = &itemState
 	return state

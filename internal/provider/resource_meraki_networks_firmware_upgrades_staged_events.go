@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -315,7 +316,7 @@ func (r *NetworksFirmwareUpgradesStagedEventsResource) Create(ctx context.Contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkFirmwareUpgradesStagedEvent",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -424,7 +425,7 @@ func (r *NetworksFirmwareUpgradesStagedEventsResource) Update(ctx context.Contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkFirmwareUpgradesStagedEvents",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -652,8 +653,18 @@ func ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsItemToBodyRs(state Ne
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsProductsSwitchNextUpgradeToVersionRs {
 												if response.Products.Switch.NextUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsProductsSwitchNextUpgradeToVersionRs{
-														ID:        types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ID),
-														ShortName: types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ShortName),
+														ID: func() types.String {
+															if response.Products.Switch.NextUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Switch.NextUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -675,8 +686,18 @@ func ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsItemToBodyRs(state Ne
 				result := make([]ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsReasonsRs, len(*response.Reasons))
 				for i, reasons := range *response.Reasons {
 					result[i] = ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsReasonsRs{
-						Category: types.StringValue(reasons.Category),
-						Comment:  types.StringValue(reasons.Comment),
+						Category: func() types.String {
+							if reasons.Category != "" {
+								return types.StringValue(reasons.Category)
+							}
+							return types.String{}
+						}(),
+						Comment: func() types.String {
+							if reasons.Comment != "" {
+								return types.StringValue(reasons.Comment)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -691,9 +712,24 @@ func ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsItemToBodyRs(state Ne
 						Group: func() *ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsStagesGroupRs {
 							if stages.Group != nil {
 								return &ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsStagesGroupRs{
-									Description: types.StringValue(stages.Group.Description),
-									ID:          types.StringValue(stages.Group.ID),
-									Name:        types.StringValue(stages.Group.Name),
+									Description: func() types.String {
+										if stages.Group.Description != "" {
+											return types.StringValue(stages.Group.Description)
+										}
+										return types.String{}
+									}(),
+									ID: func() types.String {
+										if stages.Group.ID != "" {
+											return types.StringValue(stages.Group.ID)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if stages.Group.Name != "" {
+											return types.StringValue(stages.Group.Name)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -701,15 +737,40 @@ func ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsItemToBodyRs(state Ne
 						Milestones: func() *ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsStagesMilestonesRs {
 							if stages.Milestones != nil {
 								return &ResponseNetworksGetNetworkFirmwareUpgradesStagedEventsStagesMilestonesRs{
-									CanceledAt:   types.StringValue(stages.Milestones.CanceledAt),
-									CompletedAt:  types.StringValue(stages.Milestones.CompletedAt),
-									ScheduledFor: types.StringValue(stages.Milestones.ScheduledFor),
-									StartedAt:    types.StringValue(stages.Milestones.StartedAt),
+									CanceledAt: func() types.String {
+										if stages.Milestones.CanceledAt != "" {
+											return types.StringValue(stages.Milestones.CanceledAt)
+										}
+										return types.String{}
+									}(),
+									CompletedAt: func() types.String {
+										if stages.Milestones.CompletedAt != "" {
+											return types.StringValue(stages.Milestones.CompletedAt)
+										}
+										return types.String{}
+									}(),
+									ScheduledFor: func() types.String {
+										if stages.Milestones.ScheduledFor != "" {
+											return types.StringValue(stages.Milestones.ScheduledFor)
+										}
+										return types.String{}
+									}(),
+									StartedAt: func() types.String {
+										if stages.Milestones.StartedAt != "" {
+											return types.StringValue(stages.Milestones.StartedAt)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						Status: types.StringValue(stages.Status),
+						Status: func() types.String {
+							if stages.Status != "" {
+								return types.StringValue(stages.Status)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

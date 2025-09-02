@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -355,11 +354,21 @@ func ResponseWirelessGetOrganizationWirelessSSIDsStatusesByDeviceItemToBody(stat
 								result := make([]ResponseWirelessGetOrganizationWirelessSsidsStatusesByDeviceItemsBasicServiceSets, len(*items.BasicServiceSets))
 								for i, basicServiceSets := range *items.BasicServiceSets {
 									result[i] = ResponseWirelessGetOrganizationWirelessSsidsStatusesByDeviceItemsBasicServiceSets{
-										Bssid: types.StringValue(basicServiceSets.Bssid),
+										Bssid: func() types.String {
+											if basicServiceSets.Bssid != "" {
+												return types.StringValue(basicServiceSets.Bssid)
+											}
+											return types.String{}
+										}(),
 										Radio: func() *ResponseWirelessGetOrganizationWirelessSsidsStatusesByDeviceItemsBasicServiceSetsRadio {
 											if basicServiceSets.Radio != nil {
 												return &ResponseWirelessGetOrganizationWirelessSsidsStatusesByDeviceItemsBasicServiceSetsRadio{
-													Band: types.StringValue(basicServiceSets.Radio.Band),
+													Band: func() types.String {
+														if basicServiceSets.Radio.Band != "" {
+															return types.StringValue(basicServiceSets.Radio.Band)
+														}
+														return types.String{}
+													}(),
 													Channel: func() types.Int64 {
 														if basicServiceSets.Radio.Channel != nil {
 															return types.Int64Value(int64(*basicServiceSets.Radio.Channel))
@@ -372,7 +381,12 @@ func ResponseWirelessGetOrganizationWirelessSSIDsStatusesByDeviceItemToBody(stat
 														}
 														return types.Int64{}
 													}(),
-													Index: types.StringValue(basicServiceSets.Radio.Index),
+													Index: func() types.String {
+														if basicServiceSets.Radio.Index != "" {
+															return types.StringValue(basicServiceSets.Radio.Index)
+														}
+														return types.String{}
+													}(),
 													IsBroadcasting: func() types.Bool {
 														if basicServiceSets.Radio.IsBroadcasting != nil {
 															return types.BoolValue(*basicServiceSets.Radio.IsBroadcasting)
@@ -404,7 +418,12 @@ func ResponseWirelessGetOrganizationWirelessSSIDsStatusesByDeviceItemToBody(stat
 														}
 														return types.Bool{}
 													}(),
-													Name: types.StringValue(basicServiceSets.SSID.Name),
+													Name: func() types.String {
+														if basicServiceSets.SSID.Name != "" {
+															return types.StringValue(basicServiceSets.SSID.Name)
+														}
+														return types.String{}
+													}(),
 													Number: func() types.Int64 {
 														if basicServiceSets.SSID.Number != nil {
 															return types.Int64Value(int64(*basicServiceSets.SSID.Number))
@@ -421,17 +440,37 @@ func ResponseWirelessGetOrganizationWirelessSSIDsStatusesByDeviceItemToBody(stat
 							}
 							return nil
 						}(),
-						Name: types.StringValue(items.Name),
+						Name: func() types.String {
+							if items.Name != "" {
+								return types.StringValue(items.Name)
+							}
+							return types.String{}
+						}(),
 						Network: func() *ResponseWirelessGetOrganizationWirelessSsidsStatusesByDeviceItemsNetwork {
 							if items.Network != nil {
 								return &ResponseWirelessGetOrganizationWirelessSsidsStatusesByDeviceItemsNetwork{
-									ID:   types.StringValue(items.Network.ID),
-									Name: types.StringValue(items.Network.Name),
+									ID: func() types.String {
+										if items.Network.ID != "" {
+											return types.StringValue(items.Network.ID)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if items.Network.Name != "" {
+											return types.StringValue(items.Network.Name)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						Serial: types.StringValue(items.Serial),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

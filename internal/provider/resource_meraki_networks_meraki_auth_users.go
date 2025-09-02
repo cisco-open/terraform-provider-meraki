@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -30,8 +31,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -70,7 +71,6 @@ func (r *NetworksMerakiAuthUsersResource) Schema(_ context.Context, _ resource.S
 			"account_type": schema.StringAttribute{
 				MarkdownDescription: `Authorization type for user.
                                   Allowed values: [802.1X,Client VPN,Guest]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -84,12 +84,11 @@ func (r *NetworksMerakiAuthUsersResource) Schema(_ context.Context, _ resource.S
 					),
 				},
 			},
-			"authorizations": schema.SetNestedAttribute{
+			"authorizations": schema.ListNestedAttribute{
 				MarkdownDescription: `User authorization info`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -108,7 +107,6 @@ func (r *NetworksMerakiAuthUsersResource) Schema(_ context.Context, _ resource.S
 						},
 						"expires_at": schema.StringAttribute{
 							MarkdownDescription: `Authorization expiration time`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -116,7 +114,6 @@ func (r *NetworksMerakiAuthUsersResource) Schema(_ context.Context, _ resource.S
 						},
 						"ssid_number": schema.Int64Attribute{
 							MarkdownDescription: `SSID number`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -131,7 +128,6 @@ func (r *NetworksMerakiAuthUsersResource) Schema(_ context.Context, _ resource.S
 			},
 			"email": schema.StringAttribute{
 				MarkdownDescription: `Email address of the user`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -140,7 +136,6 @@ func (r *NetworksMerakiAuthUsersResource) Schema(_ context.Context, _ resource.S
 			},
 			"email_password_to_user": schema.BoolAttribute{
 				MarkdownDescription: `Whether or not Meraki should email the password to user. Default is false.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -152,7 +147,6 @@ func (r *NetworksMerakiAuthUsersResource) Schema(_ context.Context, _ resource.S
 			},
 			"is_admin": schema.BoolAttribute{
 				MarkdownDescription: `Whether or not the user is a Dashboard administrator`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -168,7 +162,6 @@ func (r *NetworksMerakiAuthUsersResource) Schema(_ context.Context, _ resource.S
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `Name of the user`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -181,7 +174,6 @@ func (r *NetworksMerakiAuthUsersResource) Schema(_ context.Context, _ resource.S
 			"password": schema.StringAttribute{
 				MarkdownDescription: `The password for this user account. Only required If the user is not a Dashboard administrator.`,
 				Sensitive:           true,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -263,7 +255,7 @@ func (r *NetworksMerakiAuthUsersResource) Create(ctx context.Context, req resour
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkMerakiAuthUser",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -335,21 +327,11 @@ func (r *NetworksMerakiAuthUsersResource) Create(ctx context.Context, req resour
 func (r *NetworksMerakiAuthUsersResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksMerakiAuthUsersRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -380,9 +362,7 @@ func (r *NetworksMerakiAuthUsersResource) Read(ctx context.Context, req resource
 	}
 	//entro aqui 2
 	data = ResponseNetworksGetNetworkMerakiAuthUserItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksMerakiAuthUsersResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -390,35 +370,31 @@ func (r *NetworksMerakiAuthUsersResource) ImportState(ctx context.Context, req r
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,merakiAuthUserId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("meraki_user_id"), idParts[1])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("meraki_auth_user_id"), idParts[1])...)
 }
 
 func (r *NetworksMerakiAuthUsersResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksMerakiAuthUsersRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksMerakiAuthUsersRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvMerakiAuthUserID := data.MerakiAuthUserID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvMerakiAuthUserID := plan.MerakiAuthUserID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkMerakiAuthUser(vvNetworkID, vvMerakiAuthUserID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkMerakiAuthUser",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -428,9 +404,7 @@ func (r *NetworksMerakiAuthUsersResource) Update(ctx context.Context, req resour
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksMerakiAuthUsersResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -614,16 +588,41 @@ func (r *NetworksMerakiAuthUsersRs) toSdkApiRequestUpdate(ctx context.Context) *
 // From gosdk to TF Structs Schema
 func ResponseNetworksGetNetworkMerakiAuthUserItemToBodyRs(state NetworksMerakiAuthUsersRs, response *merakigosdk.ResponseNetworksGetNetworkMerakiAuthUser, is_read bool) NetworksMerakiAuthUsersRs {
 	itemState := NetworksMerakiAuthUsersRs{
-		AccountType: types.StringValue(response.AccountType),
+		AccountType: func() types.String {
+			if response.AccountType != "" {
+				return types.StringValue(response.AccountType)
+			}
+			return types.String{}
+		}(),
 		Authorizations: func() *[]ResponseNetworksGetNetworkMerakiAuthUserAuthorizationsRs {
 			if response.Authorizations != nil {
 				result := make([]ResponseNetworksGetNetworkMerakiAuthUserAuthorizationsRs, len(*response.Authorizations))
 				for i, authorizations := range *response.Authorizations {
 					result[i] = ResponseNetworksGetNetworkMerakiAuthUserAuthorizationsRs{
-						AuthorizedByEmail: types.StringValue(authorizations.AuthorizedByEmail),
-						AuthorizedByName:  types.StringValue(authorizations.AuthorizedByName),
-						AuthorizedZone:    types.StringValue(authorizations.AuthorizedZone),
-						ExpiresAt:         types.StringValue(authorizations.ExpiresAt),
+						AuthorizedByEmail: func() types.String {
+							if authorizations.AuthorizedByEmail != "" {
+								return types.StringValue(authorizations.AuthorizedByEmail)
+							}
+							return types.String{}
+						}(),
+						AuthorizedByName: func() types.String {
+							if authorizations.AuthorizedByName != "" {
+								return types.StringValue(authorizations.AuthorizedByName)
+							}
+							return types.String{}
+						}(),
+						AuthorizedZone: func() types.String {
+							if authorizations.AuthorizedZone != "" {
+								return types.StringValue(authorizations.AuthorizedZone)
+							}
+							return types.String{}
+						}(),
+						ExpiresAt: func() types.String {
+							if authorizations.ExpiresAt != "" {
+								return types.StringValue(authorizations.ExpiresAt)
+							}
+							return types.String{}
+						}(),
 						SSIDNumber: func() types.Int64 {
 							if authorizations.SSIDNumber != nil {
 								return types.Int64Value(int64(*authorizations.SSIDNumber))
@@ -636,16 +635,36 @@ func ResponseNetworksGetNetworkMerakiAuthUserItemToBodyRs(state NetworksMerakiAu
 			}
 			return nil
 		}(),
-		CreatedAt: types.StringValue(response.CreatedAt),
-		Email:     types.StringValue(response.Email),
-		ID:        types.StringValue(response.ID),
+		CreatedAt: func() types.String {
+			if response.CreatedAt != "" {
+				return types.StringValue(response.CreatedAt)
+			}
+			return types.String{}
+		}(),
+		Email: func() types.String {
+			if response.Email != "" {
+				return types.StringValue(response.Email)
+			}
+			return types.String{}
+		}(),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		IsAdmin: func() types.Bool {
 			if response.IsAdmin != nil {
 				return types.BoolValue(*response.IsAdmin)
 			}
 			return types.Bool{}
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksMerakiAuthUsersRs)

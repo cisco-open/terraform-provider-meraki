@@ -19,6 +19,8 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"encoding/json"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -26,6 +28,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -131,6 +134,7 @@ func (r *NetworksResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 				},
 
 				ElementType: types.StringType,
+				Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
 			},
 			"time_zone": schema.StringAttribute{
 				MarkdownDescription: `Timezone of the network`,
@@ -220,7 +224,7 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationNetwork",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -231,64 +235,18 @@ func (r *NetworksResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationNetworks(vvOrganizationID, &merakigosdk.GetOrganizationNetworksQueryParams{
-		PerPage: -1,
-	})
-
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizationNetworks",
-				restyResp1.String(),
-			)
-			return
-		}
+	var responseGet *merakigosdk.ResponseNetworksGetNetwork
+	err = json.Unmarshal(restyResp2.Body(), &responseGet)
+	if err != nil {
 		resp.Diagnostics.AddError(
-			"Failure when executing GetOrganizationNetworks",
+			"Failure when unmarshalling response",
 			err.Error(),
 		)
 		return
 	}
 
-	responseStruct := structToMap(responseGet)
-	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
-	if result != nil {
-		result2 := result.(map[string]interface{})
-		vvNetworkID, ok := result2["ID"].(string)
-		if !ok {
-			resp.Diagnostics.AddError(
-				"Failure when parsing path parameter NetworkID",
-				"Fail Parsing NetworkID",
-			)
-			return
-		}
-		responseVerifyItem2, restyRespGet, err := r.client.Networks.GetNetwork(vvNetworkID)
-		if responseVerifyItem2 != nil && err == nil {
-			data.NetworkID = types.StringValue(responseVerifyItem2.ID)
-			data = ResponseNetworksGetNetworkItemToBodyRs(data, responseVerifyItem2, false)
-			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-			return
-		} else {
-			if restyRespGet != nil {
-				resp.Diagnostics.AddError(
-					"Failure when executing GetNetwork",
-					restyRespGet.String(),
-				)
-				return
-			}
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetwork",
-				err.Error(),
-			)
-			return
-		}
-	} else {
-		resp.Diagnostics.AddError(
-			"Error in result.",
-			"Error in result.",
-		)
-		return
-	}
+	data = ResponseNetworksGetNetworkItemToBodyRs(data, responseGet, false)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
@@ -366,7 +324,7 @@ func (r *NetworksResource) Update(ctx context.Context, req resource.UpdateReques
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetwork",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -508,21 +466,56 @@ func (r *NetworksRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk.Req
 // From gosdk to TF Structs Schema
 func ResponseNetworksGetNetworkItemToBodyRs(state NetworksRs, response *merakigosdk.ResponseNetworksGetNetwork, is_read bool) NetworksRs {
 	itemState := NetworksRs{
-		EnrollmentString: types.StringValue(response.EnrollmentString),
-		ID:               types.StringValue(response.ID),
+		EnrollmentString: func() types.String {
+			if response.EnrollmentString != "" {
+				return types.StringValue(response.EnrollmentString)
+			}
+			return types.String{}
+		}(),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		IsBoundToConfigTemplate: func() types.Bool {
 			if response.IsBoundToConfigTemplate != nil {
 				return types.BoolValue(*response.IsBoundToConfigTemplate)
 			}
 			return types.Bool{}
 		}(),
-		Name:              types.StringValue(response.Name),
-		Notes:             types.StringValue(response.Notes),
-		OrganizationID:    types.StringValue(response.OrganizationID),
-		ProductTypes:      StringSliceToSet(response.ProductTypes),
-		Tags:              StringSliceToSet(response.Tags),
-		TimeZone:          types.StringValue(response.TimeZone),
-		URL:               types.StringValue(response.URL),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		Notes: func() types.String {
+			if response.Notes != "" {
+				return types.StringValue(response.Notes)
+			}
+			return types.String{}
+		}(),
+		OrganizationID: func() types.String {
+			if response.OrganizationID != "" {
+				return types.StringValue(response.OrganizationID)
+			}
+			return types.String{}
+		}(),
+		ProductTypes: StringSliceToSet(response.ProductTypes),
+		Tags:         StringSliceToSet(response.Tags),
+		TimeZone: func() types.String {
+			if response.TimeZone != "" {
+				return types.StringValue(response.TimeZone)
+			}
+			return types.String{}
+		}(),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
 		CopyFromNetworkID: state.CopyFromNetworkID,
 	}
 	itemState.NetworkID = types.StringValue(response.ID)

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -272,29 +271,69 @@ func ResponseWirelessGetOrganizationWirelessDevicesPowerModeHistoryItemToBody(st
 								result := make([]ResponseWirelessGetOrganizationWirelessDevicesPowerModeHistoryItemsEvents, len(*items.Events))
 								for i, events := range *items.Events {
 									result[i] = ResponseWirelessGetOrganizationWirelessDevicesPowerModeHistoryItemsEvents{
-										PowerMode: types.StringValue(events.PowerMode),
-										Ts:        types.StringValue(events.Ts),
+										PowerMode: func() types.String {
+											if events.PowerMode != "" {
+												return types.StringValue(events.PowerMode)
+											}
+											return types.String{}
+										}(),
+										Ts: func() types.String {
+											if events.Ts != "" {
+												return types.StringValue(events.Ts)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						Mac:   types.StringValue(items.Mac),
-						Model: types.StringValue(items.Model),
-						Name:  types.StringValue(items.Name),
+						Mac: func() types.String {
+							if items.Mac != "" {
+								return types.StringValue(items.Mac)
+							}
+							return types.String{}
+						}(),
+						Model: func() types.String {
+							if items.Model != "" {
+								return types.StringValue(items.Model)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if items.Name != "" {
+								return types.StringValue(items.Name)
+							}
+							return types.String{}
+						}(),
 						Network: func() *ResponseWirelessGetOrganizationWirelessDevicesPowerModeHistoryItemsNetwork {
 							if items.Network != nil {
 								return &ResponseWirelessGetOrganizationWirelessDevicesPowerModeHistoryItemsNetwork{
-									ID:   types.StringValue(items.Network.ID),
-									Name: types.StringValue(items.Network.Name),
+									ID: func() types.String {
+										if items.Network.ID != "" {
+											return types.StringValue(items.Network.ID)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if items.Network.Name != "" {
+											return types.StringValue(items.Network.Name)
+										}
+										return types.String{}
+									}(),
 									Tags: StringSliceToList(items.Network.Tags),
 								}
 							}
 							return nil
 						}(),
-						Serial: types.StringValue(items.Serial),
-						Tags:   StringSliceToList(items.Tags),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
+						Tags: StringSliceToList(items.Tags),
 					}
 				}
 				return &result

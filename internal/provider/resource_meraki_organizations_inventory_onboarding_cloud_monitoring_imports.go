@@ -245,12 +245,7 @@ func (r *OrganizationsInventoryOnboardingCloudMonitoringImports) toSdkApiRequest
 		}
 	}
 	out := merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImport{
-		Devices: func() *[]merakigosdk.RequestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImportDevices {
-			if len(requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImportDevices) > 0 {
-				return &requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImportDevices
-			}
-			return nil
-		}(),
+		Devices: &requestOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImportDevices,
 	}
 	return &out
 }
@@ -260,9 +255,24 @@ func ResponseOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringIm
 	var items []ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImport
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsCreateOrganizationInventoryOnboardingCloudMonitoringImport{
-			ImportID: types.StringValue(item.ImportID),
-			Message:  types.StringValue(item.Message),
-			Status:   types.StringValue(item.Status),
+			ImportID: func() types.String {
+				if item.ImportID != "" {
+					return types.StringValue(item.ImportID)
+				}
+				return types.String{}
+			}(),
+			Message: func() types.String {
+				if item.Message != "" {
+					return types.StringValue(item.Message)
+				}
+				return types.String{}
+			}(),
+			Status: func() types.String {
+				if item.Status != "" {
+					return types.StringValue(item.Status)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

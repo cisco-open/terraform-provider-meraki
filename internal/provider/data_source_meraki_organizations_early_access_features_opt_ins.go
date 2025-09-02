@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -188,6 +187,17 @@ func (d *OrganizationsEarlyAccessFeaturesOptInsDataSource) Read(ctx context.Cont
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetOrganizationEarlyAccessFeaturesOptIn",
+				err.Error(),
+			)
+			return
+		}
+
 		organizationsEarlyAccessFeaturesOptIns = ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInItemToBody(organizationsEarlyAccessFeaturesOptIns, response2)
 		diags = resp.State.Set(ctx, &organizationsEarlyAccessFeaturesOptIns)
 		resp.Diagnostics.Append(diags...)
@@ -232,15 +242,35 @@ type ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInOptOutEligibili
 // ToBody
 func ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInItemToBody(state OrganizationsEarlyAccessFeaturesOptIns, response *merakigosdk.ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptIn) OrganizationsEarlyAccessFeaturesOptIns {
 	itemState := ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptIn{
-		CreatedAt: types.StringValue(response.CreatedAt),
-		ID:        types.StringValue(response.ID),
+		CreatedAt: func() types.String {
+			if response.CreatedAt != "" {
+				return types.StringValue(response.CreatedAt)
+			}
+			return types.String{}
+		}(),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		LimitScopeToNetworks: func() *[]ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInLimitScopeToNetworks {
 			if response.LimitScopeToNetworks != nil {
 				result := make([]ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInLimitScopeToNetworks, len(*response.LimitScopeToNetworks))
 				for i, limitScopeToNetworks := range *response.LimitScopeToNetworks {
 					result[i] = ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInLimitScopeToNetworks{
-						ID:   types.StringValue(limitScopeToNetworks.ID),
-						Name: types.StringValue(limitScopeToNetworks.Name),
+						ID: func() types.String {
+							if limitScopeToNetworks.ID != "" {
+								return types.StringValue(limitScopeToNetworks.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if limitScopeToNetworks.Name != "" {
+								return types.StringValue(limitScopeToNetworks.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -259,18 +289,38 @@ func ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInItemToBody(stat
 					Help: func() *ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInOptOutEligibilityHelp {
 						if response.OptOutEligibility.Help != nil {
 							return &ResponseOrganizationsGetOrganizationEarlyAccessFeaturesOptInOptOutEligibilityHelp{
-								Label: types.StringValue(response.OptOutEligibility.Help.Label),
-								URL:   types.StringValue(response.OptOutEligibility.Help.URL),
+								Label: func() types.String {
+									if response.OptOutEligibility.Help.Label != "" {
+										return types.StringValue(response.OptOutEligibility.Help.Label)
+									}
+									return types.String{}
+								}(),
+								URL: func() types.String {
+									if response.OptOutEligibility.Help.URL != "" {
+										return types.StringValue(response.OptOutEligibility.Help.URL)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
 					}(),
-					Reason: types.StringValue(response.OptOutEligibility.Reason),
+					Reason: func() types.String {
+						if response.OptOutEligibility.Reason != "" {
+							return types.StringValue(response.OptOutEligibility.Reason)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		ShortName: types.StringValue(response.ShortName),
+		ShortName: func() types.String {
+			if response.ShortName != "" {
+				return types.StringValue(response.ShortName)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

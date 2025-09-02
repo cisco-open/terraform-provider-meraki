@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -65,7 +66,6 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Schema(_ context.Context, _ r
 		Attributes: map[string]schema.Attribute{
 			"advertise_via_ospf_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Option to advertise static routes via OSPF`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -73,7 +73,6 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Schema(_ context.Context, _ r
 			},
 			"management_next_hop": schema.StringAttribute{
 				MarkdownDescription: `Optional fallback IP address for management traffic`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -81,7 +80,6 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Schema(_ context.Context, _ r
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name or description of the layer 3 static route`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -89,7 +87,6 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Schema(_ context.Context, _ r
 			},
 			"next_hop_ip": schema.StringAttribute{
 				MarkdownDescription: `The IP address of the router to which traffic for this destination network should be sent`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -97,7 +94,6 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Schema(_ context.Context, _ r
 			},
 			"prefer_over_ospf_routes_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Option to prefer static routes over OSPF routes`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -109,11 +105,13 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Schema(_ context.Context, _ r
 			},
 			"static_route_id": schema.StringAttribute{
 				MarkdownDescription: `The identifier of a layer 3 static route`,
-				Computed:            true,
+				Optional:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"subnet": schema.StringAttribute{
 				MarkdownDescription: `The IP address of the subnetwork specified in CIDR notation (ex. 1.2.3.0/24)`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -194,7 +192,7 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Create(ctx context.Context, r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateDeviceSwitchRoutingStaticRoute",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -266,21 +264,11 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Create(ctx context.Context, r
 func (r *DevicesSwitchRoutingStaticRoutesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data DevicesSwitchRoutingStaticRoutesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -311,9 +299,7 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Read(ctx context.Context, req
 	}
 	//entro aqui 2
 	data = ResponseSwitchGetDeviceSwitchRoutingStaticRouteItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *DevicesSwitchRoutingStaticRoutesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -321,35 +307,31 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) ImportState(ctx context.Conte
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: serial,staticRouteId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("serial"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("static_route_id"), idParts[1])...)
 }
 
 func (r *DevicesSwitchRoutingStaticRoutesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data DevicesSwitchRoutingStaticRoutesRs
-	merge(ctx, req, resp, &data)
+	var plan DevicesSwitchRoutingStaticRoutesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvSerial := data.Serial.ValueString()
-	vvStaticRouteID := data.StaticRouteID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvSerial := plan.Serial.ValueString()
+	vvStaticRouteID := plan.StaticRouteID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateDeviceSwitchRoutingStaticRoute(vvSerial, vvStaticRouteID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceSwitchRoutingStaticRoute",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -359,9 +341,7 @@ func (r *DevicesSwitchRoutingStaticRoutesResource) Update(ctx context.Context, r
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *DevicesSwitchRoutingStaticRoutesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -506,17 +486,42 @@ func ResponseSwitchGetDeviceSwitchRoutingStaticRouteItemToBodyRs(state DevicesSw
 			}
 			return types.Bool{}
 		}(),
-		ManagementNextHop: types.StringValue(response.ManagementNextHop),
-		Name:              types.StringValue(response.Name),
-		NextHopIP:         types.StringValue(response.NextHopIP),
+		ManagementNextHop: func() types.String {
+			if response.ManagementNextHop != "" {
+				return types.StringValue(response.ManagementNextHop)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		NextHopIP: func() types.String {
+			if response.NextHopIP != "" {
+				return types.StringValue(response.NextHopIP)
+			}
+			return types.String{}
+		}(),
 		PreferOverOspfRoutesEnabled: func() types.Bool {
 			if response.PreferOverOspfRoutesEnabled != nil {
 				return types.BoolValue(*response.PreferOverOspfRoutesEnabled)
 			}
 			return types.Bool{}
 		}(),
-		StaticRouteID: types.StringValue(response.StaticRouteID),
-		Subnet:        types.StringValue(response.Subnet),
+		StaticRouteID: func() types.String {
+			if response.StaticRouteID != "" {
+				return types.StringValue(response.StaticRouteID)
+			}
+			return types.String{}
+		}(),
+		Subnet: func() types.String {
+			if response.Subnet != "" {
+				return types.StringValue(response.Subnet)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(DevicesSwitchRoutingStaticRoutesRs)

@@ -214,14 +214,39 @@ func ResponseApplianceSwapNetworkApplianceWarmSpareItemToBody(state NetworksAppl
 			}
 			return types.Bool{}
 		}(),
-		PrimarySerial: types.StringValue(response.PrimarySerial),
-		SpareSerial:   types.StringValue(response.SpareSerial),
-		UplinkMode:    types.StringValue(response.UplinkMode),
+		PrimarySerial: func() types.String {
+			if response.PrimarySerial != "" {
+				return types.StringValue(response.PrimarySerial)
+			}
+			return types.String{}
+		}(),
+		SpareSerial: func() types.String {
+			if response.SpareSerial != "" {
+				return types.StringValue(response.SpareSerial)
+			}
+			return types.String{}
+		}(),
+		UplinkMode: func() types.String {
+			if response.UplinkMode != "" {
+				return types.StringValue(response.UplinkMode)
+			}
+			return types.String{}
+		}(),
 		Wan1: func() *ResponseApplianceSwapNetworkApplianceWarmSpareWan1 {
 			if response.Wan1 != nil {
 				return &ResponseApplianceSwapNetworkApplianceWarmSpareWan1{
-					IP:     types.StringValue(response.Wan1.IP),
-					Subnet: types.StringValue(response.Wan1.Subnet),
+					IP: func() types.String {
+						if response.Wan1.IP != "" {
+							return types.StringValue(response.Wan1.IP)
+						}
+						return types.String{}
+					}(),
+					Subnet: func() types.String {
+						if response.Wan1.Subnet != "" {
+							return types.StringValue(response.Wan1.Subnet)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -229,8 +254,18 @@ func ResponseApplianceSwapNetworkApplianceWarmSpareItemToBody(state NetworksAppl
 		Wan2: func() *ResponseApplianceSwapNetworkApplianceWarmSpareWan2 {
 			if response.Wan2 != nil {
 				return &ResponseApplianceSwapNetworkApplianceWarmSpareWan2{
-					IP:     types.StringValue(response.Wan2.IP),
-					Subnet: types.StringValue(response.Wan2.Subnet),
+					IP: func() types.String {
+						if response.Wan2.IP != "" {
+							return types.StringValue(response.Wan2.IP)
+						}
+						return types.String{}
+					}(),
+					Subnet: func() types.String {
+						if response.Wan2.Subnet != "" {
+							return types.StringValue(response.Wan2.Subnet)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil

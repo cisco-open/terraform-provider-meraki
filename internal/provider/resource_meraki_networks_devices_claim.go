@@ -177,9 +177,9 @@ func (r *NetworksDevicesClaimResource) Delete(ctx context.Context, req resource.
 // TF Structs Schema
 type NetworksDevicesClaim struct {
 	NetworkID     types.String                          `tfsdk:"network_id"`
-	AddAtomically types.Bool                            `tfsdk:"add_atomically"`
 	Item          *ResponseNetworksClaimNetworkDevices  `tfsdk:"item"`
 	Parameters    *RequestNetworksClaimNetworkDevicesRs `tfsdk:"parameters"`
+	AddAtomically types.Bool                            `tfsdk:"add_atomically"`
 }
 
 type ResponseNetworksClaimNetworkDevices struct {
@@ -216,7 +216,12 @@ func ResponseNetworksClaimNetworkDevicesItemToBody(state NetworksDevicesClaim, r
 				for i, errors := range *response.Errors {
 					result[i] = ResponseNetworksClaimNetworkDevicesErrors{
 						Errors: StringSliceToList(errors.Errors),
-						Serial: types.StringValue(errors.Serial),
+						Serial: func() types.String {
+							if errors.Serial != "" {
+								return types.StringValue(errors.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

@@ -19,6 +19,8 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"encoding/json"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -27,10 +29,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -69,41 +70,32 @@ func (r *OrganizationsSNMPResource) Schema(_ context.Context, _ resource.SchemaR
 			"hostname": schema.StringAttribute{
 				MarkdownDescription: `The hostname of the SNMP server.`,
 				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
 				Required:            true,
 			},
-			"peer_ips": schema.SetAttribute{
+			"peer_ips": schema.ListAttribute{
 				MarkdownDescription: `The list of IPv4 addresses that are allowed to access the SNMP server.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
-				Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
+
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"port": schema.Int64Attribute{
 				MarkdownDescription: `The port of the SNMP server.`,
 				Computed:            true,
-				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.UseStateForUnknown(),
-				},
 			},
 			"v2_community_string": schema.StringAttribute{
 				MarkdownDescription: `The community string for SNMP version 2c, if enabled.`,
 				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"v2c_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating whether SNMP version 2c is enabled for the organization.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -112,7 +104,6 @@ func (r *OrganizationsSNMPResource) Schema(_ context.Context, _ resource.SchemaR
 			"v3_auth_mode": schema.StringAttribute{
 				MarkdownDescription: `The SNMP version 3 authentication mode. Can be either 'MD5' or 'SHA'.
                                   Allowed values: [MD5,SHA]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -126,7 +117,6 @@ func (r *OrganizationsSNMPResource) Schema(_ context.Context, _ resource.SchemaR
 			},
 			"v3_auth_pass": schema.StringAttribute{
 				MarkdownDescription: `The SNMP version 3 authentication password. Must be at least 8 characters if specified.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -134,7 +124,6 @@ func (r *OrganizationsSNMPResource) Schema(_ context.Context, _ resource.SchemaR
 			},
 			"v3_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating whether SNMP version 3 is enabled for the organization.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -143,7 +132,6 @@ func (r *OrganizationsSNMPResource) Schema(_ context.Context, _ resource.SchemaR
 			"v3_priv_mode": schema.StringAttribute{
 				MarkdownDescription: `The SNMP version 3 privacy mode. Can be either 'DES' or 'AES128'.
                                   Allowed values: [AES128,DES]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -157,7 +145,6 @@ func (r *OrganizationsSNMPResource) Schema(_ context.Context, _ resource.SchemaR
 			},
 			"v3_priv_pass": schema.StringAttribute{
 				MarkdownDescription: `The SNMP version 3 privacy password. Must be at least 8 characters if specified.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -166,9 +153,6 @@ func (r *OrganizationsSNMPResource) Schema(_ context.Context, _ resource.SchemaR
 			"v3_user": schema.StringAttribute{
 				MarkdownDescription: `The user for SNMP version 3, if enabled.`,
 				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 		},
 	}
@@ -196,27 +180,6 @@ func (r *OrganizationsSNMPResource) Create(ctx context.Context, req resource.Cre
 	vvOrganizationID := data.OrganizationID.ValueString()
 	//Has Item and not has items
 
-	if vvOrganizationID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Organizations.GetOrganizationSNMP(vvOrganizationID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource OrganizationsSnmp  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource OrganizationsSnmp only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationSNMP(vvOrganizationID, dataRequest)
@@ -225,7 +188,7 @@ func (r *OrganizationsSNMPResource) Create(ctx context.Context, req resource.Cre
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationSNMP",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -236,49 +199,31 @@ func (r *OrganizationsSNMPResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Organizations.GetOrganizationSNMP(vvOrganizationID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizationSNMP",
-				restyResp1.String(),
-			)
-			return
-		}
+	// Read
+	var responseGet *merakigosdk.ResponseOrganizationsGetOrganizationSNMP
+	err = json.Unmarshal(restyResp2.Body(), &responseGet)
+	if err != nil {
 		resp.Diagnostics.AddError(
 			"Failure when executing GetOrganizationSNMP",
 			err.Error(),
 		)
-		return
 	}
 
-	data = ResponseOrganizationsGetOrganizationSNMPItemToBodyRs(data, responseGet, false)
+	data = ResponseOrganizationsGetOrganizationSNMPItemToBodyRs(data, responseGet, true)
 
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *OrganizationsSNMPResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data OrganizationsSNMPRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -308,33 +253,28 @@ func (r *OrganizationsSNMPResource) Read(ctx context.Context, req resource.ReadR
 	}
 	//entro aqui 2
 	data = ResponseOrganizationsGetOrganizationSNMPItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *OrganizationsSNMPResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), req.ID)...)
 }
 
 func (r *OrganizationsSNMPResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data OrganizationsSNMPRs
-	merge(ctx, req, resp, &data)
+	var plan OrganizationsSNMPRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvOrganizationID := data.OrganizationID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvOrganizationID := plan.OrganizationID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationSNMP(vvOrganizationID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationSNMP",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -344,9 +284,7 @@ func (r *OrganizationsSNMPResource) Update(ctx context.Context, req resource.Upd
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *OrganizationsSNMPResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -359,7 +297,7 @@ func (r *OrganizationsSNMPResource) Delete(ctx context.Context, req resource.Del
 type OrganizationsSNMPRs struct {
 	OrganizationID    types.String `tfsdk:"organization_id"`
 	Hostname          types.String `tfsdk:"hostname"`
-	PeerIPs           types.Set    `tfsdk:"peer_ips"`
+	PeerIPs           types.List   `tfsdk:"peer_ips"`
 	Port              types.Int64  `tfsdk:"port"`
 	V2CommunityString types.String `tfsdk:"v2_community_string"`
 	V2CEnabled        types.Bool   `tfsdk:"v2c_enabled"`
@@ -427,32 +365,55 @@ func (r *OrganizationsSNMPRs) toSdkApiRequestUpdate(ctx context.Context) *meraki
 // From gosdk to TF Structs Schema
 func ResponseOrganizationsGetOrganizationSNMPItemToBodyRs(state OrganizationsSNMPRs, response *merakigosdk.ResponseOrganizationsGetOrganizationSNMP, is_read bool) OrganizationsSNMPRs {
 	itemState := OrganizationsSNMPRs{
-		Hostname: types.StringValue(response.Hostname),
-		PeerIPs:  StringSliceToSet(response.PeerIPs),
+		Hostname: func() types.String {
+			if response.Hostname != "" {
+				return types.StringValue(response.Hostname)
+			}
+			return types.String{}
+		}(),
+		PeerIPs: StringSliceToList(response.PeerIPs),
 		Port: func() types.Int64 {
 			if response.Port != nil {
 				return types.Int64Value(int64(*response.Port))
 			}
 			return types.Int64{}
 		}(),
-		V2CommunityString: types.StringValue(response.V2CommunityString),
+		V2CommunityString: func() types.String {
+			if response.V2CommunityString != "" {
+				return types.StringValue(response.V2CommunityString)
+			}
+			return types.String{}
+		}(),
 		V2CEnabled: func() types.Bool {
 			if response.V2CEnabled != nil {
 				return types.BoolValue(*response.V2CEnabled)
 			}
 			return types.Bool{}
 		}(),
-		V3AuthMode: types.StringValue(response.V3AuthMode),
+		V3AuthMode: func() types.String {
+			if response.V3AuthMode != "" {
+				return types.StringValue(response.V3AuthMode)
+			}
+			return types.String{}
+		}(),
 		V3Enabled: func() types.Bool {
 			if response.V3Enabled != nil {
 				return types.BoolValue(*response.V3Enabled)
 			}
 			return types.Bool{}
 		}(),
-		V3PrivMode: types.StringValue(response.V3PrivMode),
-		V3User:     types.StringValue(response.V3User),
-		V3AuthPass: state.V3AuthPass,
-		V3PrivPass: state.V3PrivPass,
+		V3PrivMode: func() types.String {
+			if response.V3PrivMode != "" {
+				return types.StringValue(response.V3PrivMode)
+			}
+			return types.String{}
+		}(),
+		V3User: func() types.String {
+			if response.V3User != "" {
+				return types.StringValue(response.V3User)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsSNMPRs)

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -163,6 +162,17 @@ func (d *OrganizationsSmAdminsRolesDataSource) Read(ctx context.Context, req dat
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetOrganizationSmAdminsRole",
+				err.Error(),
+			)
+			return
+		}
+
 		organizationsSmAdminsRoles = ResponseSmGetOrganizationSmAdminsRoleItemToBody(organizationsSmAdminsRoles, response2)
 		diags = resp.State.Set(ctx, &organizationsSmAdminsRoles)
 		resp.Diagnostics.Append(diags...)
@@ -193,10 +203,25 @@ type ResponseSmGetOrganizationSmAdminsRole struct {
 // ToBody
 func ResponseSmGetOrganizationSmAdminsRoleItemToBody(state OrganizationsSmAdminsRoles, response *merakigosdk.ResponseSmGetOrganizationSmAdminsRole) OrganizationsSmAdminsRoles {
 	itemState := ResponseSmGetOrganizationSmAdminsRole{
-		Name:   types.StringValue(response.Name),
-		RoleID: types.StringValue(response.RoleID),
-		Scope:  types.StringValue(response.Scope),
-		Tags:   StringSliceToList(response.Tags),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		RoleID: func() types.String {
+			if response.RoleID != "" {
+				return types.StringValue(response.RoleID)
+			}
+			return types.String{}
+		}(),
+		Scope: func() types.String {
+			if response.Scope != "" {
+				return types.StringValue(response.Scope)
+			}
+			return types.String{}
+		}(),
+		Tags: StringSliceToList(response.Tags),
 	}
 	state.Item = &itemState
 	return state

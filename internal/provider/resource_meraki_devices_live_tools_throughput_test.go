@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -239,7 +240,7 @@ func (r *DevicesLiveToolsThroughputTestResource) Create(ctx context.Context, req
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateDeviceLiveToolsThroughputTest",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -447,11 +448,21 @@ func (r *DevicesLiveToolsThroughputTestRs) toSdkApiRequestCreate(ctx context.Con
 // From gosdk to TF Structs Schema
 func ResponseDevicesGetDeviceLiveToolsThroughputTestItemToBodyRs(state DevicesLiveToolsThroughputTestRs, response *merakigosdk.ResponseDevicesGetDeviceLiveToolsThroughputTest, is_read bool) DevicesLiveToolsThroughputTestRs {
 	itemState := DevicesLiveToolsThroughputTestRs{
-		Error: types.StringValue(response.Error),
+		Error: func() types.String {
+			if response.Error != "" {
+				return types.StringValue(response.Error)
+			}
+			return types.String{}
+		}(),
 		Request: func() *ResponseDevicesGetDeviceLiveToolsThroughputTestRequestRs {
 			if response.Request != nil {
 				return &ResponseDevicesGetDeviceLiveToolsThroughputTestRequestRs{
-					Serial: types.StringValue(response.Request.Serial),
+					Serial: func() types.String {
+						if response.Request.Serial != "" {
+							return types.StringValue(response.Request.Serial)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -476,9 +487,24 @@ func ResponseDevicesGetDeviceLiveToolsThroughputTestItemToBodyRs(state DevicesLi
 			}
 			return nil
 		}(),
-		Status:           types.StringValue(response.Status),
-		ThroughputTestID: types.StringValue(response.ThroughputTestID),
-		URL:              types.StringValue(response.URL),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
+		ThroughputTestID: func() types.String {
+			if response.ThroughputTestID != "" {
+				return types.StringValue(response.ThroughputTestID)
+			}
+			return types.String{}
+		}(),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(DevicesLiveToolsThroughputTestRs)

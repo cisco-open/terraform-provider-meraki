@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -27,8 +28,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -65,7 +67,6 @@ func (r *NetworksSwitchAlternateManagementInterfaceResource) Schema(_ context.Co
 		Attributes: map[string]schema.Attribute{
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: `Boolean value to enable or disable AMI configuration. If enabled, VLAN and protocols must be set`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -75,29 +76,28 @@ func (r *NetworksSwitchAlternateManagementInterfaceResource) Schema(_ context.Co
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"protocols": schema.SetAttribute{
+			"protocols": schema.ListAttribute{
 				MarkdownDescription: `Can be one or more of the following values: 'radius', 'snmp' or 'syslog'`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
-			"switches": schema.SetNestedAttribute{
+			"switches": schema.ListNestedAttribute{
 				MarkdownDescription: `Array of switch serial number and IP assignment. If parameter is present, it cannot have empty body. Note: switches parameter is not applicable for template networks, in other words, do not put 'switches' in the body when updating template networks. Also, an empty 'switches' array will remove all previous assignments`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"alternate_management_ip": schema.StringAttribute{
 							MarkdownDescription: `Switch alternative management IP. To remove a prior IP setting, provide an empty string`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -105,7 +105,6 @@ func (r *NetworksSwitchAlternateManagementInterfaceResource) Schema(_ context.Co
 						},
 						"gateway": schema.StringAttribute{
 							MarkdownDescription: `Switch gateway must be in IP format. Only and must be specified for Polaris switches`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -113,7 +112,6 @@ func (r *NetworksSwitchAlternateManagementInterfaceResource) Schema(_ context.Co
 						},
 						"serial": schema.StringAttribute{
 							MarkdownDescription: `Switch serial number`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -121,7 +119,6 @@ func (r *NetworksSwitchAlternateManagementInterfaceResource) Schema(_ context.Co
 						},
 						"subnet_mask": schema.StringAttribute{
 							MarkdownDescription: `Switch subnet mask must be in IP format. Only and must be specified for Polaris switches`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -132,7 +129,6 @@ func (r *NetworksSwitchAlternateManagementInterfaceResource) Schema(_ context.Co
 			},
 			"vlan_id": schema.Int64Attribute{
 				MarkdownDescription: `Alternate management VLAN, must be between 1 and 4094`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -164,27 +160,6 @@ func (r *NetworksSwitchAlternateManagementInterfaceResource) Create(ctx context.
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchAlternateManagementInterface(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSwitchAlternateManagementInterface  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSwitchAlternateManagementInterface only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchAlternateManagementInterface(vvNetworkID, dataRequest)
@@ -193,7 +168,7 @@ func (r *NetworksSwitchAlternateManagementInterfaceResource) Create(ctx context.
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchAlternateManagementInterface",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -204,49 +179,19 @@ func (r *NetworksSwitchAlternateManagementInterfaceResource) Create(ctx context.
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchAlternateManagementInterface(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkSwitchAlternateManagementInterface",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkSwitchAlternateManagementInterface",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseSwitchGetNetworkSwitchAlternateManagementInterfaceItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksSwitchAlternateManagementInterfaceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksSwitchAlternateManagementInterfaceRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -276,33 +221,28 @@ func (r *NetworksSwitchAlternateManagementInterfaceResource) Read(ctx context.Co
 	}
 	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchAlternateManagementInterfaceItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksSwitchAlternateManagementInterfaceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksSwitchAlternateManagementInterfaceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksSwitchAlternateManagementInterfaceRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksSwitchAlternateManagementInterfaceRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchAlternateManagementInterface(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchAlternateManagementInterface",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -312,9 +252,7 @@ func (r *NetworksSwitchAlternateManagementInterfaceResource) Update(ctx context.
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksSwitchAlternateManagementInterfaceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -327,7 +265,7 @@ func (r *NetworksSwitchAlternateManagementInterfaceResource) Delete(ctx context.
 type NetworksSwitchAlternateManagementInterfaceRs struct {
 	NetworkID types.String                                                            `tfsdk:"network_id"`
 	Enabled   types.Bool                                                              `tfsdk:"enabled"`
-	Protocols types.Set                                                               `tfsdk:"protocols"`
+	Protocols types.List                                                              `tfsdk:"protocols"`
 	Switches  *[]ResponseSwitchGetNetworkSwitchAlternateManagementInterfaceSwitchesRs `tfsdk:"switches"`
 	VLANID    types.Int64                                                             `tfsdk:"vlan_id"`
 }
@@ -395,16 +333,36 @@ func ResponseSwitchGetNetworkSwitchAlternateManagementInterfaceItemToBodyRs(stat
 			}
 			return types.Bool{}
 		}(),
-		Protocols: StringSliceToSet(response.Protocols),
+		Protocols: StringSliceToList(response.Protocols),
 		Switches: func() *[]ResponseSwitchGetNetworkSwitchAlternateManagementInterfaceSwitchesRs {
 			if response.Switches != nil {
 				result := make([]ResponseSwitchGetNetworkSwitchAlternateManagementInterfaceSwitchesRs, len(*response.Switches))
 				for i, switches := range *response.Switches {
 					result[i] = ResponseSwitchGetNetworkSwitchAlternateManagementInterfaceSwitchesRs{
-						AlternateManagementIP: types.StringValue(switches.AlternateManagementIP),
-						Gateway:               types.StringValue(switches.Gateway),
-						Serial:                types.StringValue(switches.Serial),
-						SubnetMask:            types.StringValue(switches.SubnetMask),
+						AlternateManagementIP: func() types.String {
+							if switches.AlternateManagementIP != "" {
+								return types.StringValue(switches.AlternateManagementIP)
+							}
+							return types.String{}
+						}(),
+						Gateway: func() types.String {
+							if switches.Gateway != "" {
+								return types.StringValue(switches.Gateway)
+							}
+							return types.String{}
+						}(),
+						Serial: func() types.String {
+							if switches.Serial != "" {
+								return types.StringValue(switches.Serial)
+							}
+							return types.String{}
+						}(),
+						SubnetMask: func() types.String {
+							if switches.SubnetMask != "" {
+								return types.StringValue(switches.SubnetMask)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

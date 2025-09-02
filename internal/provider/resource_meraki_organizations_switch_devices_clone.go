@@ -174,7 +174,7 @@ type ResponseSwitchCloneOrganizationSwitchDevices struct {
 
 type RequestSwitchCloneOrganizationSwitchDevicesRs struct {
 	SourceSerial  types.String `tfsdk:"source_serial"`
-	TargetSerials types.Set    `tfsdk:"target_serials"`
+	TargetSerials types.List   `tfsdk:"target_serials"`
 }
 
 // FromBody
@@ -199,7 +199,12 @@ func (r *OrganizationsSwitchDevicesClone) toSdkApiRequestCreate(ctx context.Cont
 // ToBody
 func ResponseSwitchCloneOrganizationSwitchDevicesItemToBody(state OrganizationsSwitchDevicesClone, response *merakigosdk.ResponseSwitchCloneOrganizationSwitchDevices) OrganizationsSwitchDevicesClone {
 	itemState := ResponseSwitchCloneOrganizationSwitchDevices{
-		SourceSerial:  types.StringValue(response.SourceSerial),
+		SourceSerial: func() types.String {
+			if response.SourceSerial != "" {
+				return types.StringValue(response.SourceSerial)
+			}
+			return types.String{}
+		}(),
 		TargetSerials: StringSliceToList(response.TargetSerials),
 	}
 	state.Item = &itemState

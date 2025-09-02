@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -68,7 +69,6 @@ func (r *NetworksSmTargetGroupsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name of this target group.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -80,13 +80,12 @@ func (r *NetworksSmTargetGroupsResource) Schema(_ context.Context, _ resource.Sc
 			},
 			"scope": schema.StringAttribute{
 				MarkdownDescription: `The scope of the target group.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"tags": schema.SetAttribute{
+			"tags": schema.ListAttribute{
 				MarkdownDescription: `The tags of the target group.`,
 				Computed:            true,
 				ElementType:         types.StringType,
@@ -173,7 +172,7 @@ func (r *NetworksSmTargetGroupsResource) Create(ctx context.Context, req resourc
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSmTargetGroup",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -245,21 +244,11 @@ func (r *NetworksSmTargetGroupsResource) Create(ctx context.Context, req resourc
 func (r *NetworksSmTargetGroupsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksSmTargetGroupsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -290,9 +279,7 @@ func (r *NetworksSmTargetGroupsResource) Read(ctx context.Context, req resource.
 	}
 	//entro aqui 2
 	data = ResponseSmGetNetworkSmTargetGroupItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksSmTargetGroupsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -300,35 +287,31 @@ func (r *NetworksSmTargetGroupsResource) ImportState(ctx context.Context, req re
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,targetGroupId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("target_group_id"), idParts[1])...)
 }
 
 func (r *NetworksSmTargetGroupsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksSmTargetGroupsRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksSmTargetGroupsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvTargetGroupID := data.TargetGroupID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvTargetGroupID := plan.TargetGroupID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Sm.UpdateNetworkSmTargetGroup(vvNetworkID, vvTargetGroupID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSmTargetGroup",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -338,9 +321,7 @@ func (r *NetworksSmTargetGroupsResource) Update(ctx context.Context, req resourc
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksSmTargetGroupsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -380,7 +361,7 @@ type NetworksSmTargetGroupsRs struct {
 	ID            types.String `tfsdk:"id"`
 	Name          types.String `tfsdk:"name"`
 	Scope         types.String `tfsdk:"scope"`
-	Tags          types.Set    `tfsdk:"tags"`
+	Tags          types.List   `tfsdk:"tags"`
 }
 
 // FromBody
@@ -428,10 +409,25 @@ func (r *NetworksSmTargetGroupsRs) toSdkApiRequestUpdate(ctx context.Context) *m
 // From gosdk to TF Structs Schema
 func ResponseSmGetNetworkSmTargetGroupItemToBodyRs(state NetworksSmTargetGroupsRs, response *merakigosdk.ResponseSmGetNetworkSmTargetGroup, is_read bool) NetworksSmTargetGroupsRs {
 	itemState := NetworksSmTargetGroupsRs{
-		ID:    types.StringValue(response.ID),
-		Name:  types.StringValue(response.Name),
-		Scope: types.StringValue(response.Scope),
-		Tags:  StringSliceToSet(response.Tags),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		Scope: func() types.String {
+			if response.Scope != "" {
+				return types.StringValue(response.Scope)
+			}
+			return types.String{}
+		}(),
+		Tags: StringSliceToList(response.Tags),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksSmTargetGroupsRs)

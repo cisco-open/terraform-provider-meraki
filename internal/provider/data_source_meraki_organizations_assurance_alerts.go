@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -403,21 +402,61 @@ func ResponseOrganizationsGetOrganizationAssuranceAlertsItemsToBody(state Organi
 	var items []ResponseItemOrganizationsGetOrganizationAssuranceAlerts
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationAssuranceAlerts{
-			CategoryType: types.StringValue(item.CategoryType),
-			Description:  types.StringValue(item.Description),
-			DeviceType:   types.StringValue(item.DeviceType),
-			DismissedAt:  types.StringValue(item.DismissedAt),
-			ID:           types.StringValue(item.ID),
+			CategoryType: func() types.String {
+				if item.CategoryType != "" {
+					return types.StringValue(item.CategoryType)
+				}
+				return types.String{}
+			}(),
+			Description: func() types.String {
+				if item.Description != "" {
+					return types.StringValue(item.Description)
+				}
+				return types.String{}
+			}(),
+			DeviceType: func() types.String {
+				if item.DeviceType != "" {
+					return types.StringValue(item.DeviceType)
+				}
+				return types.String{}
+			}(),
+			DismissedAt: func() types.String {
+				if item.DismissedAt != "" {
+					return types.StringValue(item.DismissedAt)
+				}
+				return types.String{}
+			}(),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
 			Network: func() *ResponseItemOrganizationsGetOrganizationAssuranceAlertsNetwork {
 				if item.Network != nil {
 					return &ResponseItemOrganizationsGetOrganizationAssuranceAlertsNetwork{
-						ID:   types.StringValue(item.Network.ID),
-						Name: types.StringValue(item.Network.Name),
+						ID: func() types.String {
+							if item.Network.ID != "" {
+								return types.StringValue(item.Network.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if item.Network.Name != "" {
+								return types.StringValue(item.Network.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			ResolvedAt: types.StringValue(item.ResolvedAt),
+			ResolvedAt: func() types.String {
+				if item.ResolvedAt != "" {
+					return types.StringValue(item.ResolvedAt)
+				}
+				return types.String{}
+			}(),
 			Scope: func() *ResponseItemOrganizationsGetOrganizationAssuranceAlertsScope {
 				if item.Scope != nil {
 					return &ResponseItemOrganizationsGetOrganizationAssuranceAlertsScope{
@@ -427,26 +466,61 @@ func ResponseOrganizationsGetOrganizationAssuranceAlertsItemsToBody(state Organi
 								result := make([]ResponseItemOrganizationsGetOrganizationAssuranceAlertsScopeDevices, len(*item.Scope.Devices))
 								for i, devices := range *item.Scope.Devices {
 									result[i] = ResponseItemOrganizationsGetOrganizationAssuranceAlertsScopeDevices{
-										Imei: types.StringValue(devices.Imei),
+										Imei: func() types.String {
+											if devices.Imei != "" {
+												return types.StringValue(devices.Imei)
+											}
+											return types.String{}
+										}(),
 										Lldp: func() *ResponseItemOrganizationsGetOrganizationAssuranceAlertsScopeDevicesLldp {
 											if devices.Lldp != nil {
 												return &ResponseItemOrganizationsGetOrganizationAssuranceAlertsScopeDevicesLldp{
-													Port: types.StringValue(devices.Lldp.Port),
+													Port: func() types.String {
+														if devices.Lldp.Port != "" {
+															return types.StringValue(devices.Lldp.Port)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return nil
 										}(),
-										Mac:  types.StringValue(devices.Mac),
-										Name: types.StringValue(devices.Name),
+										Mac: func() types.String {
+											if devices.Mac != "" {
+												return types.StringValue(devices.Mac)
+											}
+											return types.String{}
+										}(),
+										Name: func() types.String {
+											if devices.Name != "" {
+												return types.StringValue(devices.Name)
+											}
+											return types.String{}
+										}(),
 										Order: func() types.Int64 {
 											if devices.Order != nil {
 												return types.Int64Value(int64(*devices.Order))
 											}
 											return types.Int64{}
 										}(),
-										ProductType: types.StringValue(devices.ProductType),
-										Serial:      types.StringValue(devices.Serial),
-										URL:         types.StringValue(devices.URL),
+										ProductType: func() types.String {
+											if devices.ProductType != "" {
+												return types.StringValue(devices.ProductType)
+											}
+											return types.String{}
+										}(),
+										Serial: func() types.String {
+											if devices.Serial != "" {
+												return types.StringValue(devices.Serial)
+											}
+											return types.String{}
+										}(),
+										URL: func() types.String {
+											if devices.URL != "" {
+												return types.StringValue(devices.URL)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -467,10 +541,30 @@ func ResponseOrganizationsGetOrganizationAssuranceAlertsItemsToBody(state Organi
 				}
 				return nil
 			}(),
-			Severity:  types.StringValue(item.Severity),
-			StartedAt: types.StringValue(item.StartedAt),
-			Title:     types.StringValue(item.Title),
-			Type:      types.StringValue(item.Type),
+			Severity: func() types.String {
+				if item.Severity != "" {
+					return types.StringValue(item.Severity)
+				}
+				return types.String{}
+			}(),
+			StartedAt: func() types.String {
+				if item.StartedAt != "" {
+					return types.StringValue(item.StartedAt)
+				}
+				return types.String{}
+			}(),
+			Title: func() types.String {
+				if item.Title != "" {
+					return types.StringValue(item.Title)
+				}
+				return types.String{}
+			}(),
+			Type: func() types.String {
+				if item.Type != "" {
+					return types.StringValue(item.Type)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

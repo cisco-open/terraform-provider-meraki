@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -399,7 +398,12 @@ func ResponseNetworksGetNetworkAlertsSettingsItemToBody(state NetworksAlertsSett
 											result := make([]ResponseNetworksGetNetworkAlertsSettingsAlertsFiltersConditions, len(*alerts.Filters.Conditions))
 											for i, conditions := range *alerts.Filters.Conditions {
 												result[i] = ResponseNetworksGetNetworkAlertsSettingsAlertsFiltersConditions{
-													Direction: types.StringValue(conditions.Direction),
+													Direction: func() types.String {
+														if conditions.Direction != "" {
+															return types.StringValue(conditions.Direction)
+														}
+														return types.String{}
+													}(),
 													Duration: func() types.Int64 {
 														if conditions.Duration != nil {
 															return types.Int64Value(int64(*conditions.Duration))
@@ -412,15 +416,30 @@ func ResponseNetworksGetNetworkAlertsSettingsItemToBody(state NetworksAlertsSett
 														}
 														return types.Float64{}
 													}(),
-													Type: types.StringValue(conditions.Type),
-													Unit: types.StringValue(conditions.Unit),
+													Type: func() types.String {
+														if conditions.Type != "" {
+															return types.StringValue(conditions.Type)
+														}
+														return types.String{}
+													}(),
+													Unit: func() types.String {
+														if conditions.Unit != "" {
+															return types.StringValue(conditions.Unit)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return &result
 										}
 										return nil
 									}(),
-									FailureType: types.StringValue(alerts.Filters.FailureType),
+									FailureType: func() types.String {
+										if alerts.Filters.FailureType != "" {
+											return types.StringValue(alerts.Filters.FailureType)
+										}
+										return types.String{}
+									}(),
 									LookbackWindow: func() types.Int64 {
 										if alerts.Filters.LookbackWindow != nil {
 											return types.Int64Value(int64(*alerts.Filters.LookbackWindow))
@@ -433,24 +452,49 @@ func ResponseNetworksGetNetworkAlertsSettingsItemToBody(state NetworksAlertsSett
 										}
 										return types.Int64{}
 									}(),
-									Name: types.StringValue(alerts.Filters.Name),
+									Name: func() types.String {
+										if alerts.Filters.Name != "" {
+											return types.StringValue(alerts.Filters.Name)
+										}
+										return types.String{}
+									}(),
 									Period: func() types.Int64 {
 										if alerts.Filters.Period != nil {
 											return types.Int64Value(int64(*alerts.Filters.Period))
 										}
 										return types.Int64{}
 									}(),
-									Priority: types.StringValue(alerts.Filters.Priority),
-									Regex:    types.StringValue(alerts.Filters.Regex),
-									Selector: types.StringValue(alerts.Filters.Selector),
-									Serials:  StringSliceToList(alerts.Filters.Serials),
+									Priority: func() types.String {
+										if alerts.Filters.Priority != "" {
+											return types.StringValue(alerts.Filters.Priority)
+										}
+										return types.String{}
+									}(),
+									Regex: func() types.String {
+										if alerts.Filters.Regex != "" {
+											return types.StringValue(alerts.Filters.Regex)
+										}
+										return types.String{}
+									}(),
+									Selector: func() types.String {
+										if alerts.Filters.Selector != "" {
+											return types.StringValue(alerts.Filters.Selector)
+										}
+										return types.String{}
+									}(),
+									Serials: StringSliceToList(alerts.Filters.Serials),
 									SSIDNum: func() types.Int64 {
 										if alerts.Filters.SSIDNum != nil {
 											return types.Int64Value(int64(*alerts.Filters.SSIDNum))
 										}
 										return types.Int64{}
 									}(),
-									Tag: types.StringValue(alerts.Filters.Tag),
+									Tag: func() types.String {
+										if alerts.Filters.Tag != "" {
+											return types.StringValue(alerts.Filters.Tag)
+										}
+										return types.String{}
+									}(),
 									Threshold: func() types.Int64 {
 										if alerts.Filters.Threshold != nil {
 											return types.Int64Value(int64(*alerts.Filters.Threshold))
@@ -467,7 +511,12 @@ func ResponseNetworksGetNetworkAlertsSettingsItemToBody(state NetworksAlertsSett
 							}
 							return nil
 						}(),
-						Type: types.StringValue(alerts.Type),
+						Type: func() types.String {
+							if alerts.Type != "" {
+								return types.StringValue(alerts.Type)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

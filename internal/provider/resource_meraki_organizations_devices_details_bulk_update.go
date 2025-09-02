@@ -187,7 +187,7 @@ type ResponseOrganizationsBulkUpdateOrganizationDevicesDetails struct {
 
 type RequestOrganizationsBulkUpdateOrganizationDevicesDetailsRs struct {
 	Details *[]RequestOrganizationsBulkUpdateOrganizationDevicesDetailsDetailsRs `tfsdk:"details"`
-	Serials types.Set                                                            `tfsdk:"serials"`
+	Serials types.List                                                           `tfsdk:"serials"`
 }
 
 type RequestOrganizationsBulkUpdateOrganizationDevicesDetailsDetailsRs struct {
@@ -214,12 +214,7 @@ func (r *OrganizationsDevicesDetailsBulkUpdate) toSdkApiRequestCreate(ctx contex
 	var serials []string = nil
 	re.Serials.ElementsAs(ctx, &serials, false)
 	out := merakigosdk.RequestOrganizationsBulkUpdateOrganizationDevicesDetails{
-		Details: func() *[]merakigosdk.RequestOrganizationsBulkUpdateOrganizationDevicesDetailsDetails {
-			if len(requestOrganizationsBulkUpdateOrganizationDevicesDetailsDetails) > 0 {
-				return &requestOrganizationsBulkUpdateOrganizationDevicesDetailsDetails
-			}
-			return nil
-		}(),
+		Details: &requestOrganizationsBulkUpdateOrganizationDevicesDetailsDetails,
 		Serials: serials,
 	}
 	return &out

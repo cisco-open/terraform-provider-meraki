@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -248,6 +247,17 @@ func (d *NetworksCameraWirelessProfilesDataSource) Read(ctx context.Context, req
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkCameraWirelessProfile",
+				err.Error(),
+			)
+			return
+		}
+
 		networksCameraWirelessProfiles = ResponseCameraGetNetworkCameraWirelessProfileItemToBody(networksCameraWirelessProfiles, response2)
 		diags = resp.State.Set(ctx, &networksCameraWirelessProfiles)
 		resp.Diagnostics.Append(diags...)
@@ -317,24 +327,64 @@ func ResponseCameraGetNetworkCameraWirelessProfilesItemsToBody(state NetworksCam
 				}
 				return types.Int64{}
 			}(),
-			ID: types.StringValue(item.ID),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
 			IDentity: func() *ResponseItemCameraGetNetworkCameraWirelessProfilesIdentity {
 				if item.IDentity != nil {
 					return &ResponseItemCameraGetNetworkCameraWirelessProfilesIdentity{
-						Password: types.StringValue(item.IDentity.Password),
-						Username: types.StringValue(item.IDentity.Username),
+						Password: func() types.String {
+							if item.IDentity.Password != "" {
+								return types.StringValue(item.IDentity.Password)
+							}
+							return types.String{}
+						}(),
+						Username: func() types.String {
+							if item.IDentity.Username != "" {
+								return types.StringValue(item.IDentity.Username)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			Name: types.StringValue(item.Name),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			SSID: func() *ResponseItemCameraGetNetworkCameraWirelessProfilesSsid {
 				if item.SSID != nil {
 					return &ResponseItemCameraGetNetworkCameraWirelessProfilesSsid{
-						AuthMode:       types.StringValue(item.SSID.AuthMode),
-						EncryptionMode: types.StringValue(item.SSID.EncryptionMode),
-						Name:           types.StringValue(item.SSID.Name),
-						Psk:            types.StringValue(item.SSID.Psk),
+						AuthMode: func() types.String {
+							if item.SSID.AuthMode != "" {
+								return types.StringValue(item.SSID.AuthMode)
+							}
+							return types.String{}
+						}(),
+						EncryptionMode: func() types.String {
+							if item.SSID.EncryptionMode != "" {
+								return types.StringValue(item.SSID.EncryptionMode)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if item.SSID.Name != "" {
+								return types.StringValue(item.SSID.Name)
+							}
+							return types.String{}
+						}(),
+						Psk: func() types.String {
+							if item.SSID.Psk != "" {
+								return types.StringValue(item.SSID.Psk)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -354,24 +404,64 @@ func ResponseCameraGetNetworkCameraWirelessProfileItemToBody(state NetworksCamer
 			}
 			return types.Int64{}
 		}(),
-		ID: types.StringValue(response.ID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		IDentity: func() *ResponseCameraGetNetworkCameraWirelessProfileIdentity {
 			if response.IDentity != nil {
 				return &ResponseCameraGetNetworkCameraWirelessProfileIdentity{
-					Password: types.StringValue(response.IDentity.Password),
-					Username: types.StringValue(response.IDentity.Username),
+					Password: func() types.String {
+						if response.IDentity.Password != "" {
+							return types.StringValue(response.IDentity.Password)
+						}
+						return types.String{}
+					}(),
+					Username: func() types.String {
+						if response.IDentity.Username != "" {
+							return types.StringValue(response.IDentity.Username)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		SSID: func() *ResponseCameraGetNetworkCameraWirelessProfileSsid {
 			if response.SSID != nil {
 				return &ResponseCameraGetNetworkCameraWirelessProfileSsid{
-					AuthMode:       types.StringValue(response.SSID.AuthMode),
-					EncryptionMode: types.StringValue(response.SSID.EncryptionMode),
-					Name:           types.StringValue(response.SSID.Name),
-					Psk:            types.StringValue(response.SSID.Psk),
+					AuthMode: func() types.String {
+						if response.SSID.AuthMode != "" {
+							return types.StringValue(response.SSID.AuthMode)
+						}
+						return types.String{}
+					}(),
+					EncryptionMode: func() types.String {
+						if response.SSID.EncryptionMode != "" {
+							return types.StringValue(response.SSID.EncryptionMode)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.SSID.Name != "" {
+							return types.StringValue(response.SSID.Name)
+						}
+						return types.String{}
+					}(),
+					Psk: func() types.String {
+						if response.SSID.Psk != "" {
+							return types.StringValue(response.SSID.Psk)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil

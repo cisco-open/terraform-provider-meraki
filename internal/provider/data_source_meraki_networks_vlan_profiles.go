@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -268,6 +267,17 @@ func (d *NetworksVLANProfilesDataSource) Read(ctx context.Context, req datasourc
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkVLANProfile",
+				err.Error(),
+			)
+			return
+		}
+
 		networksVLANProfiles = ResponseNetworksGetNetworkVLANProfileItemToBody(networksVLANProfiles, response2)
 		diags = resp.State.Set(ctx, &networksVLANProfiles)
 		resp.Diagnostics.Append(diags...)
@@ -339,21 +349,41 @@ func ResponseNetworksGetNetworkVLANProfilesItemsToBody(state NetworksVLANProfile
 	var items []ResponseItemNetworksGetNetworkVlanProfiles
 	for _, item := range *response {
 		itemState := ResponseItemNetworksGetNetworkVlanProfiles{
-			Iname: types.StringValue(item.Iname),
+			Iname: func() types.String {
+				if item.Iname != "" {
+					return types.StringValue(item.Iname)
+				}
+				return types.String{}
+			}(),
 			IsDefault: func() types.Bool {
 				if item.IsDefault != nil {
 					return types.BoolValue(*item.IsDefault)
 				}
 				return types.Bool{}
 			}(),
-			Name: types.StringValue(item.Name),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			VLANGroups: func() *[]ResponseItemNetworksGetNetworkVlanProfilesVlanGroups {
 				if item.VLANGroups != nil {
 					result := make([]ResponseItemNetworksGetNetworkVlanProfilesVlanGroups, len(*item.VLANGroups))
 					for i, vLANGroups := range *item.VLANGroups {
 						result[i] = ResponseItemNetworksGetNetworkVlanProfilesVlanGroups{
-							Name:    types.StringValue(vLANGroups.Name),
-							VLANIDs: types.StringValue(vLANGroups.VLANIDs),
+							Name: func() types.String {
+								if vLANGroups.Name != "" {
+									return types.StringValue(vLANGroups.Name)
+								}
+								return types.String{}
+							}(),
+							VLANIDs: func() types.String {
+								if vLANGroups.VLANIDs != "" {
+									return types.StringValue(vLANGroups.VLANIDs)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
@@ -368,14 +398,34 @@ func ResponseNetworksGetNetworkVLANProfilesItemsToBody(state NetworksVLANProfile
 							AdaptivePolicyGroup: func() *ResponseItemNetworksGetNetworkVlanProfilesVlanNamesAdaptivePolicyGroup {
 								if vLANNames.AdaptivePolicyGroup != nil {
 									return &ResponseItemNetworksGetNetworkVlanProfilesVlanNamesAdaptivePolicyGroup{
-										ID:   types.StringValue(vLANNames.AdaptivePolicyGroup.ID),
-										Name: types.StringValue(vLANNames.AdaptivePolicyGroup.Name),
+										ID: func() types.String {
+											if vLANNames.AdaptivePolicyGroup.ID != "" {
+												return types.StringValue(vLANNames.AdaptivePolicyGroup.ID)
+											}
+											return types.String{}
+										}(),
+										Name: func() types.String {
+											if vLANNames.AdaptivePolicyGroup.Name != "" {
+												return types.StringValue(vLANNames.AdaptivePolicyGroup.Name)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return nil
 							}(),
-							Name:   types.StringValue(vLANNames.Name),
-							VLANID: types.StringValue(vLANNames.VLANID),
+							Name: func() types.String {
+								if vLANNames.Name != "" {
+									return types.StringValue(vLANNames.Name)
+								}
+								return types.String{}
+							}(),
+							VLANID: func() types.String {
+								if vLANNames.VLANID != "" {
+									return types.StringValue(vLANNames.VLANID)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
@@ -391,21 +441,41 @@ func ResponseNetworksGetNetworkVLANProfilesItemsToBody(state NetworksVLANProfile
 
 func ResponseNetworksGetNetworkVLANProfileItemToBody(state NetworksVLANProfiles, response *merakigosdk.ResponseNetworksGetNetworkVLANProfile) NetworksVLANProfiles {
 	itemState := ResponseNetworksGetNetworkVlanProfile{
-		Iname: types.StringValue(response.Iname),
+		Iname: func() types.String {
+			if response.Iname != "" {
+				return types.StringValue(response.Iname)
+			}
+			return types.String{}
+		}(),
 		IsDefault: func() types.Bool {
 			if response.IsDefault != nil {
 				return types.BoolValue(*response.IsDefault)
 			}
 			return types.Bool{}
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		VLANGroups: func() *[]ResponseNetworksGetNetworkVlanProfileVlanGroups {
 			if response.VLANGroups != nil {
 				result := make([]ResponseNetworksGetNetworkVlanProfileVlanGroups, len(*response.VLANGroups))
 				for i, vLANGroups := range *response.VLANGroups {
 					result[i] = ResponseNetworksGetNetworkVlanProfileVlanGroups{
-						Name:    types.StringValue(vLANGroups.Name),
-						VLANIDs: types.StringValue(vLANGroups.VLANIDs),
+						Name: func() types.String {
+							if vLANGroups.Name != "" {
+								return types.StringValue(vLANGroups.Name)
+							}
+							return types.String{}
+						}(),
+						VLANIDs: func() types.String {
+							if vLANGroups.VLANIDs != "" {
+								return types.StringValue(vLANGroups.VLANIDs)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -420,14 +490,34 @@ func ResponseNetworksGetNetworkVLANProfileItemToBody(state NetworksVLANProfiles,
 						AdaptivePolicyGroup: func() *ResponseNetworksGetNetworkVlanProfileVlanNamesAdaptivePolicyGroup {
 							if vLANNames.AdaptivePolicyGroup != nil {
 								return &ResponseNetworksGetNetworkVlanProfileVlanNamesAdaptivePolicyGroup{
-									ID:   types.StringValue(vLANNames.AdaptivePolicyGroup.ID),
-									Name: types.StringValue(vLANNames.AdaptivePolicyGroup.Name),
+									ID: func() types.String {
+										if vLANNames.AdaptivePolicyGroup.ID != "" {
+											return types.StringValue(vLANNames.AdaptivePolicyGroup.ID)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if vLANNames.AdaptivePolicyGroup.Name != "" {
+											return types.StringValue(vLANNames.AdaptivePolicyGroup.Name)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						Name:   types.StringValue(vLANNames.Name),
-						VLANID: types.StringValue(vLANNames.VLANID),
+						Name: func() types.String {
+							if vLANNames.Name != "" {
+								return types.StringValue(vLANNames.Name)
+							}
+							return types.String{}
+						}(),
+						VLANID: func() types.String {
+							if vLANNames.VLANID != "" {
+								return types.StringValue(vLANNames.VLANID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

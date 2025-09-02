@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -331,6 +330,17 @@ func (d *OrganizationsDataSource) Read(ctx context.Context, req datasource.ReadR
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetOrganization",
+				err.Error(),
+			)
+			return
+		}
+
 		organizations = ResponseOrganizationsGetOrganizationItemToBody(organizations, response2)
 		diags = resp.State.Set(ctx, &organizations)
 		resp.Diagnostics.Append(diags...)
@@ -458,12 +468,22 @@ func ResponseOrganizationsGetOrganizationsItemsToBody(state Organizations, respo
 									Host: func() *ResponseItemOrganizationsGetOrganizationsCloudRegionHost {
 										if item.Cloud.Region.Host != nil {
 											return &ResponseItemOrganizationsGetOrganizationsCloudRegionHost{
-												Name: types.StringValue(item.Cloud.Region.Host.Name),
+												Name: func() types.String {
+													if item.Cloud.Region.Host.Name != "" {
+														return types.StringValue(item.Cloud.Region.Host.Name)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return nil
 									}(),
-									Name: types.StringValue(item.Cloud.Region.Name),
+									Name: func() types.String {
+										if item.Cloud.Region.Name != "" {
+											return types.StringValue(item.Cloud.Region.Name)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -472,11 +492,21 @@ func ResponseOrganizationsGetOrganizationsItemsToBody(state Organizations, respo
 				}
 				return nil
 			}(),
-			ID: types.StringValue(item.ID),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
 			Licensing: func() *ResponseItemOrganizationsGetOrganizationsLicensing {
 				if item.Licensing != nil {
 					return &ResponseItemOrganizationsGetOrganizationsLicensing{
-						Model: types.StringValue(item.Licensing.Model),
+						Model: func() types.String {
+							if item.Licensing.Model != "" {
+								return types.StringValue(item.Licensing.Model)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -489,8 +519,18 @@ func ResponseOrganizationsGetOrganizationsItemsToBody(state Organizations, respo
 								result := make([]ResponseItemOrganizationsGetOrganizationsManagementDetails, len(*item.Management.Details))
 								for i, details := range *item.Management.Details {
 									result[i] = ResponseItemOrganizationsGetOrganizationsManagementDetails{
-										Name:  types.StringValue(details.Name),
-										Value: types.StringValue(details.Value),
+										Name: func() types.String {
+											if details.Name != "" {
+												return types.StringValue(details.Name)
+											}
+											return types.String{}
+										}(),
+										Value: func() types.String {
+											if details.Value != "" {
+												return types.StringValue(details.Value)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -501,8 +541,18 @@ func ResponseOrganizationsGetOrganizationsItemsToBody(state Organizations, respo
 				}
 				return nil
 			}(),
-			Name: types.StringValue(item.Name),
-			URL:  types.StringValue(item.URL),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			URL: func() types.String {
+				if item.URL != "" {
+					return types.StringValue(item.URL)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -534,12 +584,22 @@ func ResponseOrganizationsGetOrganizationItemToBody(state Organizations, respons
 								Host: func() *ResponseOrganizationsGetOrganizationCloudRegionHost {
 									if response.Cloud.Region.Host != nil {
 										return &ResponseOrganizationsGetOrganizationCloudRegionHost{
-											Name: types.StringValue(response.Cloud.Region.Host.Name),
+											Name: func() types.String {
+												if response.Cloud.Region.Host.Name != "" {
+													return types.StringValue(response.Cloud.Region.Host.Name)
+												}
+												return types.String{}
+											}(),
 										}
 									}
 									return nil
 								}(),
-								Name: types.StringValue(response.Cloud.Region.Name),
+								Name: func() types.String {
+									if response.Cloud.Region.Name != "" {
+										return types.StringValue(response.Cloud.Region.Name)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -548,11 +608,21 @@ func ResponseOrganizationsGetOrganizationItemToBody(state Organizations, respons
 			}
 			return nil
 		}(),
-		ID: types.StringValue(response.ID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		Licensing: func() *ResponseOrganizationsGetOrganizationLicensing {
 			if response.Licensing != nil {
 				return &ResponseOrganizationsGetOrganizationLicensing{
-					Model: types.StringValue(response.Licensing.Model),
+					Model: func() types.String {
+						if response.Licensing.Model != "" {
+							return types.StringValue(response.Licensing.Model)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -565,8 +635,18 @@ func ResponseOrganizationsGetOrganizationItemToBody(state Organizations, respons
 							result := make([]ResponseOrganizationsGetOrganizationManagementDetails, len(*response.Management.Details))
 							for i, details := range *response.Management.Details {
 								result[i] = ResponseOrganizationsGetOrganizationManagementDetails{
-									Name:  types.StringValue(details.Name),
-									Value: types.StringValue(details.Value),
+									Name: func() types.String {
+										if details.Name != "" {
+											return types.StringValue(details.Name)
+										}
+										return types.String{}
+									}(),
+									Value: func() types.String {
+										if details.Value != "" {
+											return types.StringValue(details.Value)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return &result
@@ -577,8 +657,18 @@ func ResponseOrganizationsGetOrganizationItemToBody(state Organizations, respons
 			}
 			return nil
 		}(),
-		Name: types.StringValue(response.Name),
-		URL:  types.StringValue(response.URL),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

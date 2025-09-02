@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -27,8 +28,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -63,19 +65,17 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Metadata(_ contex
 func (r *NetworksWirelessAlternateManagementInterfaceResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"access_points": schema.SetNestedAttribute{
+			"access_points": schema.ListNestedAttribute{
 				MarkdownDescription: `Array of access point serial number and IP assignment. Note: accessPoints IP assignment is not applicable for template networks, in other words, do not put 'accessPoints' in the body when updating template networks. Also, an empty 'accessPoints' array will remove all previous static IP assignments`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"alternate_management_ip": schema.StringAttribute{
 							MarkdownDescription: `Wireless alternate management interface device IP. Provide an empty string to remove alternate management IP assignment`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -83,7 +83,6 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Schema(_ context.
 						},
 						"dns1": schema.StringAttribute{
 							MarkdownDescription: `Primary DNS must be in IP format`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -91,7 +90,6 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Schema(_ context.
 						},
 						"dns2": schema.StringAttribute{
 							MarkdownDescription: `Optional secondary DNS must be in IP format`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -99,7 +97,6 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Schema(_ context.
 						},
 						"gateway": schema.StringAttribute{
 							MarkdownDescription: `Gateway must be in IP format`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -107,7 +104,6 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Schema(_ context.
 						},
 						"serial": schema.StringAttribute{
 							MarkdownDescription: `Serial number of access point to be configured with alternate management IP`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -115,7 +111,6 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Schema(_ context.
 						},
 						"subnet_mask": schema.StringAttribute{
 							MarkdownDescription: `Subnet mask must be in IP format`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -126,7 +121,6 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Schema(_ context.
 			},
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: `Boolean value to enable or disable alternate management interface`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -136,19 +130,19 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Schema(_ context.
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"protocols": schema.SetAttribute{
+			"protocols": schema.ListAttribute{
 				MarkdownDescription: `Can be one or more of the following values: 'radius', 'snmp', 'syslog' or 'ldap'`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"vlan_id": schema.Int64Attribute{
 				MarkdownDescription: `Alternate management interface VLAN, must be between 1 and 4094`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -180,27 +174,6 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Create(ctx contex
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessAlternateManagementInterface(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessAlternateManagementInterface  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessAlternateManagementInterface only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Wireless.UpdateNetworkWirelessAlternateManagementInterface(vvNetworkID, dataRequest)
@@ -209,7 +182,7 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Create(ctx contex
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessAlternateManagementInterface",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -220,49 +193,19 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Create(ctx contex
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessAlternateManagementInterface(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkWirelessAlternateManagementInterface",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkWirelessAlternateManagementInterface",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseWirelessGetNetworkWirelessAlternateManagementInterfaceItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksWirelessAlternateManagementInterfaceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksWirelessAlternateManagementInterfaceRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -292,33 +235,28 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Read(ctx context.
 	}
 	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessAlternateManagementInterfaceItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksWirelessAlternateManagementInterfaceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksWirelessAlternateManagementInterfaceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksWirelessAlternateManagementInterfaceRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksWirelessAlternateManagementInterfaceRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Wireless.UpdateNetworkWirelessAlternateManagementInterface(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessAlternateManagementInterface",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -328,9 +266,7 @@ func (r *NetworksWirelessAlternateManagementInterfaceResource) Update(ctx contex
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksWirelessAlternateManagementInterfaceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -344,7 +280,7 @@ type NetworksWirelessAlternateManagementInterfaceRs struct {
 	NetworkID    types.String                                                                    `tfsdk:"network_id"`
 	AccessPoints *[]ResponseWirelessGetNetworkWirelessAlternateManagementInterfaceAccessPointsRs `tfsdk:"access_points"`
 	Enabled      types.Bool                                                                      `tfsdk:"enabled"`
-	Protocols    types.Set                                                                       `tfsdk:"protocols"`
+	Protocols    types.List                                                                      `tfsdk:"protocols"`
 	VLANID       types.Int64                                                                     `tfsdk:"vlan_id"`
 }
 
@@ -416,12 +352,42 @@ func ResponseWirelessGetNetworkWirelessAlternateManagementInterfaceItemToBodyRs(
 				result := make([]ResponseWirelessGetNetworkWirelessAlternateManagementInterfaceAccessPointsRs, len(*response.AccessPoints))
 				for i, accessPoints := range *response.AccessPoints {
 					result[i] = ResponseWirelessGetNetworkWirelessAlternateManagementInterfaceAccessPointsRs{
-						AlternateManagementIP: types.StringValue(accessPoints.AlternateManagementIP),
-						DNS1:                  types.StringValue(accessPoints.DNS1),
-						DNS2:                  types.StringValue(accessPoints.DNS2),
-						Gateway:               types.StringValue(accessPoints.Gateway),
-						Serial:                types.StringValue(accessPoints.Serial),
-						SubnetMask:            types.StringValue(accessPoints.SubnetMask),
+						AlternateManagementIP: func() types.String {
+							if accessPoints.AlternateManagementIP != "" {
+								return types.StringValue(accessPoints.AlternateManagementIP)
+							}
+							return types.String{}
+						}(),
+						DNS1: func() types.String {
+							if accessPoints.DNS1 != "" {
+								return types.StringValue(accessPoints.DNS1)
+							}
+							return types.String{}
+						}(),
+						DNS2: func() types.String {
+							if accessPoints.DNS2 != "" {
+								return types.StringValue(accessPoints.DNS2)
+							}
+							return types.String{}
+						}(),
+						Gateway: func() types.String {
+							if accessPoints.Gateway != "" {
+								return types.StringValue(accessPoints.Gateway)
+							}
+							return types.String{}
+						}(),
+						Serial: func() types.String {
+							if accessPoints.Serial != "" {
+								return types.StringValue(accessPoints.Serial)
+							}
+							return types.String{}
+						}(),
+						SubnetMask: func() types.String {
+							if accessPoints.SubnetMask != "" {
+								return types.StringValue(accessPoints.SubnetMask)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -434,7 +400,7 @@ func ResponseWirelessGetNetworkWirelessAlternateManagementInterfaceItemToBodyRs(
 			}
 			return types.Bool{}
 		}(),
-		Protocols: StringSliceToSet(response.Protocols),
+		Protocols: StringSliceToList(response.Protocols),
 		VLANID: func() types.Int64 {
 			if response.VLANID != nil {
 				return types.Int64Value(int64(*response.VLANID))

@@ -252,7 +252,12 @@ func (r *NetworksApplianceTrafficShapingCustomPerformanceClasses) toSdkApiReques
 // ToBody
 func ResponseApplianceCreateNetworkApplianceTrafficShapingCustomPerformanceClassItemToBody(state NetworksApplianceTrafficShapingCustomPerformanceClasses, response *merakigosdk.ResponseApplianceCreateNetworkApplianceTrafficShapingCustomPerformanceClass) NetworksApplianceTrafficShapingCustomPerformanceClasses {
 	itemState := ResponseApplianceCreateNetworkApplianceTrafficShapingCustomPerformanceClass{
-		CustomPerformanceClassID: types.StringValue(response.CustomPerformanceClassID),
+		CustomPerformanceClassID: func() types.String {
+			if response.CustomPerformanceClassID != "" {
+				return types.StringValue(response.CustomPerformanceClassID)
+			}
+			return types.String{}
+		}(),
 		MaxJitter: func() types.Int64 {
 			if response.MaxJitter != nil {
 				return types.Int64Value(int64(*response.MaxJitter))
@@ -271,7 +276,12 @@ func ResponseApplianceCreateNetworkApplianceTrafficShapingCustomPerformanceClass
 			}
 			return types.Int64{}
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

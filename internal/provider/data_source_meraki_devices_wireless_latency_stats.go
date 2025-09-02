@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -374,14 +373,34 @@ func ResponseWirelessGetDeviceWirelessLatencyStatsItemToBody(state DevicesWirele
 						}
 						return nil
 					}(),
-					BestEffortTraffic: types.StringValue(response.LatencyStats.BestEffortTraffic),
-					VideoTraffic:      types.StringValue(response.LatencyStats.VideoTraffic),
-					VoiceTraffic:      types.StringValue(response.LatencyStats.VoiceTraffic),
+					BestEffortTraffic: func() types.String {
+						if response.LatencyStats.BestEffortTraffic != "" {
+							return types.StringValue(response.LatencyStats.BestEffortTraffic)
+						}
+						return types.String{}
+					}(),
+					VideoTraffic: func() types.String {
+						if response.LatencyStats.VideoTraffic != "" {
+							return types.StringValue(response.LatencyStats.VideoTraffic)
+						}
+						return types.String{}
+					}(),
+					VoiceTraffic: func() types.String {
+						if response.LatencyStats.VoiceTraffic != "" {
+							return types.StringValue(response.LatencyStats.VoiceTraffic)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Serial: types.StringValue(response.Serial),
+		Serial: func() types.String {
+			if response.Serial != "" {
+				return types.StringValue(response.Serial)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

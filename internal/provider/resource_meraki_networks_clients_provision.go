@@ -969,12 +969,7 @@ func (r *NetworksClientsProvision) toSdkApiRequestCreate(ctx context.Context) *m
 		//[debug] Is Array: False
 	}
 	out := merakigosdk.RequestNetworksProvisionNetworkClients{
-		Clients: func() *[]merakigosdk.RequestNetworksProvisionNetworkClientsClients {
-			if len(requestNetworksProvisionNetworkClientsClients) > 0 {
-				return &requestNetworksProvisionNetworkClientsClients
-			}
-			return nil
-		}(),
+		Clients:                     &requestNetworksProvisionNetworkClientsClients,
 		DevicePolicy:                *devicePolicy,
 		GroupPolicyID:               *groupPolicyID,
 		PoliciesBySecurityAppliance: requestNetworksProvisionNetworkClientsPoliciesBySecurityAppliance,
@@ -991,18 +986,48 @@ func ResponseNetworksProvisionNetworkClientsItemToBody(state NetworksClientsProv
 				result := make([]ResponseNetworksProvisionNetworkClientsClients, len(*response.Clients))
 				for i, clients := range *response.Clients {
 					result[i] = ResponseNetworksProvisionNetworkClientsClients{
-						ClientID: types.StringValue(clients.ClientID),
-						Mac:      types.StringValue(clients.Mac),
-						Message:  types.StringValue(clients.Message),
-						Name:     types.StringValue(clients.Name),
+						ClientID: func() types.String {
+							if clients.ClientID != "" {
+								return types.StringValue(clients.ClientID)
+							}
+							return types.String{}
+						}(),
+						Mac: func() types.String {
+							if clients.Mac != "" {
+								return types.StringValue(clients.Mac)
+							}
+							return types.String{}
+						}(),
+						Message: func() types.String {
+							if clients.Message != "" {
+								return types.StringValue(clients.Message)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if clients.Name != "" {
+								return types.StringValue(clients.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		DevicePolicy:  types.StringValue(response.DevicePolicy),
-		GroupPolicyID: types.StringValue(response.GroupPolicyID),
+		DevicePolicy: func() types.String {
+			if response.DevicePolicy != "" {
+				return types.StringValue(response.DevicePolicy)
+			}
+			return types.String{}
+		}(),
+		GroupPolicyID: func() types.String {
+			if response.GroupPolicyID != "" {
+				return types.StringValue(response.GroupPolicyID)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -186,6 +185,17 @@ func (d *NetworksSwitchRoutingMulticastRendezvousPointsDataSource) Read(ctx cont
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkSwitchRoutingMulticastRendezvousPoint",
+				err.Error(),
+			)
+			return
+		}
+
 		networksSwitchRoutingMulticastRendezvousPoints = ResponseSwitchGetNetworkSwitchRoutingMulticastRendezvousPointItemToBody(networksSwitchRoutingMulticastRendezvousPoints, response2)
 		diags = resp.State.Set(ctx, &networksSwitchRoutingMulticastRendezvousPoints)
 		resp.Diagnostics.Append(diags...)
@@ -225,11 +235,36 @@ func ResponseSwitchGetNetworkSwitchRoutingMulticastRendezvousPointsItemsToBody(s
 	var items []ResponseItemSwitchGetNetworkSwitchRoutingMulticastRendezvousPoints
 	for _, item := range *response {
 		itemState := ResponseItemSwitchGetNetworkSwitchRoutingMulticastRendezvousPoints{
-			InterfaceIP:       types.StringValue(item.InterfaceIP),
-			InterfaceName:     types.StringValue(item.InterfaceName),
-			MulticastGroup:    types.StringValue(item.MulticastGroup),
-			RendezvousPointID: types.StringValue(item.RendezvousPointID),
-			Serial:            types.StringValue(item.Serial),
+			InterfaceIP: func() types.String {
+				if item.InterfaceIP != "" {
+					return types.StringValue(item.InterfaceIP)
+				}
+				return types.String{}
+			}(),
+			InterfaceName: func() types.String {
+				if item.InterfaceName != "" {
+					return types.StringValue(item.InterfaceName)
+				}
+				return types.String{}
+			}(),
+			MulticastGroup: func() types.String {
+				if item.MulticastGroup != "" {
+					return types.StringValue(item.MulticastGroup)
+				}
+				return types.String{}
+			}(),
+			RendezvousPointID: func() types.String {
+				if item.RendezvousPointID != "" {
+					return types.StringValue(item.RendezvousPointID)
+				}
+				return types.String{}
+			}(),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -239,11 +274,36 @@ func ResponseSwitchGetNetworkSwitchRoutingMulticastRendezvousPointsItemsToBody(s
 
 func ResponseSwitchGetNetworkSwitchRoutingMulticastRendezvousPointItemToBody(state NetworksSwitchRoutingMulticastRendezvousPoints, response *merakigosdk.ResponseSwitchGetNetworkSwitchRoutingMulticastRendezvousPoint) NetworksSwitchRoutingMulticastRendezvousPoints {
 	itemState := ResponseSwitchGetNetworkSwitchRoutingMulticastRendezvousPoint{
-		InterfaceIP:       types.StringValue(response.InterfaceIP),
-		InterfaceName:     types.StringValue(response.InterfaceName),
-		MulticastGroup:    types.StringValue(response.MulticastGroup),
-		RendezvousPointID: types.StringValue(response.RendezvousPointID),
-		Serial:            types.StringValue(response.Serial),
+		InterfaceIP: func() types.String {
+			if response.InterfaceIP != "" {
+				return types.StringValue(response.InterfaceIP)
+			}
+			return types.String{}
+		}(),
+		InterfaceName: func() types.String {
+			if response.InterfaceName != "" {
+				return types.StringValue(response.InterfaceName)
+			}
+			return types.String{}
+		}(),
+		MulticastGroup: func() types.String {
+			if response.MulticastGroup != "" {
+				return types.StringValue(response.MulticastGroup)
+			}
+			return types.String{}
+		}(),
+		RendezvousPointID: func() types.String {
+			if response.RendezvousPointID != "" {
+				return types.StringValue(response.RendezvousPointID)
+			}
+			return types.String{}
+		}(),
+		Serial: func() types.String {
+			if response.Serial != "" {
+				return types.StringValue(response.Serial)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

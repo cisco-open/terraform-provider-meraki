@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -203,27 +202,67 @@ func ResponseSmGetNetworkSmTrustedAccessConfigsItemsToBody(state NetworksSmTrust
 	var items []ResponseItemSmGetNetworkSmTrustedAccessConfigs
 	for _, item := range *response {
 		itemState := ResponseItemSmGetNetworkSmTrustedAccessConfigs{
-			AccessEndAt:         types.StringValue(item.AccessEndAt),
-			AccessStartAt:       types.StringValue(item.AccessStartAt),
-			AdditionalEmailText: types.StringValue(item.AdditionalEmailText),
-			ID:                  types.StringValue(item.ID),
-			Name:                types.StringValue(item.Name),
+			AccessEndAt: func() types.String {
+				if item.AccessEndAt != "" {
+					return types.StringValue(item.AccessEndAt)
+				}
+				return types.String{}
+			}(),
+			AccessStartAt: func() types.String {
+				if item.AccessStartAt != "" {
+					return types.StringValue(item.AccessStartAt)
+				}
+				return types.String{}
+			}(),
+			AdditionalEmailText: func() types.String {
+				if item.AdditionalEmailText != "" {
+					return types.StringValue(item.AdditionalEmailText)
+				}
+				return types.String{}
+			}(),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			NotifyTimeBeforeAccessEnds: func() types.Int64 {
 				if item.NotifyTimeBeforeAccessEnds != nil {
 					return types.Int64Value(int64(*item.NotifyTimeBeforeAccessEnds))
 				}
 				return types.Int64{}
 			}(),
-			Scope: types.StringValue(item.Scope),
+			Scope: func() types.String {
+				if item.Scope != "" {
+					return types.StringValue(item.Scope)
+				}
+				return types.String{}
+			}(),
 			SendExpirationEmails: func() types.Bool {
 				if item.SendExpirationEmails != nil {
 					return types.BoolValue(*item.SendExpirationEmails)
 				}
 				return types.Bool{}
 			}(),
-			SSIDName:      types.StringValue(item.SSIDName),
-			Tags:          StringSliceToList(item.Tags),
-			TimeboundType: types.StringValue(item.TimeboundType),
+			SSIDName: func() types.String {
+				if item.SSIDName != "" {
+					return types.StringValue(item.SSIDName)
+				}
+				return types.String{}
+			}(),
+			Tags: StringSliceToList(item.Tags),
+			TimeboundType: func() types.String {
+				if item.TimeboundType != "" {
+					return types.StringValue(item.TimeboundType)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

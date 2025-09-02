@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -457,7 +456,12 @@ func ResponseOrganizationsGetOrganizationDevicesSystemMemoryUsageHistoryByInterv
 								result := make([]ResponseOrganizationsGetOrganizationDevicesSystemMemoryUsageHistoryByIntervalItemsIntervals, len(*items.Intervals))
 								for i, intervals := range *items.Intervals {
 									result[i] = ResponseOrganizationsGetOrganizationDevicesSystemMemoryUsageHistoryByIntervalItemsIntervals{
-										EndTs: types.StringValue(intervals.EndTs),
+										EndTs: func() types.String {
+											if intervals.EndTs != "" {
+												return types.StringValue(intervals.EndTs)
+											}
+											return types.String{}
+										}(),
 										Memory: func() *ResponseOrganizationsGetOrganizationDevicesSystemMemoryUsageHistoryByIntervalItemsIntervalsMemory {
 											if intervals.Memory != nil {
 												return &ResponseOrganizationsGetOrganizationDevicesSystemMemoryUsageHistoryByIntervalItemsIntervalsMemory{
@@ -528,21 +532,51 @@ func ResponseOrganizationsGetOrganizationDevicesSystemMemoryUsageHistoryByInterv
 											}
 											return nil
 										}(),
-										StartTs: types.StringValue(intervals.StartTs),
+										StartTs: func() types.String {
+											if intervals.StartTs != "" {
+												return types.StringValue(intervals.StartTs)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						Mac:   types.StringValue(items.Mac),
-						Model: types.StringValue(items.Model),
-						Name:  types.StringValue(items.Name),
+						Mac: func() types.String {
+							if items.Mac != "" {
+								return types.StringValue(items.Mac)
+							}
+							return types.String{}
+						}(),
+						Model: func() types.String {
+							if items.Model != "" {
+								return types.StringValue(items.Model)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if items.Name != "" {
+								return types.StringValue(items.Name)
+							}
+							return types.String{}
+						}(),
 						Network: func() *ResponseOrganizationsGetOrganizationDevicesSystemMemoryUsageHistoryByIntervalItemsNetwork {
 							if items.Network != nil {
 								return &ResponseOrganizationsGetOrganizationDevicesSystemMemoryUsageHistoryByIntervalItemsNetwork{
-									ID:   types.StringValue(items.Network.ID),
-									Name: types.StringValue(items.Network.Name),
+									ID: func() types.String {
+										if items.Network.ID != "" {
+											return types.StringValue(items.Network.ID)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if items.Network.Name != "" {
+											return types.StringValue(items.Network.Name)
+										}
+										return types.String{}
+									}(),
 									Tags: StringSliceToList(items.Network.Tags),
 								}
 							}
@@ -554,8 +588,13 @@ func ResponseOrganizationsGetOrganizationDevicesSystemMemoryUsageHistoryByInterv
 							}
 							return types.Int64{}
 						}(),
-						Serial: types.StringValue(items.Serial),
-						Tags:   StringSliceToList(items.Tags),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
+						Tags: StringSliceToList(items.Tags),
 						Used: func() *ResponseOrganizationsGetOrganizationDevicesSystemMemoryUsageHistoryByIntervalItemsUsed {
 							if items.Used != nil {
 								return &ResponseOrganizationsGetOrganizationDevicesSystemMemoryUsageHistoryByIntervalItemsUsed{

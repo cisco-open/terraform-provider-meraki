@@ -19,6 +19,8 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"encoding/json"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -26,8 +28,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -67,19 +69,17 @@ func (r *NetworksSwitchAccessControlListsResource) Schema(_ context.Context, _ r
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"rules_response": schema.SetNestedAttribute{
+			"rules": schema.ListNestedAttribute{
 				MarkdownDescription: `An ordered array of the access control list rules`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"comment": schema.StringAttribute{
 							MarkdownDescription: `Description of the rule (optional)`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -87,7 +87,6 @@ func (r *NetworksSwitchAccessControlListsResource) Schema(_ context.Context, _ r
 						},
 						"dst_cidr": schema.StringAttribute{
 							MarkdownDescription: `Destination IP address (in IP or CIDR notation)`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -95,92 +94,6 @@ func (r *NetworksSwitchAccessControlListsResource) Schema(_ context.Context, _ r
 						},
 						"dst_port": schema.StringAttribute{
 							MarkdownDescription: `Destination port`,
-							Computed:            true,
-							Optional:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"ip_version": schema.StringAttribute{
-							MarkdownDescription: `IP address version`,
-							Computed:            true,
-							Optional:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"policy": schema.StringAttribute{
-							MarkdownDescription: `'allow' or 'deny' traffic specified by this rule`,
-							Computed:            true,
-							Optional:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"protocol": schema.StringAttribute{
-							MarkdownDescription: `The type of protocol`,
-							Computed:            true,
-							Optional:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"src_cidr": schema.StringAttribute{
-							MarkdownDescription: `Source IP address (in IP or CIDR notation)`,
-							Computed:            true,
-							Optional:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"src_port": schema.StringAttribute{
-							MarkdownDescription: `Source port`,
-							Computed:            true,
-							Optional:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"vlan": schema.StringAttribute{
-							MarkdownDescription: `ncoming traffic VLAN`,
-							Computed:            true,
-							Optional:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-					},
-				},
-			},
-			"rules": schema.SetNestedAttribute{
-				MarkdownDescription: `An ordered array of the access control list rules`,
-				Computed:            true,
-				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
-				},
-				NestedObject: schema.NestedAttributeObject{
-					Attributes: map[string]schema.Attribute{
-
-						"comment": schema.StringAttribute{
-							MarkdownDescription: `Description of the rule (optional)`,
-							Computed:            true,
-							Optional:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"dst_cidr": schema.StringAttribute{
-							MarkdownDescription: `Destination IP address (in IP or CIDR notation)`,
-							Computed:            true,
-							Optional:            true,
-							PlanModifiers: []planmodifier.String{
-								stringplanmodifier.UseStateForUnknown(),
-							},
-						},
-						"dst_port": schema.StringAttribute{
-							MarkdownDescription: `Destination port`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -189,7 +102,6 @@ func (r *NetworksSwitchAccessControlListsResource) Schema(_ context.Context, _ r
 						"ip_version": schema.StringAttribute{
 							MarkdownDescription: `IP address version
                                         Allowed values: [any,ipv4,ipv6]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -205,7 +117,6 @@ func (r *NetworksSwitchAccessControlListsResource) Schema(_ context.Context, _ r
 						"policy": schema.StringAttribute{
 							MarkdownDescription: `'allow' or 'deny' traffic specified by this rule
                                         Allowed values: [allow,deny]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -220,7 +131,6 @@ func (r *NetworksSwitchAccessControlListsResource) Schema(_ context.Context, _ r
 						"protocol": schema.StringAttribute{
 							MarkdownDescription: `The type of protocol
                                         Allowed values: [any,tcp,udp]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -235,7 +145,6 @@ func (r *NetworksSwitchAccessControlListsResource) Schema(_ context.Context, _ r
 						},
 						"src_cidr": schema.StringAttribute{
 							MarkdownDescription: `Source IP address (in IP or CIDR notation)`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -243,7 +152,6 @@ func (r *NetworksSwitchAccessControlListsResource) Schema(_ context.Context, _ r
 						},
 						"src_port": schema.StringAttribute{
 							MarkdownDescription: `Source port`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -251,7 +159,6 @@ func (r *NetworksSwitchAccessControlListsResource) Schema(_ context.Context, _ r
 						},
 						"vlan": schema.StringAttribute{
 							MarkdownDescription: `ncoming traffic VLAN`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -286,27 +193,6 @@ func (r *NetworksSwitchAccessControlListsResource) Create(ctx context.Context, r
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchAccessControlLists(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSwitchAccessControlLists  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSwitchAccessControlLists only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchAccessControlLists(vvNetworkID, dataRequest)
@@ -315,7 +201,7 @@ func (r *NetworksSwitchAccessControlListsResource) Create(ctx context.Context, r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchAccessControlLists",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -325,50 +211,29 @@ func (r *NetworksSwitchAccessControlListsResource) Create(ctx context.Context, r
 		)
 		return
 	}
-
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchAccessControlLists(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkSwitchAccessControlLists",
-				restyResp1.String(),
-			)
-			return
-		}
+	// Read
+	var responseGet *merakigosdk.ResponseSwitchGetNetworkSwitchAccessControlLists
+	err = json.Unmarshal(restyResp2.Body(), &responseGet)
+	if err != nil {
 		resp.Diagnostics.AddError(
 			"Failure when executing GetNetworkSwitchAccessControlLists",
 			err.Error(),
 		)
-		return
 	}
-
-	data = ResponseSwitchGetNetworkSwitchAccessControlListsItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	data = ResponseSwitchGetNetworkSwitchAccessControlListsItemToBodyRs(data, responseGet, true)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksSwitchAccessControlListsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksSwitchAccessControlListsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -398,33 +263,28 @@ func (r *NetworksSwitchAccessControlListsResource) Read(ctx context.Context, req
 	}
 	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchAccessControlListsItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksSwitchAccessControlListsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksSwitchAccessControlListsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksSwitchAccessControlListsRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksSwitchAccessControlListsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchAccessControlLists(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchAccessControlLists",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -434,9 +294,7 @@ func (r *NetworksSwitchAccessControlListsResource) Update(ctx context.Context, r
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksSwitchAccessControlListsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -447,9 +305,8 @@ func (r *NetworksSwitchAccessControlListsResource) Delete(ctx context.Context, r
 
 // TF Structs Schema
 type NetworksSwitchAccessControlListsRs struct {
-	NetworkID     types.String                                               `tfsdk:"network_id"`
-	Rules         *[]ResponseSwitchGetNetworkSwitchAccessControlListsRulesRs `tfsdk:"rules"`
-	RulesResponse *[]ResponseSwitchGetNetworkSwitchAccessControlListsRulesRs `tfsdk:"rules_response"`
+	NetworkID types.String                                               `tfsdk:"network_id"`
+	Rules     *[]ResponseSwitchGetNetworkSwitchAccessControlListsRulesRs `tfsdk:"rules"`
 }
 
 type ResponseSwitchGetNetworkSwitchAccessControlListsRulesRs struct {
@@ -506,21 +363,77 @@ func (r *NetworksSwitchAccessControlListsRs) toSdkApiRequestUpdate(ctx context.C
 
 // From gosdk to TF Structs Schema
 func ResponseSwitchGetNetworkSwitchAccessControlListsItemToBodyRs(state NetworksSwitchAccessControlListsRs, response *merakigosdk.ResponseSwitchGetNetworkSwitchAccessControlLists, is_read bool) NetworksSwitchAccessControlListsRs {
+	if response.Rules != nil {
+		var filteredRules []merakigosdk.ResponseSwitchGetNetworkSwitchAccessControlListsRules
+		for _, rule := range *response.Rules {
+			// Skip the default rule since it's managed by the system
+			if rule.Comment != "Default rule" {
+				filteredRules = append(filteredRules, rule)
+			}
+		}
+		// Update response with filtered rules, excluding default rule
+		response.Rules = &filteredRules
+	}
 	itemState := NetworksSwitchAccessControlListsRs{
-		RulesResponse: func() *[]ResponseSwitchGetNetworkSwitchAccessControlListsRulesRs {
+		Rules: func() *[]ResponseSwitchGetNetworkSwitchAccessControlListsRulesRs {
 			if response.Rules != nil {
 				result := make([]ResponseSwitchGetNetworkSwitchAccessControlListsRulesRs, len(*response.Rules))
 				for i, rules := range *response.Rules {
 					result[i] = ResponseSwitchGetNetworkSwitchAccessControlListsRulesRs{
-						Comment:   types.StringValue(rules.Comment),
-						DstCidr:   types.StringValue(rules.DstCidr),
-						DstPort:   types.StringValue(rules.DstPort),
-						IPVersion: types.StringValue(rules.IPVersion),
-						Policy:    types.StringValue(rules.Policy),
-						Protocol:  types.StringValue(rules.Protocol),
-						SrcCidr:   types.StringValue(rules.SrcCidr),
-						SrcPort:   types.StringValue(rules.SrcPort),
-						VLAN:      types.StringValue(rules.VLAN),
+						Comment: func() types.String {
+							if rules.Comment != "" {
+								return types.StringValue(rules.Comment)
+							}
+							return types.String{}
+						}(),
+						DstCidr: func() types.String {
+							if rules.DstCidr != "" {
+								return types.StringValue(rules.DstCidr)
+							}
+							return types.String{}
+						}(),
+						DstPort: func() types.String {
+							if rules.DstPort != "" {
+								return types.StringValue(rules.DstPort)
+							}
+							return types.String{}
+						}(),
+						IPVersion: func() types.String {
+							if rules.IPVersion != "" {
+								return types.StringValue(rules.IPVersion)
+							}
+							return types.String{}
+						}(),
+						Policy: func() types.String {
+							if rules.Policy != "" {
+								return types.StringValue(rules.Policy)
+							}
+							return types.String{}
+						}(),
+						Protocol: func() types.String {
+							if rules.Protocol != "" {
+								return types.StringValue(rules.Protocol)
+							}
+							return types.String{}
+						}(),
+						SrcCidr: func() types.String {
+							if rules.SrcCidr != "" {
+								return types.StringValue(rules.SrcCidr)
+							}
+							return types.String{}
+						}(),
+						SrcPort: func() types.String {
+							if rules.SrcPort != "" {
+								return types.StringValue(rules.SrcPort)
+							}
+							return types.String{}
+						}(),
+						VLAN: func() types.String {
+							if rules.VLAN != "" {
+								return types.StringValue(rules.VLAN)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -528,7 +441,6 @@ func ResponseSwitchGetNetworkSwitchAccessControlListsItemToBodyRs(state Networks
 			return nil
 		}(),
 	}
-	itemState.Rules = state.Rules
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksSwitchAccessControlListsRs)
 	}

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -345,9 +344,24 @@ type ResponseOrganizationsGetOrganizationClientsSearchRecordsNetwork struct {
 // ToBody
 func ResponseOrganizationsGetOrganizationClientsSearchItemToBody(state OrganizationsClientsSearch, response *merakigosdk.ResponseOrganizationsGetOrganizationClientsSearch) OrganizationsClientsSearch {
 	itemState := ResponseOrganizationsGetOrganizationClientsSearch{
-		ClientID:     types.StringValue(response.ClientID),
-		Mac:          types.StringValue(response.Mac),
-		Manufacturer: types.StringValue(response.Manufacturer),
+		ClientID: func() types.String {
+			if response.ClientID != "" {
+				return types.StringValue(response.ClientID)
+			}
+			return types.String{}
+		}(),
+		Mac: func() types.String {
+			if response.Mac != "" {
+				return types.StringValue(response.Mac)
+			}
+			return types.String{}
+		}(),
+		Manufacturer: func() types.String {
+			if response.Manufacturer != "" {
+				return types.StringValue(response.Manufacturer)
+			}
+			return types.String{}
+		}(),
 		Records: func() *[]ResponseOrganizationsGetOrganizationClientsSearchRecords {
 			if response.Records != nil {
 				result := make([]ResponseOrganizationsGetOrganizationClientsSearchRecords, len(*response.Records))
@@ -371,22 +385,42 @@ func ResponseOrganizationsGetOrganizationClientsSearchItemToBody(state Organizat
 											}
 											return types.Int64{}
 										}(),
-										RemoteIP: types.StringValue(clientVpnConnections.RemoteIP),
+										RemoteIP: func() types.String {
+											if clientVpnConnections.RemoteIP != "" {
+												return types.StringValue(clientVpnConnections.RemoteIP)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						Description: types.StringValue(records.Description),
+						Description: func() types.String {
+							if records.Description != "" {
+								return types.StringValue(records.Description)
+							}
+							return types.String{}
+						}(),
 						FirstSeen: func() types.Int64 {
 							if records.FirstSeen != nil {
 								return types.Int64Value(int64(*records.FirstSeen))
 							}
 							return types.Int64{}
 						}(),
-						IP:  types.StringValue(records.IP),
-						IP6: types.StringValue(records.IP6),
+						IP: func() types.String {
+							if records.IP != "" {
+								return types.StringValue(records.IP)
+							}
+							return types.String{}
+						}(),
+						IP6: func() types.String {
+							if records.IP6 != "" {
+								return types.StringValue(records.IP6)
+							}
+							return types.String{}
+						}(),
 						LastSeen: func() types.Int64 {
 							if records.LastSeen != nil {
 								return types.Int64Value(int64(*records.LastSeen))
@@ -397,39 +431,114 @@ func ResponseOrganizationsGetOrganizationClientsSearchItemToBody(state Organizat
 						Network: func() *ResponseOrganizationsGetOrganizationClientsSearchRecordsNetwork {
 							if records.Network != nil {
 								return &ResponseOrganizationsGetOrganizationClientsSearchRecordsNetwork{
-									EnrollmentString: types.StringValue(records.Network.EnrollmentString),
-									ID:               types.StringValue(records.Network.ID),
+									EnrollmentString: func() types.String {
+										if records.Network.EnrollmentString != "" {
+											return types.StringValue(records.Network.EnrollmentString)
+										}
+										return types.String{}
+									}(),
+									ID: func() types.String {
+										if records.Network.ID != "" {
+											return types.StringValue(records.Network.ID)
+										}
+										return types.String{}
+									}(),
 									IsBoundToConfigTemplate: func() types.Bool {
 										if records.Network.IsBoundToConfigTemplate != nil {
 											return types.BoolValue(*records.Network.IsBoundToConfigTemplate)
 										}
 										return types.Bool{}
 									}(),
-									Name:           types.StringValue(records.Network.Name),
-									Notes:          types.StringValue(records.Network.Notes),
-									OrganizationID: types.StringValue(records.Network.OrganizationID),
-									ProductTypes:   StringSliceToList(records.Network.ProductTypes),
-									Tags:           StringSliceToList(records.Network.Tags),
-									TimeZone:       types.StringValue(records.Network.TimeZone),
-									URL:            types.StringValue(records.Network.URL),
+									Name: func() types.String {
+										if records.Network.Name != "" {
+											return types.StringValue(records.Network.Name)
+										}
+										return types.String{}
+									}(),
+									Notes: func() types.String {
+										if records.Network.Notes != "" {
+											return types.StringValue(records.Network.Notes)
+										}
+										return types.String{}
+									}(),
+									OrganizationID: func() types.String {
+										if records.Network.OrganizationID != "" {
+											return types.StringValue(records.Network.OrganizationID)
+										}
+										return types.String{}
+									}(),
+									ProductTypes: StringSliceToList(records.Network.ProductTypes),
+									Tags:         StringSliceToList(records.Network.Tags),
+									TimeZone: func() types.String {
+										if records.Network.TimeZone != "" {
+											return types.StringValue(records.Network.TimeZone)
+										}
+										return types.String{}
+									}(),
+									URL: func() types.String {
+										if records.Network.URL != "" {
+											return types.StringValue(records.Network.URL)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						Os:              types.StringValue(records.Os),
-						RecentDeviceMac: types.StringValue(records.RecentDeviceMac),
+						Os: func() types.String {
+							if records.Os != "" {
+								return types.StringValue(records.Os)
+							}
+							return types.String{}
+						}(),
+						RecentDeviceMac: func() types.String {
+							if records.RecentDeviceMac != "" {
+								return types.StringValue(records.RecentDeviceMac)
+							}
+							return types.String{}
+						}(),
 						SmInstalled: func() types.Bool {
 							if records.SmInstalled != nil {
 								return types.BoolValue(*records.SmInstalled)
 							}
 							return types.Bool{}
 						}(),
-						SSID:                 types.StringValue(records.SSID),
-						Status:               types.StringValue(records.Status),
-						Switchport:           types.StringValue(records.Switchport),
-						User:                 types.StringValue(records.User),
-						VLAN:                 types.StringValue(records.VLAN),
-						WirelessCapabilities: types.StringValue(records.WirelessCapabilities),
+						SSID: func() types.String {
+							if records.SSID != "" {
+								return types.StringValue(records.SSID)
+							}
+							return types.String{}
+						}(),
+						Status: func() types.String {
+							if records.Status != "" {
+								return types.StringValue(records.Status)
+							}
+							return types.String{}
+						}(),
+						Switchport: func() types.String {
+							if records.Switchport != "" {
+								return types.StringValue(records.Switchport)
+							}
+							return types.String{}
+						}(),
+						User: func() types.String {
+							if records.User != "" {
+								return types.StringValue(records.User)
+							}
+							return types.String{}
+						}(),
+						VLAN: func() types.String {
+							if records.VLAN != "" {
+								return types.StringValue(records.VLAN)
+							}
+							return types.String{}
+						}(),
+						WirelessCapabilities: func() types.String {
+							if records.WirelessCapabilities != "" {
+								return types.StringValue(records.WirelessCapabilities)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

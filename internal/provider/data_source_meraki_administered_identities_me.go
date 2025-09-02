@@ -227,7 +227,12 @@ func ResponseAdministeredGetAdministeredIDentitiesMeItemToBody(state Administere
 						}
 						return nil
 					}(),
-					Mode: types.StringValue(response.Authentication.Mode),
+					Mode: func() types.String {
+						if response.Authentication.Mode != "" {
+							return types.StringValue(response.Authentication.Mode)
+						}
+						return types.String{}
+					}(),
 					Saml: func() *ResponseAdministeredGetAdministeredIdentitiesMeAuthenticationSaml {
 						if response.Authentication.Saml != nil {
 							return &ResponseAdministeredGetAdministeredIdentitiesMeAuthenticationSaml{
@@ -258,9 +263,24 @@ func ResponseAdministeredGetAdministeredIDentitiesMeItemToBody(state Administere
 			}
 			return nil
 		}(),
-		Email:               types.StringValue(response.Email),
-		LastUsedDashboardAt: types.StringValue(response.LastUsedDashboardAt),
-		Name:                types.StringValue(response.Name),
+		Email: func() types.String {
+			if response.Email != "" {
+				return types.StringValue(response.Email)
+			}
+			return types.String{}
+		}(),
+		LastUsedDashboardAt: func() types.String {
+			if response.LastUsedDashboardAt != "" {
+				return types.StringValue(response.LastUsedDashboardAt)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

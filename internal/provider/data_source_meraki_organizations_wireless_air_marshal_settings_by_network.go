@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -219,8 +218,18 @@ func ResponseWirelessGetOrganizationWirelessAirMarshalSettingsByNetworkItemToBod
 				result := make([]ResponseWirelessGetOrganizationWirelessAirMarshalSettingsByNetworkItems, len(*response.Items))
 				for i, items := range *response.Items {
 					result[i] = ResponseWirelessGetOrganizationWirelessAirMarshalSettingsByNetworkItems{
-						DefaultPolicy: types.StringValue(items.DefaultPolicy),
-						NetworkID:     types.StringValue(items.NetworkID),
+						DefaultPolicy: func() types.String {
+							if items.DefaultPolicy != "" {
+								return types.StringValue(items.DefaultPolicy)
+							}
+							return types.String{}
+						}(),
+						NetworkID: func() types.String {
+							if items.NetworkID != "" {
+								return types.StringValue(items.NetworkID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

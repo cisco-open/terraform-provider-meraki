@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -324,14 +323,39 @@ type ResponseSwitchGetOrganizationSwitchPortsBySwitchPorts struct {
 // ToBody
 func ResponseSwitchGetOrganizationSwitchPortsBySwitchItemToBody(state OrganizationsSwitchPortsBySwitch, response *merakigosdk.ResponseSwitchGetOrganizationSwitchPortsBySwitch) OrganizationsSwitchPortsBySwitch {
 	itemState := ResponseSwitchGetOrganizationSwitchPortsBySwitch{
-		Mac:   types.StringValue(response.Mac),
-		Model: types.StringValue(response.Model),
-		Name:  types.StringValue(response.Name),
+		Mac: func() types.String {
+			if response.Mac != "" {
+				return types.StringValue(response.Mac)
+			}
+			return types.String{}
+		}(),
+		Model: func() types.String {
+			if response.Model != "" {
+				return types.StringValue(response.Model)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		Network: func() *ResponseSwitchGetOrganizationSwitchPortsBySwitchNetwork {
 			if response.Network != nil {
 				return &ResponseSwitchGetOrganizationSwitchPortsBySwitchNetwork{
-					ID:   types.StringValue(response.Network.ID),
-					Name: types.StringValue(response.Network.Name),
+					ID: func() types.String {
+						if response.Network.ID != "" {
+							return types.StringValue(response.Network.ID)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.Network.Name != "" {
+							return types.StringValue(response.Network.Name)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -341,23 +365,48 @@ func ResponseSwitchGetOrganizationSwitchPortsBySwitchItemToBody(state Organizati
 				result := make([]ResponseSwitchGetOrganizationSwitchPortsBySwitchPorts, len(*response.Ports))
 				for i, ports := range *response.Ports {
 					result[i] = ResponseSwitchGetOrganizationSwitchPortsBySwitchPorts{
-						AccessPolicyType: types.StringValue(ports.AccessPolicyType),
-						AllowedVLANs:     types.StringValue(ports.AllowedVLANs),
+						AccessPolicyType: func() types.String {
+							if ports.AccessPolicyType != "" {
+								return types.StringValue(ports.AccessPolicyType)
+							}
+							return types.String{}
+						}(),
+						AllowedVLANs: func() types.String {
+							if ports.AllowedVLANs != "" {
+								return types.StringValue(ports.AllowedVLANs)
+							}
+							return types.String{}
+						}(),
 						Enabled: func() types.Bool {
 							if ports.Enabled != nil {
 								return types.BoolValue(*ports.Enabled)
 							}
 							return types.Bool{}
 						}(),
-						LinkNegotiation: types.StringValue(ports.LinkNegotiation),
-						Name:            types.StringValue(ports.Name),
+						LinkNegotiation: func() types.String {
+							if ports.LinkNegotiation != "" {
+								return types.StringValue(ports.LinkNegotiation)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if ports.Name != "" {
+								return types.StringValue(ports.Name)
+							}
+							return types.String{}
+						}(),
 						PoeEnabled: func() types.Bool {
 							if ports.PoeEnabled != nil {
 								return types.BoolValue(*ports.PoeEnabled)
 							}
 							return types.Bool{}
 						}(),
-						PortID: types.StringValue(ports.PortID),
+						PortID: func() types.String {
+							if ports.PortID != "" {
+								return types.StringValue(ports.PortID)
+							}
+							return types.String{}
+						}(),
 						RstpEnabled: func() types.Bool {
 							if ports.RstpEnabled != nil {
 								return types.BoolValue(*ports.RstpEnabled)
@@ -371,9 +420,19 @@ func ResponseSwitchGetOrganizationSwitchPortsBySwitchItemToBody(state Organizati
 							}
 							return types.Int64{}
 						}(),
-						StpGuard: types.StringValue(ports.StpGuard),
-						Tags:     StringSliceToList(ports.Tags),
-						Type:     types.StringValue(ports.Type),
+						StpGuard: func() types.String {
+							if ports.StpGuard != "" {
+								return types.StringValue(ports.StpGuard)
+							}
+							return types.String{}
+						}(),
+						Tags: StringSliceToList(ports.Tags),
+						Type: func() types.String {
+							if ports.Type != "" {
+								return types.StringValue(ports.Type)
+							}
+							return types.String{}
+						}(),
 						VLAN: func() types.Int64 {
 							if ports.VLAN != nil {
 								return types.Int64Value(int64(*ports.VLAN))
@@ -392,7 +451,12 @@ func ResponseSwitchGetOrganizationSwitchPortsBySwitchItemToBody(state Organizati
 			}
 			return nil
 		}(),
-		Serial: types.StringValue(response.Serial),
+		Serial: func() types.String {
+			if response.Serial != "" {
+				return types.StringValue(response.Serial)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -212,24 +211,44 @@ type ResponseOrganizationsGetOrganizationWebhooksCallbacksStatusWebhookPayloadTe
 // ToBody
 func ResponseOrganizationsGetOrganizationWebhooksCallbacksStatusItemToBody(state OrganizationsWebhooksCallbacksStatuses, response *merakigosdk.ResponseOrganizationsGetOrganizationWebhooksCallbacksStatus) OrganizationsWebhooksCallbacksStatuses {
 	itemState := ResponseOrganizationsGetOrganizationWebhooksCallbacksStatus{
-		CallbackID: types.StringValue(response.CallbackID),
+		CallbackID: func() types.String {
+			if response.CallbackID != "" {
+				return types.StringValue(response.CallbackID)
+			}
+			return types.String{}
+		}(),
 		CreatedBy: func() *ResponseOrganizationsGetOrganizationWebhooksCallbacksStatusCreatedBy {
 			if response.CreatedBy != nil {
 				return &ResponseOrganizationsGetOrganizationWebhooksCallbacksStatusCreatedBy{
-					AdminID: types.StringValue(response.CreatedBy.AdminID),
+					AdminID: func() types.String {
+						if response.CreatedBy.AdminID != "" {
+							return types.StringValue(response.CreatedBy.AdminID)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
 		Errors: StringSliceToList(response.Errors),
-		Status: types.StringValue(response.Status),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
 		Webhook: func() *ResponseOrganizationsGetOrganizationWebhooksCallbacksStatusWebhook {
 			if response.Webhook != nil {
 				return &ResponseOrganizationsGetOrganizationWebhooksCallbacksStatusWebhook{
 					HTTPServer: func() *ResponseOrganizationsGetOrganizationWebhooksCallbacksStatusWebhookHttpServer {
 						if response.Webhook.HTTPServer != nil {
 							return &ResponseOrganizationsGetOrganizationWebhooksCallbacksStatusWebhookHttpServer{
-								ID: types.StringValue(response.Webhook.HTTPServer.ID),
+								ID: func() types.String {
+									if response.Webhook.HTTPServer.ID != "" {
+										return types.StringValue(response.Webhook.HTTPServer.ID)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -237,13 +256,28 @@ func ResponseOrganizationsGetOrganizationWebhooksCallbacksStatusItemToBody(state
 					PayloadTemplate: func() *ResponseOrganizationsGetOrganizationWebhooksCallbacksStatusWebhookPayloadTemplate {
 						if response.Webhook.PayloadTemplate != nil {
 							return &ResponseOrganizationsGetOrganizationWebhooksCallbacksStatusWebhookPayloadTemplate{
-								ID: types.StringValue(response.Webhook.PayloadTemplate.ID),
+								ID: func() types.String {
+									if response.Webhook.PayloadTemplate.ID != "" {
+										return types.StringValue(response.Webhook.PayloadTemplate.ID)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
 					}(),
-					SentAt: types.StringValue(response.Webhook.SentAt),
-					URL:    types.StringValue(response.Webhook.URL),
+					SentAt: func() types.String {
+						if response.Webhook.SentAt != "" {
+							return types.StringValue(response.Webhook.SentAt)
+						}
+						return types.String{}
+					}(),
+					URL: func() types.String {
+						if response.Webhook.URL != "" {
+							return types.StringValue(response.Webhook.URL)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil

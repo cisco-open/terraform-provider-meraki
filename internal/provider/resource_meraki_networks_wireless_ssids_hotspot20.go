@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"log"
@@ -31,9 +32,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -69,37 +71,35 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Metadata(_ context.Context, req
 func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"domains": schema.SetAttribute{
+			"domains": schema.ListAttribute{
 				MarkdownDescription: `An array of domain names`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: `Whether or not Hotspot 2.0 for this SSID is enabled`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"mcc_mncs": schema.SetNestedAttribute{
+			"mcc_mncs": schema.ListNestedAttribute{
 				MarkdownDescription: `An array of MCC/MNC pairs`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"mcc": schema.StringAttribute{
 							MarkdownDescription: `MCC value`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -107,7 +107,6 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ res
 						},
 						"mnc": schema.StringAttribute{
 							MarkdownDescription: `MNC value`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -116,12 +115,11 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ res
 					},
 				},
 			},
-			"nai_realms": schema.SetNestedAttribute{
+			"nai_realms": schema.ListNestedAttribute{
 				MarkdownDescription: `An array of NAI realms`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
@@ -129,7 +127,6 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ res
 						"format": schema.StringAttribute{
 							MarkdownDescription: `The format for the realm ('1' or '0')
                                         Allowed values: [0,1]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -141,38 +138,36 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ res
 								),
 							},
 						},
-						"methods": schema.SetNestedAttribute{
+						"methods": schema.ListNestedAttribute{
 							MarkdownDescription: `An array of EAP methods for the realm.`,
-							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
 							NestedObject: schema.NestedAttributeObject{
 								Attributes: map[string]schema.Attribute{
 
 									"authentication_types": schema.SingleNestedAttribute{
 										MarkdownDescription: `The authentication types for the method. These should be formatted as an object with the EAP method category in camelcase as the key and the list of types as the value (nonEapInnerAuthentication: Reserved, PAP, CHAP, MSCHAP, MSCHAPV2; eapInnerAuthentication: EAP-TLS, EAP-SIM, EAP-AKA, EAP-TTLS with MSCHAPv2; credentials: SIM, USIM, NFC Secure Element, Hardware Token, Softoken, Certificate, username/password, none, Reserved, Vendor Specific; tunneledEapMethodCredentials: SIM, USIM, NFC Secure Element, Hardware Token, Softoken, Certificate, username/password, Reserved, Anonymous, Vendor Specific)`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Object{
 											objectplanmodifier.UseStateForUnknown(),
 										},
 										Attributes: map[string]schema.Attribute{
 
-											"credentials": schema.SetAttribute{
+											"credentials": schema.ListAttribute{
 												Computed:    true,
 												ElementType: types.StringType,
 											},
-											"eapinner_authentication": schema.SetAttribute{
+											"eapinner_authentication": schema.ListAttribute{
 												Computed:    true,
 												ElementType: types.StringType,
 											},
-											"non_eapinner_authentication": schema.SetAttribute{
+											"non_eapinner_authentication": schema.ListAttribute{
 												Computed:    true,
 												ElementType: types.StringType,
 											},
-											"tunneled_eap_method_credentials": schema.SetAttribute{
+											"tunneled_eap_method_credentials": schema.ListAttribute{
 												Computed:    true,
 												ElementType: types.StringType,
 											},
@@ -180,7 +175,6 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ res
 									},
 									"id": schema.StringAttribute{
 										MarkdownDescription: `ID of method`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -194,7 +188,6 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ res
 						},
 						"realm": schema.StringAttribute{
 							MarkdownDescription: `The name of the realm`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -206,7 +199,6 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ res
 			"network_access_type": schema.StringAttribute{
 				MarkdownDescription: `The network type of this SSID ('Private network', 'Private network with guest access', 'Chargeable public network', 'Free public network', 'Personal device network', 'Emergency services only network', 'Test or experimental', 'Wildcard')
                                   Allowed values: [Chargeable public network,Emergency services only network,Free public network,Personal device network,Private network,Private network with guest access,Test or experimental,Wildcard]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -234,7 +226,6 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ res
 			},
 			"operator": schema.SingleNestedAttribute{
 				MarkdownDescription: `Operator settings for this SSID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -243,7 +234,6 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ res
 
 					"name": schema.StringAttribute{
 						MarkdownDescription: `Operator name`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -251,19 +241,19 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ res
 					},
 				},
 			},
-			"roam_consort_ois": schema.SetAttribute{
+			"roam_consort_ois": schema.ListAttribute{
 				MarkdownDescription: `An array of roaming consortium OIs (hexadecimal number 3-5 octets in length)`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"venue": schema.SingleNestedAttribute{
 				MarkdownDescription: `Venue settings for this SSID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -272,7 +262,6 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ res
 
 					"name": schema.StringAttribute{
 						MarkdownDescription: `Venue name`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -281,7 +270,6 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Schema(_ context.Context, _ res
 					"type": schema.StringAttribute{
 						MarkdownDescription: `Venue type ('Unspecified', 'Unspecified Assembly', 'Arena', 'Stadium', 'Passenger Terminal', 'Amphitheater', 'Amusement Park', 'Place of Worship', 'Convention Center', 'Library', 'Museum', 'Restaurant', 'Theater', 'Bar', 'Coffee Shop', 'Zoo or Aquarium', 'Emergency Coordination Center', 'Unspecified Business', 'Doctor or Dentist office', 'Bank', 'Fire Station', 'Police Station', 'Post Office', 'Professional Office', 'Research and Development Facility', 'Attorney Office', 'Unspecified Educational', 'School, Primary', 'School, Secondary', 'University or College', 'Unspecified Factory and Industrial', 'Factory', 'Unspecified Institutional', 'Hospital', 'Long-Term Care Facility', 'Alcohol and Drug Rehabilitation Center', 'Group Home', 'Prison or Jail', 'Unspecified Mercantile', 'Retail Store', 'Grocery Market', 'Automotive Service Station', 'Shopping Mall', 'Gas Station', 'Unspecified Residential', 'Private Residence', 'Hotel or Motel', 'Dormitory', 'Boarding House', 'Unspecified Storage', 'Unspecified Utility and Miscellaneous', 'Unspecified Vehicular', 'Automobile or Truck', 'Airplane', 'Bus', 'Ferry', 'Ship or Boat', 'Train', 'Motor Bike', 'Unspecified Outdoor', 'Muni-mesh Network', 'City Park', 'Rest Area', 'Traffic Control', 'Bus Stop', 'Kiosk')
                                         Allowed values: [Airplane,Alcohol and Drug Rehabilitation Center,Amphitheater,Amusement Park,Arena,Attorney Office,Automobile or Truck,Automotive Service Station,Bank,Bar,Boarding House,Bus,Bus Stop,City Park,Coffee Shop,Convention Center,Doctor or Dentist office,Dormitory,Emergency Coordination Center,Factory,Ferry,Fire Station,Gas Station,Grocery Market,Group Home,Hospital,Hotel or Motel,Kiosk,Library,Long-Term Care Facility,Motor Bike,Muni-mesh Network,Museum,Passenger Terminal,Place of Worship,Police Station,Post Office,Prison or Jail,Private Residence,Professional Office,Research and Development Facility,Rest Area,Restaurant,Retail Store,School, Primary,School, Secondary,Ship or Boat,Shopping Mall,Stadium,Theater,Traffic Control,Train,University or College,Unspecified,Unspecified Assembly,Unspecified Business,Unspecified Educational,Unspecified Factory and Industrial,Unspecified Institutional,Unspecified Mercantile,Unspecified Outdoor,Unspecified Residential,Unspecified Storage,Unspecified Utility and Miscellaneous,Unspecified Vehicular,Zoo or Aquarium]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -386,27 +374,6 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Create(ctx context.Context, req
 	vvNumber := data.Number.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" && vvNumber != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDHotspot20(vvNetworkID, vvNumber)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessSsidsHotspot20  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessSsidsHotspot20 only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDHotspot20(vvNetworkID, vvNumber, dataRequest)
@@ -415,7 +382,7 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Create(ctx context.Context, req
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDHotspot20",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -426,49 +393,19 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Create(ctx context.Context, req
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSSIDHotspot20(vvNetworkID, vvNumber)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkWirelessSSIDHotspot20",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkWirelessSSIDHotspot20",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksWirelessSSIDsHotspot20Resource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksWirelessSSIDsHotspot20Rs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -499,9 +436,7 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Read(ctx context.Context, req r
 	}
 	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksWirelessSSIDsHotspot20Resource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -509,35 +444,31 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) ImportState(ctx context.Context
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,number. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("number"), idParts[1])...)
 }
 
 func (r *NetworksWirelessSSIDsHotspot20Resource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksWirelessSSIDsHotspot20Rs
-	merge(ctx, req, resp, &data)
+	var plan NetworksWirelessSSIDsHotspot20Rs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvNumber := data.Number.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvNumber := plan.Number.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDHotspot20(vvNetworkID, vvNumber, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDHotspot20",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -547,9 +478,7 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Update(ctx context.Context, req
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksWirelessSSIDsHotspot20Resource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -562,13 +491,13 @@ func (r *NetworksWirelessSSIDsHotspot20Resource) Delete(ctx context.Context, req
 type NetworksWirelessSSIDsHotspot20Rs struct {
 	NetworkID         types.String                                                  `tfsdk:"network_id"`
 	Number            types.String                                                  `tfsdk:"number"`
-	Domains           types.Set                                                     `tfsdk:"domains"`
+	Domains           types.List                                                    `tfsdk:"domains"`
 	Enabled           types.Bool                                                    `tfsdk:"enabled"`
 	MccMncs           *[]ResponseWirelessGetNetworkWirelessSsidHotspot20MccMncsRs   `tfsdk:"mcc_mncs"`
 	NaiRealms         *[]ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealmsRs `tfsdk:"nai_realms"`
 	NetworkAccessType types.String                                                  `tfsdk:"network_access_type"`
 	Operator          *ResponseWirelessGetNetworkWirelessSsidHotspot20OperatorRs    `tfsdk:"operator"`
-	RoamConsortOis    types.Set                                                     `tfsdk:"roam_consort_ois"`
+	RoamConsortOis    types.List                                                    `tfsdk:"roam_consort_ois"`
 	Venue             *ResponseWirelessGetNetworkWirelessSsidHotspot20VenueRs       `tfsdk:"venue"`
 }
 
@@ -590,10 +519,10 @@ type ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealmsMethodsRs struct {
 }
 
 type ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealmsMethodsAuthenticationTypesRs struct {
-	Credentials                  types.Set `tfsdk:"credentials"`
-	EapinnerAuthentication       types.Set `tfsdk:"eap_inner_authentication"`
-	NonEapinnerAuthentication    types.Set `tfsdk:"non_eap_inner_authentication"`
-	TunneledEapMethodCredentials types.Set `tfsdk:"tunneled_eap_method_credentials"`
+	Credentials                  types.List `tfsdk:"credentials"`
+	EapinnerAuthentication       types.List `tfsdk:"eap_inner_authentication"`
+	NonEapinnerAuthentication    types.List `tfsdk:"non_eap_inner_authentication"`
+	TunneledEapMethodCredentials types.List `tfsdk:"tunneled_eap_method_credentials"`
 }
 
 type ResponseWirelessGetNetworkWirelessSsidHotspot20OperatorRs struct {
@@ -722,7 +651,7 @@ func (r *NetworksWirelessSSIDsHotspot20Rs) toSdkApiRequestUpdate(ctx context.Con
 // From gosdk to TF Structs Schema
 func ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBodyRs(state NetworksWirelessSSIDsHotspot20Rs, response *merakigosdk.ResponseWirelessGetNetworkWirelessSSIDHotspot20, is_read bool) NetworksWirelessSSIDsHotspot20Rs {
 	itemState := NetworksWirelessSSIDsHotspot20Rs{
-		Domains: StringSliceToSet(response.Domains),
+		Domains: StringSliceToList(response.Domains),
 		Enabled: func() types.Bool {
 			if response.Enabled != nil {
 				return types.BoolValue(*response.Enabled)
@@ -734,8 +663,18 @@ func ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBodyRs(state NetworksW
 				result := make([]ResponseWirelessGetNetworkWirelessSsidHotspot20MccMncsRs, len(*response.MccMncs))
 				for i, mccMncs := range *response.MccMncs {
 					result[i] = ResponseWirelessGetNetworkWirelessSsidHotspot20MccMncsRs{
-						Mcc: types.StringValue(mccMncs.Mcc),
-						Mnc: types.StringValue(mccMncs.Mnc),
+						Mcc: func() types.String {
+							if mccMncs.Mcc != "" {
+								return types.StringValue(mccMncs.Mcc)
+							}
+							return types.String{}
+						}(),
+						Mnc: func() types.String {
+							if mccMncs.Mnc != "" {
+								return types.StringValue(mccMncs.Mnc)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -747,7 +686,12 @@ func ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBodyRs(state NetworksW
 				result := make([]ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealmsRs, len(*response.NaiRealms))
 				for i, naiRealms := range *response.NaiRealms {
 					result[i] = ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealmsRs{
-						Format: types.StringValue(naiRealms.Format),
+						Format: func() types.String {
+							if naiRealms.Format != "" {
+								return types.StringValue(naiRealms.Format)
+							}
+							return types.String{}
+						}(),
 						Methods: func() *[]ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealmsMethodsRs {
 							if naiRealms.Methods != nil {
 								result := make([]ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealmsMethodsRs, len(*naiRealms.Methods))
@@ -756,43 +700,73 @@ func ResponseWirelessGetNetworkWirelessSSIDHotspot20ItemToBodyRs(state NetworksW
 										AuthenticationTypes: func() *ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealmsMethodsAuthenticationTypesRs {
 											if methods.AuthenticationTypes != nil {
 												return &ResponseWirelessGetNetworkWirelessSsidHotspot20NaiRealmsMethodsAuthenticationTypesRs{
-													Credentials:                  StringSliceToSet(methods.AuthenticationTypes.Credentials),
-													EapinnerAuthentication:       StringSliceToSet(methods.AuthenticationTypes.EapinnerAuthentication),
-													NonEapinnerAuthentication:    StringSliceToSet(methods.AuthenticationTypes.NonEapinnerAuthentication),
-													TunneledEapMethodCredentials: StringSliceToSet(methods.AuthenticationTypes.TunneledEapMethodCredentials),
+													Credentials:                  StringSliceToList(methods.AuthenticationTypes.Credentials),
+													EapinnerAuthentication:       StringSliceToList(methods.AuthenticationTypes.EapinnerAuthentication),
+													NonEapinnerAuthentication:    StringSliceToList(methods.AuthenticationTypes.NonEapinnerAuthentication),
+													TunneledEapMethodCredentials: StringSliceToList(methods.AuthenticationTypes.TunneledEapMethodCredentials),
 												}
 											}
 											return nil
 										}(),
-										ID: types.StringValue(methods.ID),
+										ID: func() types.String {
+											if methods.ID != "" {
+												return types.StringValue(methods.ID)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						Name: types.StringValue(naiRealms.Name),
+						Name: func() types.String {
+							if naiRealms.Name != "" {
+								return types.StringValue(naiRealms.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		NetworkAccessType: types.StringValue(response.NetworkAccessType),
+		NetworkAccessType: func() types.String {
+			if response.NetworkAccessType != "" {
+				return types.StringValue(response.NetworkAccessType)
+			}
+			return types.String{}
+		}(),
 		Operator: func() *ResponseWirelessGetNetworkWirelessSsidHotspot20OperatorRs {
 			if response.Operator != nil {
 				return &ResponseWirelessGetNetworkWirelessSsidHotspot20OperatorRs{
-					Name: types.StringValue(response.Operator.Name),
+					Name: func() types.String {
+						if response.Operator.Name != "" {
+							return types.StringValue(response.Operator.Name)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		RoamConsortOis: StringSliceToSet(response.RoamConsortOis),
+		RoamConsortOis: StringSliceToList(response.RoamConsortOis),
 		Venue: func() *ResponseWirelessGetNetworkWirelessSsidHotspot20VenueRs {
 			if response.Venue != nil {
 				return &ResponseWirelessGetNetworkWirelessSsidHotspot20VenueRs{
-					Name: types.StringValue(response.Venue.Name),
-					Type: types.StringValue(response.Venue.Type),
+					Name: func() types.String {
+						if response.Venue.Name != "" {
+							return types.StringValue(response.Venue.Name)
+						}
+						return types.String{}
+					}(),
+					Type: func() types.String {
+						if response.Venue.Type != "" {
+							return types.StringValue(response.Venue.Type)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil

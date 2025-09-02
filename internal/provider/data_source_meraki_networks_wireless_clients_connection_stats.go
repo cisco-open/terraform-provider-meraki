@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -238,7 +237,12 @@ func ResponseWirelessGetNetworkWirelessClientConnectionStatsItemToBody(state Net
 			}
 			return nil
 		}(),
-		Mac: types.StringValue(response.Mac),
+		Mac: func() types.String {
+			if response.Mac != "" {
+				return types.StringValue(response.Mac)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

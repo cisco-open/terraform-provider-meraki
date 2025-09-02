@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -160,15 +159,35 @@ func ResponseOrganizationsGetOrganizationSplashThemesItemsToBody(state Organizat
 	var items []ResponseItemOrganizationsGetOrganizationSplashThemes
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationSplashThemes{
-			ID:   types.StringValue(item.ID),
-			Name: types.StringValue(item.Name),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			ThemeAssets: func() *[]ResponseItemOrganizationsGetOrganizationSplashThemesThemeAssets {
 				if item.ThemeAssets != nil {
 					result := make([]ResponseItemOrganizationsGetOrganizationSplashThemesThemeAssets, len(*item.ThemeAssets))
 					for i, themeAssets := range *item.ThemeAssets {
 						result[i] = ResponseItemOrganizationsGetOrganizationSplashThemesThemeAssets{
-							ID:   types.StringValue(themeAssets.ID),
-							Name: types.StringValue(themeAssets.Name),
+							ID: func() types.String {
+								if themeAssets.ID != "" {
+									return types.StringValue(themeAssets.ID)
+								}
+								return types.String{}
+							}(),
+							Name: func() types.String {
+								if themeAssets.Name != "" {
+									return types.StringValue(themeAssets.Name)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result

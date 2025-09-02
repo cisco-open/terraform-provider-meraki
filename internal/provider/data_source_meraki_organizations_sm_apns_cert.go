@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -126,7 +125,12 @@ type ResponseSmGetOrganizationSmApnsCert struct {
 // ToBody
 func ResponseSmGetOrganizationSmApnsCertItemToBody(state OrganizationsSmApnsCert, response *merakigosdk.ResponseSmGetOrganizationSmApnsCert) OrganizationsSmApnsCert {
 	itemState := ResponseSmGetOrganizationSmApnsCert{
-		Certificate: types.StringValue(response.Certificate),
+		Certificate: func() types.String {
+			if response.Certificate != "" {
+				return types.StringValue(response.Certificate)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

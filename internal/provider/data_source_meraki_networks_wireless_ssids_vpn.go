@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -220,8 +219,18 @@ func ResponseWirelessGetNetworkWirelessSSIDVpnItemToBody(state NetworksWirelessS
 		Concentrator: func() *ResponseWirelessGetNetworkWirelessSsidVpnConcentrator {
 			if response.Concentrator != nil {
 				return &ResponseWirelessGetNetworkWirelessSsidVpnConcentrator{
-					Name:      types.StringValue(response.Concentrator.Name),
-					NetworkID: types.StringValue(response.Concentrator.NetworkID),
+					Name: func() types.String {
+						if response.Concentrator.Name != "" {
+							return types.StringValue(response.Concentrator.Name)
+						}
+						return types.String{}
+					}(),
+					NetworkID: func() types.String {
+						if response.Concentrator.NetworkID != "" {
+							return types.StringValue(response.Concentrator.NetworkID)
+						}
+						return types.String{}
+					}(),
 					VLANID: func() types.Int64 {
 						if response.Concentrator.VLANID != nil {
 							return types.Int64Value(int64(*response.Concentrator.VLANID))
@@ -247,7 +256,12 @@ func ResponseWirelessGetNetworkWirelessSSIDVpnItemToBody(state NetworksWirelessS
 						}
 						return types.Int64{}
 					}(),
-					RequestIP: types.StringValue(response.Failover.RequestIP),
+					RequestIP: func() types.String {
+						if response.Failover.RequestIP != "" {
+							return types.StringValue(response.Failover.RequestIP)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -266,11 +280,36 @@ func ResponseWirelessGetNetworkWirelessSSIDVpnItemToBody(state NetworksWirelessS
 							result := make([]ResponseWirelessGetNetworkWirelessSsidVpnSplitTunnelRules, len(*response.SplitTunnel.Rules))
 							for i, rules := range *response.SplitTunnel.Rules {
 								result[i] = ResponseWirelessGetNetworkWirelessSsidVpnSplitTunnelRules{
-									Comment:  types.StringValue(rules.Comment),
-									DestCidr: types.StringValue(rules.DestCidr),
-									DestPort: types.StringValue(rules.DestPort),
-									Policy:   types.StringValue(rules.Policy),
-									Protocol: types.StringValue(rules.Protocol),
+									Comment: func() types.String {
+										if rules.Comment != "" {
+											return types.StringValue(rules.Comment)
+										}
+										return types.String{}
+									}(),
+									DestCidr: func() types.String {
+										if rules.DestCidr != "" {
+											return types.StringValue(rules.DestCidr)
+										}
+										return types.String{}
+									}(),
+									DestPort: func() types.String {
+										if rules.DestPort != "" {
+											return types.StringValue(rules.DestPort)
+										}
+										return types.String{}
+									}(),
+									Policy: func() types.String {
+										if rules.Policy != "" {
+											return types.StringValue(rules.Policy)
+										}
+										return types.String{}
+									}(),
+									Protocol: func() types.String {
+										if rules.Protocol != "" {
+											return types.StringValue(rules.Protocol)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return &result

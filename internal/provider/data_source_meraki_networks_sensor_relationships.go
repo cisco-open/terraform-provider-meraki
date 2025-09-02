@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -201,9 +200,24 @@ func ResponseSensorGetNetworkSensorRelationshipsItemsToBody(state NetworksSensor
 			Device: func() *ResponseItemSensorGetNetworkSensorRelationshipsDevice {
 				if item.Device != nil {
 					return &ResponseItemSensorGetNetworkSensorRelationshipsDevice{
-						Name:        types.StringValue(item.Device.Name),
-						ProductType: types.StringValue(item.Device.ProductType),
-						Serial:      types.StringValue(item.Device.Serial),
+						Name: func() types.String {
+							if item.Device.Name != "" {
+								return types.StringValue(item.Device.Name)
+							}
+							return types.String{}
+						}(),
+						ProductType: func() types.String {
+							if item.Device.ProductType != "" {
+								return types.StringValue(item.Device.ProductType)
+							}
+							return types.String{}
+						}(),
+						Serial: func() types.String {
+							if item.Device.Serial != "" {
+								return types.StringValue(item.Device.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -219,8 +233,18 @@ func ResponseSensorGetNetworkSensorRelationshipsItemsToBody(state NetworksSensor
 											result := make([]ResponseItemSensorGetNetworkSensorRelationshipsRelationshipsLivestreamRelatedDevices, len(*item.Relationships.Livestream.RelatedDevices))
 											for i, relatedDevices := range *item.Relationships.Livestream.RelatedDevices {
 												result[i] = ResponseItemSensorGetNetworkSensorRelationshipsRelationshipsLivestreamRelatedDevices{
-													ProductType: types.StringValue(relatedDevices.ProductType),
-													Serial:      types.StringValue(relatedDevices.Serial),
+													ProductType: func() types.String {
+														if relatedDevices.ProductType != "" {
+															return types.StringValue(relatedDevices.ProductType)
+														}
+														return types.String{}
+													}(),
+													Serial: func() types.String {
+														if relatedDevices.Serial != "" {
+															return types.StringValue(relatedDevices.Serial)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return &result

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -225,7 +224,12 @@ func ResponseSwitchGetNetworkSwitchDhcpServerPolicyItemToBody(state NetworksSwit
 			return nil
 		}(),
 		BlockedServers: StringSliceToList(response.BlockedServers),
-		DefaultPolicy:  types.StringValue(response.DefaultPolicy),
+		DefaultPolicy: func() types.String {
+			if response.DefaultPolicy != "" {
+				return types.StringValue(response.DefaultPolicy)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -210,30 +209,55 @@ func ResponseCameraGetOrganizationCameraDetectionsHistoryByBoundaryByIntervalIte
 	var items []ResponseItemCameraGetOrganizationCameraDetectionsHistoryByBoundaryByInterval
 	for _, item := range *response {
 		itemState := ResponseItemCameraGetOrganizationCameraDetectionsHistoryByBoundaryByInterval{
-			BoundaryID: types.StringValue(item.BoundaryID),
+			BoundaryID: func() types.String {
+				if item.BoundaryID != "" {
+					return types.StringValue(item.BoundaryID)
+				}
+				return types.String{}
+			}(),
 			Results: func() *ResponseItemCameraGetOrganizationCameraDetectionsHistoryByBoundaryByIntervalResults {
 				if item.Results != nil {
 					return &ResponseItemCameraGetOrganizationCameraDetectionsHistoryByBoundaryByIntervalResults{
-						EndTime: types.StringValue(item.Results.EndTime),
+						EndTime: func() types.String {
+							if item.Results.EndTime != "" {
+								return types.StringValue(item.Results.EndTime)
+							}
+							return types.String{}
+						}(),
 						In: func() types.Int64 {
 							if item.Results.In != nil {
 								return types.Int64Value(int64(*item.Results.In))
 							}
 							return types.Int64{}
 						}(),
-						ObjectType: types.StringValue(item.Results.ObjectType),
+						ObjectType: func() types.String {
+							if item.Results.ObjectType != "" {
+								return types.StringValue(item.Results.ObjectType)
+							}
+							return types.String{}
+						}(),
 						Out: func() types.Int64 {
 							if item.Results.Out != nil {
 								return types.Int64Value(int64(*item.Results.Out))
 							}
 							return types.Int64{}
 						}(),
-						StartTime: types.StringValue(item.Results.StartTime),
+						StartTime: func() types.String {
+							if item.Results.StartTime != "" {
+								return types.StringValue(item.Results.StartTime)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			Type: types.StringValue(item.Type),
+			Type: func() types.String {
+				if item.Type != "" {
+					return types.StringValue(item.Type)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

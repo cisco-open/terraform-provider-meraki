@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -162,17 +161,42 @@ func ResponseWirelessGetDeviceWirelessElectronicShelfLabelItemToBody(state Devic
 			}
 			return types.Int64{}
 		}(),
-		Channel: types.StringValue(response.Channel),
+		Channel: func() types.String {
+			if response.Channel != "" {
+				return types.StringValue(response.Channel)
+			}
+			return types.String{}
+		}(),
 		Enabled: func() types.Bool {
 			if response.Enabled != nil {
 				return types.BoolValue(*response.Enabled)
 			}
 			return types.Bool{}
 		}(),
-		Hostname:  types.StringValue(response.Hostname),
-		NetworkID: types.StringValue(response.NetworkID),
-		Provider:  types.StringValue(response.Provider),
-		Serial:    types.StringValue(response.Serial),
+		Hostname: func() types.String {
+			if response.Hostname != "" {
+				return types.StringValue(response.Hostname)
+			}
+			return types.String{}
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
+		Provider: func() types.String {
+			if response.Provider != "" {
+				return types.StringValue(response.Provider)
+			}
+			return types.String{}
+		}(),
+		Serial: func() types.String {
+			if response.Serial != "" {
+				return types.StringValue(response.Serial)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

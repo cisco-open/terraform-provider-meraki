@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -263,18 +262,73 @@ func ResponseSmGetNetworkSmDevicesItemsToBody(state NetworksSmDevices, response 
 	var items []ResponseItemSmGetNetworkSmDevices
 	for _, item := range *response {
 		itemState := ResponseItemSmGetNetworkSmDevices{
-			ID:           types.StringValue(item.ID),
-			IP:           types.StringValue(item.IP),
-			Name:         types.StringValue(item.Name),
-			Notes:        types.StringValue(item.Notes),
-			OsName:       types.StringValue(item.OsName),
-			Serial:       types.StringValue(item.Serial),
-			SerialNumber: types.StringValue(item.SerialNumber),
-			SSID:         types.StringValue(item.SSID),
-			SystemModel:  types.StringValue(item.SystemModel),
-			Tags:         StringSliceToList(item.Tags),
-			UUID:         types.StringValue(item.UUID),
-			WifiMac:      types.StringValue(item.WifiMac),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			IP: func() types.String {
+				if item.IP != "" {
+					return types.StringValue(item.IP)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			Notes: func() types.String {
+				if item.Notes != "" {
+					return types.StringValue(item.Notes)
+				}
+				return types.String{}
+			}(),
+			OsName: func() types.String {
+				if item.OsName != "" {
+					return types.StringValue(item.OsName)
+				}
+				return types.String{}
+			}(),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
+			SerialNumber: func() types.String {
+				if item.SerialNumber != "" {
+					return types.StringValue(item.SerialNumber)
+				}
+				return types.String{}
+			}(),
+			SSID: func() types.String {
+				if item.SSID != "" {
+					return types.StringValue(item.SSID)
+				}
+				return types.String{}
+			}(),
+			SystemModel: func() types.String {
+				if item.SystemModel != "" {
+					return types.StringValue(item.SystemModel)
+				}
+				return types.String{}
+			}(),
+			Tags: StringSliceToList(item.Tags),
+			UUID: func() types.String {
+				if item.UUID != "" {
+					return types.StringValue(item.UUID)
+				}
+				return types.String{}
+			}(),
+			WifiMac: func() types.String {
+				if item.WifiMac != "" {
+					return types.StringValue(item.WifiMac)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

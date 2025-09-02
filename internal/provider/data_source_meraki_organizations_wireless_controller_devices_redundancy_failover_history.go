@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -308,7 +307,12 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundanc
 										Chassis: func() *ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsActiveChassis {
 											if items.Active.Chassis != nil {
 												return &ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsActiveChassis{
-													Name: types.StringValue(items.Active.Chassis.Name),
+													Name: func() types.String {
+														if items.Active.Chassis.Name != "" {
+															return types.StringValue(items.Active.Chassis.Name)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return nil
@@ -323,7 +327,12 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundanc
 										Chassis: func() *ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsFailedChassis {
 											if items.Failed.Chassis != nil {
 												return &ResponseItemWirelessControllerGetOrganizationWirelessControllerDevicesRedundancyFailoverHistoryItemsFailedChassis{
-													Name: types.StringValue(items.Failed.Chassis.Name),
+													Name: func() types.String {
+														if items.Failed.Chassis.Name != "" {
+															return types.StringValue(items.Failed.Chassis.Name)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return nil
@@ -332,9 +341,24 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesRedundanc
 								}
 								return nil
 							}(),
-							Reason: types.StringValue(items.Reason),
-							Serial: types.StringValue(items.Serial),
-							Ts:     types.StringValue(items.Ts),
+							Reason: func() types.String {
+								if items.Reason != "" {
+									return types.StringValue(items.Reason)
+								}
+								return types.String{}
+							}(),
+							Serial: func() types.String {
+								if items.Serial != "" {
+									return types.StringValue(items.Serial)
+								}
+								return types.String{}
+							}(),
+							Ts: func() types.String {
+								if items.Ts != "" {
+									return types.StringValue(items.Ts)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result

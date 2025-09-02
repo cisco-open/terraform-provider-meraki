@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -248,6 +247,17 @@ func (d *NetworksWebhooksPayloadTemplatesDataSource) Read(ctx context.Context, r
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkWebhooksPayloadTemplate",
+				err.Error(),
+			)
+			return
+		}
+
 		networksWebhooksPayloadTemplates = ResponseNetworksGetNetworkWebhooksPayloadTemplateItemToBody(networksWebhooksPayloadTemplates, response2)
 		diags = resp.State.Set(ctx, &networksWebhooksPayloadTemplates)
 		resp.Diagnostics.Append(diags...)
@@ -315,22 +325,47 @@ func ResponseNetworksGetNetworkWebhooksPayloadTemplatesItemsToBody(state Network
 	var items []ResponseItemNetworksGetNetworkWebhooksPayloadTemplates
 	for _, item := range *response {
 		itemState := ResponseItemNetworksGetNetworkWebhooksPayloadTemplates{
-			Body: types.StringValue(item.Body),
+			Body: func() types.String {
+				if item.Body != "" {
+					return types.StringValue(item.Body)
+				}
+				return types.String{}
+			}(),
 			Headers: func() *[]ResponseItemNetworksGetNetworkWebhooksPayloadTemplatesHeaders {
 				if item.Headers != nil {
 					result := make([]ResponseItemNetworksGetNetworkWebhooksPayloadTemplatesHeaders, len(*item.Headers))
 					for i, headers := range *item.Headers {
 						result[i] = ResponseItemNetworksGetNetworkWebhooksPayloadTemplatesHeaders{
-							Name:     types.StringValue(headers.Name),
-							Template: types.StringValue(headers.Template),
+							Name: func() types.String {
+								if headers.Name != "" {
+									return types.StringValue(headers.Name)
+								}
+								return types.String{}
+							}(),
+							Template: func() types.String {
+								if headers.Template != "" {
+									return types.StringValue(headers.Template)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
 				}
 				return nil
 			}(),
-			Name:              types.StringValue(item.Name),
-			PayloadTemplateID: types.StringValue(item.PayloadTemplateID),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			PayloadTemplateID: func() types.String {
+				if item.PayloadTemplateID != "" {
+					return types.StringValue(item.PayloadTemplateID)
+				}
+				return types.String{}
+			}(),
 			Sharing: func() *ResponseItemNetworksGetNetworkWebhooksPayloadTemplatesSharing {
 				if item.Sharing != nil {
 					return &ResponseItemNetworksGetNetworkWebhooksPayloadTemplatesSharing{
@@ -351,7 +386,12 @@ func ResponseNetworksGetNetworkWebhooksPayloadTemplatesItemsToBody(state Network
 				}
 				return nil
 			}(),
-			Type: types.StringValue(item.Type),
+			Type: func() types.String {
+				if item.Type != "" {
+					return types.StringValue(item.Type)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -361,22 +401,47 @@ func ResponseNetworksGetNetworkWebhooksPayloadTemplatesItemsToBody(state Network
 
 func ResponseNetworksGetNetworkWebhooksPayloadTemplateItemToBody(state NetworksWebhooksPayloadTemplates, response *merakigosdk.ResponseNetworksGetNetworkWebhooksPayloadTemplate) NetworksWebhooksPayloadTemplates {
 	itemState := ResponseNetworksGetNetworkWebhooksPayloadTemplate{
-		Body: types.StringValue(response.Body),
+		Body: func() types.String {
+			if response.Body != "" {
+				return types.StringValue(response.Body)
+			}
+			return types.String{}
+		}(),
 		Headers: func() *[]ResponseNetworksGetNetworkWebhooksPayloadTemplateHeaders {
 			if response.Headers != nil {
 				result := make([]ResponseNetworksGetNetworkWebhooksPayloadTemplateHeaders, len(*response.Headers))
 				for i, headers := range *response.Headers {
 					result[i] = ResponseNetworksGetNetworkWebhooksPayloadTemplateHeaders{
-						Name:     types.StringValue(headers.Name),
-						Template: types.StringValue(headers.Template),
+						Name: func() types.String {
+							if headers.Name != "" {
+								return types.StringValue(headers.Name)
+							}
+							return types.String{}
+						}(),
+						Template: func() types.String {
+							if headers.Template != "" {
+								return types.StringValue(headers.Template)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		Name:              types.StringValue(response.Name),
-		PayloadTemplateID: types.StringValue(response.PayloadTemplateID),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		PayloadTemplateID: func() types.String {
+			if response.PayloadTemplateID != "" {
+				return types.StringValue(response.PayloadTemplateID)
+			}
+			return types.String{}
+		}(),
 		Sharing: func() *ResponseNetworksGetNetworkWebhooksPayloadTemplateSharing {
 			if response.Sharing != nil {
 				return &ResponseNetworksGetNetworkWebhooksPayloadTemplateSharing{
@@ -397,7 +462,12 @@ func ResponseNetworksGetNetworkWebhooksPayloadTemplateItemToBody(state NetworksW
 			}
 			return nil
 		}(),
-		Type: types.StringValue(response.Type),
+		Type: func() types.String {
+			if response.Type != "" {
+				return types.StringValue(response.Type)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

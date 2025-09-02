@@ -284,12 +284,27 @@ func (r *NetworksWirelessAirMarshalRulesCreate) toSdkApiRequestCreate(ctx contex
 // ToBody
 func ResponseWirelessCreateNetworkWirelessAirMarshalRuleItemToBody(state NetworksWirelessAirMarshalRulesCreate, response *merakigosdk.ResponseWirelessCreateNetworkWirelessAirMarshalRule) NetworksWirelessAirMarshalRulesCreate {
 	itemState := ResponseWirelessCreateNetworkWirelessAirMarshalRule{
-		CreatedAt: types.StringValue(response.CreatedAt),
+		CreatedAt: func() types.String {
+			if response.CreatedAt != "" {
+				return types.StringValue(response.CreatedAt)
+			}
+			return types.String{}
+		}(),
 		Match: func() *ResponseWirelessCreateNetworkWirelessAirMarshalRuleMatch {
 			if response.Match != nil {
 				return &ResponseWirelessCreateNetworkWirelessAirMarshalRuleMatch{
-					String: types.StringValue(response.Match.String),
-					Type:   types.StringValue(response.Match.Type),
+					String: func() types.String {
+						if response.Match.String != "" {
+							return types.StringValue(response.Match.String)
+						}
+						return types.String{}
+					}(),
+					Type: func() types.String {
+						if response.Match.Type != "" {
+							return types.StringValue(response.Match.Type)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -297,15 +312,40 @@ func ResponseWirelessCreateNetworkWirelessAirMarshalRuleItemToBody(state Network
 		Network: func() *ResponseWirelessCreateNetworkWirelessAirMarshalRuleNetwork {
 			if response.Network != nil {
 				return &ResponseWirelessCreateNetworkWirelessAirMarshalRuleNetwork{
-					ID:   types.StringValue(response.Network.ID),
-					Name: types.StringValue(response.Network.Name),
+					ID: func() types.String {
+						if response.Network.ID != "" {
+							return types.StringValue(response.Network.ID)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.Network.Name != "" {
+							return types.StringValue(response.Network.Name)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		RuleID:    types.StringValue(response.RuleID),
-		Type:      types.StringValue(response.Type),
-		UpdatedAt: types.StringValue(response.UpdatedAt),
+		RuleID: func() types.String {
+			if response.RuleID != "" {
+				return types.StringValue(response.RuleID)
+			}
+			return types.String{}
+		}(),
+		Type: func() types.String {
+			if response.Type != "" {
+				return types.StringValue(response.Type)
+			}
+			return types.String{}
+		}(),
+		UpdatedAt: func() types.String {
+			if response.UpdatedAt != "" {
+				return types.StringValue(response.UpdatedAt)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

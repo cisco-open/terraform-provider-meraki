@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -253,24 +252,59 @@ type ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpReservedIpRanges struct {
 // ToBody
 func ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpItemToBody(state DevicesSwitchRoutingInterfacesDhcp, response *merakigosdk.ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcp) DevicesSwitchRoutingInterfacesDhcp {
 	itemState := ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcp{
-		BootFileName:   types.StringValue(response.BootFileName),
-		BootNextServer: types.StringValue(response.BootNextServer),
+		BootFileName: func() types.String {
+			if response.BootFileName != "" {
+				return types.StringValue(response.BootFileName)
+			}
+			return types.String{}
+		}(),
+		BootNextServer: func() types.String {
+			if response.BootNextServer != "" {
+				return types.StringValue(response.BootNextServer)
+			}
+			return types.String{}
+		}(),
 		BootOptionsEnabled: func() types.Bool {
 			if response.BootOptionsEnabled != nil {
 				return types.BoolValue(*response.BootOptionsEnabled)
 			}
 			return types.Bool{}
 		}(),
-		DhcpLeaseTime: types.StringValue(response.DhcpLeaseTime),
-		DhcpMode:      types.StringValue(response.DhcpMode),
+		DhcpLeaseTime: func() types.String {
+			if response.DhcpLeaseTime != "" {
+				return types.StringValue(response.DhcpLeaseTime)
+			}
+			return types.String{}
+		}(),
+		DhcpMode: func() types.String {
+			if response.DhcpMode != "" {
+				return types.StringValue(response.DhcpMode)
+			}
+			return types.String{}
+		}(),
 		DhcpOptions: func() *[]ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpDhcpOptions {
 			if response.DhcpOptions != nil {
 				result := make([]ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpDhcpOptions, len(*response.DhcpOptions))
 				for i, dhcpOptions := range *response.DhcpOptions {
 					result[i] = ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpDhcpOptions{
-						Code:  types.StringValue(dhcpOptions.Code),
-						Type:  types.StringValue(dhcpOptions.Type),
-						Value: types.StringValue(dhcpOptions.Value),
+						Code: func() types.String {
+							if dhcpOptions.Code != "" {
+								return types.StringValue(dhcpOptions.Code)
+							}
+							return types.String{}
+						}(),
+						Type: func() types.String {
+							if dhcpOptions.Type != "" {
+								return types.StringValue(dhcpOptions.Type)
+							}
+							return types.String{}
+						}(),
+						Value: func() types.String {
+							if dhcpOptions.Value != "" {
+								return types.StringValue(dhcpOptions.Value)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -279,15 +313,35 @@ func ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpItemToBody(state DevicesSw
 		}(),
 		DhcpRelayServerIPs:   StringSliceToList(response.DhcpRelayServerIPs),
 		DNSCustomNameservers: StringSliceToList(response.DNSCustomNameservers),
-		DNSNameserversOption: types.StringValue(response.DNSNameserversOption),
+		DNSNameserversOption: func() types.String {
+			if response.DNSNameserversOption != "" {
+				return types.StringValue(response.DNSNameserversOption)
+			}
+			return types.String{}
+		}(),
 		FixedIPAssignments: func() *[]ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpFixedIpAssignments {
 			if response.FixedIPAssignments != nil {
 				result := make([]ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpFixedIpAssignments, len(*response.FixedIPAssignments))
 				for i, fixedIPAssignments := range *response.FixedIPAssignments {
 					result[i] = ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpFixedIpAssignments{
-						IP:   types.StringValue(fixedIPAssignments.IP),
-						Mac:  types.StringValue(fixedIPAssignments.Mac),
-						Name: types.StringValue(fixedIPAssignments.Name),
+						IP: func() types.String {
+							if fixedIPAssignments.IP != "" {
+								return types.StringValue(fixedIPAssignments.IP)
+							}
+							return types.String{}
+						}(),
+						Mac: func() types.String {
+							if fixedIPAssignments.Mac != "" {
+								return types.StringValue(fixedIPAssignments.Mac)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if fixedIPAssignments.Name != "" {
+								return types.StringValue(fixedIPAssignments.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -299,9 +353,24 @@ func ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpItemToBody(state DevicesSw
 				result := make([]ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpReservedIpRanges, len(*response.ReservedIPRanges))
 				for i, reservedIPRanges := range *response.ReservedIPRanges {
 					result[i] = ResponseSwitchGetDeviceSwitchRoutingInterfaceDhcpReservedIpRanges{
-						Comment: types.StringValue(reservedIPRanges.Comment),
-						End:     types.StringValue(reservedIPRanges.End),
-						Start:   types.StringValue(reservedIPRanges.Start),
+						Comment: func() types.String {
+							if reservedIPRanges.Comment != "" {
+								return types.StringValue(reservedIPRanges.Comment)
+							}
+							return types.String{}
+						}(),
+						End: func() types.String {
+							if reservedIPRanges.End != "" {
+								return types.StringValue(reservedIPRanges.End)
+							}
+							return types.String{}
+						}(),
+						Start: func() types.String {
+							if reservedIPRanges.Start != "" {
+								return types.StringValue(reservedIPRanges.Start)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

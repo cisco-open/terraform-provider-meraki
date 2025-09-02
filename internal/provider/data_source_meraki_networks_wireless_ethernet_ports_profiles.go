@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -214,7 +213,12 @@ func ResponseWirelessGetNetworkWirelessEthernetPortsProfileItemToBody(state Netw
 			}
 			return types.Bool{}
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		Ports: func() *[]ResponseWirelessGetNetworkWirelessEthernetPortsProfilePorts {
 			if response.Ports != nil {
 				result := make([]ResponseWirelessGetNetworkWirelessEthernetPortsProfilePorts, len(*response.Ports))
@@ -226,14 +230,24 @@ func ResponseWirelessGetNetworkWirelessEthernetPortsProfileItemToBody(state Netw
 							}
 							return types.Bool{}
 						}(),
-						Name: types.StringValue(ports.Name),
+						Name: func() types.String {
+							if ports.Name != "" {
+								return types.StringValue(ports.Name)
+							}
+							return types.String{}
+						}(),
 						Number: func() types.Int64 {
 							if ports.Number != nil {
 								return types.Int64Value(int64(*ports.Number))
 							}
 							return types.Int64{}
 						}(),
-						PskGroupID: types.StringValue(ports.PskGroupID),
+						PskGroupID: func() types.String {
+							if ports.PskGroupID != "" {
+								return types.StringValue(ports.PskGroupID)
+							}
+							return types.String{}
+						}(),
 						SSID: func() types.Int64 {
 							if ports.SSID != nil {
 								return types.Int64Value(int64(*ports.SSID))
@@ -246,7 +260,12 @@ func ResponseWirelessGetNetworkWirelessEthernetPortsProfileItemToBody(state Netw
 			}
 			return nil
 		}(),
-		ProfileID: types.StringValue(response.ProfileID),
+		ProfileID: func() types.String {
+			if response.ProfileID != "" {
+				return types.StringValue(response.ProfileID)
+			}
+			return types.String{}
+		}(),
 		UsbPorts: func() *[]ResponseWirelessGetNetworkWirelessEthernetPortsProfileUsbPorts {
 			if response.UsbPorts != nil {
 				result := make([]ResponseWirelessGetNetworkWirelessEthernetPortsProfileUsbPorts, len(*response.UsbPorts))
@@ -258,7 +277,12 @@ func ResponseWirelessGetNetworkWirelessEthernetPortsProfileItemToBody(state Netw
 							}
 							return types.Bool{}
 						}(),
-						Name: types.StringValue(usbPorts.Name),
+						Name: func() types.String {
+							if usbPorts.Name != "" {
+								return types.StringValue(usbPorts.Name)
+							}
+							return types.String{}
+						}(),
 						SSID: func() types.Int64 {
 							if usbPorts.SSID != nil {
 								return types.Int64Value(int64(*usbPorts.SSID))

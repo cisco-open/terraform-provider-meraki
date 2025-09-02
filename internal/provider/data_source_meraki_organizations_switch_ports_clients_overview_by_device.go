@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -352,14 +351,39 @@ func ResponseSwitchGetOrganizationSwitchPortsClientsOverviewByDeviceItemToBody(s
 				result := make([]ResponseSwitchGetOrganizationSwitchPortsClientsOverviewByDeviceItems, len(*response.Items))
 				for i, items := range *response.Items {
 					result[i] = ResponseSwitchGetOrganizationSwitchPortsClientsOverviewByDeviceItems{
-						Mac:   types.StringValue(items.Mac),
-						Model: types.StringValue(items.Model),
-						Name:  types.StringValue(items.Name),
+						Mac: func() types.String {
+							if items.Mac != "" {
+								return types.StringValue(items.Mac)
+							}
+							return types.String{}
+						}(),
+						Model: func() types.String {
+							if items.Model != "" {
+								return types.StringValue(items.Model)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if items.Name != "" {
+								return types.StringValue(items.Name)
+							}
+							return types.String{}
+						}(),
 						Network: func() *ResponseSwitchGetOrganizationSwitchPortsClientsOverviewByDeviceItemsNetwork {
 							if items.Network != nil {
 								return &ResponseSwitchGetOrganizationSwitchPortsClientsOverviewByDeviceItemsNetwork{
-									ID:   types.StringValue(items.Network.ID),
-									Name: types.StringValue(items.Network.Name),
+									ID: func() types.String {
+										if items.Network.ID != "" {
+											return types.StringValue(items.Network.ID)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if items.Network.Name != "" {
+											return types.StringValue(items.Network.Name)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -389,14 +413,24 @@ func ResponseSwitchGetOrganizationSwitchPortsClientsOverviewByDeviceItemToBody(s
 											}
 											return nil
 										}(),
-										PortID: types.StringValue(ports.PortID),
+										PortID: func() types.String {
+											if ports.PortID != "" {
+												return types.StringValue(ports.PortID)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						Serial: types.StringValue(items.Serial),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

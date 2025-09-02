@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -64,7 +65,6 @@ func (r *NetworksSensorMqttBrokersResource) Schema(_ context.Context, _ resource
 		Attributes: map[string]schema.Attribute{
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: `Specifies whether the broker is enabled for sensor data. Currently, only a single broker may be enabled for sensor data.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -107,27 +107,6 @@ func (r *NetworksSensorMqttBrokersResource) Create(ctx context.Context, req reso
 	vvMqttBrokerID := data.MqttBrokerID.ValueString()
 	//Has Item and has items and not post
 
-	if vvNetworkID != "" && vvMqttBrokerID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Sensor.GetNetworkSensorMqttBroker(vvNetworkID, vvMqttBrokerID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSensorMqttBrokers  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSensorMqttBrokers only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Sensor.UpdateNetworkSensorMqttBroker(vvNetworkID, vvMqttBrokerID, dataRequest)
@@ -136,7 +115,7 @@ func (r *NetworksSensorMqttBrokersResource) Create(ctx context.Context, req reso
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSensorMqttBroker",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -147,49 +126,19 @@ func (r *NetworksSensorMqttBrokersResource) Create(ctx context.Context, req reso
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Sensor.GetNetworkSensorMqttBroker(vvNetworkID, vvMqttBrokerID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkSensorMqttBroker",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkSensorMqttBroker",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseSensorGetNetworkSensorMqttBrokerItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksSensorMqttBrokersResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksSensorMqttBrokersRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -220,9 +169,7 @@ func (r *NetworksSensorMqttBrokersResource) Read(ctx context.Context, req resour
 	}
 	//entro aqui 2
 	data = ResponseSensorGetNetworkSensorMqttBrokerItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksSensorMqttBrokersResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -230,35 +177,31 @@ func (r *NetworksSensorMqttBrokersResource) ImportState(ctx context.Context, req
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,mqttBrokerId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("mqtt_broker_id"), idParts[1])...)
 }
 
 func (r *NetworksSensorMqttBrokersResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksSensorMqttBrokersRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksSensorMqttBrokersRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvMqttBrokerID := data.MqttBrokerID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvMqttBrokerID := plan.MqttBrokerID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Sensor.UpdateNetworkSensorMqttBroker(vvNetworkID, vvMqttBrokerID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSensorMqttBroker",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -268,9 +211,7 @@ func (r *NetworksSensorMqttBrokersResource) Update(ctx context.Context, req reso
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksSensorMqttBrokersResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -309,7 +250,12 @@ func ResponseSensorGetNetworkSensorMqttBrokerItemToBodyRs(state NetworksSensorMq
 			}
 			return types.Bool{}
 		}(),
-		MqttBrokerID: types.StringValue(response.MqttBrokerID),
+		MqttBrokerID: func() types.String {
+			if response.MqttBrokerID != "" {
+				return types.StringValue(response.MqttBrokerID)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksSensorMqttBrokersRs)

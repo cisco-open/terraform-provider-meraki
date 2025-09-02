@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -294,12 +293,22 @@ func ResponseWirelessGetOrganizationWirelessClientsOverviewByDeviceItemToBody(st
 						Network: func() *ResponseWirelessGetOrganizationWirelessClientsOverviewByDeviceItemsNetwork {
 							if items.Network != nil {
 								return &ResponseWirelessGetOrganizationWirelessClientsOverviewByDeviceItemsNetwork{
-									ID: types.StringValue(items.Network.ID),
+									ID: func() types.String {
+										if items.Network.ID != "" {
+											return types.StringValue(items.Network.ID)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						Serial: types.StringValue(items.Serial),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

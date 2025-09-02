@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -63,7 +64,6 @@ func (r *NetworksApplianceWarmSpareResource) Schema(_ context.Context, _ resourc
 		Attributes: map[string]schema.Attribute{
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: `Is the warm spare enabled`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -79,7 +79,6 @@ func (r *NetworksApplianceWarmSpareResource) Schema(_ context.Context, _ resourc
 			},
 			"spare_serial": schema.StringAttribute{
 				MarkdownDescription: `Serial number of the warm spare appliance`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -87,7 +86,6 @@ func (r *NetworksApplianceWarmSpareResource) Schema(_ context.Context, _ resourc
 			},
 			"uplink_mode": schema.StringAttribute{
 				MarkdownDescription: `Uplink mode, either virtual or public`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -95,7 +93,6 @@ func (r *NetworksApplianceWarmSpareResource) Schema(_ context.Context, _ resourc
 			},
 			"virtual_ip1": schema.StringAttribute{
 				MarkdownDescription: `The WAN 1 shared IP`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -103,7 +100,6 @@ func (r *NetworksApplianceWarmSpareResource) Schema(_ context.Context, _ resourc
 			},
 			"virtual_ip2": schema.StringAttribute{
 				MarkdownDescription: `The WAN 2 shared IP`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -165,27 +161,6 @@ func (r *NetworksApplianceWarmSpareResource) Create(ctx context.Context, req res
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceWarmSpare(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceWarmSpare  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceWarmSpare only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceWarmSpare(vvNetworkID, dataRequest)
@@ -194,7 +169,7 @@ func (r *NetworksApplianceWarmSpareResource) Create(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceWarmSpare",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -205,49 +180,19 @@ func (r *NetworksApplianceWarmSpareResource) Create(ctx context.Context, req res
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceWarmSpare(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceWarmSpare",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkApplianceWarmSpare",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseApplianceGetNetworkApplianceWarmSpareItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksApplianceWarmSpareResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksApplianceWarmSpareRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -277,33 +222,28 @@ func (r *NetworksApplianceWarmSpareResource) Read(ctx context.Context, req resou
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceWarmSpareItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksApplianceWarmSpareResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksApplianceWarmSpareResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksApplianceWarmSpareRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksApplianceWarmSpareRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceWarmSpare(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceWarmSpare",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -313,9 +253,7 @@ func (r *NetworksApplianceWarmSpareResource) Update(ctx context.Context, req res
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksApplianceWarmSpareResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -399,14 +337,39 @@ func ResponseApplianceGetNetworkApplianceWarmSpareItemToBodyRs(state NetworksApp
 			}
 			return types.Bool{}
 		}(),
-		PrimarySerial: types.StringValue(response.PrimarySerial),
-		SpareSerial:   types.StringValue(response.SpareSerial),
-		UplinkMode:    types.StringValue(response.UplinkMode),
+		PrimarySerial: func() types.String {
+			if response.PrimarySerial != "" {
+				return types.StringValue(response.PrimarySerial)
+			}
+			return types.String{}
+		}(),
+		SpareSerial: func() types.String {
+			if response.SpareSerial != "" {
+				return types.StringValue(response.SpareSerial)
+			}
+			return types.String{}
+		}(),
+		UplinkMode: func() types.String {
+			if response.UplinkMode != "" {
+				return types.StringValue(response.UplinkMode)
+			}
+			return types.String{}
+		}(),
 		Wan1: func() *ResponseApplianceGetNetworkApplianceWarmSpareWan1Rs {
 			if response.Wan1 != nil {
 				return &ResponseApplianceGetNetworkApplianceWarmSpareWan1Rs{
-					IP:     types.StringValue(response.Wan1.IP),
-					Subnet: types.StringValue(response.Wan1.Subnet),
+					IP: func() types.String {
+						if response.Wan1.IP != "" {
+							return types.StringValue(response.Wan1.IP)
+						}
+						return types.String{}
+					}(),
+					Subnet: func() types.String {
+						if response.Wan1.Subnet != "" {
+							return types.StringValue(response.Wan1.Subnet)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -414,8 +377,18 @@ func ResponseApplianceGetNetworkApplianceWarmSpareItemToBodyRs(state NetworksApp
 		Wan2: func() *ResponseApplianceGetNetworkApplianceWarmSpareWan2Rs {
 			if response.Wan2 != nil {
 				return &ResponseApplianceGetNetworkApplianceWarmSpareWan2Rs{
-					IP:     types.StringValue(response.Wan2.IP),
-					Subnet: types.StringValue(response.Wan2.Subnet),
+					IP: func() types.String {
+						if response.Wan2.IP != "" {
+							return types.StringValue(response.Wan2.IP)
+						}
+						return types.String{}
+					}(),
+					Subnet: func() types.String {
+						if response.Wan2.Subnet != "" {
+							return types.StringValue(response.Wan2.Subnet)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil

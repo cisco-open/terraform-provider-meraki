@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -445,8 +444,18 @@ func ResponseLicensingGetAdministeredLicensingSubscriptionSubscriptionsItemsToBo
 				}
 				return nil
 			}(),
-			Description: types.StringValue(item.Description),
-			EndDate:     types.StringValue(item.EndDate),
+			Description: func() types.String {
+				if item.Description != "" {
+					return types.StringValue(item.Description)
+				}
+				return types.String{}
+			}(),
+			EndDate: func() types.String {
+				if item.EndDate != "" {
+					return types.StringValue(item.EndDate)
+				}
+				return types.String{}
+			}(),
 			EnterpriseAgreement: func() *ResponseItemLicensingGetAdministeredLicensingSubscriptionSubscriptionsEnterpriseAgreement {
 				if item.EnterpriseAgreement != nil {
 					return &ResponseItemLicensingGetAdministeredLicensingSubscriptionSubscriptionsEnterpriseAgreement{
@@ -485,17 +494,37 @@ func ResponseLicensingGetAdministeredLicensingSubscriptionSubscriptionsItemsToBo
 								}
 								return nil
 							}(),
-							Sku:            types.StringValue(entitlements.Sku),
-							WebOrderLineID: types.StringValue(entitlements.WebOrderLineID),
+							Sku: func() types.String {
+								if entitlements.Sku != "" {
+									return types.StringValue(entitlements.Sku)
+								}
+								return types.String{}
+							}(),
+							WebOrderLineID: func() types.String {
+								if entitlements.WebOrderLineID != "" {
+									return types.StringValue(entitlements.WebOrderLineID)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
 				}
 				return nil
 			}(),
-			LastUpdatedAt: types.StringValue(item.LastUpdatedAt),
-			Name:          types.StringValue(item.Name),
-			ProductTypes:  StringSliceToList(item.ProductTypes),
+			LastUpdatedAt: func() types.String {
+				if item.LastUpdatedAt != "" {
+					return types.StringValue(item.LastUpdatedAt)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			ProductTypes: StringSliceToList(item.ProductTypes),
 			RenewalRequested: func() types.Bool {
 				if item.RenewalRequested != nil {
 					return types.BoolValue(*item.RenewalRequested)
@@ -508,23 +537,68 @@ func ResponseLicensingGetAdministeredLicensingSubscriptionSubscriptionsItemsToBo
 						Account: func() *ResponseItemLicensingGetAdministeredLicensingSubscriptionSubscriptionsSmartAccountAccount {
 							if item.SmartAccount.Account != nil {
 								return &ResponseItemLicensingGetAdministeredLicensingSubscriptionSubscriptionsSmartAccountAccount{
-									Domain: types.StringValue(item.SmartAccount.Account.Domain),
-									ID:     types.StringValue(item.SmartAccount.Account.ID),
-									Name:   types.StringValue(item.SmartAccount.Account.Name),
+									Domain: func() types.String {
+										if item.SmartAccount.Account.Domain != "" {
+											return types.StringValue(item.SmartAccount.Account.Domain)
+										}
+										return types.String{}
+									}(),
+									ID: func() types.String {
+										if item.SmartAccount.Account.ID != "" {
+											return types.StringValue(item.SmartAccount.Account.ID)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if item.SmartAccount.Account.Name != "" {
+											return types.StringValue(item.SmartAccount.Account.Name)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						Status: types.StringValue(item.SmartAccount.Status),
+						Status: func() types.String {
+							if item.SmartAccount.Status != "" {
+								return types.StringValue(item.SmartAccount.Status)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			StartDate:      types.StringValue(item.StartDate),
-			Status:         types.StringValue(item.Status),
-			SubscriptionID: types.StringValue(item.SubscriptionID),
-			Type:           types.StringValue(item.Type),
-			WebOrderID:     types.StringValue(item.WebOrderID),
+			StartDate: func() types.String {
+				if item.StartDate != "" {
+					return types.StringValue(item.StartDate)
+				}
+				return types.String{}
+			}(),
+			Status: func() types.String {
+				if item.Status != "" {
+					return types.StringValue(item.Status)
+				}
+				return types.String{}
+			}(),
+			SubscriptionID: func() types.String {
+				if item.SubscriptionID != "" {
+					return types.StringValue(item.SubscriptionID)
+				}
+				return types.String{}
+			}(),
+			Type: func() types.String {
+				if item.Type != "" {
+					return types.StringValue(item.Type)
+				}
+				return types.String{}
+			}(),
+			WebOrderID: func() types.String {
+				if item.WebOrderID != "" {
+					return types.StringValue(item.WebOrderID)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

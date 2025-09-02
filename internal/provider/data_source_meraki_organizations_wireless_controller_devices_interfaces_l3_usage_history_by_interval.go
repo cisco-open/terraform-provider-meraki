@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -270,8 +269,18 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 								result := make([]ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL3UsageHistoryByIntervalItemsReadings, len(*items.Readings))
 								for i, readings := range *items.Readings {
 									result[i] = ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterfacesL3UsageHistoryByIntervalItemsReadings{
-										Mac:  types.StringValue(readings.Mac),
-										Name: types.StringValue(readings.Name),
+										Mac: func() types.String {
+											if readings.Mac != "" {
+												return types.StringValue(readings.Mac)
+											}
+											return types.String{}
+										}(),
+										Name: func() types.String {
+											if readings.Name != "" {
+												return types.StringValue(readings.Name)
+											}
+											return types.String{}
+										}(),
 										Recv: func() types.Int64 {
 											if readings.Recv != nil {
 												return types.Int64Value(int64(*readings.Recv))
@@ -290,7 +299,12 @@ func ResponseWirelessControllerGetOrganizationWirelessControllerDevicesInterface
 							}
 							return nil
 						}(),
-						Serial: types.StringValue(items.Serial),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

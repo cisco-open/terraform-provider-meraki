@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -178,6 +177,17 @@ func (d *OrganizationsSamlIDpsDataSource) Read(ctx context.Context, req datasour
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetOrganizationSamlIDp",
+				err.Error(),
+			)
+			return
+		}
+
 		organizationsSamlIDps = ResponseOrganizationsGetOrganizationSamlIDpItemToBody(organizationsSamlIDps, response2)
 		diags = resp.State.Set(ctx, &organizationsSamlIDps)
 		resp.Diagnostics.Append(diags...)
@@ -215,10 +225,30 @@ func ResponseOrganizationsGetOrganizationSamlIDpsItemsToBody(state Organizations
 	var items []ResponseItemOrganizationsGetOrganizationSamlIdps
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationSamlIdps{
-			ConsumerURL:             types.StringValue(item.ConsumerURL),
-			IDpID:                   types.StringValue(item.IDpID),
-			SloLogoutURL:            types.StringValue(item.SloLogoutURL),
-			X509CertSha1Fingerprint: types.StringValue(item.X509CertSha1Fingerprint),
+			ConsumerURL: func() types.String {
+				if item.ConsumerURL != "" {
+					return types.StringValue(item.ConsumerURL)
+				}
+				return types.String{}
+			}(),
+			IDpID: func() types.String {
+				if item.IDpID != "" {
+					return types.StringValue(item.IDpID)
+				}
+				return types.String{}
+			}(),
+			SloLogoutURL: func() types.String {
+				if item.SloLogoutURL != "" {
+					return types.StringValue(item.SloLogoutURL)
+				}
+				return types.String{}
+			}(),
+			X509CertSha1Fingerprint: func() types.String {
+				if item.X509CertSha1Fingerprint != "" {
+					return types.StringValue(item.X509CertSha1Fingerprint)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -228,10 +258,30 @@ func ResponseOrganizationsGetOrganizationSamlIDpsItemsToBody(state Organizations
 
 func ResponseOrganizationsGetOrganizationSamlIDpItemToBody(state OrganizationsSamlIDps, response *merakigosdk.ResponseOrganizationsGetOrganizationSamlIDp) OrganizationsSamlIDps {
 	itemState := ResponseOrganizationsGetOrganizationSamlIdp{
-		ConsumerURL:             types.StringValue(response.ConsumerURL),
-		IDpID:                   types.StringValue(response.IDpID),
-		SloLogoutURL:            types.StringValue(response.SloLogoutURL),
-		X509CertSha1Fingerprint: types.StringValue(response.X509CertSha1Fingerprint),
+		ConsumerURL: func() types.String {
+			if response.ConsumerURL != "" {
+				return types.StringValue(response.ConsumerURL)
+			}
+			return types.String{}
+		}(),
+		IDpID: func() types.String {
+			if response.IDpID != "" {
+				return types.StringValue(response.IDpID)
+			}
+			return types.String{}
+		}(),
+		SloLogoutURL: func() types.String {
+			if response.SloLogoutURL != "" {
+				return types.StringValue(response.SloLogoutURL)
+			}
+			return types.String{}
+		}(),
+		X509CertSha1Fingerprint: func() types.String {
+			if response.X509CertSha1Fingerprint != "" {
+				return types.StringValue(response.X509CertSha1Fingerprint)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

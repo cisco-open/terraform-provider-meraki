@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -69,7 +70,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 		Attributes: map[string]schema.Attribute{
 			"audio_recording_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Whether or not to record audio. Can be either true or false. Defaults to false.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -77,7 +77,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 			},
 			"cloud_archive_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Create redundant video backup using Cloud Archive. Can be either true or false. Defaults to false.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -88,7 +87,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 			},
 			"max_retention_days": schema.Int64Attribute{
 				MarkdownDescription: `The maximum number of days for which the data will be stored, or 'null' to keep data until storage space runs out. If the former, it can be in the range of one to ninety days.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -96,7 +94,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 			},
 			"motion_based_retention_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Deletes footage older than 3 days in which no motion was detected. Can be either true or false. Defaults to false. This setting does not apply to MV2 cameras.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -104,7 +101,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 			},
 			"motion_detector_version": schema.Int64Attribute{
 				MarkdownDescription: `The version of the motion detector that will be used by the camera. Only applies to Gen 2 cameras. Defaults to v2.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -112,7 +108,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name of the new profile. Must be unique. This parameter is required.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -124,7 +119,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 			},
 			"quality_retention_profile_id": schema.StringAttribute{
 				MarkdownDescription: `qualityRetentionProfileId path parameter. Quality retention profile ID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -132,7 +126,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 			},
 			"restricted_bandwidth_mode_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Disable features that require additional bandwidth such as Motion Recap. Can be either true or false. Defaults to false. This setting does not apply to MV2 cameras.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -140,7 +133,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 			},
 			"schedule_id": schema.StringAttribute{
 				MarkdownDescription: `Schedule for which this camera will record video, or 'null' to always record.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -148,7 +140,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 			},
 			"smart_retention": schema.SingleNestedAttribute{
 				MarkdownDescription: `Smart Retention records footage in two qualities and intelligently retains higher quality when motion, people or vehicles are detected.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -157,7 +148,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Boolean indicating if Smart Retention is enabled(true) or disabled(false).`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -167,7 +157,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 			},
 			"video_settings": schema.SingleNestedAttribute{
 				MarkdownDescription: `Video quality and resolution settings for all the camera models.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -176,7 +165,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 
 					"m_v12_m_v22_m_v72": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV12/MV22/MV72 camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -186,7 +174,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -202,7 +189,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1280x720' or '1920x1080'.
                                               Allowed values: [1280x720,1920x1080]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -218,7 +204,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v12_we": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV12WE camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -228,7 +213,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -244,7 +228,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1280x720' or '1920x1080'.
                                               Allowed values: [1280x720,1920x1080]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -260,7 +243,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v13": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV13 camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -270,7 +252,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -286,7 +267,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1920x1080', '2688x1512' or '3840x2160'.
                                               Allowed values: [1920x1080,2688x1512,3840x2160]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -303,7 +283,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v13_m": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV13M camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -313,7 +292,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -329,7 +307,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1920x1080', '2688x1512' or '3840x2160'.
                                               Allowed values: [1920x1080,2688x1512,3840x2160]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -346,7 +323,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v21_m_v71": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV21/MV71 camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -356,7 +332,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -372,7 +347,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1280x720'.
                                               Allowed values: [1280x720]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -387,7 +361,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v22_xmv72_x": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV22X/MV72X camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -397,7 +370,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -413,7 +385,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1280x720', '1920x1080' or '2688x1512'.
                                               Allowed values: [1280x720,1920x1080,2688x1512]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -430,7 +401,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v23": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV23 camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -440,7 +410,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -456,7 +425,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1920x1080', '2688x1512' or '3840x2160'.
                                               Allowed values: [1920x1080,2688x1512,3840x2160]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -473,7 +441,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v23_m": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV23M camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -483,7 +450,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -499,7 +465,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1920x1080', '2688x1512' or '3840x2160'.
                                               Allowed values: [1920x1080,2688x1512,3840x2160]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -516,7 +481,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v23_x": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV23X camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -526,7 +490,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -542,7 +505,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1920x1080', '2688x1512' or '3840x2160'.
                                               Allowed values: [1920x1080,2688x1512,3840x2160]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -559,7 +521,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v32": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV32 camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -569,7 +530,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -585,7 +545,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1080x1080' or '2112x2112'.
                                               Allowed values: [1080x1080,2112x2112]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -601,7 +560,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v33": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV33 camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -611,7 +569,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -627,7 +584,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1080x1080', '2112x2112' or '2880x2880'.
                                               Allowed values: [1080x1080,2112x2112,2880x2880]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -644,7 +600,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v33_m": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV33M camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -654,7 +609,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -670,7 +624,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1080x1080', '2112x2112' or '2880x2880'.
                                               Allowed values: [1080x1080,2112x2112,2880x2880]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -687,7 +640,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v52": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV52 camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -697,7 +649,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -713,7 +664,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1280x720', '1920x1080', '2688x1512' or '3840x2160'.
                                               Allowed values: [1280x720,1920x1080,2688x1512,3840x2160]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -731,7 +681,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v53_x": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV53X camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -741,7 +690,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -757,7 +705,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1920x1080', '2688x1512' or '3840x2160'.
                                               Allowed values: [1920x1080,2688x1512,3840x2160]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -774,7 +721,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v63": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV63 camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -784,7 +730,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -800,7 +745,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1920x1080', '2688x1512' or '3840x2160'.
                                               Allowed values: [1920x1080,2688x1512,3840x2160]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -817,7 +761,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v63_m": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV63M camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -827,7 +770,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -843,7 +785,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1920x1080', '2688x1512' or '3840x2160'.
                                               Allowed values: [1920x1080,2688x1512,3840x2160]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -860,7 +801,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v63_x": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV63X camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -870,7 +810,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -886,7 +825,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1920x1080', '2688x1512' or '3840x2160'.
                                               Allowed values: [1920x1080,2688x1512,3840x2160]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -903,7 +841,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v73": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV73 camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -913,7 +850,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -929,7 +865,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1920x1080', '2688x1512' or '3840x2160'.
                                               Allowed values: [1920x1080,2688x1512,3840x2160]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -946,7 +881,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v73_m": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV73M camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -956,7 +890,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -972,7 +905,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1920x1080', '2688x1512' or '3840x2160'.
                                               Allowed values: [1920x1080,2688x1512,3840x2160]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -989,7 +921,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v73_x": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV73X camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -999,7 +930,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -1015,7 +945,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1920x1080', '2688x1512' or '3840x2160'.
                                               Allowed values: [1920x1080,2688x1512,3840x2160]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -1032,7 +961,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v84_x": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV84X camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -1042,7 +970,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard' or 'Enhanced'.
                                               Allowed values: [Enhanced,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -1057,7 +984,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1440x1080' or '2560x1920'.
                                               Allowed values: [1440x1080,2560x1920]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -1073,7 +999,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v93": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV93 camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -1083,7 +1008,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -1099,7 +1023,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1080x1080', '2112x2112' or '2880x2880'.
                                               Allowed values: [1080x1080,2112x2112,2880x2880]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -1116,7 +1039,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v93_m": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV93M camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -1126,7 +1048,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -1142,7 +1063,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1080x1080', '2112x2112' or '2880x2880'.
                                               Allowed values: [1080x1080,2112x2112,2880x2880]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -1159,7 +1079,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 					},
 					"m_v93_x": schema.SingleNestedAttribute{
 						MarkdownDescription: `Quality and resolution for MV93X camera models.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -1169,7 +1088,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"quality": schema.StringAttribute{
 								MarkdownDescription: `Quality of the camera. Can be one of 'Standard', 'Enhanced' or 'High'.
                                               Allowed values: [Enhanced,High,Standard]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -1185,7 +1103,6 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Schema(_ context.Contex
 							"resolution": schema.StringAttribute{
 								MarkdownDescription: `Resolution of the camera. Can be one of '1080x1080', '2112x2112' or '2880x2880'.
                                               Allowed values: [1080x1080,2112x2112,2880x2880]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -1277,7 +1194,7 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Create(ctx context.Cont
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkCameraQualityRetentionProfile",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -1349,21 +1266,11 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Create(ctx context.Cont
 func (r *NetworksCameraQualityRetentionProfilesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksCameraQualityRetentionProfilesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -1394,9 +1301,7 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Read(ctx context.Contex
 	}
 	//entro aqui 2
 	data = ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksCameraQualityRetentionProfilesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -1404,35 +1309,31 @@ func (r *NetworksCameraQualityRetentionProfilesResource) ImportState(ctx context
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,qualityRetentionProfileId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("qualityRetention_profile_id"), idParts[1])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("quality_retention_profile_id"), idParts[1])...)
 }
 
 func (r *NetworksCameraQualityRetentionProfilesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksCameraQualityRetentionProfilesRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksCameraQualityRetentionProfilesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvQualityRetentionProfileID := data.QualityRetentionProfileID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvQualityRetentionProfileID := plan.QualityRetentionProfileID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Camera.UpdateNetworkCameraQualityRetentionProfile(vvNetworkID, vvQualityRetentionProfileID, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkCameraQualityRetentionProfile",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -1442,9 +1343,7 @@ func (r *NetworksCameraQualityRetentionProfilesResource) Update(ctx context.Cont
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksCameraQualityRetentionProfilesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -1503,26 +1402,26 @@ type ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsRs struct
 	MV12WE       *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV12WERs       `tfsdk:"m_v12_we"`
 	MV21MV71     *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV21MV71Rs     `tfsdk:"m_v21_m_v71"`
 	MV32         *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV32Rs         `tfsdk:"m_v32"`
-	MV13         *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV13Rs       `tfsdk:"m_v13"`
-	MV13M        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV13MRs      `tfsdk:"m_v13_m"`
-	MV22XMV72X   *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV22XMV72XRs `tfsdk:"m_v22_xmv72_x"`
-	MV23         *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV23Rs       `tfsdk:"m_v23"`
-	MV23M        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV23MRs      `tfsdk:"m_v23_m"`
-	MV23X        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV23XRs      `tfsdk:"m_v23_x"`
-	MV33         *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV33Rs       `tfsdk:"m_v33"`
-	MV33M        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV33MRs      `tfsdk:"m_v33_m"`
-	MV52         *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV52Rs       `tfsdk:"m_v52"`
-	MV63         *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV63Rs       `tfsdk:"m_v63"`
-	MV63M        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV63MRs      `tfsdk:"m_v63_m"`
-	MV63X        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV63XRs      `tfsdk:"m_v63_x"`
-	MV73         *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV73Rs       `tfsdk:"m_v73"`
-	MV73M        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV73MRs      `tfsdk:"m_v73_m"`
-	MV73X        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV73XRs      `tfsdk:"m_v73_x"`
-	MV93         *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV93Rs       `tfsdk:"m_v93"`
-	MV93M        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV93MRs      `tfsdk:"m_v93_m"`
-	MV93X        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV93XRs      `tfsdk:"m_v93_x"`
-	MV84X        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV84XRs      `tfsdk:"m_v84_x"`
-	MV53X        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV53XRs      `tfsdk:"m_v53_x"`
+	MV13         *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV13Rs       `tfsdk:"mv13"`
+	MV13M        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV13MRs      `tfsdk:"mv13_m"`
+	MV22XMV72X   *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV22XMV72XRs `tfsdk:"mv22_x/mv72_x"`
+	MV23         *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV23Rs       `tfsdk:"mv23"`
+	MV23M        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV23MRs      `tfsdk:"mv23_m"`
+	MV23X        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV23XRs      `tfsdk:"mv23_x"`
+	MV33         *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV33Rs       `tfsdk:"mv33"`
+	MV33M        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV33MRs      `tfsdk:"mv33_m"`
+	MV52         *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV52Rs       `tfsdk:"mv52"`
+	MV53X        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV53XRs      `tfsdk:"mv53_x"`
+	MV63         *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV63Rs       `tfsdk:"mv63"`
+	MV63M        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV63MRs      `tfsdk:"mv63_m"`
+	MV63X        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV63XRs      `tfsdk:"mv63_x"`
+	MV73         *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV73Rs       `tfsdk:"mv73"`
+	MV73M        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV73MRs      `tfsdk:"mv73_m"`
+	MV73X        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV73XRs      `tfsdk:"mv73_x"`
+	MV84X        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV84XRs      `tfsdk:"mv84_x"`
+	MV93         *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV93Rs       `tfsdk:"mv93"`
+	MV93M        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV93MRs      `tfsdk:"mv93_m"`
+	MV93X        *RequestCameraUpdateNetworkCameraQualityRetentionProfileVideoSettingsMV93XRs      `tfsdk:"mv93_x"`
 }
 
 type ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV12MV22MV72Rs struct {
@@ -2408,7 +2307,12 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBodyRs(state Net
 			}
 			return types.Bool{}
 		}(),
-		ID: types.StringValue(response.ID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		MaxRetentionDays: func() types.Int64 {
 			if response.MaxRetentionDays != nil {
 				return types.Int64Value(int64(*response.MaxRetentionDays))
@@ -2427,15 +2331,30 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBodyRs(state Net
 			}
 			return types.Int64{}
 		}(),
-		Name:      types.StringValue(response.Name),
-		NetworkID: types.StringValue(response.NetworkID),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
 		RestrictedBandwidthModeEnabled: func() types.Bool {
 			if response.RestrictedBandwidthModeEnabled != nil {
 				return types.BoolValue(*response.RestrictedBandwidthModeEnabled)
 			}
 			return types.Bool{}
 		}(),
-		ScheduleID: types.StringValue(response.ScheduleID),
+		ScheduleID: func() types.String {
+			if response.ScheduleID != "" {
+				return types.StringValue(response.ScheduleID)
+			}
+			return types.String{}
+		}(),
 		SmartRetention: func() *ResponseCameraGetNetworkCameraQualityRetentionProfileSmartRetentionRs {
 			if response.SmartRetention != nil {
 				return &ResponseCameraGetNetworkCameraQualityRetentionProfileSmartRetentionRs{
@@ -2455,8 +2374,18 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBodyRs(state Net
 					MV12MV22MV72: func() *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV12MV22MV72Rs {
 						if response.VideoSettings.MV12MV22MV72 != nil {
 							return &ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV12MV22MV72Rs{
-								Quality:    types.StringValue(response.VideoSettings.MV12MV22MV72.Quality),
-								Resolution: types.StringValue(response.VideoSettings.MV12MV22MV72.Resolution),
+								Quality: func() types.String {
+									if response.VideoSettings.MV12MV22MV72.Quality != "" {
+										return types.StringValue(response.VideoSettings.MV12MV22MV72.Quality)
+									}
+									return types.String{}
+								}(),
+								Resolution: func() types.String {
+									if response.VideoSettings.MV12MV22MV72.Resolution != "" {
+										return types.StringValue(response.VideoSettings.MV12MV22MV72.Resolution)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -2464,8 +2393,18 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBodyRs(state Net
 					MV12WE: func() *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV12WERs {
 						if response.VideoSettings.MV12WE != nil {
 							return &ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV12WERs{
-								Quality:    types.StringValue(response.VideoSettings.MV12WE.Quality),
-								Resolution: types.StringValue(response.VideoSettings.MV12WE.Resolution),
+								Quality: func() types.String {
+									if response.VideoSettings.MV12WE.Quality != "" {
+										return types.StringValue(response.VideoSettings.MV12WE.Quality)
+									}
+									return types.String{}
+								}(),
+								Resolution: func() types.String {
+									if response.VideoSettings.MV12WE.Resolution != "" {
+										return types.StringValue(response.VideoSettings.MV12WE.Resolution)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -2473,8 +2412,18 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBodyRs(state Net
 					MV21MV71: func() *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV21MV71Rs {
 						if response.VideoSettings.MV21MV71 != nil {
 							return &ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV21MV71Rs{
-								Quality:    types.StringValue(response.VideoSettings.MV21MV71.Quality),
-								Resolution: types.StringValue(response.VideoSettings.MV21MV71.Resolution),
+								Quality: func() types.String {
+									if response.VideoSettings.MV21MV71.Quality != "" {
+										return types.StringValue(response.VideoSettings.MV21MV71.Quality)
+									}
+									return types.String{}
+								}(),
+								Resolution: func() types.String {
+									if response.VideoSettings.MV21MV71.Resolution != "" {
+										return types.StringValue(response.VideoSettings.MV21MV71.Resolution)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -2482,8 +2431,18 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBodyRs(state Net
 					MV32: func() *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV32Rs {
 						if response.VideoSettings.MV32 != nil {
 							return &ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV32Rs{
-								Quality:    types.StringValue(response.VideoSettings.MV32.Quality),
-								Resolution: types.StringValue(response.VideoSettings.MV32.Resolution),
+								Quality: func() types.String {
+									if response.VideoSettings.MV32.Quality != "" {
+										return types.StringValue(response.VideoSettings.MV32.Quality)
+									}
+									return types.String{}
+								}(),
+								Resolution: func() types.String {
+									if response.VideoSettings.MV32.Resolution != "" {
+										return types.StringValue(response.VideoSettings.MV32.Resolution)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil

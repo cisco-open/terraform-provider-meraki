@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -173,14 +172,54 @@ func ResponseSmGetNetworkSmDeviceCertsItemsToBody(state NetworksSmDevicesCerts, 
 	var items []ResponseItemSmGetNetworkSmDeviceCerts
 	for _, item := range *response {
 		itemState := ResponseItemSmGetNetworkSmDeviceCerts{
-			CertPem:        types.StringValue(item.CertPem),
-			DeviceID:       types.StringValue(item.DeviceID),
-			ID:             types.StringValue(item.ID),
-			Issuer:         types.StringValue(item.Issuer),
-			Name:           types.StringValue(item.Name),
-			NotValidAfter:  types.StringValue(item.NotValidAfter),
-			NotValidBefore: types.StringValue(item.NotValidBefore),
-			Subject:        types.StringValue(item.Subject),
+			CertPem: func() types.String {
+				if item.CertPem != "" {
+					return types.StringValue(item.CertPem)
+				}
+				return types.String{}
+			}(),
+			DeviceID: func() types.String {
+				if item.DeviceID != "" {
+					return types.StringValue(item.DeviceID)
+				}
+				return types.String{}
+			}(),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			Issuer: func() types.String {
+				if item.Issuer != "" {
+					return types.StringValue(item.Issuer)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			NotValidAfter: func() types.String {
+				if item.NotValidAfter != "" {
+					return types.StringValue(item.NotValidAfter)
+				}
+				return types.String{}
+			}(),
+			NotValidBefore: func() types.String {
+				if item.NotValidBefore != "" {
+					return types.StringValue(item.NotValidBefore)
+				}
+				return types.String{}
+			}(),
+			Subject: func() types.String {
+				if item.Subject != "" {
+					return types.StringValue(item.Subject)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

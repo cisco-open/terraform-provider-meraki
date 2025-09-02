@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -26,8 +27,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
@@ -63,7 +64,6 @@ func (r *NetworksSwitchMtuResource) Schema(_ context.Context, _ resource.SchemaR
 		Attributes: map[string]schema.Attribute{
 			"default_mtu_size": schema.Int64Attribute{
 				MarkdownDescription: `MTU size for the entire network. Default value is 9578.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -73,41 +73,37 @@ func (r *NetworksSwitchMtuResource) Schema(_ context.Context, _ resource.SchemaR
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"overrides": schema.SetNestedAttribute{
+			"overrides": schema.ListNestedAttribute{
 				MarkdownDescription: `Override MTU size for individual switches or switch templates.
       An empty array will clear overrides.`,
-				Computed: true,
 				Optional: true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"mtu_size": schema.Int64Attribute{
 							MarkdownDescription: `MTU size for the switches or switch templates.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
 							},
 						},
-						"switch_profiles": schema.SetAttribute{
+						"switch_profiles": schema.ListAttribute{
 							MarkdownDescription: `List of switch template IDs. Applicable only for template network.`,
-							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
 
 							ElementType: types.StringType,
 						},
-						"switches": schema.SetAttribute{
+						"switches": schema.ListAttribute{
 							MarkdownDescription: `List of switch serials. Applicable only for switch network.`,
-							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.Set{
-								setplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.List{
+								listplanmodifier.UseStateForUnknown(),
 							},
 
 							ElementType: types.StringType,
@@ -141,27 +137,6 @@ func (r *NetworksSwitchMtuResource) Create(ctx context.Context, req resource.Cre
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchMtu(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSwitchMtu  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSwitchMtu only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchMtu(vvNetworkID, dataRequest)
@@ -170,7 +145,7 @@ func (r *NetworksSwitchMtuResource) Create(ctx context.Context, req resource.Cre
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchMtu",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -181,49 +156,19 @@ func (r *NetworksSwitchMtuResource) Create(ctx context.Context, req resource.Cre
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchMtu(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkSwitchMtu",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkSwitchMtu",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseSwitchGetNetworkSwitchMtuItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksSwitchMtuResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksSwitchMtuRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -253,33 +198,28 @@ func (r *NetworksSwitchMtuResource) Read(ctx context.Context, req resource.ReadR
 	}
 	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchMtuItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksSwitchMtuResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksSwitchMtuResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksSwitchMtuRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksSwitchMtuRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchMtu(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchMtu",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -289,9 +229,7 @@ func (r *NetworksSwitchMtuResource) Update(ctx context.Context, req resource.Upd
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksSwitchMtuResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -309,8 +247,8 @@ type NetworksSwitchMtuRs struct {
 
 type ResponseSwitchGetNetworkSwitchMtuOverridesRs struct {
 	MtuSize        types.Int64 `tfsdk:"mtu_size"`
-	SwitchProfiles types.Set   `tfsdk:"switch_profiles"`
-	Switches       types.Set   `tfsdk:"switches"`
+	SwitchProfiles types.List  `tfsdk:"switch_profiles"`
+	Switches       types.List  `tfsdk:"switches"`
 }
 
 // FromBody
@@ -377,8 +315,8 @@ func ResponseSwitchGetNetworkSwitchMtuItemToBodyRs(state NetworksSwitchMtuRs, re
 							}
 							return types.Int64{}
 						}(),
-						SwitchProfiles: StringSliceToSet(overrides.SwitchProfiles),
-						Switches:       StringSliceToSet(overrides.Switches),
+						SwitchProfiles: StringSliceToList(overrides.SwitchProfiles),
+						Switches:       StringSliceToList(overrides.Switches),
 					}
 				}
 				return &result

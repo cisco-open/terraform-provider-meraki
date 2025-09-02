@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -246,7 +247,7 @@ func (r *DevicesLiveToolsArpTableResource) Create(ctx context.Context, req resou
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateDeviceLiveToolsArpTable",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -453,15 +454,35 @@ func (r *DevicesLiveToolsArpTableRs) toSdkApiRequestCreate(ctx context.Context) 
 // From gosdk to TF Structs Schema
 func ResponseDevicesGetDeviceLiveToolsArpTableItemToBodyRs(state DevicesLiveToolsArpTableRs, response *merakigosdk.ResponseDevicesGetDeviceLiveToolsArpTable, is_read bool) DevicesLiveToolsArpTableRs {
 	itemState := DevicesLiveToolsArpTableRs{
-		ArpTableID: types.StringValue(response.ArpTableID),
+		ArpTableID: func() types.String {
+			if response.ArpTableID != "" {
+				return types.StringValue(response.ArpTableID)
+			}
+			return types.String{}
+		}(),
 		Entries: func() *[]ResponseDevicesGetDeviceLiveToolsArpTableEntriesRs {
 			if response.Entries != nil {
 				result := make([]ResponseDevicesGetDeviceLiveToolsArpTableEntriesRs, len(*response.Entries))
 				for i, entries := range *response.Entries {
 					result[i] = ResponseDevicesGetDeviceLiveToolsArpTableEntriesRs{
-						IP:            types.StringValue(entries.IP),
-						LastUpdatedAt: types.StringValue(entries.LastUpdatedAt),
-						Mac:           types.StringValue(entries.Mac),
+						IP: func() types.String {
+							if entries.IP != "" {
+								return types.StringValue(entries.IP)
+							}
+							return types.String{}
+						}(),
+						LastUpdatedAt: func() types.String {
+							if entries.LastUpdatedAt != "" {
+								return types.StringValue(entries.LastUpdatedAt)
+							}
+							return types.String{}
+						}(),
+						Mac: func() types.String {
+							if entries.Mac != "" {
+								return types.StringValue(entries.Mac)
+							}
+							return types.String{}
+						}(),
 						VLANID: func() types.Int64 {
 							if entries.VLANID != nil {
 								return types.Int64Value(int64(*entries.VLANID))
@@ -474,17 +495,37 @@ func ResponseDevicesGetDeviceLiveToolsArpTableItemToBodyRs(state DevicesLiveTool
 			}
 			return nil
 		}(),
-		Error: types.StringValue(response.Error),
+		Error: func() types.String {
+			if response.Error != "" {
+				return types.StringValue(response.Error)
+			}
+			return types.String{}
+		}(),
 		Request: func() *ResponseDevicesGetDeviceLiveToolsArpTableRequestRs {
 			if response.Request != nil {
 				return &ResponseDevicesGetDeviceLiveToolsArpTableRequestRs{
-					Serial: types.StringValue(response.Request.Serial),
+					Serial: func() types.String {
+						if response.Request.Serial != "" {
+							return types.StringValue(response.Request.Serial)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Status: types.StringValue(response.Status),
-		URL:    types.StringValue(response.URL),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(DevicesLiveToolsArpTableRs)

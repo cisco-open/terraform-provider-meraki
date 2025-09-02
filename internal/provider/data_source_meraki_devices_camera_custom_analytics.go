@@ -153,7 +153,12 @@ type ResponseCameraGetDeviceCameraCustomAnalyticsParameters struct {
 // ToBody
 func ResponseCameraGetDeviceCameraCustomAnalyticsItemToBody(state DevicesCameraCustomAnalytics, response *merakigosdk.ResponseCameraGetDeviceCameraCustomAnalytics) DevicesCameraCustomAnalytics {
 	itemState := ResponseCameraGetDeviceCameraCustomAnalytics{
-		ArtifactID: types.StringValue(response.ArtifactID),
+		ArtifactID: func() types.String {
+			if response.ArtifactID != "" {
+				return types.StringValue(response.ArtifactID)
+			}
+			return types.String{}
+		}(),
 		Enabled: func() types.Bool {
 			if response.Enabled != nil {
 				return types.BoolValue(*response.Enabled)
@@ -165,7 +170,12 @@ func ResponseCameraGetDeviceCameraCustomAnalyticsItemToBody(state DevicesCameraC
 				result := make([]ResponseCameraGetDeviceCameraCustomAnalyticsParameters, len(*response.Parameters))
 				for i, parameters := range *response.Parameters {
 					result[i] = ResponseCameraGetDeviceCameraCustomAnalyticsParameters{
-						Name: types.StringValue(parameters.Name),
+						Name: func() types.String {
+							if parameters.Name != "" {
+								return types.StringValue(parameters.Name)
+							}
+							return types.String{}
+						}(),
 						Value: func() types.Float64 {
 							if parameters.Value != nil {
 								return types.Float64Value(float64(*parameters.Value))

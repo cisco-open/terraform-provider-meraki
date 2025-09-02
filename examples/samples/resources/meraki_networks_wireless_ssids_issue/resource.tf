@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "1.1.8-beta"
+      version = "1.2.0-beta"
       source  = "hashicorp.com/edu/meraki"
       # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
@@ -71,16 +71,16 @@ variable "vap_num" {
 
 provider "meraki" {
   meraki_debug    = true
-  meraki_base_url = "http://localhost:3002"
+  # meraki_base_url = "http://localhost:3002"
 }
 
 resource "meraki_networks_wireless_ssids" "SSID_name" {
-
-  network_id  = "1"
+  provider = meraki
+  network_id  = "L_828099381482775375"
   number      = 0
   name        = "SSID_NAME"
   enabled     = var.wifi_disable == true ? false : true
-  splash_page = "None"
+  splash_page = "Click-through splash page"
   auth_mode   = "8021x-radius"
   dot11w = {
     enabled  = var.wpa3_enable
@@ -90,8 +90,8 @@ resource "meraki_networks_wireless_ssids" "SSID_name" {
     enabled  = true
     adaptive = false
   }
-  encryption_mode     = "wpa-eap"
-  wpa_encryption_mode = var.wpa3_enable ? "WPA3 Transition Mode" : "WPA2 only"
+  encryption_mode     = "wpa"
+  wpa_encryption_mode = var.wpa3_enable ? "WPA1 and WPA2" : "WPA2 only"
   radius_servers = [
     for server in var.ise_servers : {
       host   = server.server_ip

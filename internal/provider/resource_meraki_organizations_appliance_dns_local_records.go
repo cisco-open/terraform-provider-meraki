@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -175,7 +176,7 @@ func (r *OrganizationsApplianceDNSLocalRecordsResource) Create(ctx context.Conte
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationApplianceDNSLocalRecord",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -389,17 +390,37 @@ func (r *OrganizationsApplianceDNSLocalRecordsRs) toSdkApiRequestCreate(ctx cont
 // From gosdk to TF Structs Schema
 func ResponseApplianceGetOrganizationApplianceDNSLocalRecordsItemToBodyRs(state OrganizationsApplianceDNSLocalRecordsRs, response *merakigosdk.ResponseItemApplianceGetOrganizationApplianceDNSLocalRecords, is_read bool) OrganizationsApplianceDNSLocalRecordsRs {
 	itemState := OrganizationsApplianceDNSLocalRecordsRs{
-		Address:  types.StringValue(response.Address),
-		Hostname: types.StringValue(response.Hostname),
+		Address: func() types.String {
+			if response.Address != "" {
+				return types.StringValue(response.Address)
+			}
+			return types.String{}
+		}(),
+		Hostname: func() types.String {
+			if response.Hostname != "" {
+				return types.StringValue(response.Hostname)
+			}
+			return types.String{}
+		}(),
 		Profile: func() *ResponseItemApplianceGetOrganizationApplianceDnsLocalRecordsProfileRs {
 			if response.Profile != nil {
 				return &ResponseItemApplianceGetOrganizationApplianceDnsLocalRecordsProfileRs{
-					ID: types.StringValue(response.Profile.ID),
+					ID: func() types.String {
+						if response.Profile.ID != "" {
+							return types.StringValue(response.Profile.ID)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		RecordID: types.StringValue(response.RecordID),
+		RecordID: func() types.String {
+			if response.RecordID != "" {
+				return types.StringValue(response.RecordID)
+			}
+			return types.String{}
+		}(),
 	}
 	state = itemState
 	return state

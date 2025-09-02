@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -255,8 +254,18 @@ func ResponseSwitchGetNetworkSwitchRoutingOspfItemToBody(state NetworksSwitchRou
 							}
 							return types.Int64{}
 						}(),
-						AreaName: types.StringValue(areas.AreaName),
-						AreaType: types.StringValue(areas.AreaType),
+						AreaName: func() types.String {
+							if areas.AreaName != "" {
+								return types.StringValue(areas.AreaName)
+							}
+							return types.String{}
+						}(),
+						AreaType: func() types.String {
+							if areas.AreaType != "" {
+								return types.StringValue(areas.AreaType)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -296,7 +305,12 @@ func ResponseSwitchGetNetworkSwitchRoutingOspfItemToBody(state NetworksSwitchRou
 						}
 						return types.Int64{}
 					}(),
-					Passphrase: types.StringValue(response.Md5AuthenticationKey.Passphrase),
+					Passphrase: func() types.String {
+						if response.Md5AuthenticationKey.Passphrase != "" {
+							return types.StringValue(response.Md5AuthenticationKey.Passphrase)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -315,8 +329,18 @@ func ResponseSwitchGetNetworkSwitchRoutingOspfItemToBody(state NetworksSwitchRou
 										}
 										return types.Int64{}
 									}(),
-									AreaName: types.StringValue(areas.AreaName),
-									AreaType: types.StringValue(areas.AreaType),
+									AreaName: func() types.String {
+										if areas.AreaName != "" {
+											return types.StringValue(areas.AreaName)
+										}
+										return types.String{}
+									}(),
+									AreaType: func() types.String {
+										if areas.AreaType != "" {
+											return types.StringValue(areas.AreaType)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return &result

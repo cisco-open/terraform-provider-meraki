@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	"log"
 
@@ -30,9 +31,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -68,27 +69,24 @@ func (r *NetworksSwitchRoutingOspfResource) Metadata(_ context.Context, req reso
 func (r *NetworksSwitchRoutingOspfResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"areas": schema.SetNestedAttribute{
+			"areas": schema.ListNestedAttribute{
 				MarkdownDescription: `OSPF areas`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
-						"area_id": schema.Int64Attribute{
+						"area_id": schema.StringAttribute{
 							MarkdownDescription: `OSPF area ID`,
-							Computed:            true,
 							Optional:            true,
-							PlanModifiers: []planmodifier.Int64{
-								int64planmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.String{
+								stringplanmodifier.UseStateForUnknown(),
 							},
 						},
 						"area_name": schema.StringAttribute{
 							MarkdownDescription: `Name of the OSPF area`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -97,7 +95,6 @@ func (r *NetworksSwitchRoutingOspfResource) Schema(_ context.Context, _ resource
 						"area_type": schema.StringAttribute{
 							MarkdownDescription: `Area types in OSPF. Must be one of: ["normal", "stub", "nssa"]
                                         Allowed values: [normal,nssa,stub]`,
-							Computed: true,
 							Optional: true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -115,7 +112,6 @@ func (r *NetworksSwitchRoutingOspfResource) Schema(_ context.Context, _ resource
 			},
 			"dead_timer_in_seconds": schema.Int64Attribute{
 				MarkdownDescription: `Time interval to determine when the peer will be declared inactive/dead. Value must be between 1 and 65535`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -123,7 +119,6 @@ func (r *NetworksSwitchRoutingOspfResource) Schema(_ context.Context, _ resource
 			},
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: `Boolean value to enable or disable OSPF routing. OSPF routing is disabled by default.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -131,7 +126,6 @@ func (r *NetworksSwitchRoutingOspfResource) Schema(_ context.Context, _ resource
 			},
 			"hello_timer_in_seconds": schema.Int64Attribute{
 				MarkdownDescription: `Time interval in seconds at which hello packet will be sent to OSPF neighbors to maintain connectivity. Value must be between 1 and 255. Default is 10 seconds.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -139,7 +133,6 @@ func (r *NetworksSwitchRoutingOspfResource) Schema(_ context.Context, _ resource
 			},
 			"md5_authentication_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Boolean value to enable or disable MD5 authentication. MD5 authentication is disabled by default.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -147,7 +140,6 @@ func (r *NetworksSwitchRoutingOspfResource) Schema(_ context.Context, _ resource
 			},
 			"md5_authentication_key": schema.SingleNestedAttribute{
 				MarkdownDescription: `MD5 authentication credentials. This param is only relevant if md5AuthenticationEnabled is true`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -156,7 +148,6 @@ func (r *NetworksSwitchRoutingOspfResource) Schema(_ context.Context, _ resource
 
 					"id": schema.Int64Attribute{
 						MarkdownDescription: `MD5 authentication key index. Key index must be between 1 to 255`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -164,7 +155,6 @@ func (r *NetworksSwitchRoutingOspfResource) Schema(_ context.Context, _ resource
 					},
 					"passphrase": schema.StringAttribute{
 						MarkdownDescription: `MD5 authentication passphrase`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -178,34 +168,30 @@ func (r *NetworksSwitchRoutingOspfResource) Schema(_ context.Context, _ resource
 			},
 			"v3": schema.SingleNestedAttribute{
 				MarkdownDescription: `OSPF v3 configuration`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
 				Attributes: map[string]schema.Attribute{
 
-					"areas": schema.SetNestedAttribute{
+					"areas": schema.ListNestedAttribute{
 						MarkdownDescription: `OSPF v3 areas`,
-						Computed:            true,
 						Optional:            true,
-						PlanModifiers: []planmodifier.Set{
-							setplanmodifier.UseStateForUnknown(),
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.UseStateForUnknown(),
 						},
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
-								"area_id": schema.Int64Attribute{
+								"area_id": schema.StringAttribute{
 									MarkdownDescription: `OSPF area ID`,
-									Computed:            true,
 									Optional:            true,
-									PlanModifiers: []planmodifier.Int64{
-										int64planmodifier.UseStateForUnknown(),
+									PlanModifiers: []planmodifier.String{
+										stringplanmodifier.UseStateForUnknown(),
 									},
 								},
 								"area_name": schema.StringAttribute{
 									MarkdownDescription: `Name of the OSPF area`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -214,7 +200,6 @@ func (r *NetworksSwitchRoutingOspfResource) Schema(_ context.Context, _ resource
 								"area_type": schema.StringAttribute{
 									MarkdownDescription: `Area types in OSPF. Must be one of: ["normal", "stub", "nssa"]
                                               Allowed values: [normal,nssa,stub]`,
-									Computed: true,
 									Optional: true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -232,7 +217,6 @@ func (r *NetworksSwitchRoutingOspfResource) Schema(_ context.Context, _ resource
 					},
 					"dead_timer_in_seconds": schema.Int64Attribute{
 						MarkdownDescription: `Time interval to determine when the peer will be declared inactive/dead. Value must be between 1 and 65535`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -240,7 +224,6 @@ func (r *NetworksSwitchRoutingOspfResource) Schema(_ context.Context, _ resource
 					},
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Boolean value to enable or disable V3 OSPF routing. OSPF V3 routing is disabled by default.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -248,7 +231,6 @@ func (r *NetworksSwitchRoutingOspfResource) Schema(_ context.Context, _ resource
 					},
 					"hello_timer_in_seconds": schema.Int64Attribute{
 						MarkdownDescription: `Time interval in seconds at which hello packet will be sent to OSPF neighbors to maintain connectivity. Value must be between 1 and 255. Default is 10 seconds.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Int64{
 							int64planmodifier.UseStateForUnknown(),
@@ -282,27 +264,6 @@ func (r *NetworksSwitchRoutingOspfResource) Create(ctx context.Context, req reso
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Switch.GetNetworkSwitchRoutingOspf(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSwitchRoutingOspf  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSwitchRoutingOspf only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchRoutingOspf(vvNetworkID, dataRequest)
@@ -311,7 +272,7 @@ func (r *NetworksSwitchRoutingOspfResource) Create(ctx context.Context, req reso
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchRoutingOspf",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -322,49 +283,19 @@ func (r *NetworksSwitchRoutingOspfResource) Create(ctx context.Context, req reso
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Switch.GetNetworkSwitchRoutingOspf(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkSwitchRoutingOspf",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkSwitchRoutingOspf",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseSwitchGetNetworkSwitchRoutingOspfItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksSwitchRoutingOspfResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksSwitchRoutingOspfRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -394,33 +325,28 @@ func (r *NetworksSwitchRoutingOspfResource) Read(ctx context.Context, req resour
 	}
 	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchRoutingOspfItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksSwitchRoutingOspfResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksSwitchRoutingOspfResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksSwitchRoutingOspfRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksSwitchRoutingOspfRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateNetworkSwitchRoutingOspf(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSwitchRoutingOspf",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -430,9 +356,7 @@ func (r *NetworksSwitchRoutingOspfResource) Update(ctx context.Context, req reso
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksSwitchRoutingOspfResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -454,7 +378,7 @@ type NetworksSwitchRoutingOspfRs struct {
 }
 
 type ResponseSwitchGetNetworkSwitchRoutingOspfAreasRs struct {
-	AreaID   types.Int64  `tfsdk:"area_id"`
+	Areaid   types.String `tfsdk:"area_id"`
 	AreaName types.String `tfsdk:"area_name"`
 	AreaType types.String `tfsdk:"area_type"`
 }
@@ -472,7 +396,7 @@ type ResponseSwitchGetNetworkSwitchRoutingOspfV3Rs struct {
 }
 
 type ResponseSwitchGetNetworkSwitchRoutingOspfV3AreasRs struct {
-	AreaID   types.Int64  `tfsdk:"area_id"`
+	Areaid   types.String `tfsdk:"area_id"`
 	AreaName types.String `tfsdk:"area_name"`
 	AreaType types.String `tfsdk:"area_type"`
 }
@@ -483,11 +407,11 @@ func (r *NetworksSwitchRoutingOspfRs) toSdkApiRequestUpdate(ctx context.Context)
 
 	if r.Areas != nil {
 		for _, rItem1 := range *r.Areas {
-			areaID := rItem1.AreaID.ValueInt64()
+			areaID := rItem1.Areaid.ValueString()
 			areaName := rItem1.AreaName.ValueString()
 			areaType := rItem1.AreaType.ValueString()
 			requestSwitchUpdateNetworkSwitchRoutingOspfAreas = append(requestSwitchUpdateNetworkSwitchRoutingOspfAreas, merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspfAreas{
-				AreaID:   int64ToString(&areaID),
+				AreaID:   areaID,
 				AreaName: areaName,
 				AreaType: areaType,
 			})
@@ -543,11 +467,11 @@ func (r *NetworksSwitchRoutingOspfRs) toSdkApiRequestUpdate(ctx context.Context)
 
 		if r.V3.Areas != nil {
 			for _, rItem1 := range *r.V3.Areas {
-				areaID := rItem1.AreaID.ValueInt64()
+				areaID := rItem1.Areaid.ValueString()
 				areaName := rItem1.AreaName.ValueString()
 				areaType := rItem1.AreaType.ValueString()
 				requestSwitchUpdateNetworkSwitchRoutingOspfV3Areas = append(requestSwitchUpdateNetworkSwitchRoutingOspfV3Areas, merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspfV3Areas{
-					AreaID:   int64ToString(&areaID),
+					AreaID:   areaID,
 					AreaName: areaName,
 					AreaType: areaType,
 				})
@@ -574,7 +498,7 @@ func (r *NetworksSwitchRoutingOspfRs) toSdkApiRequestUpdate(ctx context.Context)
 		}()
 		requestSwitchUpdateNetworkSwitchRoutingOspfV3 = &merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspfV3{
 			Areas: func() *[]merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspfV3Areas {
-				if len(requestSwitchUpdateNetworkSwitchRoutingOspfV3Areas) > 0 || r.V3.Areas != nil {
+				if len(requestSwitchUpdateNetworkSwitchRoutingOspfV3Areas) > 0 {
 					return &requestSwitchUpdateNetworkSwitchRoutingOspfV3Areas
 				}
 				return nil
@@ -587,7 +511,7 @@ func (r *NetworksSwitchRoutingOspfRs) toSdkApiRequestUpdate(ctx context.Context)
 	}
 	out := merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspf{
 		Areas: func() *[]merakigosdk.RequestSwitchUpdateNetworkSwitchRoutingOspfAreas {
-			if len(requestSwitchUpdateNetworkSwitchRoutingOspfAreas) > 0 || r.Areas != nil {
+			if len(requestSwitchUpdateNetworkSwitchRoutingOspfAreas) > 0 {
 				return &requestSwitchUpdateNetworkSwitchRoutingOspfAreas
 			}
 			return nil
@@ -610,9 +534,24 @@ func ResponseSwitchGetNetworkSwitchRoutingOspfItemToBodyRs(state NetworksSwitchR
 				result := make([]ResponseSwitchGetNetworkSwitchRoutingOspfAreasRs, len(*response.Areas))
 				for i, areas := range *response.Areas {
 					result[i] = ResponseSwitchGetNetworkSwitchRoutingOspfAreasRs{
-						AreaID:   types.Int64Value(int64(*areas.AreaID)),
-						AreaName: types.StringValue(areas.AreaName),
-						AreaType: types.StringValue(areas.AreaType),
+						Areaid: func() types.String {
+							if strconv.Itoa(*areas.AreaID) != "" {
+								return types.StringValue(strconv.Itoa(*areas.AreaID))
+							}
+							return types.String{}
+						}(),
+						AreaName: func() types.String {
+							if areas.AreaName != "" {
+								return types.StringValue(areas.AreaName)
+							}
+							return types.String{}
+						}(),
+						AreaType: func() types.String {
+							if areas.AreaType != "" {
+								return types.StringValue(areas.AreaType)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -652,7 +591,12 @@ func ResponseSwitchGetNetworkSwitchRoutingOspfItemToBodyRs(state NetworksSwitchR
 						}
 						return types.Int64{}
 					}(),
-					Passphrase: types.StringValue(response.Md5AuthenticationKey.Passphrase),
+					Passphrase: func() types.String {
+						if response.Md5AuthenticationKey.Passphrase != "" {
+							return types.StringValue(response.Md5AuthenticationKey.Passphrase)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -665,9 +609,24 @@ func ResponseSwitchGetNetworkSwitchRoutingOspfItemToBodyRs(state NetworksSwitchR
 							result := make([]ResponseSwitchGetNetworkSwitchRoutingOspfV3AreasRs, len(*response.V3.Areas))
 							for i, areas := range *response.V3.Areas {
 								result[i] = ResponseSwitchGetNetworkSwitchRoutingOspfV3AreasRs{
-									AreaID:   types.Int64Value(int64(*areas.AreaID)),
-									AreaName: types.StringValue(areas.AreaName),
-									AreaType: types.StringValue(areas.AreaType),
+									Areaid: func() types.String {
+										if strconv.Itoa(*areas.AreaID) != "" {
+											return types.StringValue(strconv.Itoa(*areas.AreaID))
+										}
+										return types.String{}
+									}(),
+									AreaName: func() types.String {
+										if areas.AreaName != "" {
+											return types.StringValue(areas.AreaName)
+										}
+										return types.String{}
+									}(),
+									AreaType: func() types.String {
+										if areas.AreaType != "" {
+											return types.StringValue(areas.AreaType)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return &result

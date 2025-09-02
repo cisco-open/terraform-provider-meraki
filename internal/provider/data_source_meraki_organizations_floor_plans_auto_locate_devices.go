@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -353,8 +352,18 @@ func ResponseOrganizationsGetOrganizationFloorPlansAutoLocateDevicesItemsToBody(
 							FloorPlan: func() *ResponseItemOrganizationsGetOrganizationFloorPlansAutoLocateDevicesItemsFloorPlan {
 								if items.FloorPlan != nil {
 									return &ResponseItemOrganizationsGetOrganizationFloorPlansAutoLocateDevicesItemsFloorPlan{
-										ID:     types.StringValue(items.FloorPlan.ID),
-										Status: types.StringValue(items.FloorPlan.Status),
+										ID: func() types.String {
+											if items.FloorPlan.ID != "" {
+												return types.StringValue(items.FloorPlan.ID)
+											}
+											return types.String{}
+										}(),
+										Status: func() types.String {
+											if items.FloorPlan.Status != "" {
+												return types.StringValue(items.FloorPlan.Status)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return nil
@@ -377,21 +386,56 @@ func ResponseOrganizationsGetOrganizationFloorPlansAutoLocateDevicesItemsToBody(
 								}
 								return types.Float64{}
 							}(),
-							Mac:   types.StringValue(items.Mac),
-							Model: types.StringValue(items.Model),
-							Name:  types.StringValue(items.Name),
+							Mac: func() types.String {
+								if items.Mac != "" {
+									return types.StringValue(items.Mac)
+								}
+								return types.String{}
+							}(),
+							Model: func() types.String {
+								if items.Model != "" {
+									return types.StringValue(items.Model)
+								}
+								return types.String{}
+							}(),
+							Name: func() types.String {
+								if items.Name != "" {
+									return types.StringValue(items.Name)
+								}
+								return types.String{}
+							}(),
 							Network: func() *ResponseItemOrganizationsGetOrganizationFloorPlansAutoLocateDevicesItemsNetwork {
 								if items.Network != nil {
 									return &ResponseItemOrganizationsGetOrganizationFloorPlansAutoLocateDevicesItemsNetwork{
-										ID: types.StringValue(items.Network.ID),
+										ID: func() types.String {
+											if items.Network.ID != "" {
+												return types.StringValue(items.Network.ID)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return nil
 							}(),
-							Serial: types.StringValue(items.Serial),
-							Status: types.StringValue(items.Status),
-							Tags:   StringSliceToList(items.Tags),
-							Type:   types.StringValue(items.Type),
+							Serial: func() types.String {
+								if items.Serial != "" {
+									return types.StringValue(items.Serial)
+								}
+								return types.String{}
+							}(),
+							Status: func() types.String {
+								if items.Status != "" {
+									return types.StringValue(items.Status)
+								}
+								return types.String{}
+							}(),
+							Tags: StringSliceToList(items.Tags),
+							Type: func() types.String {
+								if items.Type != "" {
+									return types.StringValue(items.Type)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result

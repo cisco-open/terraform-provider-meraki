@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -218,6 +217,17 @@ func (d *NetworksPiiRequestsDataSource) Read(ctx context.Context, req datasource
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkPiiRequest",
+				err.Error(),
+			)
+			return
+		}
+
 		networksPiiRequests = ResponseNetworksGetNetworkPiiRequestItemToBody(networksPiiRequests, response2)
 		diags = resp.State.Set(ctx, &networksPiiRequests)
 		resp.Diagnostics.Append(diags...)
@@ -277,18 +287,48 @@ func ResponseNetworksGetNetworkPiiRequestsItemsToBody(state NetworksPiiRequests,
 				}
 				return types.Int64{}
 			}(),
-			Datasets:  types.StringValue(item.Datasets),
-			ID:        types.StringValue(item.ID),
-			Mac:       types.StringValue(item.Mac),
-			NetworkID: types.StringValue(item.NetworkID),
+			Datasets: func() types.String {
+				if item.Datasets != "" {
+					return types.StringValue(item.Datasets)
+				}
+				return types.String{}
+			}(),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			Mac: func() types.String {
+				if item.Mac != "" {
+					return types.StringValue(item.Mac)
+				}
+				return types.String{}
+			}(),
+			NetworkID: func() types.String {
+				if item.NetworkID != "" {
+					return types.StringValue(item.NetworkID)
+				}
+				return types.String{}
+			}(),
 			OrganizationWide: func() types.Bool {
 				if item.OrganizationWide != nil {
 					return types.BoolValue(*item.OrganizationWide)
 				}
 				return types.Bool{}
 			}(),
-			Status: types.StringValue(item.Status),
-			Type:   types.StringValue(item.Type),
+			Status: func() types.String {
+				if item.Status != "" {
+					return types.StringValue(item.Status)
+				}
+				return types.String{}
+			}(),
+			Type: func() types.String {
+				if item.Type != "" {
+					return types.StringValue(item.Type)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -310,18 +350,48 @@ func ResponseNetworksGetNetworkPiiRequestItemToBody(state NetworksPiiRequests, r
 			}
 			return types.Int64{}
 		}(),
-		Datasets:  types.StringValue(response.Datasets),
-		ID:        types.StringValue(response.ID),
-		Mac:       types.StringValue(response.Mac),
-		NetworkID: types.StringValue(response.NetworkID),
+		Datasets: func() types.String {
+			if response.Datasets != "" {
+				return types.StringValue(response.Datasets)
+			}
+			return types.String{}
+		}(),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Mac: func() types.String {
+			if response.Mac != "" {
+				return types.StringValue(response.Mac)
+			}
+			return types.String{}
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
 		OrganizationWide: func() types.Bool {
 			if response.OrganizationWide != nil {
 				return types.BoolValue(*response.OrganizationWide)
 			}
 			return types.Bool{}
 		}(),
-		Status: types.StringValue(response.Status),
-		Type:   types.StringValue(response.Type),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
+		Type: func() types.String {
+			if response.Type != "" {
+				return types.StringValue(response.Type)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

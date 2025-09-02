@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -202,6 +201,17 @@ func (d *NetworksAppliancePortsDataSource) Read(ctx context.Context, req datasou
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkAppliancePort",
+				err.Error(),
+			)
+			return
+		}
+
 		networksAppliancePorts = ResponseApplianceGetNetworkAppliancePortItemToBody(networksAppliancePorts, response2)
 		diags = resp.State.Set(ctx, &networksAppliancePorts)
 		resp.Diagnostics.Append(diags...)
@@ -245,8 +255,18 @@ func ResponseApplianceGetNetworkAppliancePortsItemsToBody(state NetworksApplianc
 	var items []ResponseItemApplianceGetNetworkAppliancePorts
 	for _, item := range *response {
 		itemState := ResponseItemApplianceGetNetworkAppliancePorts{
-			AccessPolicy: types.StringValue(item.AccessPolicy),
-			AllowedVLANs: types.StringValue(item.AllowedVLANs),
+			AccessPolicy: func() types.String {
+				if item.AccessPolicy != "" {
+					return types.StringValue(item.AccessPolicy)
+				}
+				return types.String{}
+			}(),
+			AllowedVLANs: func() types.String {
+				if item.AllowedVLANs != "" {
+					return types.StringValue(item.AllowedVLANs)
+				}
+				return types.String{}
+			}(),
 			DropUntaggedTraffic: func() types.Bool {
 				if item.DropUntaggedTraffic != nil {
 					return types.BoolValue(*item.DropUntaggedTraffic)
@@ -265,7 +285,12 @@ func ResponseApplianceGetNetworkAppliancePortsItemsToBody(state NetworksApplianc
 				}
 				return types.Int64{}
 			}(),
-			Type: types.StringValue(item.Type),
+			Type: func() types.String {
+				if item.Type != "" {
+					return types.StringValue(item.Type)
+				}
+				return types.String{}
+			}(),
 			VLAN: func() types.Int64 {
 				if item.VLAN != nil {
 					return types.Int64Value(int64(*item.VLAN))
@@ -281,8 +306,18 @@ func ResponseApplianceGetNetworkAppliancePortsItemsToBody(state NetworksApplianc
 
 func ResponseApplianceGetNetworkAppliancePortItemToBody(state NetworksAppliancePorts, response *merakigosdk.ResponseApplianceGetNetworkAppliancePort) NetworksAppliancePorts {
 	itemState := ResponseApplianceGetNetworkAppliancePort{
-		AccessPolicy: types.StringValue(response.AccessPolicy),
-		AllowedVLANs: types.StringValue(response.AllowedVLANs),
+		AccessPolicy: func() types.String {
+			if response.AccessPolicy != "" {
+				return types.StringValue(response.AccessPolicy)
+			}
+			return types.String{}
+		}(),
+		AllowedVLANs: func() types.String {
+			if response.AllowedVLANs != "" {
+				return types.StringValue(response.AllowedVLANs)
+			}
+			return types.String{}
+		}(),
 		DropUntaggedTraffic: func() types.Bool {
 			if response.DropUntaggedTraffic != nil {
 				return types.BoolValue(*response.DropUntaggedTraffic)
@@ -301,7 +336,12 @@ func ResponseApplianceGetNetworkAppliancePortItemToBody(state NetworksApplianceP
 			}
 			return types.Int64{}
 		}(),
-		Type: types.StringValue(response.Type),
+		Type: func() types.String {
+			if response.Type != "" {
+				return types.StringValue(response.Type)
+			}
+			return types.String{}
+		}(),
 		VLAN: func() types.Int64 {
 			if response.VLAN != nil {
 				return types.Int64Value(int64(*response.VLAN))

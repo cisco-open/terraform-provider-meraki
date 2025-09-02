@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -219,20 +218,35 @@ func ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersA
 				result := make([]ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsCommunicationPlansItems, len(*response.Items))
 				for i, items := range *response.Items {
 					result[i] = ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsCommunicationPlansItems{
-						AccountID: types.StringValue(items.AccountID),
+						AccountID: func() types.String {
+							if items.AccountID != "" {
+								return types.StringValue(items.AccountID)
+							}
+							return types.String{}
+						}(),
 						Apns: func() *[]ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsCommunicationPlansItemsApns {
 							if items.Apns != nil {
 								result := make([]ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsCommunicationPlansItemsApns, len(*items.Apns))
 								for i, apns := range *items.Apns {
 									result[i] = ResponseCellularGatewayGetOrganizationCellularGatewayEsimsServiceProvidersAccountsCommunicationPlansItemsApns{
-										Name: types.StringValue(apns.Name),
+										Name: func() types.String {
+											if apns.Name != "" {
+												return types.StringValue(apns.Name)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						Name: types.StringValue(items.Name),
+						Name: func() types.String {
+							if items.Name != "" {
+								return types.StringValue(items.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

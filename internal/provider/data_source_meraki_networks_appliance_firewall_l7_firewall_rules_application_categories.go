@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -177,16 +176,36 @@ func ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesApplicationCateg
 								result := make([]ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesApplicationCategoriesApplicationCategoriesApplications, len(*applicationCategories.Applications))
 								for i, applications := range *applicationCategories.Applications {
 									result[i] = ResponseApplianceGetNetworkApplianceFirewallL7FirewallRulesApplicationCategoriesApplicationCategoriesApplications{
-										ID:   types.StringValue(applications.ID),
-										Name: types.StringValue(applications.Name),
+										ID: func() types.String {
+											if applications.ID != "" {
+												return types.StringValue(applications.ID)
+											}
+											return types.String{}
+										}(),
+										Name: func() types.String {
+											if applications.Name != "" {
+												return types.StringValue(applications.Name)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						ID:   types.StringValue(applicationCategories.ID),
-						Name: types.StringValue(applicationCategories.Name),
+						ID: func() types.String {
+							if applicationCategories.ID != "" {
+								return types.StringValue(applicationCategories.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if applicationCategories.Name != "" {
+								return types.StringValue(applicationCategories.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

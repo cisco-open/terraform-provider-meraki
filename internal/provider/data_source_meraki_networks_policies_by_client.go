@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -220,8 +219,18 @@ func ResponseNetworksGetNetworkPoliciesByClientItemsToBody(state NetworksPolicie
 					result := make([]ResponseItemNetworksGetNetworkPoliciesByClientAssigned, len(*item.Assigned))
 					for i, assigned := range *item.Assigned {
 						result[i] = ResponseItemNetworksGetNetworkPoliciesByClientAssigned{
-							GroupPolicyID: types.StringValue(assigned.GroupPolicyID),
-							Name:          types.StringValue(assigned.Name),
+							GroupPolicyID: func() types.String {
+								if assigned.GroupPolicyID != "" {
+									return types.StringValue(assigned.GroupPolicyID)
+								}
+								return types.String{}
+							}(),
+							Name: func() types.String {
+								if assigned.Name != "" {
+									return types.StringValue(assigned.Name)
+								}
+								return types.String{}
+							}(),
 							SSID: func() *[]ResponseItemNetworksGetNetworkPoliciesByClientAssignedSsid {
 								if assigned.SSID != nil {
 									result := make([]ResponseItemNetworksGetNetworkPoliciesByClientAssignedSsid, len(*assigned.SSID))
@@ -239,15 +248,30 @@ func ResponseNetworksGetNetworkPoliciesByClientItemsToBody(state NetworksPolicie
 								}
 								return nil
 							}(),
-							Type: types.StringValue(assigned.Type),
+							Type: func() types.String {
+								if assigned.Type != "" {
+									return types.StringValue(assigned.Type)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
 				}
 				return nil
 			}(),
-			ClientID: types.StringValue(item.ClientID),
-			Name:     types.StringValue(item.Name),
+			ClientID: func() types.String {
+				if item.ClientID != "" {
+					return types.StringValue(item.ClientID)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

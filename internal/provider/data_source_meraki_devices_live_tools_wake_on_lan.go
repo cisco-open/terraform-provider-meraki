@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -173,12 +172,27 @@ type ResponseDevicesGetDeviceLiveToolsWakeOnLanRequest struct {
 // ToBody
 func ResponseDevicesGetDeviceLiveToolsWakeOnLanItemToBody(state DevicesLiveToolsWakeOnLan, response *merakigosdk.ResponseDevicesGetDeviceLiveToolsWakeOnLan) DevicesLiveToolsWakeOnLan {
 	itemState := ResponseDevicesGetDeviceLiveToolsWakeOnLan{
-		Error: types.StringValue(response.Error),
+		Error: func() types.String {
+			if response.Error != "" {
+				return types.StringValue(response.Error)
+			}
+			return types.String{}
+		}(),
 		Request: func() *ResponseDevicesGetDeviceLiveToolsWakeOnLanRequest {
 			if response.Request != nil {
 				return &ResponseDevicesGetDeviceLiveToolsWakeOnLanRequest{
-					Mac:    types.StringValue(response.Request.Mac),
-					Serial: types.StringValue(response.Request.Serial),
+					Mac: func() types.String {
+						if response.Request.Mac != "" {
+							return types.StringValue(response.Request.Mac)
+						}
+						return types.String{}
+					}(),
+					Serial: func() types.String {
+						if response.Request.Serial != "" {
+							return types.StringValue(response.Request.Serial)
+						}
+						return types.String{}
+					}(),
 					VLANID: func() types.Int64 {
 						if response.Request.VLANID != nil {
 							return types.Int64Value(int64(*response.Request.VLANID))
@@ -189,9 +203,24 @@ func ResponseDevicesGetDeviceLiveToolsWakeOnLanItemToBody(state DevicesLiveTools
 			}
 			return nil
 		}(),
-		Status:      types.StringValue(response.Status),
-		URL:         types.StringValue(response.URL),
-		WakeOnLanID: types.StringValue(response.WakeOnLanID),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
+		WakeOnLanID: func() types.String {
+			if response.WakeOnLanID != "" {
+				return types.StringValue(response.WakeOnLanID)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

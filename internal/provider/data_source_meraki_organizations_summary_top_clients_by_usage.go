@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -243,14 +242,39 @@ func ResponseOrganizationsGetOrganizationSummaryTopClientsByUsageItemsToBody(sta
 	var items []ResponseItemOrganizationsGetOrganizationSummaryTopClientsByUsage
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationSummaryTopClientsByUsage{
-			ID:   types.StringValue(item.ID),
-			Mac:  types.StringValue(item.Mac),
-			Name: types.StringValue(item.Name),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			Mac: func() types.String {
+				if item.Mac != "" {
+					return types.StringValue(item.Mac)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			Network: func() *ResponseItemOrganizationsGetOrganizationSummaryTopClientsByUsageNetwork {
 				if item.Network != nil {
 					return &ResponseItemOrganizationsGetOrganizationSummaryTopClientsByUsageNetwork{
-						ID:   types.StringValue(item.Network.ID),
-						Name: types.StringValue(item.Network.Name),
+						ID: func() types.String {
+							if item.Network.ID != "" {
+								return types.StringValue(item.Network.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if item.Network.Name != "" {
+								return types.StringValue(item.Network.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil

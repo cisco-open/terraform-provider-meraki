@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -69,7 +70,6 @@ func (r *NetworksApplianceFirewallSettingsResource) Schema(_ context.Context, _ 
 			},
 			"spoofing_protection": schema.SingleNestedAttribute{
 				MarkdownDescription: `Spoofing protection settings`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -78,7 +78,6 @@ func (r *NetworksApplianceFirewallSettingsResource) Schema(_ context.Context, _ 
 
 					"ip_source_guard": schema.SingleNestedAttribute{
 						MarkdownDescription: `IP source address spoofing settings`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -88,7 +87,6 @@ func (r *NetworksApplianceFirewallSettingsResource) Schema(_ context.Context, _ 
 							"mode": schema.StringAttribute{
 								MarkdownDescription: `Mode of protection
                                               Allowed values: [block,log]`,
-								Computed: true,
 								Optional: true,
 								PlanModifiers: []planmodifier.String{
 									stringplanmodifier.UseStateForUnknown(),
@@ -130,27 +128,6 @@ func (r *NetworksApplianceFirewallSettingsResource) Create(ctx context.Context, 
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallSettings(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceFirewallSettings  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceFirewallSettings only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallSettings(vvNetworkID, dataRequest)
@@ -159,7 +136,7 @@ func (r *NetworksApplianceFirewallSettingsResource) Create(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -170,49 +147,19 @@ func (r *NetworksApplianceFirewallSettingsResource) Create(ctx context.Context, 
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceFirewallSettings(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceFirewallSettings",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkApplianceFirewallSettings",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseApplianceGetNetworkApplianceFirewallSettingsItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksApplianceFirewallSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksApplianceFirewallSettingsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -242,33 +189,28 @@ func (r *NetworksApplianceFirewallSettingsResource) Read(ctx context.Context, re
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceFirewallSettingsItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksApplianceFirewallSettingsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksApplianceFirewallSettingsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksApplianceFirewallSettingsRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksApplianceFirewallSettingsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Appliance.UpdateNetworkApplianceFirewallSettings(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceFirewallSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -278,9 +220,7 @@ func (r *NetworksApplianceFirewallSettingsResource) Update(ctx context.Context, 
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksApplianceFirewallSettingsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -337,7 +277,12 @@ func ResponseApplianceGetNetworkApplianceFirewallSettingsItemToBodyRs(state Netw
 					IPSourceGuard: func() *ResponseApplianceGetNetworkApplianceFirewallSettingsSpoofingProtectionIpSourceGuardRs {
 						if response.SpoofingProtection.IPSourceGuard != nil {
 							return &ResponseApplianceGetNetworkApplianceFirewallSettingsSpoofingProtectionIpSourceGuardRs{
-								Mode: types.StringValue(response.SpoofingProtection.IPSourceGuard.Mode),
+								Mode: func() types.String {
+									if response.SpoofingProtection.IPSourceGuard.Mode != "" {
+										return types.StringValue(response.SpoofingProtection.IPSourceGuard.Mode)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil

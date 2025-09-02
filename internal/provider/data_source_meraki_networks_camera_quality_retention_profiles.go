@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -332,6 +331,17 @@ func (d *NetworksCameraQualityRetentionProfilesDataSource) Read(ctx context.Cont
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkCameraQualityRetentionProfile",
+				err.Error(),
+			)
+			return
+		}
+
 		networksCameraQualityRetentionProfiles = ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBody(networksCameraQualityRetentionProfiles, response2)
 		diags = resp.State.Set(ctx, &networksCameraQualityRetentionProfiles)
 		resp.Diagnostics.Append(diags...)
@@ -459,7 +469,12 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfilesItemsToBody(state Net
 				}
 				return types.Bool{}
 			}(),
-			ID: types.StringValue(item.ID),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
 			MaxRetentionDays: func() types.Int64 {
 				if item.MaxRetentionDays != nil {
 					return types.Int64Value(int64(*item.MaxRetentionDays))
@@ -478,15 +493,30 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfilesItemsToBody(state Net
 				}
 				return types.Int64{}
 			}(),
-			Name:      types.StringValue(item.Name),
-			NetworkID: types.StringValue(item.NetworkID),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			NetworkID: func() types.String {
+				if item.NetworkID != "" {
+					return types.StringValue(item.NetworkID)
+				}
+				return types.String{}
+			}(),
 			RestrictedBandwidthModeEnabled: func() types.Bool {
 				if item.RestrictedBandwidthModeEnabled != nil {
 					return types.BoolValue(*item.RestrictedBandwidthModeEnabled)
 				}
 				return types.Bool{}
 			}(),
-			ScheduleID: types.StringValue(item.ScheduleID),
+			ScheduleID: func() types.String {
+				if item.ScheduleID != "" {
+					return types.StringValue(item.ScheduleID)
+				}
+				return types.String{}
+			}(),
 			SmartRetention: func() *ResponseItemCameraGetNetworkCameraQualityRetentionProfilesSmartRetention {
 				if item.SmartRetention != nil {
 					return &ResponseItemCameraGetNetworkCameraQualityRetentionProfilesSmartRetention{
@@ -506,8 +536,18 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfilesItemsToBody(state Net
 						MV12MV22MV72: func() *ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettingsMV12MV22MV72 {
 							if item.VideoSettings.MV12MV22MV72 != nil {
 								return &ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettingsMV12MV22MV72{
-									Quality:    types.StringValue(item.VideoSettings.MV12MV22MV72.Quality),
-									Resolution: types.StringValue(item.VideoSettings.MV12MV22MV72.Resolution),
+									Quality: func() types.String {
+										if item.VideoSettings.MV12MV22MV72.Quality != "" {
+											return types.StringValue(item.VideoSettings.MV12MV22MV72.Quality)
+										}
+										return types.String{}
+									}(),
+									Resolution: func() types.String {
+										if item.VideoSettings.MV12MV22MV72.Resolution != "" {
+											return types.StringValue(item.VideoSettings.MV12MV22MV72.Resolution)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -515,8 +555,18 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfilesItemsToBody(state Net
 						MV12WE: func() *ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettingsMV12WE {
 							if item.VideoSettings.MV12WE != nil {
 								return &ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettingsMV12WE{
-									Quality:    types.StringValue(item.VideoSettings.MV12WE.Quality),
-									Resolution: types.StringValue(item.VideoSettings.MV12WE.Resolution),
+									Quality: func() types.String {
+										if item.VideoSettings.MV12WE.Quality != "" {
+											return types.StringValue(item.VideoSettings.MV12WE.Quality)
+										}
+										return types.String{}
+									}(),
+									Resolution: func() types.String {
+										if item.VideoSettings.MV12WE.Resolution != "" {
+											return types.StringValue(item.VideoSettings.MV12WE.Resolution)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -524,8 +574,18 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfilesItemsToBody(state Net
 						MV21MV71: func() *ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettingsMV21MV71 {
 							if item.VideoSettings.MV21MV71 != nil {
 								return &ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettingsMV21MV71{
-									Quality:    types.StringValue(item.VideoSettings.MV21MV71.Quality),
-									Resolution: types.StringValue(item.VideoSettings.MV21MV71.Resolution),
+									Quality: func() types.String {
+										if item.VideoSettings.MV21MV71.Quality != "" {
+											return types.StringValue(item.VideoSettings.MV21MV71.Quality)
+										}
+										return types.String{}
+									}(),
+									Resolution: func() types.String {
+										if item.VideoSettings.MV21MV71.Resolution != "" {
+											return types.StringValue(item.VideoSettings.MV21MV71.Resolution)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -533,8 +593,18 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfilesItemsToBody(state Net
 						MV32: func() *ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettingsMV32 {
 							if item.VideoSettings.MV32 != nil {
 								return &ResponseItemCameraGetNetworkCameraQualityRetentionProfilesVideoSettingsMV32{
-									Quality:    types.StringValue(item.VideoSettings.MV32.Quality),
-									Resolution: types.StringValue(item.VideoSettings.MV32.Resolution),
+									Quality: func() types.String {
+										if item.VideoSettings.MV32.Quality != "" {
+											return types.StringValue(item.VideoSettings.MV32.Quality)
+										}
+										return types.String{}
+									}(),
+									Resolution: func() types.String {
+										if item.VideoSettings.MV32.Resolution != "" {
+											return types.StringValue(item.VideoSettings.MV32.Resolution)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -564,7 +634,12 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBody(state Netwo
 			}
 			return types.Bool{}
 		}(),
-		ID: types.StringValue(response.ID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		MaxRetentionDays: func() types.Int64 {
 			if response.MaxRetentionDays != nil {
 				return types.Int64Value(int64(*response.MaxRetentionDays))
@@ -583,15 +658,30 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBody(state Netwo
 			}
 			return types.Int64{}
 		}(),
-		Name:      types.StringValue(response.Name),
-		NetworkID: types.StringValue(response.NetworkID),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
 		RestrictedBandwidthModeEnabled: func() types.Bool {
 			if response.RestrictedBandwidthModeEnabled != nil {
 				return types.BoolValue(*response.RestrictedBandwidthModeEnabled)
 			}
 			return types.Bool{}
 		}(),
-		ScheduleID: types.StringValue(response.ScheduleID),
+		ScheduleID: func() types.String {
+			if response.ScheduleID != "" {
+				return types.StringValue(response.ScheduleID)
+			}
+			return types.String{}
+		}(),
 		SmartRetention: func() *ResponseCameraGetNetworkCameraQualityRetentionProfileSmartRetention {
 			if response.SmartRetention != nil {
 				return &ResponseCameraGetNetworkCameraQualityRetentionProfileSmartRetention{
@@ -611,8 +701,18 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBody(state Netwo
 					MV12MV22MV72: func() *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV12MV22MV72 {
 						if response.VideoSettings.MV12MV22MV72 != nil {
 							return &ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV12MV22MV72{
-								Quality:    types.StringValue(response.VideoSettings.MV12MV22MV72.Quality),
-								Resolution: types.StringValue(response.VideoSettings.MV12MV22MV72.Resolution),
+								Quality: func() types.String {
+									if response.VideoSettings.MV12MV22MV72.Quality != "" {
+										return types.StringValue(response.VideoSettings.MV12MV22MV72.Quality)
+									}
+									return types.String{}
+								}(),
+								Resolution: func() types.String {
+									if response.VideoSettings.MV12MV22MV72.Resolution != "" {
+										return types.StringValue(response.VideoSettings.MV12MV22MV72.Resolution)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -620,8 +720,18 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBody(state Netwo
 					MV12WE: func() *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV12WE {
 						if response.VideoSettings.MV12WE != nil {
 							return &ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV12WE{
-								Quality:    types.StringValue(response.VideoSettings.MV12WE.Quality),
-								Resolution: types.StringValue(response.VideoSettings.MV12WE.Resolution),
+								Quality: func() types.String {
+									if response.VideoSettings.MV12WE.Quality != "" {
+										return types.StringValue(response.VideoSettings.MV12WE.Quality)
+									}
+									return types.String{}
+								}(),
+								Resolution: func() types.String {
+									if response.VideoSettings.MV12WE.Resolution != "" {
+										return types.StringValue(response.VideoSettings.MV12WE.Resolution)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -629,8 +739,18 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBody(state Netwo
 					MV21MV71: func() *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV21MV71 {
 						if response.VideoSettings.MV21MV71 != nil {
 							return &ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV21MV71{
-								Quality:    types.StringValue(response.VideoSettings.MV21MV71.Quality),
-								Resolution: types.StringValue(response.VideoSettings.MV21MV71.Resolution),
+								Quality: func() types.String {
+									if response.VideoSettings.MV21MV71.Quality != "" {
+										return types.StringValue(response.VideoSettings.MV21MV71.Quality)
+									}
+									return types.String{}
+								}(),
+								Resolution: func() types.String {
+									if response.VideoSettings.MV21MV71.Resolution != "" {
+										return types.StringValue(response.VideoSettings.MV21MV71.Resolution)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil
@@ -638,8 +758,18 @@ func ResponseCameraGetNetworkCameraQualityRetentionProfileItemToBody(state Netwo
 					MV32: func() *ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV32 {
 						if response.VideoSettings.MV32 != nil {
 							return &ResponseCameraGetNetworkCameraQualityRetentionProfileVideoSettingsMV32{
-								Quality:    types.StringValue(response.VideoSettings.MV32.Quality),
-								Resolution: types.StringValue(response.VideoSettings.MV32.Resolution),
+								Quality: func() types.String {
+									if response.VideoSettings.MV32.Quality != "" {
+										return types.StringValue(response.VideoSettings.MV32.Quality)
+									}
+									return types.String{}
+								}(),
+								Resolution: func() types.String {
+									if response.VideoSettings.MV32.Resolution != "" {
+										return types.StringValue(response.VideoSettings.MV32.Resolution)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil

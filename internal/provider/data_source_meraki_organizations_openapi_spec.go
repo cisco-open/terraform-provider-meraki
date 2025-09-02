@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -250,14 +249,34 @@ func ResponseOrganizationsGetOrganizationOpenapiSpecItemToBody(state Organizatio
 		Info: func() *ResponseOrganizationsGetOrganizationOpenapiSpecInfo {
 			if response.Info != nil {
 				return &ResponseOrganizationsGetOrganizationOpenapiSpecInfo{
-					Description: types.StringValue(response.Info.Description),
-					Title:       types.StringValue(response.Info.Title),
-					Version:     types.StringValue(response.Info.Version),
+					Description: func() types.String {
+						if response.Info.Description != "" {
+							return types.StringValue(response.Info.Description)
+						}
+						return types.String{}
+					}(),
+					Title: func() types.String {
+						if response.Info.Title != "" {
+							return types.StringValue(response.Info.Title)
+						}
+						return types.String{}
+					}(),
+					Version: func() types.String {
+						if response.Info.Version != "" {
+							return types.StringValue(response.Info.Version)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Openapi: types.StringValue(response.Openapi),
+		Openapi: func() types.String {
+			if response.Openapi != "" {
+				return types.StringValue(response.Openapi)
+			}
+			return types.String{}
+		}(),
 		Paths: func() *ResponseOrganizationsGetOrganizationOpenapiSpecPaths {
 			if response.Paths != nil {
 				return &ResponseOrganizationsGetOrganizationOpenapiSpecPaths{
@@ -267,15 +286,30 @@ func ResponseOrganizationsGetOrganizationOpenapiSpecItemToBody(state Organizatio
 								Get: func() *ResponseOrganizationsGetOrganizationOpenapiSpecPathsOrganizationsGet {
 									if response.Paths.Organizations.Get != nil {
 										return &ResponseOrganizationsGetOrganizationOpenapiSpecPathsOrganizationsGet{
-											Description: types.StringValue(response.Paths.Organizations.Get.Description),
-											OperationID: types.StringValue(response.Paths.Organizations.Get.OperationID),
+											Description: func() types.String {
+												if response.Paths.Organizations.Get.Description != "" {
+													return types.StringValue(response.Paths.Organizations.Get.Description)
+												}
+												return types.String{}
+											}(),
+											OperationID: func() types.String {
+												if response.Paths.Organizations.Get.OperationID != "" {
+													return types.StringValue(response.Paths.Organizations.Get.OperationID)
+												}
+												return types.String{}
+											}(),
 											Responses: func() *ResponseOrganizationsGetOrganizationOpenapiSpecPathsOrganizationsGetResponses {
 												if response.Paths.Organizations.Get.Responses != nil {
 													return &ResponseOrganizationsGetOrganizationOpenapiSpecPathsOrganizationsGetResponses{
 														Status200: func() *ResponseOrganizationsGetOrganizationOpenapiSpecPathsOrganizationsGetResponses200 {
 															if response.Paths.Organizations.Get.Responses.Status200 != nil {
 																return &ResponseOrganizationsGetOrganizationOpenapiSpecPathsOrganizationsGetResponses200{
-																	Description: types.StringValue(response.Paths.Organizations.Get.Responses.Status200.Description),
+																	Description: func() types.String {
+																		if response.Paths.Organizations.Get.Responses.Status200.Description != "" {
+																			return types.StringValue(response.Paths.Organizations.Get.Responses.Status200.Description)
+																		}
+																		return types.String{}
+																	}(),
 																	Examples: func() *ResponseOrganizationsGetOrganizationOpenapiSpecPathsOrganizationsGetResponses200Examples {
 																		if response.Paths.Organizations.Get.Responses.Status200.Examples != nil {
 																			return &ResponseOrganizationsGetOrganizationOpenapiSpecPathsOrganizationsGetResponses200Examples{
@@ -284,8 +318,18 @@ func ResponseOrganizationsGetOrganizationOpenapiSpecItemToBody(state Organizatio
 																						result := make([]ResponseOrganizationsGetOrganizationOpenapiSpecPathsOrganizationsGetResponses200ExamplesApplicationJson, len(*response.Paths.Organizations.Get.Responses.Status200.Examples.ApplicationJSON))
 																						for i, applicationJSON := range *response.Paths.Organizations.Get.Responses.Status200.Examples.ApplicationJSON {
 																							result[i] = ResponseOrganizationsGetOrganizationOpenapiSpecPathsOrganizationsGetResponses200ExamplesApplicationJson{
-																								ID:   types.StringValue(applicationJSON.ID),
-																								Name: types.StringValue(applicationJSON.Name),
+																								ID: func() types.String {
+																									if applicationJSON.ID != "" {
+																										return types.StringValue(applicationJSON.ID)
+																									}
+																									return types.String{}
+																								}(),
+																								Name: func() types.String {
+																									if applicationJSON.Name != "" {
+																										return types.StringValue(applicationJSON.Name)
+																									}
+																									return types.String{}
+																								}(),
 																							}
 																						}
 																						return &result

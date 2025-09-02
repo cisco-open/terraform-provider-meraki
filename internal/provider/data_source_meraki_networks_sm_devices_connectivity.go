@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -163,8 +162,18 @@ func ResponseSmGetNetworkSmDeviceConnectivityItemsToBody(state NetworksSmDevices
 	var items []ResponseItemSmGetNetworkSmDeviceConnectivity
 	for _, item := range *response {
 		itemState := ResponseItemSmGetNetworkSmDeviceConnectivity{
-			FirstSeenAt: types.StringValue(item.FirstSeenAt),
-			LastSeenAt:  types.StringValue(item.LastSeenAt),
+			FirstSeenAt: func() types.String {
+				if item.FirstSeenAt != "" {
+					return types.StringValue(item.FirstSeenAt)
+				}
+				return types.String{}
+			}(),
+			LastSeenAt: func() types.String {
+				if item.LastSeenAt != "" {
+					return types.StringValue(item.LastSeenAt)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

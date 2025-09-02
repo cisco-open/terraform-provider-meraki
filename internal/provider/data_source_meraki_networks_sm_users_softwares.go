@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -248,24 +247,54 @@ func ResponseSmGetNetworkSmUserSoftwaresItemsToBody(state NetworksSmUsersSoftwar
 	var items []ResponseItemSmGetNetworkSmUserSoftwares
 	for _, item := range *response {
 		itemState := ResponseItemSmGetNetworkSmUserSoftwares{
-			AppID: types.StringValue(item.AppID),
+			AppID: func() types.String {
+				if item.AppID != "" {
+					return types.StringValue(item.AppID)
+				}
+				return types.String{}
+			}(),
 			BundleSize: func() types.Int64 {
 				if item.BundleSize != nil {
 					return types.Int64Value(int64(*item.BundleSize))
 				}
 				return types.Int64{}
 			}(),
-			CreatedAt: types.StringValue(item.CreatedAt),
-			DeviceID:  types.StringValue(item.DeviceID),
+			CreatedAt: func() types.String {
+				if item.CreatedAt != "" {
+					return types.StringValue(item.CreatedAt)
+				}
+				return types.String{}
+			}(),
+			DeviceID: func() types.String {
+				if item.DeviceID != "" {
+					return types.StringValue(item.DeviceID)
+				}
+				return types.String{}
+			}(),
 			DynamicSize: func() types.Int64 {
 				if item.DynamicSize != nil {
 					return types.Int64Value(int64(*item.DynamicSize))
 				}
 				return types.Int64{}
 			}(),
-			ID:          types.StringValue(item.ID),
-			IDentifier:  types.StringValue(item.IDentifier),
-			InstalledAt: types.StringValue(item.InstalledAt),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			IDentifier: func() types.String {
+				if item.IDentifier != "" {
+					return types.StringValue(item.IDentifier)
+				}
+				return types.String{}
+			}(),
+			InstalledAt: func() types.String {
+				if item.InstalledAt != "" {
+					return types.StringValue(item.InstalledAt)
+				}
+				return types.String{}
+			}(),
 			IosRedemptionCode: func() types.Bool {
 				if item.IosRedemptionCode != nil {
 					return types.BoolValue(*item.IosRedemptionCode)
@@ -278,18 +307,48 @@ func ResponseSmGetNetworkSmUserSoftwaresItemsToBody(state NetworksSmUsersSoftwar
 				}
 				return types.Bool{}
 			}(),
-			ItunesID:   types.StringValue(item.ItunesID),
-			LicenseKey: types.StringValue(item.LicenseKey),
-			Name:       types.StringValue(item.Name),
-			Path:       types.StringValue(item.Path),
+			ItunesID: func() types.String {
+				if item.ItunesID != "" {
+					return types.StringValue(item.ItunesID)
+				}
+				return types.String{}
+			}(),
+			LicenseKey: func() types.String {
+				if item.LicenseKey != "" {
+					return types.StringValue(item.LicenseKey)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			Path: func() types.String {
+				if item.Path != "" {
+					return types.StringValue(item.Path)
+				}
+				return types.String{}
+			}(),
 			RedemptionCode: func() types.Int64 {
 				if item.RedemptionCode != nil {
 					return types.Int64Value(int64(*item.RedemptionCode))
 				}
 				return types.Int64{}
 			}(),
-			ShortVersion: types.StringValue(item.ShortVersion),
-			Status:       types.StringValue(item.Status),
+			ShortVersion: func() types.String {
+				if item.ShortVersion != "" {
+					return types.StringValue(item.ShortVersion)
+				}
+				return types.String{}
+			}(),
+			Status: func() types.String {
+				if item.Status != "" {
+					return types.StringValue(item.Status)
+				}
+				return types.String{}
+			}(),
 			ToInstall: func() types.Bool {
 				if item.ToInstall != nil {
 					return types.BoolValue(*item.ToInstall)
@@ -302,10 +361,30 @@ func ResponseSmGetNetworkSmUserSoftwaresItemsToBody(state NetworksSmUsersSoftwar
 				}
 				return types.Bool{}
 			}(),
-			UninstalledAt: types.StringValue(item.UninstalledAt),
-			UpdatedAt:     types.StringValue(item.UpdatedAt),
-			Vendor:        types.StringValue(item.Vendor),
-			Version:       types.StringValue(item.Version),
+			UninstalledAt: func() types.String {
+				if item.UninstalledAt != "" {
+					return types.StringValue(item.UninstalledAt)
+				}
+				return types.String{}
+			}(),
+			UpdatedAt: func() types.String {
+				if item.UpdatedAt != "" {
+					return types.StringValue(item.UpdatedAt)
+				}
+				return types.String{}
+			}(),
+			Vendor: func() types.String {
+				if item.Vendor != "" {
+					return types.StringValue(item.Vendor)
+				}
+				return types.String{}
+			}(),
+			Version: func() types.String {
+				if item.Version != "" {
+					return types.StringValue(item.Version)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

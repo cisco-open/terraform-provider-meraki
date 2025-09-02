@@ -226,8 +226,18 @@ func (r *OrganizationsLicensesMoveSeats) toSdkApiRequestCreate(ctx context.Conte
 // ToBody
 func ResponseOrganizationsMoveOrganizationLicensesSeatsItemToBody(state OrganizationsLicensesMoveSeats, response *merakigosdk.ResponseOrganizationsMoveOrganizationLicensesSeats) OrganizationsLicensesMoveSeats {
 	itemState := ResponseOrganizationsMoveOrganizationLicensesSeats{
-		DestOrganizationID: types.StringValue(response.DestOrganizationID),
-		LicenseID:          types.StringValue(response.LicenseID),
+		DestOrganizationID: func() types.String {
+			if response.DestOrganizationID != "" {
+				return types.StringValue(response.DestOrganizationID)
+			}
+			return types.String{}
+		}(),
+		LicenseID: func() types.String {
+			if response.LicenseID != "" {
+				return types.StringValue(response.LicenseID)
+			}
+			return types.String{}
+		}(),
 		SeatCount: func() types.Int64 {
 			if response.SeatCount != nil {
 				return types.Int64Value(int64(*response.SeatCount))

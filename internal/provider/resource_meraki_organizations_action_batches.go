@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -308,7 +309,7 @@ func (r *OrganizationsActionBatchesResource) Create(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing ",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -430,7 +431,7 @@ func (r *OrganizationsActionBatchesResource) Update(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationActionBatch",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -642,9 +643,24 @@ func ResponseOrganizationsGetOrganizationActionBatchItemToBodyRs(state Organizat
 		Callback: func() *ResponseOrganizationsGetOrganizationActionBatchCallbackRs {
 			if response.Callback != nil {
 				return &ResponseOrganizationsGetOrganizationActionBatchCallbackRs{
-					ID:     types.StringValue(response.Callback.ID),
-					Status: types.StringValue(response.Callback.Status),
-					URL:    types.StringValue(response.Callback.URL),
+					ID: func() types.String {
+						if response.Callback.ID != "" {
+							return types.StringValue(response.Callback.ID)
+						}
+						return types.String{}
+					}(),
+					Status: func() types.String {
+						if response.Callback.Status != "" {
+							return types.StringValue(response.Callback.Status)
+						}
+						return types.String{}
+					}(),
+					URL: func() types.String {
+						if response.Callback.URL != "" {
+							return types.StringValue(response.Callback.URL)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -655,8 +671,18 @@ func ResponseOrganizationsGetOrganizationActionBatchItemToBodyRs(state Organizat
 			}
 			return types.Bool{}
 		}(),
-		ID:             types.StringValue(response.ID),
-		OrganizationID: types.StringValue(response.OrganizationID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		OrganizationID: func() types.String {
+			if response.OrganizationID != "" {
+				return types.StringValue(response.OrganizationID)
+			}
+			return types.String{}
+		}(),
 		Status: func() *ResponseOrganizationsGetOrganizationActionBatchStatusRs {
 			if response.Status != nil {
 				return &ResponseOrganizationsGetOrganizationActionBatchStatusRs{
@@ -671,8 +697,18 @@ func ResponseOrganizationsGetOrganizationActionBatchItemToBodyRs(state Organizat
 							result := make([]ResponseOrganizationsGetOrganizationActionBatchStatusCreatedResourcesRs, len(*response.Status.CreatedResources))
 							for i, createdResources := range *response.Status.CreatedResources {
 								result[i] = ResponseOrganizationsGetOrganizationActionBatchStatusCreatedResourcesRs{
-									ID:  types.StringValue(createdResources.ID),
-									URI: types.StringValue(createdResources.URI),
+									ID: func() types.String {
+										if createdResources.ID != "" {
+											return types.StringValue(createdResources.ID)
+										}
+										return types.String{}
+									}(),
+									URI: func() types.String {
+										if createdResources.URI != "" {
+											return types.StringValue(createdResources.URI)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return &result

@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -29,6 +30,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -111,6 +113,7 @@ func (r *OrganizationsSmAdminsRolesResource) Schema(_ context.Context, _ resourc
 				},
 
 				ElementType: types.StringType,
+				Default:     setdefault.StaticValue(types.SetNull(types.StringType)),
 			},
 		},
 	}
@@ -334,7 +337,7 @@ func (r *OrganizationsSmAdminsRolesResource) Update(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationSmAdminsRole",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -439,10 +442,25 @@ func (r *OrganizationsSmAdminsRolesRs) toSdkApiRequestUpdate(ctx context.Context
 // From gosdk to TF Structs Schema
 func ResponseSmGetOrganizationSmAdminsRoleItemToBodyRs(state OrganizationsSmAdminsRolesRs, response *merakigosdk.ResponseSmGetOrganizationSmAdminsRole, is_read bool) OrganizationsSmAdminsRolesRs {
 	itemState := OrganizationsSmAdminsRolesRs{
-		Name:   types.StringValue(response.Name),
-		RoleID: types.StringValue(response.RoleID),
-		Scope:  types.StringValue(response.Scope),
-		Tags:   StringSliceToSet(response.Tags),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		RoleID: func() types.String {
+			if response.RoleID != "" {
+				return types.StringValue(response.RoleID)
+			}
+			return types.String{}
+		}(),
+		Scope: func() types.String {
+			if response.Scope != "" {
+				return types.StringValue(response.Scope)
+			}
+			return types.String{}
+		}(),
+		Tags: StringSliceToSet(response.Tags),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsSmAdminsRolesRs)

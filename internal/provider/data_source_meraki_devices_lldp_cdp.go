@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -243,10 +242,30 @@ func ResponseDevicesGetDeviceLldpCdpItemToBody(state DevicesLldpCdp, response *m
 								Cdp: func() *ResponseDevicesGetDeviceLldpCdpPorts12Cdp {
 									if response.Ports.Status12.Cdp != nil {
 										return &ResponseDevicesGetDeviceLldpCdpPorts12Cdp{
-											Address:    types.StringValue(response.Ports.Status12.Cdp.Address),
-											DeviceID:   types.StringValue(response.Ports.Status12.Cdp.DeviceID),
-											PortID:     types.StringValue(response.Ports.Status12.Cdp.PortID),
-											SourcePort: types.StringValue(response.Ports.Status12.Cdp.SourcePort),
+											Address: func() types.String {
+												if response.Ports.Status12.Cdp.Address != "" {
+													return types.StringValue(response.Ports.Status12.Cdp.Address)
+												}
+												return types.String{}
+											}(),
+											DeviceID: func() types.String {
+												if response.Ports.Status12.Cdp.DeviceID != "" {
+													return types.StringValue(response.Ports.Status12.Cdp.DeviceID)
+												}
+												return types.String{}
+											}(),
+											PortID: func() types.String {
+												if response.Ports.Status12.Cdp.PortID != "" {
+													return types.StringValue(response.Ports.Status12.Cdp.PortID)
+												}
+												return types.String{}
+											}(),
+											SourcePort: func() types.String {
+												if response.Ports.Status12.Cdp.SourcePort != "" {
+													return types.StringValue(response.Ports.Status12.Cdp.SourcePort)
+												}
+												return types.String{}
+											}(),
 										}
 									}
 									return &ResponseDevicesGetDeviceLldpCdpPorts12Cdp{}
@@ -254,10 +273,30 @@ func ResponseDevicesGetDeviceLldpCdpItemToBody(state DevicesLldpCdp, response *m
 								Lldp: func() *ResponseDevicesGetDeviceLldpCdpPorts12Lldp {
 									if response.Ports.Status12.Lldp != nil {
 										return &ResponseDevicesGetDeviceLldpCdpPorts12Lldp{
-											ManagementAddress: types.StringValue(response.Ports.Status12.Lldp.ManagementAddress),
-											PortID:            types.StringValue(response.Ports.Status12.Lldp.PortID),
-											SourcePort:        types.StringValue(response.Ports.Status12.Lldp.SourcePort),
-											SystemName:        types.StringValue(response.Ports.Status12.Lldp.SystemName),
+											ManagementAddress: func() types.String {
+												if response.Ports.Status12.Lldp.ManagementAddress != "" {
+													return types.StringValue(response.Ports.Status12.Lldp.ManagementAddress)
+												}
+												return types.String{}
+											}(),
+											PortID: func() types.String {
+												if response.Ports.Status12.Lldp.PortID != "" {
+													return types.StringValue(response.Ports.Status12.Lldp.PortID)
+												}
+												return types.String{}
+											}(),
+											SourcePort: func() types.String {
+												if response.Ports.Status12.Lldp.SourcePort != "" {
+													return types.StringValue(response.Ports.Status12.Lldp.SourcePort)
+												}
+												return types.String{}
+											}(),
+											SystemName: func() types.String {
+												if response.Ports.Status12.Lldp.SystemName != "" {
+													return types.StringValue(response.Ports.Status12.Lldp.SystemName)
+												}
+												return types.String{}
+											}(),
 										}
 									}
 									return &ResponseDevicesGetDeviceLldpCdpPorts12Lldp{}
@@ -272,10 +311,30 @@ func ResponseDevicesGetDeviceLldpCdpItemToBody(state DevicesLldpCdp, response *m
 								Cdp: func() *ResponseDevicesGetDeviceLldpCdpPorts8Cdp {
 									if response.Ports.Status8.Cdp != nil {
 										return &ResponseDevicesGetDeviceLldpCdpPorts8Cdp{
-											Address:    types.StringValue(response.Ports.Status8.Cdp.Address),
-											DeviceID:   types.StringValue(response.Ports.Status8.Cdp.DeviceID),
-											PortID:     types.StringValue(response.Ports.Status8.Cdp.PortID),
-											SourcePort: types.StringValue(response.Ports.Status8.Cdp.SourcePort),
+											Address: func() types.String {
+												if response.Ports.Status8.Cdp.Address != "" {
+													return types.StringValue(response.Ports.Status8.Cdp.Address)
+												}
+												return types.String{}
+											}(),
+											DeviceID: func() types.String {
+												if response.Ports.Status8.Cdp.DeviceID != "" {
+													return types.StringValue(response.Ports.Status8.Cdp.DeviceID)
+												}
+												return types.String{}
+											}(),
+											PortID: func() types.String {
+												if response.Ports.Status8.Cdp.PortID != "" {
+													return types.StringValue(response.Ports.Status8.Cdp.PortID)
+												}
+												return types.String{}
+											}(),
+											SourcePort: func() types.String {
+												if response.Ports.Status8.Cdp.SourcePort != "" {
+													return types.StringValue(response.Ports.Status8.Cdp.SourcePort)
+												}
+												return types.String{}
+											}(),
 										}
 									}
 									return &ResponseDevicesGetDeviceLldpCdpPorts8Cdp{}
@@ -288,7 +347,12 @@ func ResponseDevicesGetDeviceLldpCdpItemToBody(state DevicesLldpCdp, response *m
 			}
 			return &ResponseDevicesGetDeviceLldpCdpPorts{}
 		}(),
-		SourceMac: types.StringValue(response.SourceMac),
+		SourceMac: func() types.String {
+			if response.SourceMac != "" {
+				return types.StringValue(response.SourceMac)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

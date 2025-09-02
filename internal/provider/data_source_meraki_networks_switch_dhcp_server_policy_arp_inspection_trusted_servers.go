@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -181,13 +180,28 @@ func ResponseSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServersIt
 			IPv4: func() *ResponseItemSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServersIpv4 {
 				if item.IPv4 != nil {
 					return &ResponseItemSwitchGetNetworkSwitchDhcpServerPolicyArpInspectionTrustedServersIpv4{
-						Address: types.StringValue(item.IPv4.Address),
+						Address: func() types.String {
+							if item.IPv4.Address != "" {
+								return types.StringValue(item.IPv4.Address)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			Mac:             types.StringValue(item.Mac),
-			TrustedServerID: types.StringValue(item.TrustedServerID),
+			Mac: func() types.String {
+				if item.Mac != "" {
+					return types.StringValue(item.Mac)
+				}
+				return types.String{}
+			}(),
+			TrustedServerID: func() types.String {
+				if item.TrustedServerID != "" {
+					return types.StringValue(item.TrustedServerID)
+				}
+				return types.String{}
+			}(),
 			VLAN: func() types.Int64 {
 				if item.VLAN != nil {
 					return types.Int64Value(int64(*item.VLAN))

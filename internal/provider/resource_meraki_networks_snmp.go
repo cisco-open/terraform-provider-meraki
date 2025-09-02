@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -26,8 +27,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -66,7 +67,6 @@ func (r *NetworksSNMPResource) Schema(_ context.Context, _ resource.SchemaReques
 			"access": schema.StringAttribute{
 				MarkdownDescription: `The type of SNMP access. Can be one of 'none' (disabled), 'community' (V1/V2c), or 'users' (V3).
                                   Allowed values: [community,none,users]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -81,7 +81,6 @@ func (r *NetworksSNMPResource) Schema(_ context.Context, _ resource.SchemaReques
 			},
 			"community_string": schema.StringAttribute{
 				MarkdownDescription: `SNMP community string if access is 'community'.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -91,19 +90,17 @@ func (r *NetworksSNMPResource) Schema(_ context.Context, _ resource.SchemaReques
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"users": schema.SetNestedAttribute{
+			"users": schema.ListNestedAttribute{
 				MarkdownDescription: `SNMP settings if access is 'users'.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"passphrase": schema.StringAttribute{
 							MarkdownDescription: `The passphrase for the SNMP user.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -111,7 +108,6 @@ func (r *NetworksSNMPResource) Schema(_ context.Context, _ resource.SchemaReques
 						},
 						"username": schema.StringAttribute{
 							MarkdownDescription: `The username for the SNMP user.`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -146,27 +142,6 @@ func (r *NetworksSNMPResource) Create(ctx context.Context, req resource.CreateRe
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkSNMP(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSnmp  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksSnmp only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkSNMP(vvNetworkID, dataRequest)
@@ -175,7 +150,7 @@ func (r *NetworksSNMPResource) Create(ctx context.Context, req resource.CreateRe
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSNMP",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -186,49 +161,19 @@ func (r *NetworksSNMPResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Networks.GetNetworkSNMP(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkSNMP",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkSNMP",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseNetworksGetNetworkSNMPItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksSNMPResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksSNMPRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -258,33 +203,28 @@ func (r *NetworksSNMPResource) Read(ctx context.Context, req resource.ReadReques
 	}
 	//entro aqui 2
 	data = ResponseNetworksGetNetworkSNMPItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksSNMPResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksSNMPResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksSNMPRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksSNMPRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkSNMP(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkSNMP",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -294,9 +234,7 @@ func (r *NetworksSNMPResource) Update(ctx context.Context, req resource.UpdateRe
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksSNMPResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -362,15 +300,35 @@ func (r *NetworksSNMPRs) toSdkApiRequestUpdate(ctx context.Context) *merakigosdk
 // From gosdk to TF Structs Schema
 func ResponseNetworksGetNetworkSNMPItemToBodyRs(state NetworksSNMPRs, response *merakigosdk.ResponseNetworksGetNetworkSNMP, is_read bool) NetworksSNMPRs {
 	itemState := NetworksSNMPRs{
-		Access:          types.StringValue(response.Access),
-		CommunityString: types.StringValue(response.CommunityString),
+		Access: func() types.String {
+			if response.Access != "" {
+				return types.StringValue(response.Access)
+			}
+			return types.String{}
+		}(),
+		CommunityString: func() types.String {
+			if response.CommunityString != "" {
+				return types.StringValue(response.CommunityString)
+			}
+			return types.String{}
+		}(),
 		Users: func() *[]ResponseNetworksGetNetworkSnmpUsersRs {
 			if response.Users != nil {
 				result := make([]ResponseNetworksGetNetworkSnmpUsersRs, len(*response.Users))
 				for i, users := range *response.Users {
 					result[i] = ResponseNetworksGetNetworkSnmpUsersRs{
-						Passphrase: types.StringValue(users.Passphrase),
-						Username:   types.StringValue(users.Username),
+						Passphrase: func() types.String {
+							if users.Passphrase != "" {
+								return types.StringValue(users.Passphrase)
+							}
+							return types.String{}
+						}(),
+						Username: func() types.String {
+							if users.Username != "" {
+								return types.StringValue(users.Username)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

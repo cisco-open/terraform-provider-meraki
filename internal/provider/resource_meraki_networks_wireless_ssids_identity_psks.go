@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -68,7 +69,6 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Schema(_ context.Context, _ 
 			},
 			"expires_at": schema.StringAttribute{
 				MarkdownDescription: `Timestamp for when the Identity PSK expires, or 'null' to never expire`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -76,7 +76,6 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Schema(_ context.Context, _ 
 			},
 			"group_policy_id": schema.StringAttribute{
 				MarkdownDescription: `The group policy to be applied to clients`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -88,7 +87,6 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Schema(_ context.Context, _ 
 			},
 			"identity_psk_id": schema.StringAttribute{
 				MarkdownDescription: `identityPskId path parameter. Identity psk ID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -96,7 +94,6 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Schema(_ context.Context, _ 
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name of the Identity PSK`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -112,7 +109,6 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Schema(_ context.Context, _ 
 			},
 			"passphrase": schema.StringAttribute{
 				MarkdownDescription: `The passphrase for client authentication`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -180,7 +176,6 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 				)
 				return
 			}
-			data.IDentityPskID = types.StringValue(vvIDentityPskID)
 			r.client.Wireless.UpdateNetworkWirelessSSIDIDentityPsk(vvNetworkID, vvNumber, vvIDentityPskID, data.toSdkApiRequestUpdate(ctx))
 
 			responseVerifyItem2, _, _ := r.client.Wireless.GetNetworkWirelessSSIDIDentityPsk(vvNetworkID, vvNumber, vvIDentityPskID)
@@ -199,7 +194,7 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkWirelessSSIDIDentityPsk",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -239,7 +234,6 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 			)
 			return
 		}
-		data.IDentityPskID = types.StringValue(vvIDentityPskID)
 		responseVerifyItem2, restyRespGet, err := r.client.Wireless.GetNetworkWirelessSSIDIDentityPsk(vvNetworkID, vvNumber, vvIDentityPskID)
 		if responseVerifyItem2 != nil && err == nil {
 			data = ResponseWirelessGetNetworkWirelessSSIDIDentityPskItemToBodyRs(data, responseVerifyItem2, false)
@@ -272,29 +266,17 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Create(ctx context.Context, 
 func (r *NetworksWirelessSSIDsIDentityPsksResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksWirelessSSIDsIDentityPsksRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
 	vvNumber := data.Number.ValueString()
-	// number
-	vvIDentityPskID := data.ID.ValueString()
-	// identity_psk_id
+	vvIDentityPskID := data.IDentityPskID.ValueString()
 	responseGet, restyRespGet, err := r.client.Wireless.GetNetworkWirelessSSIDIDentityPsk(vvNetworkID, vvNumber, vvIDentityPskID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -320,48 +302,41 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Read(ctx context.Context, re
 	}
 	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSSIDIDentityPskItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
-
 func (r *NetworksWirelessSSIDsIDentityPsksResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
 
 	if len(idParts) != 3 || idParts[0] == "" || idParts[1] == "" || idParts[2] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,number,identityPskId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("number"), idParts[1])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("identity_psk_id"), idParts[2])...)
 }
 
 func (r *NetworksWirelessSSIDsIDentityPsksResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksWirelessSSIDsIDentityPsksRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksWirelessSSIDsIDentityPsksRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvNumber := data.Number.ValueString()
-	vvIDentityPskID := data.ID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvNumber := plan.Number.ValueString()
+	vvIDentityPskID := plan.IDentityPskID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSSIDIDentityPsk(vvNetworkID, vvNumber, vvIDentityPskID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSSIDIDentityPsk",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -371,9 +346,7 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Update(ctx context.Context, 
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksWirelessSSIDsIDentityPsksResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -395,7 +368,7 @@ func (r *NetworksWirelessSSIDsIDentityPsksResource) Delete(ctx context.Context, 
 
 	vvNetworkID := state.NetworkID.ValueString()
 	vvNumber := state.Number.ValueString()
-	vvIDentityPskID := state.ID.ValueString()
+	vvIDentityPskID := state.IDentityPskID.ValueString()
 	_, err := r.client.Wireless.DeleteNetworkWirelessSSIDIDentityPsk(vvNetworkID, vvNumber, vvIDentityPskID)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -494,13 +467,48 @@ func (r *NetworksWirelessSSIDsIDentityPsksRs) toSdkApiRequestUpdate(ctx context.
 // From gosdk to TF Structs Schema
 func ResponseWirelessGetNetworkWirelessSSIDIDentityPskItemToBodyRs(state NetworksWirelessSSIDsIDentityPsksRs, response *merakigosdk.ResponseWirelessGetNetworkWirelessSSIDIDentityPsk, is_read bool) NetworksWirelessSSIDsIDentityPsksRs {
 	itemState := NetworksWirelessSSIDsIDentityPsksRs{
-		Email:                 types.StringValue(response.Email),
-		ExpiresAt:             types.StringValue(response.ExpiresAt),
-		GroupPolicyID:         types.StringValue(response.GroupPolicyID),
-		ID:                    types.StringValue(response.ID),
-		Name:                  types.StringValue(response.Name),
-		Passphrase:            types.StringValue(response.Passphrase),
-		WifiPersonalNetworkID: types.StringValue(response.WifiPersonalNetworkID),
+		Email: func() types.String {
+			if response.Email != "" {
+				return types.StringValue(response.Email)
+			}
+			return types.String{}
+		}(),
+		ExpiresAt: func() types.String {
+			if response.ExpiresAt != "" {
+				return types.StringValue(response.ExpiresAt)
+			}
+			return types.String{}
+		}(),
+		GroupPolicyID: func() types.String {
+			if response.GroupPolicyID != "" {
+				return types.StringValue(response.GroupPolicyID)
+			}
+			return types.String{}
+		}(),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		Passphrase: func() types.String {
+			if response.Passphrase != "" {
+				return types.StringValue(response.Passphrase)
+			}
+			return types.String{}
+		}(),
+		WifiPersonalNetworkID: func() types.String {
+			if response.WifiPersonalNetworkID != "" {
+				return types.StringValue(response.WifiPersonalNetworkID)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksWirelessSSIDsIDentityPsksRs)

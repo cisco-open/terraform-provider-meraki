@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -27,8 +28,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -71,7 +73,7 @@ func (r *NetworksSwitchStacksResource) Schema(_ context.Context, _ resource.Sche
 				MarkdownDescription: `Tells if stack is Monitored Stack.`,
 				Computed:            true,
 			},
-			"members": schema.SetNestedAttribute{
+			"members": schema.ListNestedAttribute{
 				MarkdownDescription: `Members of the Stack`,
 				Computed:            true,
 				NestedObject: schema.NestedAttributeObject{
@@ -103,7 +105,6 @@ func (r *NetworksSwitchStacksResource) Schema(_ context.Context, _ resource.Sche
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `Name of the Switch stack`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -113,19 +114,19 @@ func (r *NetworksSwitchStacksResource) Schema(_ context.Context, _ resource.Sche
 				MarkdownDescription: `networkId path parameter. Network ID`,
 				Required:            true,
 			},
-			"serials": schema.SetAttribute{
+			"serials": schema.ListAttribute{
 				MarkdownDescription: `Serials of the switches in the switch stack`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"switch_stack_id": schema.StringAttribute{
 				MarkdownDescription: `switchStackId path parameter. Switch stack ID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -202,7 +203,7 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkSwitchStack",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -274,26 +275,16 @@ func (r *NetworksSwitchStacksResource) Create(ctx context.Context, req resource.
 func (r *NetworksSwitchStacksResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksSwitchStacksRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
 	vvNetworkID := data.NetworkID.ValueString()
-	vvSwitchStackID := data.SwitchStackID.ValueString()
+	vvSwitchStackID := data.ID.ValueString()
 	responseGet, restyRespGet, err := r.client.Switch.GetNetworkSwitchStack(vvNetworkID, vvSwitchStackID)
 	if err != nil || restyRespGet == nil {
 		if restyRespGet != nil {
@@ -319,9 +310,7 @@ func (r *NetworksSwitchStacksResource) Read(ctx context.Context, req resource.Re
 	}
 	//entro aqui 2
 	data = ResponseSwitchGetNetworkSwitchStackItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksSwitchStacksResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
@@ -329,25 +318,21 @@ func (r *NetworksSwitchStacksResource) ImportState(ctx context.Context, req reso
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,switchStackId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("switch_stack_id"), idParts[1])...)
 }
 
 func (r *NetworksSwitchStacksResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksSwitchStacksRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksSwitchStacksRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
-	}
-	//Has Paths
-	//Update
-	// No update
+	} // No update
 	resp.Diagnostics.AddError(
 		"Update operation not supported in NetworksSwitchStacks",
 		"Update operation not supported in NetworksSwitchStacks",
@@ -393,7 +378,7 @@ type NetworksSwitchStacksRs struct {
 	IsMonitorOnly types.Bool                                      `tfsdk:"is_monitor_only"`
 	Members       *[]ResponseSwitchGetNetworkSwitchStackMembersRs `tfsdk:"members"`
 	Name          types.String                                    `tfsdk:"name"`
-	Serials       types.Set                                       `tfsdk:"serials"`
+	Serials       types.List                                      `tfsdk:"serials"`
 }
 
 type ResponseSwitchGetNetworkSwitchStackMembersRs struct {
@@ -425,7 +410,12 @@ func (r *NetworksSwitchStacksRs) toSdkApiRequestCreate(ctx context.Context) *mer
 // From gosdk to TF Structs Schema
 func ResponseSwitchGetNetworkSwitchStackItemToBodyRs(state NetworksSwitchStacksRs, response *merakigosdk.ResponseSwitchGetNetworkSwitchStack, is_read bool) NetworksSwitchStacksRs {
 	itemState := NetworksSwitchStacksRs{
-		ID: types.StringValue(response.ID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		IsMonitorOnly: func() types.Bool {
 			if response.IsMonitorOnly != nil {
 				return types.BoolValue(*response.IsMonitorOnly)
@@ -437,21 +427,50 @@ func ResponseSwitchGetNetworkSwitchStackItemToBodyRs(state NetworksSwitchStacksR
 				result := make([]ResponseSwitchGetNetworkSwitchStackMembersRs, len(*response.Members))
 				for i, members := range *response.Members {
 					result[i] = ResponseSwitchGetNetworkSwitchStackMembersRs{
-						Mac:    types.StringValue(members.Mac),
-						Model:  types.StringValue(members.Model),
-						Name:   types.StringValue(members.Name),
-						Role:   types.StringValue(members.Role),
-						Serial: types.StringValue(members.Serial),
+						Mac: func() types.String {
+							if members.Mac != "" {
+								return types.StringValue(members.Mac)
+							}
+							return types.String{}
+						}(),
+						Model: func() types.String {
+							if members.Model != "" {
+								return types.StringValue(members.Model)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if members.Name != "" {
+								return types.StringValue(members.Name)
+							}
+							return types.String{}
+						}(),
+						Role: func() types.String {
+							if members.Role != "" {
+								return types.StringValue(members.Role)
+							}
+							return types.String{}
+						}(),
+						Serial: func() types.String {
+							if members.Serial != "" {
+								return types.StringValue(members.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		Name:    types.StringValue(response.Name),
-		Serials: StringSliceToSet(response.Serials),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		Serials: StringSliceToList(response.Serials),
 	}
-	itemState.SwitchStackID = itemState.ID
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksSwitchStacksRs)
 	}

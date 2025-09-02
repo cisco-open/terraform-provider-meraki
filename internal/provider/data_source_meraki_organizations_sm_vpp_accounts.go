@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -298,6 +297,17 @@ func (d *OrganizationsSmVppAccountsDataSource) Read(ctx context.Context, req dat
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetOrganizationSmVppAccount",
+				err.Error(),
+			)
+			return
+		}
+
 		organizationsSmVppAccounts = ResponseSmGetOrganizationSmVppAccountItemToBody(organizationsSmVppAccounts, response2)
 		diags = resp.State.Set(ctx, &organizationsSmVppAccounts)
 		resp.Diagnostics.Append(diags...)
@@ -369,30 +379,110 @@ func ResponseSmGetOrganizationSmVppAccountsItemsToBody(state OrganizationsSmVppA
 	var items []ResponseItemSmGetOrganizationSmVppAccounts
 	for _, item := range *response {
 		itemState := ResponseItemSmGetOrganizationSmVppAccounts{
-			AllowedAdmins:        types.StringValue(item.AllowedAdmins),
+			AllowedAdmins: func() types.String {
+				if item.AllowedAdmins != "" {
+					return types.StringValue(item.AllowedAdmins)
+				}
+				return types.String{}
+			}(),
 			AssignableNetworkIDs: StringSliceToList(item.AssignableNetworkIDs),
-			AssignableNetworks:   types.StringValue(item.AssignableNetworks),
-			ContentToken:         types.StringValue(item.ContentToken),
-			Email:                types.StringValue(item.Email),
-			ID:                   types.StringValue(item.ID),
-			LastForceSyncedAt:    types.StringValue(item.LastForceSyncedAt),
-			LastSyncedAt:         types.StringValue(item.LastSyncedAt),
-			Name:                 types.StringValue(item.Name),
-			NetworkIDAdmins:      types.StringValue(item.NetworkIDAdmins),
+			AssignableNetworks: func() types.String {
+				if item.AssignableNetworks != "" {
+					return types.StringValue(item.AssignableNetworks)
+				}
+				return types.String{}
+			}(),
+			ContentToken: func() types.String {
+				if item.ContentToken != "" {
+					return types.StringValue(item.ContentToken)
+				}
+				return types.String{}
+			}(),
+			Email: func() types.String {
+				if item.Email != "" {
+					return types.StringValue(item.Email)
+				}
+				return types.String{}
+			}(),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			LastForceSyncedAt: func() types.String {
+				if item.LastForceSyncedAt != "" {
+					return types.StringValue(item.LastForceSyncedAt)
+				}
+				return types.String{}
+			}(),
+			LastSyncedAt: func() types.String {
+				if item.LastSyncedAt != "" {
+					return types.StringValue(item.LastSyncedAt)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			NetworkIDAdmins: func() types.String {
+				if item.NetworkIDAdmins != "" {
+					return types.StringValue(item.NetworkIDAdmins)
+				}
+				return types.String{}
+			}(),
 			ParsedToken: func() *ResponseItemSmGetOrganizationSmVppAccountsParsedToken {
 				if item.ParsedToken != nil {
 					return &ResponseItemSmGetOrganizationSmVppAccountsParsedToken{
-						ExpiresAt:   types.StringValue(item.ParsedToken.ExpiresAt),
-						HashedToken: types.StringValue(item.ParsedToken.HashedToken),
-						OrgName:     types.StringValue(item.ParsedToken.OrgName),
+						ExpiresAt: func() types.String {
+							if item.ParsedToken.ExpiresAt != "" {
+								return types.StringValue(item.ParsedToken.ExpiresAt)
+							}
+							return types.String{}
+						}(),
+						HashedToken: func() types.String {
+							if item.ParsedToken.HashedToken != "" {
+								return types.StringValue(item.ParsedToken.HashedToken)
+							}
+							return types.String{}
+						}(),
+						OrgName: func() types.String {
+							if item.ParsedToken.OrgName != "" {
+								return types.StringValue(item.ParsedToken.OrgName)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			VppAccountID:    types.StringValue(item.VppAccountID),
-			VppLocationID:   types.StringValue(item.VppLocationID),
-			VppLocationName: types.StringValue(item.VppLocationName),
-			VppServiceToken: types.StringValue(item.VppServiceToken),
+			VppAccountID: func() types.String {
+				if item.VppAccountID != "" {
+					return types.StringValue(item.VppAccountID)
+				}
+				return types.String{}
+			}(),
+			VppLocationID: func() types.String {
+				if item.VppLocationID != "" {
+					return types.StringValue(item.VppLocationID)
+				}
+				return types.String{}
+			}(),
+			VppLocationName: func() types.String {
+				if item.VppLocationName != "" {
+					return types.StringValue(item.VppLocationName)
+				}
+				return types.String{}
+			}(),
+			VppServiceToken: func() types.String {
+				if item.VppServiceToken != "" {
+					return types.StringValue(item.VppServiceToken)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -402,30 +492,110 @@ func ResponseSmGetOrganizationSmVppAccountsItemsToBody(state OrganizationsSmVppA
 
 func ResponseSmGetOrganizationSmVppAccountItemToBody(state OrganizationsSmVppAccounts, response *merakigosdk.ResponseSmGetOrganizationSmVppAccount) OrganizationsSmVppAccounts {
 	itemState := ResponseSmGetOrganizationSmVppAccount{
-		AllowedAdmins:        types.StringValue(response.AllowedAdmins),
+		AllowedAdmins: func() types.String {
+			if response.AllowedAdmins != "" {
+				return types.StringValue(response.AllowedAdmins)
+			}
+			return types.String{}
+		}(),
 		AssignableNetworkIDs: StringSliceToList(response.AssignableNetworkIDs),
-		AssignableNetworks:   types.StringValue(response.AssignableNetworks),
-		ContentToken:         types.StringValue(response.ContentToken),
-		Email:                types.StringValue(response.Email),
-		ID:                   types.StringValue(response.ID),
-		LastForceSyncedAt:    types.StringValue(response.LastForceSyncedAt),
-		LastSyncedAt:         types.StringValue(response.LastSyncedAt),
-		Name:                 types.StringValue(response.Name),
-		NetworkIDAdmins:      types.StringValue(response.NetworkIDAdmins),
+		AssignableNetworks: func() types.String {
+			if response.AssignableNetworks != "" {
+				return types.StringValue(response.AssignableNetworks)
+			}
+			return types.String{}
+		}(),
+		ContentToken: func() types.String {
+			if response.ContentToken != "" {
+				return types.StringValue(response.ContentToken)
+			}
+			return types.String{}
+		}(),
+		Email: func() types.String {
+			if response.Email != "" {
+				return types.StringValue(response.Email)
+			}
+			return types.String{}
+		}(),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		LastForceSyncedAt: func() types.String {
+			if response.LastForceSyncedAt != "" {
+				return types.StringValue(response.LastForceSyncedAt)
+			}
+			return types.String{}
+		}(),
+		LastSyncedAt: func() types.String {
+			if response.LastSyncedAt != "" {
+				return types.StringValue(response.LastSyncedAt)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		NetworkIDAdmins: func() types.String {
+			if response.NetworkIDAdmins != "" {
+				return types.StringValue(response.NetworkIDAdmins)
+			}
+			return types.String{}
+		}(),
 		ParsedToken: func() *ResponseSmGetOrganizationSmVppAccountParsedToken {
 			if response.ParsedToken != nil {
 				return &ResponseSmGetOrganizationSmVppAccountParsedToken{
-					ExpiresAt:   types.StringValue(response.ParsedToken.ExpiresAt),
-					HashedToken: types.StringValue(response.ParsedToken.HashedToken),
-					OrgName:     types.StringValue(response.ParsedToken.OrgName),
+					ExpiresAt: func() types.String {
+						if response.ParsedToken.ExpiresAt != "" {
+							return types.StringValue(response.ParsedToken.ExpiresAt)
+						}
+						return types.String{}
+					}(),
+					HashedToken: func() types.String {
+						if response.ParsedToken.HashedToken != "" {
+							return types.StringValue(response.ParsedToken.HashedToken)
+						}
+						return types.String{}
+					}(),
+					OrgName: func() types.String {
+						if response.ParsedToken.OrgName != "" {
+							return types.StringValue(response.ParsedToken.OrgName)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		VppAccountID:    types.StringValue(response.VppAccountID),
-		VppLocationID:   types.StringValue(response.VppLocationID),
-		VppLocationName: types.StringValue(response.VppLocationName),
-		VppServiceToken: types.StringValue(response.VppServiceToken),
+		VppAccountID: func() types.String {
+			if response.VppAccountID != "" {
+				return types.StringValue(response.VppAccountID)
+			}
+			return types.String{}
+		}(),
+		VppLocationID: func() types.String {
+			if response.VppLocationID != "" {
+				return types.StringValue(response.VppLocationID)
+			}
+			return types.String{}
+		}(),
+		VppLocationName: func() types.String {
+			if response.VppLocationName != "" {
+				return types.StringValue(response.VppLocationName)
+			}
+			return types.String{}
+		}(),
+		VppServiceToken: func() types.String {
+			if response.VppServiceToken != "" {
+				return types.StringValue(response.VppServiceToken)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

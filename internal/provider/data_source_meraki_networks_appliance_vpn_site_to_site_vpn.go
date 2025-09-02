@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -225,7 +224,12 @@ func ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnItemToBody(state Networ
 				result := make([]ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnHubs, len(*response.Hubs))
 				for i, hubs := range *response.Hubs {
 					result[i] = ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnHubs{
-						HubID: types.StringValue(hubs.HubID),
+						HubID: func() types.String {
+							if hubs.HubID != "" {
+								return types.StringValue(hubs.HubID)
+							}
+							return types.String{}
+						}(),
 						UseDefaultRoute: func() types.Bool {
 							if hubs.UseDefaultRoute != nil {
 								return types.BoolValue(*hubs.UseDefaultRoute)
@@ -238,7 +242,12 @@ func ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnItemToBody(state Networ
 			}
 			return nil
 		}(),
-		Mode: types.StringValue(response.Mode),
+		Mode: func() types.String {
+			if response.Mode != "" {
+				return types.StringValue(response.Mode)
+			}
+			return types.String{}
+		}(),
 		Subnet: func() *ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnet {
 			if response.Subnet != nil {
 				return &ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnet{
@@ -264,7 +273,12 @@ func ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnItemToBody(state Networ
 				result := make([]ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnets, len(*response.Subnets))
 				for i, subnets := range *response.Subnets {
 					result[i] = ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnets{
-						LocalSubnet: types.StringValue(subnets.LocalSubnet),
+						LocalSubnet: func() types.String {
+							if subnets.LocalSubnet != "" {
+								return types.StringValue(subnets.LocalSubnet)
+							}
+							return types.String{}
+						}(),
 						Nat: func() *ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetsNat {
 							if subnets.Nat != nil {
 								return &ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnSubnetsNat{
@@ -274,7 +288,12 @@ func ResponseApplianceGetNetworkApplianceVpnSiteToSiteVpnItemToBody(state Networ
 										}
 										return types.Bool{}
 									}(),
-									RemoteSubnet: types.StringValue(subnets.Nat.RemoteSubnet),
+									RemoteSubnet: func() types.String {
+										if subnets.Nat.RemoteSubnet != "" {
+											return types.StringValue(subnets.Nat.RemoteSubnet)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil

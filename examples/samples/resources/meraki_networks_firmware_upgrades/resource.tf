@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "1.1.8-beta"
+      version = "1.2.0-beta"
       source  = "hashicorp.com/edu/meraki"
       # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
@@ -15,7 +15,7 @@ provider "meraki" {
 
 resource "meraki_networks_firmware_upgrades" "example" {
 
-  network_id = "L_828099381482775374"
+  network_id = "L_828099381482775375"
   products = {
 
     appliance = {

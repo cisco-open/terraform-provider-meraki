@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -361,45 +360,145 @@ func ResponseNetworksGetNetworkEventsItemToBody(state NetworksEvents, response *
 				result := make([]ResponseNetworksGetNetworkEventsEvents, len(*response.Events))
 				for i, events := range *response.Events {
 					result[i] = ResponseNetworksGetNetworkEventsEvents{
-						Category:          types.StringValue(events.Category),
-						ClientDescription: types.StringValue(events.ClientDescription),
-						ClientID:          types.StringValue(events.ClientID),
-						ClientMac:         types.StringValue(events.ClientMac),
-						Description:       types.StringValue(events.Description),
-						DeviceName:        types.StringValue(events.DeviceName),
-						DeviceSerial:      types.StringValue(events.DeviceSerial),
+						Category: func() types.String {
+							if events.Category != "" {
+								return types.StringValue(events.Category)
+							}
+							return types.String{}
+						}(),
+						ClientDescription: func() types.String {
+							if events.ClientDescription != "" {
+								return types.StringValue(events.ClientDescription)
+							}
+							return types.String{}
+						}(),
+						ClientID: func() types.String {
+							if events.ClientID != "" {
+								return types.StringValue(events.ClientID)
+							}
+							return types.String{}
+						}(),
+						ClientMac: func() types.String {
+							if events.ClientMac != "" {
+								return types.StringValue(events.ClientMac)
+							}
+							return types.String{}
+						}(),
+						Description: func() types.String {
+							if events.Description != "" {
+								return types.StringValue(events.Description)
+							}
+							return types.String{}
+						}(),
+						DeviceName: func() types.String {
+							if events.DeviceName != "" {
+								return types.StringValue(events.DeviceName)
+							}
+							return types.String{}
+						}(),
+						DeviceSerial: func() types.String {
+							if events.DeviceSerial != "" {
+								return types.StringValue(events.DeviceSerial)
+							}
+							return types.String{}
+						}(),
 						EventData: func() *ResponseNetworksGetNetworkEventsEventsEventData {
 							if events.EventData != nil {
 								return &ResponseNetworksGetNetworkEventsEventsEventData{
-									Aid:       types.StringValue(events.EventData.Aid),
-									Channel:   types.StringValue(events.EventData.Channel),
-									ClientIP:  types.StringValue(events.EventData.ClientIP),
-									ClientMac: types.StringValue(events.EventData.ClientMac),
-									Radio:     types.StringValue(events.EventData.Radio),
-									Rssi:      types.StringValue(events.EventData.Rssi),
-									Vap:       types.StringValue(events.EventData.Vap),
+									Aid: func() types.String {
+										if events.EventData.Aid != "" {
+											return types.StringValue(events.EventData.Aid)
+										}
+										return types.String{}
+									}(),
+									Channel: func() types.String {
+										if events.EventData.Channel != "" {
+											return types.StringValue(events.EventData.Channel)
+										}
+										return types.String{}
+									}(),
+									ClientIP: func() types.String {
+										if events.EventData.ClientIP != "" {
+											return types.StringValue(events.EventData.ClientIP)
+										}
+										return types.String{}
+									}(),
+									ClientMac: func() types.String {
+										if events.EventData.ClientMac != "" {
+											return types.StringValue(events.EventData.ClientMac)
+										}
+										return types.String{}
+									}(),
+									Radio: func() types.String {
+										if events.EventData.Radio != "" {
+											return types.StringValue(events.EventData.Radio)
+										}
+										return types.String{}
+									}(),
+									Rssi: func() types.String {
+										if events.EventData.Rssi != "" {
+											return types.StringValue(events.EventData.Rssi)
+										}
+										return types.String{}
+									}(),
+									Vap: func() types.String {
+										if events.EventData.Vap != "" {
+											return types.StringValue(events.EventData.Vap)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						NetworkID:  types.StringValue(events.NetworkID),
-						OccurredAt: types.StringValue(events.OccurredAt),
+						NetworkID: func() types.String {
+							if events.NetworkID != "" {
+								return types.StringValue(events.NetworkID)
+							}
+							return types.String{}
+						}(),
+						OccurredAt: func() types.String {
+							if events.OccurredAt != "" {
+								return types.StringValue(events.OccurredAt)
+							}
+							return types.String{}
+						}(),
 						SSIDNumber: func() types.Int64 {
 							if events.SSIDNumber != nil {
 								return types.Int64Value(int64(*events.SSIDNumber))
 							}
 							return types.Int64{}
 						}(),
-						Type: types.StringValue(events.Type),
+						Type: func() types.String {
+							if events.Type != "" {
+								return types.StringValue(events.Type)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		Message:     types.StringValue(response.Message),
-		PageEndAt:   types.StringValue(response.PageEndAt),
-		PageStartAt: types.StringValue(response.PageStartAt),
+		Message: func() types.String {
+			if response.Message != "" {
+				return types.StringValue(response.Message)
+			}
+			return types.String{}
+		}(),
+		PageEndAt: func() types.String {
+			if response.PageEndAt != "" {
+				return types.StringValue(response.PageEndAt)
+			}
+			return types.String{}
+		}(),
+		PageStartAt: func() types.String {
+			if response.PageStartAt != "" {
+				return types.StringValue(response.PageStartAt)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

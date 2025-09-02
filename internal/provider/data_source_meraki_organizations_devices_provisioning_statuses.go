@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -234,20 +233,50 @@ func ResponseOrganizationsGetOrganizationDevicesProvisioningStatusesItemsToBody(
 	var items []ResponseItemOrganizationsGetOrganizationDevicesProvisioningStatuses
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationDevicesProvisioningStatuses{
-			Mac:  types.StringValue(item.Mac),
-			Name: types.StringValue(item.Name),
+			Mac: func() types.String {
+				if item.Mac != "" {
+					return types.StringValue(item.Mac)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			Network: func() *ResponseItemOrganizationsGetOrganizationDevicesProvisioningStatusesNetwork {
 				if item.Network != nil {
 					return &ResponseItemOrganizationsGetOrganizationDevicesProvisioningStatusesNetwork{
-						ID: types.StringValue(item.Network.ID),
+						ID: func() types.String {
+							if item.Network.ID != "" {
+								return types.StringValue(item.Network.ID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			ProductType: types.StringValue(item.ProductType),
-			Serial:      types.StringValue(item.Serial),
-			Status:      types.StringValue(item.Status),
-			Tags:        StringSliceToList(item.Tags),
+			ProductType: func() types.String {
+				if item.ProductType != "" {
+					return types.StringValue(item.ProductType)
+				}
+				return types.String{}
+			}(),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
+			Status: func() types.String {
+				if item.Status != "" {
+					return types.StringValue(item.Status)
+				}
+				return types.String{}
+			}(),
+			Tags: StringSliceToList(item.Tags),
 		}
 		items = append(items, itemState)
 	}

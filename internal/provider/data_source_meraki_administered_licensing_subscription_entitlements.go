@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -154,17 +153,42 @@ type ResponseLicensingGetAdministeredLicensingSubscriptionEntitlements struct {
 // ToBody
 func ResponseLicensingGetAdministeredLicensingSubscriptionEntitlementsItemToBody(state AdministeredLicensingSubscriptionEntitlements, response *merakigosdk.ResponseLicensingGetAdministeredLicensingSubscriptionEntitlements) AdministeredLicensingSubscriptionEntitlements {
 	itemState := ResponseLicensingGetAdministeredLicensingSubscriptionEntitlements{
-		FeatureTier: types.StringValue(response.FeatureTier),
+		FeatureTier: func() types.String {
+			if response.FeatureTier != "" {
+				return types.StringValue(response.FeatureTier)
+			}
+			return types.String{}
+		}(),
 		IsAddOn: func() types.Bool {
 			if response.IsAddOn != nil {
 				return types.BoolValue(*response.IsAddOn)
 			}
 			return types.Bool{}
 		}(),
-		Name:         types.StringValue(response.Name),
-		ProductClass: types.StringValue(response.ProductClass),
-		ProductType:  types.StringValue(response.ProductType),
-		Sku:          types.StringValue(response.Sku),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		ProductClass: func() types.String {
+			if response.ProductClass != "" {
+				return types.StringValue(response.ProductClass)
+			}
+			return types.String{}
+		}(),
+		ProductType: func() types.String {
+			if response.ProductType != "" {
+				return types.StringValue(response.ProductType)
+			}
+			return types.String{}
+		}(),
+		Sku: func() types.String {
+			if response.Sku != "" {
+				return types.StringValue(response.Sku)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

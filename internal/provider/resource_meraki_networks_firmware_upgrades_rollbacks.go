@@ -355,35 +355,90 @@ func (r *NetworksFirmwareUpgradesRollbacks) toSdkApiRequestCreate(ctx context.Co
 // ToBody
 func ResponseNetworksCreateNetworkFirmwareUpgradesRollbackItemToBody(state NetworksFirmwareUpgradesRollbacks, response *merakigosdk.ResponseNetworksCreateNetworkFirmwareUpgradesRollback) NetworksFirmwareUpgradesRollbacks {
 	itemState := ResponseNetworksCreateNetworkFirmwareUpgradesRollback{
-		Product: types.StringValue(response.Product),
+		Product: func() types.String {
+			if response.Product != "" {
+				return types.StringValue(response.Product)
+			}
+			return types.String{}
+		}(),
 		Reasons: func() *[]ResponseNetworksCreateNetworkFirmwareUpgradesRollbackReasons {
 			if response.Reasons != nil {
 				result := make([]ResponseNetworksCreateNetworkFirmwareUpgradesRollbackReasons, len(*response.Reasons))
 				for i, reasons := range *response.Reasons {
 					result[i] = ResponseNetworksCreateNetworkFirmwareUpgradesRollbackReasons{
-						Category: types.StringValue(reasons.Category),
-						Comment:  types.StringValue(reasons.Comment),
+						Category: func() types.String {
+							if reasons.Category != "" {
+								return types.StringValue(reasons.Category)
+							}
+							return types.String{}
+						}(),
+						Comment: func() types.String {
+							if reasons.Comment != "" {
+								return types.StringValue(reasons.Comment)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		Status: types.StringValue(response.Status),
-		Time:   types.StringValue(response.Time),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
+		Time: func() types.String {
+			if response.Time != "" {
+				return types.StringValue(response.Time)
+			}
+			return types.String{}
+		}(),
 		ToVersion: func() *ResponseNetworksCreateNetworkFirmwareUpgradesRollbackToVersion {
 			if response.ToVersion != nil {
 				return &ResponseNetworksCreateNetworkFirmwareUpgradesRollbackToVersion{
-					Firmware:    types.StringValue(response.ToVersion.Firmware),
-					ID:          types.StringValue(response.ToVersion.ID),
-					ReleaseDate: types.StringValue(response.ToVersion.ReleaseDate),
-					ReleaseType: types.StringValue(response.ToVersion.ReleaseType),
-					ShortName:   types.StringValue(response.ToVersion.ShortName),
+					Firmware: func() types.String {
+						if response.ToVersion.Firmware != "" {
+							return types.StringValue(response.ToVersion.Firmware)
+						}
+						return types.String{}
+					}(),
+					ID: func() types.String {
+						if response.ToVersion.ID != "" {
+							return types.StringValue(response.ToVersion.ID)
+						}
+						return types.String{}
+					}(),
+					ReleaseDate: func() types.String {
+						if response.ToVersion.ReleaseDate != "" {
+							return types.StringValue(response.ToVersion.ReleaseDate)
+						}
+						return types.String{}
+					}(),
+					ReleaseType: func() types.String {
+						if response.ToVersion.ReleaseType != "" {
+							return types.StringValue(response.ToVersion.ReleaseType)
+						}
+						return types.String{}
+					}(),
+					ShortName: func() types.String {
+						if response.ToVersion.ShortName != "" {
+							return types.StringValue(response.ToVersion.ShortName)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		UpgradeBatchID: types.StringValue(response.UpgradeBatchID),
+		UpgradeBatchID: func() types.String {
+			if response.UpgradeBatchID != "" {
+				return types.StringValue(response.UpgradeBatchID)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

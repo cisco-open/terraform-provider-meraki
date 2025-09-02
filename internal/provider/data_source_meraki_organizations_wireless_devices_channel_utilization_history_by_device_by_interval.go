@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -292,7 +291,12 @@ func ResponseWirelessGetOrganizationWirelessDevicesChannelUtilizationHistoryByDe
 					result := make([]ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationHistoryByDeviceByIntervalByBand, len(*item.ByBand))
 					for i, byBand := range *item.ByBand {
 						result[i] = ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationHistoryByDeviceByIntervalByBand{
-							Band: types.StringValue(byBand.Band),
+							Band: func() types.String {
+								if byBand.Band != "" {
+									return types.StringValue(byBand.Band)
+								}
+								return types.String{}
+							}(),
 							NonWifi: func() *ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationHistoryByDeviceByIntervalByBandNonWifi {
 								if byBand.NonWifi != nil {
 									return &ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationHistoryByDeviceByIntervalByBandNonWifi{
@@ -338,18 +342,43 @@ func ResponseWirelessGetOrganizationWirelessDevicesChannelUtilizationHistoryByDe
 				}
 				return nil
 			}(),
-			EndTs: types.StringValue(item.EndTs),
-			Mac:   types.StringValue(item.Mac),
+			EndTs: func() types.String {
+				if item.EndTs != "" {
+					return types.StringValue(item.EndTs)
+				}
+				return types.String{}
+			}(),
+			Mac: func() types.String {
+				if item.Mac != "" {
+					return types.StringValue(item.Mac)
+				}
+				return types.String{}
+			}(),
 			Network: func() *ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationHistoryByDeviceByIntervalNetwork {
 				if item.Network != nil {
 					return &ResponseItemWirelessGetOrganizationWirelessDevicesChannelUtilizationHistoryByDeviceByIntervalNetwork{
-						ID: types.StringValue(item.Network.ID),
+						ID: func() types.String {
+							if item.Network.ID != "" {
+								return types.StringValue(item.Network.ID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			Serial:  types.StringValue(item.Serial),
-			StartTs: types.StringValue(item.StartTs),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
+			StartTs: func() types.String {
+				if item.StartTs != "" {
+					return types.StringValue(item.StartTs)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

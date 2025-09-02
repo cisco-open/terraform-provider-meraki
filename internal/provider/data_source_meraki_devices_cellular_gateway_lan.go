@@ -191,17 +191,47 @@ type ResponseCellularGatewayGetDeviceCellularGatewayLanReservedIpRanges struct {
 // ToBody
 func ResponseCellularGatewayGetDeviceCellularGatewayLanItemToBody(state DevicesCellularGatewayLan, response *merakigosdk.ResponseCellularGatewayGetDeviceCellularGatewayLan) DevicesCellularGatewayLan {
 	itemState := ResponseCellularGatewayGetDeviceCellularGatewayLan{
-		DeviceLanIP:  types.StringValue(response.DeviceLanIP),
-		DeviceName:   types.StringValue(response.DeviceName),
-		DeviceSubnet: types.StringValue(response.DeviceSubnet),
+		DeviceLanIP: func() types.String {
+			if response.DeviceLanIP != "" {
+				return types.StringValue(response.DeviceLanIP)
+			}
+			return types.String{}
+		}(),
+		DeviceName: func() types.String {
+			if response.DeviceName != "" {
+				return types.StringValue(response.DeviceName)
+			}
+			return types.String{}
+		}(),
+		DeviceSubnet: func() types.String {
+			if response.DeviceSubnet != "" {
+				return types.StringValue(response.DeviceSubnet)
+			}
+			return types.String{}
+		}(),
 		FixedIPAssignments: func() *[]ResponseCellularGatewayGetDeviceCellularGatewayLanFixedIpAssignments {
 			if response.FixedIPAssignments != nil {
 				result := make([]ResponseCellularGatewayGetDeviceCellularGatewayLanFixedIpAssignments, len(*response.FixedIPAssignments))
 				for i, fixedIPAssignments := range *response.FixedIPAssignments {
 					result[i] = ResponseCellularGatewayGetDeviceCellularGatewayLanFixedIpAssignments{
-						IP:   types.StringValue(fixedIPAssignments.IP),
-						Mac:  types.StringValue(fixedIPAssignments.Mac),
-						Name: types.StringValue(fixedIPAssignments.Name),
+						IP: func() types.String {
+							if fixedIPAssignments.IP != "" {
+								return types.StringValue(fixedIPAssignments.IP)
+							}
+							return types.String{}
+						}(),
+						Mac: func() types.String {
+							if fixedIPAssignments.Mac != "" {
+								return types.StringValue(fixedIPAssignments.Mac)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if fixedIPAssignments.Name != "" {
+								return types.StringValue(fixedIPAssignments.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -213,9 +243,24 @@ func ResponseCellularGatewayGetDeviceCellularGatewayLanItemToBody(state DevicesC
 				result := make([]ResponseCellularGatewayGetDeviceCellularGatewayLanReservedIpRanges, len(*response.ReservedIPRanges))
 				for i, reservedIPRanges := range *response.ReservedIPRanges {
 					result[i] = ResponseCellularGatewayGetDeviceCellularGatewayLanReservedIpRanges{
-						Comment: types.StringValue(reservedIPRanges.Comment),
-						End:     types.StringValue(reservedIPRanges.End),
-						Start:   types.StringValue(reservedIPRanges.Start),
+						Comment: func() types.String {
+							if reservedIPRanges.Comment != "" {
+								return types.StringValue(reservedIPRanges.Comment)
+							}
+							return types.String{}
+						}(),
+						End: func() types.String {
+							if reservedIPRanges.End != "" {
+								return types.StringValue(reservedIPRanges.End)
+							}
+							return types.String{}
+						}(),
+						Start: func() types.String {
+							if reservedIPRanges.Start != "" {
+								return types.StringValue(reservedIPRanges.Start)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

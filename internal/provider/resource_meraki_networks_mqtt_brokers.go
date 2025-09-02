@@ -409,14 +409,34 @@ func ResponseNetworksCreateNetworkMqttBrokerItemToBody(state NetworksMqttBrokers
 		Authentication: func() *ResponseNetworksCreateNetworkMqttBrokerAuthentication {
 			if response.Authentication != nil {
 				return &ResponseNetworksCreateNetworkMqttBrokerAuthentication{
-					Username: types.StringValue(response.Authentication.Username),
+					Username: func() types.String {
+						if response.Authentication.Username != "" {
+							return types.StringValue(response.Authentication.Username)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Host: types.StringValue(response.Host),
-		ID:   types.StringValue(response.ID),
-		Name: types.StringValue(response.Name),
+		Host: func() types.String {
+			if response.Host != "" {
+				return types.StringValue(response.Host)
+			}
+			return types.String{}
+		}(),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		Port: func() types.Int64 {
 			if response.Port != nil {
 				return types.Int64Value(int64(*response.Port))
@@ -426,7 +446,12 @@ func ResponseNetworksCreateNetworkMqttBrokerItemToBody(state NetworksMqttBrokers
 		Security: func() *ResponseNetworksCreateNetworkMqttBrokerSecurity {
 			if response.Security != nil {
 				return &ResponseNetworksCreateNetworkMqttBrokerSecurity{
-					Mode: types.StringValue(response.Security.Mode),
+					Mode: func() types.String {
+						if response.Security.Mode != "" {
+							return types.StringValue(response.Security.Mode)
+						}
+						return types.String{}
+					}(),
 					Tls: func() *ResponseNetworksCreateNetworkMqttBrokerSecurityTls {
 						if response.Security.Tls != nil {
 							return &ResponseNetworksCreateNetworkMqttBrokerSecurityTls{

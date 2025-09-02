@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -262,8 +261,18 @@ func ResponseApplianceGetOrganizationApplianceFirewallMulticastForwardingByNetwo
 						Network: func() *ResponseApplianceGetOrganizationApplianceFirewallMulticastForwardingByNetworkItemsNetwork {
 							if items.Network != nil {
 								return &ResponseApplianceGetOrganizationApplianceFirewallMulticastForwardingByNetworkItemsNetwork{
-									ID:   types.StringValue(items.Network.ID),
-									Name: types.StringValue(items.Network.Name),
+									ID: func() types.String {
+										if items.Network.ID != "" {
+											return types.StringValue(items.Network.ID)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if items.Network.Name != "" {
+											return types.StringValue(items.Network.Name)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -273,9 +282,19 @@ func ResponseApplianceGetOrganizationApplianceFirewallMulticastForwardingByNetwo
 								result := make([]ResponseApplianceGetOrganizationApplianceFirewallMulticastForwardingByNetworkItemsRules, len(*items.Rules))
 								for i, rules := range *items.Rules {
 									result[i] = ResponseApplianceGetOrganizationApplianceFirewallMulticastForwardingByNetworkItemsRules{
-										Address:     types.StringValue(rules.Address),
-										Description: types.StringValue(rules.Description),
-										VLANIDs:     StringSliceToList(rules.VLANIDs),
+										Address: func() types.String {
+											if rules.Address != "" {
+												return types.StringValue(rules.Address)
+											}
+											return types.String{}
+										}(),
+										Description: func() types.String {
+											if rules.Description != "" {
+												return types.StringValue(rules.Description)
+											}
+											return types.String{}
+										}(),
+										VLANIDs: StringSliceToList(rules.VLANIDs),
 									}
 								}
 								return &result

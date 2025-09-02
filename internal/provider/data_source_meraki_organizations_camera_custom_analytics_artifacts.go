@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -200,6 +199,17 @@ func (d *OrganizationsCameraCustomAnalyticsArtifactsDataSource) Read(ctx context
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetOrganizationCameraCustomAnalyticsArtifact",
+				err.Error(),
+			)
+			return
+		}
+
 		organizationsCameraCustomAnalyticsArtifacts = ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactItemToBody(organizationsCameraCustomAnalyticsArtifacts, response2)
 		diags = resp.State.Set(ctx, &organizationsCameraCustomAnalyticsArtifacts)
 		resp.Diagnostics.Append(diags...)
@@ -247,14 +257,39 @@ func ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactsItemsToBody(stat
 	var items []ResponseItemCameraGetOrganizationCameraCustomAnalyticsArtifacts
 	for _, item := range *response {
 		itemState := ResponseItemCameraGetOrganizationCameraCustomAnalyticsArtifacts{
-			ArtifactID:     types.StringValue(item.ArtifactID),
-			Name:           types.StringValue(item.Name),
-			OrganizationID: types.StringValue(item.OrganizationID),
+			ArtifactID: func() types.String {
+				if item.ArtifactID != "" {
+					return types.StringValue(item.ArtifactID)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			OrganizationID: func() types.String {
+				if item.OrganizationID != "" {
+					return types.StringValue(item.OrganizationID)
+				}
+				return types.String{}
+			}(),
 			Status: func() *ResponseItemCameraGetOrganizationCameraCustomAnalyticsArtifactsStatus {
 				if item.Status != nil {
 					return &ResponseItemCameraGetOrganizationCameraCustomAnalyticsArtifactsStatus{
-						Message: types.StringValue(item.Status.Message),
-						Type:    types.StringValue(item.Status.Type),
+						Message: func() types.String {
+							if item.Status.Message != "" {
+								return types.StringValue(item.Status.Message)
+							}
+							return types.String{}
+						}(),
+						Type: func() types.String {
+							if item.Status.Type != "" {
+								return types.StringValue(item.Status.Type)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
@@ -268,14 +303,39 @@ func ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactsItemsToBody(stat
 
 func ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactItemToBody(state OrganizationsCameraCustomAnalyticsArtifacts, response *merakigosdk.ResponseCameraGetOrganizationCameraCustomAnalyticsArtifact) OrganizationsCameraCustomAnalyticsArtifacts {
 	itemState := ResponseCameraGetOrganizationCameraCustomAnalyticsArtifact{
-		ArtifactID:     types.StringValue(response.ArtifactID),
-		Name:           types.StringValue(response.Name),
-		OrganizationID: types.StringValue(response.OrganizationID),
+		ArtifactID: func() types.String {
+			if response.ArtifactID != "" {
+				return types.StringValue(response.ArtifactID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		OrganizationID: func() types.String {
+			if response.OrganizationID != "" {
+				return types.StringValue(response.OrganizationID)
+			}
+			return types.String{}
+		}(),
 		Status: func() *ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactStatus {
 			if response.Status != nil {
 				return &ResponseCameraGetOrganizationCameraCustomAnalyticsArtifactStatus{
-					Message: types.StringValue(response.Status.Message),
-					Type:    types.StringValue(response.Status.Type),
+					Message: func() types.String {
+						if response.Status.Message != "" {
+							return types.StringValue(response.Status.Message)
+						}
+						return types.String{}
+					}(),
+					Type: func() types.String {
+						if response.Status.Type != "" {
+							return types.StringValue(response.Status.Type)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil

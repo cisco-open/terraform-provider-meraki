@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -344,7 +343,12 @@ func ResponseOrganizationsGetOrganizationDevicesStatusesItemsToBody(state Organi
 								result := make([]ResponseItemOrganizationsGetOrganizationDevicesStatusesComponentsPowerSupplies, len(*item.Components.PowerSupplies))
 								for i, powerSupplies := range *item.Components.PowerSupplies {
 									result[i] = ResponseItemOrganizationsGetOrganizationDevicesStatusesComponentsPowerSupplies{
-										Model: types.StringValue(powerSupplies.Model),
+										Model: func() types.String {
+											if powerSupplies.Model != "" {
+												return types.StringValue(powerSupplies.Model)
+											}
+											return types.String{}
+										}(),
 										Poe: func() *ResponseItemOrganizationsGetOrganizationDevicesStatusesComponentsPowerSuppliesPoe {
 											if powerSupplies.Poe != nil {
 												return &ResponseItemOrganizationsGetOrganizationDevicesStatusesComponentsPowerSuppliesPoe{
@@ -354,19 +358,34 @@ func ResponseOrganizationsGetOrganizationDevicesStatusesItemsToBody(state Organi
 														}
 														return types.Int64{}
 													}(),
-													Unit: types.StringValue(powerSupplies.Poe.Unit),
+													Unit: func() types.String {
+														if powerSupplies.Poe.Unit != "" {
+															return types.StringValue(powerSupplies.Poe.Unit)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return nil
 										}(),
-										Serial: types.StringValue(powerSupplies.Serial),
+										Serial: func() types.String {
+											if powerSupplies.Serial != "" {
+												return types.StringValue(powerSupplies.Serial)
+											}
+											return types.String{}
+										}(),
 										Slot: func() types.Int64 {
 											if powerSupplies.Slot != nil {
 												return types.Int64Value(int64(*powerSupplies.Slot))
 											}
 											return types.Int64{}
 										}(),
-										Status: types.StringValue(powerSupplies.Status),
+										Status: func() types.String {
+											if powerSupplies.Status != "" {
+												return types.StringValue(powerSupplies.Status)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
@@ -377,21 +396,91 @@ func ResponseOrganizationsGetOrganizationDevicesStatusesItemsToBody(state Organi
 				}
 				return nil
 			}(),
-			Gateway:        types.StringValue(item.Gateway),
-			IPType:         types.StringValue(item.IPType),
-			LanIP:          types.StringValue(item.LanIP),
-			LastReportedAt: types.StringValue(item.LastReportedAt),
-			Mac:            types.StringValue(item.Mac),
-			Model:          types.StringValue(item.Model),
-			Name:           types.StringValue(item.Name),
-			NetworkID:      types.StringValue(item.NetworkID),
-			PrimaryDNS:     types.StringValue(item.PrimaryDNS),
-			ProductType:    types.StringValue(item.ProductType),
-			PublicIP:       types.StringValue(item.PublicIP),
-			SecondaryDNS:   types.StringValue(item.SecondaryDNS),
-			Serial:         types.StringValue(item.Serial),
-			Status:         types.StringValue(item.Status),
-			Tags:           StringSliceToList(item.Tags),
+			Gateway: func() types.String {
+				if item.Gateway != "" {
+					return types.StringValue(item.Gateway)
+				}
+				return types.String{}
+			}(),
+			IPType: func() types.String {
+				if item.IPType != "" {
+					return types.StringValue(item.IPType)
+				}
+				return types.String{}
+			}(),
+			LanIP: func() types.String {
+				if item.LanIP != "" {
+					return types.StringValue(item.LanIP)
+				}
+				return types.String{}
+			}(),
+			LastReportedAt: func() types.String {
+				if item.LastReportedAt != "" {
+					return types.StringValue(item.LastReportedAt)
+				}
+				return types.String{}
+			}(),
+			Mac: func() types.String {
+				if item.Mac != "" {
+					return types.StringValue(item.Mac)
+				}
+				return types.String{}
+			}(),
+			Model: func() types.String {
+				if item.Model != "" {
+					return types.StringValue(item.Model)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			NetworkID: func() types.String {
+				if item.NetworkID != "" {
+					return types.StringValue(item.NetworkID)
+				}
+				return types.String{}
+			}(),
+			PrimaryDNS: func() types.String {
+				if item.PrimaryDNS != "" {
+					return types.StringValue(item.PrimaryDNS)
+				}
+				return types.String{}
+			}(),
+			ProductType: func() types.String {
+				if item.ProductType != "" {
+					return types.StringValue(item.ProductType)
+				}
+				return types.String{}
+			}(),
+			PublicIP: func() types.String {
+				if item.PublicIP != "" {
+					return types.StringValue(item.PublicIP)
+				}
+				return types.String{}
+			}(),
+			SecondaryDNS: func() types.String {
+				if item.SecondaryDNS != "" {
+					return types.StringValue(item.SecondaryDNS)
+				}
+				return types.String{}
+			}(),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
+			Status: func() types.String {
+				if item.Status != "" {
+					return types.StringValue(item.Status)
+				}
+				return types.String{}
+			}(),
+			Tags: StringSliceToList(item.Tags),
 		}
 		items = append(items, itemState)
 	}

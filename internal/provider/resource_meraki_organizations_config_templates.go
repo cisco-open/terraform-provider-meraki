@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -69,22 +70,20 @@ func (r *OrganizationsConfigTemplatesResource) Schema(_ context.Context, _ resou
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			// "copy_from_network_id": schema.StringAttribute{
-			// 	MarkdownDescription: `The ID of the network or config template to copy configuration from`,
-			// 	Computed:            true,
-			// 	Optional:            true,
-			// 	PlanModifiers: []planmodifier.String{
-			// 		stringplanmodifier.UseStateForUnknown(),
-			// 		SuppressDiffString(),
-			// 	},
-			// },
+			"copy_from_network_id": schema.StringAttribute{
+				MarkdownDescription: `The ID of the network or config template to copy configuration from`,
+				Optional:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+					SuppressDiffString(),
+				},
+			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: `The ID of the network or config template to copy configuration from`,
 				Computed:            true,
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name of the configuration template`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -94,14 +93,13 @@ func (r *OrganizationsConfigTemplatesResource) Schema(_ context.Context, _ resou
 				MarkdownDescription: `organizationId path parameter. Organization ID`,
 				Required:            true,
 			},
-			"product_types": schema.SetAttribute{
+			"product_types": schema.ListAttribute{
 				MarkdownDescription: `The product types of the configuration template`,
 				Computed:            true,
 				ElementType:         types.StringType,
 			},
 			"time_zone": schema.StringAttribute{
 				MarkdownDescription: `The timezone of the configuration template. For a list of allowed timezones, please see the 'TZ' column in the table in <a target='_blank' href='https://en.wikipedia.org/wiki/List_of_tz_database_time_zones'>this article</a>. Not applicable if copying from existing network or template`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -183,7 +181,7 @@ func (r *OrganizationsConfigTemplatesResource) Create(ctx context.Context, req r
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationConfigTemplate",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -255,21 +253,11 @@ func (r *OrganizationsConfigTemplatesResource) Create(ctx context.Context, req r
 func (r *OrganizationsConfigTemplatesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data OrganizationsConfigTemplatesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -300,46 +288,39 @@ func (r *OrganizationsConfigTemplatesResource) Read(ctx context.Context, req res
 	}
 	//entro aqui 2
 	data = ResponseOrganizationsGetOrganizationConfigTemplateItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
-
 func (r *OrganizationsConfigTemplatesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
 
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: organizationId,configTemplateId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("config_template_id"), idParts[1])...)
 }
 
 func (r *OrganizationsConfigTemplatesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data OrganizationsConfigTemplatesRs
-	merge(ctx, req, resp, &data)
+	var plan OrganizationsConfigTemplatesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvOrganizationID := data.OrganizationID.ValueString()
-	vvConfigTemplateID := data.ConfigTemplateID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvOrganizationID := plan.OrganizationID.ValueString()
+	vvConfigTemplateID := plan.ConfigTemplateID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Organizations.UpdateOrganizationConfigTemplate(vvOrganizationID, vvConfigTemplateID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationConfigTemplate",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -349,9 +330,7 @@ func (r *OrganizationsConfigTemplatesResource) Update(ctx context.Context, req r
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *OrganizationsConfigTemplatesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -386,23 +365,24 @@ func (r *OrganizationsConfigTemplatesResource) Delete(ctx context.Context, req r
 
 // TF Structs Schema
 type OrganizationsConfigTemplatesRs struct {
-	OrganizationID   types.String `tfsdk:"organization_id"`
-	ConfigTemplateID types.String `tfsdk:"config_template_id"`
-	ID               types.String `tfsdk:"id"`
-	Name             types.String `tfsdk:"name"`
-	ProductTypes     types.Set    `tfsdk:"product_types"`
-	TimeZone         types.String `tfsdk:"time_zone"`
+	OrganizationID    types.String `tfsdk:"organization_id"`
+	ConfigTemplateID  types.String `tfsdk:"config_template_id"`
+	ID                types.String `tfsdk:"id"`
+	Name              types.String `tfsdk:"name"`
+	ProductTypes      types.List   `tfsdk:"product_types"`
+	TimeZone          types.String `tfsdk:"time_zone"`
+	CopyFromNetworkID types.String `tfsdk:"copy_from_network_id"`
 }
 
 // FromBody
 func (r *OrganizationsConfigTemplatesRs) toSdkApiRequestCreate(ctx context.Context) *merakigosdk.RequestOrganizationsCreateOrganizationConfigTemplate {
 	emptyString := ""
-	// copyFromNetworkID := new(string)
-	// if !r.CopyFromNetworkID.IsUnknown() && !r.CopyFromNetworkID.IsNull() {
-	// 	*copyFromNetworkID = r.CopyFromNetworkID.ValueString()
-	// } else {
-	// 	copyFromNetworkID = &emptyString
-	// }
+	copyFromNetworkID := new(string)
+	if !r.CopyFromNetworkID.IsUnknown() && !r.CopyFromNetworkID.IsNull() {
+		*copyFromNetworkID = r.CopyFromNetworkID.ValueString()
+	} else {
+		copyFromNetworkID = &emptyString
+	}
 	name := new(string)
 	if !r.Name.IsUnknown() && !r.Name.IsNull() {
 		*name = r.Name.ValueString()
@@ -416,9 +396,9 @@ func (r *OrganizationsConfigTemplatesRs) toSdkApiRequestCreate(ctx context.Conte
 		timeZone = &emptyString
 	}
 	out := merakigosdk.RequestOrganizationsCreateOrganizationConfigTemplate{
-		// CopyFromNetworkID: *copyFromNetworkID,
-		Name:     *name,
-		TimeZone: *timeZone,
+		CopyFromNetworkID: *copyFromNetworkID,
+		Name:              *name,
+		TimeZone:          *timeZone,
 	}
 	return &out
 }
@@ -446,10 +426,25 @@ func (r *OrganizationsConfigTemplatesRs) toSdkApiRequestUpdate(ctx context.Conte
 // From gosdk to TF Structs Schema
 func ResponseOrganizationsGetOrganizationConfigTemplateItemToBodyRs(state OrganizationsConfigTemplatesRs, response *merakigosdk.ResponseOrganizationsGetOrganizationConfigTemplate, is_read bool) OrganizationsConfigTemplatesRs {
 	itemState := OrganizationsConfigTemplatesRs{
-		ID:           types.StringValue(response.ID),
-		Name:         types.StringValue(response.Name),
-		ProductTypes: StringSliceToSet(response.ProductTypes),
-		TimeZone:     types.StringValue(response.TimeZone),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		ProductTypes: StringSliceToList(response.ProductTypes),
+		TimeZone: func() types.String {
+			if response.TimeZone != "" {
+				return types.StringValue(response.TimeZone)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsConfigTemplatesRs)

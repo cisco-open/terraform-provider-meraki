@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -264,6 +263,17 @@ func (d *OrganizationsAdaptivePolicyACLsDataSource) Read(ctx context.Context, re
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetOrganizationAdaptivePolicyACL",
+				err.Error(),
+			)
+			return
+		}
+
 		organizationsAdaptivePolicyACLs = ResponseOrganizationsGetOrganizationAdaptivePolicyACLItemToBody(organizationsAdaptivePolicyACLs, response2)
 		diags = resp.State.Set(ctx, &organizationsAdaptivePolicyACLs)
 		resp.Diagnostics.Append(diags...)
@@ -325,26 +335,71 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyACLsItemsToBody(state Org
 	var items []ResponseItemOrganizationsGetOrganizationAdaptivePolicyAcls
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationAdaptivePolicyAcls{
-			ACLID:       types.StringValue(item.ACLID),
-			CreatedAt:   types.StringValue(item.CreatedAt),
-			Description: types.StringValue(item.Description),
-			IPVersion:   types.StringValue(item.IPVersion),
-			Name:        types.StringValue(item.Name),
+			ACLID: func() types.String {
+				if item.ACLID != "" {
+					return types.StringValue(item.ACLID)
+				}
+				return types.String{}
+			}(),
+			CreatedAt: func() types.String {
+				if item.CreatedAt != "" {
+					return types.StringValue(item.CreatedAt)
+				}
+				return types.String{}
+			}(),
+			Description: func() types.String {
+				if item.Description != "" {
+					return types.StringValue(item.Description)
+				}
+				return types.String{}
+			}(),
+			IPVersion: func() types.String {
+				if item.IPVersion != "" {
+					return types.StringValue(item.IPVersion)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			Rules: func() *[]ResponseItemOrganizationsGetOrganizationAdaptivePolicyAclsRules {
 				if item.Rules != nil {
 					result := make([]ResponseItemOrganizationsGetOrganizationAdaptivePolicyAclsRules, len(*item.Rules))
 					for i, rules := range *item.Rules {
 						result[i] = ResponseItemOrganizationsGetOrganizationAdaptivePolicyAclsRules{
-							DstPort: types.StringValue(rules.DstPort),
+							DstPort: func() types.String {
+								if rules.DstPort != "" {
+									return types.StringValue(rules.DstPort)
+								}
+								return types.String{}
+							}(),
 							Log: func() types.Bool {
 								if rules.Log != nil {
 									return types.BoolValue(*rules.Log)
 								}
 								return types.Bool{}
 							}(),
-							Policy:   types.StringValue(rules.Policy),
-							Protocol: types.StringValue(rules.Protocol),
-							SrcPort:  types.StringValue(rules.SrcPort),
+							Policy: func() types.String {
+								if rules.Policy != "" {
+									return types.StringValue(rules.Policy)
+								}
+								return types.String{}
+							}(),
+							Protocol: func() types.String {
+								if rules.Protocol != "" {
+									return types.StringValue(rules.Protocol)
+								}
+								return types.String{}
+							}(),
+							SrcPort: func() types.String {
+								if rules.SrcPort != "" {
+									return types.StringValue(rules.SrcPort)
+								}
+								return types.String{}
+							}(),
 							TCPEstablished: func() types.Bool {
 								if rules.TCPEstablished != nil {
 									return types.BoolValue(*rules.TCPEstablished)
@@ -357,7 +412,12 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyACLsItemsToBody(state Org
 				}
 				return nil
 			}(),
-			UpdatedAt: types.StringValue(item.UpdatedAt),
+			UpdatedAt: func() types.String {
+				if item.UpdatedAt != "" {
+					return types.StringValue(item.UpdatedAt)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -367,26 +427,71 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyACLsItemsToBody(state Org
 
 func ResponseOrganizationsGetOrganizationAdaptivePolicyACLItemToBody(state OrganizationsAdaptivePolicyACLs, response *merakigosdk.ResponseOrganizationsGetOrganizationAdaptivePolicyACL) OrganizationsAdaptivePolicyACLs {
 	itemState := ResponseOrganizationsGetOrganizationAdaptivePolicyAcl{
-		ACLID:       types.StringValue(response.ACLID),
-		CreatedAt:   types.StringValue(response.CreatedAt),
-		Description: types.StringValue(response.Description),
-		IPVersion:   types.StringValue(response.IPVersion),
-		Name:        types.StringValue(response.Name),
+		ACLID: func() types.String {
+			if response.ACLID != "" {
+				return types.StringValue(response.ACLID)
+			}
+			return types.String{}
+		}(),
+		CreatedAt: func() types.String {
+			if response.CreatedAt != "" {
+				return types.StringValue(response.CreatedAt)
+			}
+			return types.String{}
+		}(),
+		Description: func() types.String {
+			if response.Description != "" {
+				return types.StringValue(response.Description)
+			}
+			return types.String{}
+		}(),
+		IPVersion: func() types.String {
+			if response.IPVersion != "" {
+				return types.StringValue(response.IPVersion)
+			}
+			return types.String{}
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		Rules: func() *[]ResponseOrganizationsGetOrganizationAdaptivePolicyAclRules {
 			if response.Rules != nil {
 				result := make([]ResponseOrganizationsGetOrganizationAdaptivePolicyAclRules, len(*response.Rules))
 				for i, rules := range *response.Rules {
 					result[i] = ResponseOrganizationsGetOrganizationAdaptivePolicyAclRules{
-						DstPort: types.StringValue(rules.DstPort),
+						DstPort: func() types.String {
+							if rules.DstPort != "" {
+								return types.StringValue(rules.DstPort)
+							}
+							return types.String{}
+						}(),
 						Log: func() types.Bool {
 							if rules.Log != nil {
 								return types.BoolValue(*rules.Log)
 							}
 							return types.Bool{}
 						}(),
-						Policy:   types.StringValue(rules.Policy),
-						Protocol: types.StringValue(rules.Protocol),
-						SrcPort:  types.StringValue(rules.SrcPort),
+						Policy: func() types.String {
+							if rules.Policy != "" {
+								return types.StringValue(rules.Policy)
+							}
+							return types.String{}
+						}(),
+						Protocol: func() types.String {
+							if rules.Protocol != "" {
+								return types.StringValue(rules.Protocol)
+							}
+							return types.String{}
+						}(),
+						SrcPort: func() types.String {
+							if rules.SrcPort != "" {
+								return types.StringValue(rules.SrcPort)
+							}
+							return types.String{}
+						}(),
 						TCPEstablished: func() types.Bool {
 							if rules.TCPEstablished != nil {
 								return types.BoolValue(*rules.TCPEstablished)
@@ -399,7 +504,12 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyACLItemToBody(state Organ
 			}
 			return nil
 		}(),
-		UpdatedAt: types.StringValue(response.UpdatedAt),
+		UpdatedAt: func() types.String {
+			if response.UpdatedAt != "" {
+				return types.StringValue(response.UpdatedAt)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

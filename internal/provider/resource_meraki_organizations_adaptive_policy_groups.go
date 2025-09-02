@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -229,7 +230,7 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Create(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateOrganizationAdaptivePolicyGroup",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -387,7 +388,7 @@ func (r *OrganizationsAdaptivePolicyGroupsResource) Update(ctx context.Context, 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationAdaptivePolicyGroup",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -549,23 +550,53 @@ func (r *OrganizationsAdaptivePolicyGroupsRs) toSdkApiRequestUpdate(ctx context.
 // From gosdk to TF Structs Schema
 func ResponseOrganizationsGetOrganizationAdaptivePolicyGroupItemToBodyRs(state OrganizationsAdaptivePolicyGroupsRs, response *merakigosdk.ResponseOrganizationsGetOrganizationAdaptivePolicyGroup, is_read bool) OrganizationsAdaptivePolicyGroupsRs {
 	itemState := OrganizationsAdaptivePolicyGroupsRs{
-		CreatedAt:   types.StringValue(response.CreatedAt),
-		Description: types.StringValue(response.Description),
-		GroupID:     types.StringValue(response.GroupID),
+		CreatedAt: func() types.String {
+			if response.CreatedAt != "" {
+				return types.StringValue(response.CreatedAt)
+			}
+			return types.String{}
+		}(),
+		Description: func() types.String {
+			if response.Description != "" {
+				return types.StringValue(response.Description)
+			}
+			return types.String{}
+		}(),
+		GroupID: func() types.String {
+			if response.GroupID != "" {
+				return types.StringValue(response.GroupID)
+			}
+			return types.String{}
+		}(),
 		IsDefaultGroup: func() types.Bool {
 			if response.IsDefaultGroup != nil {
 				return types.BoolValue(*response.IsDefaultGroup)
 			}
 			return types.Bool{}
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		PolicyObjects: func() *[]ResponseOrganizationsGetOrganizationAdaptivePolicyGroupPolicyObjectsRs {
 			if response.PolicyObjects != nil {
 				result := make([]ResponseOrganizationsGetOrganizationAdaptivePolicyGroupPolicyObjectsRs, len(*response.PolicyObjects))
 				for i, policyObjects := range *response.PolicyObjects {
 					result[i] = ResponseOrganizationsGetOrganizationAdaptivePolicyGroupPolicyObjectsRs{
-						ID:   types.StringValue(policyObjects.ID),
-						Name: types.StringValue(policyObjects.Name),
+						ID: func() types.String {
+							if policyObjects.ID != "" {
+								return types.StringValue(policyObjects.ID)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if policyObjects.Name != "" {
+								return types.StringValue(policyObjects.Name)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
@@ -579,7 +610,12 @@ func ResponseOrganizationsGetOrganizationAdaptivePolicyGroupItemToBodyRs(state O
 			}
 			return types.Int64{}
 		}(),
-		UpdatedAt: types.StringValue(response.UpdatedAt),
+		UpdatedAt: func() types.String {
+			if response.UpdatedAt != "" {
+				return types.StringValue(response.UpdatedAt)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsAdaptivePolicyGroupsRs)

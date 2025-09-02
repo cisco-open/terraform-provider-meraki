@@ -160,7 +160,7 @@ type ResponseOrganizationsReleaseFromOrganizationInventory struct {
 }
 
 type RequestOrganizationsReleaseFromOrganizationInventoryRs struct {
-	Serials types.Set `tfsdk:"serials"`
+	Serials types.List `tfsdk:"serials"`
 }
 
 // FromBody

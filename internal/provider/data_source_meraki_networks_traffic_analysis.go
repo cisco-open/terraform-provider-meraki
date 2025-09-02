@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -164,16 +163,36 @@ func ResponseNetworksGetNetworkTrafficAnalysisItemToBody(state NetworksTrafficAn
 				result := make([]ResponseNetworksGetNetworkTrafficAnalysisCustomPieChartItems, len(*response.CustomPieChartItems))
 				for i, customPieChartItems := range *response.CustomPieChartItems {
 					result[i] = ResponseNetworksGetNetworkTrafficAnalysisCustomPieChartItems{
-						Name:  types.StringValue(customPieChartItems.Name),
-						Type:  types.StringValue(customPieChartItems.Type),
-						Value: types.StringValue(customPieChartItems.Value),
+						Name: func() types.String {
+							if customPieChartItems.Name != "" {
+								return types.StringValue(customPieChartItems.Name)
+							}
+							return types.String{}
+						}(),
+						Type: func() types.String {
+							if customPieChartItems.Type != "" {
+								return types.StringValue(customPieChartItems.Type)
+							}
+							return types.String{}
+						}(),
+						Value: func() types.String {
+							if customPieChartItems.Value != "" {
+								return types.StringValue(customPieChartItems.Value)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		Mode: types.StringValue(response.Mode),
+		Mode: func() types.String {
+			if response.Mode != "" {
+				return types.StringValue(response.Mode)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

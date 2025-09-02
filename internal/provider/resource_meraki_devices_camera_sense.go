@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -64,7 +65,6 @@ func (r *DevicesCameraSenseResource) Schema(_ context.Context, _ resource.Schema
 		Attributes: map[string]schema.Attribute{
 			"audio_detection": schema.SingleNestedAttribute{
 				MarkdownDescription: `The details of the audio detection config.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -73,7 +73,6 @@ func (r *DevicesCameraSenseResource) Schema(_ context.Context, _ resource.Schema
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Boolean indicating if audio detection is enabled(true) or disabled(false) on the camera`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -83,7 +82,6 @@ func (r *DevicesCameraSenseResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"detection_model_id": schema.StringAttribute{
 				MarkdownDescription: `The ID of the object detection model`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -91,19 +89,17 @@ func (r *DevicesCameraSenseResource) Schema(_ context.Context, _ resource.Schema
 			},
 			"mqtt_broker_id": schema.StringAttribute{
 				MarkdownDescription: `The ID of the MQTT broker to be enabled on the camera. A value of null will disable MQTT on the camera`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"mqtt_topics": schema.SetAttribute{
+			"mqtt_topics": schema.ListAttribute{
 				Computed:    true,
 				ElementType: types.StringType,
 			},
 			"sense_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Boolean indicating if sense(license) is enabled(true) or disabled(false) on the camera`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -139,27 +135,6 @@ func (r *DevicesCameraSenseResource) Create(ctx context.Context, req resource.Cr
 	vvSerial := data.Serial.ValueString()
 	//Has Item and not has items
 
-	if vvSerial != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Camera.GetDeviceCameraSense(vvSerial)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesCameraSense  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource DevicesCameraSense only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Camera.UpdateDeviceCameraSense(vvSerial, dataRequest)
@@ -168,7 +143,7 @@ func (r *DevicesCameraSenseResource) Create(ctx context.Context, req resource.Cr
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCameraSense",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -179,49 +154,19 @@ func (r *DevicesCameraSenseResource) Create(ctx context.Context, req resource.Cr
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Camera.GetDeviceCameraSense(vvSerial)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetDeviceCameraSense",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetDeviceCameraSense",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseCameraGetDeviceCameraSenseItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *DevicesCameraSenseResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data DevicesCameraSenseRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -251,33 +196,28 @@ func (r *DevicesCameraSenseResource) Read(ctx context.Context, req resource.Read
 	}
 	//entro aqui 2
 	data = ResponseCameraGetDeviceCameraSenseItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *DevicesCameraSenseResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("serial"), req.ID)...)
 }
 
 func (r *DevicesCameraSenseResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data DevicesCameraSenseRs
-	merge(ctx, req, resp, &data)
+	var plan DevicesCameraSenseRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvSerial := data.Serial.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvSerial := plan.Serial.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	restyResp2, err := r.client.Camera.UpdateDeviceCameraSense(vvSerial, dataRequest)
 	if err != nil || restyResp2 == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateDeviceCameraSense",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -287,9 +227,7 @@ func (r *DevicesCameraSenseResource) Update(ctx context.Context, req resource.Up
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *DevicesCameraSenseResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -303,7 +241,7 @@ type DevicesCameraSenseRs struct {
 	Serial           types.String                                        `tfsdk:"serial"`
 	AudioDetection   *ResponseCameraGetDeviceCameraSenseAudioDetectionRs `tfsdk:"audio_detection"`
 	MqttBrokerID     types.String                                        `tfsdk:"mqtt_broker_id"`
-	MqttTopics       types.Set                                           `tfsdk:"mqtt_topics"`
+	MqttTopics       types.List                                          `tfsdk:"mqtt_topics"`
 	SenseEnabled     types.Bool                                          `tfsdk:"sense_enabled"`
 	DetectionModelID types.String                                        `tfsdk:"detection_model_id"`
 }
@@ -372,8 +310,13 @@ func ResponseCameraGetDeviceCameraSenseItemToBodyRs(state DevicesCameraSenseRs, 
 			}
 			return nil
 		}(),
-		MqttBrokerID: types.StringValue(response.MqttBrokerID),
-		MqttTopics:   StringSliceToSet(response.MqttTopics),
+		MqttBrokerID: func() types.String {
+			if response.MqttBrokerID != "" {
+				return types.StringValue(response.MqttBrokerID)
+			}
+			return types.String{}
+		}(),
+		MqttTopics: StringSliceToList(response.MqttTopics),
 		SenseEnabled: func() types.Bool {
 			if response.SenseEnabled != nil {
 				return types.BoolValue(*response.SenseEnabled)

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -199,10 +198,30 @@ func ResponseWirelessGetNetworkWirelessSSIDSchedulesItemToBody(state NetworksWir
 				result := make([]ResponseWirelessGetNetworkWirelessSsidSchedulesRanges, len(*response.Ranges))
 				for i, ranges := range *response.Ranges {
 					result[i] = ResponseWirelessGetNetworkWirelessSsidSchedulesRanges{
-						EndDay:    types.StringValue(ranges.EndDay),
-						EndTime:   types.StringValue(ranges.EndTime),
-						StartDay:  types.StringValue(ranges.StartDay),
-						StartTime: types.StringValue(ranges.StartTime),
+						EndDay: func() types.String {
+							if ranges.EndDay != "" {
+								return types.StringValue(ranges.EndDay)
+							}
+							return types.String{}
+						}(),
+						EndTime: func() types.String {
+							if ranges.EndTime != "" {
+								return types.StringValue(ranges.EndTime)
+							}
+							return types.String{}
+						}(),
+						StartDay: func() types.String {
+							if ranges.StartDay != "" {
+								return types.StringValue(ranges.StartDay)
+							}
+							return types.String{}
+						}(),
+						StartTime: func() types.String {
+							if ranges.StartTime != "" {
+								return types.StringValue(ranges.StartTime)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

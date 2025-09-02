@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -335,38 +334,78 @@ func ResponseApplianceGetNetworkApplianceStaticRoutesItemsToBody(state NetworksA
 				}
 				return types.Bool{}
 			}(),
-			// FixedIPAssignments: types.StringValue(item.FixedIPAssignments), //TODO POSIBLE interface
-			GatewayIP: types.StringValue(item.GatewayIP),
+			// FixedIPAssignments: func() types.String {
+			GatewayIP: func() types.String {
+				if item.GatewayIP != "" {
+					return types.StringValue(item.GatewayIP)
+				}
+				return types.String{}
+			}(),
 			GatewayVLANID: func() types.Int64 {
 				if item.GatewayVLANID != nil {
 					return types.Int64Value(int64(*item.GatewayVLANID))
 				}
 				return types.Int64{}
 			}(),
-			ID: types.StringValue(item.ID),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
 			IPVersion: func() types.Int64 {
 				if item.IPVersion != nil {
 					return types.Int64Value(int64(*item.IPVersion))
 				}
 				return types.Int64{}
 			}(),
-			Name:      types.StringValue(item.Name),
-			NetworkID: types.StringValue(item.NetworkID),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
+			NetworkID: func() types.String {
+				if item.NetworkID != "" {
+					return types.StringValue(item.NetworkID)
+				}
+				return types.String{}
+			}(),
 			ReservedIPRanges: func() *[]ResponseItemApplianceGetNetworkApplianceStaticRoutesReservedIpRanges {
 				if item.ReservedIPRanges != nil {
 					result := make([]ResponseItemApplianceGetNetworkApplianceStaticRoutesReservedIpRanges, len(*item.ReservedIPRanges))
 					for i, reservedIPRanges := range *item.ReservedIPRanges {
 						result[i] = ResponseItemApplianceGetNetworkApplianceStaticRoutesReservedIpRanges{
-							Comment: types.StringValue(reservedIPRanges.Comment),
-							End:     types.StringValue(reservedIPRanges.End),
-							Start:   types.StringValue(reservedIPRanges.Start),
+							Comment: func() types.String {
+								if reservedIPRanges.Comment != "" {
+									return types.StringValue(reservedIPRanges.Comment)
+								}
+								return types.String{}
+							}(),
+							End: func() types.String {
+								if reservedIPRanges.End != "" {
+									return types.StringValue(reservedIPRanges.End)
+								}
+								return types.String{}
+							}(),
+							Start: func() types.String {
+								if reservedIPRanges.Start != "" {
+									return types.StringValue(reservedIPRanges.Start)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result
 				}
 				return nil
 			}(),
-			Subnet: types.StringValue(item.Subnet),
+			Subnet: func() types.String {
+				if item.Subnet != "" {
+					return types.StringValue(item.Subnet)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -382,38 +421,78 @@ func ResponseApplianceGetNetworkApplianceStaticRouteItemToBody(state NetworksApp
 			}
 			return types.Bool{}
 		}(),
-		// FixedIPAssignments: types.StringValue(response.FixedIPAssignments), //TODO POSIBLE interface
-		GatewayIP: types.StringValue(response.GatewayIP),
+		// FixedIPAssignments: func() types.String {
+		GatewayIP: func() types.String {
+			if response.GatewayIP != "" {
+				return types.StringValue(response.GatewayIP)
+			}
+			return types.String{}
+		}(),
 		GatewayVLANID: func() types.Int64 {
 			if response.GatewayVLANID != nil {
 				return types.Int64Value(int64(*response.GatewayVLANID))
 			}
 			return types.Int64{}
 		}(),
-		ID: types.StringValue(response.ID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		IPVersion: func() types.Int64 {
 			if response.IPVersion != nil {
 				return types.Int64Value(int64(*response.IPVersion))
 			}
 			return types.Int64{}
 		}(),
-		Name:      types.StringValue(response.Name),
-		NetworkID: types.StringValue(response.NetworkID),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
 		ReservedIPRanges: func() *[]ResponseApplianceGetNetworkApplianceStaticRouteReservedIpRanges {
 			if response.ReservedIPRanges != nil {
 				result := make([]ResponseApplianceGetNetworkApplianceStaticRouteReservedIpRanges, len(*response.ReservedIPRanges))
 				for i, reservedIPRanges := range *response.ReservedIPRanges {
 					result[i] = ResponseApplianceGetNetworkApplianceStaticRouteReservedIpRanges{
-						Comment: types.StringValue(reservedIPRanges.Comment),
-						End:     types.StringValue(reservedIPRanges.End),
-						Start:   types.StringValue(reservedIPRanges.Start),
+						Comment: func() types.String {
+							if reservedIPRanges.Comment != "" {
+								return types.StringValue(reservedIPRanges.Comment)
+							}
+							return types.String{}
+						}(),
+						End: func() types.String {
+							if reservedIPRanges.End != "" {
+								return types.StringValue(reservedIPRanges.End)
+							}
+							return types.String{}
+						}(),
+						Start: func() types.String {
+							if reservedIPRanges.Start != "" {
+								return types.StringValue(reservedIPRanges.Start)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		Subnet: types.StringValue(response.Subnet),
+		Subnet: func() types.String {
+			if response.Subnet != "" {
+				return types.StringValue(response.Subnet)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -27,9 +28,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -66,7 +67,6 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 		Attributes: map[string]schema.Attribute{
 			"as_number": schema.Int64Attribute{
 				MarkdownDescription: `The number of the Autonomous System to which the appliance belongs`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -74,7 +74,6 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 			},
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: `Whether BGP is enabled on the appliance`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -82,25 +81,22 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 			},
 			"ibgp_hold_timer": schema.Int64Attribute{
 				MarkdownDescription: `The iBGP hold time in seconds`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
 				},
 			},
-			"neighbors": schema.SetNestedAttribute{
+			"neighbors": schema.ListNestedAttribute{
 				MarkdownDescription: `List of eBGP neighbor configurations`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"allow_transit": schema.BoolAttribute{
 							MarkdownDescription: `Whether the appliance will advertise routes learned from other Autonomous Systems`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Bool{
 								boolplanmodifier.UseStateForUnknown(),
@@ -108,7 +104,6 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 						},
 						"authentication": schema.SingleNestedAttribute{
 							MarkdownDescription: `Authentication settings between BGP peers`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Object{
 								objectplanmodifier.UseStateForUnknown(),
@@ -118,7 +113,6 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 								"password": schema.StringAttribute{
 									MarkdownDescription: `Password to configure MD5 authentication between BGP peers`,
 									Sensitive:           true,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -128,7 +122,6 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 						},
 						"ebgp_hold_timer": schema.Int64Attribute{
 							MarkdownDescription: `The eBGP hold time in seconds for the neighbor`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -136,7 +129,6 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 						},
 						"ebgp_multihop": schema.Int64Attribute{
 							MarkdownDescription: `The number of hops the appliance must traverse to establish a peering relationship with the neighbor`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -144,7 +136,6 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 						},
 						"ip": schema.StringAttribute{
 							MarkdownDescription: `The IPv4 address of the neighbor`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -152,7 +143,6 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 						},
 						"ipv6": schema.SingleNestedAttribute{
 							MarkdownDescription: `Information regarding IPv6 address of the neighbor`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Object{
 								objectplanmodifier.UseStateForUnknown(),
@@ -161,7 +151,6 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 
 								"address": schema.StringAttribute{
 									MarkdownDescription: `The IPv6 address of the neighbor`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -171,7 +160,6 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 						},
 						"next_hop_ip": schema.StringAttribute{
 							MarkdownDescription: `The IPv4 address of the neighbor that will establish a TCP session with the appliance`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -179,7 +167,6 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 						},
 						"receive_limit": schema.Int64Attribute{
 							MarkdownDescription: `The maximum number of routes that the appliance can receive from the neighbor`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -187,7 +174,6 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 						},
 						"remote_as_number": schema.Int64Attribute{
 							MarkdownDescription: `Remote AS number of the neighbor`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Int64{
 								int64planmodifier.UseStateForUnknown(),
@@ -195,7 +181,6 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 						},
 						"source_interface": schema.StringAttribute{
 							MarkdownDescription: `The output interface the appliance uses to establish a peering relationship with the neighbor`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -203,7 +188,6 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 						},
 						"ttl_security": schema.SingleNestedAttribute{
 							MarkdownDescription: `Settings for BGP TTL security to protect BGP peering sessions from forged IP attacks`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.Object{
 								objectplanmodifier.UseStateForUnknown(),
@@ -212,7 +196,6 @@ func (r *NetworksApplianceVpnBgpResource) Schema(_ context.Context, _ resource.S
 
 								"enabled": schema.BoolAttribute{
 									MarkdownDescription: `Whether BGP TTL security is enabled`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Bool{
 										boolplanmodifier.UseStateForUnknown(),
@@ -253,27 +236,6 @@ func (r *NetworksApplianceVpnBgpResource) Create(ctx context.Context, req resour
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceVpnBgp(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceVpnBgp  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceVpnBgp only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceVpnBgp(vvNetworkID, dataRequest)
@@ -282,7 +244,7 @@ func (r *NetworksApplianceVpnBgpResource) Create(ctx context.Context, req resour
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceVpnBgp",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -293,49 +255,19 @@ func (r *NetworksApplianceVpnBgpResource) Create(ctx context.Context, req resour
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceVpnBgp(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceVpnBgp",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkApplianceVpnBgp",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseApplianceGetNetworkApplianceVpnBgpItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksApplianceVpnBgpResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksApplianceVpnBgpRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -365,33 +297,28 @@ func (r *NetworksApplianceVpnBgpResource) Read(ctx context.Context, req resource
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceVpnBgpItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksApplianceVpnBgpResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksApplianceVpnBgpResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksApplianceVpnBgpRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksApplianceVpnBgpRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceVpnBgp(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceVpnBgp",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -401,9 +328,7 @@ func (r *NetworksApplianceVpnBgpResource) Update(ctx context.Context, req resour
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksApplianceVpnBgpResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -601,7 +526,12 @@ func ResponseApplianceGetNetworkApplianceVpnBgpItemToBodyRs(state NetworksApplia
 						Authentication: func() *ResponseApplianceGetNetworkApplianceVpnBgpNeighborsAuthenticationRs {
 							if neighbors.Authentication != nil {
 								return &ResponseApplianceGetNetworkApplianceVpnBgpNeighborsAuthenticationRs{
-									Password: types.StringValue(neighbors.Authentication.Password),
+									Password: func() types.String {
+										if neighbors.Authentication.Password != "" {
+											return types.StringValue(neighbors.Authentication.Password)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -618,16 +548,31 @@ func ResponseApplianceGetNetworkApplianceVpnBgpItemToBodyRs(state NetworksApplia
 							}
 							return types.Int64{}
 						}(),
-						IP: types.StringValue(neighbors.IP),
+						IP: func() types.String {
+							if neighbors.IP != "" {
+								return types.StringValue(neighbors.IP)
+							}
+							return types.String{}
+						}(),
 						IPv6: func() *ResponseApplianceGetNetworkApplianceVpnBgpNeighborsIpv6Rs {
 							if neighbors.IPv6 != nil {
 								return &ResponseApplianceGetNetworkApplianceVpnBgpNeighborsIpv6Rs{
-									Address: types.StringValue(neighbors.IPv6.Address),
+									Address: func() types.String {
+										if neighbors.IPv6.Address != "" {
+											return types.StringValue(neighbors.IPv6.Address)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
 						}(),
-						NextHopIP: types.StringValue(neighbors.NextHopIP),
+						NextHopIP: func() types.String {
+							if neighbors.NextHopIP != "" {
+								return types.StringValue(neighbors.NextHopIP)
+							}
+							return types.String{}
+						}(),
 						ReceiveLimit: func() types.Int64 {
 							if neighbors.ReceiveLimit != nil {
 								return types.Int64Value(int64(*neighbors.ReceiveLimit))
@@ -640,7 +585,12 @@ func ResponseApplianceGetNetworkApplianceVpnBgpItemToBodyRs(state NetworksApplia
 							}
 							return types.Int64{}
 						}(),
-						SourceInterface: types.StringValue(neighbors.SourceInterface),
+						SourceInterface: func() types.String {
+							if neighbors.SourceInterface != "" {
+								return types.StringValue(neighbors.SourceInterface)
+							}
+							return types.String{}
+						}(),
 						TtlSecurity: func() *ResponseApplianceGetNetworkApplianceVpnBgpNeighborsTtlSecurityRs {
 							if neighbors.TtlSecurity != nil {
 								return &ResponseApplianceGetNetworkApplianceVpnBgpNeighborsTtlSecurityRs{

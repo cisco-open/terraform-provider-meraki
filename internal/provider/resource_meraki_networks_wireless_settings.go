@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -67,7 +68,6 @@ func (r *NetworksWirelessSettingsResource) Schema(_ context.Context, _ resource.
 		Attributes: map[string]schema.Attribute{
 			"ipv6_bridge_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Toggle for enabling or disabling IPv6 bridging in a network (Note: if enabled, SSIDs must also be configured to use bridge mode)`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -75,7 +75,6 @@ func (r *NetworksWirelessSettingsResource) Schema(_ context.Context, _ resource.
 			},
 			"led_lights_on": schema.BoolAttribute{
 				MarkdownDescription: `Toggle for enabling or disabling LED lights on all APs in the network (making them run dark)`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -83,7 +82,6 @@ func (r *NetworksWirelessSettingsResource) Schema(_ context.Context, _ resource.
 			},
 			"location_analytics_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Toggle for enabling or disabling location analytics for your network`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -91,7 +89,6 @@ func (r *NetworksWirelessSettingsResource) Schema(_ context.Context, _ resource.
 			},
 			"meshing_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Toggle for enabling or disabling meshing in a network`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -99,7 +96,6 @@ func (r *NetworksWirelessSettingsResource) Schema(_ context.Context, _ resource.
 			},
 			"named_vlans": schema.SingleNestedAttribute{
 				MarkdownDescription: `Named VLAN settings for wireless networks.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -108,7 +104,6 @@ func (r *NetworksWirelessSettingsResource) Schema(_ context.Context, _ resource.
 
 					"pool_dhcp_monitoring": schema.SingleNestedAttribute{
 						MarkdownDescription: `Named VLAN Pool DHCP Monitoring settings.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -117,7 +112,6 @@ func (r *NetworksWirelessSettingsResource) Schema(_ context.Context, _ resource.
 
 							"duration": schema.Int64Attribute{
 								MarkdownDescription: `The duration in minutes that devices will refrain from using dirty VLANs before adding them back to the pool.`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Int64{
 									int64planmodifier.UseStateForUnknown(),
@@ -125,7 +119,6 @@ func (r *NetworksWirelessSettingsResource) Schema(_ context.Context, _ resource.
 							},
 							"enabled": schema.BoolAttribute{
 								MarkdownDescription: `Whether or not devices using named VLAN pools should remove dirty VLANs from the pool, thereby preventing clients from being assigned to VLANs where they would be unable to obtain an IP address via DHCP`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -158,10 +151,9 @@ func (r *NetworksWirelessSettingsResource) Schema(_ context.Context, _ resource.
 					},
 				},
 			},
-			"upgrade_strategy": schema.StringAttribute{
+			"upgradestrategy": schema.StringAttribute{
 				MarkdownDescription: `The default strategy that network devices will use to perform an upgrade. Requires firmware version MR 26.8 or higher.
                                   Allowed values: [minimizeClientDowntime,minimizeUpgradeTime]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -199,27 +191,6 @@ func (r *NetworksWirelessSettingsResource) Create(ctx context.Context, req resou
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Wireless.GetNetworkWirelessSettings(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessSettings  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksWirelessSettings only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSettings(vvNetworkID, dataRequest)
@@ -228,7 +199,7 @@ func (r *NetworksWirelessSettingsResource) Create(ctx context.Context, req resou
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -239,49 +210,19 @@ func (r *NetworksWirelessSettingsResource) Create(ctx context.Context, req resou
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Wireless.GetNetworkWirelessSettings(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkWirelessSettings",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkWirelessSettings",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseWirelessGetNetworkWirelessSettingsItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksWirelessSettingsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksWirelessSettingsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -311,33 +252,28 @@ func (r *NetworksWirelessSettingsResource) Read(ctx context.Context, req resourc
 	}
 	//entro aqui 2
 	data = ResponseWirelessGetNetworkWirelessSettingsItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksWirelessSettingsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksWirelessSettingsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksWirelessSettingsRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksWirelessSettingsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Wireless.UpdateNetworkWirelessSettings(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkWirelessSettings",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -347,9 +283,7 @@ func (r *NetworksWirelessSettingsResource) Update(ctx context.Context, req resou
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksWirelessSettingsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -367,7 +301,7 @@ type NetworksWirelessSettingsRs struct {
 	MeshingEnabled           types.Bool                                                    `tfsdk:"meshing_enabled"`
 	NamedVLANs               *ResponseWirelessGetNetworkWirelessSettingsNamedVlansRs       `tfsdk:"named_vlans"`
 	RegulatoryDomain         *ResponseWirelessGetNetworkWirelessSettingsRegulatoryDomainRs `tfsdk:"regulatory_domain"`
-	Upgradestrategy          types.String                                                  `tfsdk:"upgrade_strategy"`
+	Upgradestrategy          types.String                                                  `tfsdk:"upgradestrategy"`
 }
 
 type ResponseWirelessGetNetworkWirelessSettingsNamedVlansRs struct {
@@ -486,7 +420,7 @@ func ResponseWirelessGetNetworkWirelessSettingsItemToBodyRs(state NetworksWirele
 			return types.Bool{}
 		}(),
 		NamedVLANs: func() *ResponseWirelessGetNetworkWirelessSettingsNamedVlansRs {
-			if response.NamedVLANs != nil {
+			if response.NamedVLANs != nil && state.NamedVLANs != nil {
 				return &ResponseWirelessGetNetworkWirelessSettingsNamedVlansRs{
 					PoolDhcpMonitoring: func() *ResponseWirelessGetNetworkWirelessSettingsNamedVlansPoolDhcpMonitoringRs {
 						if response.NamedVLANs.PoolDhcpMonitoring != nil {
@@ -514,8 +448,18 @@ func ResponseWirelessGetNetworkWirelessSettingsItemToBodyRs(state NetworksWirele
 		RegulatoryDomain: func() *ResponseWirelessGetNetworkWirelessSettingsRegulatoryDomainRs {
 			if response.RegulatoryDomain != nil {
 				return &ResponseWirelessGetNetworkWirelessSettingsRegulatoryDomainRs{
-					CountryCode: types.StringValue(response.RegulatoryDomain.CountryCode),
-					Name:        types.StringValue(response.RegulatoryDomain.Name),
+					CountryCode: func() types.String {
+						if response.RegulatoryDomain.CountryCode != "" {
+							return types.StringValue(response.RegulatoryDomain.CountryCode)
+						}
+						return types.StringNull()
+					}(),
+					Name: func() types.String {
+						if response.RegulatoryDomain.Name != "" {
+							return types.StringValue(response.RegulatoryDomain.Name)
+						}
+						return types.StringNull()
+					}(),
 					Permits6E: func() types.Bool {
 						if response.RegulatoryDomain.Permits6E != nil {
 							return types.BoolValue(*response.RegulatoryDomain.Permits6E)
@@ -526,7 +470,12 @@ func ResponseWirelessGetNetworkWirelessSettingsItemToBodyRs(state NetworksWirele
 			}
 			return nil
 		}(),
-		Upgradestrategy: types.StringValue(response.Upgradestrategy),
+		Upgradestrategy: func() types.String {
+			if response.Upgradestrategy != "" {
+				return types.StringValue(response.Upgradestrategy)
+			}
+			return types.StringNull()
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksWirelessSettingsRs)

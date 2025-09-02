@@ -232,7 +232,12 @@ func (r *NetworksSmDevicesWipe) toSdkApiRequestCreate(ctx context.Context) *mera
 // ToBody
 func ResponseSmWipeNetworkSmDevicesItemToBody(state NetworksSmDevicesWipe, response *merakigosdk.ResponseSmWipeNetworkSmDevices) NetworksSmDevicesWipe {
 	itemState := ResponseSmWipeNetworkSmDevices{
-		ID: types.StringValue(response.ID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

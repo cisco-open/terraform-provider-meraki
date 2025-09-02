@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -404,14 +403,39 @@ func ResponseSwitchGetOrganizationSwitchPortsStatusesBySwitchItemToBody(state Or
 				result := make([]ResponseSwitchGetOrganizationSwitchPortsStatusesBySwitchItems, len(*response.Items))
 				for i, items := range *response.Items {
 					result[i] = ResponseSwitchGetOrganizationSwitchPortsStatusesBySwitchItems{
-						Mac:   types.StringValue(items.Mac),
-						Model: types.StringValue(items.Model),
-						Name:  types.StringValue(items.Name),
+						Mac: func() types.String {
+							if items.Mac != "" {
+								return types.StringValue(items.Mac)
+							}
+							return types.String{}
+						}(),
+						Model: func() types.String {
+							if items.Model != "" {
+								return types.StringValue(items.Model)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if items.Name != "" {
+								return types.StringValue(items.Name)
+							}
+							return types.String{}
+						}(),
 						Network: func() *ResponseSwitchGetOrganizationSwitchPortsStatusesBySwitchItemsNetwork {
 							if items.Network != nil {
 								return &ResponseSwitchGetOrganizationSwitchPortsStatusesBySwitchItemsNetwork{
-									ID:   types.StringValue(items.Network.ID),
-									Name: types.StringValue(items.Network.Name),
+									ID: func() types.String {
+										if items.Network.ID != "" {
+											return types.StringValue(items.Network.ID)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if items.Network.Name != "" {
+											return types.StringValue(items.Network.Name)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -421,7 +445,12 @@ func ResponseSwitchGetOrganizationSwitchPortsStatusesBySwitchItemToBody(state Or
 								result := make([]ResponseSwitchGetOrganizationSwitchPortsStatusesBySwitchItemsPorts, len(*items.Ports))
 								for i, ports := range *items.Ports {
 									result[i] = ResponseSwitchGetOrganizationSwitchPortsStatusesBySwitchItemsPorts{
-										Duplex: types.StringValue(ports.Duplex),
+										Duplex: func() types.String {
+											if ports.Duplex != "" {
+												return types.StringValue(ports.Duplex)
+											}
+											return types.String{}
+										}(),
 										Enabled: func() types.Bool {
 											if ports.Enabled != nil {
 												return types.BoolValue(*ports.Enabled)
@@ -448,7 +477,12 @@ func ResponseSwitchGetOrganizationSwitchPortsStatusesBySwitchItemToBody(state Or
 											}
 											return nil
 										}(),
-										PortID: types.StringValue(ports.PortID),
+										PortID: func() types.String {
+											if ports.PortID != "" {
+												return types.StringValue(ports.PortID)
+											}
+											return types.String{}
+										}(),
 										SecurePort: func() *ResponseSwitchGetOrganizationSwitchPortsStatusesBySwitchItemsPortsSecurePort {
 											if ports.SecurePort != nil {
 												return &ResponseSwitchGetOrganizationSwitchPortsStatusesBySwitchItemsPortsSecurePort{
@@ -458,7 +492,12 @@ func ResponseSwitchGetOrganizationSwitchPortsStatusesBySwitchItemToBody(state Or
 														}
 														return types.Bool{}
 													}(),
-													AuthenticationStatus: types.StringValue(ports.SecurePort.AuthenticationStatus),
+													AuthenticationStatus: func() types.String {
+														if ports.SecurePort.AuthenticationStatus != "" {
+															return types.StringValue(ports.SecurePort.AuthenticationStatus)
+														}
+														return types.String{}
+													}(),
 												}
 											}
 											return nil
@@ -471,8 +510,18 @@ func ResponseSwitchGetOrganizationSwitchPortsStatusesBySwitchItemToBody(state Or
 											}
 											return nil
 										}(),
-										Speed:    types.StringValue(ports.Speed),
-										Status:   types.StringValue(ports.Status),
+										Speed: func() types.String {
+											if ports.Speed != "" {
+												return types.StringValue(ports.Speed)
+											}
+											return types.String{}
+										}(),
+										Status: func() types.String {
+											if ports.Status != "" {
+												return types.StringValue(ports.Status)
+											}
+											return types.String{}
+										}(),
 										Warnings: StringSliceToList(ports.Warnings),
 									}
 								}
@@ -480,7 +529,12 @@ func ResponseSwitchGetOrganizationSwitchPortsStatusesBySwitchItemToBody(state Or
 							}
 							return nil
 						}(),
-						Serial: types.StringValue(items.Serial),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

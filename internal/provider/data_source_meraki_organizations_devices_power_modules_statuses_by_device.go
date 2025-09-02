@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -256,32 +255,72 @@ func ResponseOrganizationsGetOrganizationDevicesPowerModulesStatusesByDeviceItem
 	var items []ResponseItemOrganizationsGetOrganizationDevicesPowerModulesStatusesByDevice
 	for _, item := range *response {
 		itemState := ResponseItemOrganizationsGetOrganizationDevicesPowerModulesStatusesByDevice{
-			Mac:  types.StringValue(item.Mac),
-			Name: types.StringValue(item.Name),
+			Mac: func() types.String {
+				if item.Mac != "" {
+					return types.StringValue(item.Mac)
+				}
+				return types.String{}
+			}(),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			Network: func() *ResponseItemOrganizationsGetOrganizationDevicesPowerModulesStatusesByDeviceNetwork {
 				if item.Network != nil {
 					return &ResponseItemOrganizationsGetOrganizationDevicesPowerModulesStatusesByDeviceNetwork{
-						ID: types.StringValue(item.Network.ID),
+						ID: func() types.String {
+							if item.Network.ID != "" {
+								return types.StringValue(item.Network.ID)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			ProductType: types.StringValue(item.ProductType),
-			Serial:      types.StringValue(item.Serial),
+			ProductType: func() types.String {
+				if item.ProductType != "" {
+					return types.StringValue(item.ProductType)
+				}
+				return types.String{}
+			}(),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
 			Slots: func() *[]ResponseItemOrganizationsGetOrganizationDevicesPowerModulesStatusesByDeviceSlots {
 				if item.Slots != nil {
 					result := make([]ResponseItemOrganizationsGetOrganizationDevicesPowerModulesStatusesByDeviceSlots, len(*item.Slots))
 					for i, slots := range *item.Slots {
 						result[i] = ResponseItemOrganizationsGetOrganizationDevicesPowerModulesStatusesByDeviceSlots{
-							Model: types.StringValue(slots.Model),
+							Model: func() types.String {
+								if slots.Model != "" {
+									return types.StringValue(slots.Model)
+								}
+								return types.String{}
+							}(),
 							Number: func() types.Int64 {
 								if slots.Number != nil {
 									return types.Int64Value(int64(*slots.Number))
 								}
 								return types.Int64{}
 							}(),
-							Serial: types.StringValue(slots.Serial),
-							Status: types.StringValue(slots.Status),
+							Serial: func() types.String {
+								if slots.Serial != "" {
+									return types.StringValue(slots.Serial)
+								}
+								return types.String{}
+							}(),
+							Status: func() types.String {
+								if slots.Status != "" {
+									return types.StringValue(slots.Status)
+								}
+								return types.String{}
+							}(),
 						}
 					}
 					return &result

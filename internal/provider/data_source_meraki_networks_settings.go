@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -236,7 +235,12 @@ func ResponseNetworksGetNetworkSettingsItemToBody(state NetworksSettings, respon
 									}
 									return types.Bool{}
 								}(),
-								Username: types.StringValue(response.LocalStatusPage.Authentication.Username),
+								Username: func() types.String {
+									if response.LocalStatusPage.Authentication.Username != "" {
+										return types.StringValue(response.LocalStatusPage.Authentication.Username)
+									}
+									return types.String{}
+								}(),
 							}
 						}
 						return nil

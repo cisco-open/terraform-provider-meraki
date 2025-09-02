@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -218,6 +217,17 @@ func (d *NetworksAppliancePrefixesDelegatedStaticsDataSource) Read(ctx context.C
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkAppliancePrefixesDelegatedStatic",
+				err.Error(),
+			)
+			return
+		}
+
 		networksAppliancePrefixesDelegatedStatics = ResponseApplianceGetNetworkAppliancePrefixesDelegatedStaticItemToBody(networksAppliancePrefixesDelegatedStatics, response2)
 		diags = resp.State.Set(ctx, &networksAppliancePrefixesDelegatedStatics)
 		resp.Diagnostics.Append(diags...)
@@ -269,20 +279,50 @@ func ResponseApplianceGetNetworkAppliancePrefixesDelegatedStaticsItemsToBody(sta
 	var items []ResponseItemApplianceGetNetworkAppliancePrefixesDelegatedStatics
 	for _, item := range *response {
 		itemState := ResponseItemApplianceGetNetworkAppliancePrefixesDelegatedStatics{
-			CreatedAt:   types.StringValue(item.CreatedAt),
-			Description: types.StringValue(item.Description),
+			CreatedAt: func() types.String {
+				if item.CreatedAt != "" {
+					return types.StringValue(item.CreatedAt)
+				}
+				return types.String{}
+			}(),
+			Description: func() types.String {
+				if item.Description != "" {
+					return types.StringValue(item.Description)
+				}
+				return types.String{}
+			}(),
 			Origin: func() *ResponseItemApplianceGetNetworkAppliancePrefixesDelegatedStaticsOrigin {
 				if item.Origin != nil {
 					return &ResponseItemApplianceGetNetworkAppliancePrefixesDelegatedStaticsOrigin{
 						Interfaces: StringSliceToList(item.Origin.Interfaces),
-						Type:       types.StringValue(item.Origin.Type),
+						Type: func() types.String {
+							if item.Origin.Type != "" {
+								return types.StringValue(item.Origin.Type)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return nil
 			}(),
-			Prefix:                  types.StringValue(item.Prefix),
-			StaticDelegatedPrefixID: types.StringValue(item.StaticDelegatedPrefixID),
-			UpdatedAt:               types.StringValue(item.UpdatedAt),
+			Prefix: func() types.String {
+				if item.Prefix != "" {
+					return types.StringValue(item.Prefix)
+				}
+				return types.String{}
+			}(),
+			StaticDelegatedPrefixID: func() types.String {
+				if item.StaticDelegatedPrefixID != "" {
+					return types.StringValue(item.StaticDelegatedPrefixID)
+				}
+				return types.String{}
+			}(),
+			UpdatedAt: func() types.String {
+				if item.UpdatedAt != "" {
+					return types.StringValue(item.UpdatedAt)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -292,20 +332,50 @@ func ResponseApplianceGetNetworkAppliancePrefixesDelegatedStaticsItemsToBody(sta
 
 func ResponseApplianceGetNetworkAppliancePrefixesDelegatedStaticItemToBody(state NetworksAppliancePrefixesDelegatedStatics, response *merakigosdk.ResponseApplianceGetNetworkAppliancePrefixesDelegatedStatic) NetworksAppliancePrefixesDelegatedStatics {
 	itemState := ResponseApplianceGetNetworkAppliancePrefixesDelegatedStatic{
-		CreatedAt:   types.StringValue(response.CreatedAt),
-		Description: types.StringValue(response.Description),
+		CreatedAt: func() types.String {
+			if response.CreatedAt != "" {
+				return types.StringValue(response.CreatedAt)
+			}
+			return types.String{}
+		}(),
+		Description: func() types.String {
+			if response.Description != "" {
+				return types.StringValue(response.Description)
+			}
+			return types.String{}
+		}(),
 		Origin: func() *ResponseApplianceGetNetworkAppliancePrefixesDelegatedStaticOrigin {
 			if response.Origin != nil {
 				return &ResponseApplianceGetNetworkAppliancePrefixesDelegatedStaticOrigin{
 					Interfaces: StringSliceToList(response.Origin.Interfaces),
-					Type:       types.StringValue(response.Origin.Type),
+					Type: func() types.String {
+						if response.Origin.Type != "" {
+							return types.StringValue(response.Origin.Type)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Prefix:                  types.StringValue(response.Prefix),
-		StaticDelegatedPrefixID: types.StringValue(response.StaticDelegatedPrefixID),
-		UpdatedAt:               types.StringValue(response.UpdatedAt),
+		Prefix: func() types.String {
+			if response.Prefix != "" {
+				return types.StringValue(response.Prefix)
+			}
+			return types.String{}
+		}(),
+		StaticDelegatedPrefixID: func() types.String {
+			if response.StaticDelegatedPrefixID != "" {
+				return types.StringValue(response.StaticDelegatedPrefixID)
+			}
+			return types.String{}
+		}(),
+		UpdatedAt: func() types.String {
+			if response.UpdatedAt != "" {
+				return types.StringValue(response.UpdatedAt)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

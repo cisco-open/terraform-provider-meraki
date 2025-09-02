@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -146,7 +145,12 @@ type ResponseNetworksGetNetworkNetflow struct {
 // ToBody
 func ResponseNetworksGetNetworkNetflowItemToBody(state NetworksNetflow, response *merakigosdk.ResponseNetworksGetNetworkNetflow) NetworksNetflow {
 	itemState := ResponseNetworksGetNetworkNetflow{
-		CollectorIP: types.StringValue(response.CollectorIP),
+		CollectorIP: func() types.String {
+			if response.CollectorIP != "" {
+				return types.StringValue(response.CollectorIP)
+			}
+			return types.String{}
+		}(),
 		CollectorPort: func() types.Int64 {
 			if response.CollectorPort != nil {
 				return types.Int64Value(int64(*response.CollectorPort))

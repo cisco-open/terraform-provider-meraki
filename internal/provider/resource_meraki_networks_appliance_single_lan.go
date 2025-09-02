@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"strconv"
 
 	"log"
 
@@ -29,9 +30,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -69,7 +70,6 @@ func (r *NetworksApplianceSingleLanResource) Schema(_ context.Context, _ resourc
 		Attributes: map[string]schema.Attribute{
 			"appliance_ip": schema.StringAttribute{
 				MarkdownDescription: `The local IP of the appliance on the single LAN`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -77,7 +77,6 @@ func (r *NetworksApplianceSingleLanResource) Schema(_ context.Context, _ resourc
 			},
 			"ipv6": schema.SingleNestedAttribute{
 				MarkdownDescription: `IPv6 configuration on the single LAN`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -86,25 +85,22 @@ func (r *NetworksApplianceSingleLanResource) Schema(_ context.Context, _ resourc
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Enable IPv6 on single LAN`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
 						},
 					},
-					"prefix_assignments": schema.SetNestedAttribute{
+					"prefix_assignments": schema.ListNestedAttribute{
 						MarkdownDescription: `Prefix assignments on the single LAN`,
-						Computed:            true,
 						Optional:            true,
-						PlanModifiers: []planmodifier.Set{
-							setplanmodifier.UseStateForUnknown(),
+						PlanModifiers: []planmodifier.List{
+							listplanmodifier.UseStateForUnknown(),
 						},
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
 								"autonomous": schema.BoolAttribute{
 									MarkdownDescription: `Auto assign a /64 prefix from the origin to the single LAN`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Bool{
 										boolplanmodifier.UseStateForUnknown(),
@@ -112,19 +108,17 @@ func (r *NetworksApplianceSingleLanResource) Schema(_ context.Context, _ resourc
 								},
 								"origin": schema.SingleNestedAttribute{
 									MarkdownDescription: `The origin of the prefix`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.Object{
 										objectplanmodifier.UseStateForUnknown(),
 									},
 									Attributes: map[string]schema.Attribute{
 
-										"interfaces": schema.SetAttribute{
+										"interfaces": schema.ListAttribute{
 											MarkdownDescription: `Interfaces associated with the prefix`,
-											Computed:            true,
 											Optional:            true,
-											PlanModifiers: []planmodifier.Set{
-												setplanmodifier.UseStateForUnknown(),
+											PlanModifiers: []planmodifier.List{
+												listplanmodifier.UseStateForUnknown(),
 											},
 
 											ElementType: types.StringType,
@@ -132,7 +126,6 @@ func (r *NetworksApplianceSingleLanResource) Schema(_ context.Context, _ resourc
 										"type": schema.StringAttribute{
 											MarkdownDescription: `Type of the origin
                                                     Allowed values: [independent,internet]`,
-											Computed: true,
 											Optional: true,
 											PlanModifiers: []planmodifier.String{
 												stringplanmodifier.UseStateForUnknown(),
@@ -148,7 +141,6 @@ func (r *NetworksApplianceSingleLanResource) Schema(_ context.Context, _ resourc
 								},
 								"static_appliance_ip6": schema.StringAttribute{
 									MarkdownDescription: `Manual configuration of the IPv6 Appliance IP`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -156,7 +148,6 @@ func (r *NetworksApplianceSingleLanResource) Schema(_ context.Context, _ resourc
 								},
 								"static_prefix": schema.StringAttribute{
 									MarkdownDescription: `Manual configuration of a /64 prefix on the single LAN`,
-									Computed:            true,
 									Optional:            true,
 									PlanModifiers: []planmodifier.String{
 										stringplanmodifier.UseStateForUnknown(),
@@ -169,7 +160,6 @@ func (r *NetworksApplianceSingleLanResource) Schema(_ context.Context, _ resourc
 			},
 			"mandatory_dhcp": schema.SingleNestedAttribute{
 				MarkdownDescription: `Mandatory DHCP will enforce that clients connecting to this single LAN must use the IP address assigned by the DHCP server. Clients who use a static IP address won't be able to associate. Only available on firmware versions 17.0 and above`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -178,7 +168,6 @@ func (r *NetworksApplianceSingleLanResource) Schema(_ context.Context, _ resourc
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Enable Mandatory DHCP on single LAN.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -192,7 +181,6 @@ func (r *NetworksApplianceSingleLanResource) Schema(_ context.Context, _ resourc
 			},
 			"subnet": schema.StringAttribute{
 				MarkdownDescription: `The subnet of the single LAN`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -224,27 +212,6 @@ func (r *NetworksApplianceSingleLanResource) Create(ctx context.Context, req res
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Appliance.GetNetworkApplianceSingleLan(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceSingleLan  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksApplianceSingleLan only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceSingleLan(vvNetworkID, dataRequest)
@@ -253,7 +220,7 @@ func (r *NetworksApplianceSingleLanResource) Create(ctx context.Context, req res
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceSingleLan",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -264,49 +231,19 @@ func (r *NetworksApplianceSingleLanResource) Create(ctx context.Context, req res
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Appliance.GetNetworkApplianceSingleLan(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkApplianceSingleLan",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkApplianceSingleLan",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseApplianceGetNetworkApplianceSingleLanItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksApplianceSingleLanResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksApplianceSingleLanRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -336,33 +273,28 @@ func (r *NetworksApplianceSingleLanResource) Read(ctx context.Context, req resou
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceSingleLanItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksApplianceSingleLanResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksApplianceSingleLanResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksApplianceSingleLanRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksApplianceSingleLanRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceSingleLan(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceSingleLan",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -372,9 +304,7 @@ func (r *NetworksApplianceSingleLanResource) Update(ctx context.Context, req res
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksApplianceSingleLanResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -405,7 +335,7 @@ type ResponseApplianceGetNetworkApplianceSingleLanIpv6PrefixAssignmentsRs struct
 }
 
 type ResponseApplianceGetNetworkApplianceSingleLanIpv6PrefixAssignmentsOriginRs struct {
-	Interfaces types.Set    `tfsdk:"interfaces"`
+	Interfaces types.List   `tfsdk:"interfaces"`
 	Type       types.String `tfsdk:"type"`
 }
 
@@ -510,7 +440,12 @@ func (r *NetworksApplianceSingleLanRs) toSdkApiRequestUpdate(ctx context.Context
 // From gosdk to TF Structs Schema
 func ResponseApplianceGetNetworkApplianceSingleLanItemToBodyRs(state NetworksApplianceSingleLanRs, response *merakigosdk.ResponseApplianceGetNetworkApplianceSingleLan, is_read bool) NetworksApplianceSingleLanRs {
 	itemState := NetworksApplianceSingleLanRs{
-		ApplianceIP: types.StringValue(response.ApplianceIP),
+		ApplianceIP: func() types.String {
+			if response.ApplianceIP != "" {
+				return types.StringValue(response.ApplianceIP)
+			}
+			return types.String{}
+		}(),
 		IPv6: func() *ResponseApplianceGetNetworkApplianceSingleLanIpv6Rs {
 			if response.IPv6 != nil {
 				return &ResponseApplianceGetNetworkApplianceSingleLanIpv6Rs{
@@ -534,14 +469,29 @@ func ResponseApplianceGetNetworkApplianceSingleLanItemToBodyRs(state NetworksApp
 									Origin: func() *ResponseApplianceGetNetworkApplianceSingleLanIpv6PrefixAssignmentsOriginRs {
 										if prefixAssignments.Origin != nil {
 											return &ResponseApplianceGetNetworkApplianceSingleLanIpv6PrefixAssignmentsOriginRs{
-												Interfaces: StringSliceToSet(prefixAssignments.Origin.Interfaces),
-												Type:       types.StringValue(prefixAssignments.Origin.Type),
+												Interfaces: StringSliceToList(prefixAssignments.Origin.Interfaces),
+												Type: func() types.String {
+													if prefixAssignments.Origin.Type != "" {
+														return types.StringValue(prefixAssignments.Origin.Type)
+													}
+													return types.String{}
+												}(),
 											}
 										}
 										return nil
 									}(),
-									StaticApplianceIP6: types.StringValue(prefixAssignments.StaticApplianceIP6),
-									StaticPrefix:       types.StringValue(prefixAssignments.StaticPrefix),
+									StaticApplianceIP6: func() types.String {
+										if prefixAssignments.StaticApplianceIP6 != "" {
+											return types.StringValue(prefixAssignments.StaticApplianceIP6)
+										}
+										return types.String{}
+									}(),
+									StaticPrefix: func() types.String {
+										if prefixAssignments.StaticPrefix != "" {
+											return types.StringValue(prefixAssignments.StaticPrefix)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return &result
@@ -565,7 +515,12 @@ func ResponseApplianceGetNetworkApplianceSingleLanItemToBodyRs(state NetworksApp
 			}
 			return nil
 		}(),
-		Subnet: types.StringValue(response.Subnet),
+		Subnet: func() types.String {
+			if response.Subnet != "" {
+				return types.StringValue(response.Subnet)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksApplianceSingleLanRs)

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -159,8 +158,18 @@ type ResponseApplianceGetNetworkApplianceSecurityIntrusionProtectedNetworks stru
 // ToBody
 func ResponseApplianceGetNetworkApplianceSecurityIntrusionItemToBody(state NetworksApplianceSecurityIntrusion, response *merakigosdk.ResponseApplianceGetNetworkApplianceSecurityIntrusion) NetworksApplianceSecurityIntrusion {
 	itemState := ResponseApplianceGetNetworkApplianceSecurityIntrusion{
-		IDsRulesets: types.StringValue(response.IDsRulesets),
-		Mode:        types.StringValue(response.Mode),
+		IDsRulesets: func() types.String {
+			if response.IDsRulesets != "" {
+				return types.StringValue(response.IDsRulesets)
+			}
+			return types.String{}
+		}(),
+		Mode: func() types.String {
+			if response.Mode != "" {
+				return types.StringValue(response.Mode)
+			}
+			return types.String{}
+		}(),
 		ProtectedNetworks: func() *ResponseApplianceGetNetworkApplianceSecurityIntrusionProtectedNetworks {
 			if response.ProtectedNetworks != nil {
 				return &ResponseApplianceGetNetworkApplianceSecurityIntrusionProtectedNetworks{

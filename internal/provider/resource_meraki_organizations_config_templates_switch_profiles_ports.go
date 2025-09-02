@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -30,9 +31,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -70,7 +72,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 		Attributes: map[string]schema.Attribute{
 			"access_policy_number": schema.Int64Attribute{
 				MarkdownDescription: `The number of a custom access policy to configure on the switch template port. Only applicable when 'accessPolicyType' is 'Custom access policy'.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -79,7 +80,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 			"access_policy_type": schema.StringAttribute{
 				MarkdownDescription: `The type of the access policy of the switch template port. Only applicable to access ports. Can be one of 'Open', 'Custom access policy', 'MAC allow list' or 'Sticky MAC allow list'.
                                   Allowed values: [Custom access policy,MAC allow list,Open,Sticky MAC allow list]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -95,7 +95,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 			},
 			"allowed_vlans": schema.StringAttribute{
 				MarkdownDescription: `The VLANs allowed on the switch template port. Only applicable to trunk ports.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -107,7 +106,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 			},
 			"dai_trusted": schema.BoolAttribute{
 				MarkdownDescription: `If true, ARP packets for this port will be considered trusted, and Dynamic ARP Inspection will allow the traffic.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -115,7 +113,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 			},
 			"dot3az": schema.SingleNestedAttribute{
 				MarkdownDescription: `dot3az settings for the port`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -124,7 +121,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `The Energy Efficient Ethernet status of the switch template port.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -134,7 +130,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 			},
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: `The status of the switch template port.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -142,7 +137,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 			},
 			"flexible_stacking_enabled": schema.BoolAttribute{
 				MarkdownDescription: `For supported switches (e.g. MS420/MS425), whether or not the port has flexible stacking enabled.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -150,7 +144,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 			},
 			"isolation_enabled": schema.BoolAttribute{
 				MarkdownDescription: `The isolation status of the switch template port.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -158,26 +151,26 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 			},
 			"link_negotiation": schema.StringAttribute{
 				MarkdownDescription: `The link speed for the switch template port.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"link_negotiation_capabilities": schema.SetAttribute{
+			"link_negotiation_capabilities": schema.ListAttribute{
 				MarkdownDescription: `Available link speeds for the switch template port.`,
 				Computed:            true,
 				ElementType:         types.StringType,
 			},
-			"mac_allow_list": schema.SetAttribute{
+			"mac_allow_list": schema.ListAttribute{
 				MarkdownDescription: `Only devices with MAC addresses specified in this list will have access to this port. Up to 20 MAC addresses can be defined. Only applicable when 'accessPolicyType' is 'MAC allow list'.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"mirror": schema.SingleNestedAttribute{
 				MarkdownDescription: `Port mirror`,
@@ -204,7 +197,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name of the switch template port.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -216,7 +208,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 			},
 			"poe_enabled": schema.BoolAttribute{
 				MarkdownDescription: `The PoE status of the switch template port.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -228,7 +219,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 			},
 			"port_schedule_id": schema.StringAttribute{
 				MarkdownDescription: `The ID of the port schedule. A value of null will clear the port schedule.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -236,7 +226,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 			},
 			"profile": schema.SingleNestedAttribute{
 				MarkdownDescription: `Profile attributes`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -245,7 +234,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `When enabled, override this port's configuration with a port profile.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
@@ -253,7 +241,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 					},
 					"id": schema.StringAttribute{
 						MarkdownDescription: `When enabled, the ID of the port profile used to override the port's configuration.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -261,7 +248,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 					},
 					"iname": schema.StringAttribute{
 						MarkdownDescription: `When enabled, the IName of the profile.`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -275,7 +261,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 			},
 			"rstp_enabled": schema.BoolAttribute{
 				MarkdownDescription: `The rapid spanning tree protocol status.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -311,19 +296,19 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 					},
 				},
 			},
-			"sticky_mac_allow_list": schema.SetAttribute{
+			"sticky_mac_allow_list": schema.ListAttribute{
 				MarkdownDescription: `The initial list of MAC addresses for sticky Mac allow list. Only applicable when 'accessPolicyType' is 'Sticky MAC allow list'.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"sticky_mac_allow_list_limit": schema.Int64Attribute{
 				MarkdownDescription: `The maximum number of MAC addresses for sticky MAC allow list. Only applicable when 'accessPolicyType' is 'Sticky MAC allow list'.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -331,7 +316,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 			},
 			"storm_control_enabled": schema.BoolAttribute{
 				MarkdownDescription: `The storm control status of the switch template port.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
@@ -340,7 +324,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 			"stp_guard": schema.StringAttribute{
 				MarkdownDescription: `The state of the STP guard ('disabled', 'root guard', 'bpdu guard' or 'loop guard').
                                   Allowed values: [bpdu guard,disabled,loop guard,root guard]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -354,20 +337,20 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 					),
 				},
 			},
-			"tags": schema.SetAttribute{
+			"tags": schema.ListAttribute{
 				MarkdownDescription: `The list of tags of the switch template port.`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				Computed:            true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 
 				ElementType: types.StringType,
+				Default:     listdefault.StaticValue(types.ListNull(types.StringType)),
 			},
 			"type": schema.StringAttribute{
 				MarkdownDescription: `The type of the switch template port ('trunk', 'access', 'stack' or 'routed').
                                   Allowed values: [access,routed,stack,trunk]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -384,7 +367,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 			"udld": schema.StringAttribute{
 				MarkdownDescription: `The action to take when Unidirectional Link is detected (Alert only, Enforce). Default configuration is Alert only.
                                   Allowed values: [Alert only,Enforce]`,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -398,7 +380,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 			},
 			"vlan": schema.Int64Attribute{
 				MarkdownDescription: `The VLAN of the switch template port. For a trunk port, this is the native VLAN. A null value will clear the value set for trunk ports.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -406,7 +387,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Schema(_ conte
 			},
 			"voice_vlan": schema.Int64Attribute{
 				MarkdownDescription: `The voice VLAN of the switch template port. Only applicable to access ports.`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
@@ -443,27 +423,6 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Create(ctx con
 	vvPortID := data.PortID.ValueString()
 	//Has Item and has items and not post
 
-	if vvOrganizationID != "" && vvConfigTemplateID != "" && vvProfileID != "" && vvPortID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Switch.GetOrganizationConfigTemplateSwitchProfilePort(vvOrganizationID, vvConfigTemplateID, vvProfileID, vvPortID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource OrganizationsConfigTemplatesSwitchProfilesPorts  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource OrganizationsConfigTemplatesSwitchProfilesPorts only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateOrganizationConfigTemplateSwitchProfilePort(vvOrganizationID, vvConfigTemplateID, vvProfileID, vvPortID, dataRequest)
@@ -472,7 +431,7 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Create(ctx con
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationConfigTemplateSwitchProfilePort",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -483,49 +442,19 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Create(ctx con
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Switch.GetOrganizationConfigTemplateSwitchProfilePort(vvOrganizationID, vvConfigTemplateID, vvProfileID, vvPortID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetOrganizationConfigTemplateSwitchProfilePort",
-				restyResp1.String(),
-			)
-			return
-		}
-		resp.Diagnostics.AddError(
-			"Failure when executing GetOrganizationConfigTemplateSwitchProfilePort",
-			err.Error(),
-		)
-		return
-	}
-
-	data = ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data OrganizationsConfigTemplatesSwitchProfilesPortsRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -558,22 +487,18 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Read(ctx conte
 	}
 	//entro aqui 2
 	data = ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
-
 func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
 
 	if len(idParts) != 4 || idParts[0] == "" || idParts[1] == "" || idParts[2] == "" || idParts[3] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: organizationId,configTemplateId,profileId,portId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("organization_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("config_template_id"), idParts[1])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("profile_id"), idParts[2])...)
@@ -581,27 +506,24 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) ImportState(ct
 }
 
 func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data OrganizationsConfigTemplatesSwitchProfilesPortsRs
-	merge(ctx, req, resp, &data)
+	var plan OrganizationsConfigTemplatesSwitchProfilesPortsRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvOrganizationID := data.OrganizationID.ValueString()
-	vvConfigTemplateID := data.ConfigTemplateID.ValueString()
-	vvProfileID := data.ProfileID.ValueString()
-	vvPortID := data.PortID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvOrganizationID := plan.OrganizationID.ValueString()
+	vvConfigTemplateID := plan.ConfigTemplateID.ValueString()
+	vvProfileID := plan.ProfileID.ValueString()
+	vvPortID := plan.PortID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Switch.UpdateOrganizationConfigTemplateSwitchProfilePort(vvOrganizationID, vvConfigTemplateID, vvProfileID, vvPortID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateOrganizationConfigTemplateSwitchProfilePort",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -611,9 +533,7 @@ func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Update(ctx con
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *OrganizationsConfigTemplatesSwitchProfilesPortsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -637,8 +557,8 @@ type OrganizationsConfigTemplatesSwitchProfilesPortsRs struct {
 	FlexibleStackingEnabled     types.Bool                                                                      `tfsdk:"flexible_stacking_enabled"`
 	IsolationEnabled            types.Bool                                                                      `tfsdk:"isolation_enabled"`
 	LinkNegotiation             types.String                                                                    `tfsdk:"link_negotiation"`
-	LinkNegotiationCapabilities types.Set                                                                       `tfsdk:"link_negotiation_capabilities"`
-	MacAllowList                types.Set                                                                       `tfsdk:"mac_allow_list"`
+	LinkNegotiationCapabilities types.List                                                                      `tfsdk:"link_negotiation_capabilities"`
+	MacAllowList                types.List                                                                      `tfsdk:"mac_allow_list"`
 	Mirror                      *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortMirrorRs           `tfsdk:"mirror"`
 	Module                      *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortModuleRs           `tfsdk:"module"`
 	Name                        types.String                                                                    `tfsdk:"name"`
@@ -648,11 +568,11 @@ type OrganizationsConfigTemplatesSwitchProfilesPortsRs struct {
 	RstpEnabled                 types.Bool                                                                      `tfsdk:"rstp_enabled"`
 	Schedule                    *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortScheduleRs         `tfsdk:"schedule"`
 	StackwiseVirtual            *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortStackwiseVirtualRs `tfsdk:"stackwise_virtual"`
-	StickyMacAllowList          types.Set                                                                       `tfsdk:"sticky_mac_allow_list"`
+	StickyMacAllowList          types.List                                                                      `tfsdk:"sticky_mac_allow_list"`
 	StickyMacAllowListLimit     types.Int64                                                                     `tfsdk:"sticky_mac_allow_list_limit"`
 	StormControlEnabled         types.Bool                                                                      `tfsdk:"storm_control_enabled"`
 	StpGuard                    types.String                                                                    `tfsdk:"stp_guard"`
-	Tags                        types.Set                                                                       `tfsdk:"tags"`
+	Tags                        types.List                                                                      `tfsdk:"tags"`
 	Type                        types.String                                                                    `tfsdk:"type"`
 	Udld                        types.String                                                                    `tfsdk:"udld"`
 	VLAN                        types.Int64                                                                     `tfsdk:"vlan"`
@@ -880,8 +800,18 @@ func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortItemToBodyRs(st
 			}
 			return types.Int64{}
 		}(),
-		AccessPolicyType: types.StringValue(response.AccessPolicyType),
-		AllowedVLANs:     types.StringValue(response.AllowedVLANs),
+		AccessPolicyType: func() types.String {
+			if response.AccessPolicyType != "" {
+				return types.StringValue(response.AccessPolicyType)
+			}
+			return types.String{}
+		}(),
+		AllowedVLANs: func() types.String {
+			if response.AllowedVLANs != "" {
+				return types.StringValue(response.AllowedVLANs)
+			}
+			return types.String{}
+		}(),
 		DaiTrusted: func() types.Bool {
 			if response.DaiTrusted != nil {
 				return types.BoolValue(*response.DaiTrusted)
@@ -919,13 +849,23 @@ func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortItemToBodyRs(st
 			}
 			return types.Bool{}
 		}(),
-		LinkNegotiation:             types.StringValue(response.LinkNegotiation),
-		LinkNegotiationCapabilities: StringSliceToSet(response.LinkNegotiationCapabilities),
-		MacAllowList:                StringSliceToSet(response.MacAllowList),
+		LinkNegotiation: func() types.String {
+			if response.LinkNegotiation != "" {
+				return types.StringValue(response.LinkNegotiation)
+			}
+			return types.String{}
+		}(),
+		LinkNegotiationCapabilities: StringSliceToList(response.LinkNegotiationCapabilities),
+		MacAllowList:                StringSliceToList(response.MacAllowList),
 		Mirror: func() *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortMirrorRs {
 			if response.Mirror != nil {
 				return &ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortMirrorRs{
-					Mode: types.StringValue(response.Mirror.Mode),
+					Mode: func() types.String {
+						if response.Mirror.Mode != "" {
+							return types.StringValue(response.Mirror.Mode)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -933,20 +873,40 @@ func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortItemToBodyRs(st
 		Module: func() *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortModuleRs {
 			if response.Module != nil {
 				return &ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortModuleRs{
-					Model: types.StringValue(response.Module.Model),
+					Model: func() types.String {
+						if response.Module.Model != "" {
+							return types.StringValue(response.Module.Model)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		PoeEnabled: func() types.Bool {
 			if response.PoeEnabled != nil {
 				return types.BoolValue(*response.PoeEnabled)
 			}
 			return types.Bool{}
 		}(),
-		PortID:         types.StringValue(response.PortID),
-		PortScheduleID: types.StringValue(response.PortScheduleID),
+		PortID: func() types.String {
+			if response.PortID != "" {
+				return types.StringValue(response.PortID)
+			}
+			return types.String{}
+		}(),
+		PortScheduleID: func() types.String {
+			if response.PortScheduleID != "" {
+				return types.StringValue(response.PortScheduleID)
+			}
+			return types.String{}
+		}(),
 		Profile: func() *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortProfileRs {
 			if response.Profile != nil {
 				return &ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortProfileRs{
@@ -956,8 +916,18 @@ func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortItemToBodyRs(st
 						}
 						return types.Bool{}
 					}(),
-					ID:    types.StringValue(response.Profile.ID),
-					Iname: types.StringValue(response.Profile.Iname),
+					ID: func() types.String {
+						if response.Profile.ID != "" {
+							return types.StringValue(response.Profile.ID)
+						}
+						return types.String{}
+					}(),
+					Iname: func() types.String {
+						if response.Profile.Iname != "" {
+							return types.StringValue(response.Profile.Iname)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -971,8 +941,18 @@ func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortItemToBodyRs(st
 		Schedule: func() *ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortScheduleRs {
 			if response.Schedule != nil {
 				return &ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortScheduleRs{
-					ID:   types.StringValue(response.Schedule.ID),
-					Name: types.StringValue(response.Schedule.Name),
+					ID: func() types.String {
+						if response.Schedule.ID != "" {
+							return types.StringValue(response.Schedule.ID)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.Schedule.Name != "" {
+							return types.StringValue(response.Schedule.Name)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -996,7 +976,7 @@ func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortItemToBodyRs(st
 			}
 			return nil
 		}(),
-		StickyMacAllowList: StringSliceToSet(response.StickyMacAllowList),
+		StickyMacAllowList: StringSliceToList(response.StickyMacAllowList),
 		StickyMacAllowListLimit: func() types.Int64 {
 			if response.StickyMacAllowListLimit != nil {
 				return types.Int64Value(int64(*response.StickyMacAllowListLimit))
@@ -1009,10 +989,25 @@ func ResponseSwitchGetOrganizationConfigTemplateSwitchProfilePortItemToBodyRs(st
 			}
 			return types.Bool{}
 		}(),
-		StpGuard: types.StringValue(response.StpGuard),
-		Tags:     StringSliceToSet(response.Tags),
-		Type:     types.StringValue(response.Type),
-		Udld:     types.StringValue(response.Udld),
+		StpGuard: func() types.String {
+			if response.StpGuard != "" {
+				return types.StringValue(response.StpGuard)
+			}
+			return types.String{}
+		}(),
+		Tags: StringSliceToList(response.Tags),
+		Type: func() types.String {
+			if response.Type != "" {
+				return types.StringValue(response.Type)
+			}
+			return types.String{}
+		}(),
+		Udld: func() types.String {
+			if response.Udld != "" {
+				return types.StringValue(response.Udld)
+			}
+			return types.String{}
+		}(),
 		VLAN: func() types.Int64 {
 			if response.VLAN != nil {
 				return types.Int64Value(int64(*response.VLAN))

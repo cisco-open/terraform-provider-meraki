@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -482,6 +481,17 @@ func (d *NetworksWirelessSSIDsDataSource) Read(ctx context.Context, req datasour
 			return
 		}
 
+		if err != nil || response2 == nil {
+			if restyResp2 != nil {
+				log.Printf("[DEBUG] Retrieved error response %s", restyResp2.String())
+			}
+			resp.Diagnostics.AddError(
+				"Failure when executing GetNetworkWirelessSSID",
+				err.Error(),
+			)
+			return
+		}
+
 		networksWirelessSSIDs = ResponseWirelessGetNetworkWirelessSSIDItemToBody(networksWirelessSSIDs, response2)
 		diags = resp.State.Set(ctx, &networksWirelessSSIDs)
 		resp.Diagnostics.Append(diags...)
@@ -601,8 +611,18 @@ func ResponseWirelessGetNetworkWirelessSSIDsItemsToBody(state NetworksWirelessSS
 	var items []ResponseItemWirelessGetNetworkWirelessSsids
 	for _, item := range *response {
 		itemState := ResponseItemWirelessGetNetworkWirelessSsids{
-			AdminSplashURL:   types.StringValue(item.AdminSplashURL),
-			AuthMode:         types.StringValue(item.AuthMode),
+			AdminSplashURL: func() types.String {
+				if item.AdminSplashURL != "" {
+					return types.StringValue(item.AdminSplashURL)
+				}
+				return types.String{}
+			}(),
+			AuthMode: func() types.String {
+				if item.AuthMode != "" {
+					return types.StringValue(item.AuthMode)
+				}
+				return types.String{}
+			}(),
 			AvailabilityTags: StringSliceToList(item.AvailabilityTags),
 			AvailableOnAllAps: func() types.Bool {
 				if item.AvailableOnAllAps != nil {
@@ -610,15 +630,30 @@ func ResponseWirelessGetNetworkWirelessSSIDsItemsToBody(state NetworksWirelessSS
 				}
 				return types.Bool{}
 			}(),
-			BandSelection: types.StringValue(item.BandSelection),
+			BandSelection: func() types.String {
+				if item.BandSelection != "" {
+					return types.StringValue(item.BandSelection)
+				}
+				return types.String{}
+			}(),
 			Enabled: func() types.Bool {
 				if item.Enabled != nil {
 					return types.BoolValue(*item.Enabled)
 				}
 				return types.Bool{}
 			}(),
-			EncryptionMode:   types.StringValue(item.EncryptionMode),
-			IPAssignmentMode: types.StringValue(item.IPAssignmentMode),
+			EncryptionMode: func() types.String {
+				if item.EncryptionMode != "" {
+					return types.StringValue(item.EncryptionMode)
+				}
+				return types.String{}
+			}(),
+			IPAssignmentMode: func() types.String {
+				if item.IPAssignmentMode != "" {
+					return types.StringValue(item.IPAssignmentMode)
+				}
+				return types.String{}
+			}(),
 			LocalAuth: func() types.Bool {
 				if item.LocalAuth != nil {
 					return types.BoolValue(*item.LocalAuth)
@@ -637,7 +672,12 @@ func ResponseWirelessGetNetworkWirelessSSIDsItemsToBody(state NetworksWirelessSS
 				}
 				return types.Int64{}
 			}(),
-			Name: types.StringValue(item.Name),
+			Name: func() types.String {
+				if item.Name != "" {
+					return types.StringValue(item.Name)
+				}
+				return types.String{}
+			}(),
 			Number: func() types.Int64 {
 				if item.Number != nil {
 					return types.Int64Value(int64(*item.Number))
@@ -679,8 +719,18 @@ func ResponseWirelessGetNetworkWirelessSSIDsItemsToBody(state NetworksWirelessSS
 					result := make([]ResponseItemWirelessGetNetworkWirelessSsidsRadiusAccountingServers, len(*item.RadiusAccountingServers))
 					for i, radiusAccountingServers := range *item.RadiusAccountingServers {
 						result[i] = ResponseItemWirelessGetNetworkWirelessSsidsRadiusAccountingServers{
-							CaCertificate: types.StringValue(radiusAccountingServers.CaCertificate),
-							Host:          types.StringValue(radiusAccountingServers.Host),
+							CaCertificate: func() types.String {
+								if radiusAccountingServers.CaCertificate != "" {
+									return types.StringValue(radiusAccountingServers.CaCertificate)
+								}
+								return types.String{}
+							}(),
+							Host: func() types.String {
+								if radiusAccountingServers.Host != "" {
+									return types.StringValue(radiusAccountingServers.Host)
+								}
+								return types.String{}
+							}(),
 							OpenRoamingCertificateID: func() types.Int64 {
 								if radiusAccountingServers.OpenRoamingCertificateID != nil {
 									return types.Int64Value(int64(*radiusAccountingServers.OpenRoamingCertificateID))
@@ -699,22 +749,47 @@ func ResponseWirelessGetNetworkWirelessSSIDsItemsToBody(state NetworksWirelessSS
 				}
 				return nil
 			}(),
-			RadiusAttributeForGroupPolicies: types.StringValue(item.RadiusAttributeForGroupPolicies),
+			RadiusAttributeForGroupPolicies: func() types.String {
+				if item.RadiusAttributeForGroupPolicies != "" {
+					return types.StringValue(item.RadiusAttributeForGroupPolicies)
+				}
+				return types.String{}
+			}(),
 			RadiusEnabled: func() types.Bool {
 				if item.RadiusEnabled != nil {
 					return types.BoolValue(*item.RadiusEnabled)
 				}
 				return types.Bool{}
 			}(),
-			RadiusFailoverPolicy:      types.StringValue(item.RadiusFailoverPolicy),
-			RadiusLoadBalancingPolicy: types.StringValue(item.RadiusLoadBalancingPolicy),
+			RadiusFailoverPolicy: func() types.String {
+				if item.RadiusFailoverPolicy != "" {
+					return types.StringValue(item.RadiusFailoverPolicy)
+				}
+				return types.String{}
+			}(),
+			RadiusLoadBalancingPolicy: func() types.String {
+				if item.RadiusLoadBalancingPolicy != "" {
+					return types.StringValue(item.RadiusLoadBalancingPolicy)
+				}
+				return types.String{}
+			}(),
 			RadiusServers: func() *[]ResponseItemWirelessGetNetworkWirelessSsidsRadiusServers {
 				if item.RadiusServers != nil {
 					result := make([]ResponseItemWirelessGetNetworkWirelessSsidsRadiusServers, len(*item.RadiusServers))
 					for i, radiusServers := range *item.RadiusServers {
 						result[i] = ResponseItemWirelessGetNetworkWirelessSsidsRadiusServers{
-							CaCertificate: types.StringValue(radiusServers.CaCertificate),
-							Host:          types.StringValue(radiusServers.Host),
+							CaCertificate: func() types.String {
+								if radiusServers.CaCertificate != "" {
+									return types.StringValue(radiusServers.CaCertificate)
+								}
+								return types.String{}
+							}(),
+							Host: func() types.String {
+								if radiusServers.Host != "" {
+									return types.StringValue(radiusServers.Host)
+								}
+								return types.String{}
+							}(),
 							OpenRoamingCertificateID: func() types.Int64 {
 								if radiusServers.OpenRoamingCertificateID != nil {
 									return types.Int64Value(int64(*radiusServers.OpenRoamingCertificateID))
@@ -733,8 +808,18 @@ func ResponseWirelessGetNetworkWirelessSSIDsItemsToBody(state NetworksWirelessSS
 				}
 				return nil
 			}(),
-			SplashPage:    types.StringValue(item.SplashPage),
-			SplashTimeout: types.StringValue(item.SplashTimeout),
+			SplashPage: func() types.String {
+				if item.SplashPage != "" {
+					return types.StringValue(item.SplashPage)
+				}
+				return types.String{}
+			}(),
+			SplashTimeout: func() types.String {
+				if item.SplashTimeout != "" {
+					return types.StringValue(item.SplashTimeout)
+				}
+				return types.String{}
+			}(),
 			SSIDAdminAccessible: func() types.Bool {
 				if item.SSIDAdminAccessible != nil {
 					return types.BoolValue(*item.SSIDAdminAccessible)
@@ -754,7 +839,12 @@ func ResponseWirelessGetNetworkWirelessSSIDsItemsToBody(state NetworksWirelessSS
 				return types.Bool{}
 			}(),
 			WalledGardenRanges: StringSliceToList(item.WalledGardenRanges),
-			WpaEncryptionMode:  types.StringValue(item.WpaEncryptionMode),
+			WpaEncryptionMode: func() types.String {
+				if item.WpaEncryptionMode != "" {
+					return types.StringValue(item.WpaEncryptionMode)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}
@@ -764,24 +854,48 @@ func ResponseWirelessGetNetworkWirelessSSIDsItemsToBody(state NetworksWirelessSS
 
 func ResponseWirelessGetNetworkWirelessSSIDItemToBody(state NetworksWirelessSSIDs, response *merakigosdk.ResponseWirelessGetNetworkWirelessSSID) NetworksWirelessSSIDs {
 	itemState := ResponseWirelessGetNetworkWirelessSsid{
-		AdminSplashURL:   types.StringValue(response.AdminSplashURL),
-		AuthMode:         types.StringValue(response.AuthMode),
-		AvailabilityTags: StringSliceToList(response.AvailabilityTags),
+		AdminSplashURL: func() types.String {
+			if response.AdminSplashURL != "" {
+				return types.StringValue(response.AdminSplashURL)
+			}
+			return types.String{}
+		}(),
+		AuthMode: func() types.String {
+			if response.AuthMode != "" {
+				return types.StringValue(response.AuthMode)
+			}
+			return types.String{}
+		}(),
 		AvailableOnAllAps: func() types.Bool {
 			if response.AvailableOnAllAps != nil {
 				return types.BoolValue(*response.AvailableOnAllAps)
 			}
 			return types.Bool{}
 		}(),
-		BandSelection: types.StringValue(response.BandSelection),
+		BandSelection: func() types.String {
+			if response.BandSelection != "" {
+				return types.StringValue(response.BandSelection)
+			}
+			return types.String{}
+		}(),
 		Enabled: func() types.Bool {
 			if response.Enabled != nil {
 				return types.BoolValue(*response.Enabled)
 			}
 			return types.Bool{}
 		}(),
-		EncryptionMode:   types.StringValue(response.EncryptionMode),
-		IPAssignmentMode: types.StringValue(response.IPAssignmentMode),
+		EncryptionMode: func() types.String {
+			if response.EncryptionMode != "" {
+				return types.StringValue(response.EncryptionMode)
+			}
+			return types.String{}
+		}(),
+		IPAssignmentMode: func() types.String {
+			if response.IPAssignmentMode != "" {
+				return types.StringValue(response.IPAssignmentMode)
+			}
+			return types.String{}
+		}(),
 		LocalAuth: func() types.Bool {
 			if response.LocalAuth != nil {
 				return types.BoolValue(*response.LocalAuth)
@@ -800,7 +914,12 @@ func ResponseWirelessGetNetworkWirelessSSIDItemToBody(state NetworksWirelessSSID
 			}
 			return types.Int64{}
 		}(),
-		Name: types.StringValue(response.Name),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
 		Number: func() types.Int64 {
 			if response.Number != nil {
 				return types.Int64Value(int64(*response.Number))
@@ -842,8 +961,18 @@ func ResponseWirelessGetNetworkWirelessSSIDItemToBody(state NetworksWirelessSSID
 				result := make([]ResponseWirelessGetNetworkWirelessSsidRadiusAccountingServers, len(*response.RadiusAccountingServers))
 				for i, radiusAccountingServers := range *response.RadiusAccountingServers {
 					result[i] = ResponseWirelessGetNetworkWirelessSsidRadiusAccountingServers{
-						CaCertificate: types.StringValue(radiusAccountingServers.CaCertificate),
-						Host:          types.StringValue(radiusAccountingServers.Host),
+						CaCertificate: func() types.String {
+							if radiusAccountingServers.CaCertificate != "" {
+								return types.StringValue(radiusAccountingServers.CaCertificate)
+							}
+							return types.String{}
+						}(),
+						Host: func() types.String {
+							if radiusAccountingServers.Host != "" {
+								return types.StringValue(radiusAccountingServers.Host)
+							}
+							return types.String{}
+						}(),
 						OpenRoamingCertificateID: func() types.Int64 {
 							if radiusAccountingServers.OpenRoamingCertificateID != nil {
 								return types.Int64Value(int64(*radiusAccountingServers.OpenRoamingCertificateID))
@@ -862,22 +991,47 @@ func ResponseWirelessGetNetworkWirelessSSIDItemToBody(state NetworksWirelessSSID
 			}
 			return nil
 		}(),
-		RadiusAttributeForGroupPolicies: types.StringValue(response.RadiusAttributeForGroupPolicies),
+		RadiusAttributeForGroupPolicies: func() types.String {
+			if response.RadiusAttributeForGroupPolicies != "" {
+				return types.StringValue(response.RadiusAttributeForGroupPolicies)
+			}
+			return types.String{}
+		}(),
 		RadiusEnabled: func() types.Bool {
 			if response.RadiusEnabled != nil {
 				return types.BoolValue(*response.RadiusEnabled)
 			}
 			return types.Bool{}
 		}(),
-		RadiusFailoverPolicy:      types.StringValue(response.RadiusFailoverPolicy),
-		RadiusLoadBalancingPolicy: types.StringValue(response.RadiusLoadBalancingPolicy),
+		RadiusFailoverPolicy: func() types.String {
+			if response.RadiusFailoverPolicy != "" {
+				return types.StringValue(response.RadiusFailoverPolicy)
+			}
+			return types.String{}
+		}(),
+		RadiusLoadBalancingPolicy: func() types.String {
+			if response.RadiusLoadBalancingPolicy != "" {
+				return types.StringValue(response.RadiusLoadBalancingPolicy)
+			}
+			return types.String{}
+		}(),
 		RadiusServers: func() *[]ResponseWirelessGetNetworkWirelessSsidRadiusServers {
 			if response.RadiusServers != nil {
 				result := make([]ResponseWirelessGetNetworkWirelessSsidRadiusServers, len(*response.RadiusServers))
 				for i, radiusServers := range *response.RadiusServers {
 					result[i] = ResponseWirelessGetNetworkWirelessSsidRadiusServers{
-						CaCertificate: types.StringValue(radiusServers.CaCertificate),
-						Host:          types.StringValue(radiusServers.Host),
+						CaCertificate: func() types.String {
+							if radiusServers.CaCertificate != "" {
+								return types.StringValue(radiusServers.CaCertificate)
+							}
+							return types.String{}
+						}(),
+						Host: func() types.String {
+							if radiusServers.Host != "" {
+								return types.StringValue(radiusServers.Host)
+							}
+							return types.String{}
+						}(),
 						OpenRoamingCertificateID: func() types.Int64 {
 							if radiusServers.OpenRoamingCertificateID != nil {
 								return types.Int64Value(int64(*radiusServers.OpenRoamingCertificateID))
@@ -896,8 +1050,18 @@ func ResponseWirelessGetNetworkWirelessSSIDItemToBody(state NetworksWirelessSSID
 			}
 			return nil
 		}(),
-		SplashPage:    types.StringValue(response.SplashPage),
-		SplashTimeout: types.StringValue(response.SplashTimeout),
+		SplashPage: func() types.String {
+			if response.SplashPage != "" {
+				return types.StringValue(response.SplashPage)
+			}
+			return types.String{}
+		}(),
+		SplashTimeout: func() types.String {
+			if response.SplashTimeout != "" {
+				return types.StringValue(response.SplashTimeout)
+			}
+			return types.String{}
+		}(),
 		SSIDAdminAccessible: func() types.Bool {
 			if response.SSIDAdminAccessible != nil {
 				return types.BoolValue(*response.SSIDAdminAccessible)
@@ -917,7 +1081,12 @@ func ResponseWirelessGetNetworkWirelessSSIDItemToBody(state NetworksWirelessSSID
 			return types.Bool{}
 		}(),
 		WalledGardenRanges: StringSliceToList(response.WalledGardenRanges),
-		WpaEncryptionMode:  types.StringValue(response.WpaEncryptionMode),
+		WpaEncryptionMode: func() types.String {
+			if response.WpaEncryptionMode != "" {
+				return types.StringValue(response.WpaEncryptionMode)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

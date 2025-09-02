@@ -187,11 +187,11 @@ type ResponseSmLockNetworkSmDevices struct {
 }
 
 type RequestSmLockNetworkSmDevicesRs struct {
-	IDs      types.Set   `tfsdk:"ids"`
+	IDs      types.List  `tfsdk:"ids"`
 	Pin      types.Int64 `tfsdk:"pin"`
-	Scope    types.Set   `tfsdk:"scope"`
-	Serials  types.Set   `tfsdk:"serials"`
-	WifiMacs types.Set   `tfsdk:"wifi_macs"`
+	Scope    types.List  `tfsdk:"scope"`
+	Serials  types.List  `tfsdk:"serials"`
+	WifiMacs types.List  `tfsdk:"wifi_macs"`
 }
 
 // FromBody

@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -172,7 +171,12 @@ func ResponseOrganizationsGetOrganizationDevicesOverviewByModelItemToBody(state 
 				result := make([]ResponseOrganizationsGetOrganizationDevicesOverviewByModelCounts, len(*response.Counts))
 				for i, counts := range *response.Counts {
 					result[i] = ResponseOrganizationsGetOrganizationDevicesOverviewByModelCounts{
-						Model: types.StringValue(counts.Model),
+						Model: func() types.String {
+							if counts.Model != "" {
+								return types.StringValue(counts.Model)
+							}
+							return types.String{}
+						}(),
 						Total: func() types.Int64 {
 							if counts.Total != nil {
 								return types.Int64Value(int64(*counts.Total))

@@ -19,6 +19,8 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"encoding/json"
+	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
 
@@ -27,6 +29,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -70,7 +73,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 			},
 			"products": schema.SingleNestedAttribute{
 				MarkdownDescription: `The network devices to be updated`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -79,137 +81,13 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 
 					"appliance": schema.SingleNestedAttribute{
 						MarkdownDescription: `The network device to be updated`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
 						},
 						Attributes: map[string]schema.Attribute{
-
-							"available_versions": schema.SetNestedAttribute{
-								MarkdownDescription: `Firmware versions available for upgrade`,
-								Computed:            true,
-								NestedObject: schema.NestedAttributeObject{
-									Attributes: map[string]schema.Attribute{
-
-										"firmware": schema.StringAttribute{
-											MarkdownDescription: `Name of the firmware version`,
-											Computed:            true,
-										},
-										"id": schema.StringAttribute{
-											MarkdownDescription: `Firmware version identifier`,
-											Computed:            true,
-										},
-										"release_date": schema.StringAttribute{
-											MarkdownDescription: `Release date of the firmware version`,
-											Computed:            true,
-										},
-										"release_type": schema.StringAttribute{
-											MarkdownDescription: `Release type of the firmware version`,
-											Computed:            true,
-										},
-										"short_name": schema.StringAttribute{
-											MarkdownDescription: `Firmware version short name`,
-											Computed:            true,
-										},
-									},
-								},
-							},
-							"current_version": schema.SingleNestedAttribute{
-								MarkdownDescription: `Details of the current version on the device`,
-								Computed:            true,
-								Attributes: map[string]schema.Attribute{
-
-									"firmware": schema.StringAttribute{
-										MarkdownDescription: `Name of the firmware version`,
-										Computed:            true,
-									},
-									"id": schema.StringAttribute{
-										MarkdownDescription: `Firmware version identifier`,
-										Computed:            true,
-									},
-									"release_date": schema.StringAttribute{
-										MarkdownDescription: `Release date of the firmware version`,
-										Computed:            true,
-									},
-									"release_type": schema.StringAttribute{
-										MarkdownDescription: `Release type of the firmware version`,
-										Computed:            true,
-									},
-									"short_name": schema.StringAttribute{
-										MarkdownDescription: `Firmware version short name`,
-										Computed:            true,
-									},
-								},
-							},
-							"last_upgrade": schema.SingleNestedAttribute{
-								MarkdownDescription: `Details of the last firmware upgrade on the device`,
-								Computed:            true,
-								Attributes: map[string]schema.Attribute{
-
-									"from_version": schema.SingleNestedAttribute{
-										MarkdownDescription: `Details of the version the device upgraded from`,
-										Computed:            true,
-										Attributes: map[string]schema.Attribute{
-
-											"firmware": schema.StringAttribute{
-												MarkdownDescription: `Name of the firmware version`,
-												Computed:            true,
-											},
-											"id": schema.StringAttribute{
-												MarkdownDescription: `Firmware version identifier`,
-												Computed:            true,
-											},
-											"release_date": schema.StringAttribute{
-												MarkdownDescription: `Release date of the firmware version`,
-												Computed:            true,
-											},
-											"release_type": schema.StringAttribute{
-												MarkdownDescription: `Release type of the firmware version`,
-												Computed:            true,
-											},
-											"short_name": schema.StringAttribute{
-												MarkdownDescription: `Firmware version short name`,
-												Computed:            true,
-											},
-										},
-									},
-									"time": schema.StringAttribute{
-										MarkdownDescription: `Timestamp of the last successful firmware upgrade`,
-										Computed:            true,
-									},
-									"to_version": schema.SingleNestedAttribute{
-										MarkdownDescription: `Details of the version the device upgraded to`,
-										Computed:            true,
-										Attributes: map[string]schema.Attribute{
-
-											"firmware": schema.StringAttribute{
-												MarkdownDescription: `Name of the firmware version`,
-												Computed:            true,
-											},
-											"id": schema.StringAttribute{
-												MarkdownDescription: `Firmware version identifier`,
-												Computed:            true,
-											},
-											"release_date": schema.StringAttribute{
-												MarkdownDescription: `Release date of the firmware version`,
-												Computed:            true,
-											},
-											"release_type": schema.StringAttribute{
-												MarkdownDescription: `Release type of the firmware version`,
-												Computed:            true,
-											},
-											"short_name": schema.StringAttribute{
-												MarkdownDescription: `Firmware version short name`,
-												Computed:            true,
-											},
-										},
-									},
-								},
-							},
 							"next_upgrade": schema.SingleNestedAttribute{
 								MarkdownDescription: `Details of the next firmware upgrade on the device`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Object{
 									objectplanmodifier.UseStateForUnknown(),
@@ -218,7 +96,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 
 									"time": schema.StringAttribute{
 										MarkdownDescription: `Timestamp of the next scheduled firmware upgrade`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -226,7 +103,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 									},
 									"to_version": schema.SingleNestedAttribute{
 										MarkdownDescription: `Details of the version the device will upgrade to if it exists`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Object{
 											objectplanmodifier.UseStateForUnknown(),
@@ -239,7 +115,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 											},
 											"id": schema.StringAttribute{
 												MarkdownDescription: `Firmware version identifier`,
-												Computed:            true,
 												Optional:            true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
@@ -263,7 +138,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 							},
 							"participate_in_next_beta_release": schema.BoolAttribute{
 								MarkdownDescription: `Whether or not the network wants beta firmware`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -273,137 +147,14 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 					},
 					"camera": schema.SingleNestedAttribute{
 						MarkdownDescription: `The network device to be updated`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
 						},
 						Attributes: map[string]schema.Attribute{
 
-							"available_versions": schema.SetNestedAttribute{
-								MarkdownDescription: `Firmware versions available for upgrade`,
-								Computed:            true,
-								NestedObject: schema.NestedAttributeObject{
-									Attributes: map[string]schema.Attribute{
-
-										"firmware": schema.StringAttribute{
-											MarkdownDescription: `Name of the firmware version`,
-											Computed:            true,
-										},
-										"id": schema.StringAttribute{
-											MarkdownDescription: `Firmware version identifier`,
-											Computed:            true,
-										},
-										"release_date": schema.StringAttribute{
-											MarkdownDescription: `Release date of the firmware version`,
-											Computed:            true,
-										},
-										"release_type": schema.StringAttribute{
-											MarkdownDescription: `Release type of the firmware version`,
-											Computed:            true,
-										},
-										"short_name": schema.StringAttribute{
-											MarkdownDescription: `Firmware version short name`,
-											Computed:            true,
-										},
-									},
-								},
-							},
-							"current_version": schema.SingleNestedAttribute{
-								MarkdownDescription: `Details of the current version on the device`,
-								Computed:            true,
-								Attributes: map[string]schema.Attribute{
-
-									"firmware": schema.StringAttribute{
-										MarkdownDescription: `Name of the firmware version`,
-										Computed:            true,
-									},
-									"id": schema.StringAttribute{
-										MarkdownDescription: `Firmware version identifier`,
-										Computed:            true,
-									},
-									"release_date": schema.StringAttribute{
-										MarkdownDescription: `Release date of the firmware version`,
-										Computed:            true,
-									},
-									"release_type": schema.StringAttribute{
-										MarkdownDescription: `Release type of the firmware version`,
-										Computed:            true,
-									},
-									"short_name": schema.StringAttribute{
-										MarkdownDescription: `Firmware version short name`,
-										Computed:            true,
-									},
-								},
-							},
-							"last_upgrade": schema.SingleNestedAttribute{
-								MarkdownDescription: `Details of the last firmware upgrade on the device`,
-								Computed:            true,
-								Attributes: map[string]schema.Attribute{
-
-									"from_version": schema.SingleNestedAttribute{
-										MarkdownDescription: `Details of the version the device upgraded from`,
-										Computed:            true,
-										Attributes: map[string]schema.Attribute{
-
-											"firmware": schema.StringAttribute{
-												MarkdownDescription: `Name of the firmware version`,
-												Computed:            true,
-											},
-											"id": schema.StringAttribute{
-												MarkdownDescription: `Firmware version identifier`,
-												Computed:            true,
-											},
-											"release_date": schema.StringAttribute{
-												MarkdownDescription: `Release date of the firmware version`,
-												Computed:            true,
-											},
-											"release_type": schema.StringAttribute{
-												MarkdownDescription: `Release type of the firmware version`,
-												Computed:            true,
-											},
-											"short_name": schema.StringAttribute{
-												MarkdownDescription: `Firmware version short name`,
-												Computed:            true,
-											},
-										},
-									},
-									"time": schema.StringAttribute{
-										MarkdownDescription: `Timestamp of the last successful firmware upgrade`,
-										Computed:            true,
-									},
-									"to_version": schema.SingleNestedAttribute{
-										MarkdownDescription: `Details of the version the device upgraded to`,
-										Computed:            true,
-										Attributes: map[string]schema.Attribute{
-
-											"firmware": schema.StringAttribute{
-												MarkdownDescription: `Name of the firmware version`,
-												Computed:            true,
-											},
-											"id": schema.StringAttribute{
-												MarkdownDescription: `Firmware version identifier`,
-												Computed:            true,
-											},
-											"release_date": schema.StringAttribute{
-												MarkdownDescription: `Release date of the firmware version`,
-												Computed:            true,
-											},
-											"release_type": schema.StringAttribute{
-												MarkdownDescription: `Release type of the firmware version`,
-												Computed:            true,
-											},
-											"short_name": schema.StringAttribute{
-												MarkdownDescription: `Firmware version short name`,
-												Computed:            true,
-											},
-										},
-									},
-								},
-							},
 							"next_upgrade": schema.SingleNestedAttribute{
 								MarkdownDescription: `Details of the next firmware upgrade on the device`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Object{
 									objectplanmodifier.UseStateForUnknown(),
@@ -412,7 +163,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 
 									"time": schema.StringAttribute{
 										MarkdownDescription: `Timestamp of the next scheduled firmware upgrade`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -420,7 +170,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 									},
 									"to_version": schema.SingleNestedAttribute{
 										MarkdownDescription: `Details of the version the device will upgrade to if it exists`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Object{
 											objectplanmodifier.UseStateForUnknown(),
@@ -433,7 +182,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 											},
 											"id": schema.StringAttribute{
 												MarkdownDescription: `Firmware version identifier`,
-												Computed:            true,
 												Optional:            true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
@@ -457,7 +205,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 							},
 							"participate_in_next_beta_release": schema.BoolAttribute{
 								MarkdownDescription: `Whether or not the network wants beta firmware`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -467,137 +214,14 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 					},
 					"cellular_gateway": schema.SingleNestedAttribute{
 						MarkdownDescription: `The network device to be updated`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
 						},
 						Attributes: map[string]schema.Attribute{
 
-							"available_versions": schema.SetNestedAttribute{
-								MarkdownDescription: `Firmware versions available for upgrade`,
-								Computed:            true,
-								NestedObject: schema.NestedAttributeObject{
-									Attributes: map[string]schema.Attribute{
-
-										"firmware": schema.StringAttribute{
-											MarkdownDescription: `Name of the firmware version`,
-											Computed:            true,
-										},
-										"id": schema.StringAttribute{
-											MarkdownDescription: `Firmware version identifier`,
-											Computed:            true,
-										},
-										"release_date": schema.StringAttribute{
-											MarkdownDescription: `Release date of the firmware version`,
-											Computed:            true,
-										},
-										"release_type": schema.StringAttribute{
-											MarkdownDescription: `Release type of the firmware version`,
-											Computed:            true,
-										},
-										"short_name": schema.StringAttribute{
-											MarkdownDescription: `Firmware version short name`,
-											Computed:            true,
-										},
-									},
-								},
-							},
-							"current_version": schema.SingleNestedAttribute{
-								MarkdownDescription: `Details of the current version on the device`,
-								Computed:            true,
-								Attributes: map[string]schema.Attribute{
-
-									"firmware": schema.StringAttribute{
-										MarkdownDescription: `Name of the firmware version`,
-										Computed:            true,
-									},
-									"id": schema.StringAttribute{
-										MarkdownDescription: `Firmware version identifier`,
-										Computed:            true,
-									},
-									"release_date": schema.StringAttribute{
-										MarkdownDescription: `Release date of the firmware version`,
-										Computed:            true,
-									},
-									"release_type": schema.StringAttribute{
-										MarkdownDescription: `Release type of the firmware version`,
-										Computed:            true,
-									},
-									"short_name": schema.StringAttribute{
-										MarkdownDescription: `Firmware version short name`,
-										Computed:            true,
-									},
-								},
-							},
-							"last_upgrade": schema.SingleNestedAttribute{
-								MarkdownDescription: `Details of the last firmware upgrade on the device`,
-								Computed:            true,
-								Attributes: map[string]schema.Attribute{
-
-									"from_version": schema.SingleNestedAttribute{
-										MarkdownDescription: `Details of the version the device upgraded from`,
-										Computed:            true,
-										Attributes: map[string]schema.Attribute{
-
-											"firmware": schema.StringAttribute{
-												MarkdownDescription: `Name of the firmware version`,
-												Computed:            true,
-											},
-											"id": schema.StringAttribute{
-												MarkdownDescription: `Firmware version identifier`,
-												Computed:            true,
-											},
-											"release_date": schema.StringAttribute{
-												MarkdownDescription: `Release date of the firmware version`,
-												Computed:            true,
-											},
-											"release_type": schema.StringAttribute{
-												MarkdownDescription: `Release type of the firmware version`,
-												Computed:            true,
-											},
-											"short_name": schema.StringAttribute{
-												MarkdownDescription: `Firmware version short name`,
-												Computed:            true,
-											},
-										},
-									},
-									"time": schema.StringAttribute{
-										MarkdownDescription: `Timestamp of the last successful firmware upgrade`,
-										Computed:            true,
-									},
-									"to_version": schema.SingleNestedAttribute{
-										MarkdownDescription: `Details of the version the device upgraded to`,
-										Computed:            true,
-										Attributes: map[string]schema.Attribute{
-
-											"firmware": schema.StringAttribute{
-												MarkdownDescription: `Name of the firmware version`,
-												Computed:            true,
-											},
-											"id": schema.StringAttribute{
-												MarkdownDescription: `Firmware version identifier`,
-												Computed:            true,
-											},
-											"release_date": schema.StringAttribute{
-												MarkdownDescription: `Release date of the firmware version`,
-												Computed:            true,
-											},
-											"release_type": schema.StringAttribute{
-												MarkdownDescription: `Release type of the firmware version`,
-												Computed:            true,
-											},
-											"short_name": schema.StringAttribute{
-												MarkdownDescription: `Firmware version short name`,
-												Computed:            true,
-											},
-										},
-									},
-								},
-							},
 							"next_upgrade": schema.SingleNestedAttribute{
 								MarkdownDescription: `Details of the next firmware upgrade on the device`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Object{
 									objectplanmodifier.UseStateForUnknown(),
@@ -606,7 +230,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 
 									"time": schema.StringAttribute{
 										MarkdownDescription: `Timestamp of the next scheduled firmware upgrade`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -614,7 +237,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 									},
 									"to_version": schema.SingleNestedAttribute{
 										MarkdownDescription: `Details of the version the device will upgrade to if it exists`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Object{
 											objectplanmodifier.UseStateForUnknown(),
@@ -627,7 +249,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 											},
 											"id": schema.StringAttribute{
 												MarkdownDescription: `Firmware version identifier`,
-												Computed:            true,
 												Optional:            true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
@@ -651,7 +272,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 							},
 							"participate_in_next_beta_release": schema.BoolAttribute{
 								MarkdownDescription: `Whether or not the network wants beta firmware`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -661,137 +281,14 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 					},
 					"secure_connect": schema.SingleNestedAttribute{
 						MarkdownDescription: `The network device to be updated`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
 						},
 						Attributes: map[string]schema.Attribute{
 
-							"available_versions": schema.SetNestedAttribute{
-								MarkdownDescription: `Firmware versions available for upgrade`,
-								Computed:            true,
-								NestedObject: schema.NestedAttributeObject{
-									Attributes: map[string]schema.Attribute{
-
-										"firmware": schema.StringAttribute{
-											MarkdownDescription: `Name of the firmware version`,
-											Computed:            true,
-										},
-										"id": schema.StringAttribute{
-											MarkdownDescription: `Firmware version identifier`,
-											Computed:            true,
-										},
-										"release_date": schema.StringAttribute{
-											MarkdownDescription: `Release date of the firmware version`,
-											Computed:            true,
-										},
-										"release_type": schema.StringAttribute{
-											MarkdownDescription: `Release type of the firmware version`,
-											Computed:            true,
-										},
-										"short_name": schema.StringAttribute{
-											MarkdownDescription: `Firmware version short name`,
-											Computed:            true,
-										},
-									},
-								},
-							},
-							"current_version": schema.SingleNestedAttribute{
-								MarkdownDescription: `Details of the current version on the device`,
-								Computed:            true,
-								Attributes: map[string]schema.Attribute{
-
-									"firmware": schema.StringAttribute{
-										MarkdownDescription: `Name of the firmware version`,
-										Computed:            true,
-									},
-									"id": schema.StringAttribute{
-										MarkdownDescription: `Firmware version identifier`,
-										Computed:            true,
-									},
-									"release_date": schema.StringAttribute{
-										MarkdownDescription: `Release date of the firmware version`,
-										Computed:            true,
-									},
-									"release_type": schema.StringAttribute{
-										MarkdownDescription: `Release type of the firmware version`,
-										Computed:            true,
-									},
-									"short_name": schema.StringAttribute{
-										MarkdownDescription: `Firmware version short name`,
-										Computed:            true,
-									},
-								},
-							},
-							"last_upgrade": schema.SingleNestedAttribute{
-								MarkdownDescription: `Details of the last firmware upgrade on the device`,
-								Computed:            true,
-								Attributes: map[string]schema.Attribute{
-
-									"from_version": schema.SingleNestedAttribute{
-										MarkdownDescription: `Details of the version the device upgraded from`,
-										Computed:            true,
-										Attributes: map[string]schema.Attribute{
-
-											"firmware": schema.StringAttribute{
-												MarkdownDescription: `Name of the firmware version`,
-												Computed:            true,
-											},
-											"id": schema.StringAttribute{
-												MarkdownDescription: `Firmware version identifier`,
-												Computed:            true,
-											},
-											"release_date": schema.StringAttribute{
-												MarkdownDescription: `Release date of the firmware version`,
-												Computed:            true,
-											},
-											"release_type": schema.StringAttribute{
-												MarkdownDescription: `Release type of the firmware version`,
-												Computed:            true,
-											},
-											"short_name": schema.StringAttribute{
-												MarkdownDescription: `Firmware version short name`,
-												Computed:            true,
-											},
-										},
-									},
-									"time": schema.StringAttribute{
-										MarkdownDescription: `Timestamp of the last successful firmware upgrade`,
-										Computed:            true,
-									},
-									"to_version": schema.SingleNestedAttribute{
-										MarkdownDescription: `Details of the version the device upgraded to`,
-										Computed:            true,
-										Attributes: map[string]schema.Attribute{
-
-											"firmware": schema.StringAttribute{
-												MarkdownDescription: `Name of the firmware version`,
-												Computed:            true,
-											},
-											"id": schema.StringAttribute{
-												MarkdownDescription: `Firmware version identifier`,
-												Computed:            true,
-											},
-											"release_date": schema.StringAttribute{
-												MarkdownDescription: `Release date of the firmware version`,
-												Computed:            true,
-											},
-											"release_type": schema.StringAttribute{
-												MarkdownDescription: `Release type of the firmware version`,
-												Computed:            true,
-											},
-											"short_name": schema.StringAttribute{
-												MarkdownDescription: `Firmware version short name`,
-												Computed:            true,
-											},
-										},
-									},
-								},
-							},
 							"next_upgrade": schema.SingleNestedAttribute{
 								MarkdownDescription: `Details of the next firmware upgrade on the device`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Object{
 									objectplanmodifier.UseStateForUnknown(),
@@ -800,7 +297,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 
 									"time": schema.StringAttribute{
 										MarkdownDescription: `Timestamp of the next scheduled firmware upgrade`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -808,7 +304,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 									},
 									"to_version": schema.SingleNestedAttribute{
 										MarkdownDescription: `Details of the version the device will upgrade to if it exists`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Object{
 											objectplanmodifier.UseStateForUnknown(),
@@ -821,7 +316,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 											},
 											"id": schema.StringAttribute{
 												MarkdownDescription: `Firmware version identifier`,
-												Computed:            true,
 												Optional:            true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
@@ -845,7 +339,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 							},
 							"participate_in_next_beta_release": schema.BoolAttribute{
 								MarkdownDescription: `Whether or not the network wants beta firmware`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -855,14 +348,13 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 					},
 					"sensor": schema.SingleNestedAttribute{
 						MarkdownDescription: `The network device to be updated`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
 						},
 						Attributes: map[string]schema.Attribute{
 
-							"available_versions": schema.SetNestedAttribute{
+							"available_versions": schema.ListNestedAttribute{
 								MarkdownDescription: `Firmware versions available for upgrade`,
 								Computed:            true,
 								NestedObject: schema.NestedAttributeObject{
@@ -985,7 +477,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 							},
 							"next_upgrade": schema.SingleNestedAttribute{
 								MarkdownDescription: `Details of the next firmware upgrade on the device`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Object{
 									objectplanmodifier.UseStateForUnknown(),
@@ -994,7 +485,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 
 									"time": schema.StringAttribute{
 										MarkdownDescription: `Timestamp of the next scheduled firmware upgrade`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -1002,7 +492,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 									},
 									"to_version": schema.SingleNestedAttribute{
 										MarkdownDescription: `Details of the version the device will upgrade to if it exists`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Object{
 											objectplanmodifier.UseStateForUnknown(),
@@ -1015,7 +504,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 											},
 											"id": schema.StringAttribute{
 												MarkdownDescription: `Firmware version identifier`,
-												Computed:            true,
 												Optional:            true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
@@ -1039,7 +527,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 							},
 							"participate_in_next_beta_release": schema.BoolAttribute{
 								MarkdownDescription: `Whether or not the network wants beta firmware`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -1049,14 +536,13 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 					},
 					"switch": schema.SingleNestedAttribute{
 						MarkdownDescription: `The network device to be updated`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
 						},
 						Attributes: map[string]schema.Attribute{
 
-							"available_versions": schema.SetNestedAttribute{
+							"available_versions": schema.ListNestedAttribute{
 								MarkdownDescription: `Firmware versions available for upgrade`,
 								Computed:            true,
 								NestedObject: schema.NestedAttributeObject{
@@ -1179,7 +665,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 							},
 							"next_upgrade": schema.SingleNestedAttribute{
 								MarkdownDescription: `Details of the next firmware upgrade on the device`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Object{
 									objectplanmodifier.UseStateForUnknown(),
@@ -1188,7 +673,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 
 									"time": schema.StringAttribute{
 										MarkdownDescription: `Timestamp of the next scheduled firmware upgrade`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -1196,7 +680,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 									},
 									"to_version": schema.SingleNestedAttribute{
 										MarkdownDescription: `Details of the version the device will upgrade to if it exists`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Object{
 											objectplanmodifier.UseStateForUnknown(),
@@ -1209,7 +692,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 											},
 											"id": schema.StringAttribute{
 												MarkdownDescription: `Firmware version identifier`,
-												Computed:            true,
 												Optional:            true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
@@ -1233,7 +715,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 							},
 							"participate_in_next_beta_release": schema.BoolAttribute{
 								MarkdownDescription: `Whether or not the network wants beta firmware`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -1243,7 +724,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 					},
 					"switch_catalyst": schema.SingleNestedAttribute{
 						MarkdownDescription: `The network device to be updated`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
@@ -1252,7 +732,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 
 							"next_upgrade": schema.SingleNestedAttribute{
 								MarkdownDescription: `The pending firmware upgrade if it exists`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Object{
 									objectplanmodifier.UseStateForUnknown(),
@@ -1261,7 +740,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 
 									"time": schema.StringAttribute{
 										MarkdownDescription: `The time of the last successful upgrade`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -1269,7 +747,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 									},
 									"to_version": schema.SingleNestedAttribute{
 										MarkdownDescription: `The version to be updated to`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Object{
 											objectplanmodifier.UseStateForUnknown(),
@@ -1278,7 +755,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 
 											"id": schema.StringAttribute{
 												MarkdownDescription: `The version ID`,
-												Computed:            true,
 												Optional:            true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
@@ -1290,7 +766,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 							},
 							"participate_in_next_beta_release": schema.BoolAttribute{
 								MarkdownDescription: `Whether or not the network wants beta firmware`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -1300,137 +775,15 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 					},
 					"wireless": schema.SingleNestedAttribute{
 						MarkdownDescription: `The network device to be updated`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
 						},
+
 						Attributes: map[string]schema.Attribute{
 
-							"available_versions": schema.SetNestedAttribute{
-								MarkdownDescription: `Firmware versions available for upgrade`,
-								Computed:            true,
-								NestedObject: schema.NestedAttributeObject{
-									Attributes: map[string]schema.Attribute{
-
-										"firmware": schema.StringAttribute{
-											MarkdownDescription: `Name of the firmware version`,
-											Computed:            true,
-										},
-										"id": schema.StringAttribute{
-											MarkdownDescription: `Firmware version identifier`,
-											Computed:            true,
-										},
-										"release_date": schema.StringAttribute{
-											MarkdownDescription: `Release date of the firmware version`,
-											Computed:            true,
-										},
-										"release_type": schema.StringAttribute{
-											MarkdownDescription: `Release type of the firmware version`,
-											Computed:            true,
-										},
-										"short_name": schema.StringAttribute{
-											MarkdownDescription: `Firmware version short name`,
-											Computed:            true,
-										},
-									},
-								},
-							},
-							"current_version": schema.SingleNestedAttribute{
-								MarkdownDescription: `Details of the current version on the device`,
-								Computed:            true,
-								Attributes: map[string]schema.Attribute{
-
-									"firmware": schema.StringAttribute{
-										MarkdownDescription: `Name of the firmware version`,
-										Computed:            true,
-									},
-									"id": schema.StringAttribute{
-										MarkdownDescription: `Firmware version identifier`,
-										Computed:            true,
-									},
-									"release_date": schema.StringAttribute{
-										MarkdownDescription: `Release date of the firmware version`,
-										Computed:            true,
-									},
-									"release_type": schema.StringAttribute{
-										MarkdownDescription: `Release type of the firmware version`,
-										Computed:            true,
-									},
-									"short_name": schema.StringAttribute{
-										MarkdownDescription: `Firmware version short name`,
-										Computed:            true,
-									},
-								},
-							},
-							"last_upgrade": schema.SingleNestedAttribute{
-								MarkdownDescription: `Details of the last firmware upgrade on the device`,
-								Computed:            true,
-								Attributes: map[string]schema.Attribute{
-
-									"from_version": schema.SingleNestedAttribute{
-										MarkdownDescription: `Details of the version the device upgraded from`,
-										Computed:            true,
-										Attributes: map[string]schema.Attribute{
-
-											"firmware": schema.StringAttribute{
-												MarkdownDescription: `Name of the firmware version`,
-												Computed:            true,
-											},
-											"id": schema.StringAttribute{
-												MarkdownDescription: `Firmware version identifier`,
-												Computed:            true,
-											},
-											"release_date": schema.StringAttribute{
-												MarkdownDescription: `Release date of the firmware version`,
-												Computed:            true,
-											},
-											"release_type": schema.StringAttribute{
-												MarkdownDescription: `Release type of the firmware version`,
-												Computed:            true,
-											},
-											"short_name": schema.StringAttribute{
-												MarkdownDescription: `Firmware version short name`,
-												Computed:            true,
-											},
-										},
-									},
-									"time": schema.StringAttribute{
-										MarkdownDescription: `Timestamp of the last successful firmware upgrade`,
-										Computed:            true,
-									},
-									"to_version": schema.SingleNestedAttribute{
-										MarkdownDescription: `Details of the version the device upgraded to`,
-										Computed:            true,
-										Attributes: map[string]schema.Attribute{
-
-											"firmware": schema.StringAttribute{
-												MarkdownDescription: `Name of the firmware version`,
-												Computed:            true,
-											},
-											"id": schema.StringAttribute{
-												MarkdownDescription: `Firmware version identifier`,
-												Computed:            true,
-											},
-											"release_date": schema.StringAttribute{
-												MarkdownDescription: `Release date of the firmware version`,
-												Computed:            true,
-											},
-											"release_type": schema.StringAttribute{
-												MarkdownDescription: `Release type of the firmware version`,
-												Computed:            true,
-											},
-											"short_name": schema.StringAttribute{
-												MarkdownDescription: `Firmware version short name`,
-												Computed:            true,
-											},
-										},
-									},
-								},
-							},
 							"next_upgrade": schema.SingleNestedAttribute{
 								MarkdownDescription: `Details of the next firmware upgrade on the device`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Object{
 									objectplanmodifier.UseStateForUnknown(),
@@ -1439,7 +792,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 
 									"time": schema.StringAttribute{
 										MarkdownDescription: `Timestamp of the next scheduled firmware upgrade`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -1447,7 +799,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 									},
 									"to_version": schema.SingleNestedAttribute{
 										MarkdownDescription: `Details of the version the device will upgrade to if it exists`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Object{
 											objectplanmodifier.UseStateForUnknown(),
@@ -1460,7 +811,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 											},
 											"id": schema.StringAttribute{
 												MarkdownDescription: `Firmware version identifier`,
-												Computed:            true,
 												Optional:            true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
@@ -1484,7 +834,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 							},
 							"participate_in_next_beta_release": schema.BoolAttribute{
 								MarkdownDescription: `Whether or not the network wants beta firmware`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -1494,16 +843,19 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 					},
 					"wireless_controller": schema.SingleNestedAttribute{
 						MarkdownDescription: `The network device to be updated`,
-						Computed:            true,
 						Optional:            true,
 						PlanModifiers: []planmodifier.Object{
 							objectplanmodifier.UseStateForUnknown(),
 						},
 						Attributes: map[string]schema.Attribute{
 
-							"available_versions": schema.SetNestedAttribute{
+							"available_versions": schema.ListNestedAttribute{
 								MarkdownDescription: `Firmware versions available for upgrade`,
 								Computed:            true,
+								PlanModifiers: []planmodifier.List{
+									listplanmodifier.UseStateForUnknown(),
+								},
+
 								NestedObject: schema.NestedAttributeObject{
 									Attributes: map[string]schema.Attribute{
 
@@ -1624,7 +976,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 							},
 							"next_upgrade": schema.SingleNestedAttribute{
 								MarkdownDescription: `Details of the next firmware upgrade on the device`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Object{
 									objectplanmodifier.UseStateForUnknown(),
@@ -1633,7 +984,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 
 									"time": schema.StringAttribute{
 										MarkdownDescription: `Timestamp of the next scheduled firmware upgrade`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.String{
 											stringplanmodifier.UseStateForUnknown(),
@@ -1641,7 +991,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 									},
 									"to_version": schema.SingleNestedAttribute{
 										MarkdownDescription: `Details of the version the device will upgrade to if it exists`,
-										Computed:            true,
 										Optional:            true,
 										PlanModifiers: []planmodifier.Object{
 											objectplanmodifier.UseStateForUnknown(),
@@ -1654,7 +1003,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 											},
 											"id": schema.StringAttribute{
 												MarkdownDescription: `Firmware version identifier`,
-												Computed:            true,
 												Optional:            true,
 												PlanModifiers: []planmodifier.String{
 													stringplanmodifier.UseStateForUnknown(),
@@ -1678,7 +1026,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 							},
 							"participate_in_next_beta_release": schema.BoolAttribute{
 								MarkdownDescription: `Whether or not the network wants beta firmware`,
-								Computed:            true,
 								Optional:            true,
 								PlanModifiers: []planmodifier.Bool{
 									boolplanmodifier.UseStateForUnknown(),
@@ -1690,7 +1037,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 			},
 			"timezone": schema.StringAttribute{
 				MarkdownDescription: `The timezone for the network`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -1698,7 +1044,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 			},
 			"upgrade_window": schema.SingleNestedAttribute{
 				MarkdownDescription: `Upgrade window for devices in network`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -1708,7 +1053,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 					"day_of_week": schema.StringAttribute{
 						MarkdownDescription: `Day of the week
                                         Allowed values: [fri,friday,mon,monday,sat,saturday,sun,sunday,thu,thursday,tue,tuesday,wed,wednesday]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -1735,7 +1079,6 @@ func (r *NetworksFirmwareUpgradesResource) Schema(_ context.Context, _ resource.
 					"hour_of_day": schema.StringAttribute{
 						MarkdownDescription: `Hour of the day
                                         Allowed values: [0:00,10:00,11:00,12:00,13:00,14:00,15:00,16:00,17:00,18:00,19:00,1:00,20:00,21:00,22:00,23:00,2:00,3:00,4:00,5:00,6:00,7:00,8:00,9:00]`,
-						Computed: true,
 						Optional: true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.UseStateForUnknown(),
@@ -1797,27 +1140,6 @@ func (r *NetworksFirmwareUpgradesResource) Create(ctx context.Context, req resou
 	vvNetworkID := data.NetworkID.ValueString()
 	//Has Item and not has items
 
-	if vvNetworkID != "" {
-		//dentro
-		responseVerifyItem, restyResp1, err := r.client.Networks.GetNetworkFirmwareUpgrades(vvNetworkID)
-		// No Post
-		if err != nil || restyResp1 == nil || responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksFirmwareUpgrades  only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-
-		if responseVerifyItem == nil {
-			resp.Diagnostics.AddError(
-				"Resource NetworksFirmwareUpgrades only have update context, not create.",
-				err.Error(),
-			)
-			return
-		}
-	}
-
 	// UPDATE NO CREATE
 	dataRequest := data.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkFirmwareUpgrades(vvNetworkID, dataRequest)
@@ -1826,7 +1148,7 @@ func (r *NetworksFirmwareUpgradesResource) Create(ctx context.Context, req resou
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkFirmwareUpgrades",
-				restyResp2.String(),
+				restyResp2.String()+"\nStatus: "+restyResp2.Status(),
 			)
 			return
 		}
@@ -1837,49 +1159,32 @@ func (r *NetworksFirmwareUpgradesResource) Create(ctx context.Context, req resou
 		return
 	}
 
-	//Assign Path Params required
-
-	responseGet, restyResp1, err := r.client.Networks.GetNetworkFirmwareUpgrades(vvNetworkID)
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkFirmwareUpgrades",
-				restyResp1.String(),
-			)
-			return
-		}
+	// Update struct to Read struct
+	var responseGet *merakigosdk.ResponseNetworksGetNetworkFirmwareUpgrades
+	// response to json
+	err = json.Unmarshal(restyResp2.Body(), &responseGet)
+	if err != nil {
 		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkFirmwareUpgrades",
+			"Failure when unmarshalling response",
 			err.Error(),
 		)
 		return
 	}
 
-	data = ResponseNetworksGetNetworkFirmwareUpgradesItemToBodyRs(data, responseGet, false)
-
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	// Assign data
+	data = ResponseNetworksGetNetworkFirmwareUpgradesItemToBodyRs(data, responseGet, true)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 
 func (r *NetworksFirmwareUpgradesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksFirmwareUpgradesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -1909,33 +1214,28 @@ func (r *NetworksFirmwareUpgradesResource) Read(ctx context.Context, req resourc
 	}
 	//entro aqui 2
 	data = ResponseNetworksGetNetworkFirmwareUpgradesItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *NetworksFirmwareUpgradesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), req.ID)...)
 }
 
 func (r *NetworksFirmwareUpgradesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksFirmwareUpgradesRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksFirmwareUpgradesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Networks.UpdateNetworkFirmwareUpgrades(vvNetworkID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkFirmwareUpgrades",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -1945,9 +1245,7 @@ func (r *NetworksFirmwareUpgradesResource) Update(ctx context.Context, req resou
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksFirmwareUpgradesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -1977,11 +1275,8 @@ type ResponseNetworksGetNetworkFirmwareUpgradesProductsRs struct {
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceRs struct {
-	AvailableVersions            *[]ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceAvailableVersionsRs `tfsdk:"available_versions"`
-	CurrentVersion               *ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceCurrentVersionRs      `tfsdk:"current_version"`
-	LastUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceLastUpgradeRs         `tfsdk:"last_upgrade"`
-	NextUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceNextUpgradeRs         `tfsdk:"next_upgrade"`
-	ParticipateInNextBetaRelease types.Bool                                                                        `tfsdk:"participate_in_next_beta_release"`
+	NextUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceNextUpgradeRs `tfsdk:"next_upgrade"`
+	ParticipateInNextBetaRelease types.Bool                                                                `tfsdk:"participate_in_next_beta_release"`
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceAvailableVersionsRs struct {
@@ -2036,11 +1331,8 @@ type ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceNextUpgradeToVer
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraRs struct {
-	AvailableVersions            *[]ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraAvailableVersionsRs `tfsdk:"available_versions"`
-	CurrentVersion               *ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraCurrentVersionRs      `tfsdk:"current_version"`
-	LastUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraLastUpgradeRs         `tfsdk:"last_upgrade"`
-	NextUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraNextUpgradeRs         `tfsdk:"next_upgrade"`
-	ParticipateInNextBetaRelease types.Bool                                                                     `tfsdk:"participate_in_next_beta_release"`
+	NextUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraNextUpgradeRs `tfsdk:"next_upgrade"`
+	ParticipateInNextBetaRelease types.Bool                                                             `tfsdk:"participate_in_next_beta_release"`
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraAvailableVersionsRs struct {
@@ -2095,11 +1387,8 @@ type ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraNextUpgradeToVersio
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayRs struct {
-	AvailableVersions            *[]ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayAvailableVersionsRs `tfsdk:"available_versions"`
-	CurrentVersion               *ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayCurrentVersionRs      `tfsdk:"current_version"`
-	LastUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayLastUpgradeRs         `tfsdk:"last_upgrade"`
-	NextUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayNextUpgradeRs         `tfsdk:"next_upgrade"`
-	ParticipateInNextBetaRelease types.Bool                                                                              `tfsdk:"participate_in_next_beta_release"`
+	NextUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayNextUpgradeRs `tfsdk:"next_upgrade"`
+	ParticipateInNextBetaRelease types.Bool                                                                      `tfsdk:"participate_in_next_beta_release"`
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayAvailableVersionsRs struct {
@@ -2154,11 +1443,8 @@ type ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayNextUpgrad
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectRs struct {
-	AvailableVersions            *[]ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectAvailableVersionsRs `tfsdk:"available_versions"`
-	CurrentVersion               *ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectCurrentVersionRs      `tfsdk:"current_version"`
-	LastUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectLastUpgradeRs         `tfsdk:"last_upgrade"`
-	NextUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectNextUpgradeRs         `tfsdk:"next_upgrade"`
-	ParticipateInNextBetaRelease types.Bool                                                                            `tfsdk:"participate_in_next_beta_release"`
+	NextUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectNextUpgradeRs `tfsdk:"next_upgrade"`
+	ParticipateInNextBetaRelease types.Bool                                                                    `tfsdk:"participate_in_next_beta_release"`
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectAvailableVersionsRs struct {
@@ -2213,11 +1499,8 @@ type ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectNextUpgradeT
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorRs struct {
-	AvailableVersions            *[]ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorAvailableVersionsRs `tfsdk:"available_versions"`
-	CurrentVersion               *ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorCurrentVersionRs      `tfsdk:"current_version"`
-	LastUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorLastUpgradeRs         `tfsdk:"last_upgrade"`
-	NextUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorNextUpgradeRs         `tfsdk:"next_upgrade"`
-	ParticipateInNextBetaRelease types.Bool                                                                     `tfsdk:"participate_in_next_beta_release"`
+	NextUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorNextUpgradeRs `tfsdk:"next_upgrade"`
+	ParticipateInNextBetaRelease types.Bool                                                             `tfsdk:"participate_in_next_beta_release"`
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorAvailableVersionsRs struct {
@@ -2272,11 +1555,8 @@ type ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorNextUpgradeToVersio
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchRs struct {
-	AvailableVersions            *[]ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchAvailableVersionsRs `tfsdk:"available_versions"`
-	CurrentVersion               *ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchCurrentVersionRs      `tfsdk:"current_version"`
-	LastUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchLastUpgradeRs         `tfsdk:"last_upgrade"`
-	NextUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchNextUpgradeRs         `tfsdk:"next_upgrade"`
-	ParticipateInNextBetaRelease types.Bool                                                                     `tfsdk:"participate_in_next_beta_release"`
+	NextUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchNextUpgradeRs `tfsdk:"next_upgrade"`
+	ParticipateInNextBetaRelease types.Bool                                                             `tfsdk:"participate_in_next_beta_release"`
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchAvailableVersionsRs struct {
@@ -2331,11 +1611,8 @@ type ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchNextUpgradeToVersio
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessRs struct {
-	AvailableVersions            *[]ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessAvailableVersionsRs `tfsdk:"available_versions"`
-	CurrentVersion               *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessCurrentVersionRs      `tfsdk:"current_version"`
-	LastUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessLastUpgradeRs         `tfsdk:"last_upgrade"`
-	NextUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessNextUpgradeRs         `tfsdk:"next_upgrade"`
-	ParticipateInNextBetaRelease types.Bool                                                                       `tfsdk:"participate_in_next_beta_release"`
+	NextUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessNextUpgradeRs `tfsdk:"next_upgrade"`
+	ParticipateInNextBetaRelease types.Bool                                                               `tfsdk:"participate_in_next_beta_release"`
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessAvailableVersionsRs struct {
@@ -2390,11 +1667,8 @@ type ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessNextUpgradeToVers
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerRs struct {
-	AvailableVersions            *[]ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerAvailableVersionsRs `tfsdk:"available_versions"`
-	CurrentVersion               *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerCurrentVersionRs      `tfsdk:"current_version"`
-	LastUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerLastUpgradeRs         `tfsdk:"last_upgrade"`
-	NextUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerNextUpgradeRs         `tfsdk:"next_upgrade"`
-	ParticipateInNextBetaRelease types.Bool                                                                                 `tfsdk:"participate_in_next_beta_release"`
+	NextUpgrade                  *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerNextUpgradeRs `tfsdk:"next_upgrade"`
+	ParticipateInNextBetaRelease types.Bool                                                                         `tfsdk:"participate_in_next_beta_release"`
 }
 
 type ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerAvailableVersionsRs struct {
@@ -2826,78 +2100,48 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBodyRs(state NetworksFirmwa
 					Appliance: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceRs {
 						if response.Products.Appliance != nil {
 							return &ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceRs{
-								AvailableVersions: func() *[]ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceAvailableVersionsRs {
-									if response.Products.Appliance.AvailableVersions != nil {
-										result := make([]ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceAvailableVersionsRs, len(*response.Products.Appliance.AvailableVersions))
-										for i, availableVersions := range *response.Products.Appliance.AvailableVersions {
-											result[i] = ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceAvailableVersionsRs{
-												Firmware:    types.StringValue(availableVersions.Firmware),
-												ID:          types.StringValue(availableVersions.ID),
-												ReleaseDate: types.StringValue(availableVersions.ReleaseDate),
-												ReleaseType: types.StringValue(availableVersions.ReleaseType),
-												ShortName:   types.StringValue(availableVersions.ShortName),
-											}
-										}
-										return &result
-									}
-									return nil
-								}(),
-								CurrentVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceCurrentVersionRs {
-									if response.Products.Appliance.CurrentVersion != nil {
-										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceCurrentVersionRs{
-											Firmware:    types.StringValue(response.Products.Appliance.CurrentVersion.Firmware),
-											ID:          types.StringValue(response.Products.Appliance.CurrentVersion.ID),
-											ReleaseDate: types.StringValue(response.Products.Appliance.CurrentVersion.ReleaseDate),
-											ReleaseType: types.StringValue(response.Products.Appliance.CurrentVersion.ReleaseType),
-											ShortName:   types.StringValue(response.Products.Appliance.CurrentVersion.ShortName),
-										}
-									}
-									return nil
-								}(),
-								LastUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceLastUpgradeRs {
-									if response.Products.Appliance.LastUpgrade != nil {
-										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceLastUpgradeRs{
-											FromVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceLastUpgradeFromVersionRs {
-												if response.Products.Appliance.LastUpgrade.FromVersion != nil {
-													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceLastUpgradeFromVersionRs{
-														Firmware:    types.StringValue(response.Products.Appliance.LastUpgrade.FromVersion.Firmware),
-														ID:          types.StringValue(response.Products.Appliance.LastUpgrade.FromVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Appliance.LastUpgrade.FromVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Appliance.LastUpgrade.FromVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Appliance.LastUpgrade.FromVersion.ShortName),
-													}
-												}
-												return nil
-											}(),
-											Time: types.StringValue(response.Products.Appliance.LastUpgrade.Time),
-											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceLastUpgradeToVersionRs {
-												if response.Products.Appliance.LastUpgrade.ToVersion != nil {
-													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceLastUpgradeToVersionRs{
-														Firmware:    types.StringValue(response.Products.Appliance.LastUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Appliance.LastUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Appliance.LastUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Appliance.LastUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Appliance.LastUpgrade.ToVersion.ShortName),
-													}
-												}
-												return nil
-											}(),
-										}
-									}
-									return nil
-								}(),
 								NextUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceNextUpgradeRs {
 									if response.Products.Appliance.NextUpgrade != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceNextUpgradeRs{
-											Time: types.StringValue(response.Products.Appliance.NextUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.Appliance.NextUpgrade.Time != "" {
+													return types.StringValue(response.Products.Appliance.NextUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceNextUpgradeToVersionRs {
 												if response.Products.Appliance.NextUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsApplianceNextUpgradeToVersionRs{
-														Firmware:    types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Appliance.NextUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Appliance.NextUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Appliance.NextUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Appliance.NextUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Appliance.NextUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.Appliance.NextUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -2919,78 +2163,48 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBodyRs(state NetworksFirmwa
 					Camera: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraRs {
 						if response.Products.Camera != nil {
 							return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraRs{
-								AvailableVersions: func() *[]ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraAvailableVersionsRs {
-									if response.Products.Camera.AvailableVersions != nil {
-										result := make([]ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraAvailableVersionsRs, len(*response.Products.Camera.AvailableVersions))
-										for i, availableVersions := range *response.Products.Camera.AvailableVersions {
-											result[i] = ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraAvailableVersionsRs{
-												Firmware:    types.StringValue(availableVersions.Firmware),
-												ID:          types.StringValue(availableVersions.ID),
-												ReleaseDate: types.StringValue(availableVersions.ReleaseDate),
-												ReleaseType: types.StringValue(availableVersions.ReleaseType),
-												ShortName:   types.StringValue(availableVersions.ShortName),
-											}
-										}
-										return &result
-									}
-									return nil
-								}(),
-								CurrentVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraCurrentVersionRs {
-									if response.Products.Camera.CurrentVersion != nil {
-										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraCurrentVersionRs{
-											Firmware:    types.StringValue(response.Products.Camera.CurrentVersion.Firmware),
-											ID:          types.StringValue(response.Products.Camera.CurrentVersion.ID),
-											ReleaseDate: types.StringValue(response.Products.Camera.CurrentVersion.ReleaseDate),
-											ReleaseType: types.StringValue(response.Products.Camera.CurrentVersion.ReleaseType),
-											ShortName:   types.StringValue(response.Products.Camera.CurrentVersion.ShortName),
-										}
-									}
-									return nil
-								}(),
-								LastUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraLastUpgradeRs {
-									if response.Products.Camera.LastUpgrade != nil {
-										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraLastUpgradeRs{
-											FromVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraLastUpgradeFromVersionRs {
-												if response.Products.Camera.LastUpgrade.FromVersion != nil {
-													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraLastUpgradeFromVersionRs{
-														Firmware:    types.StringValue(response.Products.Camera.LastUpgrade.FromVersion.Firmware),
-														ID:          types.StringValue(response.Products.Camera.LastUpgrade.FromVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Camera.LastUpgrade.FromVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Camera.LastUpgrade.FromVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Camera.LastUpgrade.FromVersion.ShortName),
-													}
-												}
-												return nil
-											}(),
-											Time: types.StringValue(response.Products.Camera.LastUpgrade.Time),
-											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraLastUpgradeToVersionRs {
-												if response.Products.Camera.LastUpgrade.ToVersion != nil {
-													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraLastUpgradeToVersionRs{
-														Firmware:    types.StringValue(response.Products.Camera.LastUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Camera.LastUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Camera.LastUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Camera.LastUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Camera.LastUpgrade.ToVersion.ShortName),
-													}
-												}
-												return nil
-											}(),
-										}
-									}
-									return nil
-								}(),
 								NextUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraNextUpgradeRs {
 									if response.Products.Camera.NextUpgrade != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraNextUpgradeRs{
-											Time: types.StringValue(response.Products.Camera.NextUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.Camera.NextUpgrade.Time != "" {
+													return types.StringValue(response.Products.Camera.NextUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraNextUpgradeToVersionRs {
 												if response.Products.Camera.NextUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCameraNextUpgradeToVersionRs{
-														Firmware:    types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Camera.NextUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Camera.NextUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Camera.NextUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Camera.NextUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Camera.NextUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.Camera.NextUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -3012,78 +2226,48 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBodyRs(state NetworksFirmwa
 					CellularGateway: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayRs {
 						if response.Products.CellularGateway != nil {
 							return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayRs{
-								AvailableVersions: func() *[]ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayAvailableVersionsRs {
-									if response.Products.CellularGateway.AvailableVersions != nil {
-										result := make([]ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayAvailableVersionsRs, len(*response.Products.CellularGateway.AvailableVersions))
-										for i, availableVersions := range *response.Products.CellularGateway.AvailableVersions {
-											result[i] = ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayAvailableVersionsRs{
-												Firmware:    types.StringValue(availableVersions.Firmware),
-												ID:          types.StringValue(availableVersions.ID),
-												ReleaseDate: types.StringValue(availableVersions.ReleaseDate),
-												ReleaseType: types.StringValue(availableVersions.ReleaseType),
-												ShortName:   types.StringValue(availableVersions.ShortName),
-											}
-										}
-										return &result
-									}
-									return nil
-								}(),
-								CurrentVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayCurrentVersionRs {
-									if response.Products.CellularGateway.CurrentVersion != nil {
-										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayCurrentVersionRs{
-											Firmware:    types.StringValue(response.Products.CellularGateway.CurrentVersion.Firmware),
-											ID:          types.StringValue(response.Products.CellularGateway.CurrentVersion.ID),
-											ReleaseDate: types.StringValue(response.Products.CellularGateway.CurrentVersion.ReleaseDate),
-											ReleaseType: types.StringValue(response.Products.CellularGateway.CurrentVersion.ReleaseType),
-											ShortName:   types.StringValue(response.Products.CellularGateway.CurrentVersion.ShortName),
-										}
-									}
-									return nil
-								}(),
-								LastUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayLastUpgradeRs {
-									if response.Products.CellularGateway.LastUpgrade != nil {
-										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayLastUpgradeRs{
-											FromVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayLastUpgradeFromVersionRs {
-												if response.Products.CellularGateway.LastUpgrade.FromVersion != nil {
-													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayLastUpgradeFromVersionRs{
-														Firmware:    types.StringValue(response.Products.CellularGateway.LastUpgrade.FromVersion.Firmware),
-														ID:          types.StringValue(response.Products.CellularGateway.LastUpgrade.FromVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.CellularGateway.LastUpgrade.FromVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.CellularGateway.LastUpgrade.FromVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.CellularGateway.LastUpgrade.FromVersion.ShortName),
-													}
-												}
-												return nil
-											}(),
-											Time: types.StringValue(response.Products.CellularGateway.LastUpgrade.Time),
-											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayLastUpgradeToVersionRs {
-												if response.Products.CellularGateway.LastUpgrade.ToVersion != nil {
-													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayLastUpgradeToVersionRs{
-														Firmware:    types.StringValue(response.Products.CellularGateway.LastUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.CellularGateway.LastUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.CellularGateway.LastUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.CellularGateway.LastUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.CellularGateway.LastUpgrade.ToVersion.ShortName),
-													}
-												}
-												return nil
-											}(),
-										}
-									}
-									return nil
-								}(),
 								NextUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayNextUpgradeRs {
 									if response.Products.CellularGateway.NextUpgrade != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayNextUpgradeRs{
-											Time: types.StringValue(response.Products.CellularGateway.NextUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.CellularGateway.NextUpgrade.Time != "" {
+													return types.StringValue(response.Products.CellularGateway.NextUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayNextUpgradeToVersionRs {
 												if response.Products.CellularGateway.NextUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsCellularGatewayNextUpgradeToVersionRs{
-														Firmware:    types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.CellularGateway.NextUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.CellularGateway.NextUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.CellularGateway.NextUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.CellularGateway.NextUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.CellularGateway.NextUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.CellularGateway.NextUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -3105,78 +2289,48 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBodyRs(state NetworksFirmwa
 					SecureConnect: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectRs {
 						if response.Products.SecureConnect != nil {
 							return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectRs{
-								AvailableVersions: func() *[]ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectAvailableVersionsRs {
-									if response.Products.SecureConnect.AvailableVersions != nil {
-										result := make([]ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectAvailableVersionsRs, len(*response.Products.SecureConnect.AvailableVersions))
-										for i, availableVersions := range *response.Products.SecureConnect.AvailableVersions {
-											result[i] = ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectAvailableVersionsRs{
-												Firmware:    types.StringValue(availableVersions.Firmware),
-												ID:          types.StringValue(availableVersions.ID),
-												ReleaseDate: types.StringValue(availableVersions.ReleaseDate),
-												ReleaseType: types.StringValue(availableVersions.ReleaseType),
-												ShortName:   types.StringValue(availableVersions.ShortName),
-											}
-										}
-										return &result
-									}
-									return nil
-								}(),
-								CurrentVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectCurrentVersionRs {
-									if response.Products.SecureConnect.CurrentVersion != nil {
-										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectCurrentVersionRs{
-											Firmware:    types.StringValue(response.Products.SecureConnect.CurrentVersion.Firmware),
-											ID:          types.StringValue(response.Products.SecureConnect.CurrentVersion.ID),
-											ReleaseDate: types.StringValue(response.Products.SecureConnect.CurrentVersion.ReleaseDate),
-											ReleaseType: types.StringValue(response.Products.SecureConnect.CurrentVersion.ReleaseType),
-											ShortName:   types.StringValue(response.Products.SecureConnect.CurrentVersion.ShortName),
-										}
-									}
-									return nil
-								}(),
-								LastUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectLastUpgradeRs {
-									if response.Products.SecureConnect.LastUpgrade != nil {
-										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectLastUpgradeRs{
-											FromVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectLastUpgradeFromVersionRs {
-												if response.Products.SecureConnect.LastUpgrade.FromVersion != nil {
-													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectLastUpgradeFromVersionRs{
-														Firmware:    types.StringValue(response.Products.SecureConnect.LastUpgrade.FromVersion.Firmware),
-														ID:          types.StringValue(response.Products.SecureConnect.LastUpgrade.FromVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.SecureConnect.LastUpgrade.FromVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.SecureConnect.LastUpgrade.FromVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.SecureConnect.LastUpgrade.FromVersion.ShortName),
-													}
-												}
-												return nil
-											}(),
-											Time: types.StringValue(response.Products.SecureConnect.LastUpgrade.Time),
-											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectLastUpgradeToVersionRs {
-												if response.Products.SecureConnect.LastUpgrade.ToVersion != nil {
-													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectLastUpgradeToVersionRs{
-														Firmware:    types.StringValue(response.Products.SecureConnect.LastUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.SecureConnect.LastUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.SecureConnect.LastUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.SecureConnect.LastUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.SecureConnect.LastUpgrade.ToVersion.ShortName),
-													}
-												}
-												return nil
-											}(),
-										}
-									}
-									return nil
-								}(),
 								NextUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectNextUpgradeRs {
 									if response.Products.SecureConnect.NextUpgrade != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectNextUpgradeRs{
-											Time: types.StringValue(response.Products.SecureConnect.NextUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.SecureConnect.NextUpgrade.Time != "" {
+													return types.StringValue(response.Products.SecureConnect.NextUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectNextUpgradeToVersionRs {
 												if response.Products.SecureConnect.NextUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSecureConnectNextUpgradeToVersionRs{
-														Firmware:    types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.SecureConnect.NextUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.SecureConnect.NextUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.SecureConnect.NextUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.SecureConnect.NextUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.SecureConnect.NextUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.SecureConnect.NextUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -3198,78 +2352,48 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBodyRs(state NetworksFirmwa
 					Sensor: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorRs {
 						if response.Products.Sensor != nil {
 							return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorRs{
-								AvailableVersions: func() *[]ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorAvailableVersionsRs {
-									if response.Products.Sensor.AvailableVersions != nil {
-										result := make([]ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorAvailableVersionsRs, len(*response.Products.Sensor.AvailableVersions))
-										for i, availableVersions := range *response.Products.Sensor.AvailableVersions {
-											result[i] = ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorAvailableVersionsRs{
-												Firmware:    types.StringValue(availableVersions.Firmware),
-												ID:          types.StringValue(availableVersions.ID),
-												ReleaseDate: types.StringValue(availableVersions.ReleaseDate),
-												ReleaseType: types.StringValue(availableVersions.ReleaseType),
-												ShortName:   types.StringValue(availableVersions.ShortName),
-											}
-										}
-										return &result
-									}
-									return nil
-								}(),
-								CurrentVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorCurrentVersionRs {
-									if response.Products.Sensor.CurrentVersion != nil {
-										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorCurrentVersionRs{
-											Firmware:    types.StringValue(response.Products.Sensor.CurrentVersion.Firmware),
-											ID:          types.StringValue(response.Products.Sensor.CurrentVersion.ID),
-											ReleaseDate: types.StringValue(response.Products.Sensor.CurrentVersion.ReleaseDate),
-											ReleaseType: types.StringValue(response.Products.Sensor.CurrentVersion.ReleaseType),
-											ShortName:   types.StringValue(response.Products.Sensor.CurrentVersion.ShortName),
-										}
-									}
-									return nil
-								}(),
-								LastUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorLastUpgradeRs {
-									if response.Products.Sensor.LastUpgrade != nil {
-										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorLastUpgradeRs{
-											FromVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorLastUpgradeFromVersionRs {
-												if response.Products.Sensor.LastUpgrade.FromVersion != nil {
-													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorLastUpgradeFromVersionRs{
-														Firmware:    types.StringValue(response.Products.Sensor.LastUpgrade.FromVersion.Firmware),
-														ID:          types.StringValue(response.Products.Sensor.LastUpgrade.FromVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Sensor.LastUpgrade.FromVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Sensor.LastUpgrade.FromVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Sensor.LastUpgrade.FromVersion.ShortName),
-													}
-												}
-												return nil
-											}(),
-											Time: types.StringValue(response.Products.Sensor.LastUpgrade.Time),
-											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorLastUpgradeToVersionRs {
-												if response.Products.Sensor.LastUpgrade.ToVersion != nil {
-													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorLastUpgradeToVersionRs{
-														Firmware:    types.StringValue(response.Products.Sensor.LastUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Sensor.LastUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Sensor.LastUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Sensor.LastUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Sensor.LastUpgrade.ToVersion.ShortName),
-													}
-												}
-												return nil
-											}(),
-										}
-									}
-									return nil
-								}(),
 								NextUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorNextUpgradeRs {
 									if response.Products.Sensor.NextUpgrade != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorNextUpgradeRs{
-											Time: types.StringValue(response.Products.Sensor.NextUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.Sensor.NextUpgrade.Time != "" {
+													return types.StringValue(response.Products.Sensor.NextUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorNextUpgradeToVersionRs {
 												if response.Products.Sensor.NextUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSensorNextUpgradeToVersionRs{
-														Firmware:    types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Sensor.NextUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Sensor.NextUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Sensor.NextUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Sensor.NextUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Sensor.NextUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.Sensor.NextUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -3291,78 +2415,48 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBodyRs(state NetworksFirmwa
 					Switch: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchRs {
 						if response.Products.Switch != nil {
 							return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchRs{
-								AvailableVersions: func() *[]ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchAvailableVersionsRs {
-									if response.Products.Switch.AvailableVersions != nil {
-										result := make([]ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchAvailableVersionsRs, len(*response.Products.Switch.AvailableVersions))
-										for i, availableVersions := range *response.Products.Switch.AvailableVersions {
-											result[i] = ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchAvailableVersionsRs{
-												Firmware:    types.StringValue(availableVersions.Firmware),
-												ID:          types.StringValue(availableVersions.ID),
-												ReleaseDate: types.StringValue(availableVersions.ReleaseDate),
-												ReleaseType: types.StringValue(availableVersions.ReleaseType),
-												ShortName:   types.StringValue(availableVersions.ShortName),
-											}
-										}
-										return &result
-									}
-									return nil
-								}(),
-								CurrentVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchCurrentVersionRs {
-									if response.Products.Switch.CurrentVersion != nil {
-										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchCurrentVersionRs{
-											Firmware:    types.StringValue(response.Products.Switch.CurrentVersion.Firmware),
-											ID:          types.StringValue(response.Products.Switch.CurrentVersion.ID),
-											ReleaseDate: types.StringValue(response.Products.Switch.CurrentVersion.ReleaseDate),
-											ReleaseType: types.StringValue(response.Products.Switch.CurrentVersion.ReleaseType),
-											ShortName:   types.StringValue(response.Products.Switch.CurrentVersion.ShortName),
-										}
-									}
-									return nil
-								}(),
-								LastUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchLastUpgradeRs {
-									if response.Products.Switch.LastUpgrade != nil {
-										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchLastUpgradeRs{
-											FromVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchLastUpgradeFromVersionRs {
-												if response.Products.Switch.LastUpgrade.FromVersion != nil {
-													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchLastUpgradeFromVersionRs{
-														Firmware:    types.StringValue(response.Products.Switch.LastUpgrade.FromVersion.Firmware),
-														ID:          types.StringValue(response.Products.Switch.LastUpgrade.FromVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Switch.LastUpgrade.FromVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Switch.LastUpgrade.FromVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Switch.LastUpgrade.FromVersion.ShortName),
-													}
-												}
-												return nil
-											}(),
-											Time: types.StringValue(response.Products.Switch.LastUpgrade.Time),
-											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchLastUpgradeToVersionRs {
-												if response.Products.Switch.LastUpgrade.ToVersion != nil {
-													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchLastUpgradeToVersionRs{
-														Firmware:    types.StringValue(response.Products.Switch.LastUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Switch.LastUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Switch.LastUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Switch.LastUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Switch.LastUpgrade.ToVersion.ShortName),
-													}
-												}
-												return nil
-											}(),
-										}
-									}
-									return nil
-								}(),
 								NextUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchNextUpgradeRs {
 									if response.Products.Switch.NextUpgrade != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchNextUpgradeRs{
-											Time: types.StringValue(response.Products.Switch.NextUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.Switch.NextUpgrade.Time != "" {
+													return types.StringValue(response.Products.Switch.NextUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchNextUpgradeToVersionRs {
 												if response.Products.Switch.NextUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsSwitchNextUpgradeToVersionRs{
-														Firmware:    types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Switch.NextUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Switch.NextUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Switch.NextUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Switch.NextUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Switch.NextUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.Switch.NextUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -3384,78 +2478,48 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBodyRs(state NetworksFirmwa
 					Wireless: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessRs {
 						if response.Products.Wireless != nil {
 							return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessRs{
-								AvailableVersions: func() *[]ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessAvailableVersionsRs {
-									if response.Products.Wireless.AvailableVersions != nil {
-										result := make([]ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessAvailableVersionsRs, len(*response.Products.Wireless.AvailableVersions))
-										for i, availableVersions := range *response.Products.Wireless.AvailableVersions {
-											result[i] = ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessAvailableVersionsRs{
-												Firmware:    types.StringValue(availableVersions.Firmware),
-												ID:          types.StringValue(availableVersions.ID),
-												ReleaseDate: types.StringValue(availableVersions.ReleaseDate),
-												ReleaseType: types.StringValue(availableVersions.ReleaseType),
-												ShortName:   types.StringValue(availableVersions.ShortName),
-											}
-										}
-										return &result
-									}
-									return nil
-								}(),
-								CurrentVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessCurrentVersionRs {
-									if response.Products.Wireless.CurrentVersion != nil {
-										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessCurrentVersionRs{
-											Firmware:    types.StringValue(response.Products.Wireless.CurrentVersion.Firmware),
-											ID:          types.StringValue(response.Products.Wireless.CurrentVersion.ID),
-											ReleaseDate: types.StringValue(response.Products.Wireless.CurrentVersion.ReleaseDate),
-											ReleaseType: types.StringValue(response.Products.Wireless.CurrentVersion.ReleaseType),
-											ShortName:   types.StringValue(response.Products.Wireless.CurrentVersion.ShortName),
-										}
-									}
-									return nil
-								}(),
-								LastUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessLastUpgradeRs {
-									if response.Products.Wireless.LastUpgrade != nil {
-										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessLastUpgradeRs{
-											FromVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessLastUpgradeFromVersionRs {
-												if response.Products.Wireless.LastUpgrade.FromVersion != nil {
-													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessLastUpgradeFromVersionRs{
-														Firmware:    types.StringValue(response.Products.Wireless.LastUpgrade.FromVersion.Firmware),
-														ID:          types.StringValue(response.Products.Wireless.LastUpgrade.FromVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Wireless.LastUpgrade.FromVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Wireless.LastUpgrade.FromVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Wireless.LastUpgrade.FromVersion.ShortName),
-													}
-												}
-												return nil
-											}(),
-											Time: types.StringValue(response.Products.Wireless.LastUpgrade.Time),
-											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessLastUpgradeToVersionRs {
-												if response.Products.Wireless.LastUpgrade.ToVersion != nil {
-													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessLastUpgradeToVersionRs{
-														Firmware:    types.StringValue(response.Products.Wireless.LastUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Wireless.LastUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Wireless.LastUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Wireless.LastUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Wireless.LastUpgrade.ToVersion.ShortName),
-													}
-												}
-												return nil
-											}(),
-										}
-									}
-									return nil
-								}(),
 								NextUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessNextUpgradeRs {
 									if response.Products.Wireless.NextUpgrade != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessNextUpgradeRs{
-											Time: types.StringValue(response.Products.Wireless.NextUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.Wireless.NextUpgrade.Time != "" {
+													return types.StringValue(response.Products.Wireless.NextUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessNextUpgradeToVersionRs {
 												if response.Products.Wireless.NextUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessNextUpgradeToVersionRs{
-														Firmware:    types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.Wireless.NextUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.Wireless.NextUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.Wireless.NextUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.Wireless.NextUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.Wireless.NextUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.Wireless.NextUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -3477,78 +2541,48 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBodyRs(state NetworksFirmwa
 					WirelessController: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerRs {
 						if response.Products.WirelessController != nil {
 							return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerRs{
-								AvailableVersions: func() *[]ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerAvailableVersionsRs {
-									if response.Products.WirelessController.AvailableVersions != nil {
-										result := make([]ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerAvailableVersionsRs, len(*response.Products.WirelessController.AvailableVersions))
-										for i, availableVersions := range *response.Products.WirelessController.AvailableVersions {
-											result[i] = ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerAvailableVersionsRs{
-												Firmware:    types.StringValue(availableVersions.Firmware),
-												ID:          types.StringValue(availableVersions.ID),
-												ReleaseDate: types.StringValue(availableVersions.ReleaseDate),
-												ReleaseType: types.StringValue(availableVersions.ReleaseType),
-												ShortName:   types.StringValue(availableVersions.ShortName),
-											}
-										}
-										return &result
-									}
-									return nil
-								}(),
-								CurrentVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerCurrentVersionRs {
-									if response.Products.WirelessController.CurrentVersion != nil {
-										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerCurrentVersionRs{
-											Firmware:    types.StringValue(response.Products.WirelessController.CurrentVersion.Firmware),
-											ID:          types.StringValue(response.Products.WirelessController.CurrentVersion.ID),
-											ReleaseDate: types.StringValue(response.Products.WirelessController.CurrentVersion.ReleaseDate),
-											ReleaseType: types.StringValue(response.Products.WirelessController.CurrentVersion.ReleaseType),
-											ShortName:   types.StringValue(response.Products.WirelessController.CurrentVersion.ShortName),
-										}
-									}
-									return nil
-								}(),
-								LastUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerLastUpgradeRs {
-									if response.Products.WirelessController.LastUpgrade != nil {
-										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerLastUpgradeRs{
-											FromVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerLastUpgradeFromVersionRs {
-												if response.Products.WirelessController.LastUpgrade.FromVersion != nil {
-													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerLastUpgradeFromVersionRs{
-														Firmware:    types.StringValue(response.Products.WirelessController.LastUpgrade.FromVersion.Firmware),
-														ID:          types.StringValue(response.Products.WirelessController.LastUpgrade.FromVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.WirelessController.LastUpgrade.FromVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.WirelessController.LastUpgrade.FromVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.WirelessController.LastUpgrade.FromVersion.ShortName),
-													}
-												}
-												return nil
-											}(),
-											Time: types.StringValue(response.Products.WirelessController.LastUpgrade.Time),
-											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerLastUpgradeToVersionRs {
-												if response.Products.WirelessController.LastUpgrade.ToVersion != nil {
-													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerLastUpgradeToVersionRs{
-														Firmware:    types.StringValue(response.Products.WirelessController.LastUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.WirelessController.LastUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.WirelessController.LastUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.WirelessController.LastUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.WirelessController.LastUpgrade.ToVersion.ShortName),
-													}
-												}
-												return nil
-											}(),
-										}
-									}
-									return nil
-								}(),
 								NextUpgrade: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerNextUpgradeRs {
 									if response.Products.WirelessController.NextUpgrade != nil {
 										return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerNextUpgradeRs{
-											Time: types.StringValue(response.Products.WirelessController.NextUpgrade.Time),
+											Time: func() types.String {
+												if response.Products.WirelessController.NextUpgrade.Time != "" {
+													return types.StringValue(response.Products.WirelessController.NextUpgrade.Time)
+												}
+												return types.String{}
+											}(),
 											ToVersion: func() *ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerNextUpgradeToVersionRs {
 												if response.Products.WirelessController.NextUpgrade.ToVersion != nil {
 													return &ResponseNetworksGetNetworkFirmwareUpgradesProductsWirelessControllerNextUpgradeToVersionRs{
-														Firmware:    types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.Firmware),
-														ID:          types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.ID),
-														ReleaseDate: types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.ReleaseDate),
-														ReleaseType: types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.ReleaseType),
-														ShortName:   types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.ShortName),
+														Firmware: func() types.String {
+															if response.Products.WirelessController.NextUpgrade.ToVersion.Firmware != "" {
+																return types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.Firmware)
+															}
+															return types.String{}
+														}(),
+														ID: func() types.String {
+															if response.Products.WirelessController.NextUpgrade.ToVersion.ID != "" {
+																return types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.ID)
+															}
+															return types.String{}
+														}(),
+														ReleaseDate: func() types.String {
+															if response.Products.WirelessController.NextUpgrade.ToVersion.ReleaseDate != "" {
+																return types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.ReleaseDate)
+															}
+															return types.String{}
+														}(),
+														ReleaseType: func() types.String {
+															if response.Products.WirelessController.NextUpgrade.ToVersion.ReleaseType != "" {
+																return types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.ReleaseType)
+															}
+															return types.String{}
+														}(),
+														ShortName: func() types.String {
+															if response.Products.WirelessController.NextUpgrade.ToVersion.ShortName != "" {
+																return types.StringValue(response.Products.WirelessController.NextUpgrade.ToVersion.ShortName)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
@@ -3571,12 +2605,27 @@ func ResponseNetworksGetNetworkFirmwareUpgradesItemToBodyRs(state NetworksFirmwa
 			}
 			return nil
 		}(),
-		Timezone: types.StringValue(response.Timezone),
+		Timezone: func() types.String {
+			if response.Timezone != "" {
+				return types.StringValue(response.Timezone)
+			}
+			return types.String{}
+		}(),
 		UpgradeWindow: func() *ResponseNetworksGetNetworkFirmwareUpgradesUpgradeWindowRs {
 			if response.UpgradeWindow != nil {
 				return &ResponseNetworksGetNetworkFirmwareUpgradesUpgradeWindowRs{
-					DayOfWeek: types.StringValue(response.UpgradeWindow.DayOfWeek),
-					HourOfDay: types.StringValue(response.UpgradeWindow.HourOfDay),
+					DayOfWeek: func() types.String {
+						if response.UpgradeWindow.DayOfWeek != "" {
+							return types.StringValue(response.UpgradeWindow.DayOfWeek)
+						}
+						return types.String{}
+					}(),
+					HourOfDay: func() types.String {
+						if response.UpgradeWindow.HourOfDay != "" {
+							return types.StringValue(response.UpgradeWindow.HourOfDay)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil

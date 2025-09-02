@@ -20,6 +20,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -29,9 +30,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -68,38 +68,18 @@ func (r *NetworksApplianceStaticRoutesResource) Schema(_ context.Context, _ reso
 		Attributes: map[string]schema.Attribute{
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: `Whether the route is enabled or not`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"fixed_ip_assignments": schema.SingleNestedAttribute{
-				MarkdownDescription: `The DHCP fixed IP assignments on the static route. This should be an object that contains mappings from MAC addresses to objects that themselves each contain "ip" and "name" string fields. See the sample request/response for more details.`,
-				Computed:            true,
+			"fixed_ip_assignments": schema.StringAttribute{
+				//Todo interface
+				MarkdownDescription: `Fixed DHCP IP assignments on the route`,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
-				Attributes: map[string]schema.Attribute{
-
-					"attribute_22_33_44_55_66_77": schema.SingleNestedAttribute{
-						Computed: true,
-						Attributes: map[string]schema.Attribute{
-
-							"ip": schema.StringAttribute{
-								Computed: true,
-							},
-							"name": schema.StringAttribute{
-								Computed: true,
-							},
-						},
-					},
-				},
 			},
 			"gateway_ip": schema.StringAttribute{
 				MarkdownDescription: `Gateway IP address (next hop)`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -107,19 +87,9 @@ func (r *NetworksApplianceStaticRoutesResource) Schema(_ context.Context, _ reso
 			},
 			"gateway_vlan_id": schema.Int64Attribute{
 				MarkdownDescription: `Gateway VLAN ID`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.UseStateForUnknown(),
-				},
-				//            Differents_types: `   parameter: schema.TypeString, item: schema.TypeInt`,
-			},
-			"gateway_vlan_id_rs": schema.StringAttribute{
-				MarkdownDescription: `Gateway VLAN ID`,
-				Computed:            true,
-				Optional:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
 				},
 				//            Differents_types: `   parameter: schema.TypeString, item: schema.TypeInt`,
 			},
@@ -133,7 +103,6 @@ func (r *NetworksApplianceStaticRoutesResource) Schema(_ context.Context, _ reso
 			},
 			"name": schema.StringAttribute{
 				MarkdownDescription: `Name of the route`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -143,19 +112,17 @@ func (r *NetworksApplianceStaticRoutesResource) Schema(_ context.Context, _ reso
 				MarkdownDescription: `Network ID`,
 				Required:            true,
 			},
-			"reserved_ip_ranges": schema.SetNestedAttribute{
+			"reserved_ip_ranges": schema.ListNestedAttribute{
 				MarkdownDescription: `DHCP reserved IP ranges`,
-				Computed:            true,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Set{
-					setplanmodifier.UseStateForUnknown(),
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.UseStateForUnknown(),
 				},
 				NestedObject: schema.NestedAttributeObject{
 					Attributes: map[string]schema.Attribute{
 
 						"comment": schema.StringAttribute{
 							MarkdownDescription: `Description of the range`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -163,7 +130,6 @@ func (r *NetworksApplianceStaticRoutesResource) Schema(_ context.Context, _ reso
 						},
 						"end": schema.StringAttribute{
 							MarkdownDescription: `Last address in the reserved range`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -171,7 +137,6 @@ func (r *NetworksApplianceStaticRoutesResource) Schema(_ context.Context, _ reso
 						},
 						"start": schema.StringAttribute{
 							MarkdownDescription: `First address in the reserved range`,
-							Computed:            true,
 							Optional:            true,
 							PlanModifiers: []planmodifier.String{
 								stringplanmodifier.UseStateForUnknown(),
@@ -183,14 +148,12 @@ func (r *NetworksApplianceStaticRoutesResource) Schema(_ context.Context, _ reso
 			"static_route_id": schema.StringAttribute{
 				MarkdownDescription: `staticRouteId path parameter. Static route ID`,
 				Optional:            true,
-				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"subnet": schema.StringAttribute{
 				MarkdownDescription: `Subnet of the route`,
-				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -271,7 +234,7 @@ func (r *NetworksApplianceStaticRoutesResource) Create(ctx context.Context, req 
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing CreateNetworkApplianceStaticRoute",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -343,21 +306,11 @@ func (r *NetworksApplianceStaticRoutesResource) Create(ctx context.Context, req 
 func (r *NetworksApplianceStaticRoutesResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var data NetworksApplianceStaticRoutesRs
 
-	var item types.Object
-
-	resp.Diagnostics.Append(req.State.Get(ctx, &item)...)
-	if resp.Diagnostics.HasError() {
+	diags := req.State.Get(ctx, &data)
+	if resp.Diagnostics.Append(diags...); resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(item.As(ctx, &data, basetypes.ObjectAsOptions{
-		UnhandledNullAsEmpty:    true,
-		UnhandledUnknownAsEmpty: true,
-	})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
 	//Has Paths
 	// Has Item2
 
@@ -388,45 +341,39 @@ func (r *NetworksApplianceStaticRoutesResource) Read(ctx context.Context, req re
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetNetworkApplianceStaticRouteItemToBodyRs(data, responseGet, true)
-	diags := resp.State.Set(ctx, &data)
-	//update path params assigned
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
-
 func (r *NetworksApplianceStaticRoutesResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	idParts := strings.Split(req.ID, ",")
+
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		resp.Diagnostics.AddError(
 			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: attr_one,attr_two. Got: %q", req.ID),
+			fmt.Sprintf("Expected import identifier with format: networkId,staticRouteId. Got: %q", req.ID),
 		)
 		return
 	}
-
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("network_id"), idParts[0])...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("static_route_id"), idParts[1])...)
 }
 
 func (r *NetworksApplianceStaticRoutesResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data NetworksApplianceStaticRoutesRs
-	merge(ctx, req, resp, &data)
+	var plan NetworksApplianceStaticRoutesRs
+	merge(ctx, req, resp, &plan)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	//Has Paths
-	//Update
-
 	//Path Params
-	vvNetworkID := data.NetworkID.ValueString()
-	vvStaticRouteID := data.StaticRouteID.ValueString()
-	dataRequest := data.toSdkApiRequestUpdate(ctx)
+	vvNetworkID := plan.NetworkID.ValueString()
+	vvStaticRouteID := plan.StaticRouteID.ValueString()
+	dataRequest := plan.toSdkApiRequestUpdate(ctx)
 	response, restyResp2, err := r.client.Appliance.UpdateNetworkApplianceStaticRoute(vvNetworkID, vvStaticRouteID, dataRequest)
 	if err != nil || restyResp2 == nil || response == nil {
 		if restyResp2 != nil {
 			resp.Diagnostics.AddError(
 				"Failure when executing UpdateNetworkApplianceStaticRoute",
-				restyResp2.String(),
+				"Status: "+strconv.Itoa(restyResp2.StatusCode())+"\n"+restyResp2.String(),
 			)
 			return
 		}
@@ -436,9 +383,7 @@ func (r *NetworksApplianceStaticRoutesResource) Update(ctx context.Context, req 
 		)
 		return
 	}
-	resp.Diagnostics.Append(req.Plan.Set(ctx, &data)...)
-	diags := resp.State.Set(ctx, &data)
-	resp.Diagnostics.Append(diags...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *NetworksApplianceStaticRoutesResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -479,7 +424,6 @@ type NetworksApplianceStaticRoutesRs struct {
 	FixedIPAssignments *ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignmentsRs `tfsdk:"fixed_ip_assignments"`
 	GatewayIP          types.String                                                         `tfsdk:"gateway_ip"`
 	GatewayVLANID      types.Int64                                                          `tfsdk:"gateway_vlan_id"`
-	GatewayVLANIDRs    types.String                                                         `tfsdk:"gateway_vlan_id_rs"`
 	ID                 types.String                                                         `tfsdk:"id"`
 	IPVersion          types.Int64                                                          `tfsdk:"ip_version"`
 	Name               types.String                                                         `tfsdk:"name"`
@@ -487,14 +431,7 @@ type NetworksApplianceStaticRoutesRs struct {
 	Subnet             types.String                                                         `tfsdk:"subnet"`
 }
 
-type ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignmentsRs struct {
-	Status223344556677 *ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignments223344556677Rs `tfsdk:"attribute_22_33_44_55_66_77"`
-}
-
-type ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignments223344556677Rs struct {
-	IP   types.String `tfsdk:"ip"`
-	Name types.String `tfsdk:"name"`
-}
+type ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignmentsRs interface{}
 
 type ResponseApplianceGetNetworkApplianceStaticRouteReservedIpRangesRs struct {
 	Comment types.String `tfsdk:"comment"`
@@ -513,7 +450,7 @@ func (r *NetworksApplianceStaticRoutesRs) toSdkApiRequestCreate(ctx context.Cont
 	}
 	gatewayVLANID := new(string)
 	if !r.GatewayVLANID.IsUnknown() && !r.GatewayVLANID.IsNull() {
-		*gatewayVLANID = r.GatewayVLANIDRs.ValueString()
+		*gatewayVLANID = strconv.Itoa(int(r.GatewayVLANID.ValueInt64()))
 	} else {
 		gatewayVLANID = &emptyString
 	}
@@ -545,7 +482,7 @@ func (r *NetworksApplianceStaticRoutesRs) toSdkApiRequestUpdate(ctx context.Cont
 	} else {
 		enabled = nil
 	}
-	// var requestApplianceUpdateNetworkApplianceStaticRouteFixedIPAssignments *merakigosdk.RequestApplianceUpdateNetworkApplianceStaticRouteFixedIPAssignments
+	var requestApplianceUpdateNetworkApplianceStaticRouteFixedIPAssignments *merakigosdk.RequestApplianceUpdateNetworkApplianceStaticRouteFixedIPAssignments
 
 	// if r.FixedIPAssignments != nil {
 	// 	requestApplianceUpdateNetworkApplianceStaticRouteFixedIPAssignments = &merakigosdk.RequestApplianceUpdateNetworkApplianceStaticRouteFixedIPAssignments{}
@@ -558,8 +495,8 @@ func (r *NetworksApplianceStaticRoutesRs) toSdkApiRequestUpdate(ctx context.Cont
 		gatewayIP = &emptyString
 	}
 	gatewayVLANID := new(string)
-	if !r.GatewayVLANIDRs.IsUnknown() && !r.GatewayVLANIDRs.IsNull() {
-		*gatewayVLANID = r.GatewayVLANIDRs.ValueString()
+	if !r.GatewayVLANID.IsUnknown() && !r.GatewayVLANID.IsNull() {
+		*gatewayVLANID = strconv.Itoa(int(r.GatewayVLANID.ValueInt64()))
 	} else {
 		gatewayVLANID = &emptyString
 	}
@@ -591,11 +528,11 @@ func (r *NetworksApplianceStaticRoutesRs) toSdkApiRequestUpdate(ctx context.Cont
 		subnet = &emptyString
 	}
 	out := merakigosdk.RequestApplianceUpdateNetworkApplianceStaticRoute{
-		Enabled: enabled,
-		// FixedIPAssignments: requestApplianceUpdateNetworkApplianceStaticRouteFixedIPAssignments,
-		GatewayIP:     *gatewayIP,
-		GatewayVLANID: *gatewayVLANID,
-		Name:          *name,
+		Enabled:            enabled,
+		FixedIPAssignments: requestApplianceUpdateNetworkApplianceStaticRouteFixedIPAssignments,
+		GatewayIP:          *gatewayIP,
+		GatewayVLANID:      *gatewayVLANID,
+		Name:               *name,
 		ReservedIPRanges: func() *[]merakigosdk.RequestApplianceUpdateNetworkApplianceStaticRouteReservedIPRanges {
 			if len(requestApplianceUpdateNetworkApplianceStaticRouteReservedIPRanges) > 0 {
 				return &requestApplianceUpdateNetworkApplianceStaticRouteReservedIPRanges
@@ -616,54 +553,78 @@ func ResponseApplianceGetNetworkApplianceStaticRouteItemToBodyRs(state NetworksA
 			}
 			return types.Bool{}
 		}(),
-		FixedIPAssignments: func() *ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignmentsRs {
-			if response.FixedIPAssignments != nil {
-				return &ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignmentsRs{
-					Status223344556677: func() *ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignments223344556677Rs {
-						if response.FixedIPAssignments.Status223344556677 != nil {
-							return &ResponseApplianceGetNetworkApplianceStaticRouteFixedIpAssignments223344556677Rs{
-								IP:   types.StringValue(response.FixedIPAssignments.Status223344556677.IP),
-								Name: types.StringValue(response.FixedIPAssignments.Status223344556677.Name),
-							}
-						}
-						return nil
-					}(),
-				}
+		// FixedIPAssignments: func() types.String { //TODO POSIBLE interface
+		GatewayIP: func() types.String {
+			if response.GatewayIP != "" {
+				return types.StringValue(response.GatewayIP)
 			}
-			return nil
+			return types.String{}
 		}(),
-		GatewayIP: types.StringValue(response.GatewayIP),
 		GatewayVLANID: func() types.Int64 {
 			if response.GatewayVLANID != nil {
 				return types.Int64Value(int64(*response.GatewayVLANID))
 			}
 			return types.Int64{}
 		}(),
-		ID: types.StringValue(response.ID),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
 		IPVersion: func() types.Int64 {
 			if response.IPVersion != nil {
 				return types.Int64Value(int64(*response.IPVersion))
 			}
 			return types.Int64{}
 		}(),
-		Name:      types.StringValue(response.Name),
-		NetworkID: types.StringValue(response.NetworkID),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
+		}(),
+		NetworkID: func() types.String {
+			if response.NetworkID != "" {
+				return types.StringValue(response.NetworkID)
+			}
+			return types.String{}
+		}(),
 		ReservedIPRanges: func() *[]ResponseApplianceGetNetworkApplianceStaticRouteReservedIpRangesRs {
 			if response.ReservedIPRanges != nil {
 				result := make([]ResponseApplianceGetNetworkApplianceStaticRouteReservedIpRangesRs, len(*response.ReservedIPRanges))
 				for i, reservedIPRanges := range *response.ReservedIPRanges {
 					result[i] = ResponseApplianceGetNetworkApplianceStaticRouteReservedIpRangesRs{
-						Comment: types.StringValue(reservedIPRanges.Comment),
-						End:     types.StringValue(reservedIPRanges.End),
-						Start:   types.StringValue(reservedIPRanges.Start),
+						Comment: func() types.String {
+							if reservedIPRanges.Comment != "" {
+								return types.StringValue(reservedIPRanges.Comment)
+							}
+							return types.String{}
+						}(),
+						End: func() types.String {
+							if reservedIPRanges.End != "" {
+								return types.StringValue(reservedIPRanges.End)
+							}
+							return types.String{}
+						}(),
+						Start: func() types.String {
+							if reservedIPRanges.Start != "" {
+								return types.StringValue(reservedIPRanges.Start)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result
 			}
 			return nil
 		}(),
-		Subnet:        types.StringValue(response.Subnet),
-		StaticRouteID: types.StringValue(response.ID),
+		Subnet: func() types.String {
+			if response.Subnet != "" {
+				return types.StringValue(response.Subnet)
+			}
+			return types.String{}
+		}(),
 	}
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksApplianceStaticRoutesRs)

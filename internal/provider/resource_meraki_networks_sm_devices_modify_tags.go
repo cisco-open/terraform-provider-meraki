@@ -227,12 +227,12 @@ type ResponseItemSmModifyNetworkSmDevicesTags struct {
 }
 
 type RequestSmModifyNetworkSmDevicesTagsRs struct {
-	IDs          types.Set    `tfsdk:"ids"`
-	Scope        types.Set    `tfsdk:"scope"`
-	Serials      types.Set    `tfsdk:"serials"`
-	Tags         types.Set    `tfsdk:"tags"`
+	IDs          types.List   `tfsdk:"ids"`
+	Scope        types.List   `tfsdk:"scope"`
+	Serials      types.List   `tfsdk:"serials"`
+	Tags         types.List   `tfsdk:"tags"`
 	UpdateAction types.String `tfsdk:"update_action"`
-	WifiMacs     types.Set    `tfsdk:"wifi_macs"`
+	WifiMacs     types.List   `tfsdk:"wifi_macs"`
 }
 
 // FromBody
@@ -271,10 +271,25 @@ func ResponseSmModifyNetworkSmDevicesTagsItemsToBody(state NetworksSmDevicesModi
 	var items []ResponseItemSmModifyNetworkSmDevicesTags
 	for _, item := range *response {
 		itemState := ResponseItemSmModifyNetworkSmDevicesTags{
-			ID:      types.StringValue(item.ID),
-			Serial:  types.StringValue(item.Serial),
-			Tags:    StringSliceToList(item.Tags),
-			WifiMac: types.StringValue(item.WifiMac),
+			ID: func() types.String {
+				if item.ID != "" {
+					return types.StringValue(item.ID)
+				}
+				return types.String{}
+			}(),
+			Serial: func() types.String {
+				if item.Serial != "" {
+					return types.StringValue(item.Serial)
+				}
+				return types.String{}
+			}(),
+			Tags: StringSliceToList(item.Tags),
+			WifiMac: func() types.String {
+				if item.WifiMac != "" {
+					return types.StringValue(item.WifiMac)
+				}
+				return types.String{}
+			}(),
 		}
 		items = append(items, itemState)
 	}

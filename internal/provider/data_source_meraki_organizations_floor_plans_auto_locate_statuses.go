@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -426,7 +425,12 @@ func ResponseOrganizationsGetOrganizationFloorPlansAutoLocateStatusesItemsToBody
 								}
 								return nil
 							}(),
-							FloorPlanID: types.StringValue(items.FloorPlanID),
+							FloorPlanID: func() types.String {
+								if items.FloorPlanID != "" {
+									return types.StringValue(items.FloorPlanID)
+								}
+								return types.String{}
+							}(),
 							Jobs: func() *[]ResponseItemOrganizationsGetOrganizationFloorPlansAutoLocateStatusesItemsJobs {
 								if items.Jobs != nil {
 									result := make([]ResponseItemOrganizationsGetOrganizationFloorPlansAutoLocateStatusesItemsJobs, len(*items.Jobs))
@@ -450,8 +454,18 @@ func ResponseOrganizationsGetOrganizationFloorPlansAutoLocateStatusesItemsToBody
 													result := make([]ResponseItemOrganizationsGetOrganizationFloorPlansAutoLocateStatusesItemsJobsErrors, len(*jobs.Errors))
 													for i, errors := range *jobs.Errors {
 														result[i] = ResponseItemOrganizationsGetOrganizationFloorPlansAutoLocateStatusesItemsJobsErrors{
-															Source: types.StringValue(errors.Source),
-															Type:   types.StringValue(errors.Type),
+															Source: func() types.String {
+																if errors.Source != "" {
+																	return types.StringValue(errors.Source)
+																}
+																return types.String{}
+															}(),
+															Type: func() types.String {
+																if errors.Type != "" {
+																	return types.StringValue(errors.Type)
+																}
+																return types.String{}
+															}(),
 														}
 													}
 													return &result
@@ -474,12 +488,22 @@ func ResponseOrganizationsGetOrganizationFloorPlansAutoLocateStatusesItemsToBody
 															}
 															return nil
 														}(),
-														Status: types.StringValue(jobs.Gnss.Status),
+														Status: func() types.String {
+															if jobs.Gnss.Status != "" {
+																return types.StringValue(jobs.Gnss.Status)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
 											}(),
-											ID: types.StringValue(jobs.ID),
+											ID: func() types.String {
+												if jobs.ID != "" {
+													return types.StringValue(jobs.ID)
+												}
+												return types.String{}
+											}(),
 											Ranging: func() *ResponseItemOrganizationsGetOrganizationFloorPlansAutoLocateStatusesItemsJobsRanging {
 												if jobs.Ranging != nil {
 													return &ResponseItemOrganizationsGetOrganizationFloorPlansAutoLocateStatusesItemsJobsRanging{
@@ -496,24 +520,49 @@ func ResponseOrganizationsGetOrganizationFloorPlansAutoLocateStatusesItemsToBody
 															}
 															return nil
 														}(),
-														Status: types.StringValue(jobs.Ranging.Status),
+														Status: func() types.String {
+															if jobs.Ranging.Status != "" {
+																return types.StringValue(jobs.Ranging.Status)
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return nil
 											}(),
-											ScheduledAt: types.StringValue(jobs.ScheduledAt),
-											Status:      types.StringValue(jobs.Status),
+											ScheduledAt: func() types.String {
+												if jobs.ScheduledAt != "" {
+													return types.StringValue(jobs.ScheduledAt)
+												}
+												return types.String{}
+											}(),
+											Status: func() types.String {
+												if jobs.Status != "" {
+													return types.StringValue(jobs.Status)
+												}
+												return types.String{}
+											}(),
 										}
 									}
 									return &result
 								}
 								return nil
 							}(),
-							Name: types.StringValue(items.Name),
+							Name: func() types.String {
+								if items.Name != "" {
+									return types.StringValue(items.Name)
+								}
+								return types.String{}
+							}(),
 							Network: func() *ResponseItemOrganizationsGetOrganizationFloorPlansAutoLocateStatusesItemsNetwork {
 								if items.Network != nil {
 									return &ResponseItemOrganizationsGetOrganizationFloorPlansAutoLocateStatusesItemsNetwork{
-										ID: types.StringValue(items.Network.ID),
+										ID: func() types.String {
+											if items.Network.ID != "" {
+												return types.StringValue(items.Network.ID)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return nil

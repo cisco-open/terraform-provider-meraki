@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -462,14 +461,39 @@ func ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemT
 				result := make([]ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItems, len(*response.Items))
 				for i, items := range *response.Items {
 					result[i] = ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItems{
-						Mac:   types.StringValue(items.Mac),
-						Model: types.StringValue(items.Model),
-						Name:  types.StringValue(items.Name),
+						Mac: func() types.String {
+							if items.Mac != "" {
+								return types.StringValue(items.Mac)
+							}
+							return types.String{}
+						}(),
+						Model: func() types.String {
+							if items.Model != "" {
+								return types.StringValue(items.Model)
+							}
+							return types.String{}
+						}(),
+						Name: func() types.String {
+							if items.Name != "" {
+								return types.StringValue(items.Name)
+							}
+							return types.String{}
+						}(),
 						Network: func() *ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemsNetwork {
 							if items.Network != nil {
 								return &ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemsNetwork{
-									ID:   types.StringValue(items.Network.ID),
-									Name: types.StringValue(items.Network.Name),
+									ID: func() types.String {
+										if items.Network.ID != "" {
+											return types.StringValue(items.Network.ID)
+										}
+										return types.String{}
+									}(),
+									Name: func() types.String {
+										if items.Network.Name != "" {
+											return types.StringValue(items.Network.Name)
+										}
+										return types.String{}
+									}(),
 								}
 							}
 							return nil
@@ -548,7 +572,12 @@ func ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemT
 															}
 															return nil
 														}(),
-														EndTs: types.StringValue(intervals.EndTs.Format(time.RFC3339)),
+														EndTs: func() types.String {
+															if intervals.EndTs.Format(time.RFC3339) != "" {
+																return types.StringValue(intervals.EndTs.Format(time.RFC3339))
+															}
+															return types.String{}
+														}(),
 														Energy: func() *ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemsPortsIntervalsEnergy {
 															if intervals.Energy.Usage != nil {
 																return &ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemsPortsIntervalsEnergy{
@@ -569,21 +598,36 @@ func ResponseSwitchGetOrganizationSwitchPortsUsageHistoryByDeviceByIntervalItemT
 															}
 															return nil
 														}(),
-														StartTs: types.StringValue(intervals.StartTs.Format(time.RFC3339)),
+														StartTs: func() types.String {
+															if intervals.StartTs.Format(time.RFC3339) != "" {
+																return types.StringValue(intervals.StartTs.Format(time.RFC3339))
+															}
+															return types.String{}
+														}(),
 													}
 												}
 												return &result
 											}
 											return nil
 										}(),
-										PortID: types.StringValue(ports.PortID),
+										PortID: func() types.String {
+											if ports.PortID != "" {
+												return types.StringValue(ports.PortID)
+											}
+											return types.String{}
+										}(),
 									}
 								}
 								return &result
 							}
 							return nil
 						}(),
-						Serial: types.StringValue(items.Serial),
+						Serial: func() types.String {
+							if items.Serial != "" {
+								return types.StringValue(items.Serial)
+							}
+							return types.String{}
+						}(),
 					}
 				}
 				return &result

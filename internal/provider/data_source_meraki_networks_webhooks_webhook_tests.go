@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: MPL-2.0
-
 package provider
 
 // DATA SOURCE NORMAL
@@ -142,9 +141,24 @@ type ResponseNetworksGetNetworkWebhooksWebhookTest struct {
 // ToBody
 func ResponseNetworksGetNetworkWebhooksWebhookTestItemToBody(state NetworksWebhooksWebhookTests, response *merakigosdk.ResponseNetworksGetNetworkWebhooksWebhookTest) NetworksWebhooksWebhookTests {
 	itemState := ResponseNetworksGetNetworkWebhooksWebhookTest{
-		ID:     types.StringValue(response.ID),
-		Status: types.StringValue(response.Status),
-		URL:    types.StringValue(response.URL),
+		ID: func() types.String {
+			if response.ID != "" {
+				return types.StringValue(response.ID)
+			}
+			return types.String{}
+		}(),
+		Status: func() types.String {
+			if response.Status != "" {
+				return types.StringValue(response.Status)
+			}
+			return types.String{}
+		}(),
+		URL: func() types.String {
+			if response.URL != "" {
+				return types.StringValue(response.URL)
+			}
+			return types.String{}
+		}(),
 	}
 	state.Item = &itemState
 	return state

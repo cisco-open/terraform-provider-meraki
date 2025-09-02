@@ -236,7 +236,7 @@ type RequestApplianceUpdateNetworkApplianceFirewallMulticastForwardingRs struct 
 type RequestApplianceUpdateNetworkApplianceFirewallMulticastForwardingRulesRs struct {
 	Address     types.String `tfsdk:"address"`
 	Description types.String `tfsdk:"description"`
-	VLANIDs     types.Set    `tfsdk:"vlan_ids"`
+	VLANIDs     types.List   `tfsdk:"vlan_ids"`
 }
 
 // FromBody
@@ -271,8 +271,18 @@ func ResponseApplianceUpdateNetworkApplianceFirewallMulticastForwardingItemToBod
 		Network: func() *ResponseApplianceUpdateNetworkApplianceFirewallMulticastForwardingNetwork {
 			if response.Network != nil {
 				return &ResponseApplianceUpdateNetworkApplianceFirewallMulticastForwardingNetwork{
-					ID:   types.StringValue(response.Network.ID),
-					Name: types.StringValue(response.Network.Name),
+					ID: func() types.String {
+						if response.Network.ID != "" {
+							return types.StringValue(response.Network.ID)
+						}
+						return types.String{}
+					}(),
+					Name: func() types.String {
+						if response.Network.Name != "" {
+							return types.StringValue(response.Network.Name)
+						}
+						return types.String{}
+					}(),
 				}
 			}
 			return nil
@@ -282,9 +292,19 @@ func ResponseApplianceUpdateNetworkApplianceFirewallMulticastForwardingItemToBod
 				result := make([]ResponseApplianceUpdateNetworkApplianceFirewallMulticastForwardingRules, len(*response.Rules))
 				for i, rules := range *response.Rules {
 					result[i] = ResponseApplianceUpdateNetworkApplianceFirewallMulticastForwardingRules{
-						Address:     types.StringValue(rules.Address),
-						Description: types.StringValue(rules.Description),
-						VLANIDs:     StringSliceToList(rules.VLANIDs),
+						Address: func() types.String {
+							if rules.Address != "" {
+								return types.StringValue(rules.Address)
+							}
+							return types.String{}
+						}(),
+						Description: func() types.String {
+							if rules.Description != "" {
+								return types.StringValue(rules.Description)
+							}
+							return types.String{}
+						}(),
+						VLANIDs: StringSliceToList(rules.VLANIDs),
 					}
 				}
 				return &result

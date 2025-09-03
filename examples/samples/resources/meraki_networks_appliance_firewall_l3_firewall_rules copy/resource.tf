@@ -22,7 +22,7 @@ resource "meraki_networks_appliance_firewall_l3_firewall_rules" "example" {
     policy         = "allow"
     protocol       = "tcp"
     src_cidr       = "any"
-    src_port       = "Any"
+    src_port       = "any"
     syslog_enabled = false
   }]
 }

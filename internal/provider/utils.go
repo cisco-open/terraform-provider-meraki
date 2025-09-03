@@ -832,8 +832,241 @@ func prioritizeNonNullValuesForMerge(fieldA, fieldB reflect.Value) reflect.Value
 		return reflect.Zero(fieldA.Type())
 	}
 
-	// If both have values, prioritize A (changed from B to A)
+	// If both have values, prioritize A (original behavior for mergeInterfaces)
 	return fieldA
+}
+
+// prioritizeNonNullValuesForMergeWithPriority allows specifying whether to prioritize A or B when both have values
+func prioritizeNonNullValuesForMergeWithPriority(fieldA, fieldB reflect.Value, prioritizeA bool) reflect.Value {
+	isANull := isNullOrZero(fieldA)
+	isBNull := isNullOrZero(fieldB)
+	log.Printf("About to check if fieldA is nil")
+	log.Printf("fieldA is nil: %v", isANull)
+	log.Printf("fieldB is nil: %v", isBNull)
+
+	// Check if fieldA is unknown
+	isAUnknown := false
+	if fieldA.CanInterface() {
+		valStr := fmt.Sprint(fieldA.Interface())
+		isAUnknown = valStr == "<unknown>"
+	}
+
+	// Check if fieldA is empty string and treat it as null
+	isAEmptyString := false
+	if fieldA.Kind() == reflect.String {
+		if fieldA.CanInterface() {
+			valStr := fieldA.Interface().(string)
+			isAEmptyString = valStr == ""
+		}
+	}
+
+	// If A is unknown, prioritize B if available, otherwise return null
+	if isAUnknown {
+		if !isBNull {
+			return fieldB
+		}
+		// Return null for unknown values when B is not available
+		return reflect.Zero(fieldA.Type())
+	}
+
+	// If A is empty string, treat it as null and use B if available, otherwise return null
+	if isAEmptyString {
+		// if !isBNull {
+		// 	return fieldB
+		// }
+		// Return null for empty string values when B is not available
+		return reflect.Zero(fieldA.Type())
+	}
+	if isANull && !isBNull && (reflect.TypeOf(types.List{}) != fieldA.Type() && reflect.TypeOf(types.Set{}) != fieldA.Type()) {
+		return reflect.Zero(fieldB.Type())
+	} else if isANull && !isBNull && (reflect.TypeOf(types.List{}) == fieldA.Type() || reflect.TypeOf(types.Set{}) == fieldA.Type()) {
+		return reflect.ValueOf(createEmptySetOrList(fieldA.Type()))
+	}
+
+	// If A is null and B is not null, use B
+	// if isANull && !isBNull {
+	// 	return fieldB
+	// }
+
+	// If B is null and A is not null, use A
+	if isBNull && !isANull {
+		return fieldA
+	}
+
+	// If both are null, return null (except for List/Set which return empty)
+	if isANull && isBNull {
+		// If it's a List or Set, return an empty slice/set
+		if fieldA.Type() == reflect.TypeOf(types.List{}) || fieldA.Type() == reflect.TypeOf(types.Set{}) {
+			return reflect.ValueOf(createEmptySetOrList(fieldA.Type()))
+		}
+		// For all other types, return zero value (which represents null in Terraform)
+		return reflect.Zero(fieldA.Type())
+	}
+
+	// If both have values, use the specified priority
+	if prioritizeA {
+		return fieldA
+	}
+	log.Printf("About to check if fieldA is an Struct want to know the type and kind: %v", fieldA.Type())
+	log.Printf("Field A kind: %v", fieldA.Kind())
+	// Verify if is an Struct
+	if fieldA.Kind() == reflect.Slice {
+		log.Printf("Field A is an Slice")
+		log.Printf("About to iterate through slice elements")
+		for i := 0; i < fieldA.Len(); i++ {
+			sliceElemA := fieldA.Index(i)
+			sliceElemB := fieldB.Index(i)
+			log.Printf("Processing slice element %d", i)
+			if sliceElemA.Kind() == reflect.Struct {
+				foreachStructFieldBoth(sliceElemA, sliceElemB)
+			}
+		}
+		log.Printf("Finished iterating through slice elements")
+	} else {
+		if fieldA.Kind() == reflect.Struct {
+			//FieldName print
+			log.Printf("Field A is an Struct")
+			log.Printf("About to call foreachStructField with both fieldA and fieldB")
+			foreachStructFieldBoth(fieldA, fieldB)
+			log.Printf("Finished foreachStructField call")
+		} else {
+			// si fieldA es null, hacer que fieldB sea null}
+			log.Printf("Field A is not an Struct")
+			log.Printf("About to check if fieldA is nil")
+			log.Printf("fieldA is nil: %v", fieldA.IsNil())
+			if fieldA.IsNil() {
+				fieldB.Set(reflect.Zero(fieldB.Type()))
+			}
+
+		}
+	}
+
+	return fieldB
+}
+
+func foreachStructField(field reflect.Value) {
+	log.Printf("foreachStructField called with field type: %v", field.Type())
+	log.Printf("Field kind: %v, NumField: %d", field.Kind(), field.NumField())
+
+	for i := 0; i < field.NumField(); i++ {
+		fieldName := field.Type().Field(i).Name
+		fieldValue := field.Field(i)
+		log.Printf("Campo: %s", fieldName)
+		log.Printf("Field value kind: %v", fieldValue.Kind())
+
+		// Handle direct struct
+		if fieldValue.Kind() == reflect.Struct {
+			foreachStructField(fieldValue)
+		}
+
+		// Handle pointer to struct
+		if fieldValue.Kind() == reflect.Ptr && !fieldValue.IsNil() {
+			elem := fieldValue.Elem()
+			if elem.Kind() == reflect.Struct {
+				log.Printf("  -> Diving into pointer to struct: %s", fieldName)
+				foreachStructField(elem)
+			}
+		}
+	}
+}
+
+func foreachStructFieldBoth(fieldA, fieldB reflect.Value) {
+	log.Printf("foreachStructFieldBoth called with fieldA type: %v", fieldA.Type())
+	log.Printf("fieldA kind: %v, NumField: %d", fieldA.Kind(), fieldA.NumField())
+	log.Printf("fieldB type: %v", fieldB.Type())
+	log.Printf("fieldB kind: %v, NumField: %d", fieldB.Kind(), fieldB.NumField())
+
+	for i := 0; i < fieldA.NumField(); i++ {
+		fieldTypeA := fieldA.Type().Field(i)
+		fieldTypeB := fieldB.Type().Field(i)
+
+		// Skip unexported fields
+		if !fieldTypeA.IsExported() || !fieldTypeB.IsExported() {
+			log.Printf("Skipping unexported field: %s", fieldTypeA.Name)
+			continue
+		}
+
+		fieldNameA := fieldTypeA.Name
+		fieldValueA := fieldA.Field(i)
+		fieldNameB := fieldTypeB.Name
+		fieldValueB := fieldB.Field(i)
+
+		log.Printf("Comparing field %s (A) and field %s (B)", fieldNameA, fieldNameB)
+		log.Printf("Field A value kind: %v", fieldValueA.Kind())
+		log.Printf("Field B value kind: %v", fieldValueB.Kind())
+
+		// Handle direct structs
+		if fieldValueA.Kind() == reflect.Struct && fieldValueB.Kind() == reflect.Struct {
+			log.Printf("Both fields are structs, diving into recursion")
+			foreachStructFieldBoth(fieldValueA, fieldValueB)
+		}
+
+		// Handle pointer to structs
+		if fieldValueA.Kind() == reflect.Ptr && !fieldValueA.IsNil() && fieldValueB.Kind() == reflect.Ptr && !fieldValueB.IsNil() {
+			elemA := fieldValueA.Elem()
+			elemB := fieldValueB.Elem()
+			if elemA.Kind() == reflect.Struct && elemB.Kind() == reflect.Struct {
+				log.Printf("Both fields are pointers to structs, diving into recursion")
+				foreachStructFieldBoth(elemA, elemB)
+			}
+		}
+
+		// Handle direct structs and pointers to structs
+		if fieldValueA.Kind() == reflect.Struct && fieldValueB.Kind() == reflect.Ptr && !fieldValueB.IsNil() {
+			elemB := fieldValueB.Elem()
+			if elemB.Kind() == reflect.Struct {
+				log.Printf("Field A is struct, Field B is pointer to struct, diving into recursion")
+				foreachStructFieldBoth(fieldValueA, elemB)
+			}
+		}
+
+		// Handle pointers to structs and direct structs
+		if fieldValueA.Kind() == reflect.Ptr && !fieldValueA.IsNil() && fieldValueB.Kind() == reflect.Struct {
+			elemA := fieldValueA.Elem()
+			if elemA.Kind() == reflect.Struct {
+				log.Printf("Field A is pointer to struct, Field B is struct, diving into recursion")
+				foreachStructFieldBoth(elemA, fieldValueB)
+			}
+		}
+
+		// Handle simple types - safely check if we can access the values
+		if fieldValueA.Kind() == reflect.String && fieldValueB.Kind() == reflect.String {
+			// Only try to access values if they are exported fields
+			if fieldValueA.CanInterface() && fieldValueB.CanInterface() {
+				valueA := fieldValueA.Interface().(string)
+				valueB := fieldValueB.Interface().(string)
+				log.Printf("String values - A: %s, B: %s", valueA, valueB)
+
+				if valueA == "<unknown>" {
+					fieldValueA.Set(reflect.Zero(fieldValueA.Type()))
+				}
+				if valueB == "<unknown>" {
+					fieldValueB.Set(reflect.Zero(fieldValueB.Type()))
+				}
+			}
+		}
+
+		// Handle null/nil values - if A is null, make B null too
+		// Only call IsNil() on types that support it
+		if (fieldValueA.Kind() == reflect.Ptr || fieldValueA.Kind() == reflect.Interface ||
+			fieldValueA.Kind() == reflect.Slice || fieldValueA.Kind() == reflect.Map ||
+			fieldValueA.Kind() == reflect.Chan) && fieldValueA.IsNil() &&
+			!fieldValueB.IsNil() {
+			log.Printf("Field A is null, setting field B to null as well")
+			fieldValueB.Set(reflect.Zero(fieldValueB.Type()))
+		}
+
+		// Handle zero values for basic types - if A is zero, make B zero too
+		// Only check zero values for types that can be compared
+		if fieldValueA.CanInterface() && fieldValueB.CanInterface() {
+			// Check if A is a zero value for its type
+			zeroValue := reflect.Zero(fieldValueA.Type())
+			if reflect.DeepEqual(fieldValueA.Interface(), zeroValue.Interface()) {
+				log.Printf("Field A is zero value, setting field B to zero as well")
+				fieldValueB.Set(zeroValue)
+			}
+		}
+	}
 }
 
 // safeSetField safely sets a field value, handling pointer types correctly
@@ -953,6 +1186,7 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 			if fieldA.Kind() == reflect.Slice && fieldB.Kind() == reflect.Slice && valueA.Field(i).Kind() == reflect.Slice && valueB.Field(i).Kind() == reflect.Slice {
 				log.Printf("IF Slice:")
 				// If both fields are slices, merge them recursively
+				// In mergeInterfaces, always prioritize A (state) over B (respRead)
 				if field := replaceUnknownFields(valueA.Field(i)); field != nil {
 					log.Printf("IF Slice Replace:")
 					if resultStruct.Field(i).CanSet() {
@@ -960,8 +1194,9 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 					}
 				} else {
 					log.Printf("Else Slice Replace:")
+					// Even when replaceUnknownFields returns nil, prioritize A over B
 					if resultStruct.Field(i).CanSet() {
-						resultStruct.Field(i).Set(valueB.Field(i))
+						resultStruct.Field(i).Set(valueA.Field(i))
 					}
 				}
 			} else if valueA.Field(i).Type() != reflect.TypeOf(types.String{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Bool{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Int64{}) && valueA.Field(i).Type() != reflect.TypeOf(types.Float64{}) && !isSetOrListType(valueA.Field(i).Type()) {
@@ -1194,7 +1429,8 @@ func mergeInterfacesOnlyPath(a, b interface{}) interface{} {
 				}
 			} else {
 				// Use the merge prioritization logic for non-slice types
-				prioritizedValue := prioritizeNonNullValuesForMerge(fieldA, fieldB)
+				// In mergeInterfacesOnlyPath, prioritize B (respRead) over A (state)
+				prioritizedValue := prioritizeNonNullValuesForMergeWithPriority(fieldA, fieldB, false)
 				if resultStruct.Field(i).CanSet() {
 					// Handle type compatibility for slices and structs
 					if prioritizedValue.Kind() == reflect.Slice && resultStruct.Field(i).Type().Kind() == reflect.Ptr {

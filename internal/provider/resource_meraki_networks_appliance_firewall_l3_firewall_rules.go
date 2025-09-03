@@ -335,7 +335,7 @@ func (r *NetworksApplianceFirewallL3FirewallRulesRs) toSdkApiRequestUpdate(ctx c
 			destPort := rItem1.DestPort.ValueString()
 			policy := rItem1.Policy.ValueString()
 			protocol := rItem1.Protocol.ValueString()
-			srcCidr := rItem1.SrcCidr.ValueString()
+			srcCidr := strings.ToLower(rItem1.SrcCidr.ValueString())
 			srcPort := rItem1.SrcPort.ValueString()
 			syslogEnabled := func() *bool {
 				if !rItem1.SyslogEnabled.IsUnknown() && !rItem1.SyslogEnabled.IsNull() {
@@ -432,13 +432,13 @@ func ResponseApplianceGetNetworkApplianceFirewallL3FirewallRulesItemToBodyRs(sta
 						}(),
 						SrcCidr: func() types.String {
 							if rules.SrcCidr != "" {
-								return types.StringValue(rules.SrcCidr)
+								return types.StringValue(strings.ToLower(rules.SrcCidr))
 							}
 							return types.String{}
 						}(),
 						SrcPort: func() types.String {
 							if rules.SrcPort != "" {
-								return types.StringValue(rules.SrcPort)
+								return types.StringValue(strings.ToLower(rules.SrcPort))
 							}
 							return types.String{}
 						}(),

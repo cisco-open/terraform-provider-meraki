@@ -1,5 +1,17 @@
 ## Unreleased (- -, -)
 
+### 1.2.1-beta (September 2, 2025)
+IMPROVEMENTS:
+* Enhanced field handling in `meraki_devices_appliance_uplinks_settings` resource for better interface management
+* Enhanced utility functions for better null value handling and field prioritization during merges
+* Added comprehensive logging for debugging field assignment issues
+
+BUGFIXES:
+* Fixed case sensitivity issues in firewall rules by normalizing CIDR and port values to lowercase
+* Resolved field assignment inconsistencies in management interface configurations
+* Improved handling of unknown and empty string values in utility functions
+* Fixed interface field handling in appliance uplinks settings for better state management
+
 ### 1.2.0-beta (September 2, 2025)
 FEATURES:
 * Updated Meraki Dashboard API SDK from v5.0.6 to v5.0.7 for improved compatibility and performance

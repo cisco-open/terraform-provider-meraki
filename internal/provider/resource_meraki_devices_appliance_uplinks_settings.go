@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"log"
 	"strconv"
 
 	merakigosdk "github.com/meraki/dashboard-api-go/v5/sdk"
@@ -70,6 +71,7 @@ func (r *DevicesApplianceUplinksSettingsResource) Schema(_ context.Context, _ re
 			"interfaces": schema.SingleNestedAttribute{
 				MarkdownDescription: `Interface settings.`,
 				Optional:            true,
+				Computed:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
@@ -554,7 +556,6 @@ func (r *DevicesApplianceUplinksSettingsResource) Create(ctx context.Context, re
 		return
 	}
 
-	// Assign data
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
@@ -596,6 +597,7 @@ func (r *DevicesApplianceUplinksSettingsResource) Read(ctx context.Context, req 
 	}
 	//entro aqui 2
 	data = ResponseApplianceGetDeviceApplianceUplinksSettingsItemToBodyRs(data, responseGet, true)
+	log.Printf("data: %+v", data.Interfaces)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 func (r *DevicesApplianceUplinksSettingsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {

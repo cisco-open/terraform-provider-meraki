@@ -126,7 +126,6 @@ func (r *NetworksSettingsResource) Schema(_ context.Context, _ resource.SchemaRe
 			"local_status_page_enabled": schema.BoolAttribute{
 				MarkdownDescription: `Enables / disables the local device status pages (<a target='_blank' href='http://my.meraki.com/'>my.meraki.com, </a><a target='_blank' href='http://ap.meraki.com/'>ap.meraki.com, </a><a target='_blank' href='http://switch.meraki.com/'>switch.meraki.com, </a><a target='_blank' href='http://wired.meraki.com/'>wired.meraki.com</a>). Optional (defaults to false)`,
 				Optional:            true,
-				Computed:            true,
 				PlanModifiers: []planmodifier.Bool{
 					boolplanmodifier.UseStateForUnknown(),
 				},
@@ -134,7 +133,6 @@ func (r *NetworksSettingsResource) Schema(_ context.Context, _ resource.SchemaRe
 			"named_vlans": schema.SingleNestedAttribute{
 				MarkdownDescription: `A hash of Named VLANs options applied to the Network.`,
 				Optional:            true,
-				Computed:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
@@ -495,7 +493,7 @@ func ResponseNetworksGetNetworkSettingsItemToBodyRs(state NetworksSettingsRs, re
 			return types.Bool{}
 		}(),
 		NamedVLANs: func() *ResponseNetworksGetNetworkSettingsNamedVlansRs {
-			if response.NamedVLANs != nil {
+			if response.NamedVLANs != nil && response.NamedVLANs.Enabled != nil {
 				return &ResponseNetworksGetNetworkSettingsNamedVlansRs{
 					Enabled: func() types.Bool {
 						if response.NamedVLANs.Enabled != nil {
@@ -527,6 +525,7 @@ func ResponseNetworksGetNetworkSettingsItemToBodyRs(state NetworksSettingsRs, re
 			return nil
 		}(),
 	}
+	itemState.NamedVLANs = state.NamedVLANs
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(NetworksSettingsRs)
 	}

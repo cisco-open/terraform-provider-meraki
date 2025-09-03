@@ -574,6 +574,7 @@ func ResponseOrganizationsGetOrganizationLoginSecurityItemToBodyRs(state Organiz
 			return types.Int64{}
 		}(),
 	}
+	itemState.APIAuthentication = state.APIAuthentication
 	if is_read {
 		return mergeInterfacesOnlyPath(state, itemState).(OrganizationsLoginSecurityRs)
 	}

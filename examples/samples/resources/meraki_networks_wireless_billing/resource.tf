@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     meraki = {
-      version = "1.2.0-beta"
+      version = "1.2.1-beta"
       source  = "hashicorp.com/edu/meraki"
       # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
     }
@@ -23,9 +23,7 @@ resource "meraki_networks_wireless_billing" "example" {
   currency   = "USD"
   network_id = var.my_network_id
   plans = [{
-
     bandwidth_limits = {
-
       limit_down = 1000
       limit_up   = 1000
     }
@@ -35,7 +33,6 @@ resource "meraki_networks_wireless_billing" "example" {
     {
 
       bandwidth_limits = {
-
         limit_down = 500
         limit_up   = 1000
       }

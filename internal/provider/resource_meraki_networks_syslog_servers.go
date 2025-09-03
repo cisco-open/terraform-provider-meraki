@@ -29,6 +29,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -90,11 +91,11 @@ func (r *NetworksSyslogServersResource) Schema(_ context.Context, _ resource.Sch
 								int64planmodifier.UseStateForUnknown(),
 							},
 						},
-						"roles": schema.ListAttribute{
+						"roles": schema.SetAttribute{
 							MarkdownDescription: `A list of roles for the syslog server. Options (case-insensitive): 'Wireless event log', 'Appliance event log', 'Switch event log', 'Air Marshal events', 'Flows', 'URLs', 'IDS alerts', 'Security events'`,
 							Optional:            true,
-							PlanModifiers: []planmodifier.List{
-								listplanmodifier.UseStateForUnknown(),
+							PlanModifiers: []planmodifier.Set{
+								setplanmodifier.UseStateForUnknown(),
 							},
 
 							ElementType: types.StringType,
@@ -238,7 +239,7 @@ type NetworksSyslogServersRs struct {
 type ResponseNetworksGetNetworkSyslogServersServersRs struct {
 	Host  types.String `tfsdk:"host"`
 	Port  types.Int64  `tfsdk:"port"`
-	Roles types.List   `tfsdk:"roles"`
+	Roles types.Set    `tfsdk:"roles"`
 }
 
 // FromBody
@@ -300,7 +301,7 @@ func ResponseNetworksGetNetworkSyslogServersItemToBodyRs(state NetworksSyslogSer
 							}
 							return types.Int64{}
 						}(),
-						Roles: StringSliceToList(servers.Roles),
+						Roles: StringSliceToSet(servers.Roles),
 					}
 				}
 				return &result

@@ -23,7 +23,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: "1.21.6"
         id: go
@@ -57,7 +57,7 @@ jobs:
           - '1.4.*'
     steps:
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: "1.21.6"
         id: go

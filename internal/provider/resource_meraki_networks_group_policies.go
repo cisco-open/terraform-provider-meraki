@@ -19,6 +19,7 @@ package provider
 // RESOURCE NORMAL
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -125,7 +126,6 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 			"bonjour_forwarding": schema.SingleNestedAttribute{
 				MarkdownDescription: `The Bonjour settings for your group policy. Only valid if your network has a wireless configuration.`,
 				Optional:            true,
-				Computed:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
@@ -823,7 +823,6 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 				MarkdownDescription: `Whether clients bound to your policy will bypass splash authorization or behave according to the network's rules. Can be one of 'network default' or 'bypass'. Only available if your network has a wireless configuration.
                                   Allowed values: [bypass,network default]`,
 				Optional: true,
-				Computed: true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -837,7 +836,6 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 			"vlan_tagging": schema.SingleNestedAttribute{
 				MarkdownDescription: `The VLAN tagging settings for your group policy. Only available if your network has a wireless configuration.`,
 				Optional:            true,
-				Computed:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
@@ -952,62 +950,17 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 		)
 		return
 	}
-
-	responseGet, restyResp1, err := r.client.Networks.GetNetworkGroupPolicies(vvNetworkID)
-
-	if err != nil || responseGet == nil {
-		if restyResp1 != nil {
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkGroupPolicies",
-				restyResp1.String(),
-			)
-			return
-		}
+	var responseGet *merakigosdk.ResponseNetworksGetNetworkGroupPolicy
+	err = json.Unmarshal(restyResp2.Body(), &responseGet)
+	if err != nil {
 		resp.Diagnostics.AddError(
-			"Failure when executing GetNetworkGroupPolicies",
+			"Failure when unmarshalling response",
 			err.Error(),
 		)
 		return
 	}
-
-	responseStruct := structToMap(responseGet)
-	result := getDictResult(responseStruct, "Name", vvName, simpleCmp)
-	if result != nil {
-		result2 := result.(map[string]interface{})
-		vvGroupPolicyID, ok := result2["GroupPolicyID"].(string)
-		if !ok {
-			resp.Diagnostics.AddError(
-				"Failure when parsing path parameter GroupPolicyID",
-				"Fail Parsing GroupPolicyID",
-			)
-			return
-		}
-		responseVerifyItem2, restyRespGet, err := r.client.Networks.GetNetworkGroupPolicy(vvNetworkID, vvGroupPolicyID)
-		if responseVerifyItem2 != nil && err == nil {
-			data = ResponseNetworksGetNetworkGroupPolicyItemToBodyRs(data, responseVerifyItem2, false)
-			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-			return
-		} else {
-			if restyRespGet != nil {
-				resp.Diagnostics.AddError(
-					"Failure when executing GetNetworkGroupPolicy",
-					restyRespGet.String(),
-				)
-				return
-			}
-			resp.Diagnostics.AddError(
-				"Failure when executing GetNetworkGroupPolicy",
-				err.Error(),
-			)
-			return
-		}
-	} else {
-		resp.Diagnostics.AddError(
-			"Error in result.",
-			"Error in result.",
-		)
-		return
-	}
+	data = ResponseNetworksGetNetworkGroupPolicyItemToBodyRs(data, responseGet, false)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
 }
 

@@ -21,8 +21,8 @@ resource "meraki_networks_appliance_firewall_l3_firewall_rules" "example" {
     dest_port      = "443"
     policy         = "allow"
     protocol       = "tcp"
-    src_cidr       = "any"
-    src_port       = "any"
+    src_cidr       = "icmp"
+    src_port       = "8080"
     syslog_enabled = false
   }]
 }

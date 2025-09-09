@@ -1,5 +1,19 @@
 ## Unreleased (- -, -)
 
+### 1.2.2-beta (September 9, 2025)
+
+IMPROVEMENTS:
+* Refactored `meraki_networks_group_policies` resource Create function for improved performance and reliability
+* Simplified response handling in group policies resource by removing redundant API calls
+* Enhanced error handling and response parsing in group policies creation workflow
+* Optimized resource creation process by eliminating unnecessary GetNetworkGroupPolicies calls
+
+BUGFIXES:
+* Fixed schema attribute definitions in `meraki_networks_group_policies` resource by removing incorrect `Computed` flags
+* Resolved potential race conditions in group policy creation by streamlining the creation workflow
+* Improved response unmarshalling in group policies resource for better error handling
+
+
 ### 1.2.1-beta (September 2, 2025)
 IMPROVEMENTS:
 * Enhanced field handling in `meraki_devices_appliance_uplinks_settings` resource for better interface management

@@ -13,6 +13,6 @@ provider "meraki" {
 }
 
 resource "meraki_networks_group_policies" "foobar" {
-  network_id = "L_828099381482775779"
+  network_id = "L_828099381482777237"
   name = "foobar"
 }

@@ -26,7 +26,7 @@ BUGFIXES:
 * Improved handling of unknown and empty string values in utility functions
 * Fixed interface field handling in appliance uplinks settings for better state management
 
-### 1.2.1-beta (September 2, 2025)
+### 1.2.0-beta (September 2, 2025)
 FEATURES:
 * Updated Meraki Dashboard API SDK from v5.0.6 to v5.0.7 for improved compatibility and performance
 * Enhanced utility functions for better handling of Set and List types in Terraform schemas

@@ -1,5 +1,12 @@
 ## Unreleased (- -, -)
 
+### 1.2.3-beta (September 10, 2025)
+BUGFIXES:
+* Updated `github.com/meraki/dashboard-api-go/v5` dependency from v5.0.7 to v5.0.8 in `go.mod` and `go.sum`.
+* Modified example resource configuration to improve clarity and functionality, including dynamic handling of network IDs in `meraki_networks_group_policies`.
+* Refactored schema definitions in `resource_meraki_networks_group_policies.go` to remove unnecessary `Computed` flags and improve response handling.
+* Added new utility functions for better null field management and validation in `utils.go`.
+
 ### 1.2.2-beta (September 9, 2025)
 
 IMPROVEMENTS:

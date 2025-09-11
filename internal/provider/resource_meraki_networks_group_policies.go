@@ -75,7 +75,6 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 			"bandwidth": schema.SingleNestedAttribute{
 				MarkdownDescription: `    The bandwidth settings for clients bound to your group policy.
 `,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -126,17 +125,11 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 			"bonjour_forwarding": schema.SingleNestedAttribute{
 				MarkdownDescription: `The Bonjour settings for your group policy. Only valid if your network has a wireless configuration.`,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
 				Attributes: map[string]schema.Attribute{
 
 					"rules": schema.ListNestedAttribute{
 						MarkdownDescription: `A list of the Bonjour forwarding rules for your group policy. If 'settings' is set to 'custom', at least one rule must be specified.`,
 						Optional:            true,
-						PlanModifiers: []planmodifier.List{
-							listplanmodifier.UseStateForUnknown(),
-						},
 						NestedObject: schema.NestedAttributeObject{
 							Attributes: map[string]schema.Attribute{
 
@@ -186,7 +179,6 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 			"content_filtering": schema.SingleNestedAttribute{
 				MarkdownDescription: `The content filtering settings for your group policy`,
 				Optional:            true,
-				Computed:            true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
 				},
@@ -299,7 +291,6 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 			"firewall_and_traffic_shaping": schema.SingleNestedAttribute{
 				MarkdownDescription: `    The firewall and traffic shaping rules and settings for your policy.
 `,
-				Computed: true,
 				Optional: true,
 				PlanModifiers: []planmodifier.Object{
 					objectplanmodifier.UseStateForUnknown(),
@@ -551,7 +542,6 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 			},
 			"group_policy_id": schema.StringAttribute{
 				MarkdownDescription: `The ID of the group policy`,
-				Optional:            true,
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
@@ -560,9 +550,6 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 			"name": schema.StringAttribute{
 				MarkdownDescription: `The name for your group policy. Required.`,
 				Optional:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"network_id": schema.StringAttribute{
 				MarkdownDescription: `networkId path parameter. Network ID`,
@@ -572,16 +559,11 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 				MarkdownDescription: `    The schedule for the group policy. Schedules are applied to days of the week.
 `,
 				Optional: true,
-				Computed: true,
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
 				Attributes: map[string]schema.Attribute{
 
 					"enabled": schema.BoolAttribute{
 						MarkdownDescription: `Whether scheduling is enabled (true) or disabled (false). Defaults to false. If true, the schedule objects for each day of the week (monday - sunday) are parsed.`,
 						Optional:            true,
-						Computed:            true,
 						PlanModifiers: []planmodifier.Bool{
 							boolplanmodifier.UseStateForUnknown(),
 						},
@@ -589,23 +571,16 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 					"friday": schema.SingleNestedAttribute{
 						MarkdownDescription: `The schedule object for Friday.`,
 						Optional:            true,
-						PlanModifiers: []planmodifier.Object{
-							objectplanmodifier.UseStateForUnknown(),
-						},
 						Attributes: map[string]schema.Attribute{
 
 							"active": schema.BoolAttribute{
 								MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
 								Optional:            true,
-								PlanModifiers: []planmodifier.Bool{
-									boolplanmodifier.UseStateForUnknown(),
-								},
 							},
 							"from": schema.StringAttribute{
 								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.UseStateForUnknown(),
 									&TimeFormatPlanModifier{},
 								},
 							},
@@ -613,7 +588,6 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.UseStateForUnknown(),
 									&TimeFormatPlanModifier{},
 								},
 							},
@@ -622,23 +596,16 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 					"monday": schema.SingleNestedAttribute{
 						MarkdownDescription: `The schedule object for Monday.`,
 						Optional:            true,
-						PlanModifiers: []planmodifier.Object{
-							objectplanmodifier.UseStateForUnknown(),
-						},
 						Attributes: map[string]schema.Attribute{
 
 							"active": schema.BoolAttribute{
 								MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
 								Optional:            true,
-								PlanModifiers: []planmodifier.Bool{
-									boolplanmodifier.UseStateForUnknown(),
-								},
 							},
 							"from": schema.StringAttribute{
 								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.UseStateForUnknown(),
 									&TimeFormatPlanModifier{},
 								},
 							},
@@ -646,7 +613,6 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be greater than the time specified in 'from'. Defaults to '24:00'. Only 30 minute increments are allowed.`,
 								Optional:            true,
 								PlanModifiers: []planmodifier.String{
-									stringplanmodifier.UseStateForUnknown(),
 									&TimeFormatPlanModifier{},
 								},
 							},
@@ -655,17 +621,11 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 					"saturday": schema.SingleNestedAttribute{
 						MarkdownDescription: `The schedule object for Saturday.`,
 						Optional:            true,
-						PlanModifiers: []planmodifier.Object{
-							objectplanmodifier.UseStateForUnknown(),
-						},
 						Attributes: map[string]schema.Attribute{
 
 							"active": schema.BoolAttribute{
 								MarkdownDescription: `Whether the schedule is active (true) or inactive (false) during the time specified between 'from' and 'to'. Defaults to true.`,
 								Optional:            true,
-								PlanModifiers: []planmodifier.Bool{
-									boolplanmodifier.UseStateForUnknown(),
-								},
 							},
 							"from": schema.StringAttribute{
 								MarkdownDescription: `The time, from '00:00' to '24:00'. Must be less than the time specified in 'to'. Defaults to '00:00'. Only 30 minute increments are allowed.`,
@@ -836,18 +796,13 @@ func (r *NetworksGroupPoliciesResource) Schema(_ context.Context, _ resource.Sch
 			"vlan_tagging": schema.SingleNestedAttribute{
 				MarkdownDescription: `The VLAN tagging settings for your group policy. Only available if your network has a wireless configuration.`,
 				Optional:            true,
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.UseStateForUnknown(),
-				},
 				Attributes: map[string]schema.Attribute{
 
 					"settings": schema.StringAttribute{
 						MarkdownDescription: `How VLAN tagging is applied. Can be 'network default', 'ignore' or 'custom'.
                                         Allowed values: [custom,ignore,network default]`,
 						Optional: true,
-						PlanModifiers: []planmodifier.String{
-							stringplanmodifier.UseStateForUnknown(),
-						},
+
 						Validators: []validator.String{
 							stringvalidator.OneOf(
 								"custom",
@@ -922,15 +877,19 @@ func (r *NetworksGroupPoliciesResource) Create(ctx context.Context, req resource
 				)
 				return
 			}
-			r.client.Networks.UpdateNetworkGroupPolicy(vvNetworkID, vvGroupPolicyID, data.toSdkApiRequestUpdate(ctx))
-
-			responseVerifyItem2, _, _ := r.client.Networks.GetNetworkGroupPolicy(vvNetworkID, vvGroupPolicyID)
-			if responseVerifyItem2 != nil {
-				data = ResponseNetworksGetNetworkGroupPolicyItemToBodyRs(data, responseVerifyItem2, false)
-				// Path params update assigned
-				resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			_, restyResp1, err := r.client.Networks.UpdateNetworkGroupPolicy(vvNetworkID, vvGroupPolicyID, data.toSdkApiRequestUpdate(ctx))
+			var responseVerifyItem2 *merakigosdk.ResponseNetworksGetNetworkGroupPolicy
+			err = json.Unmarshal(restyResp1.Body(), &responseVerifyItem2)
+			if err != nil {
+				resp.Diagnostics.AddError(
+					"Failure when unmarshalling response",
+					err.Error(),
+				)
 				return
 			}
+			data = ResponseNetworksGetNetworkGroupPolicyItemToBodyRs(data, responseVerifyItem2, false)
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+			return
 		}
 	}
 
@@ -2159,7 +2118,7 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBodyRs(state NetworksGroupPolici
 			return nil
 		}(),
 		BonjourForwarding: func() *ResponseNetworksGetNetworkGroupPolicyBonjourForwardingRs {
-			if response.BonjourForwarding != nil {
+			if response.BonjourForwarding != nil && response.BonjourForwarding.Rules != nil && response.BonjourForwarding.Settings != "" {
 				return &ResponseNetworksGetNetworkGroupPolicyBonjourForwardingRs{
 					Rules: func() *[]ResponseNetworksGetNetworkGroupPolicyBonjourForwardingRulesRs {
 						if response.BonjourForwarding.Rules != nil {
@@ -2423,7 +2382,7 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBodyRs(state NetworksGroupPolici
 			return types.String{}
 		}(),
 		Scheduling: func() *ResponseNetworksGetNetworkGroupPolicySchedulingRs {
-			if response.Scheduling != nil {
+			if response.Scheduling != nil && response.Scheduling.Enabled != nil && response.Scheduling.Friday != nil && response.Scheduling.Monday != nil && response.Scheduling.Saturday != nil && response.Scheduling.Sunday != nil && response.Scheduling.Thursday != nil && response.Scheduling.Tuesday != nil && response.Scheduling.Wednesday != nil {
 				return &ResponseNetworksGetNetworkGroupPolicySchedulingRs{
 					Enabled: func() types.Bool {
 						if response.Scheduling.Enabled != nil {
@@ -2617,7 +2576,7 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBodyRs(state NetworksGroupPolici
 			return types.String{}
 		}(),
 		VLANTagging: func() *ResponseNetworksGetNetworkGroupPolicyVlanTaggingRs {
-			if response.VLANTagging != nil {
+			if response.VLANTagging != nil && response.VLANTagging.Settings != "" && response.VLANTagging.VLANID != "" {
 				return &ResponseNetworksGetNetworkGroupPolicyVlanTaggingRs{
 					Settings: func() types.String {
 						if response.VLANTagging.Settings != "" {
@@ -2634,6 +2593,12 @@ func ResponseNetworksGetNetworkGroupPolicyItemToBodyRs(state NetworksGroupPolici
 				}
 			}
 			return nil
+		}(),
+		Name: func() types.String {
+			if response.Name != "" {
+				return types.StringValue(response.Name)
+			}
+			return types.String{}
 		}(),
 	}
 	// Set Priority

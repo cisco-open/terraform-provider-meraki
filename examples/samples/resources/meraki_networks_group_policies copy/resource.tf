@@ -1,18 +1,37 @@
 terraform {
   required_providers {
     meraki = {
-      version = "1.2.2-beta"
       source  = "hashicorp.com/edu/meraki"
-      # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
+      version = "1.2.3-beta"
+
     }
   }
 }
-provider "meraki" {
-  meraki_debug    = "true"
 
+
+provider "meraki" {
+  # Configuration options
+  meraki_debug = "true"
 }
 
+data "meraki_networks" "my_networks" {
+  provider        = meraki
+  organization_id = "828099381482762270"
+}
+
+output "networks" {
+  value = data.meraki_networks.my_networks.items
+}
+#  resource "meraki_networks_group_policies" "foobar" {
+#    network_id = "L_828099381482771185"
+#    name = "foobar"
+# }
+
 resource "meraki_networks_group_policies" "foobar" {
-  network_id = "L_828099381482777237"
+  for_each = {
+    for idx, network in data.meraki_networks.my_networks.items : idx => network
+    if contains(network.product_types, "appliance") || contains(network.product_types, "wireless")
+  }
+  network_id = each.value.id
   name = "foobar"
 }

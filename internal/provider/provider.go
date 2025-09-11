@@ -40,7 +40,7 @@ import (
 )
 
 const (
-	CUSTOM_USER_AGENT        = "MerakiTerraform/1.2.2-beta Cisco"
+	CUSTOM_USER_AGENT        = "MerakiTerraform/1.2.3-beta Cisco"
 	DEFAULT_USER_AGENT       = ""
 	DEFAULT_MAX_RETRIES      = 3
 	DEFAULT_MAX_RETRY_DELAY  = 1000

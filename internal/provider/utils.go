@@ -1100,8 +1100,20 @@ func safeSetField(field reflect.Value, value interface{}) bool {
 	return true
 }
 
+func isUnknown(value reflect.Value) bool {
+	if value.CanInterface() {
+		valStr := fmt.Sprint(value.Interface())
+		return valStr == "<unknown>"
+	}
+	return false
+}
+
 func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
+
 	if a == nil {
+		return a
+	}
+	if isUnknown(reflect.ValueOf(a)) {
 		return b
 	}
 	if b == nil {
@@ -1132,7 +1144,7 @@ func mergeInterfaces(a, b interface{}, isFirstTime bool) interface{} {
 		if lenA != lenB {
 			// If they are not the same length, we return the largest slice
 			if lenB > lenA {
-				return b
+				return a
 			}
 			return a
 		}
@@ -1262,8 +1274,11 @@ func changeStructUnknowns(a interface{}, b interface{}) interface{} {
 
 	// Handle nil/zero values early
 	if !valueA.IsValid() || valueA.IsZero() {
-		if valueB.IsValid() && !valueB.IsZero() {
+		if isUnknown(valueA) {
 			return b
+		}
+		if valueB.IsValid() && !valueB.IsZero() {
+			return a
 		}
 		return a
 	}
@@ -1410,6 +1425,7 @@ func mergeInterfacesOnlyPath(a, b interface{}) interface{} {
 		log.Printf("fieldA %v", fieldA)
 		log.Printf("fieldB %v", fieldB)
 		log.Printf("fieldB %v", fieldB)
+
 		// Check if both fields are valid before proceeding
 		if fieldA.IsValid() && fieldB.IsValid() {
 			// Handle slices
@@ -1432,25 +1448,31 @@ func mergeInterfacesOnlyPath(a, b interface{}) interface{} {
 				// In mergeInterfacesOnlyPath, prioritize B (respRead) over A (state)
 				prioritizedValue := prioritizeNonNullValuesForMergeWithPriority(fieldA, fieldB, false)
 				if resultStruct.Field(i).CanSet() {
-					// Handle type compatibility for slices and structs
-					if prioritizedValue.Kind() == reflect.Slice && resultStruct.Field(i).Type().Kind() == reflect.Ptr {
-						// Field expects pointer to slice, but we have a slice
-						if prioritizedValue.IsNil() {
-							resultStruct.Field(i).Set(reflect.Zero(resultStruct.Field(i).Type()))
-						} else {
-							// Create a pointer to the slice
-							slicePtr := reflect.New(prioritizedValue.Type())
-							slicePtr.Elem().Set(prioritizedValue)
-							resultStruct.Field(i).Set(slicePtr)
-						}
-					} else if prioritizedValue.Kind() == reflect.Struct && resultStruct.Field(i).Type().Kind() == reflect.Ptr {
-						// Field expects pointer to struct, but we have a struct
-						// Create a pointer to the struct
-						structPtr := reflect.New(prioritizedValue.Type())
-						structPtr.Elem().Set(prioritizedValue)
-						resultStruct.Field(i).Set(structPtr)
+					// Check if the prioritized value is null/zero and the field type is a pointer
+					if isNullOrZero(prioritizedValue) && resultStruct.Field(i).Type().Kind() == reflect.Ptr {
+						// Set to nil pointer for null values
+						resultStruct.Field(i).Set(reflect.Zero(resultStruct.Field(i).Type()))
 					} else {
-						resultStruct.Field(i).Set(prioritizedValue)
+						// Handle type compatibility for slices and structs
+						if prioritizedValue.Kind() == reflect.Slice && resultStruct.Field(i).Type().Kind() == reflect.Ptr {
+							// Field expects pointer to slice, but we have a slice
+							if prioritizedValue.IsNil() {
+								resultStruct.Field(i).Set(prioritizedValue)
+							} else {
+								// Create a pointer to the slice
+								slicePtr := reflect.New(prioritizedValue.Type())
+								slicePtr.Elem().Set(prioritizedValue)
+								resultStruct.Field(i).Set(slicePtr)
+							}
+						} else if prioritizedValue.Kind() == reflect.Struct && resultStruct.Field(i).Type().Kind() == reflect.Ptr {
+							// Field expects pointer to struct, but we have a struct
+							// Create a pointer to the struct
+							structPtr := reflect.New(prioritizedValue.Type())
+							structPtr.Elem().Set(prioritizedValue)
+							resultStruct.Field(i).Set(structPtr)
+						} else {
+							resultStruct.Field(i).Set(prioritizedValue)
+						}
 					}
 				}
 			}
@@ -1462,7 +1484,7 @@ func mergeInterfacesOnlyPath(a, b interface{}) interface{} {
 				if fieldA.Kind() == reflect.Slice && resultStruct.Field(i).Type().Kind() == reflect.Ptr {
 					// Field expects pointer to slice, but we have a slice
 					if fieldA.IsNil() {
-						resultStruct.Field(i).Set(reflect.Zero(resultStruct.Field(i).Type()))
+						resultStruct.Field(i).Set(fieldA)
 					} else {
 						// Create a pointer to the slice
 						slicePtr := reflect.New(fieldA.Type())
@@ -1487,7 +1509,7 @@ func mergeInterfacesOnlyPath(a, b interface{}) interface{} {
 				if fieldB.Kind() == reflect.Slice && resultStruct.Field(i).Type().Kind() == reflect.Ptr {
 					// Field expects pointer to slice, but we have a slice
 					if fieldB.IsNil() {
-						resultStruct.Field(i).Set(reflect.Zero(resultStruct.Field(i).Type()))
+						resultStruct.Field(i).Set(fieldB)
 					} else {
 						// Create a pointer to the slice
 						slicePtr := reflect.New(fieldB.Type())
@@ -1505,7 +1527,11 @@ func mergeInterfacesOnlyPath(a, b interface{}) interface{} {
 				}
 			}
 		} else {
-			log.Printf("One or both fields are invalid.")
+			// Both fields are invalid/null - set to nil pointer if field type is pointer
+			log.Printf("Both fields are invalid/null - setting to nil")
+			if resultStruct.Field(i).CanSet() && resultStruct.Field(i).Type().Kind() == reflect.Ptr {
+				resultStruct.Field(i).Set(reflect.Zero(resultStruct.Field(i).Type()))
+			}
 		}
 
 		log.Printf("Before")
@@ -1524,7 +1550,7 @@ func mergeInterfacesOnlyPath(a, b interface{}) interface{} {
 					if fieldValue.Kind() == reflect.Slice && resultStruct.Field(i).Type().Kind() == reflect.Ptr {
 						// Field expects pointer to slice, but we have a slice
 						if fieldValue.IsNil() {
-							resultStruct.Field(i).Set(reflect.Zero(resultStruct.Field(i).Type()))
+							resultStruct.Field(i).Set(fieldA)
 						} else {
 							// Create a pointer to the slice
 							slicePtr := reflect.New(fieldValue.Type())

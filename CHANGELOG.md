@@ -1,5 +1,10 @@
 ## Unreleased (- -, -)
 
+### 1.2.4-beta (October 08, 2025)
+BUGFIXES:
+* meraki_organizations_policy_objects creation fails with a value conversation error #295.
+* enrollment_string left unknown after apply in meraki_organizations_networks_combine #299.
+
 ### 1.2.3-beta (September 10, 2025)
 BUGFIXES:
 * Updated `github.com/meraki/dashboard-api-go/v5` dependency from v5.0.7 to v5.0.8 in `go.mod` and `go.sum`.

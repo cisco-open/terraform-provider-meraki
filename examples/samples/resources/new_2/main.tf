@@ -1,3 +1,6 @@
+locals {
+  organization_id = "828099381482762270"
+}
 terraform {
   required_providers {
     meraki = {
@@ -7,16 +10,16 @@ terraform {
     }
   }
 }
+
 provider "meraki" {
   meraki_debug = "true"
 }
 
+resource "meraki_organizations_policy_objects" "foobar_bugreport" {
+  organization_id = local.organization_id
 
-data "meraki_networks_wireless_rf_profiles" "example" {
-  network_id    = "L_828099381482775342"
-  rf_profile_id = "outdoor"
-}
-
-output "meraki_networks_wireless_rf_profiles_example" {
-  value = data.meraki_networks_wireless_rf_profiles.example.item
+  category = "network"
+  type     = "cidr"
+  name     = "FooBar Bugreport"
+  cidr     = "192.168.243.0/24"
 }

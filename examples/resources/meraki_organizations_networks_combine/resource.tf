@@ -6,7 +6,7 @@ resource "meraki_organizations_networks_combine" "example" {
 
     enrollment_string = "my-enrollment-string"
     name              = "Long Island Office"
-    network_ids       = ["N_1234", "N_5678"]
+    network_ids       = ["N_828099381482850157", "N_828099381482850161"]
   }
 }
 

@@ -77,10 +77,6 @@ func (r *OrganizationsNetworksCombineResource) Schema(_ context.Context, _ resou
 						Computed:            true,
 						Attributes: map[string]schema.Attribute{
 
-							"enrollment_string": schema.StringAttribute{
-								MarkdownDescription: `Enrollment string for the network`,
-								Computed:            true,
-							},
 							"id": schema.StringAttribute{
 								MarkdownDescription: `Network ID`,
 								Computed:            true,
@@ -129,7 +125,6 @@ func (r *OrganizationsNetworksCombineResource) Schema(_ context.Context, _ resou
 					"enrollment_string": schema.StringAttribute{
 						MarkdownDescription: `A unique identifier which can be used for device enrollment or easy access through the Meraki SM Registration page or the Self Service Portal. Please note that changing this field may cause existing bookmarks to break. All networks that are part of this combined network will have their enrollment string appended by '-network_type'. If left empty, all exisitng enrollment strings will be deleted.`,
 						Optional:            true,
-						Computed:            true,
 						PlanModifiers: []planmodifier.String{
 							stringplanmodifier.RequiresReplace(),
 						},
@@ -220,7 +215,6 @@ type ResponseOrganizationsCombineOrganizationNetworks struct {
 }
 
 type ResponseOrganizationsCombineOrganizationNetworksResultingNetwork struct {
-	EnrollmentString        types.String `tfsdk:"enrollment_string"`
 	ID                      types.String `tfsdk:"id"`
 	IsBoundToConfigTemplate types.Bool   `tfsdk:"is_bound_to_config_template"`
 	Name                    types.String `tfsdk:"name"`
@@ -270,12 +264,6 @@ func ResponseOrganizationsCombineOrganizationNetworksItemToBody(state Organizati
 		ResultingNetwork: func() *ResponseOrganizationsCombineOrganizationNetworksResultingNetwork {
 			if response.ResultingNetwork != nil {
 				return &ResponseOrganizationsCombineOrganizationNetworksResultingNetwork{
-					EnrollmentString: func() types.String {
-						if response.ResultingNetwork.EnrollmentString != "" {
-							return types.StringValue(response.ResultingNetwork.EnrollmentString)
-						}
-						return types.String{}
-					}(),
 					ID: func() types.String {
 						if response.ResultingNetwork.ID != "" {
 							return types.StringValue(response.ResultingNetwork.ID)

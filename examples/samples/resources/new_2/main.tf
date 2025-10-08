@@ -1,0 +1,25 @@
+locals {
+  organization_id = "828099381482762270"
+}
+terraform {
+  required_providers {
+    meraki = {
+      version = "1.2.3-beta"
+      source  = "hashicorp.com/edu/meraki"
+      # "hashicorp.com/edu/meraki" is the local built source, change to "cisco-en-programmability/meraki" to use downloaded version from registry
+    }
+  }
+}
+
+provider "meraki" {
+  meraki_debug = "true"
+}
+
+resource "meraki_organizations_policy_objects" "foobar_bugreport" {
+  organization_id = local.organization_id
+
+  category = "network"
+  type     = "cidr"
+  name     = "FooBar Bugreport"
+  cidr     = "192.168.243.0/24"
+}

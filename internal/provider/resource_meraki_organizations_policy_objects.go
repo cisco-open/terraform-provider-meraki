@@ -137,6 +137,10 @@ func (r *OrganizationsPolicyObjectsResource) Schema(_ context.Context, _ resourc
 				MarkdownDescription: `The IDs of the networks that use the policy object.`,
 				Computed:            true,
 				ElementType:         types.StringType,
+				PlanModifiers: []planmodifier.Set{
+					setplanmodifier.UseStateForUnknown(),
+				},
+				Default: setdefault.StaticValue(types.SetNull(types.StringType)),
 			},
 			"organization_id": schema.StringAttribute{
 				MarkdownDescription: `organizationId path parameter. Organization ID`,

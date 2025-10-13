@@ -7,14 +7,8 @@ The new Terraform provider will provide more efficient operations, ongoing suppo
 ## Can I continue using the old provider? 
 Yes, but the old provider will no longer receive updates, bug fixes, or new features. We encourage you to plan a migration to the new provider.  
 
-## How to migrate to the new provider? 
-You cannot simply switch the provider source and expect your configuration to work as before. You must review, update, and test your Terraform plans and state files.  
-Resource Names and Attributes: Check the new provider documentation for changes in resource names, argument formats, and supported features. 
-HCL Format Differences: The structure of your configuration files may need significant changes to match the new provider’s requirements. 
-State Management: You may need to import existing resources into the new provider’s state or manually update your state files. 
-
 ## What are the recommended migration steps? 
-1. Review Documentation: Read the new provider’s documentation carefully. 
+1. Review Documentation: Read the new provider’s documentation carefully. Resource names and attributes are not necesarily the same.
 2. Update Configurations: Refactor your .tf files to match the new HCL format and attribute names. 
 3. Test Plans: Run terraform plan to identify required changes and resolve any errors. 
 4. Handle State: Use terraform import or state manipulation commands to align existing resources with the new provider’s resource model. 

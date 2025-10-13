@@ -1,3 +1,31 @@
+# DEPRECATION NOTICE
+Cisco is consolidating two Meraki Terraform providers. This provider has been deprecated and will no longer be updated. The new provider ([CiscoDevNet/terraform-provider-meraki](https://github.com/CiscoDevNet/terraform-provider-meraki)) is now the official, actively maintained version.
+
+## Why is this change happening? 
+The new Terraform provider will provide more efficient operations, ongoing support, new features, and improvements, ensuring a more robust and future-proof experience for all Meraki users. 
+
+## Can I continue using the old provider? 
+Yes, but the old provider will no longer receive updates, bug fixes, or new features. We encourage you to plan a migration to the new provider.  
+
+## How to migrate to the new provider? 
+You cannot simply switch the provider source and expect your configuration to work as before. You must review, update, and test your Terraform plans and state files.  
+Resource Names and Attributes: Check the new provider documentation for changes in resource names, argument formats, and supported features. 
+HCL Format Differences: The structure of your configuration files may need significant changes to match the new provider’s requirements. 
+State Management: You may need to import existing resources into the new provider’s state or manually update your state files. 
+
+## What are the recommended migration steps? 
+1. Review Documentation: Read the new provider’s documentation carefully. 
+2. Update Configurations: Refactor your .tf files to match the new HCL format and attribute names. 
+3. Test Plans: Run terraform plan to identify required changes and resolve any errors. 
+4. Handle State: Use terraform import or state manipulation commands to align existing resources with the new provider’s resource model. 
+5. Validate Changes: Test in a non-production environment before applying changes in production. 
+
+## What happens if I don’t migrate? 
+Your existing setup will continue to function, but: 
+No bug fixes or new features will be available for the old provider. Over time, compatibility issues may arise as Terraform and Meraki evolve. 
+
+- - - 
+
 # terraform-provider-meraki
 
 terraform-provider-meraki is a Terraform Provider for [Cisco Meraki]()

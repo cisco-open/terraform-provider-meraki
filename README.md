@@ -5,7 +5,8 @@ Cisco is consolidating two Meraki Terraform providers. This provider has been de
 The new Terraform provider will provide more efficient operations, ongoing support, new features, and improvements, ensuring a more robust and future-proof experience for all Meraki users. 
 
 ## Can I continue using the old provider? 
-Yes, but the old provider will no longer receive updates, bug fixes, or new features. We encourage you to plan a migration to the new provider.  
+Yes, but the old provider will no longer receive updates or new features. We encourage you to plan a migration to the new provider.
+Bugs will be fixed on a best effort basis until January 31st, 2026.
 
 ## What are the recommended migration steps? 
 1. Review Documentation: Read the new provider’s documentation carefully. Resource names and attributes are not necesarily the same.
@@ -16,7 +17,8 @@ Yes, but the old provider will no longer receive updates, bug fixes, or new feat
 
 ## What happens if I don’t migrate? 
 Your existing setup will continue to function, but: 
-No bug fixes or new features will be available for the old provider. Over time, compatibility issues may arise as Terraform and Meraki evolve. 
+No new features will be available for this provider. Over time, compatibility issues may arise as Terraform and Meraki evolve.
+Bugs will be fixed on a best effort basis until January 31st, 2026.
 
 - - - 
 

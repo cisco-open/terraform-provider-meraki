@@ -16,8 +16,7 @@ Bugs will be fixed on a best effort basis until January 31st, 2026.
 5. Validate Changes: Test in a non-production environment before applying changes in production. 
 
 ## What happens if I don’t migrate? 
-Your existing setup will continue to function, but: 
-No new features will be available for this provider. Over time, compatibility issues may arise as Terraform and Meraki evolve.
+Your existing setup will continue to function, but no new features will be available for this provider. Over time, compatibility issues may arise as Terraform and Meraki evolve.
 Bugs will be fixed on a best effort basis until January 31st, 2026.
 
 - - - 
